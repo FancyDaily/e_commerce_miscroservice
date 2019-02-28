@@ -1,3 +1,5 @@
+`mkdir ~/.ssh/`
+
 `cat <<EOF >~/.ssh/id_rsa.pub
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL0oKnUxSC0ngCeyjspe6ZSDDMELnypnrHO0rk/mh7qQ/4DhPL
 jjfeAphr/xvaH4jC8H7xZKla2/JjuX8EQ1jpaIwjDAK8Fi7j2cbJ62QQ6mu2dHPSlzcZqewWdMhkQ78yvXv5Twqn
