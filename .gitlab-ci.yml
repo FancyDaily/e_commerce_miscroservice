@@ -1,0 +1,9 @@
+stages:
+  - build
+
+job:
+  stage: build
+  only:
+    - master
+  script:
+    - sh ./auto_developer_miscroserver_server.sh
