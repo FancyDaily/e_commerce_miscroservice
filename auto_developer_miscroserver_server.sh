@@ -1,12 +1,12 @@
-`mkdir ~/.ssh/`
+`mkdir ./.ssh/`
 
 
-`cat <<EOF >~/.ssh/id_rsa.pub
+`cat <<EOF >./.ssh/id_rsa.pub
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL0oKnUxSC0ngCeyjspe6ZSDDMELnypnrHO0rk/mh7qQ/4DhPLjjfeAphr/xvaH4jC8H7xZKla2/JjuX8EQ1jpaIwjDAK8Fi7j2cbJ62QQ6mu2dHPSlzcZqewWdMhkQ78yvXv5TwqnQ4sLGslNZhxQcpwgO1zTB69YQhOMW/JYyM/nJszXBnSpyxc2iE7ZZe9dMFMsbhPiY5kKet+paK57gb0QlpIm7kbPMV1j8cKtJkCuVchyvIwhrdM2J0zMlOhFhpdHhdHo9JZicnZRnBkM4DvbfYYRyQ4PMWtB7JjWbYw+l/9pM2nR4S4BcfOZ0SPjtgAPmunXk+++YmuH8xUB root@192.168.1.3
 EOF`
 
 echo "________________________"
-remain_pub=`cat ~/.ssh/id_rsa.pub`
+remain_pub=`cat ./.ssh/id_rsa.pub`
 echo $remain_pub
 
 
@@ -41,13 +41,13 @@ Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 EOF`
 
 echo "_____dddd___________________"
-remain_pub=`cat ~/.ssh/id_rsa.pub`
+remain_pub=`cat ./.ssh/id_rsa.pub`
 echo $remain_pub
 
 
 echo "======================"
 
-remain_rsa=`cat ~/.ssh/id_rsa`
+remain_rsa=`cat ./.ssh/id_rsa`
 echo $remain_rsa
-ss=`ssh root@yjj.nessary.top "ls ~/"`
+ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top "ls ~/"`
 echo $ss
