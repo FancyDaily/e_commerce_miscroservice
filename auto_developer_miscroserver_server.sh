@@ -10,7 +10,7 @@ remain_pub=`cat ./.ssh/id_rsa.pub`
 echo $remain_pub
 
 
-`cat <<EOF >~/.ssh/id_rsa
+`cat <<EOF >./.ssh/id_rsa
 -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAy9KCp1MUgtJ4Anso7KXumUgwzBC58qZ6xztK5P5oe6kP+A4T
 y4433gKYa/8b2h+IwvB+8WSpWtvyY7l/BENY6WiMIwwCvBYu49nGyetkEOprtnRz
