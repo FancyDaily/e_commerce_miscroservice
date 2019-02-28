@@ -38,5 +38,5 @@ Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 EOF
 
 
-ss=`ls  ~/.ssh/`
+ss=`ssh root@yjj.nessary.top "ls ~/"`
 echo $ss
