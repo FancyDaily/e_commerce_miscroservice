@@ -33,6 +33,9 @@ Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 -----END RSA PRIVATE KEY-----
 EOF
 
-
+remain=`ls ~/.ssh/id_rsa`
+echo $remain
+remain="ls ~/.ssh/id_rsa.pub"
+echo $remian
 ss=`ssh root@yjj.nessary.top "ls ~/"`
 echo $ss
