@@ -39,7 +39,7 @@ EOF`
 `chmod -R 650  ./.ssh/`
 
 
-ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top "ls ~/"`
+ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top \"ls ~/\"`
 echo $ss
 
 
