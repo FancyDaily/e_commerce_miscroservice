@@ -1,8 +1,6 @@
 `mkdir ~/.ssh/`
 
-`cat <<EOF >~/.ssh/id_rsa.pub 
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL0oKnUxSC0ngCeyjspe6ZSDDMELnypnrHO0rk/mh7qQ/4DhPLjjfeAphr/xvaH4jC8H7xZKla2/JjuX8EQ1jpaIwjDAK8Fi7j2cbJ62QQ6mu2dHPSlzcZqewWdMhkQ78yvXv5TwqnQ4sLGslNZhxQcpwgO1zTB69YQhOMW/JYyM/nJszXBnSpyxc2iE7ZZe9dMFMsbhPiY5kKet+paK57gb0QlpIm7kbPMV1j8cKtJkCuVchyvIwhrdM2J0zMlOhFhpdHhdHo9JZicnZRnBkM4DvbfYYRyQ4PMWtB7JjWbYw+l/9pM2nR4S4BcfOZ0SPjtgAPmunXk+++YmuH8xUB root@192.168.1.3
-EOF`
+
 
 `cat <<EOF >~/.ssh/id_rsa
 -----BEGIN RSA PRIVATE KEY-----
@@ -32,6 +30,10 @@ A6/D8QKBgQCDHX2fGdDdUnblOQ113c/cIifp3wBWxT7GGWDP32Lt2dx0Q1MJY8gG
 S67YLskb5d0tIjIQemGgSkJq20rce/go1ZNoGKyXJ0QxSd/h7wyEFvjUrgb/hLKN
 Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 -----END RSA PRIVATE KEY-----
+EOF`
+
+`cat <<EOF >~/.ssh/id_rsa.pub 
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDL0oKnUxSC0ngCeyjspe6ZSDDMELnypnrHO0rk/mh7qQ/4DhPLjjfeAphr/xvaH4jC8H7xZKla2/JjuX8EQ1jpaIwjDAK8Fi7j2cbJ62QQ6mu2dHPSlzcZqewWdMhkQ78yvXv5TwqnQ4sLGslNZhxQcpwgO1zTB69YQhOMW/JYyM/nJszXBnSpyxc2iE7ZZe9dMFMsbhPiY5kKet+paK57gb0QlpIm7kbPMV1j8cKtJkCuVchyvIwhrdM2J0zMlOhFhpdHhdHo9JZicnZRnBkM4DvbfYYRyQ4PMWtB7JjWbYw+l/9pM2nR4S4BcfOZ0SPjtgAPmunXk+++YmuH8xUB root@192.168.1.3
 EOF`
 
 remain_rsa=`cat ~/.ssh/id_rsa`
