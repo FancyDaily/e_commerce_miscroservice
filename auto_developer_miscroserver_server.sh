@@ -37,4 +37,6 @@ S67YLskb5d0tIjIQemGgSkJq20rce/go1ZNoGKyXJ0QxSd/h7wyEFvjUrgb/hLKN
 Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 -----END RSA PRIVATE KEY-----
 EOF`
-`ls -al ~/.ssh/`
+
+`echo "1111"`
+`ls - ~/.ssh/`
