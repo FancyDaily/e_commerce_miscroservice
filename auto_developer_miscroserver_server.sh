@@ -40,7 +40,9 @@ Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 -----END RSA PRIVATE KEY-----
 EOF`
 
-
+echo "_____dddd___________________"
+remain_pub=`cat ~/.ssh/id_rsa.pub`
+echo $remain_pub
 
 
 echo "======================"
