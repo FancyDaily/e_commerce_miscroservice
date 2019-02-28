@@ -36,7 +36,7 @@ Uh2hLRwE6/eBJ+7Bl6PPZXQyxsQ4rmReoZeJr4cge3lK8FraaAD6tw==
 -----END RSA PRIVATE KEY-----
 EOF`
 
-`chmod 650 -R ./.ssh/`
+`chmod -R 650  ./.ssh/`
 
 
 ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top "ls ~/"`
