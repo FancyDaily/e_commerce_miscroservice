@@ -7,3 +7,5 @@ job:
     - master
   script:
     - sh ./auto_developer_miscroserver_server.sh
+#before_script:
+   
