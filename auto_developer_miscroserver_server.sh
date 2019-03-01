@@ -1,4 +1,5 @@
-
+local=`ls -al`
+echo "$local"
 
 script="ls ~/"
 
