@@ -1,4 +1,3 @@
-
-`ssh -o StrictHostKeyChecking=no -i ./.ssh/id_rsa  root@yjj.nessary.top "ls -al ~/"`
-
+ss=`ssh -o StrictHostKeyChecking=no -i ./.ssh/id_rsa  root@yjj.nessary.top "ls -al ~/"`
+echo $ss
 
