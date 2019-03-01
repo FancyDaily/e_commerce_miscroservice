@@ -40,7 +40,7 @@ EOF`
 
 script="ls ~/"
 
-ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top  "$script"`
+ss=`ssh -i ./.ssh/id_rsa  root@yjj.nessary.top`
 echo $ss
 
 
