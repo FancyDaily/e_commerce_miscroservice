@@ -10,6 +10,6 @@ package com.e_commerce.miscroservice.order.service;
  * 邮箱: 747052172@qq.com
  * 创建时间:2019年3月2日 下午3:46:32
  */
-public interface ProductService {
+public interface OrderService {
 
 }
