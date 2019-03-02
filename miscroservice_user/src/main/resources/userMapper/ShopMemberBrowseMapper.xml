@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.ShopMemberBrowseMapper">
+
+
+	<update id="safeInsertShopInShop">
+		INSERT INTO `shop_member_browse`
+		 (`target_id`, `in_shop_member_id`, `type`)
+		SELECT
+			#{targetId},
+			#{inShopMemberId},
+			1
+		FROM
+			DUAL
+		WHERE
+			NOT EXISTS (SELECT
+				1
+			FROM
+				`shop_member_browse` AS temp
+			-- 重复的数据
+			WHERE temp.target_id = #{targetId}
+			AND temp.type = 1
+			AND temp.in_shop_member_id = #{inShopMemberId}
+		)
+	</update>
+
+
+
+	<select id="listShopInShop" resultType="map">
+		SELECT
+			browse.id AS browseId,
+			browse.target_id AS storeId,
+			IFNULL(auditData.shop_name, "") AS nickName,
+			store.is_open_wxa AS isOpenWxa,
+			store.wxa_open_time AS wxaOpenTime,
+			store.wxa_close_time AS wxaCloseTime,
+			store.wxa_business_type AS wxaBusinessType
+		FROM`shop_member_browse` browse
+		LEFT JOIN yjj_store_wxa_shop_audit_data auditData ON auditData.store_id = browse.target_id
+		JOIN yjj_storebusiness store ON store.Id = browse.target_id
+		WHERE browse.del_status = 0
+		AND auditData.`del_status` = 0
+		AND browse.type = 1
+		AND browse.in_shop_member_id = #{inShopMemberId}
+		ORDER BY browse.update_time DESC
+	</select>
+
+
+
+
+
+</mapper>

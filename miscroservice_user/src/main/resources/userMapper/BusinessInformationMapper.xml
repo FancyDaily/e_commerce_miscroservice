@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.BusinessInformationMapper">
+
+
+
+	<select id="findByStoreId" resultType="map">
+		SELECT *
+		FROM yjj_business_information
+		where user_id = #{storeId}
+	</select>
+
+
+</mapper>

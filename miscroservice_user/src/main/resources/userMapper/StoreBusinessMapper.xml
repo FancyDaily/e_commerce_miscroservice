@@ -1,0 +1,2157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.StoreBusinessMapper">
+
+ 	<!-- 主要的返回映射-->
+	<resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.user.entity.StoreBusiness"	>
+		<id column="Id" property="id" jdbcType="BIGINT" />
+		<result column="BusinessNumber"  property="businessNumber"  jdbcType="BIGINT" />
+		<result column="BusinessName"  property="businessName"  jdbcType="VARCHAR" />
+		<result column="CompanyName"  property="companyName"  jdbcType="VARCHAR" />
+		<result column="Status"  property="status"  jdbcType="TINYINT" />
+		<result column="CreateTime"  property="createTime"  jdbcType="BIGINT" />
+		<result column="UpdateTime"  property="updateTime"  jdbcType="BIGINT" />
+		<result column="MemberNumber"  property="memberNumber"  jdbcType="INTEGER" />
+		<result column="DistributionStatus"  property="distributionStatus"  jdbcType="TINYINT" />
+		<result column="PhoneNumber"  property="phoneNumber"  jdbcType="VARCHAR" />
+		<result column="CashIncome"  property="cashIncome"  jdbcType="DECIMAL" />
+		<result column="CommissionPercentage"  property="commissionPercentage"  jdbcType="DECIMAL" />
+		<result column="MemberCommissionPercentage"  property="memberCommissionPercentage"  jdbcType="DECIMAL" />
+		<result column="DefaultCommissionPercentage"  property="defaultCommissionPercentage"  jdbcType="DECIMAL" />
+		<result column="SuperBusinessIds"  property="superBusinessIds"  jdbcType="VARCHAR" />
+		<result column="AvailableBalance"  property="availableBalance"  jdbcType="DECIMAL" />
+		<result column="WithdrawApply"  property="withdrawApply"  jdbcType="INTEGER" />
+		<result column="BusinessAddress"  property="businessAddress"  jdbcType="VARCHAR" />
+		<result column="LicenseNumber"  property="licenseNumber"  jdbcType="VARCHAR" />
+		<result column="OrganizationNo"  property="organizationNo"  jdbcType="VARCHAR" />
+		<result column="TaxId"  property="taxId"  jdbcType="VARCHAR" />
+		<result column="LegalPerson"  property="legalPerson"  jdbcType="VARCHAR" />
+		<result column="LegalPhone"  property="legalPhone"  jdbcType="VARCHAR" />
+		<result column="Province"  property="province"  jdbcType="VARCHAR" />
+		<result column="City"  property="city"  jdbcType="VARCHAR" />
+		<result column="County"  property="county"  jdbcType="VARCHAR" />
+		<result column="StoreArea"  property="storeArea"  jdbcType="DECIMAL" />
+		<result column="StoreDescription"  property="storeDescription"  jdbcType="VARCHAR" />
+		<result column="StoreLogo"  property="storeLogo"  jdbcType="VARCHAR" />
+		<result column="StoreShowImgs"  property="storeShowImgs"  jdbcType="VARCHAR" />
+		<result column="StorePanoramaImg"  property="storePanoramaImg"  jdbcType="VARCHAR" />
+		<result column="BankAccountName"  property="bankAccountName"  jdbcType="VARCHAR" />
+		<result column="BankName"  property="bankName"  jdbcType="VARCHAR" />
+		<result column="BankAccountNo"  property="bankAccountNo"  jdbcType="VARCHAR" />
+		<result column="UserName"  property="userName"  jdbcType="VARCHAR" />
+		<result column="UserPassword"  property="userPassword"  jdbcType="VARCHAR" />
+		<result column="BankCardFlag"  property="bankCardFlag"  jdbcType="TINYINT" />
+		<result column="AlipayFlag"  property="alipayFlag"  jdbcType="TINYINT" />
+		<result column="AlipayAccount"  property="alipayAccount"  jdbcType="VARCHAR" />
+		<result column="AlipayName"  property="alipayName"  jdbcType="VARCHAR" />
+		<result column="WeixinFlag"  property="weixinFlag"  jdbcType="TINYINT" />
+		<result column="WeixinAccount"  property="weixinAccount"  jdbcType="VARCHAR" />
+		<result column="WeixinName"  property="weixinName"  jdbcType="VARCHAR" />
+		<result column="IdCardNumber"  property="idCardNumber"  jdbcType="VARCHAR" />
+		<result column="BusinessType"  property="businessType"  jdbcType="TINYINT" />
+		<result column="WithdrawPassword"  property="withdrawPassword"  jdbcType="VARCHAR" />
+		<result column="Grade"  property="grade"  jdbcType="INTEGER" />
+		<result column="BusinessHours"  property="businessHours"  jdbcType="VARCHAR" />
+		<result column="SignTime"  property="signTime"  jdbcType="VARCHAR" />
+		<result column="ActiveTime"  property="activeTime"  jdbcType="BIGINT" />
+		<result column="UserCID"  property="userCID"  jdbcType="VARCHAR" />
+		<result column="BankCardUseFlag"  property="bankCardUseFlag"  jdbcType="TINYINT" />
+		<result column="AlipayUseFlag"  property="alipayUseFlag"  jdbcType="TINYINT" />
+		<result column="WeixinUseFlag"  property="weixinUseFlag"  jdbcType="TINYINT" />
+		<result column="LastErrorWithdrawPasswordTime"  property="lastErrorWithdrawPasswordTime"  jdbcType="BIGINT" />
+		<result column="ErrorCount"  property="errorCount"  jdbcType="INTEGER" />
+		<result column="Deep"  property="deep"  jdbcType="BIGINT" />
+		<result column="BindWeixinId"  property="bindWeixinId"  jdbcType="VARCHAR" />
+		<result column="BindWeixinName"  property="bindWeixinName"  jdbcType="VARCHAR" />
+		<result column="BindWeixinIcon"  property="bindWeixinIcon"  jdbcType="VARCHAR" />
+		<result column="ProtocolTime"  property="protocolTime"  jdbcType="BIGINT" />
+		<result column="LegalIdNumber"  property="legalIdNumber"  jdbcType="VARCHAR" />
+		<result column="AppId"  property="appId"  jdbcType="VARCHAR" />
+		<result column="WxaAppId"  property="wxaAppId"  jdbcType="VARCHAR" />
+		<result column="WeiXinNum"  property="weiXinNum"  jdbcType="VARCHAR" />
+		<result column="vip"  property="vip"  jdbcType="TINYINT" />
+		<result column="StoreNotice"  property="storeNotice"  jdbcType="VARCHAR" />
+		<result column="is_open_wxa"  property="isOpenWxa"  jdbcType="TINYINT" />
+		<result column="used_coupon_total_member_count"  property="usedCouponTotalMemberCount"  jdbcType="INTEGER" />
+		<result column="used_coupon_total_count"  property="usedCouponTotalCount"  jdbcType="INTEGER" />
+		<result column="used_coupon_total_money"  property="usedCouponTotalMoney"  jdbcType="DECIMAL" />
+		<result column="wxaType"  property="wxaType"  jdbcType="TINYINT" />
+		<result column="qualificationProofImages"  property="qualificationProofImages"  jdbcType="VARCHAR" />
+		<result column="rate"  property="rate"  jdbcType="DECIMAL" />
+		<result column="synchronousButtonStatus"  property="synchronousButtonStatus"  jdbcType="TINYINT" />
+		<result column="supplierId"  property="supplierId"  jdbcType="BIGINT" />
+		<result column="first_login_status"  property="firstLoginStatus"  jdbcType="TINYINT" />
+		<result column="store_display_images"  property="storeDisplayImages"  jdbcType="VARCHAR" />
+		<result column="one_stage_time"  property="oneStageTime"  jdbcType="INTEGER" />
+		<result column="two_stage_time"  property="twoStageTime"  jdbcType="INTEGER" />
+		<result column="three_stage_time"  property="threeStageTime"  jdbcType="INTEGER" />
+		<result column="ground_user_id"  property="groundUserId"  jdbcType="BIGINT" />
+		<result column="super_ids"  property="superIds"  jdbcType="VARCHAR" />
+		<result column="activation_time"  property="activationTime"  jdbcType="BIGINT" />
+		<result column="audit_status"  property="auditStatus"  jdbcType="TINYINT" />
+		<result column="audit_time"  property="auditTime"  jdbcType="BIGINT" />
+		<result column="ground_user_phone"  property="groundUserPhone"  jdbcType="VARCHAR" />
+		<result column="ground_user_name"  property="groundUserName"  jdbcType="VARCHAR" />
+		<result column="store_style"  property="storeStyle"  jdbcType="VARCHAR" />
+		<result column="store_age"  property="storeAge"  jdbcType="VARCHAR" />
+		<result column="store_area_scope"  property="storeAreaScope"  jdbcType="VARCHAR" />
+		<result column="wxa_article_show"  property="wxaArticleShow"  jdbcType="TINYINT" />
+		<result column="greeting_image"  property="greetingImage"  jdbcType="VARCHAR" />
+		<result column="greeting_words"  property="greetingWords"  jdbcType="VARCHAR" />
+		<result column="greeting_send_type"  property="greetingSendType"  jdbcType="TINYINT" />
+		<result column="shop_reservations_order_switch"  property="shopReservationsOrderSwitch"  jdbcType="TINYINT" />
+		<result column="online_wxa_version"  property="onlineWxaVersion"  jdbcType="VARCHAR" />
+		<result column="has_hotonline"  property="hasHotonline"  jdbcType="TINYINT" />
+		<result column="hot_online"  property="hotOnline"  jdbcType="VARCHAR" />
+		<result column="wxa_open_time"  property="wxaOpenTime"  jdbcType="BIGINT" />
+		<result column="wxa_close_time"  property="wxaCloseTime"  jdbcType="BIGINT" />
+		<result column="wxa_renew_protect_close_time"  property="wxaRenewProtectCloseTime"  jdbcType="BIGINT" />
+		<result column="purchase_channel"  property="purchaseChannel"  jdbcType="VARCHAR" />
+		<result column="price_level"  property="priceLevel"  jdbcType="VARCHAR" />
+		<result column="data_audit_status"  property="dataAuditStatus"  jdbcType="TINYINT" />
+		<result column="data_audit_time"  property="dataAuditTime"  jdbcType="BIGINT" />
+		<result column="auth_id"  property="authId"  jdbcType="BIGINT" />
+		<result column="in_shop_open_id"  property="inShopOpenId"  jdbcType="VARCHAR" />
+		<result column="in_shop_member_id"  property="inShopMemberId"  jdbcType="BIGINT" />
+		<result column="wxa_business_type"  property="wxaBusinessType"  jdbcType="TINYINT" />
+	</resultMap>
+
+	<!-- 所有的列名-->
+	<sql id="Base_Column_List" >
+		Id,BusinessNumber,BusinessName,CompanyName,Status,CreateTime,UpdateTime,MemberNumber,DistributionStatus,
+		PhoneNumber,CashIncome,CommissionPercentage,MemberCommissionPercentage,DefaultCommissionPercentage,SuperBusinessIds,AvailableBalance,WithdrawApply,
+		BusinessAddress,LicenseNumber,OrganizationNo,TaxId,LegalPerson,LegalPhone,Province,City,
+		County,StoreArea,StoreDescription,StoreLogo,StoreShowImgs,StorePanoramaImg,BankAccountName,BankName,
+		BankAccountNo,UserName,UserPassword,BankCardFlag,AlipayFlag,AlipayAccount,AlipayName,WeixinFlag,
+		WeixinAccount,WeixinName,IdCardNumber,BusinessType,WithdrawPassword,Grade,BusinessHours,SignTime,
+		ActiveTime,UserCID,BankCardUseFlag,AlipayUseFlag,WeixinUseFlag,LastErrorWithdrawPasswordTime,ErrorCount,Deep,
+		BindWeixinId,BindWeixinName,BindWeixinIcon,ProtocolTime,LegalIdNumber,AppId,WxaAppId,WeiXinNum,
+		vip,StoreNotice,is_open_wxa,used_coupon_total_member_count,used_coupon_total_count,used_coupon_total_money,wxaType,qualificationProofImages,
+		rate,synchronousButtonStatus,supplierId,first_login_status,store_display_images,one_stage_time,two_stage_time,three_stage_time,
+		ground_user_id,super_ids,activation_time,audit_status,audit_time,ground_user_phone,ground_user_name,store_style,
+		store_age,store_area_scope,wxa_article_show,greeting_image,greeting_words,greeting_send_type,shop_reservations_order_switch,online_wxa_version,
+		has_hotonline,hot_online,wxa_open_time,wxa_close_time,wxa_renew_protect_close_time,purchase_channel,price_level,data_audit_status,
+		data_audit_time,auth_id,in_shop_open_id,in_shop_member_id,wxa_business_type
+	</sql>
+
+	<!-- 精确更新的字段-->
+	<sql id="updateBase">
+		<if test="id  !=null">
+			Id = #{id,jdbcType=BIGINT},
+		</if>
+		<if test="businessNumber  !=null">
+			BusinessNumber = #{businessNumber,jdbcType=BIGINT},
+		</if>
+		<if test="businessName  !=null">
+			BusinessName = #{businessName,jdbcType=VARCHAR},
+		</if>
+		<if test="companyName  !=null">
+			CompanyName = #{companyName,jdbcType=VARCHAR},
+		</if>
+		<if test="status  !=null">
+			Status = #{status,jdbcType=TINYINT},
+		</if>
+		<if test="createTime  !=null">
+			CreateTime = #{createTime,jdbcType=BIGINT},
+		</if>
+		<if test="updateTime  !=null">
+			UpdateTime = #{updateTime,jdbcType=BIGINT},
+		</if>
+		<if test="memberNumber  !=null">
+			MemberNumber = #{memberNumber,jdbcType=INTEGER},
+		</if>
+		<if test="distributionStatus  !=null">
+			DistributionStatus = #{distributionStatus,jdbcType=TINYINT},
+		</if>
+		<if test="phoneNumber  !=null">
+			PhoneNumber = #{phoneNumber,jdbcType=VARCHAR},
+		</if>
+		<if test="cashIncome  !=null">
+			CashIncome = #{cashIncome,jdbcType=DECIMAL},
+		</if>
+		<if test="commissionPercentage  !=null">
+			CommissionPercentage = #{commissionPercentage,jdbcType=DECIMAL},
+		</if>
+		<if test="memberCommissionPercentage  !=null">
+			MemberCommissionPercentage = #{memberCommissionPercentage,jdbcType=DECIMAL},
+		</if>
+		<if test="defaultCommissionPercentage  !=null">
+			DefaultCommissionPercentage = #{defaultCommissionPercentage,jdbcType=DECIMAL},
+		</if>
+		<if test="superBusinessIds  !=null">
+			SuperBusinessIds = #{superBusinessIds,jdbcType=VARCHAR},
+		</if>
+		<if test="availableBalance  !=null">
+			AvailableBalance = #{availableBalance,jdbcType=DECIMAL},
+		</if>
+		<if test="withdrawApply  !=null">
+			WithdrawApply = #{withdrawApply,jdbcType=INTEGER},
+		</if>
+		<if test="businessAddress  !=null">
+			BusinessAddress = #{businessAddress,jdbcType=VARCHAR},
+		</if>
+		<if test="licenseNumber  !=null">
+			LicenseNumber = #{licenseNumber,jdbcType=VARCHAR},
+		</if>
+		<if test="organizationNo  !=null">
+			OrganizationNo = #{organizationNo,jdbcType=VARCHAR},
+		</if>
+		<if test="taxId  !=null">
+			TaxId = #{taxId,jdbcType=VARCHAR},
+		</if>
+		<if test="legalPerson  !=null">
+			LegalPerson = #{legalPerson,jdbcType=VARCHAR},
+		</if>
+		<if test="legalPhone  !=null">
+			LegalPhone = #{legalPhone,jdbcType=VARCHAR},
+		</if>
+		<if test="province  !=null">
+			Province = #{province,jdbcType=VARCHAR},
+		</if>
+		<if test="city  !=null">
+			City = #{city,jdbcType=VARCHAR},
+		</if>
+		<if test="county  !=null">
+			County = #{county,jdbcType=VARCHAR},
+		</if>
+		<if test="storeArea  !=null">
+			StoreArea = #{storeArea,jdbcType=DECIMAL},
+		</if>
+		<if test="storeDescription  !=null">
+			StoreDescription = #{storeDescription,jdbcType=VARCHAR},
+		</if>
+		<if test="storeLogo  !=null">
+			StoreLogo = #{storeLogo,jdbcType=VARCHAR},
+		</if>
+		<if test="storeShowImgs  !=null">
+			StoreShowImgs = #{storeShowImgs,jdbcType=VARCHAR},
+		</if>
+		<if test="storePanoramaImg  !=null">
+			StorePanoramaImg = #{storePanoramaImg,jdbcType=VARCHAR},
+		</if>
+		<if test="bankAccountName  !=null">
+			BankAccountName = #{bankAccountName,jdbcType=VARCHAR},
+		</if>
+		<if test="bankName  !=null">
+			BankName = #{bankName,jdbcType=VARCHAR},
+		</if>
+		<if test="bankAccountNo  !=null">
+			BankAccountNo = #{bankAccountNo,jdbcType=VARCHAR},
+		</if>
+		<if test="userName  !=null">
+			UserName = #{userName,jdbcType=VARCHAR},
+		</if>
+		<if test="userPassword  !=null">
+			UserPassword = #{userPassword,jdbcType=VARCHAR},
+		</if>
+		<if test="bankCardFlag  !=null">
+			BankCardFlag = #{bankCardFlag,jdbcType=TINYINT},
+		</if>
+		<if test="alipayFlag  !=null">
+			AlipayFlag = #{alipayFlag,jdbcType=TINYINT},
+		</if>
+		<if test="alipayAccount  !=null">
+			AlipayAccount = #{alipayAccount,jdbcType=VARCHAR},
+		</if>
+		<if test="alipayName  !=null">
+			AlipayName = #{alipayName,jdbcType=VARCHAR},
+		</if>
+		<if test="weixinFlag  !=null">
+			WeixinFlag = #{weixinFlag,jdbcType=TINYINT},
+		</if>
+		<if test="weixinAccount  !=null">
+			WeixinAccount = #{weixinAccount,jdbcType=VARCHAR},
+		</if>
+		<if test="weixinName  !=null">
+			WeixinName = #{weixinName,jdbcType=VARCHAR},
+		</if>
+		<if test="idCardNumber  !=null">
+			IdCardNumber = #{idCardNumber,jdbcType=VARCHAR},
+		</if>
+		<if test="businessType  !=null">
+			BusinessType = #{businessType,jdbcType=TINYINT},
+		</if>
+		<if test="withdrawPassword  !=null">
+			WithdrawPassword = #{withdrawPassword,jdbcType=VARCHAR},
+		</if>
+		<if test="grade  !=null">
+			Grade = #{grade,jdbcType=INTEGER},
+		</if>
+		<if test="businessHours  !=null">
+			BusinessHours = #{businessHours,jdbcType=VARCHAR},
+		</if>
+		<if test="signTime  !=null">
+			SignTime = #{signTime,jdbcType=VARCHAR},
+		</if>
+		<if test="activeTime  !=null">
+			ActiveTime = #{activeTime,jdbcType=BIGINT},
+		</if>
+		<if test="userCID  !=null">
+			UserCID = #{userCID,jdbcType=VARCHAR},
+		</if>
+		<if test="bankCardUseFlag  !=null">
+			BankCardUseFlag = #{bankCardUseFlag,jdbcType=TINYINT},
+		</if>
+		<if test="alipayUseFlag  !=null">
+			AlipayUseFlag = #{alipayUseFlag,jdbcType=TINYINT},
+		</if>
+		<if test="weixinUseFlag  !=null">
+			WeixinUseFlag = #{weixinUseFlag,jdbcType=TINYINT},
+		</if>
+		<if test="lastErrorWithdrawPasswordTime  !=null">
+			LastErrorWithdrawPasswordTime = #{lastErrorWithdrawPasswordTime,jdbcType=BIGINT},
+		</if>
+		<if test="errorCount  !=null">
+			ErrorCount = #{errorCount,jdbcType=INTEGER},
+		</if>
+		<if test="deep  !=null">
+			Deep = #{deep,jdbcType=BIGINT},
+		</if>
+		<if test="bindWeixinId  !=null">
+			BindWeixinId = #{bindWeixinId,jdbcType=VARCHAR},
+		</if>
+		<if test="bindWeixinName  !=null">
+			BindWeixinName = #{bindWeixinName,jdbcType=VARCHAR},
+		</if>
+		<if test="bindWeixinIcon  !=null">
+			BindWeixinIcon = #{bindWeixinIcon,jdbcType=VARCHAR},
+		</if>
+		<if test="protocolTime  !=null">
+			ProtocolTime = #{protocolTime,jdbcType=BIGINT},
+		</if>
+		<if test="legalIdNumber  !=null">
+			LegalIdNumber = #{legalIdNumber,jdbcType=VARCHAR},
+		</if>
+		<if test="appId  !=null">
+			AppId = #{appId,jdbcType=VARCHAR},
+		</if>
+		<if test="wxaAppId  !=null">
+			WxaAppId = #{wxaAppId,jdbcType=VARCHAR},
+		</if>
+		<if test="weiXinNum  !=null">
+			WeiXinNum = #{weiXinNum,jdbcType=VARCHAR},
+		</if>
+		<if test="vip  !=null">
+			vip = #{vip,jdbcType=TINYINT},
+		</if>
+		<if test="storeNotice  !=null">
+			StoreNotice = #{storeNotice,jdbcType=VARCHAR},
+		</if>
+		<if test="isOpenWxa  !=null">
+			is_open_wxa = #{isOpenWxa,jdbcType=TINYINT},
+		</if>
+		<if test="usedCouponTotalMemberCount  !=null">
+			used_coupon_total_member_count = #{usedCouponTotalMemberCount,jdbcType=INTEGER},
+		</if>
+		<if test="usedCouponTotalCount  !=null">
+			used_coupon_total_count = #{usedCouponTotalCount,jdbcType=INTEGER},
+		</if>
+		<if test="usedCouponTotalMoney  !=null">
+			used_coupon_total_money = #{usedCouponTotalMoney,jdbcType=DECIMAL},
+		</if>
+		<if test="wxaType  !=null">
+			wxaType = #{wxaType,jdbcType=TINYINT},
+		</if>
+		<if test="qualificationProofImages  !=null">
+			qualificationProofImages = #{qualificationProofImages,jdbcType=VARCHAR},
+		</if>
+		<if test="rate  !=null">
+			rate = #{rate,jdbcType=DECIMAL},
+		</if>
+		<if test="synchronousButtonStatus  !=null">
+			synchronousButtonStatus = #{synchronousButtonStatus,jdbcType=TINYINT},
+		</if>
+		<if test="supplierId  !=null">
+			supplierId = #{supplierId,jdbcType=BIGINT},
+		</if>
+		<if test="firstLoginStatus  !=null">
+			first_login_status = #{firstLoginStatus,jdbcType=TINYINT},
+		</if>
+		<if test="storeDisplayImages  !=null">
+			store_display_images = #{storeDisplayImages,jdbcType=VARCHAR},
+		</if>
+		<if test="oneStageTime  !=null">
+			one_stage_time = #{oneStageTime,jdbcType=INTEGER},
+		</if>
+		<if test="twoStageTime  !=null">
+			two_stage_time = #{twoStageTime,jdbcType=INTEGER},
+		</if>
+		<if test="threeStageTime  !=null">
+			three_stage_time = #{threeStageTime,jdbcType=INTEGER},
+		</if>
+		<if test="groundUserId  !=null">
+			ground_user_id = #{groundUserId,jdbcType=BIGINT},
+		</if>
+		<if test="superIds  !=null">
+			super_ids = #{superIds,jdbcType=VARCHAR},
+		</if>
+		<if test="activationTime  !=null">
+			activation_time = #{activationTime,jdbcType=BIGINT},
+		</if>
+		<if test="auditStatus  !=null">
+			audit_status = #{auditStatus,jdbcType=TINYINT},
+		</if>
+		<if test="auditTime  !=null">
+			audit_time = #{auditTime,jdbcType=BIGINT},
+		</if>
+		<if test="groundUserPhone  !=null">
+			ground_user_phone = #{groundUserPhone,jdbcType=VARCHAR},
+		</if>
+		<if test="groundUserName  !=null">
+			ground_user_name = #{groundUserName,jdbcType=VARCHAR},
+		</if>
+		<if test="storeStyle  !=null">
+			store_style = #{storeStyle,jdbcType=VARCHAR},
+		</if>
+		<if test="storeAge  !=null">
+			store_age = #{storeAge,jdbcType=VARCHAR},
+		</if>
+		<if test="storeAreaScope  !=null">
+			store_area_scope = #{storeAreaScope,jdbcType=VARCHAR},
+		</if>
+		<if test="wxaArticleShow  !=null">
+			wxa_article_show = #{wxaArticleShow,jdbcType=TINYINT},
+		</if>
+		<if test="greetingImage  !=null">
+			greeting_image = #{greetingImage,jdbcType=VARCHAR},
+		</if>
+		<if test="greetingWords  !=null">
+			greeting_words = #{greetingWords,jdbcType=VARCHAR},
+		</if>
+		<if test="greetingSendType  !=null">
+			greeting_send_type = #{greetingSendType,jdbcType=TINYINT},
+		</if>
+		<if test="shopReservationsOrderSwitch  !=null">
+			shop_reservations_order_switch = #{shopReservationsOrderSwitch,jdbcType=TINYINT},
+		</if>
+		<if test="onlineWxaVersion  !=null">
+			online_wxa_version = #{onlineWxaVersion,jdbcType=VARCHAR},
+		</if>
+		<if test="hasHotonline  !=null">
+			has_hotonline = #{hasHotonline,jdbcType=TINYINT},
+		</if>
+		<if test="hotOnline  !=null">
+			hot_online = #{hotOnline,jdbcType=VARCHAR},
+		</if>
+		<if test="wxaOpenTime  !=null">
+			wxa_open_time = #{wxaOpenTime,jdbcType=BIGINT},
+		</if>
+		<if test="wxaCloseTime  !=null">
+			wxa_close_time = #{wxaCloseTime,jdbcType=BIGINT},
+		</if>
+		<if test="wxaRenewProtectCloseTime  !=null">
+			wxa_renew_protect_close_time = #{wxaRenewProtectCloseTime,jdbcType=BIGINT},
+		</if>
+		<if test="purchaseChannel  !=null">
+			purchase_channel = #{purchaseChannel,jdbcType=VARCHAR},
+		</if>
+		<if test="priceLevel  !=null">
+			price_level = #{priceLevel,jdbcType=VARCHAR},
+		</if>
+		<if test="dataAuditStatus  !=null">
+			data_audit_status = #{dataAuditStatus,jdbcType=TINYINT},
+		</if>
+		<if test="dataAuditTime  !=null">
+			data_audit_time = #{dataAuditTime,jdbcType=BIGINT},
+		</if>
+		<if test="authId  !=null">
+			auth_id = #{authId,jdbcType=BIGINT},
+		</if>
+		<if test="inShopOpenId  !=null">
+			in_shop_open_id = #{inShopOpenId,jdbcType=VARCHAR},
+		</if>
+		<if test="inShopMemberId  !=null">
+			in_shop_member_id = #{inShopMemberId,jdbcType=BIGINT},
+		</if>
+		<if test="wxaBusinessType  !=null">
+			wxa_business_type = #{wxaBusinessType,jdbcType=TINYINT}
+		</if>
+	</sql>
+
+	<!-- 通过主键查找-->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+		select
+		<include refid="Base_Column_List" />
+		from yjj_storebusiness
+		where  Id = #{id,jdbcType=BIGINT}
+	</select>
+
+	<!-- 通过主键删除-->
+	<delete id="deleteByPrimaryKey" parameterType="Long" >
+		delete from yjj_storebusiness
+		where Id = #{id,jdbcType=BIGINT}
+	</delete>
+
+	<!-- 普通插入全字段插t入-->
+	<insert id="insert" parameterType="com.e_commerce.miscroservice.user.entity.StoreBusiness" >
+		insert into yjj_storebusiness
+		(
+			Id,
+			BusinessNumber,
+			BusinessName,
+			CompanyName,
+			Status,
+			CreateTime,
+			UpdateTime,
+			MemberNumber,
+			DistributionStatus,
+			PhoneNumber,
+			CashIncome,
+			CommissionPercentage,
+			MemberCommissionPercentage,
+			DefaultCommissionPercentage,
+			SuperBusinessIds,
+			AvailableBalance,
+			WithdrawApply,
+			BusinessAddress,
+			LicenseNumber,
+			OrganizationNo,
+			TaxId,
+			LegalPerson,
+			LegalPhone,
+			Province,
+			City,
+			County,
+			StoreArea,
+			StoreDescription,
+			StoreLogo,
+			StoreShowImgs,
+			StorePanoramaImg,
+			BankAccountName,
+			BankName,
+			BankAccountNo,
+			UserName,
+			UserPassword,
+			BankCardFlag,
+			AlipayFlag,
+			AlipayAccount,
+			AlipayName,
+			WeixinFlag,
+			WeixinAccount,
+			WeixinName,
+			IdCardNumber,
+			BusinessType,
+			WithdrawPassword,
+			Grade,
+			BusinessHours,
+			SignTime,
+			ActiveTime,
+			UserCID,
+			BankCardUseFlag,
+			AlipayUseFlag,
+			WeixinUseFlag,
+			LastErrorWithdrawPasswordTime,
+			ErrorCount,
+			Deep,
+			BindWeixinId,
+			BindWeixinName,
+			BindWeixinIcon,
+			ProtocolTime,
+			LegalIdNumber,
+			AppId,
+			WxaAppId,
+			WeiXinNum,
+			vip,
+			StoreNotice,
+			is_open_wxa,
+			used_coupon_total_member_count,
+			used_coupon_total_count,
+			used_coupon_total_money,
+			wxaType,
+			qualificationProofImages,
+			rate,
+			synchronousButtonStatus,
+			supplierId,
+			first_login_status,
+			store_display_images,
+			one_stage_time,
+			two_stage_time,
+			three_stage_time,
+			ground_user_id,
+			super_ids,
+			activation_time,
+			audit_status,
+			audit_time,
+			ground_user_phone,
+			ground_user_name,
+			store_style,
+			store_age,
+			store_area_scope,
+			wxa_article_show,
+			greeting_image,
+			greeting_words,
+			greeting_send_type,
+			shop_reservations_order_switch,
+			online_wxa_version,
+			has_hotonline,
+			hot_online,
+			wxa_open_time,
+			wxa_close_time,
+			wxa_renew_protect_close_time,
+			purchase_channel,
+			price_level,
+			data_audit_status,
+			data_audit_time,
+			auth_id,
+			in_shop_open_id,
+			in_shop_member_id,
+			wxa_business_type
+		)
+		values
+		(
+			#{id ,jdbcType=BIGINT},
+			#{businessNumber ,jdbcType=BIGINT},
+			#{businessName ,jdbcType=VARCHAR},
+			#{companyName ,jdbcType=VARCHAR},
+			#{status ,jdbcType=TINYINT},
+			#{createTime ,jdbcType=BIGINT},
+			#{updateTime ,jdbcType=BIGINT},
+			#{memberNumber ,jdbcType=INTEGER},
+			#{distributionStatus ,jdbcType=TINYINT},
+			#{phoneNumber ,jdbcType=VARCHAR},
+			#{cashIncome ,jdbcType=DECIMAL},
+			#{commissionPercentage ,jdbcType=DECIMAL},
+			#{memberCommissionPercentage ,jdbcType=DECIMAL},
+			#{defaultCommissionPercentage ,jdbcType=DECIMAL},
+			#{superBusinessIds ,jdbcType=VARCHAR},
+			#{availableBalance ,jdbcType=DECIMAL},
+			#{withdrawApply ,jdbcType=INTEGER},
+			#{businessAddress ,jdbcType=VARCHAR},
+			#{licenseNumber ,jdbcType=VARCHAR},
+			#{organizationNo ,jdbcType=VARCHAR},
+			#{taxId ,jdbcType=VARCHAR},
+			#{legalPerson ,jdbcType=VARCHAR},
+			#{legalPhone ,jdbcType=VARCHAR},
+			#{province ,jdbcType=VARCHAR},
+			#{city ,jdbcType=VARCHAR},
+			#{county ,jdbcType=VARCHAR},
+			#{storeArea ,jdbcType=DECIMAL},
+			#{storeDescription ,jdbcType=VARCHAR},
+			#{storeLogo ,jdbcType=VARCHAR},
+			#{storeShowImgs ,jdbcType=VARCHAR},
+			#{storePanoramaImg ,jdbcType=VARCHAR},
+			#{bankAccountName ,jdbcType=VARCHAR},
+			#{bankName ,jdbcType=VARCHAR},
+			#{bankAccountNo ,jdbcType=VARCHAR},
+			#{userName ,jdbcType=VARCHAR},
+			#{userPassword ,jdbcType=VARCHAR},
+			#{bankCardFlag ,jdbcType=TINYINT},
+			#{alipayFlag ,jdbcType=TINYINT},
+			#{alipayAccount ,jdbcType=VARCHAR},
+			#{alipayName ,jdbcType=VARCHAR},
+			#{weixinFlag ,jdbcType=TINYINT},
+			#{weixinAccount ,jdbcType=VARCHAR},
+			#{weixinName ,jdbcType=VARCHAR},
+			#{idCardNumber ,jdbcType=VARCHAR},
+			#{businessType ,jdbcType=TINYINT},
+			#{withdrawPassword ,jdbcType=VARCHAR},
+			#{grade ,jdbcType=INTEGER},
+			#{businessHours ,jdbcType=VARCHAR},
+			#{signTime ,jdbcType=VARCHAR},
+			#{activeTime ,jdbcType=BIGINT},
+			#{userCID ,jdbcType=VARCHAR},
+			#{bankCardUseFlag ,jdbcType=TINYINT},
+			#{alipayUseFlag ,jdbcType=TINYINT},
+			#{weixinUseFlag ,jdbcType=TINYINT},
+			#{lastErrorWithdrawPasswordTime ,jdbcType=BIGINT},
+			#{errorCount ,jdbcType=INTEGER},
+			#{deep ,jdbcType=BIGINT},
+			#{bindWeixinId ,jdbcType=VARCHAR},
+			#{bindWeixinName ,jdbcType=VARCHAR},
+			#{bindWeixinIcon ,jdbcType=VARCHAR},
+			#{protocolTime ,jdbcType=BIGINT},
+			#{legalIdNumber ,jdbcType=VARCHAR},
+			#{appId ,jdbcType=VARCHAR},
+			#{wxaAppId ,jdbcType=VARCHAR},
+			#{weiXinNum ,jdbcType=VARCHAR},
+			#{vip ,jdbcType=TINYINT},
+			#{storeNotice ,jdbcType=VARCHAR},
+			#{isOpenWxa ,jdbcType=TINYINT},
+			#{usedCouponTotalMemberCount ,jdbcType=INTEGER},
+			#{usedCouponTotalCount ,jdbcType=INTEGER},
+			#{usedCouponTotalMoney ,jdbcType=DECIMAL},
+			#{wxaType ,jdbcType=TINYINT},
+			#{qualificationProofImages ,jdbcType=VARCHAR},
+			#{rate ,jdbcType=DECIMAL},
+			#{synchronousButtonStatus ,jdbcType=TINYINT},
+			#{supplierId ,jdbcType=BIGINT},
+			#{firstLoginStatus ,jdbcType=TINYINT},
+			#{storeDisplayImages ,jdbcType=VARCHAR},
+			#{oneStageTime ,jdbcType=INTEGER},
+			#{twoStageTime ,jdbcType=INTEGER},
+			#{threeStageTime ,jdbcType=INTEGER},
+			#{groundUserId ,jdbcType=BIGINT},
+			#{superIds ,jdbcType=VARCHAR},
+			#{activationTime ,jdbcType=BIGINT},
+			#{auditStatus ,jdbcType=TINYINT},
+			#{auditTime ,jdbcType=BIGINT},
+			#{groundUserPhone ,jdbcType=VARCHAR},
+			#{groundUserName ,jdbcType=VARCHAR},
+			#{storeStyle ,jdbcType=VARCHAR},
+			#{storeAge ,jdbcType=VARCHAR},
+			#{storeAreaScope ,jdbcType=VARCHAR},
+			#{wxaArticleShow ,jdbcType=TINYINT},
+			#{greetingImage ,jdbcType=VARCHAR},
+			#{greetingWords ,jdbcType=VARCHAR},
+			#{greetingSendType ,jdbcType=TINYINT},
+			#{shopReservationsOrderSwitch ,jdbcType=TINYINT},
+			#{onlineWxaVersion ,jdbcType=VARCHAR},
+			#{hasHotonline ,jdbcType=TINYINT},
+			#{hotOnline ,jdbcType=VARCHAR},
+			#{wxaOpenTime ,jdbcType=BIGINT},
+			#{wxaCloseTime ,jdbcType=BIGINT},
+			#{wxaRenewProtectCloseTime ,jdbcType=BIGINT},
+			#{purchaseChannel ,jdbcType=VARCHAR},
+			#{priceLevel ,jdbcType=VARCHAR},
+			#{dataAuditStatus ,jdbcType=TINYINT},
+			#{dataAuditTime ,jdbcType=BIGINT},
+			#{authId ,jdbcType=BIGINT},
+			#{inShopOpenId ,jdbcType=VARCHAR},
+			#{inShopMemberId ,jdbcType=BIGINT},
+			#{wxaBusinessType ,jdbcType=TINYINT}
+		)
+	</insert>
+
+	<!-- 批量插入，全部字段插入-->
+	<insert id="insertBach"   parameterType="List" >
+		insert into yjj_storebusiness
+		(
+		Id,
+		BusinessNumber,
+		BusinessName,
+		CompanyName,
+		Status,
+		CreateTime,
+		UpdateTime,
+		MemberNumber,
+		DistributionStatus,
+		PhoneNumber,
+		CashIncome,
+		CommissionPercentage,
+		MemberCommissionPercentage,
+		DefaultCommissionPercentage,
+		SuperBusinessIds,
+		AvailableBalance,
+		WithdrawApply,
+		BusinessAddress,
+		LicenseNumber,
+		OrganizationNo,
+		TaxId,
+		LegalPerson,
+		LegalPhone,
+		Province,
+		City,
+		County,
+		StoreArea,
+		StoreDescription,
+		StoreLogo,
+		StoreShowImgs,
+		StorePanoramaImg,
+		BankAccountName,
+		BankName,
+		BankAccountNo,
+		UserName,
+		UserPassword,
+		BankCardFlag,
+		AlipayFlag,
+		AlipayAccount,
+		AlipayName,
+		WeixinFlag,
+		WeixinAccount,
+		WeixinName,
+		IdCardNumber,
+		BusinessType,
+		WithdrawPassword,
+		Grade,
+		BusinessHours,
+		SignTime,
+		ActiveTime,
+		UserCID,
+		BankCardUseFlag,
+		AlipayUseFlag,
+		WeixinUseFlag,
+		LastErrorWithdrawPasswordTime,
+		ErrorCount,
+		Deep,
+		BindWeixinId,
+		BindWeixinName,
+		BindWeixinIcon,
+		ProtocolTime,
+		LegalIdNumber,
+		AppId,
+		WxaAppId,
+		WeiXinNum,
+		vip,
+		StoreNotice,
+		is_open_wxa,
+		used_coupon_total_member_count,
+		used_coupon_total_count,
+		used_coupon_total_money,
+		wxaType,
+		qualificationProofImages,
+		rate,
+		synchronousButtonStatus,
+		supplierId,
+		first_login_status,
+		store_display_images,
+		one_stage_time,
+		two_stage_time,
+		three_stage_time,
+		ground_user_id,
+		super_ids,
+		activation_time,
+		audit_status,
+		audit_time,
+		ground_user_phone,
+		ground_user_name,
+		store_style,
+		store_age,
+		store_area_scope,
+		wxa_article_show,
+		greeting_image,
+		greeting_words,
+		greeting_send_type,
+		shop_reservations_order_switch,
+		online_wxa_version,
+		has_hotonline,
+		hot_online,
+		wxa_open_time,
+		wxa_close_time,
+		wxa_renew_protect_close_time,
+		purchase_channel,
+		price_level,
+		data_audit_status,
+		data_audit_time,
+		auth_id,
+		in_shop_open_id,
+		in_shop_member_id,
+		wxa_business_type
+		)
+		values
+		<foreach collection="list" item="item" separator=",">
+			(
+			#{item.id ,jdbcType=BIGINT},
+			#{item.businessNumber ,jdbcType=BIGINT},
+			#{item.businessName ,jdbcType=VARCHAR},
+			#{item.companyName ,jdbcType=VARCHAR},
+			#{item.status ,jdbcType=TINYINT},
+			#{item.createTime ,jdbcType=BIGINT},
+			#{item.updateTime ,jdbcType=BIGINT},
+			#{item.memberNumber ,jdbcType=INTEGER},
+			#{item.distributionStatus ,jdbcType=TINYINT},
+			#{item.phoneNumber ,jdbcType=VARCHAR},
+			#{item.cashIncome ,jdbcType=DECIMAL},
+			#{item.commissionPercentage ,jdbcType=DECIMAL},
+			#{item.memberCommissionPercentage ,jdbcType=DECIMAL},
+			#{item.defaultCommissionPercentage ,jdbcType=DECIMAL},
+			#{item.superBusinessIds ,jdbcType=VARCHAR},
+			#{item.availableBalance ,jdbcType=DECIMAL},
+			#{item.withdrawApply ,jdbcType=INTEGER},
+			#{item.businessAddress ,jdbcType=VARCHAR},
+			#{item.licenseNumber ,jdbcType=VARCHAR},
+			#{item.organizationNo ,jdbcType=VARCHAR},
+			#{item.taxId ,jdbcType=VARCHAR},
+			#{item.legalPerson ,jdbcType=VARCHAR},
+			#{item.legalPhone ,jdbcType=VARCHAR},
+			#{item.province ,jdbcType=VARCHAR},
+			#{item.city ,jdbcType=VARCHAR},
+			#{item.county ,jdbcType=VARCHAR},
+			#{item.storeArea ,jdbcType=DECIMAL},
+			#{item.storeDescription ,jdbcType=VARCHAR},
+			#{item.storeLogo ,jdbcType=VARCHAR},
+			#{item.storeShowImgs ,jdbcType=VARCHAR},
+			#{item.storePanoramaImg ,jdbcType=VARCHAR},
+			#{item.bankAccountName ,jdbcType=VARCHAR},
+			#{item.bankName ,jdbcType=VARCHAR},
+			#{item.bankAccountNo ,jdbcType=VARCHAR},
+			#{item.userName ,jdbcType=VARCHAR},
+			#{item.userPassword ,jdbcType=VARCHAR},
+			#{item.bankCardFlag ,jdbcType=TINYINT},
+			#{item.alipayFlag ,jdbcType=TINYINT},
+			#{item.alipayAccount ,jdbcType=VARCHAR},
+			#{item.alipayName ,jdbcType=VARCHAR},
+			#{item.weixinFlag ,jdbcType=TINYINT},
+			#{item.weixinAccount ,jdbcType=VARCHAR},
+			#{item.weixinName ,jdbcType=VARCHAR},
+			#{item.idCardNumber ,jdbcType=VARCHAR},
+			#{item.businessType ,jdbcType=TINYINT},
+			#{item.withdrawPassword ,jdbcType=VARCHAR},
+			#{item.grade ,jdbcType=INTEGER},
+			#{item.businessHours ,jdbcType=VARCHAR},
+			#{item.signTime ,jdbcType=VARCHAR},
+			#{item.activeTime ,jdbcType=BIGINT},
+			#{item.userCID ,jdbcType=VARCHAR},
+			#{item.bankCardUseFlag ,jdbcType=TINYINT},
+			#{item.alipayUseFlag ,jdbcType=TINYINT},
+			#{item.weixinUseFlag ,jdbcType=TINYINT},
+			#{item.lastErrorWithdrawPasswordTime ,jdbcType=BIGINT},
+			#{item.errorCount ,jdbcType=INTEGER},
+			#{item.deep ,jdbcType=BIGINT},
+			#{item.bindWeixinId ,jdbcType=VARCHAR},
+			#{item.bindWeixinName ,jdbcType=VARCHAR},
+			#{item.bindWeixinIcon ,jdbcType=VARCHAR},
+			#{item.protocolTime ,jdbcType=BIGINT},
+			#{item.legalIdNumber ,jdbcType=VARCHAR},
+			#{item.appId ,jdbcType=VARCHAR},
+			#{item.wxaAppId ,jdbcType=VARCHAR},
+			#{item.weiXinNum ,jdbcType=VARCHAR},
+			#{item.vip ,jdbcType=TINYINT},
+			#{item.storeNotice ,jdbcType=VARCHAR},
+			#{item.isOpenWxa ,jdbcType=TINYINT},
+			#{item.usedCouponTotalMemberCount ,jdbcType=INTEGER},
+			#{item.usedCouponTotalCount ,jdbcType=INTEGER},
+			#{item.usedCouponTotalMoney ,jdbcType=DECIMAL},
+			#{item.wxaType ,jdbcType=TINYINT},
+			#{item.qualificationProofImages ,jdbcType=VARCHAR},
+			#{item.rate ,jdbcType=DECIMAL},
+			#{item.synchronousButtonStatus ,jdbcType=TINYINT},
+			#{item.supplierId ,jdbcType=BIGINT},
+			#{item.firstLoginStatus ,jdbcType=TINYINT},
+			#{item.storeDisplayImages ,jdbcType=VARCHAR},
+			#{item.oneStageTime ,jdbcType=INTEGER},
+			#{item.twoStageTime ,jdbcType=INTEGER},
+			#{item.threeStageTime ,jdbcType=INTEGER},
+			#{item.groundUserId ,jdbcType=BIGINT},
+			#{item.superIds ,jdbcType=VARCHAR},
+			#{item.activationTime ,jdbcType=BIGINT},
+			#{item.auditStatus ,jdbcType=TINYINT},
+			#{item.auditTime ,jdbcType=BIGINT},
+			#{item.groundUserPhone ,jdbcType=VARCHAR},
+			#{item.groundUserName ,jdbcType=VARCHAR},
+			#{item.storeStyle ,jdbcType=VARCHAR},
+			#{item.storeAge ,jdbcType=VARCHAR},
+			#{item.storeAreaScope ,jdbcType=VARCHAR},
+			#{item.wxaArticleShow ,jdbcType=TINYINT},
+			#{item.greetingImage ,jdbcType=VARCHAR},
+			#{item.greetingWords ,jdbcType=VARCHAR},
+			#{item.greetingSendType ,jdbcType=TINYINT},
+			#{item.shopReservationsOrderSwitch ,jdbcType=TINYINT},
+			#{item.onlineWxaVersion ,jdbcType=VARCHAR},
+			#{item.hasHotonline ,jdbcType=TINYINT},
+			#{item.hotOnline ,jdbcType=VARCHAR},
+			#{item.wxaOpenTime ,jdbcType=BIGINT},
+			#{item.wxaCloseTime ,jdbcType=BIGINT},
+			#{item.wxaRenewProtectCloseTime ,jdbcType=BIGINT},
+			#{item.purchaseChannel ,jdbcType=VARCHAR},
+			#{item.priceLevel ,jdbcType=VARCHAR},
+			#{item.dataAuditStatus ,jdbcType=TINYINT},
+			#{item.dataAuditTime ,jdbcType=BIGINT},
+			#{item.authId ,jdbcType=BIGINT},
+			#{item.inShopOpenId ,jdbcType=VARCHAR},
+			#{item.inShopMemberId ,jdbcType=BIGINT},
+			#{item.wxaBusinessType ,jdbcType=TINYINT}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 精确插入，非null得字段才会插入-->
+	<insert id="insertSelective" parameterType="com.e_commerce.miscroservice.user.entity.StoreBusiness" useGeneratedKeys="true" keyProperty="id" >
+		insert into yjj_storebusiness
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="id !=null">
+				Id,
+			</if>
+			<if test="businessNumber !=null">
+				BusinessNumber,
+			</if>
+			<if test="businessName !=null">
+				BusinessName,
+			</if>
+			<if test="companyName !=null">
+				CompanyName,
+			</if>
+			<if test="status !=null">
+				Status,
+			</if>
+			<if test="createTime !=null">
+				CreateTime,
+			</if>
+			<if test="updateTime !=null">
+				UpdateTime,
+			</if>
+			<if test="memberNumber !=null">
+				MemberNumber,
+			</if>
+			<if test="distributionStatus !=null">
+				DistributionStatus,
+			</if>
+			<if test="phoneNumber !=null">
+				PhoneNumber,
+			</if>
+			<if test="cashIncome !=null">
+				CashIncome,
+			</if>
+			<if test="commissionPercentage !=null">
+				CommissionPercentage,
+			</if>
+			<if test="memberCommissionPercentage !=null">
+				MemberCommissionPercentage,
+			</if>
+			<if test="defaultCommissionPercentage !=null">
+				DefaultCommissionPercentage,
+			</if>
+			<if test="superBusinessIds !=null">
+				SuperBusinessIds,
+			</if>
+			<if test="availableBalance !=null">
+				AvailableBalance,
+			</if>
+			<if test="withdrawApply !=null">
+				WithdrawApply,
+			</if>
+			<if test="businessAddress !=null">
+				BusinessAddress,
+			</if>
+			<if test="licenseNumber !=null">
+				LicenseNumber,
+			</if>
+			<if test="organizationNo !=null">
+				OrganizationNo,
+			</if>
+			<if test="taxId !=null">
+				TaxId,
+			</if>
+			<if test="legalPerson !=null">
+				LegalPerson,
+			</if>
+			<if test="legalPhone !=null">
+				LegalPhone,
+			</if>
+			<if test="province !=null">
+				Province,
+			</if>
+			<if test="city !=null">
+				City,
+			</if>
+			<if test="county !=null">
+				County,
+			</if>
+			<if test="storeArea !=null">
+				StoreArea,
+			</if>
+			<if test="storeDescription !=null">
+				StoreDescription,
+			</if>
+			<if test="storeLogo !=null">
+				StoreLogo,
+			</if>
+			<if test="storeShowImgs !=null">
+				StoreShowImgs,
+			</if>
+			<if test="storePanoramaImg !=null">
+				StorePanoramaImg,
+			</if>
+			<if test="bankAccountName !=null">
+				BankAccountName,
+			</if>
+			<if test="bankName !=null">
+				BankName,
+			</if>
+			<if test="bankAccountNo !=null">
+				BankAccountNo,
+			</if>
+			<if test="userName !=null">
+				UserName,
+			</if>
+			<if test="userPassword !=null">
+				UserPassword,
+			</if>
+			<if test="bankCardFlag !=null">
+				BankCardFlag,
+			</if>
+			<if test="alipayFlag !=null">
+				AlipayFlag,
+			</if>
+			<if test="alipayAccount !=null">
+				AlipayAccount,
+			</if>
+			<if test="alipayName !=null">
+				AlipayName,
+			</if>
+			<if test="weixinFlag !=null">
+				WeixinFlag,
+			</if>
+			<if test="weixinAccount !=null">
+				WeixinAccount,
+			</if>
+			<if test="weixinName !=null">
+				WeixinName,
+			</if>
+			<if test="idCardNumber !=null">
+				IdCardNumber,
+			</if>
+			<if test="businessType !=null">
+				BusinessType,
+			</if>
+			<if test="withdrawPassword !=null">
+				WithdrawPassword,
+			</if>
+			<if test="grade !=null">
+				Grade,
+			</if>
+			<if test="businessHours !=null">
+				BusinessHours,
+			</if>
+			<if test="signTime !=null">
+				SignTime,
+			</if>
+			<if test="activeTime !=null">
+				ActiveTime,
+			</if>
+			<if test="userCID !=null">
+				UserCID,
+			</if>
+			<if test="bankCardUseFlag !=null">
+				BankCardUseFlag,
+			</if>
+			<if test="alipayUseFlag !=null">
+				AlipayUseFlag,
+			</if>
+			<if test="weixinUseFlag !=null">
+				WeixinUseFlag,
+			</if>
+			<if test="lastErrorWithdrawPasswordTime !=null">
+				LastErrorWithdrawPasswordTime,
+			</if>
+			<if test="errorCount !=null">
+				ErrorCount,
+			</if>
+			<if test="deep !=null">
+				Deep,
+			</if>
+			<if test="bindWeixinId !=null">
+				BindWeixinId,
+			</if>
+			<if test="bindWeixinName !=null">
+				BindWeixinName,
+			</if>
+			<if test="bindWeixinIcon !=null">
+				BindWeixinIcon,
+			</if>
+			<if test="protocolTime !=null">
+				ProtocolTime,
+			</if>
+			<if test="legalIdNumber !=null">
+				LegalIdNumber,
+			</if>
+			<if test="appId !=null">
+				AppId,
+			</if>
+			<if test="wxaAppId !=null">
+				WxaAppId,
+			</if>
+			<if test="weiXinNum !=null">
+				WeiXinNum,
+			</if>
+			<if test="vip !=null">
+				vip,
+			</if>
+			<if test="storeNotice !=null">
+				StoreNotice,
+			</if>
+			<if test="isOpenWxa !=null">
+				is_open_wxa,
+			</if>
+			<if test="usedCouponTotalMemberCount !=null">
+				used_coupon_total_member_count,
+			</if>
+			<if test="usedCouponTotalCount !=null">
+				used_coupon_total_count,
+			</if>
+			<if test="usedCouponTotalMoney !=null">
+				used_coupon_total_money,
+			</if>
+			<if test="wxaType !=null">
+				wxaType,
+			</if>
+			<if test="qualificationProofImages !=null">
+				qualificationProofImages,
+			</if>
+			<if test="rate !=null">
+				rate,
+			</if>
+			<if test="synchronousButtonStatus !=null">
+				synchronousButtonStatus,
+			</if>
+			<if test="supplierId !=null">
+				supplierId,
+			</if>
+			<if test="firstLoginStatus !=null">
+				first_login_status,
+			</if>
+			<if test="storeDisplayImages !=null">
+				store_display_images,
+			</if>
+			<if test="oneStageTime !=null">
+				one_stage_time,
+			</if>
+			<if test="twoStageTime !=null">
+				two_stage_time,
+			</if>
+			<if test="threeStageTime !=null">
+				three_stage_time,
+			</if>
+			<if test="groundUserId !=null">
+				ground_user_id,
+			</if>
+			<if test="superIds !=null">
+				super_ids,
+			</if>
+			<if test="activationTime !=null">
+				activation_time,
+			</if>
+			<if test="auditStatus !=null">
+				audit_status,
+			</if>
+			<if test="auditTime !=null">
+				audit_time,
+			</if>
+			<if test="groundUserPhone !=null">
+				ground_user_phone,
+			</if>
+			<if test="groundUserName !=null">
+				ground_user_name,
+			</if>
+			<if test="storeStyle !=null">
+				store_style,
+			</if>
+			<if test="storeAge !=null">
+				store_age,
+			</if>
+			<if test="storeAreaScope !=null">
+				store_area_scope,
+			</if>
+			<if test="wxaArticleShow !=null">
+				wxa_article_show,
+			</if>
+			<if test="greetingImage !=null">
+				greeting_image,
+			</if>
+			<if test="greetingWords !=null">
+				greeting_words,
+			</if>
+			<if test="greetingSendType !=null">
+				greeting_send_type,
+			</if>
+			<if test="shopReservationsOrderSwitch !=null">
+				shop_reservations_order_switch,
+			</if>
+			<if test="onlineWxaVersion !=null">
+				online_wxa_version,
+			</if>
+			<if test="hasHotonline !=null">
+				has_hotonline,
+			</if>
+			<if test="hotOnline !=null">
+				hot_online,
+			</if>
+			<if test="wxaOpenTime !=null">
+				wxa_open_time,
+			</if>
+			<if test="wxaCloseTime !=null">
+				wxa_close_time,
+			</if>
+			<if test="wxaRenewProtectCloseTime !=null">
+				wxa_renew_protect_close_time,
+			</if>
+			<if test="purchaseChannel !=null">
+				purchase_channel,
+			</if>
+			<if test="priceLevel !=null">
+				price_level,
+			</if>
+			<if test="dataAuditStatus !=null">
+				data_audit_status,
+			</if>
+			<if test="dataAuditTime !=null">
+				data_audit_time,
+			</if>
+			<if test="authId !=null">
+				auth_id,
+			</if>
+			<if test="inShopOpenId !=null">
+				in_shop_open_id,
+			</if>
+			<if test="inShopMemberId !=null">
+				in_shop_member_id,
+			</if>
+			<if test="wxaBusinessType !=null">
+				wxa_business_type,
+			</if>
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="id  !=null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="businessNumber  !=null">
+				#{businessNumber,jdbcType=BIGINT},
+			</if>
+			<if test="businessName  !=null">
+				#{businessName,jdbcType=VARCHAR},
+			</if>
+			<if test="companyName  !=null">
+				#{companyName,jdbcType=VARCHAR},
+			</if>
+			<if test="status  !=null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="createTime  !=null">
+				#{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateTime  !=null">
+				#{updateTime,jdbcType=BIGINT},
+			</if>
+			<if test="memberNumber  !=null">
+				#{memberNumber,jdbcType=INTEGER},
+			</if>
+			<if test="distributionStatus  !=null">
+				#{distributionStatus,jdbcType=TINYINT},
+			</if>
+			<if test="phoneNumber  !=null">
+				#{phoneNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="cashIncome  !=null">
+				#{cashIncome,jdbcType=DECIMAL},
+			</if>
+			<if test="commissionPercentage  !=null">
+				#{commissionPercentage,jdbcType=DECIMAL},
+			</if>
+			<if test="memberCommissionPercentage  !=null">
+				#{memberCommissionPercentage,jdbcType=DECIMAL},
+			</if>
+			<if test="defaultCommissionPercentage  !=null">
+				#{defaultCommissionPercentage,jdbcType=DECIMAL},
+			</if>
+			<if test="superBusinessIds  !=null">
+				#{superBusinessIds,jdbcType=VARCHAR},
+			</if>
+			<if test="availableBalance  !=null">
+				#{availableBalance,jdbcType=DECIMAL},
+			</if>
+			<if test="withdrawApply  !=null">
+				#{withdrawApply,jdbcType=INTEGER},
+			</if>
+			<if test="businessAddress  !=null">
+				#{businessAddress,jdbcType=VARCHAR},
+			</if>
+			<if test="licenseNumber  !=null">
+				#{licenseNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="organizationNo  !=null">
+				#{organizationNo,jdbcType=VARCHAR},
+			</if>
+			<if test="taxId  !=null">
+				#{taxId,jdbcType=VARCHAR},
+			</if>
+			<if test="legalPerson  !=null">
+				#{legalPerson,jdbcType=VARCHAR},
+			</if>
+			<if test="legalPhone  !=null">
+				#{legalPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="province  !=null">
+				#{province,jdbcType=VARCHAR},
+			</if>
+			<if test="city  !=null">
+				#{city,jdbcType=VARCHAR},
+			</if>
+			<if test="county  !=null">
+				#{county,jdbcType=VARCHAR},
+			</if>
+			<if test="storeArea  !=null">
+				#{storeArea,jdbcType=DECIMAL},
+			</if>
+			<if test="storeDescription  !=null">
+				#{storeDescription,jdbcType=VARCHAR},
+			</if>
+			<if test="storeLogo  !=null">
+				#{storeLogo,jdbcType=VARCHAR},
+			</if>
+			<if test="storeShowImgs  !=null">
+				#{storeShowImgs,jdbcType=VARCHAR},
+			</if>
+			<if test="storePanoramaImg  !=null">
+				#{storePanoramaImg,jdbcType=VARCHAR},
+			</if>
+			<if test="bankAccountName  !=null">
+				#{bankAccountName,jdbcType=VARCHAR},
+			</if>
+			<if test="bankName  !=null">
+				#{bankName,jdbcType=VARCHAR},
+			</if>
+			<if test="bankAccountNo  !=null">
+				#{bankAccountNo,jdbcType=VARCHAR},
+			</if>
+			<if test="userName  !=null">
+				#{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="userPassword  !=null">
+				#{userPassword,jdbcType=VARCHAR},
+			</if>
+			<if test="bankCardFlag  !=null">
+				#{bankCardFlag,jdbcType=TINYINT},
+			</if>
+			<if test="alipayFlag  !=null">
+				#{alipayFlag,jdbcType=TINYINT},
+			</if>
+			<if test="alipayAccount  !=null">
+				#{alipayAccount,jdbcType=VARCHAR},
+			</if>
+			<if test="alipayName  !=null">
+				#{alipayName,jdbcType=VARCHAR},
+			</if>
+			<if test="weixinFlag  !=null">
+				#{weixinFlag,jdbcType=TINYINT},
+			</if>
+			<if test="weixinAccount  !=null">
+				#{weixinAccount,jdbcType=VARCHAR},
+			</if>
+			<if test="weixinName  !=null">
+				#{weixinName,jdbcType=VARCHAR},
+			</if>
+			<if test="idCardNumber  !=null">
+				#{idCardNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="businessType  !=null">
+				#{businessType,jdbcType=TINYINT},
+			</if>
+			<if test="withdrawPassword  !=null">
+				#{withdrawPassword,jdbcType=VARCHAR},
+			</if>
+			<if test="grade  !=null">
+				#{grade,jdbcType=INTEGER},
+			</if>
+			<if test="businessHours  !=null">
+				#{businessHours,jdbcType=VARCHAR},
+			</if>
+			<if test="signTime  !=null">
+				#{signTime,jdbcType=VARCHAR},
+			</if>
+			<if test="activeTime  !=null">
+				#{activeTime,jdbcType=BIGINT},
+			</if>
+			<if test="userCID  !=null">
+				#{userCID,jdbcType=VARCHAR},
+			</if>
+			<if test="bankCardUseFlag  !=null">
+				#{bankCardUseFlag,jdbcType=TINYINT},
+			</if>
+			<if test="alipayUseFlag  !=null">
+				#{alipayUseFlag,jdbcType=TINYINT},
+			</if>
+			<if test="weixinUseFlag  !=null">
+				#{weixinUseFlag,jdbcType=TINYINT},
+			</if>
+			<if test="lastErrorWithdrawPasswordTime  !=null">
+				#{lastErrorWithdrawPasswordTime,jdbcType=BIGINT},
+			</if>
+			<if test="errorCount  !=null">
+				#{errorCount,jdbcType=INTEGER},
+			</if>
+			<if test="deep  !=null">
+				#{deep,jdbcType=BIGINT},
+			</if>
+			<if test="bindWeixinId  !=null">
+				#{bindWeixinId,jdbcType=VARCHAR},
+			</if>
+			<if test="bindWeixinName  !=null">
+				#{bindWeixinName,jdbcType=VARCHAR},
+			</if>
+			<if test="bindWeixinIcon  !=null">
+				#{bindWeixinIcon,jdbcType=VARCHAR},
+			</if>
+			<if test="protocolTime  !=null">
+				#{protocolTime,jdbcType=BIGINT},
+			</if>
+			<if test="legalIdNumber  !=null">
+				#{legalIdNumber,jdbcType=VARCHAR},
+			</if>
+			<if test="appId  !=null">
+				#{appId,jdbcType=VARCHAR},
+			</if>
+			<if test="wxaAppId  !=null">
+				#{wxaAppId,jdbcType=VARCHAR},
+			</if>
+			<if test="weiXinNum  !=null">
+				#{weiXinNum,jdbcType=VARCHAR},
+			</if>
+			<if test="vip  !=null">
+				#{vip,jdbcType=TINYINT},
+			</if>
+			<if test="storeNotice  !=null">
+				#{storeNotice,jdbcType=VARCHAR},
+			</if>
+			<if test="isOpenWxa  !=null">
+				#{isOpenWxa,jdbcType=TINYINT},
+			</if>
+			<if test="usedCouponTotalMemberCount  !=null">
+				#{usedCouponTotalMemberCount,jdbcType=INTEGER},
+			</if>
+			<if test="usedCouponTotalCount  !=null">
+				#{usedCouponTotalCount,jdbcType=INTEGER},
+			</if>
+			<if test="usedCouponTotalMoney  !=null">
+				#{usedCouponTotalMoney,jdbcType=DECIMAL},
+			</if>
+			<if test="wxaType  !=null">
+				#{wxaType,jdbcType=TINYINT},
+			</if>
+			<if test="qualificationProofImages  !=null">
+				#{qualificationProofImages,jdbcType=VARCHAR},
+			</if>
+			<if test="rate  !=null">
+				#{rate,jdbcType=DECIMAL},
+			</if>
+			<if test="synchronousButtonStatus  !=null">
+				#{synchronousButtonStatus,jdbcType=TINYINT},
+			</if>
+			<if test="supplierId  !=null">
+				#{supplierId,jdbcType=BIGINT},
+			</if>
+			<if test="firstLoginStatus  !=null">
+				#{firstLoginStatus,jdbcType=TINYINT},
+			</if>
+			<if test="storeDisplayImages  !=null">
+				#{storeDisplayImages,jdbcType=VARCHAR},
+			</if>
+			<if test="oneStageTime  !=null">
+				#{oneStageTime,jdbcType=INTEGER},
+			</if>
+			<if test="twoStageTime  !=null">
+				#{twoStageTime,jdbcType=INTEGER},
+			</if>
+			<if test="threeStageTime  !=null">
+				#{threeStageTime,jdbcType=INTEGER},
+			</if>
+			<if test="groundUserId  !=null">
+				#{groundUserId,jdbcType=BIGINT},
+			</if>
+			<if test="superIds  !=null">
+				#{superIds,jdbcType=VARCHAR},
+			</if>
+			<if test="activationTime  !=null">
+				#{activationTime,jdbcType=BIGINT},
+			</if>
+			<if test="auditStatus  !=null">
+				#{auditStatus,jdbcType=TINYINT},
+			</if>
+			<if test="auditTime  !=null">
+				#{auditTime,jdbcType=BIGINT},
+			</if>
+			<if test="groundUserPhone  !=null">
+				#{groundUserPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="groundUserName  !=null">
+				#{groundUserName,jdbcType=VARCHAR},
+			</if>
+			<if test="storeStyle  !=null">
+				#{storeStyle,jdbcType=VARCHAR},
+			</if>
+			<if test="storeAge  !=null">
+				#{storeAge,jdbcType=VARCHAR},
+			</if>
+			<if test="storeAreaScope  !=null">
+				#{storeAreaScope,jdbcType=VARCHAR},
+			</if>
+			<if test="wxaArticleShow  !=null">
+				#{wxaArticleShow,jdbcType=TINYINT},
+			</if>
+			<if test="greetingImage  !=null">
+				#{greetingImage,jdbcType=VARCHAR},
+			</if>
+			<if test="greetingWords  !=null">
+				#{greetingWords,jdbcType=VARCHAR},
+			</if>
+			<if test="greetingSendType  !=null">
+				#{greetingSendType,jdbcType=TINYINT},
+			</if>
+			<if test="shopReservationsOrderSwitch  !=null">
+				#{shopReservationsOrderSwitch,jdbcType=TINYINT},
+			</if>
+			<if test="onlineWxaVersion  !=null">
+				#{onlineWxaVersion,jdbcType=VARCHAR},
+			</if>
+			<if test="hasHotonline  !=null">
+				#{hasHotonline,jdbcType=TINYINT},
+			</if>
+			<if test="hotOnline  !=null">
+				#{hotOnline,jdbcType=VARCHAR},
+			</if>
+			<if test="wxaOpenTime  !=null">
+				#{wxaOpenTime,jdbcType=BIGINT},
+			</if>
+			<if test="wxaCloseTime  !=null">
+				#{wxaCloseTime,jdbcType=BIGINT},
+			</if>
+			<if test="wxaRenewProtectCloseTime  !=null">
+				#{wxaRenewProtectCloseTime,jdbcType=BIGINT},
+			</if>
+			<if test="purchaseChannel  !=null">
+				#{purchaseChannel,jdbcType=VARCHAR},
+			</if>
+			<if test="priceLevel  !=null">
+				#{priceLevel,jdbcType=VARCHAR},
+			</if>
+			<if test="dataAuditStatus  !=null">
+				#{dataAuditStatus,jdbcType=TINYINT},
+			</if>
+			<if test="dataAuditTime  !=null">
+				#{dataAuditTime,jdbcType=BIGINT},
+			</if>
+			<if test="authId  !=null">
+				#{authId,jdbcType=BIGINT},
+			</if>
+			<if test="inShopOpenId  !=null">
+				#{inShopOpenId,jdbcType=VARCHAR},
+			</if>
+			<if test="inShopMemberId  !=null">
+				#{inShopMemberId,jdbcType=BIGINT},
+			</if>
+			<if test="wxaBusinessType  !=null">
+				#{wxaBusinessType,jdbcType=TINYINT}
+			</if>
+		</trim>
+	</insert>
+
+	<!-- 精确更新-->
+	<update id="updateByPrimaryKeySelective" parameterType="com.e_commerce.miscroservice.user.entity.StoreBusiness" >
+		update yjj_storebusiness
+		<set>
+			<include refid="updateBase"/>
+		</set>
+		where Id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<!-- 全字段更新 需要注意-->
+	<update id="updateByPrimaryKey" parameterType="com.e_commerce.miscroservice.user.entity.StoreBusiness" >
+		update yjj_storebusiness
+		set
+			Id = #{id ,jdbcType=BIGINT},
+			BusinessNumber = #{businessNumber ,jdbcType=BIGINT},
+			BusinessName = #{businessName ,jdbcType=VARCHAR},
+			CompanyName = #{companyName ,jdbcType=VARCHAR},
+			Status = #{status ,jdbcType=TINYINT},
+			CreateTime = #{createTime ,jdbcType=BIGINT},
+			UpdateTime = #{updateTime ,jdbcType=BIGINT},
+			MemberNumber = #{memberNumber ,jdbcType=INTEGER},
+			DistributionStatus = #{distributionStatus ,jdbcType=TINYINT},
+			PhoneNumber = #{phoneNumber ,jdbcType=VARCHAR},
+			CashIncome = #{cashIncome ,jdbcType=DECIMAL},
+			CommissionPercentage = #{commissionPercentage ,jdbcType=DECIMAL},
+			MemberCommissionPercentage = #{memberCommissionPercentage ,jdbcType=DECIMAL},
+			DefaultCommissionPercentage = #{defaultCommissionPercentage ,jdbcType=DECIMAL},
+			SuperBusinessIds = #{superBusinessIds ,jdbcType=VARCHAR},
+			AvailableBalance = #{availableBalance ,jdbcType=DECIMAL},
+			WithdrawApply = #{withdrawApply ,jdbcType=INTEGER},
+			BusinessAddress = #{businessAddress ,jdbcType=VARCHAR},
+			LicenseNumber = #{licenseNumber ,jdbcType=VARCHAR},
+			OrganizationNo = #{organizationNo ,jdbcType=VARCHAR},
+			TaxId = #{taxId ,jdbcType=VARCHAR},
+			LegalPerson = #{legalPerson ,jdbcType=VARCHAR},
+			LegalPhone = #{legalPhone ,jdbcType=VARCHAR},
+			Province = #{province ,jdbcType=VARCHAR},
+			City = #{city ,jdbcType=VARCHAR},
+			County = #{county ,jdbcType=VARCHAR},
+			StoreArea = #{storeArea ,jdbcType=DECIMAL},
+			StoreDescription = #{storeDescription ,jdbcType=VARCHAR},
+			StoreLogo = #{storeLogo ,jdbcType=VARCHAR},
+			StoreShowImgs = #{storeShowImgs ,jdbcType=VARCHAR},
+			StorePanoramaImg = #{storePanoramaImg ,jdbcType=VARCHAR},
+			BankAccountName = #{bankAccountName ,jdbcType=VARCHAR},
+			BankName = #{bankName ,jdbcType=VARCHAR},
+			BankAccountNo = #{bankAccountNo ,jdbcType=VARCHAR},
+			UserName = #{userName ,jdbcType=VARCHAR},
+			UserPassword = #{userPassword ,jdbcType=VARCHAR},
+			BankCardFlag = #{bankCardFlag ,jdbcType=TINYINT},
+			AlipayFlag = #{alipayFlag ,jdbcType=TINYINT},
+			AlipayAccount = #{alipayAccount ,jdbcType=VARCHAR},
+			AlipayName = #{alipayName ,jdbcType=VARCHAR},
+			WeixinFlag = #{weixinFlag ,jdbcType=TINYINT},
+			WeixinAccount = #{weixinAccount ,jdbcType=VARCHAR},
+			WeixinName = #{weixinName ,jdbcType=VARCHAR},
+			IdCardNumber = #{idCardNumber ,jdbcType=VARCHAR},
+			BusinessType = #{businessType ,jdbcType=TINYINT},
+			WithdrawPassword = #{withdrawPassword ,jdbcType=VARCHAR},
+			Grade = #{grade ,jdbcType=INTEGER},
+			BusinessHours = #{businessHours ,jdbcType=VARCHAR},
+			SignTime = #{signTime ,jdbcType=VARCHAR},
+			ActiveTime = #{activeTime ,jdbcType=BIGINT},
+			UserCID = #{userCID ,jdbcType=VARCHAR},
+			BankCardUseFlag = #{bankCardUseFlag ,jdbcType=TINYINT},
+			AlipayUseFlag = #{alipayUseFlag ,jdbcType=TINYINT},
+			WeixinUseFlag = #{weixinUseFlag ,jdbcType=TINYINT},
+			LastErrorWithdrawPasswordTime = #{lastErrorWithdrawPasswordTime ,jdbcType=BIGINT},
+			ErrorCount = #{errorCount ,jdbcType=INTEGER},
+			Deep = #{deep ,jdbcType=BIGINT},
+			BindWeixinId = #{bindWeixinId ,jdbcType=VARCHAR},
+			BindWeixinName = #{bindWeixinName ,jdbcType=VARCHAR},
+			BindWeixinIcon = #{bindWeixinIcon ,jdbcType=VARCHAR},
+			ProtocolTime = #{protocolTime ,jdbcType=BIGINT},
+			LegalIdNumber = #{legalIdNumber ,jdbcType=VARCHAR},
+			AppId = #{appId ,jdbcType=VARCHAR},
+			WxaAppId = #{wxaAppId ,jdbcType=VARCHAR},
+			WeiXinNum = #{weiXinNum ,jdbcType=VARCHAR},
+			vip = #{vip ,jdbcType=TINYINT},
+			StoreNotice = #{storeNotice ,jdbcType=VARCHAR},
+			is_open_wxa = #{isOpenWxa ,jdbcType=TINYINT},
+			used_coupon_total_member_count = #{usedCouponTotalMemberCount ,jdbcType=INTEGER},
+			used_coupon_total_count = #{usedCouponTotalCount ,jdbcType=INTEGER},
+			used_coupon_total_money = #{usedCouponTotalMoney ,jdbcType=DECIMAL},
+			wxaType = #{wxaType ,jdbcType=TINYINT},
+			qualificationProofImages = #{qualificationProofImages ,jdbcType=VARCHAR},
+			rate = #{rate ,jdbcType=DECIMAL},
+			synchronousButtonStatus = #{synchronousButtonStatus ,jdbcType=TINYINT},
+			supplierId = #{supplierId ,jdbcType=BIGINT},
+			first_login_status = #{firstLoginStatus ,jdbcType=TINYINT},
+			store_display_images = #{storeDisplayImages ,jdbcType=VARCHAR},
+			one_stage_time = #{oneStageTime ,jdbcType=INTEGER},
+			two_stage_time = #{twoStageTime ,jdbcType=INTEGER},
+			three_stage_time = #{threeStageTime ,jdbcType=INTEGER},
+			ground_user_id = #{groundUserId ,jdbcType=BIGINT},
+			super_ids = #{superIds ,jdbcType=VARCHAR},
+			activation_time = #{activationTime ,jdbcType=BIGINT},
+			audit_status = #{auditStatus ,jdbcType=TINYINT},
+			audit_time = #{auditTime ,jdbcType=BIGINT},
+			ground_user_phone = #{groundUserPhone ,jdbcType=VARCHAR},
+			ground_user_name = #{groundUserName ,jdbcType=VARCHAR},
+			store_style = #{storeStyle ,jdbcType=VARCHAR},
+			store_age = #{storeAge ,jdbcType=VARCHAR},
+			store_area_scope = #{storeAreaScope ,jdbcType=VARCHAR},
+			wxa_article_show = #{wxaArticleShow ,jdbcType=TINYINT},
+			greeting_image = #{greetingImage ,jdbcType=VARCHAR},
+			greeting_words = #{greetingWords ,jdbcType=VARCHAR},
+			greeting_send_type = #{greetingSendType ,jdbcType=TINYINT},
+			shop_reservations_order_switch = #{shopReservationsOrderSwitch ,jdbcType=TINYINT},
+			online_wxa_version = #{onlineWxaVersion ,jdbcType=VARCHAR},
+			has_hotonline = #{hasHotonline ,jdbcType=TINYINT},
+			hot_online = #{hotOnline ,jdbcType=VARCHAR},
+			wxa_open_time = #{wxaOpenTime ,jdbcType=BIGINT},
+			wxa_close_time = #{wxaCloseTime ,jdbcType=BIGINT},
+			wxa_renew_protect_close_time = #{wxaRenewProtectCloseTime ,jdbcType=BIGINT},
+			purchase_channel = #{purchaseChannel ,jdbcType=VARCHAR},
+			price_level = #{priceLevel ,jdbcType=VARCHAR},
+			data_audit_status = #{dataAuditStatus ,jdbcType=TINYINT},
+			data_audit_time = #{dataAuditTime ,jdbcType=BIGINT},
+			auth_id = #{authId ,jdbcType=BIGINT},
+			in_shop_open_id = #{inShopOpenId ,jdbcType=VARCHAR},
+			in_shop_member_id = #{inShopMemberId ,jdbcType=BIGINT},
+			wxa_business_type = #{wxaBusinessType ,jdbcType=TINYINT}
+		where Id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<!-- 所有的条件集合-->
+	<sql id="whereCase"  >
+		where  1=1
+		<if test="id  !=null">
+			AND Id = #{id,jdbcType=BIGINT}
+		</if>
+		<if test="businessNumber  !=null">
+			AND BusinessNumber = #{businessNumber,jdbcType=BIGINT}
+		</if>
+		<if test="businessName  !=null">
+			AND BusinessName = #{businessName,jdbcType=VARCHAR}
+		</if>
+		<if test="companyName  !=null">
+			AND CompanyName = #{companyName,jdbcType=VARCHAR}
+		</if>
+		<if test="status  !=null">
+			AND Status = #{status,jdbcType=TINYINT}
+		</if>
+		<if test="createTime  !=null">
+			AND CreateTime = #{createTime,jdbcType=BIGINT}
+		</if>
+		<if test="updateTime  !=null">
+			AND UpdateTime = #{updateTime,jdbcType=BIGINT}
+		</if>
+		<if test="memberNumber  !=null">
+			AND MemberNumber = #{memberNumber,jdbcType=INTEGER}
+		</if>
+		<if test="distributionStatus  !=null">
+			AND DistributionStatus = #{distributionStatus,jdbcType=TINYINT}
+		</if>
+		<if test="phoneNumber  !=null">
+			AND PhoneNumber = #{phoneNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="cashIncome  !=null">
+			AND CashIncome = #{cashIncome,jdbcType=DECIMAL}
+		</if>
+		<if test="commissionPercentage  !=null">
+			AND CommissionPercentage = #{commissionPercentage,jdbcType=DECIMAL}
+		</if>
+		<if test="memberCommissionPercentage  !=null">
+			AND MemberCommissionPercentage = #{memberCommissionPercentage,jdbcType=DECIMAL}
+		</if>
+		<if test="defaultCommissionPercentage  !=null">
+			AND DefaultCommissionPercentage = #{defaultCommissionPercentage,jdbcType=DECIMAL}
+		</if>
+		<if test="superBusinessIds  !=null">
+			AND SuperBusinessIds = #{superBusinessIds,jdbcType=VARCHAR}
+		</if>
+		<if test="availableBalance  !=null">
+			AND AvailableBalance = #{availableBalance,jdbcType=DECIMAL}
+		</if>
+		<if test="withdrawApply  !=null">
+			AND WithdrawApply = #{withdrawApply,jdbcType=INTEGER}
+		</if>
+		<if test="businessAddress  !=null">
+			AND BusinessAddress = #{businessAddress,jdbcType=VARCHAR}
+		</if>
+		<if test="licenseNumber  !=null">
+			AND LicenseNumber = #{licenseNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="organizationNo  !=null">
+			AND OrganizationNo = #{organizationNo,jdbcType=VARCHAR}
+		</if>
+		<if test="taxId  !=null">
+			AND TaxId = #{taxId,jdbcType=VARCHAR}
+		</if>
+		<if test="legalPerson  !=null">
+			AND LegalPerson = #{legalPerson,jdbcType=VARCHAR}
+		</if>
+		<if test="legalPhone  !=null">
+			AND LegalPhone = #{legalPhone,jdbcType=VARCHAR}
+		</if>
+		<if test="province  !=null">
+			AND Province = #{province,jdbcType=VARCHAR}
+		</if>
+		<if test="city  !=null">
+			AND City = #{city,jdbcType=VARCHAR}
+		</if>
+		<if test="county  !=null">
+			AND County = #{county,jdbcType=VARCHAR}
+		</if>
+		<if test="storeArea  !=null">
+			AND StoreArea = #{storeArea,jdbcType=DECIMAL}
+		</if>
+		<if test="storeDescription  !=null">
+			AND StoreDescription = #{storeDescription,jdbcType=VARCHAR}
+		</if>
+		<if test="storeLogo  !=null">
+			AND StoreLogo = #{storeLogo,jdbcType=VARCHAR}
+		</if>
+		<if test="storeShowImgs  !=null">
+			AND StoreShowImgs = #{storeShowImgs,jdbcType=VARCHAR}
+		</if>
+		<if test="storePanoramaImg  !=null">
+			AND StorePanoramaImg = #{storePanoramaImg,jdbcType=VARCHAR}
+		</if>
+		<if test="bankAccountName  !=null">
+			AND BankAccountName = #{bankAccountName,jdbcType=VARCHAR}
+		</if>
+		<if test="bankName  !=null">
+			AND BankName = #{bankName,jdbcType=VARCHAR}
+		</if>
+		<if test="bankAccountNo  !=null">
+			AND BankAccountNo = #{bankAccountNo,jdbcType=VARCHAR}
+		</if>
+		<if test="userName  !=null">
+			AND UserName = #{userName,jdbcType=VARCHAR}
+		</if>
+		<if test="userPassword  !=null">
+			AND UserPassword = #{userPassword,jdbcType=VARCHAR}
+		</if>
+		<if test="bankCardFlag  !=null">
+			AND BankCardFlag = #{bankCardFlag,jdbcType=TINYINT}
+		</if>
+		<if test="alipayFlag  !=null">
+			AND AlipayFlag = #{alipayFlag,jdbcType=TINYINT}
+		</if>
+		<if test="alipayAccount  !=null">
+			AND AlipayAccount = #{alipayAccount,jdbcType=VARCHAR}
+		</if>
+		<if test="alipayName  !=null">
+			AND AlipayName = #{alipayName,jdbcType=VARCHAR}
+		</if>
+		<if test="weixinFlag  !=null">
+			AND WeixinFlag = #{weixinFlag,jdbcType=TINYINT}
+		</if>
+		<if test="weixinAccount  !=null">
+			AND WeixinAccount = #{weixinAccount,jdbcType=VARCHAR}
+		</if>
+		<if test="weixinName  !=null">
+			AND WeixinName = #{weixinName,jdbcType=VARCHAR}
+		</if>
+		<if test="idCardNumber  !=null">
+			AND IdCardNumber = #{idCardNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="businessType  !=null">
+			AND BusinessType = #{businessType,jdbcType=TINYINT}
+		</if>
+		<if test="withdrawPassword  !=null">
+			AND WithdrawPassword = #{withdrawPassword,jdbcType=VARCHAR}
+		</if>
+		<if test="grade  !=null">
+			AND Grade = #{grade,jdbcType=INTEGER}
+		</if>
+		<if test="businessHours  !=null">
+			AND BusinessHours = #{businessHours,jdbcType=VARCHAR}
+		</if>
+		<if test="signTime  !=null">
+			AND SignTime = #{signTime,jdbcType=VARCHAR}
+		</if>
+		<if test="activeTime  !=null">
+			AND ActiveTime = #{activeTime,jdbcType=BIGINT}
+		</if>
+		<if test="userCID  !=null">
+			AND UserCID = #{userCID,jdbcType=VARCHAR}
+		</if>
+		<if test="bankCardUseFlag  !=null">
+			AND BankCardUseFlag = #{bankCardUseFlag,jdbcType=TINYINT}
+		</if>
+		<if test="alipayUseFlag  !=null">
+			AND AlipayUseFlag = #{alipayUseFlag,jdbcType=TINYINT}
+		</if>
+		<if test="weixinUseFlag  !=null">
+			AND WeixinUseFlag = #{weixinUseFlag,jdbcType=TINYINT}
+		</if>
+		<if test="lastErrorWithdrawPasswordTime  !=null">
+			AND LastErrorWithdrawPasswordTime = #{lastErrorWithdrawPasswordTime,jdbcType=BIGINT}
+		</if>
+		<if test="errorCount  !=null">
+			AND ErrorCount = #{errorCount,jdbcType=INTEGER}
+		</if>
+		<if test="deep  !=null">
+			AND Deep = #{deep,jdbcType=BIGINT}
+		</if>
+		<if test="bindWeixinId  !=null">
+			AND BindWeixinId = #{bindWeixinId,jdbcType=VARCHAR}
+		</if>
+		<if test="bindWeixinName  !=null">
+			AND BindWeixinName = #{bindWeixinName,jdbcType=VARCHAR}
+		</if>
+		<if test="bindWeixinIcon  !=null">
+			AND BindWeixinIcon = #{bindWeixinIcon,jdbcType=VARCHAR}
+		</if>
+		<if test="protocolTime  !=null">
+			AND ProtocolTime = #{protocolTime,jdbcType=BIGINT}
+		</if>
+		<if test="legalIdNumber  !=null">
+			AND LegalIdNumber = #{legalIdNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="appId  !=null">
+			AND AppId = #{appId,jdbcType=VARCHAR}
+		</if>
+		<if test="wxaAppId  !=null">
+			AND WxaAppId = #{wxaAppId,jdbcType=VARCHAR}
+		</if>
+		<if test="weiXinNum  !=null">
+			AND WeiXinNum = #{weiXinNum,jdbcType=VARCHAR}
+		</if>
+		<if test="vip  !=null">
+			AND vip = #{vip,jdbcType=TINYINT}
+		</if>
+		<if test="storeNotice  !=null">
+			AND StoreNotice = #{storeNotice,jdbcType=VARCHAR}
+		</if>
+		<if test="isOpenWxa  !=null">
+			AND is_open_wxa = #{isOpenWxa,jdbcType=TINYINT}
+		</if>
+		<if test="usedCouponTotalMemberCount  !=null">
+			AND used_coupon_total_member_count = #{usedCouponTotalMemberCount,jdbcType=INTEGER}
+		</if>
+		<if test="usedCouponTotalCount  !=null">
+			AND used_coupon_total_count = #{usedCouponTotalCount,jdbcType=INTEGER}
+		</if>
+		<if test="usedCouponTotalMoney  !=null">
+			AND used_coupon_total_money = #{usedCouponTotalMoney,jdbcType=DECIMAL}
+		</if>
+		<if test="wxaType  !=null">
+			AND wxaType = #{wxaType,jdbcType=TINYINT}
+		</if>
+		<if test="qualificationProofImages  !=null">
+			AND qualificationProofImages = #{qualificationProofImages,jdbcType=VARCHAR}
+		</if>
+		<if test="rate  !=null">
+			AND rate = #{rate,jdbcType=DECIMAL}
+		</if>
+		<if test="synchronousButtonStatus  !=null">
+			AND synchronousButtonStatus = #{synchronousButtonStatus,jdbcType=TINYINT}
+		</if>
+		<if test="supplierId  !=null">
+			AND supplierId = #{supplierId,jdbcType=BIGINT}
+		</if>
+		<if test="firstLoginStatus  !=null">
+			AND first_login_status = #{firstLoginStatus,jdbcType=TINYINT}
+		</if>
+		<if test="storeDisplayImages  !=null">
+			AND store_display_images = #{storeDisplayImages,jdbcType=VARCHAR}
+		</if>
+		<if test="oneStageTime  !=null">
+			AND one_stage_time = #{oneStageTime,jdbcType=INTEGER}
+		</if>
+		<if test="twoStageTime  !=null">
+			AND two_stage_time = #{twoStageTime,jdbcType=INTEGER}
+		</if>
+		<if test="threeStageTime  !=null">
+			AND three_stage_time = #{threeStageTime,jdbcType=INTEGER}
+		</if>
+		<if test="groundUserId  !=null">
+			AND ground_user_id = #{groundUserId,jdbcType=BIGINT}
+		</if>
+		<if test="superIds  !=null">
+			AND super_ids = #{superIds,jdbcType=VARCHAR}
+		</if>
+		<if test="activationTime  !=null">
+			AND activation_time = #{activationTime,jdbcType=BIGINT}
+		</if>
+		<if test="auditStatus  !=null">
+			AND audit_status = #{auditStatus,jdbcType=TINYINT}
+		</if>
+		<if test="auditTime  !=null">
+			AND audit_time = #{auditTime,jdbcType=BIGINT}
+		</if>
+		<if test="groundUserPhone  !=null">
+			AND ground_user_phone = #{groundUserPhone,jdbcType=VARCHAR}
+		</if>
+		<if test="groundUserName  !=null">
+			AND ground_user_name = #{groundUserName,jdbcType=VARCHAR}
+		</if>
+		<if test="storeStyle  !=null">
+			AND store_style = #{storeStyle,jdbcType=VARCHAR}
+		</if>
+		<if test="storeAge  !=null">
+			AND store_age = #{storeAge,jdbcType=VARCHAR}
+		</if>
+		<if test="storeAreaScope  !=null">
+			AND store_area_scope = #{storeAreaScope,jdbcType=VARCHAR}
+		</if>
+		<if test="wxaArticleShow  !=null">
+			AND wxa_article_show = #{wxaArticleShow,jdbcType=TINYINT}
+		</if>
+		<if test="greetingImage  !=null">
+			AND greeting_image = #{greetingImage,jdbcType=VARCHAR}
+		</if>
+		<if test="greetingWords  !=null">
+			AND greeting_words = #{greetingWords,jdbcType=VARCHAR}
+		</if>
+		<if test="greetingSendType  !=null">
+			AND greeting_send_type = #{greetingSendType,jdbcType=TINYINT}
+		</if>
+		<if test="shopReservationsOrderSwitch  !=null">
+			AND shop_reservations_order_switch = #{shopReservationsOrderSwitch,jdbcType=TINYINT}
+		</if>
+		<if test="onlineWxaVersion  !=null">
+			AND online_wxa_version = #{onlineWxaVersion,jdbcType=VARCHAR}
+		</if>
+		<if test="hasHotonline  !=null">
+			AND has_hotonline = #{hasHotonline,jdbcType=TINYINT}
+		</if>
+		<if test="hotOnline  !=null">
+			AND hot_online = #{hotOnline,jdbcType=VARCHAR}
+		</if>
+		<if test="wxaOpenTime  !=null">
+			AND wxa_open_time = #{wxaOpenTime,jdbcType=BIGINT}
+		</if>
+		<if test="wxaCloseTime  !=null">
+			AND wxa_close_time = #{wxaCloseTime,jdbcType=BIGINT}
+		</if>
+		<if test="wxaRenewProtectCloseTime  !=null">
+			AND wxa_renew_protect_close_time = #{wxaRenewProtectCloseTime,jdbcType=BIGINT}
+		</if>
+		<if test="purchaseChannel  !=null">
+			AND purchase_channel = #{purchaseChannel,jdbcType=VARCHAR}
+		</if>
+		<if test="priceLevel  !=null">
+			AND price_level = #{priceLevel,jdbcType=VARCHAR}
+		</if>
+		<if test="dataAuditStatus  !=null">
+			AND data_audit_status = #{dataAuditStatus,jdbcType=TINYINT}
+		</if>
+		<if test="dataAuditTime  !=null">
+			AND data_audit_time = #{dataAuditTime,jdbcType=BIGINT}
+		</if>
+		<if test="authId  !=null">
+			AND auth_id = #{authId,jdbcType=BIGINT}
+		</if>
+		<if test="inShopOpenId  !=null">
+			AND in_shop_open_id = #{inShopOpenId,jdbcType=VARCHAR}
+		</if>
+		<if test="inShopMemberId  !=null">
+			AND in_shop_member_id = #{inShopMemberId,jdbcType=BIGINT}
+		</if>
+		<if test="wxaBusinessType  !=null">
+			AND wxa_business_type = #{wxaBusinessType,jdbcType=TINYINT}
+		</if>
+		<include refid="costomWhereCase"/>
+	</sql>
+
+	<!-- 查询一条，如果返回多条会报错-->
+	<select id="selectOne" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM yjj_storebusiness
+		<include refid="whereCase" />
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectList" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM yjj_storebusiness
+		<include refid="whereCase" />
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM yjj_storebusiness
+		<include refid="whereCase" />
+	</select>
+
+	<!--  @Costom -->
+	<!-- 从上一行注释以上为系统生成 从这一行往下为用户自定义 请将自定义的sql放在此行下面 -->
+	<sql id="costomWhereCase">
+	</sql>
+
+
+	<update id="updateWxaCloseTime">
+		UPDATE yjj_storebusiness
+		SET wxa_close_time = #{newWxaCloseTime}, UpdateTime = #{updTime}
+		WHERE wxa_close_time = #{historyWxaCloseTime}
+		AND Id =#{storeId}
+	</update>
+
+	<update id="oldUserBindWeixin" parameterType="com.e_commerce.miscroservice.user.entity.StoreBusiness">
+		<![CDATA[
+			update yjj_StoreBusiness
+			set
+			BindWeixinName = #{bindWeixinName},
+			BindWeixinId = #{bindWeixinId},
+			BindWeixinIcon = #{bindWeixinIcon},
+			 UpdateTime = unix_timestamp()*1000
+			where Id = #{id} and (BindWeixinId is null  or BindWeixinId = '')
+		]]>
+	</update>
+
+	<select id="getShareShopLoginQr" resultType="map">
+		SELECT  IFNULL(`share_qr_code_url`, "") AS shareQcCodeUrl, id AS id from `yjj_store_wxa_shop_audit_data` where `store_id`=#{storeId} and `del_status`=0
+	</select>
+
+	<select id="selectStoreWxaAppidList" parameterType="Long" resultType="com.e_commerce.miscroservice.user.entity.StoreWxa">
+			select
+			`id`,
+			`app_id` as appId
+			from `jiuy_store_wxa` where `store_id`=#{storeId}
+	</select>
+	<!--根据id查询是否开通小程序-->
+	<select id="openWxUserByStoreId" resultType="com.e_commerce.miscroservice.user.entity.StoreBusiness">
+		select wxa_open_time as wxaOpenTime , wxa_close_time wxaCloseTime,is_open_wxa  isOpenWxa ,id
+		from yjj_storebusiness
+		where id = #{storeId}
+	</select>
+
+
+	<update id="updateUrlNew" >
+			update `yjj_store_wxa_shop_audit_data` set `share_qr_code_url`=#{url} where `store_id`=#{storeId}
+	</update>
+
+	<select id="selectAllStoreId" resultType="Long">
+			select `store_id` from `yjj_store_wxa_shop_audit_data`
+	</select>
+
+	<update id="updeteUrl">
+			UPDATE `yjj_store_wxa_shop_audit_data` SET `share_qr_code_url`=NULL
+	</update>
+</mapper>

@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.ShopMemberMapper">
+
+ 	<!-- 主要的返回映射-->
+	<resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.user.entity.ShopMember"	>
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="store_id"  property="storeId"  jdbcType="BIGINT" />
+		<result column="bind_phone"  property="bindPhone"  jdbcType="VARCHAR" />
+		<result column="bind_weixin"  property="bindWeixin"  jdbcType="VARCHAR" />
+		<result column="user_nickname"  property="userNickname"  jdbcType="VARCHAR" />
+		<result column="user_icon"  property="userIcon"  jdbcType="VARCHAR" />
+		<result column="minicode_url"  property="minicodeUrl"  jdbcType="VARCHAR" />
+		<result column="last_message_time"  property="lastMessageTime"  jdbcType="BIGINT" />
+		<result column="last_message_type"  property="lastMessageType"  jdbcType="TINYINT" />
+		<result column="last_message_content"  property="lastMessageContent"  jdbcType="VARCHAR" />
+		<result column="not_read_message_count"  property="notReadMessageCount"  jdbcType="VARCHAR" />
+		<result column="tag_ids"  property="tagIds"  jdbcType="VARCHAR" />
+		<result column="status"  property="status"  jdbcType="TINYINT" />
+		<result column="memo_name"  property="memoName"  jdbcType="VARCHAR" />
+		<result column="create_time"  property="createTime"  jdbcType="BIGINT" />
+		<result column="update_time"  property="updateTime"  jdbcType="BIGINT" />
+		<result column="source"  property="source"  jdbcType="VARCHAR" />
+		<result column="sex"  property="sex"  jdbcType="INTEGER" />
+		<result column="in_shop_open_id"  property="inShopOpenId"  jdbcType="VARCHAR" />
+		<result column="in_shop_member_id"  property="inShopMemberId"  jdbcType="BIGINT" />
+	</resultMap>
+
+	<!-- 所有的列名-->
+	<sql id="Base_Column_List" >
+		id,store_id,bind_phone,bind_weixin,user_nickname,user_icon,minicode_url,last_message_time,last_message_type,
+		last_message_content,not_read_message_count,tag_ids,status,memo_name,create_time,update_time,source,
+		sex,in_shop_open_id,in_shop_member_id,wx_phone
+	</sql>
+
+	<!-- 精确更新的字段-->
+	<sql id="updateBase">
+		<if test="id  !=null">
+			id = #{id,jdbcType=BIGINT},
+		</if>
+		<if test="storeId  !=null">
+			store_id = #{storeId,jdbcType=BIGINT},
+		</if>
+		<if test="bindPhone  !=null">
+			bind_phone = #{bindPhone,jdbcType=VARCHAR},
+		</if>
+		<if test="bindWeixin  !=null">
+			bind_weixin = #{bindWeixin,jdbcType=VARCHAR},
+		</if>
+		<if test="userNickname  !=null">
+			user_nickname = #{userNickname,jdbcType=VARCHAR},
+		</if>
+		<if test="userIcon  !=null">
+			user_icon = #{userIcon,jdbcType=VARCHAR},
+		</if>
+		<if test="minicodeUrl  !=null">
+			minicode_url = #{minicodeUrl,jdbcType=VARCHAR},
+		</if>
+		<if test="lastMessageTime  !=null">
+			last_message_time = #{lastMessageTime,jdbcType=BIGINT},
+		</if>
+		<if test="lastMessageType  !=null">
+			last_message_type = #{lastMessageType,jdbcType=TINYINT},
+		</if>
+		<if test="lastMessageContent  !=null">
+			last_message_content = #{lastMessageContent,jdbcType=VARCHAR},
+		</if>
+		<if test="notReadMessageCount  !=null">
+			not_read_message_count = #{notReadMessageCount,jdbcType=VARCHAR},
+		</if>
+		<if test="tagIds  !=null">
+			tag_ids = #{tagIds,jdbcType=VARCHAR},
+		</if>
+		<if test="status  !=null">
+			status = #{status,jdbcType=TINYINT},
+		</if>
+		<if test="memoName  !=null">
+			memo_name = #{memoName,jdbcType=VARCHAR},
+		</if>
+		<if test="createTime  !=null">
+			create_time = #{createTime,jdbcType=BIGINT},
+		</if>
+		<if test="updateTime  !=null">
+			update_time = #{updateTime,jdbcType=BIGINT},
+		</if>
+		<if test="source  !=null">
+			source = #{source,jdbcType=VARCHAR},
+		</if>
+		<if test="sex  !=null">
+			sex = #{sex,jdbcType=INTEGER},
+		</if>
+		<if test="inShopOpenId  !=null">
+			in_shop_open_id = #{inShopOpenId,jdbcType=VARCHAR},
+		</if>
+		<if test="inShopMemberId  !=null">
+			in_shop_member_id = #{inShopMemberId,jdbcType=BIGINT}
+		</if>
+	</sql>
+
+	<!-- 通过主键查找-->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+		select
+		<include refid="Base_Column_List" />
+		from shop_member
+		where  id = #{id,jdbcType=BIGINT}
+	</select>
+
+	<!-- 通过主键删除-->
+	<delete id="deleteByPrimaryKey" parameterType="Long" >
+		delete from shop_member
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+
+	<!-- 普通插入全字段插t入-->
+	<insert id="insert" parameterType="com.e_commerce.miscroservice.user.entity.ShopMember" >
+		insert into shop_member
+		(
+			id,
+			store_id,
+			bind_phone,
+			bind_weixin,
+			user_nickname,
+			user_icon,
+			minicode_url,
+			last_message_time,
+			last_message_type,
+			last_message_content,
+			not_read_message_count,
+			tag_ids,
+			status,
+			memo_name,
+			create_time,
+			update_time,
+			source,
+			sex,
+			in_shop_open_id,
+			in_shop_member_id
+		)
+		values
+		(
+			#{id ,jdbcType=BIGINT},
+			#{storeId ,jdbcType=BIGINT},
+			#{bindPhone ,jdbcType=VARCHAR},
+			#{bindWeixin ,jdbcType=VARCHAR},
+			#{userNickname ,jdbcType=VARCHAR},
+			#{userIcon ,jdbcType=VARCHAR},
+			#{minicodeUrl ,jdbcType=VARCHAR},
+			#{lastMessageTime ,jdbcType=BIGINT},
+			#{lastMessageType ,jdbcType=TINYINT},
+			#{lastMessageContent ,jdbcType=VARCHAR},
+			#{notReadMessageCount ,jdbcType=VARCHAR},
+			#{tagIds ,jdbcType=VARCHAR},
+			#{status ,jdbcType=TINYINT},
+			#{memoName ,jdbcType=VARCHAR},
+			#{createTime ,jdbcType=BIGINT},
+			#{updateTime ,jdbcType=BIGINT},
+			#{source ,jdbcType=VARCHAR},
+			#{sex ,jdbcType=INTEGER},
+			#{inShopOpenId ,jdbcType=VARCHAR},
+			#{inShopMemberId ,jdbcType=BIGINT}
+		)
+	</insert>
+
+	<!-- 批量插入，全部字段插入-->
+	<insert id="insertBach"   parameterType="List" >
+		insert into shop_member
+		(
+		id,
+		store_id,
+		bind_phone,
+		bind_weixin,
+		user_nickname,
+		user_icon,
+		minicode_url,
+		last_message_time,
+		last_message_type,
+		last_message_content,
+		not_read_message_count,
+		tag_ids,
+		status,
+		memo_name,
+		create_time,
+		update_time,
+		source,
+		sex,
+		in_shop_open_id,
+		in_shop_member_id
+		)
+		values
+		<foreach collection="list" item="item" separator=",">
+			(
+			#{item.id ,jdbcType=BIGINT},
+			#{item.storeId ,jdbcType=BIGINT},
+			#{item.bindPhone ,jdbcType=VARCHAR},
+			#{item.bindWeixin ,jdbcType=VARCHAR},
+			#{item.userNickname ,jdbcType=VARCHAR},
+			#{item.userIcon ,jdbcType=VARCHAR},
+			#{item.minicodeUrl ,jdbcType=VARCHAR},
+			#{item.lastMessageTime ,jdbcType=BIGINT},
+			#{item.lastMessageType ,jdbcType=TINYINT},
+			#{item.lastMessageContent ,jdbcType=VARCHAR},
+			#{item.notReadMessageCount ,jdbcType=VARCHAR},
+			#{item.tagIds ,jdbcType=VARCHAR},
+			#{item.status ,jdbcType=TINYINT},
+			#{item.memoName ,jdbcType=VARCHAR},
+			#{item.createTime ,jdbcType=BIGINT},
+			#{item.updateTime ,jdbcType=BIGINT},
+			#{item.source ,jdbcType=VARCHAR},
+			#{item.sex ,jdbcType=INTEGER},
+			#{item.inShopOpenId ,jdbcType=VARCHAR},
+			#{item.inShopMemberId ,jdbcType=BIGINT}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 精确插入，非null得字段才会插入-->
+	<insert id="insertSelective" parameterType="com.e_commerce.miscroservice.user.entity.ShopMember" useGeneratedKeys="true" keyProperty="id" >
+		insert into shop_member
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="id !=null">
+				id,
+			</if>
+			<if test="storeId !=null">
+				store_id,
+			</if>
+			<if test="bindPhone !=null">
+				bind_phone,
+			</if>
+			<if test="bindWeixin !=null">
+				bind_weixin,
+			</if>
+			<if test="userNickname !=null">
+				user_nickname,
+			</if>
+			<if test="userIcon !=null">
+				user_icon,
+			</if>
+			<if test="minicodeUrl !=null">
+				minicode_url,
+			</if>
+			<if test="lastMessageTime !=null">
+				last_message_time,
+			</if>
+			<if test="lastMessageType !=null">
+				last_message_type,
+			</if>
+			<if test="lastMessageContent !=null">
+				last_message_content,
+			</if>
+			<if test="notReadMessageCount !=null">
+				not_read_message_count,
+			</if>
+			<if test="tagIds !=null">
+				tag_ids,
+			</if>
+			<if test="status !=null">
+				status,
+			</if>
+			<if test="memoName !=null">
+				memo_name,
+			</if>
+			<if test="createTime !=null">
+				create_time,
+			</if>
+			<if test="updateTime !=null">
+				update_time,
+			</if>
+			<if test="source !=null">
+				source,
+			</if>
+			<if test="sex !=null">
+				sex,
+			</if>
+			<if test="inShopOpenId !=null">
+				in_shop_open_id,
+			</if>
+			<if test="inShopMemberId !=null">
+				in_shop_member_id,
+			</if>
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="id  !=null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="storeId  !=null">
+				#{storeId,jdbcType=BIGINT},
+			</if>
+			<if test="bindPhone  !=null">
+				#{bindPhone,jdbcType=VARCHAR},
+			</if>
+			<if test="bindWeixin  !=null">
+				#{bindWeixin,jdbcType=VARCHAR},
+			</if>
+			<if test="userNickname  !=null">
+				#{userNickname,jdbcType=VARCHAR},
+			</if>
+			<if test="userIcon  !=null">
+				#{userIcon,jdbcType=VARCHAR},
+			</if>
+			<if test="minicodeUrl  !=null">
+				#{minicodeUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="lastMessageTime  !=null">
+				#{lastMessageTime,jdbcType=BIGINT},
+			</if>
+			<if test="lastMessageType  !=null">
+				#{lastMessageType,jdbcType=TINYINT},
+			</if>
+			<if test="lastMessageContent  !=null">
+				#{lastMessageContent,jdbcType=VARCHAR},
+			</if>
+			<if test="notReadMessageCount  !=null">
+				#{notReadMessageCount,jdbcType=VARCHAR},
+			</if>
+			<if test="tagIds  !=null">
+				#{tagIds,jdbcType=VARCHAR},
+			</if>
+			<if test="status  !=null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="memoName  !=null">
+				#{memoName,jdbcType=VARCHAR},
+			</if>
+			<if test="createTime  !=null">
+				#{createTime,jdbcType=BIGINT},
+			</if>
+			<if test="updateTime  !=null">
+				#{updateTime,jdbcType=BIGINT},
+			</if>
+			<if test="source  !=null">
+				#{source,jdbcType=VARCHAR},
+			</if>
+			<if test="sex  !=null">
+				#{sex,jdbcType=INTEGER},
+			</if>
+			<if test="inShopOpenId  !=null">
+				#{inShopOpenId,jdbcType=VARCHAR},
+			</if>
+			<if test="inShopMemberId  !=null">
+				#{inShopMemberId,jdbcType=BIGINT}
+			</if>
+		</trim>
+	</insert>
+
+	<!-- 精确更新-->
+	<update id="updateByPrimaryKeySelective" parameterType="com.e_commerce.miscroservice.user.entity.ShopMember" >
+		update shop_member
+		<set>
+			<include refid="updateBase"/>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<!-- 全字段更新 需要注意-->
+	<update id="updateByPrimaryKey" parameterType="com.e_commerce.miscroservice.user.entity.ShopMember" >
+		update shop_member
+		set
+			id = #{id ,jdbcType=BIGINT},
+			store_id = #{storeId ,jdbcType=BIGINT},
+			bind_phone = #{bindPhone ,jdbcType=VARCHAR},
+			bind_weixin = #{bindWeixin ,jdbcType=VARCHAR},
+			user_nickname = #{userNickname ,jdbcType=VARCHAR},
+			user_icon = #{userIcon ,jdbcType=VARCHAR},
+			minicode_url = #{minicodeUrl ,jdbcType=VARCHAR},
+			last_message_time = #{lastMessageTime ,jdbcType=BIGINT},
+			last_message_type = #{lastMessageType ,jdbcType=TINYINT},
+			last_message_content = #{lastMessageContent ,jdbcType=VARCHAR},
+			not_read_message_count = #{notReadMessageCount ,jdbcType=VARCHAR},
+			tag_ids = #{tagIds ,jdbcType=VARCHAR},
+			status = #{status ,jdbcType=TINYINT},
+			memo_name = #{memoName ,jdbcType=VARCHAR},
+			create_time = #{createTime ,jdbcType=BIGINT},
+			update_time = #{updateTime ,jdbcType=BIGINT},
+			source = #{source ,jdbcType=VARCHAR},
+			sex = #{sex ,jdbcType=INTEGER},
+			in_shop_open_id = #{inShopOpenId ,jdbcType=VARCHAR},
+			in_shop_member_id = #{inShopMemberId ,jdbcType=BIGINT}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<!-- 所有的条件集合-->
+	<sql id="whereCase"  >
+		where  1=1
+		<if test="id  !=null">
+			AND id = #{id,jdbcType=BIGINT}
+		</if>
+		<if test="storeId  !=null">
+			AND store_id = #{storeId,jdbcType=BIGINT}
+		</if>
+		<if test="bindPhone  !=null">
+			AND bind_phone = #{bindPhone,jdbcType=VARCHAR}
+		</if>
+		<if test="bindWeixin  !=null">
+			AND bind_weixin = #{bindWeixin,jdbcType=VARCHAR}
+		</if>
+		<if test="userNickname  !=null">
+			AND user_nickname = #{userNickname,jdbcType=VARCHAR}
+		</if>
+		<if test="userIcon  !=null">
+			AND user_icon = #{userIcon,jdbcType=VARCHAR}
+		</if>
+		<if test="minicodeUrl  !=null">
+			AND minicode_url = #{minicodeUrl,jdbcType=VARCHAR}
+		</if>
+		<if test="lastMessageTime  !=null">
+			AND last_message_time = #{lastMessageTime,jdbcType=BIGINT}
+		</if>
+		<if test="lastMessageType  !=null">
+			AND last_message_type = #{lastMessageType,jdbcType=TINYINT}
+		</if>
+		<if test="lastMessageContent  !=null">
+			AND last_message_content = #{lastMessageContent,jdbcType=VARCHAR}
+		</if>
+		<if test="notReadMessageCount  !=null">
+			AND not_read_message_count = #{notReadMessageCount,jdbcType=VARCHAR}
+		</if>
+		<if test="tagIds  !=null">
+			AND tag_ids = #{tagIds,jdbcType=VARCHAR}
+		</if>
+		<if test="status  !=null">
+			AND status = #{status,jdbcType=TINYINT}
+		</if>
+		<if test="memoName  !=null">
+			AND memo_name = #{memoName,jdbcType=VARCHAR}
+		</if>
+		<if test="createTime  !=null">
+			AND create_time = #{createTime,jdbcType=BIGINT}
+		</if>
+		<if test="updateTime  !=null">
+			AND update_time = #{updateTime,jdbcType=BIGINT}
+		</if>
+		<if test="source  !=null">
+			AND source = #{source,jdbcType=VARCHAR}
+		</if>
+		<if test="sex  !=null">
+			AND sex = #{sex,jdbcType=INTEGER}
+		</if>
+		<if test="inShopOpenId  !=null">
+			AND in_shop_open_id = #{inShopOpenId,jdbcType=VARCHAR}
+		</if>
+		<if test="inShopMemberId  !=null">
+			AND in_shop_member_id = #{inShopMemberId,jdbcType=BIGINT}
+		</if>
+		<include refid="costomWhereCase"/>
+	</sql>
+
+	<!-- 查询一条，如果返回多条会报错-->
+	<select id="selectOne" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM shop_member
+		<include refid="whereCase" />
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectList" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM shop_member
+		<include refid="whereCase" />
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM shop_member
+		<include refid="whereCase" />
+	</select>
+
+	<!--  @Costom -->
+	<!-- 从上一行注释以上为系统生成 从这一行往下为用户自定义 请将自定义的sql放在此行下面 -->
+	<sql id="costomWhereCase">
+	</sql>
+
+</mapper>

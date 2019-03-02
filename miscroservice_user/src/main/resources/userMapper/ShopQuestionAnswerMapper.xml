@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.ShopQuestionAnswerMapper">
+
+    <!--更新问题查询次数-->
+    <update id="upQuestionSearchTime">
+		update shop_question_answer
+		set search_time = search_time + 1
+		where id = #{id}
+	</update>
+    <!--问题 是否有用-->
+    <update id="upQuestionUseful">
+        update shop_question_answer
+        <set>
+            <if test="useful==0">
+                useful = useful+1
+            </if>
+            <if test="useful==1">
+                useless = useless+1
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <!--问题查询-->
+    <select id="questionSearch"
+            resultType="com.e_commerce.miscroservice.commons.entity.application.user.ShopQuestionAnswer">
+        select * from shop_question_answer
+        where question like CONCAT('%',#{question},'%') and del_status = 0 order by search_time desc
+    </select>
+</mapper>

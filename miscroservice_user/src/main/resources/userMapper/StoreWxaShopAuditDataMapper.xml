@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.StoreWxaShopAuditDataMapper">
+
+    <insert id="safeInsertInShopWxaDraft" parameterType="map"  useGeneratedKeys="true" keyProperty="id" >
+         INSERT INTO `yjj_store_wxa_shop_audit_data`
+             (`store_id`, `shop_name`, `industry`, `boss_name`,
+             `main_business`, `address`, `del_status`)
+            SELECT
+                #{storeId},
+                #{shopName},
+                #{industry},
+                #{bossName},
+                #{mainBusiness},
+                #{address},
+                #{delStatus}
+            FROM
+                DUAL
+            WHERE
+                NOT EXISTS (SELECT
+                    1
+                FROM
+                    `yjj_store_wxa_shop_audit_data` AS temp
+                WHERE temp.store_id != #{storeId}
+                AND temp.`del_status` IN (0,4)
+                AND temp.`shop_name` = #{shopName}
+            )
+    </insert>
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

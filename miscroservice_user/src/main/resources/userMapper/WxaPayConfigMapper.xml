@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.e_commerce.miscroservice.distribution.mapper.WxaPayConfigMapper">
+ 
+ 	<!-- 主要的返回映射-->
+	<resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.user.WxaPayConfig"	>
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="app_id"  property="appId"  jdbcType="VARCHAR" />
+		<result column="mch_id"  property="mchId"  jdbcType="VARCHAR" />
+		<result column="paterner_key"  property="paternerKey"  jdbcType="VARCHAR" />
+		<result column="cert_path"  property="certPath"  jdbcType="VARCHAR" />
+		<result column="order_prefix"  property="orderPrefix"  jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 所有的列名-->
+	<sql id="Base_Column_List" >
+		id,app_id,mch_id,paterner_key,cert_path,order_prefix
+	</sql>
+
+	<!-- 精确更新的字段-->
+	<sql id="updateBase">
+		<if test="id  !=null">
+			id = #{id,jdbcType=BIGINT}, 
+		</if>
+		<if test="appId  !=null">
+			app_id = #{appId,jdbcType=VARCHAR}, 
+		</if>
+		<if test="mchId  !=null">
+			mch_id = #{mchId,jdbcType=VARCHAR}, 
+		</if>
+		<if test="paternerKey  !=null">
+			paterner_key = #{paternerKey,jdbcType=VARCHAR}, 
+		</if>
+		<if test="certPath  !=null">
+			cert_path = #{certPath,jdbcType=VARCHAR}, 
+		</if>
+		<if test="orderPrefix  !=null">
+			order_prefix = #{orderPrefix,jdbcType=VARCHAR} 
+		</if>
+	</sql>
+
+	<!-- 通过主键查找-->
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Long" >
+		select 
+		<include refid="Base_Column_List" />
+		from yjj_wxa_pay_config
+		where  id = #{id,jdbcType=BIGINT} 
+	</select>
+
+	<!-- 通过主键删除-->
+	<delete id="deleteByPrimaryKey" parameterType="Long" >
+		delete from yjj_wxa_pay_config
+		where id = #{id,jdbcType=BIGINT} 
+	</delete>
+
+	<!-- 普通插入全字段插t入-->
+	<insert id="insert" parameterType="com.e_commerce.miscroservice.commons.entity.application.user.WxaPayConfig" >
+		insert into yjj_wxa_pay_config
+		(
+			id,
+			app_id,
+			mch_id,
+			paterner_key,
+			cert_path,
+			order_prefix
+		)
+		values
+		(
+			#{id ,jdbcType=BIGINT},
+			#{appId ,jdbcType=VARCHAR},
+			#{mchId ,jdbcType=VARCHAR},
+			#{paternerKey ,jdbcType=VARCHAR},
+			#{certPath ,jdbcType=VARCHAR},
+			#{orderPrefix ,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<!-- 批量插入，全部字段插入-->
+	<insert id="insertBach"   parameterType="List" >
+		insert into yjj_wxa_pay_config
+		(
+			id,
+			app_id,
+			mch_id,
+			paterner_key,
+			cert_path,
+			order_prefix
+		)
+		values 
+		<foreach collection="list" item="item" separator=",">
+		(
+			#{item.id ,jdbcType=BIGINT},
+			#{item.appId ,jdbcType=VARCHAR},
+			#{item.mchId ,jdbcType=VARCHAR},
+			#{item.paternerKey ,jdbcType=VARCHAR},
+			#{item.certPath ,jdbcType=VARCHAR},
+			#{item.orderPrefix ,jdbcType=VARCHAR}
+		)
+		</foreach>
+	</insert>
+
+	<!-- 精确插入，非null得字段才会插入-->
+	<insert id="insertSelective" parameterType="com.e_commerce.miscroservice.commons.entity.application.user.WxaPayConfig" useGeneratedKeys="true" keyProperty="id" >
+		insert into yjj_wxa_pay_config
+		<trim prefix="(" suffix=")" suffixOverrides="," > 
+			<if test="id !=null">  
+				id,
+			</if>
+			<if test="appId !=null">  
+				app_id,
+			</if>
+			<if test="mchId !=null">  
+				mch_id,
+			</if>
+			<if test="paternerKey !=null">  
+				paterner_key,
+			</if>
+			<if test="certPath !=null">  
+				cert_path,
+			</if>
+			<if test="orderPrefix !=null">  
+				order_prefix,
+			</if>
+		</trim>
+
+		<trim prefix="values (" suffix=")" suffixOverrides="," >
+			<if test="id  !=null">
+				#{id,jdbcType=BIGINT}, 
+			</if>
+			<if test="appId  !=null">
+				#{appId,jdbcType=VARCHAR}, 
+			</if>
+			<if test="mchId  !=null">
+				#{mchId,jdbcType=VARCHAR}, 
+			</if>
+			<if test="paternerKey  !=null">
+				#{paternerKey,jdbcType=VARCHAR}, 
+			</if>
+			<if test="certPath  !=null">
+				#{certPath,jdbcType=VARCHAR}, 
+			</if>
+			<if test="orderPrefix  !=null">
+				#{orderPrefix,jdbcType=VARCHAR} 
+			</if>
+		</trim>
+	</insert> 
+
+	<!-- 精确更新-->
+	<update id="updateByPrimaryKeySelective" parameterType="com.e_commerce.miscroservice.commons.entity.application.user.WxaPayConfig" >
+		update yjj_wxa_pay_config
+		<set>
+			<include refid="updateBase"/>
+		</set>
+		where id = #{id,jdbcType=BIGINT} 
+	</update> 
+
+	<!-- 全字段更新 需要注意-->
+	<update id="updateByPrimaryKey" parameterType="com.e_commerce.miscroservice.commons.entity.application.user.WxaPayConfig" >
+		update yjj_wxa_pay_config
+		set 
+			id = #{id ,jdbcType=BIGINT},
+			app_id = #{appId ,jdbcType=VARCHAR},
+			mch_id = #{mchId ,jdbcType=VARCHAR},
+			paterner_key = #{paternerKey ,jdbcType=VARCHAR},
+			cert_path = #{certPath ,jdbcType=VARCHAR},
+			order_prefix = #{orderPrefix ,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT} 
+	</update> 
+
+	<!-- 所有的条件集合-->
+	<sql id="whereCase"  >
+		where  1=1 
+		<if test="id  !=null">
+			AND id = #{id,jdbcType=BIGINT} 
+		</if>
+		<if test="appId  !=null">
+			AND app_id = #{appId,jdbcType=VARCHAR} 
+		</if>
+		<if test="mchId  !=null">
+			AND mch_id = #{mchId,jdbcType=VARCHAR} 
+		</if>
+		<if test="paternerKey  !=null">
+			AND paterner_key = #{paternerKey,jdbcType=VARCHAR} 
+		</if>
+		<if test="certPath  !=null">
+			AND cert_path = #{certPath,jdbcType=VARCHAR} 
+		</if>
+		<if test="orderPrefix  !=null">
+			AND order_prefix = #{orderPrefix,jdbcType=VARCHAR} 
+		</if>
+		<include refid="costomWhereCase"/>
+	</sql>
+
+	<!-- 查询一条，如果返回多条会报错-->
+	<select id="selectOne" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" /> 
+		FROM yjj_wxa_pay_config 
+		<include refid="whereCase" /> 
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectList" parameterType="java.util.Map" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List" /> 
+		FROM yjj_wxa_pay_config 
+		<include refid="whereCase" /> 
+	</select>
+
+	<!-- 查询一个list-->
+	<select id="selectCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+		count(1) 
+		FROM yjj_wxa_pay_config
+		<include refid="whereCase" /> 
+	</select>
+
+	<!--  @Costom -->
+	<!-- 从上一行注释以上为系统生成 从这一行往下为用户自定义 请将自定义的sql放在此行下面 -->
+	<sql id="costomWhereCase">
+	</sql>
+
+</mapper>

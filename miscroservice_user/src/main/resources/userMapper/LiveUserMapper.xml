@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.LiveUserMapper">
+
+	<select id="findLiveUserStoreId" resultType="com.e_commerce.miscroservice.user.entity.rep.AnchorRep">
+		select * from live_user where store_id = #{storeId} and del_status = 0 and live_type <![CDATA[<>]]> 0
+	</select>
+</mapper>
