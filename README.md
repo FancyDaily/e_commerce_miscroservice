@@ -1,5 +1,5 @@
 # e_commerce
-#目前为玖远的项目迭代
+#目前为壹小时的项目迭代
 ##API 接口文档规范
 1. 需写上Controller注释-写在`@RestController`上方
 2. Controller类的方法上方写`/** */`注释
