@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.user.listener;
 
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.utils.DebugUtils;
 import com.e_commerce.miscroservice.user.service.store.StoreBusinessAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
