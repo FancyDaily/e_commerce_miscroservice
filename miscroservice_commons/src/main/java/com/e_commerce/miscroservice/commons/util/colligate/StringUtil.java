@@ -1,5 +1,10 @@
 package com.e_commerce.miscroservice.commons.util.colligate;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.beans.XMLDecoder;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -7,22 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -36,13 +28,6 @@ import org.apache.commons.logging.LogFactory;
  * 作者:丁卫江
  * 邮箱:1664315156@qq.com
  * 创建时间:2017年7月7日 下午4:10:13
- *************************************
- *************************************
- * 修改人:
- * 修改时间:
- * 修改内容:
- * 1.
- * 2.
  */
 public class StringUtil {
 	

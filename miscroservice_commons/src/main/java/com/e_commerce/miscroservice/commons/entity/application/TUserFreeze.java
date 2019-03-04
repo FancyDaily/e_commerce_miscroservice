@@ -7,7 +7,7 @@ public class TUserFreeze implements Serializable {
 
     private Long userId;
 
-    private Long serviceId;
+    private Long orderId;
 
     private String serviceName;
 
@@ -47,12 +47,12 @@ public class TUserFreeze implements Serializable {
         this.userId = userId;
     }
 
-    public Long getServiceId() {
-        return serviceId;
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setServiceId(Long serviceId) {
-        this.serviceId = serviceId;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public String getServiceName() {
