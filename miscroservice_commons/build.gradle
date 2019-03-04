@@ -72,5 +72,6 @@ dependencies {
     compile group: 'com.alipay.sdk', name: 'alipay-sdk-java', version: '3.4.27.ALL'
     //poi
     compile group: 'org.apache.poi', name: 'poi', version: '3.12'
-
+    // jodd json
+    compile group: 'org.jodd', name: 'jodd-json', version: '5.0.5'
 }
