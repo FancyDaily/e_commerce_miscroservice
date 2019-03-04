@@ -16,9 +16,11 @@ public class ProductController {
 	private ProductService productService;
 
 	/**
-	 * 测试
-	 *
-	 * @return
+	 * 功能描述:
+	 * @author 马晓晨
+	 * @date 2019/3/4 9:58
+	 * @params []
+	 * @return java.lang.String
 	 */
 	@RequestMapping("/hello")
 	public String hello() {
