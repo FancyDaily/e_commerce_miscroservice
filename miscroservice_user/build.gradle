@@ -2,6 +2,7 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
