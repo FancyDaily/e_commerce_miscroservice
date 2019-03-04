@@ -1,19 +1,28 @@
 package com.e_commerce.miscroservice.product.controller;
 
+import com.e_commerce.miscroservice.product.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 功能描述:
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2019年3月2日 下午3:40:18
+ * 求助服务
+ * 求助服务controller层
  */
 @RestController
 public class ProductController {
+
+	@Autowired
+	private ProductService productService;
+
+	/**
+	 * 测试
+	 *
+	 * @return
+	 */
+	@RequestMapping("/hello")
+	public String hello() {
+		return "hello";
+	}
 
 }

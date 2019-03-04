@@ -1,14 +1,16 @@
+/*
 package com.e_commerce.miscroservice.user.listener;
 
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.user.service.store.StoreBusinessAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+*/
 /**
  *
- */
+ *//*
+
 @Component
 public class StoreBusinessAccountDelayListener extends MqListenerConvert {
     private static Log logger = Log.getInstance(StoreBusinessAccountDelayListener.class);
@@ -33,3 +35,4 @@ public class StoreBusinessAccountDelayListener extends MqListenerConvert {
 	}
 
 }
+*/

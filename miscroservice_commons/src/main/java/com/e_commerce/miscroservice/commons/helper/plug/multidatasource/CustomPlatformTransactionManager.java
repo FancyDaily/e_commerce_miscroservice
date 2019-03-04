@@ -1,3 +1,4 @@
+/*
 package com.e_commerce.miscroservice.commons.helper.plug.multidatasource;
 
 import com.e_commerce.miscroservice.commons.helper.plug.multidatasource.MultiDataSourceHepler;
@@ -9,9 +10,11 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import java.sql.Connection;
 
+*/
 /**
  * 自定义事物处理器
- */
+ *//*
+
 public class CustomPlatformTransactionManager extends AbstractPlatformTransactionManager {
 
 
@@ -84,3 +87,4 @@ public class CustomPlatformTransactionManager extends AbstractPlatformTransactio
     }
 
 }
+*/

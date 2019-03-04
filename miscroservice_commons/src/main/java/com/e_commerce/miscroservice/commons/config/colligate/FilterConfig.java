@@ -1,3 +1,4 @@
+/*
 package com.e_commerce.miscroservice.commons.config.colligate;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
@@ -13,7 +14,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.e_commerce.miscroservice.commons.utils.AESUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,12 +24,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.ValueOperations;
 
+*/
 /**
  * @author hyf
  * @version V1.0
  * @date 2018/11/16 15:25
  * @Copyright 玖远网络
- */
+ *//*
+
 
 @Configuration
 public class FilterConfig {
@@ -206,3 +208,4 @@ public class FilterConfig {
         }
     }
 }
+*/

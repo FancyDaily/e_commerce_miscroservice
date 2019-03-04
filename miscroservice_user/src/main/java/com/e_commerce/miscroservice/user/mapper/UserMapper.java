@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.user.mapper;
 
-import com.e_commerce.miscroservice.commons.entity.user.UserLoginLog;
 import com.e_commerce.miscroservice.user.po.UserPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -13,13 +12,13 @@ public interface UserMapper {
      * @param userPhone 用户的手机
      * @return
      */
-    UserPO findUserOneByUserPhone(@Param("userPhone") String userPhone);
+//    UserPO findUserOneByUserPhone(@Param("userPhone") String userPhone);
 
     /**
      * 用户登陆日志
      * @param userLoginLog
      */
-    void addUserLoginLog(UserLoginLog userLoginLog);
+//    void addUserLoginLog(UserLoginLog userLoginLog);
 
 
 }
