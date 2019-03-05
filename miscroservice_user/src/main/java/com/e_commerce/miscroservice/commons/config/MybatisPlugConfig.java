@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.user.config;
+package com.e_commerce.miscroservice.commons.config;
 
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.config.MybatisConfig;
@@ -20,6 +20,7 @@ public class MybatisPlugConfig {
         return mybatisConfig;
     }
 
+
     @Bean(initMethod = "init")
     public DbHandler createDbHandler(DataSource dataSource) {
         DbHandler dbHandler = new DbHandler();
@@ -27,9 +28,10 @@ public class MybatisPlugConfig {
         dbHandler.setAlwaysDrop(Boolean.FALSE);
         dbHandler.setDataSource(dataSource);
 //        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.entity,com.e_commerce.miscroservice.commons.entity.application.user");
-        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.entity");
+        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.controller");
         dbHandler.setShowSql(Boolean.TRUE);
         dbHandler.setAlwaysInit(Boolean.TRUE);
+//        dbHandler.generate(false,"t" ,"com.e_commerce.miscroservice.user.controller.doz","t*");
         return dbHandler;
     }
 

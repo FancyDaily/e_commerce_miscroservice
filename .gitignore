@@ -1,9 +1,0 @@
-.idea
-.git
-.gradle
-logs
-*/out
-*/build
-test
-*/src/main/resources/static
-*/src/test

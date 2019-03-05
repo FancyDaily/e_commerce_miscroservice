@@ -15,6 +15,8 @@ public class TServiceDescribe implements Serializable {
 
     private String url;
 
+    private String isCover;
+
     private String extend;
 
     private Long createUser;
@@ -79,6 +81,14 @@ public class TServiceDescribe implements Serializable {
 
     public void setUrl(String url) {
         this.url = url == null ? null : url.trim();
+    }
+
+    public String getIsCover() {
+        return isCover;
+    }
+
+    public void setIsCover(String isCover) {
+        this.isCover = isCover == null ? null : isCover.trim();
     }
 
     public String getExtend() {

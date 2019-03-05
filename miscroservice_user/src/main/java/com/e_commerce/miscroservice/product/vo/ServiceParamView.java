@@ -1,7 +1,9 @@
-package com.xiaoshitimebank.app.view;
+package com.e_commerce.miscroservice.product.vo;
 
-import com.xiaoshitimebank.app.entity.TService;
-import com.xiaoshitimebank.app.entity.TServiceDescribe;
+
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import lombok.Data;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
  * 邮箱:747052172
  * 创建时间:2018/10/30 上午10:50
  */
+@Data
 public class ServiceParamView {
     /**
      * 求助服务
@@ -32,35 +35,4 @@ public class ServiceParamView {
      */
     private Integer publishType;
     
-    public Integer getPublishType() {
-		return publishType;
-	}
-
-	public void setPublishType(Integer publishType) {
-		this.publishType = publishType;
-	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public TService getService() {
-        return service;
-    }
-
-    public void setService(TService service) {
-        this.service = service;
-    }
-
-    public List<TServiceDescribe> getListServiceDescribe() {
-        return listServiceDescribe;
-    }
-
-    public void setListServiceDescribe(List<TServiceDescribe> listServiceDescribe) {
-        this.listServiceDescribe = listServiceDescribe;
-    }
 }

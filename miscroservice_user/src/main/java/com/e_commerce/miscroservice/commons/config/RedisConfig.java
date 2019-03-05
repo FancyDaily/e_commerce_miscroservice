@@ -1,8 +1,18 @@
 package com.e_commerce.miscroservice.commons.config;
 
+import com.e_commerce.miscroservice.commons.config.colligate.RedisTemplateConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+
 /**
  * @author 马晓晨
  * @date 2019/3/4
  */
-public class RedisConfig {
+@Configuration
+public class RedisConfig extends RedisTemplateConfig {
+	@Bean(name = "redisTemplate")
+	public RedisTemplate create() {
+		return createTemplateCache(OperateEnum.STR);
+	}
 }

@@ -1,4 +1,6 @@
-package com.xiaoshitimebank.app.view;
+package com.e_commerce.miscroservice.product.vo;
+
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年10月31日 下午5:46:37
  */
+@Data
 public class PageServiceParamView implements Serializable {
 
 	/**
@@ -74,81 +77,5 @@ public class PageServiceParamView implements Serializable {
 	 * 当前用户ID，用于查询时的排序
 	 */
 	private Long currentUserId;
-	
-	
-	public Long getCurrentUserId() {
-		return currentUserId;
-	}
-	public void setCurrentUserId(Long currentUserId) {
-		this.currentUserId = currentUserId;
-	}
-	public String getCondition() {
-		return condition;
-	}
-	public void setCondition(String condition) {
-		this.condition = condition;
-	}
-	public List<Long> getUserCompanyIds() {
-		return userCompanyIds;
-	}
-	public void setUserCompanyIds(List<Long> userCompanyIds) {
-		this.userCompanyIds = userCompanyIds;
-	}
-	public Integer getServiceTypeId() {
-		return serviceTypeId;
-	}
-	public void setServiceTypeId(Integer serviceTypeId) {
-		this.serviceTypeId = serviceTypeId;
-	}
-	public Integer getType() {
-		return type;
-	}
-	public void setType(Integer type) {
-		this.type = type;
-	}
-	public Integer getServicePlaceType() {
-		return servicePlaceType;
-	}
-	public void setServicePlaceType(Integer servicePlaceType) {
-		this.servicePlaceType = servicePlaceType;
-	}
-	public Integer getServiceTimeType() {
-		return serviceTimeType;
-	}
-	public void setServiceTimeType(Integer serviceTimeType) {
-		this.serviceTimeType = serviceTimeType;
-	}
-	public Integer getCollectTimeType() {
-		return collectTimeType;
-	}
-	public void setCollectTimeType(Integer collectTimeType) {
-		this.collectTimeType = collectTimeType;
-	}
-	public double getLongitude() {
-		return longitude;
-	}
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
-	public double getLatitude() {
-		return latitude;
-	}
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
-	public Integer getPageNum() {
-		return pageNum;
-	}
-	public void setPageNum(Integer pageNum) {
-		this.pageNum = pageNum;
-	}
-	public Integer getPageSize() {
-		return pageSize;
-	}
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
 
-	
-	
 }

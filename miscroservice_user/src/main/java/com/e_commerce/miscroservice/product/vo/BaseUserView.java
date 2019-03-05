@@ -1,4 +1,6 @@
-package com.xiaoshitimebank.app.view;
+package com.e_commerce.miscroservice.product.vo;
+
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -12,21 +14,17 @@ import java.io.Serializable;
  * 作者:马晓晨
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年11月7日 下午3:45:55
- *************************************
- *************************************
+ * ************************************
+ * ************************************
  * 修改人:
  * 修改时间:
  * 修改内容:
  * 1.
  * 2.
  */
-public class BaseUserView implements Serializable{
+@Data
+public class BaseUserView implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
 	/**
 	 * 用户id
 	 */
@@ -79,106 +77,17 @@ public class BaseUserView implements Serializable{
 	 * 性别  0 未知  1、男 2、女
 	 */
 	private Integer sex;
-	
-	public String getUserTel() {
-		return userTel;
-	}
-
-	public void setUserTel(String userTel) {
-		this.userTel = userTel;
-	}
-
-	public Integer getAge() {
-		return age;
-	}
-
-	public void setAge(Integer age) {
-		this.age = age;
-	}
-
-	public Integer getSex() {
-		return sex;
-	}
-
-	public void setSex(Integer sex) {
-		this.sex = sex;
-	}
+	/**
+	 * 信息完整度
+	 */
+	private Integer integrity;
 
 	/**
-	 * 
-	 * 功能描述:获取字符串id
-	 * 作者:马晓晨
-	 * 创建时间:2018年11月19日 下午12:13:09
+	 * 获取字符串类型ID
+	 *
 	 * @return
 	 */
 	public String getIdString() {
 		return id + "";
 	}
-	
-	public Integer getPointStatus() {
-		return pointStatus;
-	}
-
-	public void setPointStatus(Integer pointStatus) {
-		this.pointStatus = pointStatus;
-	}
-
-
-	public Integer getMasterStatus() {
-		return masterStatus;
-	}
-
-	public void setMasterStatus(Integer masterStatus) {
-		this.masterStatus = masterStatus;
-	}
-
-	public Integer getCareStatus() {
-		return careStatus;
-	}
-	public void setCareStatus(Integer careStatus) {
-		this.careStatus = careStatus;
-	}
-	public String getOccupation() {
-		return occupation;
-	}
-	public void setOccupation(String occupation) {
-		this.occupation = occupation;
-	}
-	public String getSkill() {
-		return skill;
-	}
-	public void setSkill(String skill) {
-		this.skill = skill;
-	}
-	public Integer getServeNum() {
-		return serveNum;
-	}
-	public void setServeNum(Integer serveNum) {
-		this.serveNum = serveNum;
-	}
-	public Integer getTotalEvaluate() {
-		return totalEvaluate;
-	}
-	public void setTotalEvaluate(Integer totalEvaluate) {
-		this.totalEvaluate = totalEvaluate;
-	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	public String getUserHeadPortraitPath() {
-		return userHeadPortraitPath;
-	}
-	public void setUserHeadPortraitPath(String userHeadPortraitPath) {
-		this.userHeadPortraitPath = userHeadPortraitPath;
-	}
-
 }

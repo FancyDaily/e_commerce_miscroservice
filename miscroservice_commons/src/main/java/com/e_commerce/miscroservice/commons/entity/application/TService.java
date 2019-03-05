@@ -59,6 +59,8 @@ public class TService implements Serializable {
 
     private Integer openAuth;
 
+    private String nameAudioUrl;
+
     private String extend;
 
     private Long createUser;
@@ -299,6 +301,14 @@ public class TService implements Serializable {
 
     public void setOpenAuth(Integer openAuth) {
         this.openAuth = openAuth;
+    }
+
+    public String getNameAudioUrl() {
+        return nameAudioUrl;
+    }
+
+    public void setNameAudioUrl(String nameAudioUrl) {
+        this.nameAudioUrl = nameAudioUrl == null ? null : nameAudioUrl.trim();
     }
 
     public String getExtend() {

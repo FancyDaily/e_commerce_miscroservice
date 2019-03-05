@@ -1,10 +1,11 @@
-package com.xiaoshitimebank.app.view;
+package com.e_commerce.miscroservice.product.vo;
+
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import lombok.Data;
 
 import java.util.List;
 
-import com.xiaoshitimebank.app.constant.ServiceEnum;
-import com.xiaoshitimebank.app.entity.TService;
-import com.xiaoshitimebank.app.entity.TServiceDescribe;
 
 /**
  * 功能描述:服务求助详情返回view
@@ -17,6 +18,7 @@ import com.xiaoshitimebank.app.entity.TServiceDescribe;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年11月3日 下午6:18:50
  */
+@Data
 public class DetailServiceReturnView {
 	/**
 	 * 不显示关注
@@ -72,7 +74,7 @@ public class DetailServiceReturnView {
 	/**
 	 * 服务求助发布者
 	 */
-	private DetailSeekHelpUserView user;
+	private BaseUserView user;
 	/**
 	 * 服务求助详细描述
 	 */
@@ -113,63 +115,5 @@ public class DetailServiceReturnView {
 		}
 		return "";
 	}
-	
-	public Integer getShowHelpStatus() {
-		return showHelpStatus;
-	}
 
-	public void setShowHelpStatus(Integer showHelpStatus) {
-		this.showHelpStatus = showHelpStatus;
-	}
-
-	public String getServiceType() {
-		return serviceType;
-	}
-	
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
-	}
-
-	public TService getService() {
-		return service;
-	}
-
-	public void setService(TService service) {
-		this.service = service;
-	}
-
-	public DetailSeekHelpUserView getUser() {
-		return user;
-	}
-
-	public void setUser(DetailSeekHelpUserView user) {
-		this.user = user;
-	}
-
-	public List<TServiceDescribe> getListServiceDescribe() {
-		return listServiceDescribe;
-	}
-
-	public void setListServiceDescribe(List<TServiceDescribe> listServiceDescribe) {
-		this.listServiceDescribe = listServiceDescribe;
-	}
-
-	public Integer getCareStatus() {
-		return careStatus;
-	}
-
-	public void setCareStatus(Integer careStatus) {
-		this.careStatus = careStatus;
-	}
-
-	public Integer getCollectStatus() {
-		return collectStatus;
-	}
-
-	public void setCollectStatus(Integer collectStatus) {
-		this.collectStatus = collectStatus;
-	}
-	
-	
-	
 }

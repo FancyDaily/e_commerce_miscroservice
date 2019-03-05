@@ -1,9 +1,10 @@
-package com.xiaoshitimebank.app.view;
+package com.e_commerce.miscroservice.product.vo;
+
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import lombok.Data;
 
 import java.io.Serializable;
 
-import com.xiaoshitimebank.app.entity.TService;
-import com.xiaoshitimebank.app.entity.TUser;
 
 /**
  * 功能描述:求助服务分页返回值
@@ -16,6 +17,7 @@ import com.xiaoshitimebank.app.entity.TUser;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年10月31日 下午6:28:06
  */
+@Data
 public class PageServiceReturnView implements Serializable {
 
 	/**
@@ -25,7 +27,7 @@ public class PageServiceReturnView implements Serializable {
 	/**
 	 * 用户信息
 	 */
-	private PageServiceUserView user;
+	private BaseUserView user;
 	/**
 	 * 服务信息
 	 */
@@ -42,30 +44,6 @@ public class PageServiceReturnView implements Serializable {
 	 * 封面图地址
 	 */
 	private String imgUrl;
-	
-	public String getImgUrl() {
-		return imgUrl;
-	}
-
-	public void setImgUrl(String imgUrl) {
-		this.imgUrl = imgUrl;
-	}
-
-	public Long getEnrollPeopleNum() {
-		return enrollPeopleNum;
-	}
-
-	public void setEnrollPeopleNum(Long enrollPeopleNum) {
-		this.enrollPeopleNum = enrollPeopleNum;
-	}
-
-	public String getServiceType() {
-		return serviceType;
-	}
-
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
-	}
 
 	public String getServiceIdString() {
 		if (service != null) {
@@ -73,20 +51,4 @@ public class PageServiceReturnView implements Serializable {
 		}
 		return "";
 	}
-	
-	public PageServiceUserView getUser() {
-		return user;
-	}
-	public void setUser(PageServiceUserView user) {
-		this.user = user;
-	}
-	public TService getService() {
-		return service;
-	}
-	public void setService(TService service) {
-		this.service = service;
-	}
-	
-	
-
 }

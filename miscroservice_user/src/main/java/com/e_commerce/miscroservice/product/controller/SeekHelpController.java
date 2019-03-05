@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.product.controller;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
@@ -20,9 +21,9 @@ import javax.servlet.http.HttpServletRequest;
  */
 //@RestController
 //@RequestMapping("/api/v1/seekHelp")
-public class ProductController extends BaseController {
+public class SeekHelpController extends BaseController {
 
-	Log logger = Log.getInstance(ProductController.class);
+	Log logger = Log.getInstance(SeekHelpController.class);
 
 	@Autowired
 	private ProductService seekHelpService;
@@ -47,6 +48,8 @@ public class ProductController extends BaseController {
 		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 		String token = param.getToken();*/
 		TUser user = (TUser) redisUtil.get(token);
+		//这一层可判断出是求助，手动设置type参数
+		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
 			seekHelpService.submitSeekHelp(user, param, token);
 			result.setSuccess(true);
