@@ -18,4 +18,11 @@ public interface ProductDescDao {
 	 * @return
 	 */
 	int batchInsert(List<TServiceDescribe> list);
+
+	/**
+	 * 根据商品ID查询出多条商品详情
+	 * @param id
+	 * @return
+	 */
+	List<TServiceDescribe> selectDescByServiceId(Long id);
 }

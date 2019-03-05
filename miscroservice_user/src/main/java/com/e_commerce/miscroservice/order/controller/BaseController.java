@@ -1,7 +1,8 @@
-package com.e_commerce.miscroservice.product.controller;
+package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.product.controller.SeekHelpController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,10 +28,9 @@ public class BaseController {
 	Log logger = Log.getInstance(SeekHelpController.class);
 
 	@Autowired
-	protected ProductService productService;
+	protected ProductService seekHelpService;
 	@Autowired
 	protected RedisUtil redisUtil;
-
 	/**
 	 * 
 	 * 功能描述:输出错误消息

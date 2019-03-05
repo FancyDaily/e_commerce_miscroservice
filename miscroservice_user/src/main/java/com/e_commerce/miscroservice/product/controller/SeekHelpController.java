@@ -7,11 +7,11 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
-import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.vo.ProductSubmitParamView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,14 +19,12 @@ import javax.servlet.http.HttpServletRequest;
  * 求助服务
  * 求助服务controller层
  */
-//@RestController
-//@RequestMapping("/api/v1/seekHelp")
+@RestController
+@RequestMapping("/api/v1/seekHelp")
 public class SeekHelpController extends BaseController {
 
 	Log logger = Log.getInstance(SeekHelpController.class);
 
-	@Autowired
-	private ProductService seekHelpService;
 	@Autowired
 	private RedisUtil redisUtil;
 
@@ -51,7 +49,7 @@ public class SeekHelpController extends BaseController {
 		//这一层可判断出是求助，手动设置type参数
 		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
-			seekHelpService.submitSeekHelp(user, param, token);
+			productService.submitSeekHelp(user, param, token);
 			result.setSuccess(true);
 			result.setMsg("发布求助成功");
 			return result;
