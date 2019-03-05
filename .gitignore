@@ -4,7 +4,7 @@
 logs
 */out
 */build
-test
+#test
 */src/main/resources/static
 */src/test
 bin/.gitignore

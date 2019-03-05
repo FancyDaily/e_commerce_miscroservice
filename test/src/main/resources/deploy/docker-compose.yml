@@ -1,0 +1,25 @@
+#版本信息
+version: '3'
+#服务
+services:
+  #服务的名称
+  miscroservice:
+    #构建的Dockerfile地址
+    build: .
+    #参数列表
+    environment:
+    - innerAddress=${innerAddress}
+    - port=${port}
+    - serviceName=${serviceName}
+    #容器名称
+    container_name: ${serviceName}
+    #共享地址
+    volumes:
+    - /opt/logs:/opt/logs
+    - /tmp:/tmp
+    - /root:/root
+    #绑定端口
+    ports:
+    - ${port}:${port}
+
+
