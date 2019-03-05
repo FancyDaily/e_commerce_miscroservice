@@ -1,0 +1,15 @@
+.idea
+.git
+.gradle
+logs
+*/out
+*/build
+test
+*/src/main/resources/static
+*/src/test
+bin/.gitignore
+bin/.classpath
+.project
+.classpath
+.settings/
+bin/
