@@ -7,6 +7,7 @@ logs
 test
 */src/main/resources/static
 */src/test
+*lombok.config
 bin/.gitignore
 bin/.classpath
 .project
