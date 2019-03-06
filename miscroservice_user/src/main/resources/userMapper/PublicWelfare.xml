@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.e_commerce.miscroservice.user.mapper.PublicWelfareMapper">
+    <select id="getYearWelfare"
+            parameterType="com.e_commerce.miscroservice.user.vo.WelfareParamView"
+            resultType="long">
+		SELECT t1.sumWelfare from
+		(SELECT FROM_UNIXTIME(create_time/1000,'%Y') as years,sum(time)
+		sumWelfare
+		FROM t_public_welfare
+		WHERE user_id = #{id} and is_valid = '1'
+		GROUP BY years)t1
+		WHERE t1.years = #{year}
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
