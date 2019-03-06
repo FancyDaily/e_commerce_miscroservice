@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.e_commerce.miscroservice.order.mapper.OrderMapper">
+    <select id="pageService" parameterType="com.xiaoshitimebank.app.view.PageServiceParamView" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>, IFNULL(st_distance (point (lng, lat),point(115.067,34.76) ) / 0.0111, 0) AS distance
+        FROM
+        t_service
+        WHERE
+        is_valid = 1
+        AND (
+        source = 1
+        OR (source = 2 AND open_auth = 1)
+        <if test="userCompanyIds != null and userCompanyIds.size > 0">
+            OR (
+            source = 2
+            AND open_auth = 2
+            AND company_id IN
+            <foreach collection="userCompanyIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+        )
+        <choose>
+            <when test="type != null and type == 1">
+                AND type = 1
+                AND (status = 2 OR status = 3 OR status = 4 OR status = 5)
+            </when>
+            <when test="type != null and type == 2">
+                AND type = 2
+                AND (status = 2 OR status = 3)
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+        <if test="serviceTypeId != null and serviceTypeId != 1000000">
+            AND service_type_id = #{serviceTypeId}
+        </if>
+        <if test="condition !=null and condition !=''">
+            AND (service_name LIKE "%${condition}%"
+            OR labels LIKE "%${condition}%"
+            OR create_user_name LIKE "%${condition}%"
+            )
+        </if>
+        ORDER BY  FIELD(`status`, 5, 4) DESC
+        <if test="currentUserId != null">
+            ,CASE
+            WHEN create_user = #{currentUserId} THEN
+            1
+            ELSE
+            0
+            END
+            DESC
+        </if>
+        ,source DESC
+        ,CASE
+        WHEN t.distance <![CDATA[>=]]> 10000 THEN
+        1
+        ELSE
+        0
+        END
+        DESC
+        <choose>
+            <when test="type != null and type == 1">
+                ,end_time DESC
+            </when>
+            <when test="type != null and type == 2">
+                ,total_evaluate DESC
+            </when>
+            <otherwise>
+            </otherwise>
+        </choose>
+
+    </select>
+    <resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.TOrder">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="service_id" jdbcType="BIGINT" property="serviceId" />
+        <result column="main_id" jdbcType="BIGINT" property="mainId" />
+        <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
+        <result column="service_num" jdbcType="INTEGER" property="serviceNum" />
+        <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
+        <result column="labels" jdbcType="VARCHAR" property="labels" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="source" jdbcType="INTEGER" property="source" />
+        <result column="address_name" jdbcType="VARCHAR" property="addressName" />
+        <result column="longitude" jdbcType="DOUBLE" property="longitude" />
+        <result column="latitude" jdbcType="DOUBLE" property="latitude" />
+        <result column="total_evaluate" jdbcType="INTEGER" property="totalEvaluate" />
+        <result column="enroll_num" jdbcType="INTEGER" property="enrollNum" />
+        <result column="confirm_num" jdbcType="INTEGER" property="confirmNum" />
+        <result column="start_time" jdbcType="BIGINT" property="startTime" />
+        <result column="end_time" jdbcType="BIGINT" property="endTime" />
+        <result column="service_status" jdbcType="INTEGER" property="serviceStatus" />
+        <result column="open_auth" jdbcType="INTEGER" property="openAuth" />
+        <result column="collect_time" jdbcType="BIGINT" property="collectTime" />
+        <result column="collect_type" jdbcType="INTEGER" property="collectType" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName" />
+        <result column="create_time" jdbcType="BIGINT" property="createTime" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="update_user_name" jdbcType="VARCHAR" property="updateUserName" />
+        <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+        <result column="company_id" jdbcType="BIGINT" property="companyId" />
+        <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    id, service_id, main_id, service_name, service_num, service_place, labels, type,
+    status, source, address_name, longitude, latitude, total_evaluate, enroll_num, confirm_num,
+    start_time, end_time, service_status, open_auth, collect_time, collect_type, create_user,
+    create_user_name, create_time, update_user, update_user_name, update_time, company_id,
+    is_valid
+  </sql>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+

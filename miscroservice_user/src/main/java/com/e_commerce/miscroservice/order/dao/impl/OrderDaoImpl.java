@@ -1,11 +1,12 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
-import com.e_commerce.miscroservice.product.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.mapper.OrderMapper;
+import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,6 +17,9 @@ import java.util.List;
  */
 @Repository
 public class OrderDaoImpl implements OrderDao {
+
+	@Autowired
+	OrderMapper orderMapper;
 
 	@Override
 	public int saveOneOrder(TOrder order) {
@@ -35,7 +39,7 @@ public class OrderDaoImpl implements OrderDao {
 	}
 
 	@Override
-	public List<TService> pageOrder(PageServiceParamView param) {
-		return null;
+	public List<TOrder> pageOrder(PageServiceParamView param) {
+		return orderMapper.pageOrder(param);
 	}
 }

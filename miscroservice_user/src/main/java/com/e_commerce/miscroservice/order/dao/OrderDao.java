@@ -1,8 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.product.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
 
 import java.util.List;
 
@@ -38,5 +37,5 @@ public interface OrderDao {
 	 * @param param
 	 * @return
 	 */
-	List<TService> pageOrder(PageServiceParamView param);
+	List<TOrder> pageOrder(PageServiceParamView param);
 }

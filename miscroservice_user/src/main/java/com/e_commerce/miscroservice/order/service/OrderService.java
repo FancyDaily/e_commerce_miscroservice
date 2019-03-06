@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.order.service;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.product.vo.PageServiceParamView;
-import com.e_commerce.miscroservice.product.vo.PageServiceReturnView;
+import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.vo.PageOrderReturnView;
 
 /**
  * 功能描述:
@@ -31,5 +31,5 @@ public interface OrderService {
 	 * @param user 当前用户
 	 * @return
 	 */
-	QueryResult<PageServiceReturnView> list(PageServiceParamView param, TUser user);
+	QueryResult<PageOrderReturnView> list(PageServiceParamView param, TUser user);
 }

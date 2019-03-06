@@ -7,7 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
-import com.e_commerce.miscroservice.order.controller.OrderController;
+import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
@@ -26,7 +26,7 @@ import java.util.*;
 public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Autowired
-	OrderController orderService;
+	OrderCommonController orderService;
 	/**
 	 * 功能描述:发布求助
 	 * 作者:马晓晨
@@ -81,6 +81,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			param.getService().setSource(ProductEnum.SOURCE_PERSONAL.getValue());
 			submitUserService(user, param, token);
 		}
+	}
+
+	@Override
+	public List<TService> getListProduct(List<Long> productIds) {
+		return productDao.selectListByIds(productIds);
 	}
 
 	/**

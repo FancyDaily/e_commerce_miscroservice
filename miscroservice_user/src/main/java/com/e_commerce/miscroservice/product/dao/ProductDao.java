@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.product.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 
+import java.util.List;
+
 /**
  * @author 马晓晨
  * @date 2019/3/4
@@ -35,4 +37,11 @@ public interface ProductDao {
 	 * @return 可能为null
 	 */
 	TService selectUserNewOneRecord(Long userId, Integer type);
+
+	/**
+	 * 获取商品信息根据商品的idList
+	 * @param productIds 商品的ID
+	 * @return 商品的list
+	 */
+	List<TService> selectListByIds(List<Long> productIds);
 }

@@ -17,10 +17,9 @@ public class ProductDescDaoImpl implements ProductDescDao {
 		return MybatisOperaterUtil.getInstance().save(describe);
 	}
 
-	//TODO 后期插件加入
 	@Override
 	public int batchInsert(List<TServiceDescribe> list) {
-		return 0;
+		return MybatisOperaterUtil.getInstance().save(list);
 	}
 
 	@Override

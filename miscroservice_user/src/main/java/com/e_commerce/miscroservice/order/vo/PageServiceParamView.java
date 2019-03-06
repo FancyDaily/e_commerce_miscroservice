@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.product.vo;
+package com.e_commerce.miscroservice.order.vo;
 
 import lombok.Data;
 

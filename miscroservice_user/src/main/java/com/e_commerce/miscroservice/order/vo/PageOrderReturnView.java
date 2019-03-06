@@ -1,6 +1,7 @@
-package com.e_commerce.miscroservice.product.vo;
+package com.e_commerce.miscroservice.order.vo;
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.product.vo.BaseUserView;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ import java.io.Serializable;
  * 创建时间:2018年10月31日 下午6:28:06
  */
 @Data
-public class PageServiceReturnView implements Serializable {
+public class PageOrderReturnView implements Serializable {
 
 	/**
 	 * 
@@ -29,25 +30,21 @@ public class PageServiceReturnView implements Serializable {
 	 */
 	private BaseUserView user;
 	/**
-	 * 服务信息
+	 * 订单信息
 	 */
-	private TService service;
+	private TOrder order;
 	/**
 	 * 服务类型标签
 	 */
 	private String serviceType;
 	/**
-	 * 报名人数
-	 */
-	private Long enrollPeopleNum;
-	/**
 	 * 封面图地址
 	 */
 	private String imgUrl;
 
-	public String getServiceIdString() {
-		if (service != null) {
-			return service.getId() + "";
+	public String getOrderIdString() {
+		if (order != null) {
+			return order.getId() + "";
 		}
 		return "";
 	}

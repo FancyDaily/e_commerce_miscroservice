@@ -9,6 +9,8 @@ import com.e_commerce.miscroservice.product.mapper.ProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author 马晓晨
  * @date 2019/3/4
@@ -42,5 +44,11 @@ public class ProductDaoImpl implements ProductDao {
 				.eq(TService::getUserId, userId).eq(TService::getType, type).eq(TService::getIsValid, '1')
 				.eq(TService::getStatus, ProductEnum.STATUS_UPPER_FRAME.getValue())
 				.orderBy(MybatisSqlWhereBuild.ORDER.DESC, TService::getCreateTime));
+	}
+
+	@Override
+	public List<TService> selectListByIds(List<Long> productIds) {
+		return MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class).
+				in(TService::getId, productIds.toArray()));
 	}
 }

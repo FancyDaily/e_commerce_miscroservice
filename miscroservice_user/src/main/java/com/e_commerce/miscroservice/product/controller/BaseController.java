@@ -31,6 +31,27 @@ public class BaseController {
 	protected RedisUtil redisUtil;
 
 	/**
+	 * 有效
+	 */
+	protected String IS_VALID_YES = "1";
+	/**
+	 * 无效
+	 */
+	protected String IS_VALID_NO = "0";
+	/**
+	 * 是封面图片
+	 */
+	protected String IS_COVER_YES = "1";
+	/**
+	 * 是组织账户
+	 */
+	protected Integer IS_COMPANY_ACCOUNT_YES = 1;
+	/**
+	 * 用户类型为公益组织
+	 */
+	protected String USER_TYPE_ORGANIZATION = "2";
+
+	/**
 	 * 
 	 * 功能描述:输出错误消息
 	 * 作者:马晓晨
