@@ -1,4 +1,3 @@
-/*
 package com.e_commerce.miscroservice.commons.util.colligate;
 
 import java.text.ParseException;
@@ -9,15 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.el.StaticFieldELResolver;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 
-import com.xiaoshitimebank.app.constant.AppConstant;
-import com.xiaoshitimebank.app.constant.AppErrorConstant;
-import com.xiaoshitimebank.app.entity.TUserSkillExample.Criteria;
-import com.xiaoshitimebank.core.exception.MessageException;
 
-*/
-/**
+ /**
  * 功能描述: 日期工具
  * 模块:
  * 项目:timebank
@@ -34,19 +30,18 @@ import com.xiaoshitimebank.core.exception.MessageException;
  * 修改内容:
  * 1.
  * 2.
- *//*
+ */
 
 public class DateUtil {
 
 	private static Long interval = (long) (24 * 60 * 60 * 1000);
 
-	*/
-/**
+/*
 	 * 时间戳转换成日期格式字符串 
 	 * @param seconds 精确到秒的字符串 
 	 * @param formatStr 
 	 * @return 
-	 *//*
+*/
 
 	public static String timeStamp2Date(String seconds, String format) {
 		if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
@@ -58,13 +53,12 @@ public class DateUtil {
 		return sdf.format(new Date(Long.valueOf(seconds + "000")));
 	}
 
-	*/
-/**
+/*
 	 * 时间戳转换成日期格式字符串 
 	 * @param seconds 精确到秒的字符串 
 	 * @param formatStr 
 	 * @return 
-	 *//*
+*/
 
 	public static String timeStamp2Date(Long timeStamp) {
 		String seconds = String.valueOf(timeStamp / 1000);
@@ -76,12 +70,11 @@ public class DateUtil {
 		return sdf.format(new Date(Long.valueOf(seconds + "000")));
 	}
 
-	*/
-/**
+/*
 	 * 时间戳转换成月份字符串 
 	 * @param time
 	 * @return
-	 *//*
+*/
 
 	public static String timeStamp2Month(Long time) {
 		String date = timeStamp2Date(time);
@@ -89,10 +82,9 @@ public class DateUtil {
 		return split[1].toString(); // 初始月数
 	}
 
-	*/
-/**
+/*
 	 * 将时间转换为时间戳
-	 *//*
+*/
 
 	public static String dateToStamp(String s) {
 		String res;
@@ -108,14 +100,13 @@ public class DateUtil {
 		return res;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 将年月字符串转换成时间戳区间 
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月7日 上午11:58:55
 	 * @param ymString eg. -> 2019-01-03
 	 * @return
-	 *//*
+*/
 
 	public static Map<String, Object> ym2BetweenStamp(String ymString) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -135,15 +126,14 @@ public class DateUtil {
 		return resultMap;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 将年月转换成最后日期 
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月7日 下午2:54:42
 	 * @param year
 	 * @param month
 	 * @return
-	 *//*
+*/
 
 	public static String ym2EndDate(String year, String month) {
 		//处理月份信息
@@ -205,14 +195,13 @@ public class DateUtil {
 
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 年份返回起止时间戳
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月10日 下午3:08:17
 	 * @param year
 	 * @return
-	 *//*
+*/
 
 	public static Map<String, Object> y2BetweenStamp(Integer year) {
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -225,14 +214,13 @@ public class DateUtil {
 		return map;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 比较最后签到日为昨天、今天、其他日期	-> 
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月24日 下午1:50:24
 	 * @param paramStamp
 	 * @return
-	 *//*
+*/
 
 	public static String curtMillesVsYesMilles(Long paramStamp) {
 		String status = null;
@@ -256,15 +244,14 @@ public class DateUtil {
 		return status;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 判读两个时间戳是否为连续的日期（支持跨年、跨月） 
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月24日 下午1:51:24
 	 * @param paramLeft 相对较晚的时间戳
 	 * @param paramRight 相对较早的时间戳
 	 * @return
-	 *//*
+*/
 
 	public static boolean oneMillesVsAnother(Long paramLeft, Long paramRight) {
 		boolean result = false;
@@ -276,14 +263,13 @@ public class DateUtil {
 		return result;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 判断时间戳是否为今日 
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月13日 下午6:56:04
 	 * @param updateTime
 	 * @return
-	 *//*
+*/
 
 	public static boolean isToday(Long updateTime) {
 		boolean result = false;
@@ -293,28 +279,26 @@ public class DateUtil {
 		return result;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 获取当前的日期
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月24日 下午3:17:33
 	 * @return
-	 *//*
+*/
 
 	public static String getThisYmString() {
 		long currentTimeMillis = System.currentTimeMillis();
 		return timeStamp2Date(currentTimeMillis);
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 根据当前日期在七日连签中的位置返回反正签到日期list
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月25日 下午5:02:30
 	 * @param position
 	 * @return
 	 * @throws Exception 
-	 *//*
+*/
 
 	public static String[] getDateListWithinSeven(Integer position) {
 		// 请求参数判断
@@ -350,51 +334,47 @@ public class DateUtil {
 		return strs;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 获取当日伊始时间戳
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月25日 下午6:28:57
 	 * @param timeStamp
-	 *//*
+*/
 
 	public static long getStartStamp(long timeStamp) {
 		return Long.valueOf(dateToStamp(timeStamp2Date(timeStamp)));
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 获取昨天伊始时间戳
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月25日 下午6:27:28
 	 * @return 
-	 *//*
+*/
 
 	public static long getYesStartStamp() {
 		long currentTimeMillis = System.currentTimeMillis();
 		return getStartStamp(currentTimeMillis) - interval;
 	}
 	
-	*/
-/**
+/*
 	 * 功能描述: 获取明日伊始时间戳 
 	 * 作者: 许方毅
 	 * 创建时间: 2019年1月14日 下午8:36:38
 	 * @return
-	 *//*
+*/
 
 	public static long getEndStamp(long timeStamp) {
 		return getStartStamp(timeStamp) + interval - 1;
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 根据时间戳返回当月起止时间Map 
 	 * 作者: 许方毅
 	 * 创建时间: 2019年1月14日 下午3:11:50
 	 * @param timeMillis
 	 * @return
-	 *//*
+*/
 
 	public static Map<String, Object> getMonthBetween(long timeMillis) {
 		String timeStamp2Date = timeStamp2Date(timeMillis);
@@ -402,14 +382,13 @@ public class DateUtil {
 		return ym2BetweenStamp(split[0]+ "-" + split[1]);
 	}
 	
-	*/
-/**
+/*
 	 * 功能描述: 精确到时分秒的时间戳转化 
 	 * 作者: 许方毅
 	 * 创建时间: 2019年1月19日 下午5:14:54
 	 * @param timeStamp
 	 * @return
-	 *//*
+*/
 
 	public static String timeStamp2Seconds(Long timeStamp) {
 		String format = "yyyy-MM-dd HH:mm:ss";
@@ -417,8 +396,7 @@ public class DateUtil {
 		return sdf.format(new Date(timeStamp));
 	}
 
-	*/
-/**
+/*
 	 * 功能描述: 获取发布者期望的日期数组(针对于重复性求助/服务) 
 	 * 作者: 许方毅
 	 * 创建时间: 2019年2月19日 下午4:07:06
@@ -426,18 +404,17 @@ public class DateUtil {
 	 * @param dateWeekArray
 	 * @param servcieValidityTerm
 	 * @return
-	 *//*
+*/
 
 	public static List<String> getWillingDateWeekArray(Long timeStamp, String[] dateWeekArray, Integer servcieValidityTerm) {
 		//获取系统建议的日期数组
 		long startStamp = getStartStamp(timeStamp);
 		Integer validTerm = servcieValidityTerm;
-		*/
-/*Long[] dates = new Long[validTerm];
+Long[] dates = new Long[validTerm];
 		for(int i=0;i<dates.length;i++) {
 			dates[i] = startStamp + i * interval;
 			
-		}*//*
+		}
 
 		List<String> resultList = new ArrayList<>();
 		for(int i=0;i<validTerm;i++) {
@@ -452,14 +429,13 @@ public class DateUtil {
 		return resultList; 
 	}
 	
-	*/
-/**
+/*
 	 * 功能描述:	将日期转换成周几 
 	 * 作者: 许方毅
 	 * 创建时间: 2019年2月19日 下午4:11:52
 	 * @param date
 	 * @return
-	 *//*
+ */
 
 	public static String getWeekDay(String date) {
 		if(date == null) {
@@ -489,4 +465,3 @@ public class DateUtil {
 		return weekDayStrs[week];
 	}
 }
-*/
