@@ -14,15 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * 订单Controller
+ *
  * 功能描述:订单Controller
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2019年3月2日 下午3:46:01
  */
 @RestController
 @RequestMapping("/api/v1/order")

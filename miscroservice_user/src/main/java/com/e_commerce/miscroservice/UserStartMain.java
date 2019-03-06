@@ -8,6 +8,6 @@ public class UserStartMain {
 
 
 	public static void main(String[] args) {
-		ApplicationContextUtil.run(UserStartMain.class, Boolean.FALSE, args);
+		ApplicationContextUtil.run(UserStartMain.class, Boolean.TRUE, args);
 	}
 }
