@@ -17,7 +17,7 @@ import java.util.List;
  * 创建时间:2018年10月31日 下午5:46:37
  */
 @Data
-public class PageServiceParamView implements Serializable {
+public class PageOrderParamView implements Serializable {
 
 	/**
 	 * 

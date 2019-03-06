@@ -7,7 +7,6 @@ import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.product.controller.SeekHelpController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,7 +23,6 @@ import java.io.StringWriter;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年11月18日 下午3:50:03
  */
-@Controller
 public class BaseController {
 
 	Log logger = Log.getInstance(SeekHelpController.class);

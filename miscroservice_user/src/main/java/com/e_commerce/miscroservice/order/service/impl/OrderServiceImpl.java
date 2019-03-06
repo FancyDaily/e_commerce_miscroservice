@@ -7,7 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.order.vo.PageOrderReturnView;
-import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -36,7 +36,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
-	public QueryResult<PageOrderReturnView> list(PageServiceParamView param, TUser user) {
+	public QueryResult<PageOrderReturnView> list(PageOrderParamView param, TUser user) {
 		QueryResult<PageOrderReturnView> result = new QueryResult<>();
 		List<PageOrderReturnView> listReturn = new ArrayList<>();
 		// 为了兼容PC端组织发布的权限显示问题，根据当前用户的组织查看当前用户是否有权限访问

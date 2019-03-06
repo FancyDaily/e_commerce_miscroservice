@@ -1,10 +1,6 @@
 package com.e_commerce.miscroservice.user.controller;
 
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class TestController {
@@ -13,12 +9,12 @@ public class TestController {
 	public void init(){
 //		 查询 根据条件查询 代表 userName和userPass两个字段
 //		SELECT * FROM `test_tmp_d_t_o` WHERE (age =18 AND user_name="1") or (age >33) ;
-		 List<TestTmpDTO> id = MybatisOperaterUtil.getInstance().finAll(new TestTmpDTO(),
-				 new MybatisSqlWhereBuild(TestTmpDTO.class).
-						 groupBefore().eq(TestTmpDTO::getAge,18).or().eq(TestTmpDTO::getUserName,"1").groupAfter().
-						 or(). groupBefore().gte(TestTmpDTO::getAge,32).eq(TestTmpDTO::getUserName,"10").groupAfter());
-
-		 System.out.println(id);
+//		 List<TestTmpDTO> id = MybatisOperaterUtil.getInstance().finAll(new TestTmpDTO(),
+//				 new MybatisSqlWhereBuild(TestTmpDTO.class).
+//						 groupBefore().eq(TestTmpDTO::getAge,18).or().eq(TestTmpDTO::getUserName,"1").groupAfter().
+//						 or(). groupBefore().gte(TestTmpDTO::getAge,32).eq(TestTmpDTO::getUserName,"10").groupAfter());
+//
+//		 System.out.println(id);
 
 
 //		 long count = MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TestTmpDTO.class).

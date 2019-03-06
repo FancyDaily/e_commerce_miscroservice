@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.order.mapper;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -14,5 +14,5 @@ public interface OrderMapper {
 	 * @param param 查询参数
 	 * @return order列表
 	 */
-	List<TOrder> pageOrder(PageServiceParamView param);
+	List<TOrder> pageOrder(PageOrderParamView param);
 }

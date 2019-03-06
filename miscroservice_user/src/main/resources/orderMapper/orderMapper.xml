@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.e_commerce.miscroservice.order.mapper.OrderMapper">
-    <select id="pageService" parameterType="com.xiaoshitimebank.app.view.PageServiceParamView" resultMap="BaseResultMap">
-        SELECT <include refid="Base_Column_List"/>, IFNULL(st_distance (point (lng, lat),point(115.067,34.76) ) / 0.0111, 0) AS distance
+    <select id="pageService" parameterType="com.e_commerce.miscroservice.order.vo.PageOrderParamView" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>, IFNULL(st_distance (point (latitude, longitude),point(#{latitude},#{longitude}) ) / 0.0111, 0) AS distance
         FROM
         t_service
         WHERE

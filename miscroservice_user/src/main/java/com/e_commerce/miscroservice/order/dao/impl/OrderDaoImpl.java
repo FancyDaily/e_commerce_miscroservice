@@ -5,7 +5,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
-import com.e_commerce.miscroservice.order.vo.PageServiceParamView;
+import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +39,7 @@ public class OrderDaoImpl implements OrderDao {
 	}
 
 	@Override
-	public List<TOrder> pageOrder(PageServiceParamView param) {
+	public List<TOrder> pageOrder(PageOrderParamView param) {
 		return orderMapper.pageOrder(param);
 	}
 }
