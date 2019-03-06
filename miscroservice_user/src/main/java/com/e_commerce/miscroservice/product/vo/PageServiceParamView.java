@@ -24,22 +24,7 @@ public class PageServiceParamView implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 服务场所的类型筛选
-	 * 1、线上    2、线下   0、不限
-	 */
-	private Integer servicePlaceType;
-	/**
-	 * 根据时间筛选的状态
-	 * 1、上午   2、下午  3、晚上   4、工作日  5、非工作日  0、不限
-	 */
-	private Integer serviceTimeType;
-	/**
-	 * 根据时间币筛选
-	 * 1、小于一小时  2、1~3小时  3、3~5小时  4、5小时以上 0、不限
-	 */
-	private Integer collectTimeType;
-	/**
-	 * 服务求助类型  根据接口名controller添加  不需要前端传递
+	 * 服务求助类型
 	 * 1、求助  2、服务
 	 */
 	private Integer type;

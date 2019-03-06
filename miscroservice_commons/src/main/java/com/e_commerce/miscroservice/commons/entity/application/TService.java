@@ -33,6 +33,8 @@ public class TService implements Serializable {
 
     private Integer timeType;
 
+    private Integer dateWeekNumber;
+
     private String dateWeek;
 
     private String startDateS;
@@ -197,6 +199,14 @@ public class TService implements Serializable {
 
     public void setTimeType(Integer timeType) {
         this.timeType = timeType;
+    }
+
+    public Integer getDateWeekNumber() {
+        return dateWeekNumber;
+    }
+
+    public void setDateWeekNumber(Integer dateWeekNumber) {
+        this.dateWeekNumber = dateWeekNumber;
     }
 
     public String getDateWeek() {

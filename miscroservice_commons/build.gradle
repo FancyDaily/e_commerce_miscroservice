@@ -57,5 +57,5 @@ dependencies {
     compile 'com.alipay.jarslink:jarslink-api:1.6.1.20180301'
     //扩展请添加在这下面-------------------------------------------------
     //------------------------------------------------------------------
-  
+    compile group: 'org.jodd', name: 'jodd-json', version: '5.0.5'
 }

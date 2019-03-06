@@ -9,6 +9,8 @@ public class TOrder implements Serializable {
 
     private Long mainId;
 
+    private String nameAudioUrl;
+
     private String serviceName;
 
     private Integer serviceNum;
@@ -22,6 +24,8 @@ public class TOrder implements Serializable {
     private Integer status;
 
     private Integer source;
+
+    private Long serviceTypeId;
 
     private String addressName;
 
@@ -38,6 +42,14 @@ public class TOrder implements Serializable {
     private Long startTime;
 
     private Long endTime;
+
+    private Integer serviceStatus;
+
+    private Integer openAuth;
+
+    private Long collectTime;
+
+    private Integer collectType;
 
     private Long createUser;
 
@@ -79,6 +91,14 @@ public class TOrder implements Serializable {
 
     public void setMainId(Long mainId) {
         this.mainId = mainId;
+    }
+
+    public String getNameAudioUrl() {
+        return nameAudioUrl;
+    }
+
+    public void setNameAudioUrl(String nameAudioUrl) {
+        this.nameAudioUrl = nameAudioUrl == null ? null : nameAudioUrl.trim();
     }
 
     public String getServiceName() {
@@ -135,6 +155,14 @@ public class TOrder implements Serializable {
 
     public void setSource(Integer source) {
         this.source = source;
+    }
+
+    public Long getServiceTypeId() {
+        return serviceTypeId;
+    }
+
+    public void setServiceTypeId(Long serviceTypeId) {
+        this.serviceTypeId = serviceTypeId;
     }
 
     public String getAddressName() {
@@ -199,6 +227,38 @@ public class TOrder implements Serializable {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getServiceStatus() {
+        return serviceStatus;
+    }
+
+    public void setServiceStatus(Integer serviceStatus) {
+        this.serviceStatus = serviceStatus;
+    }
+
+    public Integer getOpenAuth() {
+        return openAuth;
+    }
+
+    public void setOpenAuth(Integer openAuth) {
+        this.openAuth = openAuth;
+    }
+
+    public Long getCollectTime() {
+        return collectTime;
+    }
+
+    public void setCollectTime(Long collectTime) {
+        this.collectTime = collectTime;
+    }
+
+    public Integer getCollectType() {
+        return collectType;
+    }
+
+    public void setCollectType(Integer collectType) {
+        this.collectType = collectType;
     }
 
     public Long getCreateUser() {
