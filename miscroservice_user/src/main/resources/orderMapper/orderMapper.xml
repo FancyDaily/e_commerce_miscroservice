@@ -1,10 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.e_commerce.miscroservice.order.mapper.OrderMapper">
-    <select id="pageService" parameterType="com.e_commerce.miscroservice.order.vo.PageOrderParamView" resultMap="BaseResultMap">
+    <resultMap id="BaseResultMap" type="TOrder">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="service_id" jdbcType="BIGINT" property="serviceId" />
+        <result column="main_id" jdbcType="BIGINT" property="mainId" />
+        <result column="name_audio_url" jdbcType="VARCHAR" property="nameAudioUrl" />
+        <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
+        <result column="service_num" jdbcType="INTEGER" property="serviceNum" />
+        <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
+        <result column="labels" jdbcType="VARCHAR" property="labels" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="status" jdbcType="INTEGER" property="status" />
+        <result column="source" jdbcType="INTEGER" property="source" />
+        <result column="service_type_id" jdbcType="BIGINT" property="serviceTypeId" />
+        <result column="address_name" jdbcType="VARCHAR" property="addressName" />
+        <result column="longitude" jdbcType="DOUBLE" property="longitude" />
+        <result column="latitude" jdbcType="DOUBLE" property="latitude" />
+        <result column="total_evaluate" jdbcType="INTEGER" property="totalEvaluate" />
+        <result column="enroll_num" jdbcType="INTEGER" property="enrollNum" />
+        <result column="confirm_num" jdbcType="INTEGER" property="confirmNum" />
+        <result column="start_time" jdbcType="BIGINT" property="startTime" />
+        <result column="end_time" jdbcType="BIGINT" property="endTime" />
+        <result column="service_status" jdbcType="INTEGER" property="serviceStatus" />
+        <result column="open_auth" jdbcType="INTEGER" property="openAuth" />
+        <result column="collect_time" jdbcType="BIGINT" property="collectTime" />
+        <result column="collect_type" jdbcType="INTEGER" property="collectType" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName" />
+        <result column="create_time" jdbcType="BIGINT" property="createTime" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="update_user_name" jdbcType="VARCHAR" property="updateUserName" />
+        <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+        <result column="company_id" jdbcType="BIGINT" property="companyId" />
+        <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, service_id, main_id, name_audio_url, service_name, service_num, service_place,
+    labels, type, status, source, service_type_id, address_name, longitude, latitude,
+    total_evaluate, enroll_num, confirm_num, start_time, end_time, service_status, open_auth,
+    collect_time, collect_type, create_user, create_user_name, create_time, update_user,
+    update_user_name, update_time, company_id, is_valid
+  </sql>
+    <select id="pageOrder" parameterType="com.e_commerce.miscroservice.order.vo.PageOrderParamView" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>, IFNULL(st_distance (point (latitude, longitude),point(#{latitude},#{longitude}) ) / 0.0111, 0) AS distance
         FROM
-        t_service
+        t_order
         WHERE
         is_valid = 1
         AND (
@@ -72,47 +113,6 @@
         </choose>
 
     </select>
-    <resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.TOrder">
-        <id column="id" jdbcType="BIGINT" property="id" />
-        <result column="service_id" jdbcType="BIGINT" property="serviceId" />
-        <result column="main_id" jdbcType="BIGINT" property="mainId" />
-        <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
-        <result column="service_num" jdbcType="INTEGER" property="serviceNum" />
-        <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
-        <result column="labels" jdbcType="VARCHAR" property="labels" />
-        <result column="type" jdbcType="INTEGER" property="type" />
-        <result column="status" jdbcType="INTEGER" property="status" />
-        <result column="source" jdbcType="INTEGER" property="source" />
-        <result column="address_name" jdbcType="VARCHAR" property="addressName" />
-        <result column="longitude" jdbcType="DOUBLE" property="longitude" />
-        <result column="latitude" jdbcType="DOUBLE" property="latitude" />
-        <result column="total_evaluate" jdbcType="INTEGER" property="totalEvaluate" />
-        <result column="enroll_num" jdbcType="INTEGER" property="enrollNum" />
-        <result column="confirm_num" jdbcType="INTEGER" property="confirmNum" />
-        <result column="start_time" jdbcType="BIGINT" property="startTime" />
-        <result column="end_time" jdbcType="BIGINT" property="endTime" />
-        <result column="service_status" jdbcType="INTEGER" property="serviceStatus" />
-        <result column="open_auth" jdbcType="INTEGER" property="openAuth" />
-        <result column="collect_time" jdbcType="BIGINT" property="collectTime" />
-        <result column="collect_type" jdbcType="INTEGER" property="collectType" />
-        <result column="create_user" jdbcType="BIGINT" property="createUser" />
-        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName" />
-        <result column="create_time" jdbcType="BIGINT" property="createTime" />
-        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
-        <result column="update_user_name" jdbcType="VARCHAR" property="updateUserName" />
-        <result column="update_time" jdbcType="BIGINT" property="updateTime" />
-        <result column="company_id" jdbcType="BIGINT" property="companyId" />
-        <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
-    </resultMap>
-
-    <sql id="Base_Column_List">
-    id, service_id, main_id, service_name, service_num, service_place, labels, type,
-    status, source, address_name, longitude, latitude, total_evaluate, enroll_num, confirm_num,
-    start_time, end_time, service_status, open_auth, collect_time, collect_type, create_user,
-    create_user_name, create_time, update_user, update_user_name, update_time, company_id,
-    is_valid
-  </sql>
-
 </mapper>
 
 

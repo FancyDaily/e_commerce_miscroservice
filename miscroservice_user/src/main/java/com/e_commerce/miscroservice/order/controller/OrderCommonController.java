@@ -1,16 +1,20 @@
 package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.product.util.DateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author 马晓晨
@@ -18,6 +22,11 @@ import java.util.Date;
  */
 @Component
 public class OrderCommonController extends BaseController {
+
+
+	@Autowired
+	private OrderRelationshipDao orderRelationshipDao;
+
 	/**
 	 * 根据service派生订单 供其他模块调用
 	 *
@@ -112,4 +121,40 @@ public class OrderCommonController extends BaseController {
 		}
 		return WeekDayNumberArray;
 	}
+	/**
+	 * @Author 姜修弘
+	 * 功能描述:插入订单
+	 * 创建时间:@Date 下午6:38 2019/3/6
+	 * @Param [orderRelationship]
+	 * @return int
+	 **/
+	public int insertOrderRelationship(TOrderRelationship orderRelationship){return orderRelationshipDao.insert(orderRelationship);}
+
+	/**
+	 * @Author 姜修弘
+	 * 功能描述:更新订单
+	 * 创建时间:@Date 下午6:39 2019/3/6
+	 * @Param [orderRelationship]
+	 * @return int
+	 **/
+	public int updateOrderRelationship(TOrderRelationship orderRelationship){return  orderRelationshipDao.updateByPrimaryKey(orderRelationship);}
+
+	/**
+	 * @Author 姜修弘
+	 * 功能描述:获取指定用户、订单的订单关系
+	 * 创建时间:@Date 下午6:39 2019/3/6
+	 * @Param [userId, orderId]
+	 * @return com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship
+	 **/
+	public TOrderRelationship selectOrdertionshipByuserIdAndOrderId(Long userId , Long orderId){return orderRelationshipDao.selectByOrderIdAndUserId(orderId,userId);}
+
+	/**
+	 * @Author 姜修弘
+	 * 功能描述:获取指定用户所有的订单关系
+	 * 创建时间:@Date 下午6:39 2019/3/6
+	 * @Param [userId]
+	 * @return java.util.List<com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship>
+	 **/
+	public List<TOrderRelationship> selectOrdertionshipListByuserId(Long userId){return  orderRelationshipDao.selectByUserId(userId);}
+
 }
