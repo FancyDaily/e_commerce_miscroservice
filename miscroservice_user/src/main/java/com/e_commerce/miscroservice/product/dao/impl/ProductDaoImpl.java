@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
@@ -49,6 +50,12 @@ public class ProductDaoImpl implements ProductDao {
 	@Override
 	public List<TService> selectListByIds(List<Long> productIds) {
 		return MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class).
-				in(TService::getId, productIds.toArray()));
+				in(TService::getId, productIds));
+	}
+
+	@Override
+	public List<TServiceDescribe> getListProductDesc(List<Long> productIds) {
+		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+				.in(TServiceDescribe::getServiceId, productIds));
 	}
 }

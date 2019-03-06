@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 
 import java.util.List;
 
@@ -44,4 +45,11 @@ public interface ProductDao {
 	 * @return 商品的list
 	 */
 	List<TService> selectListByIds(List<Long> productIds);
+
+	/**
+	 * 根据商品ID的list获取商品详情list
+	 * @param productIds 商品ID的list
+	 * @return 商品详情的list
+	 */
+	List<TServiceDescribe> getListProductDesc(List<Long> productIds);
 }
