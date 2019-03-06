@@ -45,6 +45,7 @@ public class SeekHelpController extends BaseController {
 		request.removeAttribute("paramString");
 		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 		String token = param.getToken();*/
+
 		TUser user = (TUser) redisUtil.get(token);
 		//这一层可判断出是求助，手动设置type参数
 		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());

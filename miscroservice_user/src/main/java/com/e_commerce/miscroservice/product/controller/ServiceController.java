@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.product.controller;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/api/v1/service")
 public class ServiceController extends BaseController{
-
+	Log logger = Log.getInstance(ServiceController.class);
 	/**
 	 *
 	 * 功能描述:发布服务

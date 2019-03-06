@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.product.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceReceipt;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
@@ -18,9 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * @author 马晓晨
@@ -71,40 +68,6 @@ public class BaseService {
 
 //	@Autowired
 //	protected ObjectMapper objectMapper;
-
-
-	/**
-	 * 功能描述:根据serviceid获取订单列表
-	 * 作者:马晓晨
-	 * 创建时间:2018年11月22日 上午10:34:50
-	 * @param serviceId
-	 */
-	protected List<TServiceReceipt> selectReceiptsByServiceId(Long serviceId) {
-//		TServiceReceiptExample serviceReceiptExample = new TServiceReceiptExample();
-//		TServiceReceiptExample.Criteria serviceReceiptCriteria = serviceReceiptExample.createCriteria();
-//		serviceReceiptCriteria.andIsValidEqualTo(IS_VALID_YES);
-//		serviceReceiptCriteria.andServiceIdEqualTo(serviceId);
-//		List<TServiceReceipt> serviceReceipt = serviceReceiptDao.selectByExample(serviceReceiptExample);
-//		return serviceReceipt;
-		return null;
-	}
-
-	/**
-	 *
-	 * 功能描述:根据serviceid获取订单列表的id
-	 * 作者:马晓晨
-	 * 创建时间:2018年11月22日 上午10:40:10
-	 * @param serviceId
-	 * @return
-	 */
-	protected List<Long> selectReceiptIdsByServiceId(Long serviceId) {
-		List<TServiceReceipt> listReceipt = selectReceiptsByServiceId(serviceId);
-		List<Long> ids = new ArrayList<>(listReceipt.size() + 1);
-		for (int i = 0; i < listReceipt.size(); i++) {
-			ids.add(listReceipt.get(i).getId());
-		}
-		return ids;
-	}
 
 	/**
 	 * 赋值servcieDesc公共字段

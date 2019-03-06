@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.product.controller;
 
-import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,7 @@ import java.io.StringWriter;
 @Controller
 public class BaseController {
 
-	Log logger = Log.getInstance(SeekHelpController.class);
+
 
 	@Autowired
 	protected ProductService productService;

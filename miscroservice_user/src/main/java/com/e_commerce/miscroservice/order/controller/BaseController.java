@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
+import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.product.controller.SeekHelpController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,10 @@ public class BaseController {
 	protected ProductService seekHelpService;
 	@Autowired
 	protected RedisUtil redisUtil;
+	@Autowired
+	protected OrderService orderService;
+
+	protected SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 	/**
 	 * 
 	 * 功能描述:输出错误消息
@@ -40,12 +46,10 @@ public class BaseController {
 	 * @return
 	 */
 	public String errInfo(Exception e) {  
-	    StringWriter sw = null;  
-	    PrintWriter pw = null;  
+	    StringWriter sw = new StringWriter();
+	    PrintWriter pw = new PrintWriter(sw);
 	    try {  
-	        sw = new StringWriter();  
-	        pw = new PrintWriter(sw);  
-	        // 将出错的栈信息输出到printWriter中  
+	        // 将出错的栈信息输出到printWriter中
 	        e.printStackTrace(pw);  
 	        pw.flush();  
 	        sw.flush();  
