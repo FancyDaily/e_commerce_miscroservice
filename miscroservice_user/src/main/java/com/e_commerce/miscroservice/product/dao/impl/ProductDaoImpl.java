@@ -1,10 +1,10 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.mapper.ProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;

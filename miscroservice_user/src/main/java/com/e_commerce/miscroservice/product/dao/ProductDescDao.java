@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 
 import java.util.List;
 

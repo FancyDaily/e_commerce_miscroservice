@@ -1,13 +1,13 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
@@ -42,7 +42,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
-		user = userService.getUserById(user.getId());
+//		user = userService.getUserById(user.getId());
+		user = userService.getUserById(68813260748488704L);
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		// 组织发布
 		if (isCompany) {
@@ -471,12 +472,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service);
+		boolean isSuccess = orderService.produceOrder(service);
+		if (!isSuccess) {
+			logger.error("调用订单模块派生订单错误>>>>>>");
+			throw new MessageException("发布失败，请重新尝试");
+		}
 		// 3、扣除用户时间币，生成交易流水
 		// 将用户时间币冻结
 		user.setFreezeTime(user.getFreezeTime() + seekHelpPrice);
 		user.setUpdateTime(System.currentTimeMillis());
-		boolean isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
+		isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
 		if (!isSuccess) {
 			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
 			throw new MessageException("冻结用户时间失败，请重新尝试");
@@ -636,27 +641,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		// TODO 调用用户模块
-//		// 3、扣除用户时间币，生成交易流水
-//		// 将用户时间币冻结
-//		user.setFreezeTime(freezeTime + seekHelpPrice);
-//		user.setUpdateTime(currentTime);
-//		userDao.updateByPrimaryKeySelective(user);
-//		// 生成冻结记录
-//		TUserFreeze userFreeze = new TUserFreeze();
-//		userFreeze.setId(snowflakeIdWorker.nextId());
-//		userFreeze.setUserId(user.getId());
-//		userFreeze.setServiceId(service.getId());
-//		userFreeze.setServiceName(service.getServiceName());
-//		userFreeze.setFreezeTime(seekHelpPrice); // 冻结金额
-//		userFreeze.setCreateTime(System.currentTimeMillis());
-//		userFreeze.setCreateUser(user.getId());
-//		userFreeze.setCreateUserName(user.getName());
-//		userFreeze.setUpdateTime(System.currentTimeMillis());
-//		userFreeze.setUpdateUser(user.getId());
-//		userFreeze.setUpdateUserName(user.getName());
-//		userFreeze.setIsValid(IS_VALID_YES);
-//		userFreezeDao.insert(userFreeze);
+		boolean isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
+		if (!isSuccess) {
+			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
+			throw new MessageException("冻结用户时间失败，请重新尝试");
+		}
 	}
 
 	/**
