@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
+import com.e_commerce.miscroservice.user.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserSkillListView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -280,8 +281,10 @@ public class UserController extends BaseController {
     public Object page(String token,Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
+        user.setId(68813259007852544l);
         try {
-            userService.page(user,userId);
+            UserPageView page = userService.page(user, userId);
+            result.setData(page);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("查看个人主页异常: " + e.getMessage());
@@ -295,5 +298,60 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 查看发布的服务/求助列表
+     * @param token
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @param isService
+     * @return
+     */
+    @PostMapping("page/service")
+    public Object pageService(String token,Long userId,Integer pageNum,Integer pageSize,boolean isService) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813259007852544l);
+        try {
+            QueryResult queryResult = userService.pageService(userId, pageNum, pageSize, isService);
+            result.setData(queryResult);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看发布的服务/求助列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查看发布的服务/求助列表异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
+    /**
+     * 历史互助记录
+     * @param token
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @PostMapping("historyService")
+    public Object historyService(String token,Long userId,Integer pageNum,Integer pageSize) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813259007852544l);
+        try {
+            userService.historyService(user,userId,pageNum,pageSize);
+        } catch (MessageException e) {
+            logger.error("查看历史互助记录列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查看历史互助记录列表异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 }

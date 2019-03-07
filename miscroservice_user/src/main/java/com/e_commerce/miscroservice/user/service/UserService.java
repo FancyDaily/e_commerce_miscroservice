@@ -82,4 +82,24 @@ public interface UserService {
      * @return
      */
     UserPageView page(TUser user, Long userId);
+
+    /**
+     * 发布的服务/求助
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @param isService
+     * @return
+     */
+    QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService);
+
+    /**
+     * 历史服务和求助
+     * @param user
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    QueryResult historyService(TUser user, Long userId, Integer pageNum, Integer pageSize);
 }

@@ -426,29 +426,98 @@ public class UserServiceImpl implements UserService {
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
         //求助列表
-        List<TOrder> helps = getOnesAvailableHelps(userId);
+        QueryResult<TOrder> helps = getOnesAvailableItems(userId,1,8,false);
 
         //服务列表
-        List<TOrder> servies = getOnesAvailableServies(userId);
+        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1,8,true);
 
         //技能列表
         UserSkillListView skills = skills(user);
 
         result.setHelps(helps);
-        result.setServices(servies);
+        result.setServices(services);
         result.setSkills(skills);
 
-        return null;
+        return result;
     }
 
-    private List<TOrder> getOnesAvailableServies(Long userId) {
-        return null;
+    /**
+     * 发布的服务/求助
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @param isService
+     * @return
+     */
+    @Override
+    public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService) {
+        return getOnesAvailableItems(userId,pageNum,pageSize,isService);
     }
 
-    private List<TOrder> getOnesAvailableHelps(Long userId) {
-        return null;
+    /**
+     * 获取历史互助记录列表
+     * @param user
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public QueryResult historyService(TUser user, Long userId, Integer pageNum, Integer pageSize) {
+        //分页
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+
+        //查找符合条件的订单记录
+        List<TOrder> orders = orderService.selectEndOrdersByUserId(userId);
+        List<Long> orderIds = new ArrayList<>();
+        for(TOrder order:orders) {
+            orderIds.add(order.getId());
+        }
+
+        Map<Long,Object> evaluateMap = new HashMap<>();
+        List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIds(orderIds);
+        for(TEvaluate evaluate:evaluates) {
+            List<TEvaluate> evaluateList = (List<TEvaluate>) evaluateMap.get(evaluate.getOrderId());
+            if(evaluateList==null) {
+                evaluateList = new ArrayList<>();
+            }
+            evaluateList.add(evaluate);
+            evaluateMap.put(evaluate.getOrderId(),evaluateList);
+        }
+
+        //结果集
+        List<HistoryServView> resultList = new ArrayList<>();
+        for(TOrder order:orders) {
+            HistoryServView historyServView = new HistoryServView();
+            historyServView.setOrder(order);
+            historyServView.setEvaluates((List<TEvaluate>) evaluateMap.get(order.getId()));
+            resultList.add(historyServView);
+        }
+
+        //倒序输出
+        Collections.sort(resultList,new Comparator<HistoryServView>() {
+                    @Override
+                    public int compare(HistoryServView o1, HistoryServView o2) {
+                        return (int) (o2.getOrder().getCreateTime() - o1.getOrder().getCreateTime());
+                    }
+                }
+        );
+
+        QueryResult result = new QueryResult();
+        result.setResultList(resultList);
+        result.setTotalCount(startPage.getTotal());
+
+        return result;
     }
 
+    private QueryResult getOnesAvailableItems(Long userId,  Integer pageNum, Integer pageSize,boolean isService) {
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+        List<TOrder> orders = orderService.selectOdersByUserId(userId, isService);
+        QueryResult queryResult = new QueryResult();
+        queryResult.setTotalCount(startPage.getTotal());
+        queryResult.setResultList(orders);
+        return queryResult;
+    }
 
     private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
         Long userId = user.getId();
