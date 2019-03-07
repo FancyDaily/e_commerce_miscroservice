@@ -1,6 +1,8 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 
 import java.util.List;
 
@@ -30,22 +32,14 @@ public interface OrderRelationshipDao {
      * @return
      */
     TOrderRelationship selectByPrimaryKey(Long orderRelationshipId);
+
     /**
-     * 根据日期判断是否参加该订单
-     * @param startTime
-     * @param endTime
-     * @param serviceId
-     * @param userId
+     *插入订单关系表
+     * @param orderRelationship
      * @return
      */
-    TOrderRelationship selectByDate(Long startTime , Long endTime , Long serviceId , Long userId);
-    /**
-     * 根据订单id和用户id来查询订单关系
-     * @param orderId
-     * @param userId
-     * @return
-     */
-    TOrderRelationship selectByOrderIdAndUserId(Long orderId , Long userId);
+    int insert(TOrderRelationship orderRelationship);
+
     /**
      *根据主键更新订单关系表
      * @param orderRelationship
@@ -54,43 +48,63 @@ public interface OrderRelationshipDao {
     int updateByPrimaryKey(TOrderRelationship orderRelationship);
 
     /**
-     *插入订单关系表
-     * @param orderRelationship
+     * 根据日期找到报名者的订单关系
+     * @param startTime
+     * @param endTime
+     * @param serviceId
+     * @param userId
      * @return
      */
-    int insert(TOrderRelationship orderRelationship);
+    TOrderRelationship selectByDateByEnrollUserId(Long startTime , Long endTime , Long serviceId , Long userId);
+
     /**
-     * 根据orderId和statusList来查询订单List
+     * 根据订单id和用户id来查找订单关系
      * @param orderId
-     * @param statusList
+     * @param userId
      * @return
      */
-    List<TOrderRelationship> selectListByStatusList(Long orderId , List<Integer> statusList);
+    TOrderRelationship selectByOrderIdAndUserId(Long orderId , Long userId);
     /**
-     * 根据orderId和status来查询订单List
-     * @param orderId
-     * @param status
-     * @return
-     */
-    List<TOrderRelationship> selectListByStatus(Long orderId , int status);
-    /**
-     * 根据订单id和用户idList来查询订单关系List
+     * 根据订单id和报名用户idList来查询订单关系List
      * @param orderId
      * @param userIdList
      * @return
      */
-    List<TOrderRelationship> selectByOrderIdAndUserIdList(Long orderId , List<Long> userIdList);
+    List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId , List<Long> userIdList);
+
     /**
-     * 根据statusList来查询订单数量
-     * @param orderId
-     * @param statusList
-     * @return
-     */
-    long selectCountByStatusList(Long orderId , List<Integer> statusList);
-    /**
-     * 根据用户id来查询订单关系List
+     * 根据用户id（发布者和参与者）来查询订单关系List
      * @param userId
      * @return
      */
     List<TOrderRelationship> selectByUserId(Long userId);
+
+    /**
+     * 根据orderId和statusList来升序查询报名者订单List
+     * @param orderId
+     * @param statusList
+     * @return
+     */
+    List<TOrderRelationship> selectListByStatusListByEnroll(Long orderId , List<Integer> statusList);
+    /**
+     * 根据orderId和status来查询未开始（签到）报名者订单List
+     * @param orderId
+     * @param status
+     * @return
+     */
+    List<TOrderRelationship> selectListByStatusForNotSignByEnroll(Long orderId , int status);
+    /**
+     * 根据orderId和status来查询报名者订单List
+     * @param orderId
+     * @param status
+     * @return
+     */
+    List<TOrderRelationship> selectListByStatusByEnroll(Long orderId , int status);
+    /**
+     * 根据statusList来查询参与者订单数量
+     * @param orderId
+     * @param statusList
+     * @return
+     */
+    long selectCountByStatusListByEnroll(Long orderId , List<Integer> statusList);
 }
