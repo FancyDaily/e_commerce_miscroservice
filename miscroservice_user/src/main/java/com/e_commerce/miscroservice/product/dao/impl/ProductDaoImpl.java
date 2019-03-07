@@ -44,7 +44,7 @@ public class ProductDaoImpl implements ProductDao {
 		return MybatisOperaterUtil.getInstance().findOne(new TService(), new MybatisSqlWhereBuild(TService.class)
 				.eq(TService::getUserId, userId).eq(TService::getType, type).eq(TService::getIsValid, '1')
 				.eq(TService::getStatus, ProductEnum.STATUS_UPPER_FRAME.getValue())
-				.orderBy(MybatisSqlWhereBuild.ORDER.DESC, TService::getCreateTime));
+				.orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 	}
 
 	@Override
