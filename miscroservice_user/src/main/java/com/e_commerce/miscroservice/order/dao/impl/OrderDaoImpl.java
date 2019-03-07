@@ -1,11 +1,13 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +41,15 @@ public class OrderDaoImpl implements OrderDao {
 	}
 
 	@Override
-	public List<TOrder> pageOrder(PageOrderParamView param) {
-		return orderMapper.pageOrder(param);
+	public Page<TOrder> pageOrder(PageOrderParamView param) {
+		Page<TOrder> page = PageHelper.startPage(param.getPageNum(), param.getPageSize());
+		orderMapper.pageOrder(param);
+		return page;
+	}
+
+	@Override
+	public List<TOrder> selectOrderByOrderIds(List<Long> orderIds) {
+		return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+				.in(TOrder::getId, orderIds));
 	}
 }

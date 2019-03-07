@@ -40,4 +40,13 @@ public class ProductCommonController extends BaseController{
 				.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
 		return coverPic;
 	}
+
+	/**
+	 * 获取服务详情（图片及详情）
+	 * @param serviceId
+	 * @return
+	 */
+	public List<TServiceDescribe> getProductDesc(Long serviceId) {
+		return productService.getProductDesc(serviceId);
+	}
 }

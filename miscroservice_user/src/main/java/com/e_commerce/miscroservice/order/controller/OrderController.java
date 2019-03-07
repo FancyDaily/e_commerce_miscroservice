@@ -66,12 +66,40 @@ public class OrderController extends BaseController {
 	 * @param token 用户token
 	 * @return
 	 */
-	@RequestMapping("/detail")
+	@PostMapping("/detail")
 	public Object detail(Long orderId, String token) {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			DetailOrderReturnView data = orderService.orderDetail(orderId, user);
+			result.setSuccess(true);
+//			result.setData(data);
+			result.setMsg("获取详情成功");
+		} catch (MessageException e) {
+			logger.warn("获取详情失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败," + e.getMessage());
+		} catch (Exception e) {
+			logger.error("获取详情失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败");
+		}
+		return result;
+	}
+
+	/**
+	 * 报名选人列表
+	 * @param token 用户token
+	 * @return
+	 */
+	@PostMapping("/enrollList")
+	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			orderService.enrollList(pageNum, pageSize, user);
 			result.setSuccess(true);
 //			result.setData(data);
 			result.setMsg("获取详情成功");

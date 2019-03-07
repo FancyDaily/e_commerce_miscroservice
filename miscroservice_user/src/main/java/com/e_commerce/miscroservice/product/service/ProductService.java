@@ -45,4 +45,11 @@ public interface ProductService {
 	 * @return 所有商品的desc
 	 */
 	List<TServiceDescribe> getListProductDesc(List<Long> productIds);
+
+	/**
+	 * 根据产品ID获取产品详情
+	 * @param serviceId
+	 * @return
+	 */
+	List<TServiceDescribe> getProductDesc(Long serviceId);
 }

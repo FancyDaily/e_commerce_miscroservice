@@ -1,10 +1,14 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
+import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
+import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -30,6 +34,9 @@ import java.util.List;
  */
 @Repository
 public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
+
+    @Autowired
+    OrderRelationshipMapper relationshipMapper;
 
     /**
      *根据主键查询订单关系表
@@ -126,6 +133,13 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .groupAfter()
                         .eq(TOrderRelationship::getIsValid , "1"));
         return  orderRelationshipList;
+    }
+
+    @Override
+    public Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId) {
+        Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
+        relationshipMapper.pageEnrollAndChoose(userId);
+        return page;
     }
 
     /**

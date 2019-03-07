@@ -93,6 +93,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return productDao.getListProductDesc(productIds);
 	}
 
+	@Override
+	public List<TServiceDescribe> getProductDesc(Long serviceId) {
+		return productDao.getProductDesc(serviceId);
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务

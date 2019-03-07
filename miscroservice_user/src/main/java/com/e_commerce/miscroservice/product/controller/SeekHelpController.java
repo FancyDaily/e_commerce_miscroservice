@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.product.vo.ProductSubmitParamView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,7 +39,7 @@ public class SeekHelpController extends BaseController {
 	 */
 	@RequestMapping("/submit")
 	@Consume(ProductSubmitParamView.class)
-	public Object submitSeekHelp(HttpServletRequest request, ServiceParamView param, String token) {
+	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param, String token) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
 /*		String paramString = (String) request.getAttribute("paramString");
@@ -55,7 +56,7 @@ public class SeekHelpController extends BaseController {
 			result.setMsg("发布求助成功");
 			return result;
 		} catch (MessageException e) {
-			logger.error("发布求助失败," + e.getMessage());
+			logger.warn("发布求助失败, {}" + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg("发布求助失败," + e.getMessage());

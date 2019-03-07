@@ -1,6 +1,8 @@
 package com.e_commerce.miscroservice.order.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+
+import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -93,4 +95,13 @@ public interface OrderRelationshipDao {
      * @return
      */
     List<TOrderRelationship> selectByUserId(Long userId);
+
+    /**
+     * 分页报名和选人列表
+     * @param pageNum 分页页数
+     * @param pageSize 每页数量
+     * @param userId 当前用户id
+     * @return
+     */
+	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
 }
