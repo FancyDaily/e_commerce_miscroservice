@@ -1,11 +1,9 @@
 package com.e_commerce.miscroservice.order.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.github.pagehelper.Page;
+
 
 import java.util.List;
 
@@ -75,12 +73,6 @@ public interface OrderRelationshipDao {
      */
     List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId , List<Long> userIdList);
 
-    /**
-     * 根据用户id（发布者和参与者）来查询订单关系List
-     * @param userId
-     * @return
-     */
-    List<TOrderRelationship> selectByUserId(Long userId);
 
     /**
      * 根据orderId和statusList来升序查询报名者订单List
@@ -125,5 +117,4 @@ public interface OrderRelationshipDao {
      * @return
      */
 	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
-    long selectCountByStatusListByEnroll(Long orderId , List<Integer> statusList);
 }
