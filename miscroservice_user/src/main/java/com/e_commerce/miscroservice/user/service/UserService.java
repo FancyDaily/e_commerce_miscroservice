@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.user.service;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.order.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
+import com.e_commerce.miscroservice.user.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserSkillListView;
 
 import java.util.Map;
