@@ -1,11 +1,13 @@
 package com.e_commerce.miscroservice.order.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.product.util.DateUtil;
@@ -30,6 +32,9 @@ public class OrderCommonController extends BaseController {
 
     @Autowired
     private OrderDao orderDao;
+
+    @Autowired
+    private EvaluateDao evaluateDao;
 
     /**
      * 根据service派生订单 供其他模块调用
@@ -177,7 +182,26 @@ public class OrderCommonController extends BaseController {
      * @param userId
      * @return
      */
-    public List<TOrder> selectOdersByUserId(Long userId) {
-        return orderDao.selectByUserId(userId);
+    public List<TOrder> selectOdersByUserId(Long userId,boolean isService) {
+        return orderDao.selectPublishedByUserId(userId,isService);
     }
+
+    /**
+     * 查询指定用户id过往订单记录
+     * @param userId
+     * @return
+     */
+    public List<TOrder> selectEndOrdersByUserId(Long userId) {
+        return  orderDao.selectPastByUserId(userId);
+    }
+
+    /**
+     * 查询指定订单Id集合的评价记录
+     * @param orderIds
+     * @return
+     */
+    public List<TEvaluate> selectEvaluateInOrderIds(List orderIds) {
+        return evaluateDao.selectEvaluateInOrderIds(orderIds);
+    }
+
 }
