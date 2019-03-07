@@ -11,4 +11,5 @@ public interface UserDao {
     List<TUser> queryByIds(List<Long> idList);
 
 	int updateByPrimaryKey(TUser tUser);
+
 }
