@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
+import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,7 +27,10 @@ import java.util.*;
 public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Autowired
-	OrderCommonController orderService;
+	private OrderCommonController orderService;
+	@Autowired
+	private UserCommonController userService;
+
 	/**
 	 * 功能描述:发布求助
 	 * 作者:马晓晨
@@ -38,8 +42,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
-/*		boolean isCompany = param.getService().getSource() != null
-				&& param.getService().getSource().equals(ProductEnum.SOURCE_GROUP.getValue());*/
+		user = userService.getUserById(user.getId());
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		// 组织发布
 		if (isCompany) {
@@ -440,9 +443,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			throw new MessageException("求助名称包含敏感词");
 		}
 		// 如果是上架,先将之前那条记录改为状态8删除
-		if (service.getId() != null) {
-			delService(service);
-		}
+//		if (service.getId() != null) {
+//			delService(service);
+//		}
 		service.setId(snowflakeIdWorker.nextId());
 		// 待审核 TODO 暂时不做审核限制，直接是待开始
 //		service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
@@ -454,10 +457,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (TServiceDescribe desc : listServiceDescribe) {
-			if (StringUtil.isNotEmpty(desc.getDepict())) {
-				if (BadWordUtil.isContaintBadWord(desc.getDepict(), 2)){
-					throw new MessageException("求助描述中包含敏感词");
-				}
+			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
+				throw new MessageException("求助描述中包含敏感词");
 			}
 			desc.setId(snowflakeIdWorker.nextId());
 			desc.setServiceId(service.getId()); // 求助id关联
@@ -475,28 +476,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		// 将用户时间币冻结
 		user.setFreezeTime(user.getFreezeTime() + seekHelpPrice);
 		user.setUpdateTime(System.currentTimeMillis());
-		//TODO 使用用户模块
-//		userDao.updateByPrimaryKeySelective(user);
-		// 生成冻结记录
+		boolean isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
+		if (!isSuccess) {
+			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
+			throw new MessageException("冻结用户时间失败，请重新尝试");
+		}
 		// TODO 使用用户模块
-	/*	TUserFreeze userFreeze = new TUserFreeze();
-		userFreeze.setId(snowflakeIdWorker.nextId());
-		userFreeze.setUserId(user.getId());
-		userFreeze.setOrderId(service.getId());
-		userFreeze.setServiceName(service.getServiceName());
-		userFreeze.setFreezeTime(seekHelpPrice); // 冻结金额
-		userFreeze.setCreateTime(System.currentTimeMillis());
-		userFreeze.setCreateUser(user.getId());
-		userFreeze.setCreateUserName(user.getName());
-		userFreeze.setUpdateTime(System.currentTimeMillis());
-		userFreeze.setUpdateUser(user.getId());
-		userFreeze.setUpdateUserName(user.getName());
-		userFreeze.setIsValid(IS_VALID_YES);
-		userFreezeDao.insert(userFreeze);
 		// 增加成长值 刷新缓冲
-		TUser addGrowthUser = growthValueService.addGrowthValue(user,
-				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
-		userService.flushRedisUser(token, addGrowthUser);*/
+//		TUser addGrowthUser = growthValueService.addGrowthValue(user,
+//				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
+//		userService.flushRedisUser(token, addGrowthUser);
 	}
 
 
@@ -507,12 +496,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param param 发布参数view
 	 */
 	private void submitCompanySeekHelp(TUser user, ServiceParamView param) {
-//		user = userDao.selectByPrimaryKey(user.getId());
-		// 这里做一层检测 检测用户是否是组织用户
-/*		if (!Objects.equals(user.getIsCompanyAccount(), 1)) {
-			logger.error("非法用户登录，用户ID为{}", user.getId());
-			throw new MessageException("用户不是组织用户，请重新登录");
-		}*/
 		// 做一层校验
 		if (param.getService().getCollectType() == null) {
 			logger.error("组织发布的求助传递时间币的类型错误");
@@ -541,6 +524,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		TService service = param.getService();
 		if (service.getTimeType() == 0 && service.getEndTime() < currentTime) {
 			throw new MessageException("求助结束时间不能小于当前时间");
+		}
+		if (!user.getUserType().equals(IS_PUBLIC_WELFARE_YES)) {
+			throw new MessageException("您不是公益组织，没有权限发布公益时的项目");
 		}
 
 		// 进行标题敏感词检测

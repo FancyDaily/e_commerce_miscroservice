@@ -56,7 +56,7 @@ public class SeekHelpController extends BaseController {
 			result.setMsg("发布求助成功");
 			return result;
 		} catch (MessageException e) {
-			logger.warn("发布求助失败, {}" + e.getMessage());
+			logger.warn("发布求助失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg("发布求助失败," + e.getMessage());
