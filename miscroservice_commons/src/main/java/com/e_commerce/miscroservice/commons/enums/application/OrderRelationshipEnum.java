@@ -21,6 +21,10 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum OrderRelationshipEnum {
     /**
+     * 订单关系状态为初始状态，没报名参与 只算收藏或者投诉了 状态值为0
+     */
+    STATUS_NO_STATE(0 , "初始状态"),
+    /**
      * 订单关系状态为待确认，报名成功未被选择 状态值为1
      */
     STATUS_WAIT_CHOOSE(1, "待确认"),
