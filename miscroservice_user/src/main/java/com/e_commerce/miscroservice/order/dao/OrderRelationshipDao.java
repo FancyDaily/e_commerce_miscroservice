@@ -80,7 +80,7 @@ public interface OrderRelationshipDao {
      * @param statusList
      * @return
      */
-    List<TOrderRelationship> selectListByStatusList(Long orderId , List<Integer> statusList);
+    //List<TOrderRelationship> selectListByStatusList(Long orderId , List<Integer> statusList);
     /**
      * 根据orderId和status来查询未开始（签到）报名者订单List
      * @param orderId
@@ -101,7 +101,7 @@ public interface OrderRelationshipDao {
      * @param statusList
      * @return
      */
-    long selectCountByStatusList(Long orderId , List<Integer> statusList);
+    //long selectCountByStatusList(Long orderId , List<Integer> statusList);
     /**
      * 根据用户id来查询订单关系List
      * @param userId
