@@ -13,6 +13,14 @@ public interface FocusService {
      */
     void submit(TUser user, Long userFollowId);
 
+    /**
+     * 关注/粉丝列表
+     * @param user
+     * @param lastTime
+     * @param pageSize
+     * @param isFocus
+     * @return
+     */
     QueryResult<DesensitizedUserView> myList(TUser user, Long lastTime, Integer pageSize, boolean isFocus);
     /*
     *//**

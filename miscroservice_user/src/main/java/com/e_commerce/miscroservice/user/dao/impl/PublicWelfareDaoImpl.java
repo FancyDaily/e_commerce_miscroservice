@@ -8,13 +8,13 @@ import com.e_commerce.miscroservice.user.dao.PublicWelfareDao;
 import com.e_commerce.miscroservice.user.mapper.PublicWelfareMapper;
 import com.e_commerce.miscroservice.user.vo.WelfareParamView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Repository
 public class PublicWelfareDaoImpl implements PublicWelfareDao {
 
     @Autowired

@@ -5,9 +5,9 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
-import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
@@ -47,6 +47,8 @@ public class UserController extends BaseController {
             Map<String, Object> payments = userService.payments(user, ymString, option);
             result.setData(payments);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("时间轨迹异常: " + e.getMessage());
         } catch (Exception e) {
             logger.info("时间轨迹异常", errInfo(e));
             result.setSuccess(false);
@@ -71,6 +73,10 @@ public class UserController extends BaseController {
             QueryResult<UserFreezeView> queryResult = userService.frozenList(user.getId(), lastTime, pageSize);
             result.setSuccess(true);
             result.setData(queryResult);
+        } catch (MessageException e) {
+            result.setMsg("冻结明细异常: " + e.getMessage());
+            logger.error(e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             logger.info("冻结明细异常", errInfo(e));
             result.setSuccess(false);
@@ -97,6 +103,8 @@ public class UserController extends BaseController {
             Map<String, Object> map = userService.publicWelfareList(user, lastTime, pageSize, year);
             result.setData(map);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("公益历程列表异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("公益历程列表异常", errInfo(e));
@@ -120,6 +128,8 @@ public class UserController extends BaseController {
             UserSkillListView skillView = userService.skills(user);
             result.setData(skillView);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看技能异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("查看技能异常", errInfo(e));
@@ -148,9 +158,13 @@ public class UserController extends BaseController {
         try {
             userService.skillAdd(user, skill);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            result.setMsg(e.getMessage());
+            logger.error("添加技能异常: " + e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看技能异常", errInfo(e));
+            logger.info("添加技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -176,9 +190,13 @@ public class UserController extends BaseController {
         try {
             userService.skillModify(user, skill);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("修改技能异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看技能异常", errInfo(e));
+            logger.info("修改技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -201,9 +219,13 @@ public class UserController extends BaseController {
             //TODO 调订单模块的收藏列表方法
 //            QueryResult<Map<String, Object>> queryResult = userService.collectList(user,lastTime,pageSize);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("收藏列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看技能异常", errInfo(e));
+            logger.info("收藏列表异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -211,18 +233,34 @@ public class UserController extends BaseController {
 
     /**
      * 收藏/取消收藏
+     *
      * @param token
      * @param orderId
      * @return
      */
     @PostMapping("collect")
     public Object collect(String token, Long orderId) {
-
-        return null;
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813259007852544l);
+        try {
+            userService.collect(user,orderId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("收藏列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("收藏列表异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
     }
 
     /**
      * 查看用户基本信息
+     *
      * @param token
      * @param userId
      * @return
@@ -233,9 +271,29 @@ public class UserController extends BaseController {
         return null;
     }
 
-
-    public TUser getUserById(Long userId) {
-        return userService.getUserbyId(userId);
+    /**
+     * 查看个人主页(基本信息、技能列表、提供的服务、提供的求助)
+     * @param token
+     * @return
+     */
+    @PostMapping("page")
+    public Object page(String token,Long userId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        try {
+            userService.page(user,userId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看个人主页异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查看个人主页异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
     }
+
 
 }

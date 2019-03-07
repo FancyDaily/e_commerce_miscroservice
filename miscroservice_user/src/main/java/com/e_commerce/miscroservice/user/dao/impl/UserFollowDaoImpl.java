@@ -39,18 +39,19 @@ public class UserFollowDaoImpl implements UserFollowDao {
         List<TUserFollow> userFollows = MybatisOperaterUtil.getInstance().finAll(new TUserFollow(), new MybatisSqlWhereBuild(TUserFollow.class)
                 .groupBefore().
                         eq(TUserFollow::getUserId, userId)
-                .eq(TUserFollow::getUserFollowId, userFollowId)
+                .eq(TUserFollow::getUserFollowId, userFollowId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
                 .groupAfter().or().groupBefore().
                         eq(TUserFollow::getUserId, userFollowId)
                 .eq(TUserFollow::getUserFollowId, userId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
                 .groupAfter());
-        if (userFollows.isEmpty()) { //如果找不到记录
-            resultMap.put("isFollowTheSame", false); //互关标志
-            return resultMap;
-        }
-
         if(userFollows.size()>1) {
             resultMap.put("isFollowTheSame", true);  //互关标志
+        } else {
+            resultMap.put("isFollowTheSame", false); //互关标志
+        }
+
+        if (userFollows.isEmpty()) { //如果找不到记录
+            return resultMap;
         }
 
         //我关注ta
@@ -94,7 +95,8 @@ public class UserFollowDaoImpl implements UserFollowDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserFollow(),new MybatisSqlWhereBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getUpdateTime));
+                .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
+                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getCreateTime));
     }
 
     /**
@@ -108,6 +110,41 @@ public class UserFollowDaoImpl implements UserFollowDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserFollow(),new MybatisSqlWhereBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserFollowId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getUpdateTime));
+                .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
+                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getCreateTime));
+    }
+
+    /**
+     * 查询指定对方的关注状态 0未关注 1已关注 3互相关注
+     * @param id
+     * @param userId
+     * @return
+     */
+    @Override
+    public Integer queryAttenStatus(Long id, Long userId) {
+        List<TUserFollow> userFollows = MybatisOperaterUtil.getInstance().finAll(new TUserFollow(), new MybatisSqlWhereBuild(TUserFollow.class)
+                .groupBefore().
+                        eq(TUserFollow::getUserId, id)
+                .eq(TUserFollow::getUserFollowId, userId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
+                .groupAfter().or().groupBefore().
+                        eq(TUserFollow::getUserId, userId)
+                .eq(TUserFollow::getUserFollowId, id).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
+                .groupAfter());
+        Integer myStatus = 0;
+        Integer herStatus = 0;
+        //我关注ta
+        for (TUserFollow userFollow : userFollows) {
+            if (id.equals(userFollow.getUserId()) && userId.equals(userFollow.getUserFollowId())) {  //我关注ta的记录
+                myStatus = 1;
+                continue;
+            }
+            herStatus = 1;
+        }
+        Integer status = myStatus;
+        if(myStatus.equals(1) && herStatus.equals(1)) {
+            status = 2;
+        }
+
+        return status;
     }
 }

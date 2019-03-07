@@ -73,6 +73,10 @@ public class DesensitizedUserView implements Serializable {
 
 	private String occupation;
 
+	private String workPlace;	//公司
+
+	private String college;	//学校
+
 	private Long birthday;
 
 	private Integer sex;
@@ -92,6 +96,10 @@ public class DesensitizedUserView implements Serializable {
 	private Integer seekHelpNum;
 
 	private Integer serveNum;
+
+	private Integer seekHelpDoneNum;	//完成求助次数
+
+	private Integer serveDoneNum;	//完成服务次数
 
 	private Long surplusTime;
 

@@ -50,7 +50,7 @@ public class FocusServiceImpl implements FocusService {
 
         Map<String, Object> recordMap = userFollowDao.findRecords(id, userFollowId);
         //互相关注
-        boolean isFollowTheSame = (boolean) recordMap.get("isFollwTheSame");
+        boolean isFollowTheSame = (boolean) recordMap.get("isFollowTheSame");   //操作之前的关注状态
         //我-关注对象 关注记录
         TUserFollow follow = (TUserFollow) recordMap.get("follow");
         //关注对象-我 关注记录
@@ -85,7 +85,7 @@ public class FocusServiceImpl implements FocusService {
         userFollow.setUpdateUser(id);
         userFollow.setUpdateUserName(user.getName());
         // extend
-        if (isFollowTheSame) { //TODO 如果我关注的对象也关注我(互关)
+        if (!isFollowTheSame && befollowed!=null) { //TODO 如果我关注的对象也关注我(操作后)
             //将符合条件的两条记录改为互关
             befollowed.setExtend(AppConstant.IS_ATTEN_THE_SAME_YES);
             userFollowDao.update(befollowed);
@@ -94,153 +94,6 @@ public class FocusServiceImpl implements FocusService {
         }
         userFollowDao.insert(userFollow);
     }
-
-/*
-    *//**
-     * 关注列表
-     *
-     * @param user
-     * @param lastTime
-     * @param pageSize
-     * @return
-     *//*
-    @Override
-    public QueryResult<DesensitizedUserView> focusList(TUser user, Long lastTime, Integer pageSize) {
-        //主键
-        Long userId = user.getId();
-
-        // 非空
-        if (lastTime == null) {
-            lastTime = System.currentTimeMillis();
-        }
-
-        if (pageSize == null) {
-            pageSize = 0;
-        }
-
-        // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
-
-        // 查询关注表
-        List<TUserFollow> userFollows = userFollowDao.findUserIdRecords(userId, lastTime);
-
-        // idlist & timeStampMap
-        List<Long> idList = new ArrayList<>();
-        Map<Long, Object> timeStampMap = new HashMap<>();
-        Map<Long, Object> isAttenMap = new HashMap<>();
-        for (TUserFollow userFollow : userFollows) {
-            idList.add(userFollow.getUserFollowId());
-            timeStampMap.put(userFollow.getUserFollowId(), userFollow.getCreateTime());    //creatTime
-            isAttenMap.put(userFollow.getUserFollowId(), userFollow.getExtend());    //记录互相关注状态的map
-        }
-
-        if (idList.size() == 0) {
-            return new QueryResult<>();
-        }
-
-        // 查询用户
-        List<TUser> users = userDao.queryByIds(idList);
-
-        //String化
-        List<DesensitizedUserView> userList = new ArrayList<>();
-        for (TUser theUser : users) {
-            DesensitizedUserView userView = BeanUtil.copy(theUser, DesensitizedUserView.class);
-            userView.setIdStr(String.valueOf(userView.getId()));
-            userView.setTimeStamp(String.valueOf(timeStampMap.get(userView.getId())));
-            //互相关注状态
-            String extendStr = (String) isAttenMap.get(userView.getId());
-            userView.setIsAtten(AppConstant.IS_ATTEN_THE_SAME_YES.equals(extendStr) ? AppConstant.IS_ATTEN_YES : AppConstant.IS_ATTEN_NO);
-
-            userList.add(userView);
-        }
-
-        //排序
-        Collections.sort(userList, new Comparator<DesensitizedUserView>() {
-
-            @Override
-            public int compare(DesensitizedUserView o1, DesensitizedUserView o2) {
-                return o2.getTimeStamp().compareTo(o1.getTimeStamp());
-            }
-        });
-
-        QueryResult<DesensitizedUserView> queryResult = new QueryResult<>();
-        queryResult.setResultList(userList);
-        queryResult.setTotalCount(startPage.getTotal());
-
-        return queryResult;
-    }
-
-    *//**
-     * 粉丝列表
-     *
-     * @param user
-     * @param lastTime
-     * @param pageSize
-     * @return
-     *//*
-    @Override
-    public QueryResult<DesensitizedUserView> fanList(TUser user, Long lastTime, Integer pageSize) {
-        //主键
-        Long userId = user.getId();
-
-        // 非空
-        if (lastTime == null) {
-            lastTime = System.currentTimeMillis();
-        }
-
-        if (pageSize == null) {
-            pageSize = 0;
-        }
-
-        // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
-
-        // 查询关注表
-        List<TUserFollow> userFollows = userFollowDao.findUserFollowIdRecords(userId, lastTime);
-        // idlist & timeStampMap
-        List<Long> idList = new ArrayList<>();
-        Map<Long, Object> timeStampMap = new HashMap<>();
-        Map<Long, Object> isAttenMap = new HashMap<>();
-        for (TUserFollow userFollow : userFollows) {
-            idList.add(userFollow.getUserId());
-            timeStampMap.put(userFollow.getUserId(), userFollow.getCreateTime());
-            isAttenMap.put(userFollow.getUserId(), userFollow.getExtend());    //记录互相关注状态的map
-        }
-
-        if (idList.size() == 0) {
-            return new QueryResult<>();
-        }
-
-        // 查询用户
-        List<TUser> select = userDao.queryByIds(idList);
-
-        //String化与装载timeStamp
-        List<DesensitizedUserView> userList = new ArrayList<>();
-        for (TUser theUser : select) {
-            DesensitizedUserView userView = BeanUtil.copy(theUser, DesensitizedUserView.class);
-            userView.setIdStr(String.valueOf(userView.getId()));
-            userView.setTimeStamp(String.valueOf(timeStampMap.get(userView.getId())));
-            //获得互相关注状态
-            String extendStr = (String) isAttenMap.get(userView.getId());
-            userView.setIsAtten(AppConstant.IS_ATTEN_THE_SAME_YES.equals(extendStr) ? AppConstant.IS_ATTEN_YES : AppConstant.IS_ATTEN_NO);
-            userList.add(userView);
-        }
-
-        //排序
-        Collections.sort(userList, new Comparator<DesensitizedUserView>() {
-
-            @Override
-            public int compare(DesensitizedUserView o1, DesensitizedUserView o2) {
-                return o2.getTimeStamp().compareTo(o1.getTimeStamp());
-            }
-        });
-
-        QueryResult<DesensitizedUserView> queryResult = new QueryResult<>();
-        queryResult.setResultList(userList);
-        queryResult.setTotalCount(startPage.getTotal());
-
-        return queryResult;
-    }*/
 
     /**
      * 关注/粉丝列表

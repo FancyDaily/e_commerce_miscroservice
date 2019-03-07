@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.user.service;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.order.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
 import com.e_commerce.miscroservice.user.vo.UserSkillListView;
 
@@ -66,4 +67,19 @@ public interface UserService {
      * @return
      */
     TUser getUserbyId(Long userId);
+
+    /**
+     * 收藏/取消收藏
+     * @param user
+     * @param orderId
+     */
+    void collect(TUser user, Long orderId);
+
+    /**
+     * 个人主页
+     * @param user
+     * @param userId
+     * @return
+     */
+    UserPageView page(TUser user, Long userId);
 }

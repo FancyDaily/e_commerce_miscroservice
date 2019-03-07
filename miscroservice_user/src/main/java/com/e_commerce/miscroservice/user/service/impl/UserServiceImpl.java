@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
+import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.order.vo.UserPageView;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
@@ -24,6 +26,9 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
 
     @Autowired
+    private OrderCommonController orderService;
+
+    @Autowired
     private UserDao userDao;
 
     @Autowired
@@ -37,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserSkillDao userSkillDao;
+
+    @Autowired
+    private UserFollowDao userFollowDao;
 
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
@@ -342,7 +350,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void skillAdd(TUser user, TUserSkill skill) {
         //校验
-        skillPass(user, skill,false);
+        skillPass(user, skill, false);
 
         skill.setId(idGenerator.nextId()); // 生成主键
         skill.setUserId(user.getId()); // 创建者id
@@ -369,7 +377,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void skillModify(TUser user, TUserSkill skill) {
         //校验
-        skillPass(user,skill, true);
+        skillPass(user, skill, true);
 
         // updater
         long currentTimeMillis = System.currentTimeMillis();
@@ -379,10 +387,69 @@ public class UserServiceImpl implements UserService {
         userSkillDao.update(skill);
     }
 
+    /**
+     * 根据id查询用户
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public TUser getUserbyId(Long userId) {
         return userDao.selectByPrimaryKey(userId);
     }
+
+    /**
+     * 收藏/取消收藏
+     *
+     * @param user
+     * @param orderId
+     */
+    @Override
+    public void collect(TUser user, Long orderId) {
+
+//TODO  orderService.updateOrderRelationship();
+    }
+
+    /**
+     * 个人主页
+     * @param user
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserPageView page(TUser user, Long userId) {
+        UserPageView result = new UserPageView();
+        //基本信息
+        user = userDao.selectByPrimaryKey(userId);
+        DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
+        //关注状态
+        Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(),userId);
+        view.setIsAtten(attenStatus);
+        result.setDesensitizedUserView(view);
+        //求助列表
+        List<TOrder> helps = getOnesAvailableHelps(userId);
+
+        //服务列表
+        List<TOrder> servies = getOnesAvailableServies(userId);
+
+        //技能列表
+        UserSkillListView skills = skills(user);
+
+        result.setHelps(helps);
+        result.setServices(servies);
+        result.setSkills(skills);
+
+        return null;
+    }
+
+    private List<TOrder> getOnesAvailableServies(Long userId) {
+        return null;
+    }
+
+    private List<TOrder> getOnesAvailableHelps(Long userId) {
+        return null;
+    }
+
 
     private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
         Long userId = user.getId();
@@ -393,7 +460,7 @@ public class UserServiceImpl implements UserService {
 
         String name = skill.getName();
 
-        if(isModify) {
+        if (isModify) {
             if (skill.getId() == null) {
                 throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能编号不能为空!");
             }
@@ -415,8 +482,10 @@ public class UserServiceImpl implements UserService {
         // 判重 技能名
         boolean isExist = userSkillDao.isExist(name, userId);
 
-        if (isExist) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在同名技能！");
+        if (!isModify) {
+            if (isExist) {
+                throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在同名技能！");
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.user.controller;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
@@ -12,6 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 关注
+ * 关注Controller层
+ */
 @RestController
 @RequestMapping("api/v2/focus")
 public class FocusController extends BaseController {
@@ -36,9 +41,13 @@ public class FocusController extends BaseController {
         try {
             focusService.submit(user, userFollowId);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("关注异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("关注注异常", errInfo(e));
+            logger.error("关注异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -58,10 +67,14 @@ public class FocusController extends BaseController {
         TUser user = new TUser();
         user.setId(68813259007852544l);
         try {
-            QueryResult<DesensitizedUserView> queryResult = focusService.myList(user,lastTime,pageSize,true);
+            QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, true);
             result.setData(queryResult);
             result.setSuccess(true);
-        } catch (Exception e) {
+        } catch (MessageException e) {
+            logger.error("关注列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }  catch (Exception e) {
             e.printStackTrace();
             logger.error("关注列表异常", errInfo(e));
             result.setSuccess(false);
@@ -71,6 +84,7 @@ public class FocusController extends BaseController {
 
     /**
      * 粉丝列表
+     *
      * @param token
      * @param lastTime
      * @param pageSize
@@ -82,9 +96,13 @@ public class FocusController extends BaseController {
         TUser user = new TUser();
         user.setId(68813259007852544l);
         try {
-            QueryResult<DesensitizedUserView> queryResult = focusService.myList(user,lastTime,pageSize,false);
+            QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, false);
             result.setData(queryResult);
             result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("粉丝列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("关注列表异常", errInfo(e));

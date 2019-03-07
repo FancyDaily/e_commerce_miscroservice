@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserFollowDao {
+
+
     /**
      * 是否关注
      * @param userId 用户id
@@ -51,4 +53,12 @@ public interface UserFollowDao {
      * @return
      */
     List<TUserFollow> findUserFollowIdRecords(Long userId, Long lastTime);
+
+    /**
+     * 查询指定对方的关注状态
+     * @param id
+     * @param userId
+     * @return
+     */
+    Integer queryAttenStatus(Long id, Long userId);
 }

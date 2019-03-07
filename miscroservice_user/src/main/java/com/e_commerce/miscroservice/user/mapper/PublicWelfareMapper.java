@@ -2,14 +2,13 @@ package com.e_commerce.miscroservice.user.mapper;
 
 import com.e_commerce.miscroservice.user.vo.WelfareParamView;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
 
 @Mapper
-@Component
 public interface PublicWelfareMapper {
 
     /**
      * 获取年度公益时
+     *
      * @param param
      * @return
      */
