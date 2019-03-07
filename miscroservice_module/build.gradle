@@ -41,6 +41,8 @@ dependencies {
     compile "org.springframework:spring-context:${springVersion}"
     compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
     compile group: 'com.netflix.eureka', name: 'eureka-client', version: '1.9.4'
+    compile group: 'com.netflix.archaius', name: 'archaius-core', version: '0.7.6'
+
 
 
 
