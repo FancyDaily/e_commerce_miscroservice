@@ -23,6 +23,8 @@ public class MybatisPlugConfig {
 
     @Bean(initMethod = "init")
     public DbHandler createDbHandler(DataSource dataSource) {
+
+
         DbHandler dbHandler = new DbHandler();
         dbHandler.setIsCamel(Boolean.TRUE);
         dbHandler.setAlwaysDrop(Boolean.FALSE);

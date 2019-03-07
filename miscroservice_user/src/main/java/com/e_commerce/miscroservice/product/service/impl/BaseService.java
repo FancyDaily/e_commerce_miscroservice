@@ -41,6 +41,10 @@ public class BaseService {
 	 */
 	protected Integer IS_COMPANY_ACCOUNT_YES = 1;
 	/**
+	 * 是公益组织
+	 */
+	protected String IS_PUBLIC_WELFARE_YES = "2";
+	/**
 	 * 用户类型为公益组织
 	 */
 	protected String USER_TYPE_ORGANIZATION = "2";

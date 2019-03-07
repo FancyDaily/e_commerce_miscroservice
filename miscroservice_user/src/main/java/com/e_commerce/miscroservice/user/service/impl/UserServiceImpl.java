@@ -384,6 +384,30 @@ public class UserServiceImpl implements UserService {
         return userDao.selectByPrimaryKey(userId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    public void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
+        //跟新用户冻结信息
+        TUser tUser = userDao.selectByPrimaryKey(userId);
+        tUser.setFreezeTime(tUser.getFreezeTime() + freeTime);
+        userDao.updateByPrimaryKey(tUser);
+        //创建用户冻结记录
+        TUserFreeze userFreeze = new TUserFreeze();
+        userFreeze.setId(idGenerator.nextId());
+        userFreeze.setUserId(userId);
+        userFreeze.setOrderId(serviceId);
+        userFreeze.setServiceName(serviceName);
+        userFreeze.setFreezeTime(freeTime); // 冻结金额
+        userFreeze.setCreateTime(System.currentTimeMillis());
+        userFreeze.setCreateUser(userId);
+        userFreeze.setCreateUserName(tUser.getName());
+        userFreeze.setUpdateTime(System.currentTimeMillis());
+        userFreeze.setUpdateUser(userId);
+        userFreeze.setUpdateUserName(tUser.getName());
+        userFreeze.setIsValid(AppConstant.IS_VALID_YES);
+        userFreezeDao.insert(userFreeze);
+    }
+
     private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
         Long userId = user.getId();
         // 非空校验 必要元素：技能名称、封面图、id

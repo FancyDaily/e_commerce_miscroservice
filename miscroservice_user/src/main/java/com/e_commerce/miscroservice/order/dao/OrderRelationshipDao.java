@@ -4,6 +4,9 @@ import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationshi
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 
+import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.github.pagehelper.Page;
+
 import java.util.List;
 
 /**
@@ -85,7 +88,7 @@ public interface OrderRelationshipDao {
      * @param statusList
      * @return
      */
-    List<TOrderRelationship> selectListByStatusListByEnroll(Long orderId , List<Integer> statusList);
+    List<TOrderRelationship> selectListByStatusList(Long orderId , List<Integer> statusList);
     /**
      * 根据orderId和status来查询未开始（签到）报名者订单List
      * @param orderId
@@ -106,5 +109,21 @@ public interface OrderRelationshipDao {
      * @param statusList
      * @return
      */
+    long selectCountByStatusList(Long orderId , List<Integer> statusList);
+    /**
+     * 根据用户id来查询订单关系List
+     * @param userId
+     * @return
+     */
+    List<TOrderRelationship> selectByUserId(Long userId);
+
+    /**
+     * 分页报名和选人列表
+     * @param pageNum 分页页数
+     * @param pageSize 每页数量
+     * @param userId 当前用户id
+     * @return
+     */
+	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
     long selectCountByStatusListByEnroll(Long orderId , List<Integer> statusList);
 }

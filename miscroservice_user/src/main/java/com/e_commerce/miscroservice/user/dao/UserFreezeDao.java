@@ -15,4 +15,10 @@ public interface UserFreezeDao {
      * @return
      */
     List<TUserFreeze> queryUserFreeze(Long userId, Long lastTime, MybatisSqlWhereBuild.ORDER order);
+
+    /**
+     * 插入用户冻结记录
+     * @param userFreeze
+     */
+    int insert(TUserFreeze userFreeze);
 }

@@ -9,4 +9,6 @@ public interface UserDao {
     TUser selectByPrimaryKey(Long id);
 
     List<TUser> queryByIds(List<Long> idList);
+
+	int updateByPrimaryKey(TUser tUser);
 }

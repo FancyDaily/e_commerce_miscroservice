@@ -58,4 +58,10 @@ public class ProductDaoImpl implements ProductDao {
 		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
 				.in(TServiceDescribe::getServiceId, productIds));
 	}
+
+	@Override
+	public List<TServiceDescribe> getProductDesc(Long serviceId) {
+		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+				.eq(TServiceDescribe::getServiceId, serviceId));
+	}
 }

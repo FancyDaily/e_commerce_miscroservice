@@ -27,4 +27,9 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(order, TUserFreeze::getCreateTime));
     }
+
+    @Override
+    public int insert(TUserFreeze userFreeze) {
+        return MybatisOperaterUtil.getInstance().save(userFreeze);
+    }
 }

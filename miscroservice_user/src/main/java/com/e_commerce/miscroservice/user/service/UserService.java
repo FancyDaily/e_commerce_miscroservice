@@ -66,4 +66,13 @@ public interface UserService {
      * @return
      */
     TUser getUserbyId(Long userId);
+
+    /**
+     * 冻结用户时间币
+     * @param userId 用户id
+     * @param freeTime 要冻结的时间币
+     * @param serviceId 商品ID
+     * @param serviceName 商品名称
+     */
+	void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName);
 }

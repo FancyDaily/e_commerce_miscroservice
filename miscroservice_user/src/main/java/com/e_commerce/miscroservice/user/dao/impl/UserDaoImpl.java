@@ -38,6 +38,12 @@ public class UserDaoImpl implements UserDao {
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
     }
 
+    @Override
+    public int updateByPrimaryKey(TUser tUser) {
+        return MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+                .eq(TUser::getId,tUser.getId()));
+    }
+
 }
 
 
