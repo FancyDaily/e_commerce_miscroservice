@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.order.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 
 import java.util.List;
@@ -37,6 +36,12 @@ public interface OrderDao {
      */
     int updateByPrimaryKey(TOrder order);
 
+	/**
+	 * 根据order的ids查询出多个order
+	 * @param orderIds 要查询的订单IDs
+	 * @return
+	 */
+	List<TOrder> selectOrderByOrderIds(List<Long> orderIds);
     /**
      * 分页查询首页订单列表
      *

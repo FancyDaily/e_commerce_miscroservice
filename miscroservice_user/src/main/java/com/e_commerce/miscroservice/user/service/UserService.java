@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
 import com.e_commerce.miscroservice.user.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserSkillListView;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -102,4 +104,7 @@ public interface UserService {
      * @return
      */
     QueryResult historyService(TUser user, Long userId, Integer pageNum, Integer pageSize);
+
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName);
 }

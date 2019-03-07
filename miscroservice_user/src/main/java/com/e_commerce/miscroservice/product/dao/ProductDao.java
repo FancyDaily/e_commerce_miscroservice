@@ -52,4 +52,11 @@ public interface ProductDao {
 	 * @return 商品详情的list
 	 */
 	List<TServiceDescribe> getListProductDesc(List<Long> productIds);
+
+	/**
+	 * 获取商品详情
+	 * @param serviceId 商品ID
+	 * @return 详情list（多张图片多个desc）
+	 */
+	List<TServiceDescribe> getProductDesc(Long serviceId);
 }

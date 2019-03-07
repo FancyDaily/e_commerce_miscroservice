@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.order.vo;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.product.vo.BaseUserView;
 import lombok.Data;
 

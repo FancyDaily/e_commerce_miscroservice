@@ -47,6 +47,8 @@ public class TOrder implements Serializable {
 
     private Integer openAuth;
 
+    private Integer timeType;
+
     private Long collectTime;
 
     private Integer collectType;
@@ -243,6 +245,14 @@ public class TOrder implements Serializable {
 
     public void setOpenAuth(Integer openAuth) {
         this.openAuth = openAuth;
+    }
+
+    public Integer getTimeType() {
+        return timeType;
+    }
+
+    public void setTimeType(Integer timeType) {
+        this.timeType = timeType;
     }
 
     public Long getCollectTime() {
