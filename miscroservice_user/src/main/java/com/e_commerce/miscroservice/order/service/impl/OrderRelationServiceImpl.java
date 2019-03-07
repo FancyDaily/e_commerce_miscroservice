@@ -19,7 +19,9 @@ import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
+import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.e_commerce.miscroservice.user.controller.UserController;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -53,7 +55,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     private OrderDao orderDao;
 
     @Autowired
-    private UserController userController;
+    private UserCommonController userCommonController;
 
 
     /**
@@ -68,7 +70,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public long enroll(Long orderId, Long userId , String date, Long serviceId , Long orderRelationServiceId) throws ParseException {
-        TUser nowUser = userController.getUserById(userId);
+        TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
         String errorMsg = canEnroll(nowUser , orderRelationServiceId , date , serviceId , orderId , nowTime);
         if (!errorMsg.isEmpty()){
@@ -80,9 +82,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()){
             //如果是服务
             long canUseTime = nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime();
-            /*if (canUseTime < order.getcollectTime){
+            if (canUseTime < order.getCollectTime()){
                 throw new MessageException("499", "对不起，余额不足 不可以报名");
-            }*/
+            }
             //TODO 冻结时间（要看一下是不是有可以复用的，，没有新增）
             //TODO 修改用户表的冻结字段
         }
@@ -100,7 +102,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     public void removeEnroll(Long orderId , TUser nowUser){
         long nowTime = System.currentTimeMillis();
         TOrderRelationship orderRelationship = null;
-        //orderRelationship = orderRelationshipDao.selectByOrderIdAndEnrollUserId(orderId,nowUser.getId());
+        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId,nowUser.getId());
         if (orderRelationship == null){
             //如果订单关系表为空
             throw new MessageException("499", "异常，该订单没有您参与信息，请后退重试");
@@ -334,25 +336,58 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , userIdList.get(0));
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
         }
+        long seekHelpDoneNum = userIdList.size() - msg.size();
         //解冻时间币，解冻数量是支付成功人数量*时间币单价
         //unFreezeTime(orderRelationship.getCollectTime() , nowTime , nowUser); TODO 暂时标注
         //List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList();
         return msg;
     }
-    private List<String> payOrderPri(TOrderRelationship orderRelationship , Long payment , TUser nowUser , long nowTime , TUser toUser){
-        List<String> msg = new ArrayList<>();
+    private String payOrderPri(TOrderRelationship orderRelationship , Long payment , TUser nowUser , long nowTime , TUser toUser){
+        String msg = null;
+        if (orderRelationship.getStatus() != OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()){
+            msg = "支付失败：用户"+toUser.getName()+"状态无法支付";
+            return msg;
+        }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()){
+            //如果用户被投诉
+            msg = "支付失败：用户"+toUser.getName()+"已对您发起投诉";
+        }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()){
+            //如果用户被投诉
+            msg = "支付失败：用户"+toUser.getName()+"已被您投诉";
+        }
         orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        //被支付用户增加时间币
+        if (toUser.getServeNum() + toUser.getSeekHelpNum() == 0){
+            //如果是首次完成互助
+            //TODO 奖励互助时 增加成长值
+        }
         toUser.setSurplusTime(toUser.getSurplusTime() + payment);
         toUser.setUpdateUserName(nowUser.getName());
         toUser.setUpdateUser(nowUser.getId());
         toUser.setUpdateTime(nowTime);
-        //TODO 更新user
+        toUser.setServeNum(toUser.getServeNum()+1);
+        userCommonController.updateByPrimaryKey(toUser);
+
+        //插入支付流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
         userTimeRecord.setId(snowflakeIdWorker.nextId());
         userTimeRecord.setUserId(toUser.getId());
         userTimeRecord.setFromUserId(nowUser.getId());
         userTimeRecord.setType(1);
         userTimeRecord.setTargetId(orderRelationship.getOrderId());
+        userTimeRecord.setTime(orderRelationship.getCollectTime());
+        userTimeRecord.setCreateUser(nowUser.getId());
+        userTimeRecord.setCreateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setUpdateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setIsValid("1");
+        //TODO insert 支付表
+        //TODO 发送系统通知
+        //TODO 插入成长值
+        //插入服务记录
+
         return msg;
     }
 /*    public List<UserInfoView> startUserList(Long orderId){
@@ -550,7 +585,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
      * @return java.lang.String
      **/
     public String test(Long userId , long orderRelationshipId){
-        TUser user = userController.getUserById(userId);
+        TUser user = userCommonController.getUserById(userId);
         TOrderRelationship orderRelationship = orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
         orderRelationship.setCreateUserName(user.getName());
         orderRelationshipDao.updateByPrimaryKey(orderRelationship);
