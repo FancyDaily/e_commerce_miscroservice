@@ -25,6 +25,10 @@ public class TUser implements Serializable {
 
     private String occupation;
 
+    private String workPlace;
+
+    private String college;
+
     private Integer age;
 
     private Long birthday;
@@ -46,6 +50,10 @@ public class TUser implements Serializable {
     private Integer seekHelpNum;
 
     private Integer serveNum;
+
+    private Integer seekHelpDoneNum;
+
+    private Integer serveDoneNum;
 
     private Long surplusTime;
 
@@ -195,6 +203,22 @@ public class TUser implements Serializable {
         this.occupation = occupation == null ? null : occupation.trim();
     }
 
+    public String getWorkPlace() {
+        return workPlace;
+    }
+
+    public void setWorkPlace(String workPlace) {
+        this.workPlace = workPlace == null ? null : workPlace.trim();
+    }
+
+    public String getCollege() {
+        return college;
+    }
+
+    public void setCollege(String college) {
+        this.college = college == null ? null : college.trim();
+    }
+
     public Integer getAge() {
         return age;
     }
@@ -281,6 +305,22 @@ public class TUser implements Serializable {
 
     public void setServeNum(Integer serveNum) {
         this.serveNum = serveNum;
+    }
+
+    public Integer getSeekHelpDoneNum() {
+        return seekHelpDoneNum;
+    }
+
+    public void setSeekHelpDoneNum(Integer seekHelpDoneNum) {
+        this.seekHelpDoneNum = seekHelpDoneNum;
+    }
+
+    public Integer getServeDoneNum() {
+        return serveDoneNum;
+    }
+
+    public void setServeDoneNum(Integer serveDoneNum) {
+        this.serveDoneNum = serveDoneNum;
     }
 
     public Long getSurplusTime() {
