@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.order.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
+import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
