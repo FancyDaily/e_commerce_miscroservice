@@ -55,30 +55,30 @@ public class OrderDaoImpl implements OrderDao {
         if (isService) {
             result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                     .groupBefore()
-                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT)
-                    .and().eq(TOrder::getStatus, OrderEnum.STATUS_END).groupAfter().or()
+                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue()).groupAfter().or()
                     .groupBefore()
-                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL)
-                    .and().in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
-                    .groupAfter().and()
+                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+                    .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+                    .groupAfter()
                     .eq(TOrder::getCreateUser, userId)
-                    .eq(TOrder::getType, ProductEnum.TYPE_SERVICE)
+                    .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                    .orderBy(MybatisSqlWhereBuild.ORDER.DESC, TOrder::getCreateTime) //TODO status ASC
+                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime)) //TODO status ASC
             );
         } else {
             result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                     .groupBefore()
-                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT)
-                    .and().eq(TOrder::getStatus, OrderEnum.STATUS_END).groupAfter().or()
+                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue()).groupAfter().or()
                     .groupBefore()
-                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL)
-                    .and().in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
-                    .groupAfter().and()
+                    .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+                    .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+                    .groupAfter()
                     .eq(TOrder::getCreateUser, userId)
-                    .eq(TOrder::getType, ProductEnum.TYPE_SERVICE)
+                    .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                    .orderBy(MybatisSqlWhereBuild.ORDER.DESC, TOrder::getCreateTime)
+                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
             );
         }
         return result;
@@ -121,6 +121,6 @@ public class OrderDaoImpl implements OrderDao {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                 .eq(TOrder::getCreateUser, userId)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC, TOrder::getCreateTime));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime)));
     }
 }

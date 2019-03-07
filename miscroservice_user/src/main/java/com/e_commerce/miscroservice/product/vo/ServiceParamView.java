@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.product.vo;
 
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import lombok.Data;
 
 import java.util.List;

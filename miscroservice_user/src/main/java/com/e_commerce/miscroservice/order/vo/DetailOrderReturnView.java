@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.order.vo;
 
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.vo.BaseUserView;
 import lombok.Data;
 

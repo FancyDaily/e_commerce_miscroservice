@@ -22,7 +22,7 @@ public class UserSkillDaoImpl implements UserSkillDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserSkill(),new MybatisSqlWhereBuild(TUserSkill.class)
                 .eq(TUserSkill::getUserId,userId)
                 .eq(TUserSkill::getIsValid, AppConstant.IS_VALID_YES).
-                        orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserSkill::getCreateTime));
+                        orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserSkill::getCreateTime)));
     }
 
     /**

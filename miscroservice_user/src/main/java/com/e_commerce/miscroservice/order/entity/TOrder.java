@@ -9,7 +9,11 @@ public class TOrder implements Serializable {
 
     private Long mainId;
 
+    private String nameAudioUrl;
+
     private String serviceName;
+
+    private Integer serveNum;
 
     private Integer servicePlace;
 
@@ -21,6 +25,8 @@ public class TOrder implements Serializable {
 
     private Integer source;
 
+    private Long serviceTypeId;
+
     private String addressName;
 
     private Double longitude;
@@ -31,9 +37,21 @@ public class TOrder implements Serializable {
 
     private Integer enrollNum;
 
+    private Integer confirmNum;
+
     private Long startTime;
 
     private Long endTime;
+
+    private Integer serviceStatus;
+
+    private Integer openAuth;
+
+    private Integer timeType;
+
+    private Long collectTime;
+
+    private Integer collectType;
 
     private Long createUser;
 
@@ -77,12 +95,28 @@ public class TOrder implements Serializable {
         this.mainId = mainId;
     }
 
+    public String getNameAudioUrl() {
+        return nameAudioUrl;
+    }
+
+    public void setNameAudioUrl(String nameAudioUrl) {
+        this.nameAudioUrl = nameAudioUrl == null ? null : nameAudioUrl.trim();
+    }
+
     public String getServiceName() {
         return serviceName;
     }
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName == null ? null : serviceName.trim();
+    }
+
+    public Integer getServeNum() {
+        return serveNum;
+    }
+
+    public void setServeNum(Integer serveNum) {
+        this.serveNum = serveNum;
     }
 
     public Integer getServicePlace() {
@@ -125,6 +159,14 @@ public class TOrder implements Serializable {
         this.source = source;
     }
 
+    public Long getServiceTypeId() {
+        return serviceTypeId;
+    }
+
+    public void setServiceTypeId(Long serviceTypeId) {
+        this.serviceTypeId = serviceTypeId;
+    }
+
     public String getAddressName() {
         return addressName;
     }
@@ -165,6 +207,14 @@ public class TOrder implements Serializable {
         this.enrollNum = enrollNum;
     }
 
+    public Integer getConfirmNum() {
+        return confirmNum;
+    }
+
+    public void setConfirmNum(Integer confirmNum) {
+        this.confirmNum = confirmNum;
+    }
+
     public Long getStartTime() {
         return startTime;
     }
@@ -179,6 +229,46 @@ public class TOrder implements Serializable {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getServiceStatus() {
+        return serviceStatus;
+    }
+
+    public void setServiceStatus(Integer serviceStatus) {
+        this.serviceStatus = serviceStatus;
+    }
+
+    public Integer getOpenAuth() {
+        return openAuth;
+    }
+
+    public void setOpenAuth(Integer openAuth) {
+        this.openAuth = openAuth;
+    }
+
+    public Integer getTimeType() {
+        return timeType;
+    }
+
+    public void setTimeType(Integer timeType) {
+        this.timeType = timeType;
+    }
+
+    public Long getCollectTime() {
+        return collectTime;
+    }
+
+    public void setCollectTime(Long collectTime) {
+        this.collectTime = collectTime;
+    }
+
+    public Integer getCollectType() {
+        return collectType;
+    }
+
+    public void setCollectType(Integer collectType) {
+        this.collectType = collectType;
     }
 
     public Long getCreateUser() {

@@ -155,7 +155,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId , orderId)
                         .in(TOrderRelationship::getStatus , statusList)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime));
+                        //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+        );
         return  orderRelationshipList;
     }
     /**
@@ -171,7 +172,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getStatus , status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
                         //.eq(TOrderRelationship::gets) TODO 实体类更新了之后 查签到状态未签到的
-                        .orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime));
+                        //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+        );
         return  orderRelationshipList;
     }
     /**
@@ -186,7 +188,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId , orderId)
                         .eq(TOrderRelationship::getStatus , status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime));
+                        //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+        );
         return  orderRelationshipList;
     }
     /**

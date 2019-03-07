@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
+import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.e_commerce.miscroservice.user.controller.UserController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,7 +54,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     private OrderDao orderDao;
 
     @Autowired
-    private UserController userController;
+    private UserCommonController userController;
 
 
     /**

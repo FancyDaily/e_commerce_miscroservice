@@ -1,9 +1,9 @@
 package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.order.po.TOrder;
+import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
