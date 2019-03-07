@@ -1,12 +1,12 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
-import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;

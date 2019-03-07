@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
  * 创建时间:2018/10/30 上午10:50
  */
 @Data
-public class ServiceParamView {
+public class ServiceParamView implements Serializable {
     /**
      * 求助服务
      */
@@ -30,9 +31,4 @@ public class ServiceParamView {
     private List<TServiceDescribe> listServiceDescribe;
     
     private String token;
-    /**
-     * 区分发布时候是个人发布还是组织发布的发布类型（组织发布为2，个人小程序暂时不传该参数）
-     */
-    private Integer publishType;
-    
 }
