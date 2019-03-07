@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * 用户
+ *
+ */
 @RestController
 @RequestMapping("api/v2/user")
 public class UserController extends BaseController {
@@ -274,6 +278,7 @@ public class UserController extends BaseController {
 
     /**
      * 查看个人主页(基本信息、技能列表、提供的服务、提供的求助)
+     *
      * @param token
      * @return
      */
@@ -300,6 +305,7 @@ public class UserController extends BaseController {
 
     /**
      * 查看发布的服务/求助列表
+     *
      * @param token
      * @param userId
      * @param pageNum
@@ -330,6 +336,7 @@ public class UserController extends BaseController {
 
     /**
      * 历史互助记录
+     *
      * @param token
      * @param userId
      * @param pageNum
