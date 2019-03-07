@@ -7,7 +7,7 @@
         <result column="main_id" jdbcType="BIGINT" property="mainId" />
         <result column="name_audio_url" jdbcType="VARCHAR" property="nameAudioUrl" />
         <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
-        <result column="service_num" jdbcType="INTEGER" property="serviceNum" />
+        <result column="serve_num" jdbcType="INTEGER" property="serveNum" />
         <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
         <result column="labels" jdbcType="VARCHAR" property="labels" />
         <result column="type" jdbcType="INTEGER" property="type" />
