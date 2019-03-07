@@ -24,6 +24,7 @@
         <result column="end_time" jdbcType="BIGINT" property="endTime" />
         <result column="service_status" jdbcType="INTEGER" property="serviceStatus" />
         <result column="open_auth" jdbcType="INTEGER" property="openAuth" />
+        <result column="time_type" jdbcType="INTEGER" property="timeType" />
         <result column="collect_time" jdbcType="BIGINT" property="collectTime" />
         <result column="collect_type" jdbcType="INTEGER" property="collectType" />
         <result column="create_user" jdbcType="BIGINT" property="createUser" />
