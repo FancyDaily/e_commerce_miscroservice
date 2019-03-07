@@ -240,7 +240,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     public List<String> chooseUser(Long orderId , TUser nowUser , List<Long> userIdList){
         List<Integer> statusList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        long canChooseUserSum = order.getServiceNum() - order.getConfirmNum();
+        long canChooseUserSum = order.getServeNum() - order.getConfirmNum();
         int chooseUserSum = 0;
         if (userIdList.size() > canChooseUserSum){
             throw new MessageException("499", "对不起，您最多可选"+canChooseUserSum+"人");
