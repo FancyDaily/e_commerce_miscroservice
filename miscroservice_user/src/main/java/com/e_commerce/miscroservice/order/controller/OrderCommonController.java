@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class OrderCommonController extends BaseController {
 
     @Autowired
     private OrderRelationshipDao orderRelationshipDao;
+
+    @Autowired
+    private OrderDao orderDao;
 
     /**
      * 根据service派生订单 供其他模块调用
@@ -168,4 +172,12 @@ public class OrderCommonController extends BaseController {
         return orderRelationshipDao.selectByUserId(userId);
     }
 
+    /**
+     * 根据用户id获取订单列表
+     * @param userId
+     * @return
+     */
+    public List<TOrder> selectOdersByUserId(Long userId) {
+        return orderDao.selectByUserId(userId);
+    }
 }

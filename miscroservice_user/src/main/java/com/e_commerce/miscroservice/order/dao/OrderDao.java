@@ -38,4 +38,11 @@ public interface OrderDao {
 	 * @return
 	 */
 	List<TOrder> pageOrder(PageOrderParamView param);
+
+	/**
+	 * 根据userId查找订单列表
+	 * @param userId
+	 * @return
+	 */
+	List<TOrder> selectByUserId(Long userId);
 }
