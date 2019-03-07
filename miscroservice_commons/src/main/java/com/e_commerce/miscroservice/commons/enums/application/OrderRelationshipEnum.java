@@ -120,6 +120,14 @@ public enum OrderRelationshipEnum {
      * 商品类型为服务 类型值为2
      */
     SERVICE_TYPE_SERV(2,"服务"),
+    /**
+     * 订单关系状态为未签到，默认状态  状态值为0
+     */
+    SIGN_TYPE_NO(0 , "未签到"),
+    /**
+     * 订单关系状态为已签到，开始后这样  状态值为1
+     */
+    SIGN_TYPE_YES(1 , "已签到"),
     ;
 
     private String value;
