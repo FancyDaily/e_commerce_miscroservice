@@ -71,7 +71,8 @@ public class OrderController extends BaseController {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
 		try {
-			DetailOrderReturnView data = orderService.orderDetail(orderId, user);
+//			DetailOrderReturnView data = orderService.orderDetail(orderId, user);
+			DetailOrderReturnView data = null;
 			result.setSuccess(true);
 //			result.setData(data);
 			result.setMsg("获取详情成功");
