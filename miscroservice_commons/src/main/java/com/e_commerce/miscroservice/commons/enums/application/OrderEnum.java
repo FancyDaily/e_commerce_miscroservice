@@ -2,7 +2,12 @@ package com.e_commerce.miscroservice.commons.enums.application;
 
 public enum OrderEnum {
 
+	TIME_TYPE_NORMAL(0,"指定时间"),
+	TIME_TYPE_REPEAT(1,"可重复"),
+
+	STATUS_END(2,"结束"),
 	STATUS_NORMAL(1, "正常产出的订单状态");
+
 
 	private int value;
 	private String desc;
