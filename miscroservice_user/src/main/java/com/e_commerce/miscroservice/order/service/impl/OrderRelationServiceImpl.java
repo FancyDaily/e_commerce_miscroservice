@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import sun.util.resources.cldr.gv.LocaleNames_gv;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,7 +24,7 @@ import java.util.List;
 
 
 /**
- * 
+ *
  * 功能描述:
  * 模块:
  * 项目:时间银行
@@ -38,49 +39,55 @@ import java.util.List;
 public class OrderRelationServiceImpl implements OrderRelationService {
 
 
-	Log logger = Log.getInstance(OrderRelationServiceImpl.class);
+    Log logger = Log.getInstance(com.e_commerce.miscroservice.order.service.impl.OrderRelationServiceImpl.class);
 
     private SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
-	@Autowired
-	private OrderRelationshipDao orderRelationshipDao;
+    @Autowired
+    private OrderRelationshipDao orderRelationshipDao;
 
     @Autowired
     private OrderDao orderDao;
 
     @Autowired
-    private UserCommonController userController;
+    private UserCommonController userCommonController;
 
 
     /**
      * 报名
+     *
      * @param orderId
      * @param userId
      * @param date
      * @param serviceId
-     * @param orderRelationServiceId
-     * @return
+     * @return¶
      * @throws ParseException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-    public long enroll(Long orderId, Long userId , String date, Long serviceId , Long orderRelationServiceId) throws ParseException {
-        TUser nowUser = userController.getUserById(userId);
+    public long enroll(Long orderId, Long userId, String date, Long serviceId) throws ParseException {
+        TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
-        String errorMsg = canEnroll(nowUser , orderRelationServiceId , date , serviceId , orderId , nowTime);
-        if (!errorMsg.isEmpty()){
+        String errorMsg = canEnroll(nowUser, date, serviceId, orderId, nowTime);
+        if (errorMsg != null) {
             //如果错误消息不为空，说明该用户有部分问题不允许报名，抛出错误信息
             throw new MessageException("499", errorMsg);
         }
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        helpEnroll(order,nowUser,date,nowTime,serviceId);
-        if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()){
+        helpEnroll(order, nowUser, date, nowTime, serviceId);
+        if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务
             long canUseTime = nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime();
-            /*if (canUseTime < order.getcollectTime){
+            if (canUseTime < order.getCollectTime()) {
                 throw new MessageException("499", "对不起，余额不足 不可以报名");
-            }*/
+            }
             //TODO 冻结时间（要看一下是不是有可以复用的，，没有新增）
-            //TODO 修改用户表的冻结字段
+            //修改用户表的冻结字段
+            nowUser.setFreezeTime(nowUser.getFreezeTime() + order.getCollectTime());
+            nowUser.setUpdateTime(nowTime);
+            nowUser.setUpdateUser(nowUser.getId());
+            nowUser.setUpdateUserName(nowUser.getName());
+            userCommonController.updateByPrimaryKey(nowUser);
+
         }
         order.setEnrollNum(order.getEnrollNum() + 1);
         orderDao.updateByPrimaryKey(order);
@@ -90,28 +97,30 @@ public class OrderRelationServiceImpl implements OrderRelationService {
 
     /**
      * 取消报名
+     *
      * @param orderId
-     * @param nowUser
+     * @param nowUserId
      */
-    public void removeEnroll(Long orderId , TUser nowUser){
+    public void removeEnroll(Long orderId, Long nowUserId) {
         long nowTime = System.currentTimeMillis();
+        TUser nowUser = userCommonController.getUserById(nowUserId);
         TOrderRelationship orderRelationship = null;
-        //orderRelationship = orderRelationshipDao.selectByOrderIdAndEnrollUserId(orderId,nowUser.getId());
-        if (orderRelationship == null){
+        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUser.getId());
+        if (orderRelationship == null) {
             //如果订单关系表为空
             throw new MessageException("499", "异常，该订单没有您参与信息，请后退重试");
         }
-        if (!orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())){
+        if (!orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())) {
             //如果订单关系表状态不为待确认
             throw new MessageException("499", "异常，该订单没有您报名信息，请后退重试");
         }
         orderRelationship.setStatus(OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType());
         orderRelationship.setUpdateTime(nowTime);
         orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-        if (orderRelationship.getServiceType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()){
+        if (orderRelationship.getServiceType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务，那么取消报名要解冻时间币
             //TODO 解冻时间币（根据用户和订单编号找出该冻结信息，然后修改更新）
-            unFreezeTime(orderRelationship.getCollectTime() , nowTime , nowUser);
+            unFreezeTime(orderRelationship.getCollectTime(), nowTime, nowUser);
 
         }
 
@@ -119,39 +128,41 @@ public class OrderRelationServiceImpl implements OrderRelationService {
 
     /**
      * 根据状态来查询所有未被操作的人的列表
+     *
      * @param orderId
      * @param type
-     * @param nowUser
+     * @param nowUserId
      * @return
      */
-    public  List<UserInfoView> userListByPperation(Long orderId , int type , TUser nowUser){
+    public List<UserInfoView> userListByPperation(Long orderId, int type, Long nowUserId) {
         List<Integer> statusList = new ArrayList<>();
+        TUser nowUser = userCommonController.getUserById(nowUserId);
         List<TOrderRelationship> orderRelationshipList = new ArrayList<>();
-        if (type == 1){
+        if (type == 1) {
             //状态1代表要查询选人列表
             orderRelationshipList = orderRelationshipDao.selectListByStatusByEnroll(orderId
                     , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
         }
-        if (type == 2){
+        if (type == 2) {
             //状态2代表开始
             orderRelationshipList = orderRelationshipDao.selectListByStatusForNotSignByEnroll(orderId
                     , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         }
-        if (type == 7){
+        if (type == 7) {
             //状态为7代表支付
             orderRelationshipList = orderRelationshipDao.selectListByStatusByEnroll(orderId
                     , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         }
-        if (type == 9){
-            TOrder order = new TOrder();//TODO
+        if (type == 9) {
+            TOrder order = orderDao.selectByPrimaryKey(orderId);
             //默认是服务者 找求助者评价服务者未评价
             statusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
             statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
             boolean isPublish = false;
-            if (order.getCreateUser() == nowUser.getId().longValue()){
+            if (order.getCreateUser() == nowUser.getId().longValue()) {
                 isPublish = true;
             }
-            if ((order.getType() == 1 && isPublish) || (order.getType() == 2 && !isPublish)){
+            if ((order.getType() == 1 && isPublish) || (order.getType() == 2 && !isPublish)) {
                 //改为求助者-如果是求助的发布者 或者 服务的非发布者
                 statusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
                 statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
@@ -160,14 +171,17 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         List<Long> userIdList = new ArrayList<>();
         List<UserInfoView> userInfoViewList = new ArrayList<>();
-        for (int i = 0 ; i < orderRelationshipList.size() ; i++){
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
             userIdList.add(orderRelationshipList.get(i).getReceiptUserId());
             UserInfoView userInfoView = new UserInfoView();
             userInfoView.setToStringId(orderRelationshipList.get(i).getReceiptUserId());
         }
-        List<TUser> userlist = new ArrayList<TUser>();//TODO 之后根据userdao来查
-        for (int i = 0 ; i < orderRelationshipList.size() ; i++){
-            for (int j = 0 ; j < userlist.size() ; j++) {
+        if (userIdList.size() == 0){
+            return userInfoViewList;
+        }
+        List<TUser> userlist = userCommonController.selectUserByIds(userIdList);
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
+            for (int j = 0; j < userlist.size(); j++) {
                 if (orderRelationshipList.get(i).getReceiptUserId() == userlist.get(j).getId().longValue()) {
                     //匹配到对应用户，数据填充，跳出循环 查找下一个
                     UserInfoView userInfoView = new UserInfoView();
@@ -181,10 +195,10 @@ public class OrderRelationServiceImpl implements OrderRelationService {
                     }
                     if (type == 7) {
                         //如果是是支付，还要看一下未到人员
-                        /*if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()) {
+                        if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()) {
                             //如果是未签到，将状态置为未到
                             userInfoView.setStatus(3);
-                        }*/
+                        }
                     }
                     userInfoViewList.add(userInfoView);
                     break;
@@ -194,7 +208,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         return userInfoViewList;
     }
 
- /*   *//**
+    /*   *//**
      * 选人的用户列表
      * @param orderId
      * @return
@@ -227,25 +241,26 @@ public class OrderRelationServiceImpl implements OrderRelationService {
 
     /**
      * 选择用户
+     *
      * @param orderId
      * @param nowUser
      * @param userIdList
      * @return
      */
-    public List<String> chooseUser(Long orderId , TUser nowUser , List<Long> userIdList){
+    public List<String> chooseUser(Long orderId, TUser nowUser, List<Long> userIdList) {
         List<Integer> statusList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         long canChooseUserSum = order.getServeNum() - order.getConfirmNum();
         int chooseUserSum = 0;
-        if (userIdList.size() > canChooseUserSum){
-            throw new MessageException("499", "对不起，您最多可选"+canChooseUserSum+"人");
+        if (userIdList.size() > canChooseUserSum) {
+            throw new MessageException("499", "对不起，您最多可选" + canChooseUserSum + "人");
         }
         List<String> errorMsg = new ArrayList<>();
         List<TUser> userList = new ArrayList<>();
         long nowTime = System.currentTimeMillis();
-        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIdList);
-        for (int i = 0 ; i < orderRelationshipList.size() ; i++){
-            if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()){
+        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
+            if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()) {
                 orderRelationshipList.get(i).setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
                 orderRelationshipList.get(i).setCreateTime(nowTime);
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
@@ -253,15 +268,15 @@ public class OrderRelationServiceImpl implements OrderRelationService {
                 chooseUserSum++;
                 //TODO 发送通知
             } else {
-                for (int j = 0 ; j < userList.size() ; j++ ){
-                    if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId()){
-                        errorMsg.add("用户"+userList.get(j).getName()+"已被您操作");
+                for (int j = 0; j < userList.size(); j++) {
+                    if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId()) {
+                        errorMsg.add("用户" + userList.get(j).getName() + "已被您操作");
                         break;
                     }
                 }
             }
         }
-        if ((canChooseUserSum - chooseUserSum) == 0){
+        if ((canChooseUserSum - chooseUserSum) == 0) {
             //如果选满人了，那么判断是否有下周期的订单，如果有不处理，没有就派生订单
             //TODO 派生订单
         }
@@ -269,44 +284,45 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         order.setConfirmNum(order.getConfirmNum() + chooseUserSum);
         orderDao.updateByPrimaryKey(order);
         //选人了就要吧发布者状态改成待支付
-        TOrderRelationship publisherOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
+        TOrderRelationship publisherOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUser.getId());
         publisherOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         orderRelationshipDao.updateByPrimaryKey(publisherOrderRelationship);
         return errorMsg;
     }
+
     /**
+     * @return java.util.List<java.lang.String>
      * @Author 姜修弘
      * 功能描述:拒绝人选
      * 创建时间:@Date 下午7:48 2019/3/6
      * @Param [orderId, userIdList]
-     * @return java.util.List<java.lang.String>
      **/
-    public List<String> unChooseUser(Long orderId , List<Long> userIdList , TUser nowUser){
-        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIdList);
+    public List<String> unChooseUser(Long orderId, List<Long> userIdList, TUser nowUser) {
+        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
         List<String> errorMsg = new ArrayList<>();
         List<TUser> userList = new ArrayList<>();
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        for (int i = 0 ; i < orderRelationshipList.size() ; i++){
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
             TUser toUser = new TUser();
-            for (int j = 0 ; j < userList.size() ; j++ ){
-                if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId()){
+            for (int j = 0; j < userList.size(); j++) {
+                if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId()) {
                     toUser = userList.get(j);
                     break;
                 }
             }
-            if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()){
+            if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()) {
                 orderRelationshipList.get(i).setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
                 orderRelationshipList.get(i).setCreateTime(nowTime);
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 //TODO 发送通知
-                if (order.getType() == 2){
+                if (order.getType() == 2) {
                     //如果是服务,解冻时间币
-                    unFreezeTime(order.getCollectTime() , nowTime , toUser);
+                    unFreezeTime(order.getCollectTime(), nowTime, toUser);
                 }
             } else {
-                errorMsg.add("用户"+toUser.getName()+"已被您操作");
+                errorMsg.add("用户" + toUser.getName() + "已被您操作");
             }
         }
         //TODO 批量更新订单关系表
@@ -323,32 +339,107 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     }*/
 
 
-    public List<String> payOrder(Long orderId , List<Long> userIdList , List<Long> paymentList){
-        List<String> msg = new ArrayList<>();
+    /**
+     * @return java.util.List<java.lang.String>
+     * @Author 姜修弘
+     * 功能描述:订单支付
+     * 创建时间:@Date 下午1:41 2019/3/8
+     * @Param [orderId, userIdList, paymentList, nowUser]
+     **/
+    public List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, TUser nowUser) {
+        List<String> msgList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        if (userIdList.size() == 1){
-            TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , userIdList.get(0));
-            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        long nowTime = System.currentTimeMillis();
+        List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
+        if (userIdList.size() == 1) {
+            TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, userIdList.get(0));
+            String msg = payOrderPri(orderRelationship, paymentList.get(0), nowUser, nowTime, toUserList.get(0));
+            if (!msg.isEmpty()) {
+                msgList.add(msg);
+            }
+        } else {
+            //如果是多人，那么这个操作者肯定是发布者，那么就查找报名者即可
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
+
+            for (int i = 0; i < userIdList.size(); i++) {
+                TOrderRelationship orderRelationship = new TOrderRelationship();
+                TUser toUser = new TUser();
+                for (int j = 0; j < orderRelationshipList.size(); j++) {
+                    if (userIdList.get(i) == orderRelationshipList.get(j).getReceiptUserId().longValue()) {
+                        orderRelationship = orderRelationshipList.get(j);
+                        break;
+                    }
+                }
+                for (int j = 0; j < toUserList.size(); j++) {
+                    if (userIdList.get(i) == toUserList.get(j).getId().longValue()) {
+                        toUser = toUserList.get(j);
+                        break;
+                    }
+                }
+                String msg = payOrderPri(orderRelationship, paymentList.get(i), nowUser, nowTime, toUser);
+                if (!msg.isEmpty()) {
+                    msgList.add(msg);
+                }
+            }
         }
+        //支付数量为传入人数量减去错误消息数量
+        long seekHelpDoneNum = userIdList.size() - msgList.size();
+        long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         //解冻时间币，解冻数量是支付成功人数量*时间币单价
         //unFreezeTime(orderRelationship.getCollectTime() , nowTime , nowUser); TODO 暂时标注
         //List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList();
-        return msg;
+        return msgList;
     }
-    private List<String> payOrderPri(TOrderRelationship orderRelationship , Long payment , TUser nowUser , long nowTime , TUser toUser){
-        List<String> msg = new ArrayList<>();
+
+    private String payOrderPri(TOrderRelationship orderRelationship, Long payment, TUser nowUser, long nowTime, TUser toUser) {
+        String msg = null;
+        if (orderRelationship.getStatus() != OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()) {
+            msg = "支付失败：用户" + toUser.getName() + "状态无法支付";
+            return msg;
+        }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()) {
+            //如果用户被投诉
+            msg = "支付失败：用户" + toUser.getName() + "已对您发起投诉";
+            return msg;
+        }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()) {
+            //如果用户发起投诉
+            msg = "支付失败：用户" + toUser.getName() + "已被您投诉";
+            return msg;
+        }
         orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        //被支付用户增加时间币
+        if (toUser.getServeNum() + toUser.getSeekHelpNum() == 0) {
+            //如果是首次完成互助
+            //TODO 奖励互助时 增加成长值
+        }
         toUser.setSurplusTime(toUser.getSurplusTime() + payment);
         toUser.setUpdateUserName(nowUser.getName());
         toUser.setUpdateUser(nowUser.getId());
         toUser.setUpdateTime(nowTime);
-        //TODO 更新user
+        toUser.setServeNum(toUser.getServeNum() + 1);
+        userCommonController.updateByPrimaryKey(toUser);
+
+        //插入支付流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
         userTimeRecord.setId(snowflakeIdWorker.nextId());
         userTimeRecord.setUserId(toUser.getId());
         userTimeRecord.setFromUserId(nowUser.getId());
         userTimeRecord.setType(1);
         userTimeRecord.setTargetId(orderRelationship.getOrderId());
+        userTimeRecord.setTime(orderRelationship.getCollectTime());
+        userTimeRecord.setCreateUser(nowUser.getId());
+        userTimeRecord.setCreateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setUpdateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setIsValid("1");
+        //TODO insert 支付表
+        //TODO 发送系统通知
+        //TODO 插入成长值
+        //TODO 插入服务记录
+
+
         return msg;
     }
 /*    public List<UserInfoView> startUserList(Long orderId){
@@ -375,7 +466,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         return userInfoViewList;
     }*/
-   /* *//**
+    /* *//**
      * @Author 姜修弘
      * 功能描述:支付列表
      * 创建时间:@Date 下午9:45 2019/3/6
@@ -414,16 +505,18 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         return userInfoViewList;
     }*/
+
     /**
      * 解冻时间币
+     *
      * @param unfreezeTime
      * @param nowTime
      * @param nowUser
      */
-    private void unFreezeTime(long unfreezeTime , long nowTime, TUser nowUser){
+    private void unFreezeTime(long unfreezeTime, long nowTime, TUser nowUser) {
         TUserFreeze userFreeze = new TUserFreeze();//TODO 调用冻结dao来查询冻结表
         //TODO nowUser重新查一遍 确保是最新的
-        if (userFreeze == null){
+        if (userFreeze == null) {
             //如果没有冻结信息，说明订单有问题，取消失败
             throw new MessageException("499", "冻结信息表更新失败，请后退刷新重试");
         }
@@ -431,7 +524,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         userFreeze.setUpdateTime(nowTime);
         userFreeze.setUpdateUser(nowUser.getId());
         userFreeze.setUpdateUserName(nowUser.getName());
-        if (userFreeze.getFreezeTime() == 0){
+        if (userFreeze.getFreezeTime() == 0) {
             userFreeze.setIsValid("0");
         }
         //TODO 更新冻结表
@@ -442,39 +535,39 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         nowUser.setUpdateUserName(nowUser.getName());
         //TODO 更新用户表
     }
-	/**
-	 * 
-	 * 功能描述:报名的各种限制
-	 * 作者:姜修弘
-	 * 创建时间:2019年2月25日 下午2:38:44
-	 * @param orderRelationshipId
-	 */
-	private String canEnroll(TUser nowUser , Long orderRelationshipId ,String date , Long serviceId , Long orderId , long nowTime) throws ParseException {
 
-	    String msg = null;
-	    TOrder order = orderDao.selectByPrimaryKey(orderId);//TODO 之后用马晓晨的方法根据serviceId配合日期查出，如果没有就新建一个订单，然后拿过来
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date startDate = simpleDateFormat.parse(date + " 00:00:00");
-		Date endDate = simpleDateFormat.parse(date + " 23:59:59");
-		long startTime = startDate.getTime();
-		long endTime = endDate.getTime();
+    /**
+     * 功能描述:报名的各种限制
+     * 作者:姜修弘
+     * 创建时间:2019年2月25日 下午2:38:44
+     *
+     */
+    private String canEnroll(TUser nowUser, String date, Long serviceId, Long orderId, long nowTime) throws ParseException {
 
-		TOrderRelationship orderRelationship = null;
-		//查询出传入日期是否有参加的订单关系
-		//orderRelationship = orderRelationshipDao.selectByDate(startTime , endTime , serviceId , nowUser.getId());
+        String msg = null;
+        TOrder order = orderDao.selectByPrimaryKey(orderId);//TODO 之后用马晓晨的方法根据serviceId配合日期查出，如果没有就新建一个订单，然后拿过来
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date startDate = simpleDateFormat.parse(date + " 00:00:00");
+        Date endDate = simpleDateFormat.parse(date + " 23:59:59");
+        long startTime = startDate.getTime();
+        long endTime = endDate.getTime();
 
-		if (orderRelationship != null){
-			//如果有参加的订单关系，则不允许报名
-            msg="对不起，您已报名，请勿多次报名";
-            return msg;
-		}
-        if (order.getEndTime().longValue() < nowTime ) {
-            msg="对不起，该项目已经结束，无法报名";
+        TOrderRelationship orderRelationship = null;
+        //查询出传入日期是否有参与的订单关系
+        orderRelationship = orderRelationshipDao.selectOrderRelationshipByJoinIn(orderId , nowUser.getId());
+
+        if (orderRelationship != null) {
+            //如果有参加的订单关系，则不允许报名
+            msg = "对不起，您已报名，请勿多次报名";
             return msg;
         }
-        if (order.getCreateUser() == nowUser.getId().longValue()){
+        if (order.getEndTime().longValue() < nowTime) {
+            msg = "对不起，该项目已经结束，无法报名";
+            return msg;
+        }
+        if (order.getCreateUser() == nowUser.getId().longValue()) {
             // 如果用户报名的是自己的需求
-            msg="对不起，您不能报名自己的求助";
+            msg = "对不起，您不能报名自己的求助";
             return msg;
         }
         if (order.getSource() == 2) {
@@ -483,17 +576,18 @@ public class OrderRelationServiceImpl implements OrderRelationService {
                 //TODO 调用许方毅 是否是组内成员
                 if (false) {
                     // 不属于组织成员
-                    msg="对不起，该互助仅允许组织内成员报名，您非组织内成员，无法报名";
+                    msg = "对不起，该互助仅允许组织内成员报名，您非组织内成员，无法报名";
                     return msg;
                 }
             }
         }
         return msg;
 
-	}
+    }
 
     /**
      * 求助报名
+     *
      * @param order
      * @param nowUser
      * @param date
@@ -501,9 +595,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
      * @param serviceId
      * @return
      */
-    private long helpEnroll(TOrder order, TUser nowUser , String date , long nowTime , Long serviceId) {
+    private long helpEnroll(TOrder order, TUser nowUser, String date, long nowTime, Long serviceId) {
         TOrderRelationship orderRelationship = null;
-        //orderRelationship = orderRelationshipDao.selectByOrderIdAndEnrollUserId(order.getId(), nowUser.getId());
+        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(order.getId(), nowUser.getId());
         if (orderRelationship != null) {
             //如果订单ID非空，说明以前有取消被取消等等状态，将原订单复用
             orderRelationship.setUpdateTime(nowTime);
@@ -512,6 +606,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             orderRelationship.setUpdateUserName(nowUser.getName());
             orderRelationshipDao.updateByPrimaryKey(orderRelationship);
         } else {
+            orderRelationship=new TOrderRelationship();
             //没有可以复用的订单关系，那么就新建订单关系
             orderRelationship.setId(snowflakeIdWorker.nextId());
             orderRelationship.setServiceId(serviceId);
@@ -526,7 +621,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             orderRelationship.setServiceName(order.getServiceName());
             orderRelationship.setStartTime(order.getStartTime());
             orderRelationship.setEndTime(order.getEndTime());
-            //TODO 等马晓晨加完字段再该那个两三个
+            orderRelationship.setTimeType(order.getTimeType());
+            orderRelationship.setCollectTime(order.getCollectTime());
+            orderRelationship.setCollectType(order.getCollectType());
             orderRelationship.setCreateUser(nowUser.getId());
             orderRelationship.setCreateUserName(nowUser.getName());
             orderRelationship.setCreateTime(nowTime);
@@ -538,18 +635,43 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         return orderRelationship.getId();
     }
+
     /**
+     * @return java.lang.String
      * @Author 姜修弘
      * 功能描述:
      * 创建时间:@Date 下午5:04 2019/3/6
      * @Param [userId, orderRelationshipId]
-     * @return java.lang.String
      **/
-    public String test(Long userId , long orderRelationshipId){
-        TUser user = userController.getUserById(userId);
-        TOrderRelationship orderRelationship = orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
-        orderRelationship.setCreateUserName(user.getName());
-        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-        return "ok";
+    public String test(Long orderId ,List<Long> userIdList) {
+        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId ,userIdList);
+        List<Long> orderRelatingshipIdList = new ArrayList<>();
+        for (int i = 0 ;i < orderRelationshipList.size() ; i++){
+            if (orderRelationshipList.get(i).getReceiptUserId() == 68813259653775360l) {
+                orderRelationshipList.get(i).setCreateUserName("测试");
+            } else {
+                orderRelationshipList.get(i).setCreateUserName("测试2");
+            }
+            orderRelatingshipIdList.add(orderRelationshipList.get(i).getId());
+        }
+
+        long count = orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList ,orderRelatingshipIdList);
+        return count+"";
+    }
+
+    /**
+     * 参与的订单的状态
+     *
+     * @return
+     */
+    private List<Integer> participationStatusList() {
+        List<Integer> orderRelationshipStatusList = new ArrayList<>();
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
+        return orderRelationshipStatusList;
     }
 }

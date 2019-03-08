@@ -2,10 +2,12 @@ package com.e_commerce.miscroservice.order.service;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
+import java.util.List;
 
 /**
  * 
@@ -27,12 +29,28 @@ public interface OrderRelationService {
      * @param userId
      * @param date
      * @param serviceId
-     * @param orderRelationServiceId
      * @return
      * @throws ParseException
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-    long enroll(Long orderId, Long userId , String date, Long serviceId , Long orderRelationServiceId) throws ParseException ;
+    long enroll(Long orderId, Long userId , String date, Long serviceId ) throws ParseException;
 
-    String test(Long userId , long orderRelationshipId);
+    String test(Long orderId , List<Long> userIdList);
+    /**
+     * @Author 姜修弘
+     * 功能描述:取消报名
+     * 创建时间:@Date 下午3:06 2019/3/8
+     * @Param [orderId, nowUser]
+     * @return void
+     **/
+    void removeEnroll(Long orderId , Long nowUserId);
+    /**
+     * 根据状态来查询所有未被操作的人的列表
+     *
+     * @param orderId
+     * @param type
+     * @param nowUserId
+     * @return
+     */
+    List<UserInfoView> userListByPperation(Long orderId, int type, Long nowUserId);
 }

@@ -71,15 +71,6 @@ public interface OrderRelationshipDao {
      * @return
      */
     List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId , List<Long> userIdList);
-
-
-    /**
-     * 根据orderId和statusList来升序查询报名者订单List
-     * @param orderId
-     * @param statusList
-     * @return
-     */
-    //List<TOrderRelationship> selectListByStatusList(Long orderId , List<Integer> statusList);
     /**
      * 根据orderId和status来查询未开始（签到）报名者订单List
      * @param orderId
@@ -95,12 +86,20 @@ public interface OrderRelationshipDao {
      */
     List<TOrderRelationship> selectListByStatusByEnroll(Long orderId , int status);
     /**
-     * 根据statusList来查询参与者订单数量
+     * 根据orderId和statusList来升序查询报名者订单List
      * @param orderId
      * @param statusList
      * @return
      */
-    //long selectCountByStatusList(Long orderId , List<Integer> statusList);
+
+    List<TOrderRelationship> selectListByStatusListByEnroll(Long orderId , List<Integer> statusList);
+    /**
+     * 根据statusList来查询参与者订单数量
+     * @param orderId
+     * @param status
+     * @return
+     */
+    long selectCountByStatusByEnroll(Long orderId , Integer status);
     /**
      * 根据用户id来查询订单关系List
      * @param userId
@@ -116,4 +115,20 @@ public interface OrderRelationshipDao {
      * @return
      */
 	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
+    /**
+     * @Author 姜修弘
+     * 功能描述:根据参与者id和orderId查询参与者订单
+     * 创建时间:@Date 下午3:33 2019/3/8
+     * @Param [orderId, userId]
+     * @return com.e_commerce.miscroservice.order.po.TOrderRelationship
+     **/
+    TOrderRelationship selectOrderRelationshipByJoinIn(Long orderId , Long userId);
+    /**
+     * 批量更新订单关系表
+     * @param orderRelationshipList
+     * @param orderRelationgshipIdList
+     * @return
+     */
+    long updateOrderRelationshipByList(List<TOrderRelationship> orderRelationshipList , List<Long> orderRelationgshipIdList);
+
 }

@@ -195,20 +195,48 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     /**
      * 根据statusList来查询参与者订单数量
      * @param orderId
-     * @param statusList
+     * @param status
      * @return
      */
-    public long selectCountByStatusListByEnroll(Long orderId , List<Integer> statusList){
+    public long selectCountByStatusByEnroll(Long orderId , Integer status){
         long count = MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
                 .count(TOrderRelationship::getId)
                 .eq(TOrderRelationship::getOrderId , orderId)
                 .isNotNull(TOrderRelationship::getReceiptUserId)
-                .in(TOrderRelationship::getStatus , statusList));
+                .eq(TOrderRelationship::getStatus , status));
         return  count;
     }
     /*public long updateByOrderRelationshipList(List<TOrderRelationship> orderRelationshipList){
         long update = MybatisOperaterUtil.getInstance().update(orderRelationshipList,)
     }*/
+    /**
+     * @Author 姜修弘
+     * 功能描述:根据参与者id和orderId查询参与者订单
+     * 创建时间:@Date 下午3:33 2019/3/8
+     * @Param [orderId, userId]
+     * @return com.e_commerce.miscroservice.order.po.TOrderRelationship
+     **/
+    public  TOrderRelationship selectOrderRelationshipByJoinIn(Long orderId , Long userId){
+        TOrderRelationship orderRelationship = MybatisOperaterUtil.getInstance().findOne(new TOrderRelationship(),
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .eq(TOrderRelationship::getOrderId , orderId)
+                        .eq(TOrderRelationship::getReceiptUserId , userId)
+                        .in(TOrderRelationship::getStatus , participationStatusList()));
+        return orderRelationship;
+    }
+
+    /**
+     * 批量更新订单关系表
+     * @param orderRelationshipList
+     * @param orderRelationgshipIdList
+     * @return
+     */
+    public long updateOrderRelationshipByList(List<TOrderRelationship> orderRelationshipList , List<Long> orderRelationgshipIdList){
+        long count = MybatisOperaterUtil.getInstance().update(orderRelationshipList,
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .in(TOrderRelationship::getId , orderRelationgshipIdList));
+        return count;
+    }
     /**
      * 参与的订单的状态
      * @return
