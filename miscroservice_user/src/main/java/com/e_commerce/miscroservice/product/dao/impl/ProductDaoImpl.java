@@ -1,12 +1,14 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.mapper.ProductMapper;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -63,5 +65,14 @@ public class ProductDaoImpl implements ProductDao {
 	public List<TServiceDescribe> getProductDesc(Long serviceId) {
 		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
 				.eq(TServiceDescribe::getServiceId, serviceId));
+	}
+
+	@Override
+	public Page<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
+		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
+		MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getUserId, userId).eq(TService::getType, type)
+				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
+		return page;
 	}
 }

@@ -11,9 +11,9 @@ package com.e_commerce.miscroservice.user.vo;
  * 创建时间:2019年2月20日 下午4:16:07
  */
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TTypeDictionaries;
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 
 import java.io.Serializable;
 

@@ -1,26 +1,11 @@
-package com.e_commerce.miscroservice.product.vo;
+package com.e_commerce.miscroservice.order.vo;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 功能描述:
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2018年11月7日 下午3:45:55
- * ************************************
- * ************************************
- * 修改人:
- * 修改时间:
- * 修改内容:
- * 1.
- * 2.
+ * 订单查询用户的基本信息
  */
 @Data
 public class BaseUserView implements Serializable {

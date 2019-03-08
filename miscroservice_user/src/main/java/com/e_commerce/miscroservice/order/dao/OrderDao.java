@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.order.dao;
 
-import com.e_commerce.miscroservice.order.po.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import com.github.pagehelper.Page;
 
@@ -76,9 +76,15 @@ public interface OrderDao {
      */
     List<TOrder> selectPastByUserId(Long userId);
 
+	/**
+	 * 同步商品和订单的状态
+	 * @param productId 商品ID
+	 * @param status 商品状态  3、改为手动下架 4、改为自动下架
+	 */
+	void updateByServiceId(Long productId, Integer status);
 
 
-    //TODO NEW!!!!!!EMD
+	//TODO NEW!!!!!!EMD
 
 
 }

@@ -1,9 +1,8 @@
 package com.e_commerce.miscroservice.order.dao;
 
 
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.github.pagehelper.Page;
-
 
 import java.util.List;
 

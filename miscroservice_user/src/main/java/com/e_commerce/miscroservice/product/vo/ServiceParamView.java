@@ -1,23 +1,15 @@
 package com.e_commerce.miscroservice.product.vo;
 
 
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * 功能描述:求助和服务参数view
- * 模块:
- * 项目:时间银行
- * 版本号:V1.0
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱:747052172
- * 创建时间:2018/10/30 上午10:50
+ * 发布的json参数view
  */
 @Data
 public class ServiceParamView implements Serializable {

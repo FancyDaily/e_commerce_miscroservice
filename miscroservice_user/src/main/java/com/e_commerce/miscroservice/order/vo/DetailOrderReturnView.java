@@ -1,24 +1,17 @@
 package com.e_commerce.miscroservice.order.vo;
 
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
-import com.e_commerce.miscroservice.product.vo.BaseUserView;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import lombok.Data;
 
 import java.util.List;
 
 
 /**
- * 功能描述:服务求助详情返回view
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2018年11月3日 下午6:18:50
+ * 功能描述:订单详情view
+ * @author 马晓晨
+ * @date 2019/3/8 15:49
  */
 @Data
 public class DetailOrderReturnView {
@@ -47,6 +40,10 @@ public class DetailOrderReturnView {
 	 * 封面图地址
 	 */
 	private String coverImgUrl;
+	/**
+	 * 是否关注 true 已关注
+	 */
+	private boolean careStatus;
 
 	public String getServiceIdString() {
 		if (order != null) {

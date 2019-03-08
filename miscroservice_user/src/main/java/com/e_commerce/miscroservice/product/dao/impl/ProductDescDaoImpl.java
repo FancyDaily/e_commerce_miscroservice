@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.dao.ProductDescDao;
 import org.springframework.stereotype.Repository;
 

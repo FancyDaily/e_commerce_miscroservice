@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.order.po.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
@@ -111,7 +111,15 @@ public class OrderDaoImpl implements OrderDao {
         .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 
-    /**
+	@Override
+	public void updateByServiceId(Long productId, Integer status) {
+		TOrder order = new TOrder();
+		order.setServiceStatus(status);
+		MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
+				.eq(TOrder::getServiceId,productId));
+	}
+
+	/**
      * 查询发布的所有记录
      * @param userId
      * @return

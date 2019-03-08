@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.e_commerce.miscroservice.order.mapper.OrderMapper">
-    <resultMap id="BaseResultMap" type="TOrder">
+    <resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.TOrder">
         <id column="id" jdbcType="BIGINT" property="id" />
         <result column="service_id" jdbcType="BIGINT" property="serviceId" />
         <result column="main_id" jdbcType="BIGINT" property="mainId" />
@@ -37,7 +37,7 @@
         <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
     </resultMap>
     <sql id="Base_Column_List">
-    id, service_id, main_id, name_audio_url, service_name, service_num, service_place,
+    id, service_id, main_id, name_audio_url, service_name, serve_num, service_place,
     labels, type, status, source, service_type_id, address_name, longitude, latitude,
     total_evaluate, enroll_num, confirm_num, start_time, end_time, service_status, open_auth,
     collect_time, collect_type, create_user, create_user_name, create_time, update_user,
@@ -63,18 +63,6 @@
             )
         </if>
         )
-        <choose>
-            <when test="type != null and type == 1">
-                AND type = 1
-                AND (status = 2 OR status = 3 OR status = 4 OR status = 5)
-            </when>
-            <when test="type != null and type == 2">
-                AND type = 2
-                AND (status = 2 OR status = 3)
-            </when>
-            <otherwise>
-            </otherwise>
-        </choose>
         <if test="serviceTypeId != null and serviceTypeId != 1000000">
             AND service_type_id = #{serviceTypeId}
         </if>
@@ -96,7 +84,7 @@
         </if>
         ,source DESC
         ,CASE
-        WHEN t.distance <![CDATA[>=]]> 10000 THEN
+        WHEN distance <![CDATA[>=]]> 10000 THEN
         1
         ELSE
         0

@@ -6,15 +6,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 功能描述:分页求助服务接收参数的view
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2018年10月31日 下午5:46:37
+ * 首页显示参数列表
+ * @author 马晓晨
  */
 @Data
 public class PageOrderParamView implements Serializable {

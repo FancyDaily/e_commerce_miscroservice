@@ -1,17 +1,20 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
+import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,7 +45,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
-		user = userService.getUserById(user.getId());
+		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			checkRepeatProductLegal(param.getService());
+		}
+		user = userService.getUserById(68813260748488704L);
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		// 组织发布
 		if (isCompany) {
@@ -71,6 +77,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	@Override
 	public void submitService(TUser user, ServiceParamView param, String token) {
+		//校验重复时间
+		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			checkRepeatProductLegal(param.getService());
+		}
 		// 组织发布
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		if (isCompany) {
@@ -101,6 +111,108 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return productDao.getProductDesc(serviceId);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Override
+	public void lowerFrame(TUser user, Long productId) {
+		user = userService.getUserById(68813260748488704L);
+		logger.info("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
+		try {
+			TService tService = productDao.selectByPrimaryKey(productId);
+			tService.setStatus(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
+			tService.setUpdateUser(user.getId());
+			tService.setUpdateUserName(user.getName());
+			tService.setUpdateTime(System.currentTimeMillis());
+			productDao.updateByPrimaryKeySelective(tService);
+			//将该商品派生出来的订单的service_status进行修改
+			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
+		} catch (Exception e) {
+			logger.error(errInfo(e));
+			throw new MessageException("下架失败");
+		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	public void del(TUser user, Long productId) {
+		user = userService.getUserById(68813260748488704L);
+		logger.info("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
+		try {
+			TService tService = productDao.selectByPrimaryKey(productId);
+			tService.setStatus(ProductEnum.STATUS_DELETE.getValue());
+			tService.setUpdateUser(user.getId());
+			tService.setUpdateUserName(user.getName());
+			tService.setUpdateTime(System.currentTimeMillis());
+			productDao.updateByPrimaryKeySelective(tService);
+			//将该商品派生出来的订单的service_status进行修改
+			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_DELETE.getValue());
+		} catch (Exception e) {
+			logger.error(errInfo(e));
+			throw new MessageException("删除失败");
+		}
+	}
+
+	@Override
+	public void upperFrame(TUser user, Long productId) {
+		// TODO 写死用户
+		user = userService.getUserById(68813260748488704L);
+		logger.info("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
+		try {
+			TService tService = productDao.selectByPrimaryKey(productId);
+			// TODO 判断时间段是否可以上架  上架后是否需要派生新的订单  进行状态判断
+			tService.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
+			tService.setUpdateUser(user.getId());
+			tService.setUpdateUserName(user.getName());
+			tService.setUpdateTime(System.currentTimeMillis());
+			productDao.updateByPrimaryKeySelective(tService);
+			//将该商品派生出来的订单的service_status进行修改
+			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
+		} catch (Exception e) {
+			logger.error(errInfo(e));
+			throw new MessageException("重新上架失败");
+		}
+	}
+
+	@Override
+	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type) {
+		user = userService.getUserById(68813260748488704L);
+		QueryResult<PageMineReturnView> result = new QueryResult<PageMineReturnView>();
+		List<PageMineReturnView> listPageMineReturnView = new ArrayList<>();
+		Page<TService> page = productDao.getListProductByUserId(user.getId(), pageNum, pageSize, type);
+		//我发布的列表
+		List<TService> listProductByUserId = page.getResult();
+		if (listProductByUserId.size() == 0) {
+			result.setResultList(new ArrayList<>());
+			result.setTotalCount(0L);
+			return result;
+		}
+		List<Long> serviceIds = new ArrayList<>();
+//		listProductByUserId.stream().forEach(product -> serviceIds.add(product.getId()));
+		for (TService product : listProductByUserId) {
+			serviceIds.add(product.getId());
+		}
+		//获取封面图  serviceId -> 封面图
+		Map<Long, String> coverPic = new HashMap<>();
+		List<TServiceDescribe> listProductDesc = productDao.getListProductDesc(serviceIds);
+		if (listProductDesc != null && listProductDesc.size() > 0) {
+			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
+					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
+		}
+		for (TService tService : listProductByUserId) {
+			PageMineReturnView returnView = new PageMineReturnView();
+			returnView.setService(tService);
+			returnView.setImgUrl(coverPic.get(tService.getId()));
+			if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_UPPER_FRAME.getValue())) {
+				returnView.setStatus("上架中");
+			} else if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+				returnView.setStatus("已下架");
+			}
+			listPageMineReturnView.add(returnView);
+		}
+		result.setResultList(listPageMineReturnView);
+		result.setTotalCount(page.getTotal());
+		return result;
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务
@@ -129,7 +241,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}*/
 		long nowTime = System.currentTimeMillis();
 		TService service = param.getService();
-		if (service.getEndTime() < nowTime && service.getTimeType().equals(0)) {
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < nowTime) {
 			throw new MessageException("一次性服务的服务结束时间不能小于当前时间");
 		}
 		// 进行标题敏感词检测
@@ -141,12 +253,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (service.getId() != null && service.getId() != 0) {
 			delService(service);
 		}
-		service.setId(snowflakeIdWorker.nextId());
-		// TODO 审核暂时先拿掉
-//		service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
-		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
-		service.setUserId(user.getId());
-		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
 		setServiceCommonField(user, service);
 		// 服务的总分和总次数
 		// 总分
@@ -287,7 +393,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//是否包含用户选择的周期
 		boolean isContainWeek = false;
-		String[] weekDayArray = service.getDateWeek().split(",");
+		String[] weekDayArray = service.getDateWeekNumber().split(",");
 		for (int i = 0; i < weekDayArray.length; i++) {
 			int weekDay = Integer.parseInt(weekDayArray[i]);
 			long countWeek = DateUtil.countWeek(service.getStartDateS(), service.getEndDateS(), weekDay);
@@ -299,8 +405,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			throw new MessageException("发布的重复时间段内不包含您选择的星期");
 		}
 	}
-
-
 
 
 	/**
@@ -435,12 +539,15 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (availableTime < seekHelpPrice) {
 			throw new MessageException("用户余额不足");
 		}
-		if (service.getEndTime() < currentTime) {
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < currentTime) {
 			throw new MessageException("求助结束时间不能小于当前时间");
 		}
 		// 进行标题敏感词检测
 		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
 			throw new MessageException("求助名称包含敏感词");
+		}
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			checkRepeatProductLegal(service);
 		}
 		// 如果是上架,先将之前那条记录改为状态8删除
 //		if (service.getId() != null) {
@@ -461,6 +568,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				throw new MessageException("求助描述中包含敏感词");
 			}
 			desc.setId(snowflakeIdWorker.nextId());
+			desc.setType(service.getType());
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
 		}
@@ -471,12 +579,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service);
+		boolean isSuccess = orderService.produceOrder(service);
+		if (!isSuccess) {
+			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
+			throw new MessageException("发布失败，请重新尝试");
+		}
 		// 3、扣除用户时间币，生成交易流水
 		// 将用户时间币冻结
 		user.setFreezeTime(user.getFreezeTime() + seekHelpPrice);
 		user.setUpdateTime(System.currentTimeMillis());
-		boolean isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
+		isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
 		if (!isSuccess) {
 			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
 			throw new MessageException("冻结用户时间失败，请重新尝试");
@@ -522,7 +634,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		 */
 		long currentTime = System.currentTimeMillis();
 		TService service = param.getService();
-		if (service.getTimeType() == 0 && service.getEndTime() < currentTime) {
+		if (service.getTimeType() == ProductEnum.TIME_TYPE_FIXED.getValue() && service.getEndTime() < currentTime) {
 			throw new MessageException("求助结束时间不能小于当前时间");
 		}
 		if (!user.getUserType().equals(IS_PUBLIC_WELFARE_YES)) {
@@ -547,8 +659,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		setServiceCommonField(user, service);
 		// 组织发布互助时还是公益时由前端传递参数
 		// service.setCollectType(1);
-		service.setTimeType(0); // 区分固定时间还是重复周期 所有求助都是固定时间，所以为0
-		service.setIsValid(IS_VALID_YES);
+//		service.setTimeType(0); // 区分固定时间还是重复周期 所有求助都是固定时间，所以为0
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
@@ -612,13 +723,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		if (service.getId() != null) {
 //			delService(service);
 //		}
-		service.setId(snowflakeIdWorker.nextId());
-		// 待审核 TODO 暂时不做审核限制，直接是待开始
-//			service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
-		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
-		service.setUserId(user.getId());
+
 		setServiceCommonField(user, service);
-		service.setIsValid(IS_VALID_YES);
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
@@ -636,7 +742,18 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		//派生出第一张订单
+		boolean isSuccess = orderService.produceOrder(service);
+		if (!isSuccess) {
+			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
+			throw new MessageException("发布失败，请重新尝试");
+		}
 		// TODO 调用用户模块
+		isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
+		if (!isSuccess) {
+			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
+			throw new MessageException("冻结用户时间失败，请重新尝试");
+		}
 //		// 3、扣除用户时间币，生成交易流水
 //		// 将用户时间币冻结
 //		user.setFreezeTime(freezeTime + seekHelpPrice);
