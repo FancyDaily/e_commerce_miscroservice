@@ -91,7 +91,7 @@ public class DateUtil {
 	 * @return
 	 */
 	public static Long parse(String dateTime) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 		try {
 			Date date = sdf.parse(dateTime);
 			sdf = null;
@@ -108,7 +108,7 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String format(Long timestamp) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 		try {
 			String format = sdf.format(timestamp);
 			sdf = null;
@@ -125,7 +125,7 @@ public class DateUtil {
 	 * @return 周一为1  周日为7
 	 */
 	public static Integer getWeekDay(String date) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 		Calendar cal = Calendar.getInstance();
 		try {
 			Date parse = sdf.parse(date);

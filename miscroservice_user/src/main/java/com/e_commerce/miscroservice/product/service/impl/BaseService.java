@@ -1,12 +1,12 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.order.controller.OrderController;
+import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.order.service.impl.OrderServiceImpl;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.dao.ProductDescDao;

@@ -18,8 +18,8 @@ package com.e_commerce.miscroservice.user.vo;
  * 2.
  */
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceReceipt;
+import com.e_commerce.miscroservice.order.po.TService;
 
 import java.io.Serializable;
 

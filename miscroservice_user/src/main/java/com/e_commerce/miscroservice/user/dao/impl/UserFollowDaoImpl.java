@@ -96,7 +96,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
                 .eq(TUserFollow::getUserId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getCreateTime));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
     }
 
     /**
@@ -111,7 +111,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
                 .eq(TUserFollow::getUserFollowId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC,TUserFollow::getCreateTime));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
     }
 
     /**

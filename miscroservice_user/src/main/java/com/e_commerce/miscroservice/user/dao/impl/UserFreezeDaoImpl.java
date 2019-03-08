@@ -25,7 +25,7 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
                 .eq(TUserFreeze::getCreateTime, lastTime)
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(order, TUserFreeze::getCreateTime));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFreeze::getCreateTime)));
     }
 
     @Override

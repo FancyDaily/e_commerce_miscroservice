@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import lombok.Data;
 import lombok.Getter;

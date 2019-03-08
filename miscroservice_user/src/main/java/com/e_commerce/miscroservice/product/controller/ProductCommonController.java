@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.product.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -26,7 +26,7 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
                 .lt(TPublicWelfare::getCreateTime, lastTime)
                 .between(TPublicWelfare::getCreateTime, betLeft, betRight)
                 .eq(TPublicWelfare::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.ORDER.DESC));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TPublicWelfare::getCreateTime)));
         Long yearWelfare = mapper.getYearWelfare(param);
         Map<String,Object> resultMap = new HashMap<String,Object>();
         resultMap.put("yearWelfare",yearWelfare);

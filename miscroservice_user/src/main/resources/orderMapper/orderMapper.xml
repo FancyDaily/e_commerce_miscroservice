@@ -7,7 +7,7 @@
         <result column="main_id" jdbcType="BIGINT" property="mainId" />
         <result column="name_audio_url" jdbcType="VARCHAR" property="nameAudioUrl" />
         <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
-        <result column="service_num" jdbcType="INTEGER" property="serviceNum" />
+        <result column="serve_num" jdbcType="INTEGER" property="serveNum" />
         <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
         <result column="labels" jdbcType="VARCHAR" property="labels" />
         <result column="type" jdbcType="INTEGER" property="type" />
@@ -24,6 +24,7 @@
         <result column="end_time" jdbcType="BIGINT" property="endTime" />
         <result column="service_status" jdbcType="INTEGER" property="serviceStatus" />
         <result column="open_auth" jdbcType="INTEGER" property="openAuth" />
+        <result column="time_type" jdbcType="INTEGER" property="timeType" />
         <result column="collect_time" jdbcType="BIGINT" property="collectTime" />
         <result column="collect_type" jdbcType="INTEGER" property="collectType" />
         <result column="create_user" jdbcType="BIGINT" property="createUser" />
