@@ -1,36 +1,26 @@
 package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
+import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 功能描述:
- * 模块:
- * 项目:时间银行
- * 版本号:V1.0
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:姜修弘
- * 邮箱:414368243@qq.com
- * 创建时间:2019/3/4 下午4:59
- * ************************************
- * ************************************
- * 修改人:
- * 修改时间:
- * 修改内容:
- * 1.
- * 2.
- */
+ * 订单关系
+ * <p>
+ * 订单关系controller
+ **/
 @RestController
 @RequestMapping("/api/v2/orderRelation")
-public class OrderRelationController {
+public class OrderRelationController extends BaseController {
 
     @Autowired
     private OrderRelationService orderRelationService;
@@ -38,31 +28,142 @@ public class OrderRelationController {
     @Autowired
     private OrderRelationshipDao orderRelationshipDao;
 
-    @RequestMapping("/id")
-    public Object notices(Long orderId, long userId , String date, Long serviceId , Long orderRelationServiceId) {
+    /**
+     * 报名
+     *
+     * @param orderId   订单id
+     * @param userId    用户id
+     * @param date      日期
+     * @param serviceId 商品id
+     *                  <p>
+     *                  "success": true,
+     *                  "msg": "报名成功"
+     * @return
+     */
+    @PostMapping("/enroll")
+    public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
-            long msg = orderRelationService.enroll(orderId , userId , date , serviceId ,orderRelationServiceId);
+            orderRelationService.enroll(orderId, userId, date, serviceId);
             result.setSuccess(true);
-            result.setMsg("查看成功");
-            result.setData(msg);;
-            return result;
+            result.setMsg("报名成功");
+        } catch (MessageException e) {
+            logger.warn("报名失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("报名失败," + e.getMessage());
         } catch (Exception e) {
+            logger.error("报名失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("报名失败");
+        }
+        return result;
+    }
+
+    /**
+     * 取消报名
+     *
+     * @param orderId   订单id
+     * @param nowUserId 当前用户id
+     *                  <p>
+     *                  "success": true,
+     *                  "msg": "取消报名成功"
+     * @return
+     */
+    @PostMapping("/removeEnroll")
+    public Object removeEnroll(Long orderId, Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.removeEnroll(orderId, nowUserId);
+            result.setSuccess(true);
+            result.setMsg("取消报名成功");
+        } catch (MessageException e) {
+            logger.warn("取消报名失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("取消报名失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("取消报名失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("取消报名失败");
+        }
+        return result;
+    }
+
+    /**
+     * 操作用户列表
+     *
+     * @param orderId   订单id
+     * @param type      类型 1-选人 2-开始 7-支付 9-评价
+     * @param nowUserId 操作用户id
+     *                  <p>
+     *                  {
+     *                  "success": true,
+     *                  "msg": "查看成功",
+     *                  "data": [
+     *                  {
+     *                  "name": "刘维",
+     *                  "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544189745461122.png",
+     *                  "status": 1,
+     *                  "toStringId": "68813258559062016"
+     *                  },
+     *                  {
+     *                  "name": "左岸",
+     *                  "userHeadPortraitPath": "https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTI0PmHoNhhs1zvJdDYGT8ddTLkCXzLk6fO1mWiaYwFrBRaoh6wqicWVXoECbOC00khkXwzWhIjoGflg/132",
+     *                  "status": 1,
+     *                  "toStringId": "68813259653775360"
+     *                  }
+     *                  ]
+     *                  }
+     * @return
+     */
+    @PostMapping("/userList")
+    public Object userList(Long orderId, int type, Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            List<UserInfoView> userInfoViewList = orderRelationService.userListByPperation(orderId, type, nowUserId);
+            result.setSuccess(true);
+            result.setData(userInfoViewList);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
-            e.printStackTrace();
-            return result;
         }
+        return result;
     }
-    @RequestMapping("/test")
-    public Object notices(Long orderRelationshipId, long userId) {
+
+    /**
+     * 测试
+     *
+     * @param orderId sa
+     * @param userIds  ss
+     * "success": true,
+     *                "msg": "报名成功"
+     */
+    @PostMapping("/test")
+    public Object notices(Long orderId, String userIds) {
         AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
         try {
-            String msg = orderRelationService.test(userId , orderRelationshipId);
+            String msg = orderRelationService.test(orderId, userIdList);
             result.setSuccess(true);
             result.setMsg("查看成功");
-            result.setData(msg);;
+            result.setData(msg);
+            ;
             return result;
         } catch (Exception e) {
             result.setSuccess(false);
@@ -72,40 +173,4 @@ public class OrderRelationController {
             return result;
         }
     }
-
-    /**
-     * @Author 姜修弘
-     * 功能描述:插入订单
-     * 创建时间:@Date 下午6:38 2019/3/6
-     * @Param [orderRelationship]
-     * @return int
-     **/
-    public int insertOrderRelationship(TOrderRelationship orderRelationship){return orderRelationshipDao.insert(orderRelationship);}
-
-    /**
-     * @Author 姜修弘
-     * 功能描述:更新订单
-     * 创建时间:@Date 下午6:39 2019/3/6
-     * @Param [orderRelationship]
-     * @return int
-     **/
-    public int updateOrderRelationship(TOrderRelationship orderRelationship){return  orderRelationshipDao.updateByPrimaryKey(orderRelationship);}
-
-    /**
-     * @Author 姜修弘
-     * 功能描述:获取指定用户、订单的订单关系
-     * 创建时间:@Date 下午6:39 2019/3/6
-     * @Param [userId, orderId]
-     * @return com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship
-     **/
-    public TOrderRelationship selectOrdertionshipByuserIdAndOrderId(Long userId , Long orderId){return orderRelationshipDao.selectByOrderIdAndUserId(orderId,userId);}
-
-    /**
-     * @Author 姜修弘
-     * 功能描述:获取指定用户所有的订单关系
-     * 创建时间:@Date 下午6:39 2019/3/6
-     * @Param [userId]
-     * @return java.util.List<com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship>
-     **/
-    public List<TOrderRelationship> selectOrdertionshipListByuserId(Long userId){return  orderRelationshipDao.selectByUserId(userId);}
 }

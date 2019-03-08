@@ -224,6 +224,19 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .in(TOrderRelationship::getStatus , participationStatusList()));
         return orderRelationship;
     }
+
+    /**
+     * 批量更新订单关系表
+     * @param orderRelationshipList
+     * @param orderRelationgshipIdList
+     * @return
+     */
+    public long updateOrderRelationshipByList(List<TOrderRelationship> orderRelationshipList , List<Long> orderRelationgshipIdList){
+        long count = MybatisOperaterUtil.getInstance().update(orderRelationshipList,
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .in(TOrderRelationship::getId , orderRelationgshipIdList));
+        return count;
+    }
     /**
      * 参与的订单的状态
      * @return
