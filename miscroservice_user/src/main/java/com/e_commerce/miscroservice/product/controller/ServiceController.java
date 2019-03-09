@@ -2,9 +2,12 @@ package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
+import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +24,68 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/api/v2/service")
 public class ServiceController extends BaseController{
 	Log logger = Log.getInstance(ServiceController.class);
+
+	/**
+	 * 我发布的求助
+	 *
+	 * @param token    当前用户token
+	 * @param pageNum  页数
+	 * @param pageSize 每页数量
+	 *                 {
+	 *                 "success": 是否成功,
+	 *                 "msg": "成功或失败消息",
+	 *                 "data": {
+	 *                 "resultList": [
+	 *                 {
+	 *                 "service": {
+	 *                 "id": 商品ID,
+	 *                 "serviceName": "名称",
+	 *                 "servicePlace": 线上或线下,
+	 *                 "servicePersonnel": 需要人数,
+	 *                 "startTime": 开始时间毫秒值（单次显示开始时间使用此字段）,
+	 *                 "endTime": 结束时间毫秒值(单词显示结束时间使用此字段),
+	 *                 "timeType": 是否重复 0、不重复 1、重复性,
+	 *                 "collectType": 收取分类, 1、互助时 2、公益时
+	 *                 "collectTime": 收取时长,
+	 *                 "nameAudioUrl": "音频地址",
+	 *                 "dateWeekNumber": "5,6",
+	 *                 "startDateS": 开始日期字符串  例："20190308",
+	 *                 "endDateS": 结束日期字符串  例："20190310",
+	 *                 "startTimeS": 开始时间字符串  例："1320",
+	 *                 "endTimeS": 结束时间字符串   例："1340",
+	 *                 "dateWeek":显示周X的字符串
+	 *                 },
+	 *                 "imgUrl": "封面图"
+	 *                 }
+	 *                 ],
+	 *                 "totalCount": 总条数
+	 *                 }
+	 *                 }
+	 * @return
+	 */
+	@PostMapping("/pageMine")
+	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SERVICE.getValue());
+			result.setData(list);
+			result.setSuccess(true);
+			result.setMsg("查询成功");
+		} catch (MessageException e) {
+			logger.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败," + e.getMessage());
+		} catch (Exception e) {
+			logger.error("查询失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败");
+		}
+		return result;
+	}
+
 
 	/**
 	 * 删除服务

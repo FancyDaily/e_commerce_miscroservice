@@ -8,17 +8,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-/**
- * 功能描述:Controller的公共方法
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2018年11月18日 下午3:50:03
- */
 public class BaseController {
 
 
