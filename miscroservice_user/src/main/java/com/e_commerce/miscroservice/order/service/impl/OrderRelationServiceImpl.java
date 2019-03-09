@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import sun.util.resources.cldr.gv.LocaleNames_gv;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -250,7 +249,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
     public List<String> chooseUser(Long orderId, TUser nowUser, List<Long> userIdList) {
         List<Integer> statusList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        long canChooseUserSum = order.getServeNum() - order.getConfirmNum();
+        long canChooseUserSum = order.getServicePersonnel() - order.getConfirmNum();
         int chooseUserSum = 0;
         if (userIdList.size() > canChooseUserSum) {
             throw new MessageException("499", "对不起，您最多可选" + canChooseUserSum + "人");

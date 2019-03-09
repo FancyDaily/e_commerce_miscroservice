@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -174,22 +175,24 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Override
 	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type) {
+		// TODO 写死用户
 		user = userService.getUserById(68813260748488704L);
 		QueryResult<PageMineReturnView> result = new QueryResult<PageMineReturnView>();
 		List<PageMineReturnView> listPageMineReturnView = new ArrayList<>();
-		Page<TService> page = productDao.getListProductByUserId(user.getId(), pageNum, pageSize, type);
+		//分页插件
+		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
 		//我发布的列表
-		List<TService> listProductByUserId = page.getResult();
+		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(), pageNum, pageSize, type);
 		if (listProductByUserId.size() == 0) {
 			result.setResultList(new ArrayList<>());
 			result.setTotalCount(0L);
 			return result;
 		}
 		List<Long> serviceIds = new ArrayList<>();
-//		listProductByUserId.stream().forEach(product -> serviceIds.add(product.getId()));
-		for (TService product : listProductByUserId) {
-			serviceIds.add(product.getId());
-		}
+		listProductByUserId.stream().forEach(product -> serviceIds.add(product.getId()));
+//		for (TService product : listProductByUserId) {
+//			serviceIds.add(product.getId());
+//		}
 		//获取封面图  serviceId -> 封面图
 		Map<Long, String> coverPic = new HashMap<>();
 		List<TServiceDescribe> listProductDesc = productDao.getListProductDesc(serviceIds);
@@ -200,7 +203,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		for (TService tService : listProductByUserId) {
 			PageMineReturnView returnView = new PageMineReturnView();
 			returnView.setService(tService);
-			returnView.setImgUrl(coverPic.get(tService.getId()));
+			tService.setNameAudioUrl("");
+//			returnView.setImgUrl(coverPic.get(tService.getId()));
+			returnView.setImgUrl("");
 			if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_UPPER_FRAME.getValue())) {
 				returnView.setStatus("上架中");
 			} else if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {

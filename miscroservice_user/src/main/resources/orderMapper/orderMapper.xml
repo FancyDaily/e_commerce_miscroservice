@@ -7,7 +7,7 @@
         <result column="main_id" jdbcType="BIGINT" property="mainId" />
         <result column="name_audio_url" jdbcType="VARCHAR" property="nameAudioUrl" />
         <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
-        <result column="serve_num" jdbcType="INTEGER" property="serveNum" />
+        <result column="service_personnel" jdbcType="INTEGER" property="servicePersonnel" />
         <result column="service_place" jdbcType="INTEGER" property="servicePlace" />
         <result column="labels" jdbcType="VARCHAR" property="labels" />
         <result column="type" jdbcType="INTEGER" property="type" />
@@ -37,7 +37,7 @@
         <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
     </resultMap>
     <sql id="Base_Column_List">
-    id, service_id, main_id, name_audio_url, service_name, serve_num, service_place,
+    id, service_id, main_id, name_audio_url, service_name, service_personnel, service_place,
     labels, type, status, source, service_type_id, address_name, longitude, latitude,
     total_evaluate, enroll_num, confirm_num, start_time, end_time, service_status, open_auth,
     collect_time, collect_type, create_user, create_user_name, create_time, update_user,

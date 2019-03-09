@@ -55,7 +55,7 @@ public class OrderController extends BaseController {
 	 *                      "source": 1,
 	 *                      "serviceTypeId": 15000,
 	 *                      "enrollNum": 报名人数,
-	 *                      "serveNum":需要的人数
+	 *                      "servicePersonnel":需要的人数
 	 *                      "confirmNum": 确定人数（确定人数等于需要报名的人数，显示已满额）,
 	 *                      "collectTime": 10,
 	 *                      "collectType": 收取类型 1、互助时  2、公益时,
@@ -102,40 +102,41 @@ public class OrderController extends BaseController {
 	 * @param orderId 订单ID
 	 * @param token   用户token
 	 *                {
-	 *     "success": 是否成功,
-	 *     "msg": "成功失败的消息",
-	 *     "data": {
-	 *         "order": {
-	 *             "id": 订单ID,
-	 *             "serviceId": 商品ID,
-	 *             "nameAudioUrl": "音频url",
-	 *             "serviceName": "名称",
-	 *             "servicePlace": 1、线上  2、线下,
-	 *             "labels": "标签",
-	 *             "type": 1、求助 2、服务,
-	 *             "source": 来源 1、个人  2、组织,
-	 *             "startTime": 开始时间,
-	 *             "endTime": 结束时间,
-	 *             "collectTime": 收取时间币,
-	 *             "collectType": 收取类型 1、互助时  2、公益时,
-	 *         },
-	 *         "user": {
-	 *             "id": 发布人id,
-	 *             "name": "发布人名称",
-	 *         },
-	 *         "listServiceDescribe": [
-	 *             {
-	 *                 "sort": 图片排序,
-	 *                 "depict": "详情内容",
-	 *                 "url": "详情url",
-	 *                 "isCover": "是否是封面图",
-	 *             }
-	 *         ],
-	 *         "careStatus": 是否关注  true 已关注  false 未关注,
-	 *         "serviceIdString": "101675590041468928",
-	 *         "serviceUserIdString": "68813260748488704"
-	 *     }
-	 * }
+	 *                "success": 是否成功,
+	 *                "msg": "成功失败的消息",
+	 *                "data": {
+	 *                "order": {
+	 *                "id": 订单ID,
+	 *                "serviceId": 商品ID,
+	 *                "nameAudioUrl": "音频url",
+	 *                "serviceName": "名称",
+	 *                "servicePlace": 1、线上  2、线下,
+	 *                "labels": "标签",
+	 *                "servicePersonnel":"需要人数"，
+	 *                "type": 1、求助 2、服务,
+	 *                "source": 来源 1、个人  2、组织,
+	 *                "startTime": 开始时间,
+	 *                "endTime": 结束时间,
+	 *                "collectTime": 收取时间币,
+	 *                "collectType": 收取类型 1、互助时  2、公益时,
+	 *                },
+	 *                "user": {
+	 *                "id": 发布人id,
+	 *                "name": "发布人名称",
+	 *                },
+	 *                "listServiceDescribe": [
+	 *                {
+	 *                "sort": 图片排序,
+	 *                "depict": "详情内容",
+	 *                "url": "详情url",
+	 *                "isCover": "是否是封面图",
+	 *                }
+	 *                ],
+	 *                "careStatus": 是否关注  true 已关注  false 未关注,
+	 *                "serviceIdString": "101675590041468928",
+	 *                "serviceUserIdString": "68813260748488704"
+	 *                }
+	 *                }
 	 * @return
 	 */
 	@PostMapping("/detail")
@@ -178,6 +179,7 @@ public class OrderController extends BaseController {
 	 *                 "serviceName": "服务名称",
 	 *                 "servicePlace": 1、线上 2、线下,
 	 *                 "labels": "标签",
+	 *                 "servicePersonnel"：需要人数,
 	 *                 "type": 类型 1、求助 2、服务,
 	 *                 "source": 来源 1、个人  2、组织,
 	 *                 "startTime": 1552526400000,

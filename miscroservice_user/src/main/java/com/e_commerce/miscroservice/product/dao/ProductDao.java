@@ -3,7 +3,6 @@ package com.e_commerce.miscroservice.product.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
-import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -70,5 +69,5 @@ public interface ProductDao {
 	 * @param type 类型 1、求助 2、服务
 	 * @return
 	 */
-	Page<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type);
+	List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type);
 }

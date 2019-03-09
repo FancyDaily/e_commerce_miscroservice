@@ -34,9 +34,41 @@ public class SeekHelpController extends BaseController {
 
 	/**
 	 * 我发布的求助
-	 * @param token 当前用户token
-	 * @param pageNum 页数
+	 *
+	 * @param token    当前用户token
+	 * @param pageNum  页数
 	 * @param pageSize 每页数量
+	 *                 {
+	 *                 "success": 是否成功,
+	 *                 "msg": "成功或失败消息",
+	 *                 "data": {
+	 *                 "resultList": [
+	 *                 {
+	 *                 "service": {
+	 *                 "id": 商品ID,
+	 *                 "serviceName": "名称",
+	 *                 "servicePlace": 线上或线下,
+	 *                 "servicePersonnel": 1,
+	 *                 "startTime": 1544249700000,
+	 *                 "endTime": 1544253300000,
+	 *                 "timeType": 0,
+	 *                 "collectType": 1,
+	 *                 "collectTime": 30,
+	 *                 "nameAudioUrl": "",
+	 *                 "createUser": 68813260748488704,
+	 *                 "createUserName": "马晓晨",
+	 *                 "createTime": 1544192157901,
+	 *                 "updateUser": 1,
+	 *                 "updateUserName": "系统管理员",
+	 *                 "updateTime": 1544424600013,
+	 *                 "isValid": "1"
+	 *                 },
+	 *                 "imgUrl": ""
+	 *                 }
+	 *                 ],
+	 *                 "totalCount": 30
+	 *                 }
+	 *                 }
 	 * @return
 	 */
 	@PostMapping("/pageMine")
@@ -64,12 +96,13 @@ public class SeekHelpController extends BaseController {
 
 	/**
 	 * 上架求助服务
-	 * @param token 当前用户token
+	 *
+	 * @param token     当前用户token
 	 * @param productId 商品ID
 	 *                  {
-	 *     "success": 是否成功,
-	 *     "msg": "成功或错误消息"
-	 * }
+	 *                  "success": 是否成功,
+	 *                  "msg": "成功或错误消息"
+	 *                  }
 	 * @return
 	 */
 	@PostMapping("/upperFrame")

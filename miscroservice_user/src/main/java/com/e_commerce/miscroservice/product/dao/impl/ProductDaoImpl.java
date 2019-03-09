@@ -7,8 +7,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.mapper.ProductMapper;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -68,11 +66,10 @@ public class ProductDaoImpl implements ProductDao {
 	}
 
 	@Override
-	public Page<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
-		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
-		MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
+	public List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
+		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
 				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
-		return page;
+		return listServie;
 	}
 }

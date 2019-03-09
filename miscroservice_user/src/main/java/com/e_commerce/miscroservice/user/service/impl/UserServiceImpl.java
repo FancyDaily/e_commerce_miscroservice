@@ -221,7 +221,7 @@ public class UserServiceImpl implements UserService {
                 result.setServiceName(order.getServiceName());
                 result.setStartTime(order.getStartTime());
                 result.setEndTime(order.getEndTime());
-                result.setServicePersonnel(order.getServeNum());
+                result.setServicePersonnel(order.getServicePersonnel());
                 result.setType(order.getType());
                 result.setServiceIdString(String.valueOf(order.getServiceId()));
                 result.setOrderIdString(String.valueOf(order.getId()));
