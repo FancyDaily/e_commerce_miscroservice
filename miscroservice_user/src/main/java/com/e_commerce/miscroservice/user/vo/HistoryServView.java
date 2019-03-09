@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.vo;
 
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.order.po.TEvaluate;
 import com.e_commerce.miscroservice.order.po.TOrder;
 import lombok.Data;
@@ -15,5 +16,7 @@ public class HistoryServView {
     TOrder order;
 
     List<TEvaluate> evaluates;
+
+    TUser user;
 
 }

@@ -48,6 +48,10 @@ public class FocusServiceImpl implements FocusService {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "关注对象id不能为空");
         }
 
+        //获取目标用户
+        TUser targetUser = userDao.selectByPrimaryKey(userFollowId);
+        Integer followNum = targetUser.getFollowNum();
+
         Map<String, Object> recordMap = userFollowDao.findRecords(id, userFollowId);
         //互相关注
         boolean isFollowTheSame = (boolean) recordMap.get("isFollowTheSame");   //操作之前的关注状态
@@ -67,6 +71,12 @@ public class FocusServiceImpl implements FocusService {
                 follow.setExtend(AppConstant.IS_ATTEN_THE_SAME_NO);
             }
             userFollowDao.update(follow);
+
+            //TODO 对方的粉丝数目减1
+            if(followNum>0) {
+                targetUser.setFollowNum(targetUser.getFollowNum() - 1);
+                userDao.updateByPrimaryKey(targetUser);
+            }
             return;
         }
 
@@ -93,6 +103,10 @@ public class FocusServiceImpl implements FocusService {
             userFollow.setExtend(AppConstant.IS_ATTEN_THE_SAME_YES);
         }
         userFollowDao.insert(userFollow);
+
+        //TODO 对方的粉丝数目加1
+        targetUser.setFollowNum(targetUser.getFollowNum() + 1);
+        userDao.updateByPrimaryKey(targetUser);
     }
 
     /**

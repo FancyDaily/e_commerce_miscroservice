@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -142,6 +144,19 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         relationshipMapper.pageEnrollAndChoose(userId);
         return page;
     }
+
+    /**
+     * 查询指定接单者的订单记录
+     * @param userId
+     * @return
+     */
+//    @Override
+//    public List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId) {
+//        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),new MybatisSqlWhereBuild(TOrderRelationship.class)
+//        .eq(TOrderRelationship::getReceiptUserId,userId)
+//        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+//
+//    }
 
     /**
      * 根据orderId和statusList来升序查询报名者订单List

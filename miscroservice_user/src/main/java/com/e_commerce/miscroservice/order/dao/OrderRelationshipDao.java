@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 
+import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.github.pagehelper.Page;
 
@@ -117,4 +118,11 @@ public interface OrderRelationshipDao {
      * @return
      */
 	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
+
+    /**
+     * 查找指定接单者的订单记录
+     * @param userId
+     * @return
+     */
+//    List<TOrder> selectOrderRelationshipByReceiptUserId(Long userId);
 }

@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 服务controller
  * @author 马晓晨
- * @date 2019/3/4
  */
 @RestController
 @RequestMapping("/api/v1/service")

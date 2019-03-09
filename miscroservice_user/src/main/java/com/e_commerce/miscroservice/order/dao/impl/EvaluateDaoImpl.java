@@ -17,4 +17,12 @@ public class EvaluateDaoImpl implements EvaluateDao {
         .in(TEvaluate::getOrderId,orderIds)
         .eq(TEvaluate::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TEvaluate> selectEvaluateInOrderIdsAndByUserId(List orderIds, Long userId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TEvaluate(),new MybatisSqlWhereBuild(TEvaluate.class)
+                .in(TEvaluate::getOrderId,orderIds)
+                .eq(TEvaluate::getUserId,userId)
+                .eq(TEvaluate::getIsValid, AppConstant.IS_VALID_YES));
+    }
 }

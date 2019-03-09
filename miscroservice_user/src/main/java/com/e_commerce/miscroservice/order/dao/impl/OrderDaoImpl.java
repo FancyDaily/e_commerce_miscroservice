@@ -55,30 +55,34 @@ public class OrderDaoImpl implements OrderDao {
         if (isService) {
             result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                     .groupBefore()
+                    .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
-                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue()).groupAfter().or()
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
                     .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
                     .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
                     .groupAfter()
+                    .groupAfter()
                     .eq(TOrder::getCreateUser, userId)
                     .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime)) //TODO status ASC
+                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))  //TODO status ASC
             );
         } else {
             result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                     .groupBefore()
+                    .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
-                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue()).groupAfter().or()
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
                     .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
                     .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
                     .groupAfter()
+                    .groupAfter()
                     .eq(TOrder::getCreateUser, userId)
-                    .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
+                    .eq(TOrder::getType, ProductEnum.TYPE_SEEK_HELP.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
+                    .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))
             );
         }
         return result;
@@ -107,7 +111,35 @@ public class OrderDaoImpl implements OrderDao {
     public List<TOrder> selectPastByUserId(Long userId) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
         .eq(TOrder::getCreateUser,userId)
-        .eq(TOrder::getStatus,OrderEnum.STATUS_END)
+        .eq(TOrder::getStatus,OrderEnum.STATUS_END.getValue())
+        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据订单id集合查找订单
+     * @param orderIds
+     * @return
+     */
+    @Override
+    public List<TOrder> selectOrdersInOrderIds(List orderIds) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+        .in(TOrder::getId,orderIds)
+        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据来源、状态、用户id查找订单记录
+     * @param sourceType
+     * @param userId
+     * @param availableStatusArray
+     * @return
+     */
+    @Override
+    public List<TOrder> selectBySourceAndUserIdAndStatuses(Integer sourceType, Long userId, Integer[] availableStatusArray) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+        .eq(TOrder::getSource,sourceType)
+        .eq(TOrder::getCreateUser,userId)
+        .in(TOrder::getStatus,availableStatusArray)
         .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 
