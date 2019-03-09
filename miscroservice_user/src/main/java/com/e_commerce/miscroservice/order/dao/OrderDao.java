@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import com.github.pagehelper.Page;
 
@@ -98,8 +99,18 @@ public interface OrderDao {
 	 */
 	void updateByServiceId(Long productId, Integer status);
 
+    /**
+     * 根据来源、状态、用户id、订单id查找订单记录
+     * @param sourceGroup
+     * @param userId
+     * @param availableStatusArray
+     * @param idList
+     * @return
+     */
+    List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList);
 
-	//TODO NEW!!!!!!EMD
+
+    //TODO NEW!!!!!!EMD
 
 
 }

@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
@@ -14,10 +15,7 @@ import com.e_commerce.miscroservice.product.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 订单模块的公共订单
@@ -254,7 +252,26 @@ public class OrderCommonController extends BaseController {
      * 获取指定接单者的订单记录
      * @return
      */
-//    public List<TOrderRelationship> selectOrderrelationshipListByReceiptUserId(Long userId) {
-//        return orderRelationshipDao.selectOrderRelationshipByReceiptUserId(userId);
-//    }
+    public List<TOrderRelationship> selectOrderrelationshipListByReceiptUserId(Long userId) {
+        return orderRelationshipDao.selectOrderRelationshipByReceiptUserId(userId);
+    }
+
+    /**
+     * 获取收藏列表
+     * @param id
+     * @return
+     */
+    public List<TOrderRelationship> selectCollectList(Long id) {
+        return orderRelationshipDao.selectCollectList(id);
+    }
+
+    /**
+     * 获取指定id，指定状态的所有订单记录
+     * @param idList
+     * @param collectionAvailableStatusArray
+     * @return
+     */
+    public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer[] collectionAvailableStatusArray) {
+        return orderRelationshipDao.selectOrdersInOrderIdsInStatus(idList,collectionAvailableStatusArray);
+    }
 }

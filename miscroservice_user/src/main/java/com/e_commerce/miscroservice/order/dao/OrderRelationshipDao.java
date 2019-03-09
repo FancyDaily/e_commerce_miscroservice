@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.order.dao;
 
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.github.pagehelper.Page;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 功能描述:
@@ -85,6 +88,8 @@ public interface OrderRelationshipDao {
      * @return
      */
     List<TOrderRelationship> selectListByStatusByEnroll(Long orderId , int status);
+
+
     /**
      * 根据orderId和statusList来升序查询报名者订单List
      * @param orderId
@@ -137,5 +142,20 @@ public interface OrderRelationshipDao {
      * @param userId
      * @return
      */
-//    List<TOrder> selectOrderRelationshipByReceiptUserId(Long userId);
+    List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId);
+
+    /**
+     * 根据用户id查找订单关系记录
+     * @param id
+     * @return
+     */
+    List<TOrderRelationship> selectCollectList(Long id);
+
+    /**
+     *
+     * @param idList
+     * @param collectionAvailableStatusArray
+     * @return
+     */
+    List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray);
 }

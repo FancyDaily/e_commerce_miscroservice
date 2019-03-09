@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
@@ -148,13 +150,39 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
      * @param userId
      * @return
      */
-//    @Override
-//    public List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId) {
-//        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),new MybatisSqlWhereBuild(TOrderRelationship.class)
-//        .eq(TOrderRelationship::getReceiptUserId,userId)
-//        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
-//
-//    }
+    @Override
+    public List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),new MybatisSqlWhereBuild(TOrderRelationship.class)
+        .eq(TOrderRelationship::getReceiptUserId,userId)
+        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+
+    }
+
+    /**
+     * 查询用户相关订单关系记录
+     * @param id
+     * @return
+     */
+    @Override
+    public List<TOrderRelationship> selectCollectList(Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),new MybatisSqlWhereBuild(TOrderRelationship.class)
+        .groupBefore()
+        .groupBefore()
+        .eq(TOrderRelationship::getFromUserId,id)
+        .groupAfter().or()
+                .groupBefore().eq(TOrderRelationship::getReceiptUserId,id)
+                .groupAfter().groupAfter()
+        .eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
+
+    }
+
+    @Override
+    public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+                .in(TOrder::getId,idList)
+                .in(TOrder::getStatus,collectionAvailableStatusArray)
+        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
 
     /**
      * 根据orderId和statusList来升序查询报名者订单List
