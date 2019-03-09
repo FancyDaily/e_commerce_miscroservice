@@ -21,4 +21,14 @@ public interface UserFreezeDao {
      * @param userFreeze
      */
     int insert(TUserFreeze userFreeze);
+
+    /**
+     * 根据用户id和订单id查找冻结记录
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    TUserFreeze selectUserFreezeByUserIdAndOrderId(Long userId, Long orderId);
+
+    int update(TUserFreeze userFreeze);
 }

@@ -76,6 +76,21 @@ public interface OrderDao {
      */
     List<TOrder> selectPastByUserId(Long userId);
 
+    /**
+     * 根据订单id查找订单记录
+     * @param orderIds
+     * @return
+     */
+    List<TOrder> selectOrdersInOrderIds(List orderIds);
+
+    /**
+     * 根据来源、状态、用户id查找订单记录
+     * @param sourceType
+     * @param userId
+     * @param availableStatusArray
+     * @return
+     */
+    List<TOrder> selectBySourceAndUserIdAndStatuses(Integer sourceType, Long userId, Integer[] availableStatusArray);
 	/**
 	 * 同步商品和订单的状态
 	 * @param productId 商品ID

@@ -12,4 +12,9 @@ public interface UserDao {
 
 	int updateByPrimaryKey(TUser tUser);
 
+    TUser info(Long userId);
+
+    TUser queryDoppelganger(TUser user);
+
+    List<TUser> queryUsersByTelephone(String telephone);
 }

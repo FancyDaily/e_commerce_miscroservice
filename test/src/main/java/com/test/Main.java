@@ -6,10 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 
 @SpringBootApplication(exclude = XADataSourceAutoConfiguration.class)
-class Main {
+public class Main {
 
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
 
 
         SpringApplication.run(Main.class, args);

@@ -41,7 +41,50 @@ public class UserDaoImpl implements UserDao {
     @Override
     public int updateByPrimaryKey(TUser tUser) {
         return MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
-                .eq(TUser::getId,tUser.getId()));
+                .eq(TUser::getId, tUser.getId()));
+    }
+
+    @Override
+    public TUser info(Long userId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+                .eq(TUser::getId, userId)
+                .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    public List<TUser> queryUsersByTelephone(String telephone) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+                .eq(TUser::getUserTel, telephone)
+                .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 获取该账号的分身
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public TUser queryDoppelganger(TUser user) {
+        TUser result = null;
+        List<TUser> users = queryUsersByTelephone(user.getUserTel());
+
+        if (AppConstant.AUTH_TYPE_CORP.equals(user.getAuthenticationType()) && AppConstant.AUTH_STATUS_YES.equals(user.getAuthenticationStatus())) {
+            if (AppConstant.IS_COMPANY_ACCOUNT_YES.equals(user.getIsCompanyAccount())) { //目的是获取组织账号的个人账号
+                for (TUser theUser : users) {
+                    if (AppConstant.IS_COMPANY_ACCOUNT_NO.equals(theUser.getIsCompanyAccount())) {
+                        result = theUser;
+                    }
+                }
+            } else {    //目的是获取个人账号的组织账号
+                for (TUser theUser : users) {
+                    if (AppConstant.IS_COMPANY_ACCOUNT_YES.equals(theUser.getIsCompanyAccount())) {
+                        result = theUser;
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
 }

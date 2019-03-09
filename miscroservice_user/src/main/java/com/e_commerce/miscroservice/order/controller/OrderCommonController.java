@@ -230,4 +230,31 @@ public class OrderCommonController extends BaseController {
         }
         return true;
     }
+    /**
+     * 根据订单id集合和用户id返回评价记录
+     * @param orderIds
+     * @param userId
+     * @return
+     */
+    public List<TEvaluate> selectEvaluateInOrderIdsAndByUserId(List orderIds,Long userId) {
+        return  evaluateDao.selectEvaluateInOrderIdsAndByUserId(orderIds,userId);
+    }
+
+    /**
+     * 根据订单id集合返回订单记录
+     * @param orderIds
+     * @return
+     */
+    public List<TOrder> selectOrdersInOrderIds(List orderIds) {
+        return orderDao.selectOrdersInOrderIds(orderIds);
+    }
+
+
+    /**
+     * 获取指定接单者的订单记录
+     * @return
+     */
+//    public List<TOrderRelationship> selectOrderrelationshipListByReceiptUserId(Long userId) {
+//        return orderRelationshipDao.selectOrderRelationshipByReceiptUserId(userId);
+//    }
 }

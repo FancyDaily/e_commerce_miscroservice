@@ -8,7 +8,7 @@ public interface UserSkillDao {
 
     /**
      * 查看某个userId的技能记录
-     * @param id
+     * @param userId
      * @return
      */
     List<TUserSkill> queryOnesSkills(Long userId);
@@ -28,5 +28,17 @@ public interface UserSkillDao {
      */
     int insert(TUserSkill skill);
 
+    /**
+     * 更新指定id的技能记录
+     * @param skill
+     * @return
+     */
     int update(TUserSkill skill);
+
+    /**
+     * 将指定id的技能记录修改为不可用
+     * @param id
+     * @return
+     */
+    int delete(Long id);
 }

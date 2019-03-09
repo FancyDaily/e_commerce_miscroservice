@@ -181,9 +181,6 @@ public class UserServiceImpl implements UserService {
             pageSize = 0;
         }
 
-        // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
-
         List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreeze(id, lastTime, MybatisSqlWhereBuild.ORDER.DESC);
 
         // 如果列表为空
@@ -204,9 +201,12 @@ public class UserServiceImpl implements UserService {
             resultList.add(result);
         }
 
+        // PageHelper
+        Page<Object> startPage = PageHelper.startPage(0, pageSize);
+
         // 服务集
         // 查找订单表
-        List<TOrder> orders = new ArrayList<>();    //TODO 调用订单模块的controller() 入餐 -> orderId
+        List<TOrder> orders = orderService.selectOrdersInOrderIds(idList);//TODO 调用订单模块的controller() 入餐 -> orderId
         //建立订单id-订单实体映射
         Map<Long, TOrder> orderMap = new HashMap<Long, TOrder>();
         for (TOrder order : orders) {
@@ -466,6 +466,15 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public QueryResult historyService(TUser user, Long userId, Integer pageNum, Integer pageSize) {
+
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+
+        if (pageSize == null) {
+            pageSize = 0;
+        }
+
         //分页
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
@@ -477,7 +486,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Map<Long,Object> evaluateMap = new HashMap<>();
-        List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIds(orderIds);
+        List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds,userId);
         for(TEvaluate evaluate:evaluates) {
             List<TEvaluate> evaluateList = (List<TEvaluate>) evaluateMap.get(evaluate.getOrderId());
             if(evaluateList==null) {
@@ -491,6 +500,7 @@ public class UserServiceImpl implements UserService {
         List<HistoryServView> resultList = new ArrayList<>();
         for(TOrder order:orders) {
             HistoryServView historyServView = new HistoryServView();
+            historyServView.setUser(userDao.selectByPrimaryKey(order.getCreateUser())); //查找用户信息
             historyServView.setOrder(order);
             historyServView.setEvaluates((List<TEvaluate>) evaluateMap.get(order.getId()));
             resultList.add(historyServView);
@@ -543,6 +553,24 @@ public class UserServiceImpl implements UserService {
         userFreeze.setUpdateUserName(tUser.getName());
         userFreeze.setIsValid(AppConstant.IS_VALID_YES);
         userFreezeDao.insert(userFreeze);
+    }
+
+    /**
+     * 删除技能
+     * @param id
+     */
+    @Override
+    public void skillDelete(Long id) {
+        userSkillDao.delete(id);
+    }
+
+    @Override
+    public DesensitizedUserView info(TUser user, Long userId) {
+        TUser findUser = userDao.info(userId);
+        if(findUser==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该用户不存在！");
+        }
+        return BeanUtil.copy(findUser,DesensitizedUserView.class);
     }
 
     private void skillPass(TUser user, TUserSkill skill, boolean isModify) {

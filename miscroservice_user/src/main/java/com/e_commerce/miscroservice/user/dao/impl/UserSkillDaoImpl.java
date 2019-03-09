@@ -58,4 +58,19 @@ public class UserSkillDaoImpl implements UserSkillDao {
     public int update(TUserSkill skill) {
         return MybatisOperaterUtil.getInstance().update(skill,new MybatisSqlWhereBuild(TUserSkill.class).eq(TUserSkill::getId,skill.getId()));
     }
+
+    /**
+     * 删除技能
+     * @param id
+     * @return
+     */
+    @Override
+    public int delete(Long id) {
+        TUserSkill skill = new TUserSkill();
+        skill.setId(id);
+        skill.setIsValid(AppConstant.IS_VALID_NO);
+        return MybatisOperaterUtil.getInstance().update(skill,new MybatisSqlWhereBuild(TUserSkill.class)
+        .eq(TUserSkill::getId,id)
+        .eq(TUserSkill::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

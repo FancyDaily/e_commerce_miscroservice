@@ -11,4 +11,12 @@ public interface EvaluateDao {
      * @return
      */
     List<TEvaluate> selectEvaluateInOrderIds(List orderIds);
+
+    /**
+     * 根据订单id集合、用户id查找评价列表
+     * @param orderIds
+     * @param userId
+     * @return
+     */
+    List<TEvaluate> selectEvaluateInOrderIdsAndByUserId(List orderIds, Long userId);
 }

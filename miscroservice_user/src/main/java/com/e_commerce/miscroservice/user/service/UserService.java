@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.user.service;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
 import com.e_commerce.miscroservice.user.vo.UserPageView;
 import com.e_commerce.miscroservice.user.vo.UserSkillListView;
@@ -107,4 +108,18 @@ public interface UserService {
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName);
+
+    /**
+     * 删除技能
+     * @param id
+     */
+    void skillDelete(Long id);
+
+    /**
+     * 查看用户基本信息
+     * @param user
+     * @param userId
+     * @return
+     */
+    DesensitizedUserView info(TUser user, Long userId);
 }

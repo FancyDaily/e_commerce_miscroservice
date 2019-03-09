@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 功能描述:
+ */
+//@RestController
 @RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {

@@ -167,4 +167,11 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> getReceiver(Long orderId);
+
+    /**
+     * 查找指定接单者的订单记录
+     * @param userId
+     * @return
+     */
+//    List<TOrder> selectOrderRelationshipByReceiptUserId(Long userId);
 }

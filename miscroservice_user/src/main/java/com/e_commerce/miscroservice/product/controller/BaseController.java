@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * 'product 的公共Controller
+ */
 public class BaseController {
 
 
