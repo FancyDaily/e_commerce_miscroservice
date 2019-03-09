@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.user.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceReceipt;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -10,8 +10,6 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.user.dao.CompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserDao;
@@ -20,7 +18,6 @@ import com.e_commerce.miscroservice.user.vo.StrServiceView;
 import com.e_commerce.miscroservice.user.vo.StrUserCompanyView;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
