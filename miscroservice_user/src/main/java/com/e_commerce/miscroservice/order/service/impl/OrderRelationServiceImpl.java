@@ -6,17 +6,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
+import com.e_commerce.miscroservice.message.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import sun.util.resources.cldr.gv.LocaleNames_gv;
+
 
 
 /**
@@ -566,8 +566,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
      * @param nowUser
      */
     private void unFreezeTime(long unfreezeTime, long nowTime, TUser nowUser) {
-        TUserFreeze userFreeze = new TUserFreeze();//TODO 调用冻结dao来查询冻结表
-        //TODO nowUser重新查一遍 确保是最新的
+        TUserFreeze userFreeze = null;//TODO 调用冻结dao来查询冻结表
         if (userFreeze == null) {
             //如果没有冻结信息，说明订单有问题，取消失败
             throw new MessageException("499", "冻结信息表更新失败，请后退刷新重试");
@@ -580,7 +579,6 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             userFreeze.setIsValid("0");
         }
         //TODO 更新冻结表
-        //TODO nowUser重新查一遍 确保是最新的
         nowUser.setFreezeTime(nowUser.getFreezeTime() - unfreezeTime);
         nowUser.setUpdateTime(nowTime);
         nowUser.setUpdateUser(nowUser.getId());
