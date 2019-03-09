@@ -3,93 +3,93 @@ package com.e_commerce.miscroservice.commons.entity.application;
 import java.io.Serializable;
 
 public class TOrder implements Serializable {
-        private Long id;
+    private Long id;
 
-        private Long serviceId;
+    private Long serviceId;
 
-        private Long mainId;
+    private Long mainId;
 
-        private String nameAudioUrl;
+    private String nameAudioUrl;
 
-        private String serviceName;
+    private String serviceName;
 
-        private Integer servicePersonnel;
+    private Integer servicePersonnel;
 
-        private Integer servicePlace;
+    private Integer servicePlace;
 
-        private String labels;
+    private String labels;
 
-        private Integer type;
+    private Integer type;
 
-        private Integer status;
+    private Integer status;
 
-        private Integer source;
+    private Integer source;
 
-        private Long serviceTypeId;
+    private Long serviceTypeId;
 
-        private String addressName;
+    private String addressName;
 
-        private Double longitude;
+    private Double longitude;
 
-        private Double latitude;
+    private Double latitude;
 
-        private Integer totalEvaluate;
+    private Integer totalEvaluate;
 
-        private Integer enrollNum;
+    private Integer enrollNum;
 
-        private Integer confirmNum;
+    private Integer confirmNum;
 
-        private Long startTime;
+    private Long startTime;
 
-        private Long endTime;
+    private Long endTime;
 
-        private Integer serviceStatus;
+    private Integer serviceStatus;
 
-        private Integer openAuth;
+    private Integer openAuth;
 
-        private Integer timeType;
+    private Integer timeType;
 
-        private Long collectTime;
+    private Long collectTime;
 
-        private Integer collectType;
+    private Integer collectType;
 
-        private Long createUser;
+    private Long createUser;
 
-        private String createUserName;
+    private String createUserName;
 
-        private Long createTime;
+    private Long createTime;
 
-        private Long updateUser;
+    private Long updateUser;
 
-        private String updateUserName;
+    private String updateUserName;
 
-        private Long updateTime;
+    private Long updateTime;
 
-        private Long companyId;
+    private Long companyId;
 
-        private String isValid;
+    private String isValid;
 
-        private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-        public Long getId() {
-            return id;
-        }
+    public Long getId() {
+        return id;
+    }
 
-        public void setId(Long id) {
-            this.id = id;
-        }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-        public Long getServiceId() {
-            return serviceId;
-        }
+    public Long getServiceId() {
+        return serviceId;
+    }
 
-        public void setServiceId(Long serviceId) {
-            this.serviceId = serviceId;
-        }
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
+    }
 
-        public Long getMainId() {
-            return mainId;
-        }
+    public Long getMainId() {
+        return mainId;
+    }
 
         public void setMainId(Long mainId) {
             this.mainId = mainId;
@@ -111,13 +111,13 @@ public class TOrder implements Serializable {
             this.serviceName = serviceName == null ? null : serviceName.trim();
         }
 
-        public Integer getServicePersonnel() {
-            return servicePersonnel;
-        }
+    public Integer getServicePersonnel() {
+        return servicePersonnel;
+    }
 
-        public void setServicePersonnel(Integer servicePersonnel) {
-            this.servicePersonnel = servicePersonnel;
-        }
+    public void setServicePersonnel(Integer servicePersonnel) {
+        this.servicePersonnel = servicePersonnel;
+    }
 
         public Integer getServicePlace() {
             return servicePlace;
@@ -203,9 +203,9 @@ public class TOrder implements Serializable {
             return enrollNum;
         }
 
-        public void setEnrollNum(Integer enrollNum) {
-            this.enrollNum = enrollNum;
-        }
+    public void setEnrollNum(Integer enrollNum) {
+        this.enrollNum = enrollNum;
+    }
 
         public Integer getConfirmNum() {
             return confirmNum;
@@ -231,9 +231,9 @@ public class TOrder implements Serializable {
             this.endTime = endTime;
         }
 
-        public Integer getServiceStatus() {
-            return serviceStatus;
-        }
+    public Integer getServiceStatus() {
+        return serviceStatus;
+    }
 
         public void setServiceStatus(Integer serviceStatus) {
             this.serviceStatus = serviceStatus;
