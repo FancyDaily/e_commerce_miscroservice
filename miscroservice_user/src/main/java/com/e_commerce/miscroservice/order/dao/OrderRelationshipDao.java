@@ -95,7 +95,7 @@ public interface OrderRelationshipDao {
 
     List<TOrderRelationship> selectListByStatusListByEnroll(Long orderId , List<Integer> statusList);
     /**
-     * 根据statusList来查询参与者订单数量
+     * 根据statusList来查询未投诉参与者订单数量
      * @param orderId
      * @param status
      * @return
