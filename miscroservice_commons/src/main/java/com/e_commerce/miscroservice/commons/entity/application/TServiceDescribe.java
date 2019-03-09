@@ -1,25 +1,21 @@
-package com.e_commerce.miscroservice.order.po;
+package com.e_commerce.miscroservice.commons.entity.application;
 
 import java.io.Serializable;
 
-public class TEvaluate implements Serializable {
+public class TServiceDescribe implements Serializable {
     private Long id;
 
-    private Long evaluateUserId;
+    private Long serviceId;
 
-    private Long userId;
+    private Integer type;
 
-    private Long orderId;
+    private Integer sort;
 
-    private Integer creditEvaluate;
+    private String depict;
 
-    private Integer majorEvaluate;
+    private String url;
 
-    private Integer attitudeEvaluate;
-
-    private String message;
-
-    private String labels;
+    private String isCover;
 
     private String extend;
 
@@ -47,68 +43,52 @@ public class TEvaluate implements Serializable {
         this.id = id;
     }
 
-    public Long getEvaluateUserId() {
-        return evaluateUserId;
+    public Long getServiceId() {
+        return serviceId;
     }
 
-    public void setEvaluateUserId(Long evaluateUserId) {
-        this.evaluateUserId = evaluateUserId;
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Integer getType() {
+        return type;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setType(Integer type) {
+        this.type = type;
     }
 
-    public Long getOrderId() {
-        return orderId;
+    public Integer getSort() {
+        return sort;
     }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
+    public void setSort(Integer sort) {
+        this.sort = sort;
     }
 
-    public Integer getCreditEvaluate() {
-        return creditEvaluate;
+    public String getDepict() {
+        return depict;
     }
 
-    public void setCreditEvaluate(Integer creditEvaluate) {
-        this.creditEvaluate = creditEvaluate;
+    public void setDepict(String depict) {
+        this.depict = depict == null ? null : depict.trim();
     }
 
-    public Integer getMajorEvaluate() {
-        return majorEvaluate;
+    public String getUrl() {
+        return url;
     }
 
-    public void setMajorEvaluate(Integer majorEvaluate) {
-        this.majorEvaluate = majorEvaluate;
+    public void setUrl(String url) {
+        this.url = url == null ? null : url.trim();
     }
 
-    public Integer getAttitudeEvaluate() {
-        return attitudeEvaluate;
+    public String getIsCover() {
+        return isCover;
     }
 
-    public void setAttitudeEvaluate(Integer attitudeEvaluate) {
-        this.attitudeEvaluate = attitudeEvaluate;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message == null ? null : message.trim();
-    }
-
-    public String getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String labels) {
-        this.labels = labels == null ? null : labels.trim();
+    public void setIsCover(String isCover) {
+        this.isCover = isCover == null ? null : isCover.trim();
     }
 
     public String getExtend() {

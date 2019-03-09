@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.order.vo;
 
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.product.vo.BaseUserView;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -33,10 +32,6 @@ public class PageOrderReturnView implements Serializable {
 	 * 订单信息
 	 */
 	private TOrder order;
-	/**
-	 * 服务类型标签
-	 */
-	private String serviceType;
 	/**
 	 * 封面图地址
 	 */

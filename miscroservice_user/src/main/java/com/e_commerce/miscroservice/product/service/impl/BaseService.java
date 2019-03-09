@@ -1,12 +1,13 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.order.controller.OrderController;
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.order.service.impl.OrderServiceImpl;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.dao.ProductDescDao;
@@ -96,6 +97,11 @@ public class BaseService {
 	 * @param service 发布的服务求助
 	 */
 	protected void setServiceCommonField(TUser user, TService service) {
+		service.setId(snowflakeIdWorker.nextId());
+		// 待审核 TODO 暂时不做审核限制，直接是待开始
+//			service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
+		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
+		service.setUserId(user.getId());
 		long currentTime = System.currentTimeMillis();
 		service.setCreateUser(user.getId());
 		service.setCreateUserName(user.getName());

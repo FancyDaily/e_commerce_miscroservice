@@ -120,6 +120,36 @@ public class DateUtil {
 	}
 
 	/**
+	 * 获取指定周期的下一个周  1、周一  7、周日 不包含weekDay
+	 * @param weekDayNumberArray  指定周期的数组
+	 * @param weekDay 指定的周
+	 * @return
+	 */
+	public static int getNextWeekDay(int[] weekDayNumberArray, int weekDay) {
+		for (int i = 0; i < weekDayNumberArray.length; i++) {
+			if (weekDayNumberArray[i] > weekDay) {
+				return weekDayNumberArray[i];
+			}
+		}
+		return weekDayNumberArray[0];
+	}
+	/**
+	 * 获取指定周期最近的一个周X 可能包含weekDay  1、周一  7、周日
+	 * @param weekDayNumberArray  指定周期的数组
+	 * @param weekDay 指定的周
+	 * @return
+	 */
+	public static int getMostNearWeekDay(int[] weekDayNumberArray, int weekDay) {
+		for (int i = 0; i < weekDayNumberArray.length; i++) {
+			if (weekDayNumberArray[i] >= weekDay) {
+				return weekDayNumberArray[i];
+			}
+		}
+		return weekDayNumberArray[0];
+	}
+
+
+	/**
 	 * 获取当前日期的周几
 	 * @param date
 	 * @return 周一为1  周日为7
@@ -149,4 +179,6 @@ public class DateUtil {
 		int week = (day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
 		return week + 1;
 	}
+
+
 }

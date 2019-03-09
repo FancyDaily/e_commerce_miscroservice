@@ -1,8 +1,10 @@
 package com.e_commerce.miscroservice.product.service;
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 
 import java.util.List;
@@ -52,4 +54,35 @@ public interface ProductService {
 	 * @return
 	 */
 	List<TServiceDescribe> getProductDesc(Long serviceId);
+
+	/**
+	 * 求助服务下架
+	 * @param user 当前用户
+	 * @param productId 商品ID
+	 */
+	void lowerFrame(TUser user, Long productId);
+
+	/**
+	 * 求助服务删除
+	 * @param user 当前用户
+	 * @param productId 商品ID
+	 */
+	void del(TUser user, Long productId);
+
+	/**
+	 * 求助服务上架
+	 * @param user 当前用户
+	 * @param productId 上架的产品ID
+	 */
+	void upperFrame(TUser user, Long productId);
+
+	/**
+	 * 分页我发布的
+	 * @param user 当前用户
+	 * @param pageNum 页数
+	 * @param pageSize 每页数量
+	 * @param type 类型 1、求助 2、服务
+	 * @return
+	 */
+	QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type);
 }
