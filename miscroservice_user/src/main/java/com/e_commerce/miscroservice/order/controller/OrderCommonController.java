@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
@@ -273,5 +272,23 @@ public class OrderCommonController extends BaseController {
      */
     public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer[] collectionAvailableStatusArray) {
         return orderRelationshipDao.selectOrdersInOrderIdsInStatus(idList,collectionAvailableStatusArray);
+    }
+
+    /**
+     * 根据id查找订单
+     * @param orderRelationshipId
+     * @return
+     */
+    public TOrderRelationship selectOrderById(Long orderRelationshipId) {
+        return orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
+    }
+
+    /**
+     * 根据订单关系id、收藏状态更新收藏状态
+     * @param orderRelationshipId
+     * @param collectStatus
+     */
+    public int updateCollectStatus(Long orderRelationshipId, int collectStatus) {
+        return orderRelationshipDao.updateCollectStatus(orderRelationshipId,collectStatus);
     }
 }
