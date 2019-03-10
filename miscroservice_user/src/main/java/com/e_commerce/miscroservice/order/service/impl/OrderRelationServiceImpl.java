@@ -15,10 +15,8 @@ import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipE
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
-import com.e_commerce.miscroservice.message.po.TOrderRelationship;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
@@ -267,10 +265,8 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             throw new MessageException("499", "对不起，您不可以对非自己发布对互助进行操作");
         }
         List<Integer> statusList = new ArrayList<>();
-        TOrder order = orderDao.selectByPrimaryKey(orderId);
         long canChooseUserSum = order.getServicePersonnel() - order.getConfirmNum();
         int chooseUserSum = 0;
-        long canChooseUserSum = order.getServeNum() - order.getConfirmNum();
         if (userIdList.size() > canChooseUserSum) {
             if (canChooseUserSum == 0){
                 throw new MessageException("499", "对不起，您已选满所需人数");
