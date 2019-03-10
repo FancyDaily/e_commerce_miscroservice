@@ -2,10 +2,9 @@ package com.e_commerce.miscroservice.user.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
@@ -187,84 +186,41 @@ public class CompanyServiceImpl implements CompanyService {
         if (companyId == null || (companyId != null && companyId <= 0)) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "组织Id不能为空！");
         }
-//
-//        // 查询我作为接单者的所有订单关系
-//        List<TOrder> orders = orderService.selectOrderrelationshipListByReceiptUserId(userId);
-//
-//
-//        List<Long> idList = new ArrayList<Long>();
-//        for (TServiceReceipt serviceReceipt : serviceReceipts) {
-//            idList.add(serviceReceipt.getServiceId());
-//        }
-//
-//        if(idList.isEmpty()) {
-//            QueryResult<StrServiceView> queryResult = new QueryResult<>();
-//            queryResult.setResultList(new ArrayList<>());
-//            return queryResult;
-//        }
-//
-//        // 查询单位申请人(OLD) => 直接查询组织账号
-//        Long masterId = null;
-//
-//        //查询组织账号id
-//        TUserCompanyExample userCompanyExample = new TUserCompanyExample();
-//        TUserCompanyExample.Criteria userCompanyCriteria = userCompanyExample.createCriteria();
-//        userCompanyCriteria.andCompanyIdEqualTo(companyId);	//组织id
-//        userCompanyCriteria.andCompanyJobEqualTo(AppConstant.JOB_COMPANY_CREATER);	//创建者
-//        userCompanyCriteria.andIsValidEqualTo(AppConstant.IS_VALID_YES);	//TODO 有效
-//        List<TUserCompany> userCompanies = userCompanyDao.selectByExample(userCompanyExample);
-//        if(!userCompanies.isEmpty()) {
-//            masterId = userCompanies.get(0).getUserId();
-//        }
-//
-//        // exclude list
-//        List<Integer> excludeList = new ArrayList<>();
-//        excludeList.add(AppConstant.SERV_STATUS_UNAUDITED);// 1
-//        excludeList.add(AppConstant.SERV_STATUS_FAILPASS);// 9
-//        excludeList.add(AppConstant.SERV_STATUS_MASTERCANCLE);// 6 TODO 是否显示已被取消的项目
-//        excludeList.add(AppConstant.SERV_STATUS_GUESTCANCLE);// 8
-//        excludeList.add(AppConstant.SERV_STATUS_OUT_OF_TIME);// 7
-//
-//        // PageHelper
-//        PageHelper.startPage(0, pageSize); // TODO 分页
-//
-//        // 查询组织账号发布的活动
-//        TServiceExample serviceExample = new TServiceExample();
-//        TServiceExample.Criteria serviceCriteria = serviceExample.createCriteria();
-//        serviceExample.setOrderByClause("create_time desc,update_time asc");// 排序规则
-////		serviceCriteria.andTypeEqualTo(AppConstant.PUBLISH_TYPE_ACTY);
-//        serviceCriteria.andSourceEqualTo(AppConstant.SERV_TYPE_CORP);
-//        serviceCriteria.andUserIdEqualTo(masterId); // 活动方
-//        serviceCriteria.andStatusNotIn(excludeList);// 筛选状态
-//        serviceCriteria.andIdIn(idList);
-//        serviceCriteria.andIsValidEqualTo(AppConstant.IS_VALID_YES); // 有效
-//        serviceCriteria.andCreateTimeLessThan(lastTime); // TODO 分页参数
-//        List<TService> services = serviceDao.selectByExample(serviceExample);
-//
-//        //String化
-//        List<StrServiceView> views = new ArrayList<StrServiceView>();
-//        for(TService service:services) {
-//            StrServiceView view = BeanUtil.copy(service, StrServiceView.class);
-//            view.setIdString(String.valueOf(view.getId()));
-//            views.add(view);
-//        }
-//
-//        PageInfo<TService> pageInfo = new PageInfo<TService>(services);
-//        queryResult.setResultList(views);
-//        queryResult.setTotalCount(pageInfo.getTotal());
-        QueryResult<StrServiceView> queryResult = new QueryResult<StrServiceView>();
 
-        /*
-         * //OLD 遍历与比较 -> 结果集 // resultList List<TService> resultList = new
-         * ArrayList<>();
-         *
-         * // id列表 List<Long> strList = new ArrayList<>(); for (TServiceReceipt
-         * serviceReceipt : serviceReceipts) {
-         * strList.add(serviceReceipt.getServiceId()); }
-         *
-         * // 匹配构建结果集 for (TService service : services) { if
-         * (strList.contains(service.getId())) { resultList.add(service); } }
-         */
+        // 查询我作为接单者的所有订单关系
+        List<TOrderRelationship> orderRelationships = orderService.selectOrderrelationshipListByReceiptUserId(userId);
+        List<Long> idList = new ArrayList<>();
+        for(TOrderRelationship orderRelationship:orderRelationships) {
+            idList.add(orderRelationship.getOrderId());
+        }
+
+        // 查询单位申请人(OLD) => 直接查询组织账号
+        Long masterId = null;
+
+        //查询组织账号id
+        List<TUserCompany> userCompanies = userCompanyDao.findRecordOfCompanyAccount(companyId);
+
+        if(!userCompanies.isEmpty()) {
+            masterId = userCompanies.get(0).getUserId();
+        }
+
+        // PageHelper
+        Page<Object> startPage = PageHelper.startPage(0, pageSize);
+
+        List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP, masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
+
+        //String化
+        List<StrServiceView> views = new ArrayList<StrServiceView>();
+        for(TOrder order:orders) {
+            StrServiceView view = BeanUtil.copy(order, StrServiceView.class);
+            view.setIdString(String.valueOf(view.getId()));
+            view.setServiceIdString(String.valueOf(view.getServiceId()));
+            views.add(view);
+        }
+
+        QueryResult<StrServiceView> queryResult = new QueryResult<>();
+        queryResult.setResultList(views);
+        queryResult.setTotalCount(startPage.getTotal());
 
         return queryResult;
     }

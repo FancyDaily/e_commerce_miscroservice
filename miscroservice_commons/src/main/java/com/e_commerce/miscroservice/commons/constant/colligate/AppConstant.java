@@ -744,4 +744,9 @@ public interface AppConstant {
      * 可用的服务/求助状态(可报名)
      */
     Integer[] AVAILABLE_STATUS_ARRAY = {0, 1, 2, 3};    //TODO 可用服务状态待确定
+
+    /**
+     * //收藏列表中的订单状态
+     */
+    Integer[] COLLECTION_AVAILABLE_STATUS_ARRAY = AVAILABLE_STATUS_ARRAY; //TODO 收藏列表中的订单状态
 }

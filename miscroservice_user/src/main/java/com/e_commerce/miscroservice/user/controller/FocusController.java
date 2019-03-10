@@ -37,7 +37,7 @@ public class FocusController extends BaseController {
     public Object submit(String token, Long userFollowId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             focusService.submit(user, userFollowId);
             result.setSuccess(true);
@@ -65,7 +65,7 @@ public class FocusController extends BaseController {
     public Object focusList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, true);
             result.setData(queryResult);
@@ -94,7 +94,7 @@ public class FocusController extends BaseController {
     public Object fanList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, false);
             result.setData(queryResult);

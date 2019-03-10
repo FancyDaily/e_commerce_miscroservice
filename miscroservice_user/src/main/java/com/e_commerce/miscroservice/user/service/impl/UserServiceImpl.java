@@ -7,10 +7,12 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
@@ -24,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private OrderCommonController orderService;
@@ -46,6 +48,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserFollowDao userFollowDao;
+
+    @Autowired
+    private BonusPackageDao bonusPackageDao;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
@@ -406,6 +414,7 @@ public class UserServiceImpl implements UserService {
      * @param orderId
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public void collect(TUser user, Long orderId) {
 
 //TODO  orderService.updateOrderRelationship();
@@ -560,6 +569,7 @@ public class UserServiceImpl implements UserService {
      * 删除技能
      * @param id
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillDelete(Long id) {
         userSkillDao.delete(id);
@@ -574,6 +584,322 @@ public class UserServiceImpl implements UserService {
         return BeanUtil.copy(findUser,DesensitizedUserView.class);
     }
 
+    /**
+     * 更新用户信息
+     *
+     * @param token
+     * @param user
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Override
+    public String modify(String token, TUser user) {
+      return "";
+/*
+        TUser idHolder = (TUser) redisUtil.get(token);
+        TUser updateData = user; // 原始数据
+
+        // 判空
+        if (user == null) {
+            return token;
+        }
+
+        // 赋予id
+        if (user.getId() == null) {
+            user.setId(idHolder.getId());
+        }
+
+        // 防止将他人的信息篡改
+        if (!idHolder.getId().equals(user.getId())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请勿尝试篡改他人的数据！");
+        }
+
+        String telephone = user.getUserTel();
+        if (telephone != null) {
+            // 若对手机号进行修改
+            if (!idHolder.getUserTel().equals(telephone)) {
+                if (getUserByTelephone(telephone).isEmpty()) {
+                    throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已存在！");
+                }
+//				return flushRedisUserNewToken(token, user);
+//				flushRedisUser(token, user);
+//				return token;
+            }
+        } else { // 若为基本信息修改
+            user.setAuthStatus(AppConstant.BASIC_INFO_ALREADY_MODIFY);
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+        // updater
+        user.setUpdateTime(currentTimeMillis);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        // 更新数据库
+        userDao.updateByPrimaryKey(user);
+
+        // TODO 如果为修改昵称 -> 同步修改服务表里的创建者昵称
+        user = userDao.selectByPrimaryKey(idHolder.getId());
+//        completeReward(user); //TODO 任务奖励
+
+        // 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
+        if (updateData != null && updateData.getUserTel() != null) {
+            TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
+            if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
+                    && !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
+                companyAccount.setUserTel(telephone);
+                // updater
+                companyAccount.setUpdateTime(currentTimeMillis);
+                companyAccount.setUpdateUser(user.getId());
+                companyAccount.setUpdateUserName(user.getName());
+                userDao.updateByPrimaryKey(companyAccount);
+                // 删除组织账号的缓存
+                String redisKey = "str" + companyAccount.getId();
+                String companyToken = (String) redisUtil.get(redisKey);
+                if (companyToken != null) {
+                    redisUtil.del(companyToken);// 删除访问凭证
+                }
+                redisUtil.del(redisKey);// 删除登录凭证
+            }
+        }
+
+        // 刷新缓存
+        flushRedisUser(token, user);
+        return token;
+ */
+
+    }
+
+    /**
+     * 预创建一个红包
+     *
+     * @param user
+     * @param bonusPackage
+     * @return
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Override
+    public TBonusPackage preGenerateBonusPackage(TUser user, TBonusPackage bonusPackage) {
+        //TODO 判穷(含授信)
+
+        long currentTimeMillis = System.currentTimeMillis();
+        bonusPackage.setId(idGenerator.nextId());
+        bonusPackage.setUserId(user.getId());
+        bonusPackage.setCreateTime(currentTimeMillis);
+        bonusPackage.setUpdateTime(currentTimeMillis);
+        bonusPackage.setCreateUser(user.getId());
+        bonusPackage.setUpdateUser(user.getId());
+        bonusPackage.setCreateUserName(user.getName());
+        bonusPackage.setUpdateUserName(user.getName());
+        bonusPackage.setIsValid(AppConstant.IS_VALID_NO);   //预生成红包不可见
+        bonusPackageDao.insert(bonusPackage);
+        return bonusPackage;
+    }
+
+    /**
+     * 生成红包
+     * @param user
+     * @param bonusPackageId
+     */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Override
+    public void generateBonusPackage(TUser user, Long bonusPackageId) {
+        TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
+        //校验
+        if(bonusPackage==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该红包不存在！");
+        }
+        //校验红包状态
+        if(AppConstant.IS_VALID_YES.equals(bonusPackage.getIsValid())) {
+            return;
+        }
+        Long time = bonusPackage.getTime();
+        Long currentMills = System.currentTimeMillis();
+        //TODO 判穷(含授信)
+
+        //余额变动
+        user = userDao.selectByPrimaryKey(user.getId());    //最新数据
+        user.setSurplusTime(user.getSurplusTime() - time);
+        //updater
+        user.setUpdateTime(currentMills);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(user);
+
+        //流水
+        TUserTimeRecord record = new TUserTimeRecord();
+        record.setId(idGenerator.nextId());
+        record.setFromUserId(user.getId());
+        record.setTime(time);
+        record.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_OUT.getCode());
+        record.setTargetId(bonusPackageId);
+        //creater & updater
+        record.setCreateTime(currentMills);
+        record.setCreateUser(user.getId());
+        record.setCreateUserName(user.getName());
+        record.setUpdateTime(currentMills);
+        record.setUpdateUser(user.getId());
+        record.setUpdateUserName(user.getName());
+        record.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(record);
+
+        bonusPackage.setId(bonusPackageId);
+        //updater
+        bonusPackage.setUpdateUser(user.getId());
+        bonusPackage.setUpdateUserName(user.getName());
+        bonusPackage.setUpdateTime(System.currentTimeMillis());
+        //isValid
+        bonusPackage.setIsValid(AppConstant.IS_VALID_YES);
+        bonusPackageDao.updateByPrimaryKey(bonusPackage);
+    }
+
+    /**
+     * 查看一个红包
+     * @param user
+     * @param bonusId
+     * @return
+     */
+    @Override
+    public TBonusPackage bonusPackageInfo(TUser user, Long bonusId) {
+        return bonusPackageDao.info(bonusId);
+    }
+
+    /**
+     * 打开一个红包
+     * @param user
+     * @param bonusId
+     */
+    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Throwable.class)
+    @Override
+    public void openBonusPackage(TUser user, Long bonusId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        // 判空
+        if (bonusId == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "红包id不能为空！");
+        }
+
+        TBonusPackage bonusRecord = bonusPackageDao.selectByPrimaryKey(bonusId);
+
+        if (bonusRecord == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在!");
+        }
+
+        if (AppConstant.IS_VALID_NO.equals(bonusRecord.getIsValid())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"红包已失效！");
+        }
+
+        //判权
+        if(bonusRecord.getCreateUser().equals(user.getId())) { //TODO
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"您不能领取自己的红包!");
+        }
+
+        // 更新红包状态
+        bonusRecord.setIsValid(AppConstant.IS_VALID_NO);
+        //updater
+        bonusRecord.setUpdateTime(currentTimeMillis);
+        bonusRecord.setUpdateUser(user.getId());
+        bonusRecord.setUpdateUserName(user.getName());
+        bonusPackageDao.updateByPrimaryKey(bonusRecord);
+
+        // 用户余额增加
+        user = userDao.selectByPrimaryKey(user.getId());
+        user.setSurplusTime(user.getSurplusTime() + bonusRecord.getTime());
+        userDao.updateByPrimaryKey(user);
+
+        // 记录收入流水
+        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
+        userTimeRecord.setId(snowflakeIdWorker.nextId());
+        userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_IN.getCode());
+        userTimeRecord.setTargetId(bonusId); // 关联红包记录
+        userTimeRecord.setTime(bonusRecord.getTime());
+        // creater & updater
+        userTimeRecord.setCreateTime(currentTimeMillis);
+        userTimeRecord.setCreateUser(user.getId());
+        userTimeRecord.setCreateUserName(user.getName());
+        userTimeRecord.setUpdateTime(currentTimeMillis);
+        userTimeRecord.setUpdateUser(user.getId());
+        userTimeRecord.setUpdateUserName(user.getName());
+        userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(userTimeRecord);
+
+        // 写一条通知(通知红包发起人)
+        String content = String.format(SysMsgEnum.BONUS_PACKAGE_DONE.getContent(), bonusRecord.getDescription(),
+                user.getId());
+        Long targetUserId = bonusRecord.getUserId();
+
+        //TODO 插入一条系统消息 调用order模块的接口
+        //insertSysMsg(targetUserId, SysMsgEnum.BONUS_PACKAGE_DONE.getTitle(), content);
+    }
+
+    /**
+     * 收藏列表
+     * @param user
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public QueryResult<List<TOrder>> collectList(TUser user, Integer pageNum, Integer pageSize) {
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+
+        if (pageSize == null) {
+            pageSize = 0;
+        }
+
+        List<TOrderRelationship> orderRelationships = orderService.selectCollectList(user.getId());
+
+        List<Long> idList = new ArrayList<>();
+        for(TOrderRelationship orderRelationship:orderRelationships) {
+            idList.add(orderRelationship.getOrderId());
+        }
+
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+        List<TOrder> orders = orderService.selectOrdersInOrderIdsInStatus(idList, AppConstant.COLLECTION_AVAILABLE_STATUS_ARRAY);
+
+        QueryResult queryResult = new QueryResult();
+        queryResult.setResultList(orders);
+        queryResult.setTotalCount(startPage.getTotal());
+
+        return  queryResult;
+    }
+
+    /**
+     * 刷勋缓存
+     * @param token
+     * @param user
+     */
+    private void flushRedisUser(String token, TUser user) {
+        String idKey = String.valueOf(user.getId());
+
+        // 清除
+        if (redisUtil.hasKey(token)) {
+            redisUtil.del(token);
+        }
+        if (redisUtil.hasKey(idKey)) {
+            redisUtil.del(idKey);
+        }
+
+        // 刷新
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set(idKey, user, getUserTokenInterval());
+    }
+
+    /**
+     * 通过手机号获取用户记录
+     * @param telephone
+     * @return
+     */
+    private List<TUser> getUserByTelephone(String telephone) {
+        return userDao.queryUsersByTelephone(telephone);
+    }
+
+    /**
+     * 技能校验
+     * @param user
+     * @param skill
+     * @param isModify
+     */
     private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
         Long userId = user.getId();
         // 非空校验 必要元素：技能名称、封面图、id
@@ -611,6 +937,5 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
 
 }

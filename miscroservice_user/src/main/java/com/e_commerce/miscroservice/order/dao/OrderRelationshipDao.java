@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.order.dao;
 
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.github.pagehelper.Page;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 功能描述:
@@ -61,41 +64,42 @@ public interface OrderRelationshipDao {
 	 */
 	TOrderRelationship selectByDateByEnrollUserId(Long startTime, Long endTime, Long serviceId, Long userId);
 
-	/**
-	 * 根据订单id和用户id来查找订单关系
-	 *
-	 * @param orderId
-	 * @param userId
-	 * @return
-	 */
-	TOrderRelationship selectByOrderIdAndUserId(Long orderId, Long userId);
+    /**
+     * 根据订单id和用户id来查找订单关系
+     * @param orderId
+     * @param userId
+     * @return
+     */
+    TOrderRelationship selectByOrderIdAndUserId(Long orderId , Long userId);
+    /**
+     * 根据订单id和报名用户idList来查询订单关系List
+     * @param orderId
+     * @param userIdList
+     * @return
+     */
+    List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId , List<Long> userIdList);
+    /**
+     * 根据orderId和status来查询未开始（签到）报名者订单List
+     * @param orderId
+     * @param status
+     * @return
+     */
+    List<TOrderRelationship> selectListByStatusForNotSignByEnroll(Long orderId , int status);
+    /**
+     * 根据orderId和status来查询报名者订单List
+     * @param orderId
+     * @param status
+     * @return
+     */
+    List<TOrderRelationship> selectListByStatusByEnroll(Long orderId , int status);
 
-	/**
-	 * 根据订单id和报名用户idList来查询订单关系List
-	 *
-	 * @param orderId
-	 * @param userIdList
-	 * @return
-	 */
-	List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId, List<Long> userIdList);
 
-	/**
-	 * 根据orderId和status来查询未开始（签到）报名者订单List
-	 *
-	 * @param orderId
-	 * @param status
-	 * @return
-	 */
-	List<TOrderRelationship> selectListByStatusForNotSignByEnroll(Long orderId, int status);
-
-	/**
-	 * 根据orderId和status来查询报名者订单List
-	 *
-	 * @param orderId
-	 * @param status
-	 * @return
-	 */
-	List<TOrderRelationship> selectListByStatusByEnroll(Long orderId, int status);
+    /**
+     * 根据orderId和statusList来升序查询报名者订单List
+     * @param orderId
+     * @param statusList
+     * @return
+     */
 
 	/**
 	 * 根据orderId和statusList来升序查询报名者订单List
@@ -173,5 +177,20 @@ public interface OrderRelationshipDao {
      * @param userId
      * @return
      */
-//    List<TOrder> selectOrderRelationshipByReceiptUserId(Long userId);
+    List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId);
+
+    /**
+     * 根据用户id查找订单关系记录
+     * @param id
+     * @return
+     */
+    List<TOrderRelationship> selectCollectList(Long id);
+
+    /**
+     *
+     * @param idList
+     * @param collectionAvailableStatusArray
+     * @return
+     */
+    List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray);
 }

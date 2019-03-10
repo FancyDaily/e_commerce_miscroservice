@@ -1,8 +1,7 @@
 package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,7 +54,7 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "82438795718295552", //主键
      *                 "id": 82438795718295552,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "fromUserId": 68813285541019648,
      *                 "type": 1,
      *                 "title": "提供一次服务",   //名目
@@ -72,15 +72,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "82435699785072640",
      *                 "id": 82435699785072640,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-14",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1547436602410,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1547436602410,
      *                 "isValid": "1"
@@ -88,15 +88,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "81365494354935808",
      *                 "id": 81365494354935808,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-11",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1547181445552,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1547181445552,
      *                 "isValid": "1"
@@ -104,15 +104,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "81073248518799360",
      *                 "id": 81073248518799360,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-10",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1547111768715,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1547111768715,
      *                 "isValid": "1"
@@ -120,7 +120,7 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "80740311462051840",
      *                 "id": 80740311462051840,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "fromUserId": 68813260748488704,
      *                 "type": 1,
      *                 "title": "提供一次服务",
@@ -138,15 +138,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "80739259920678912",
      *                 "id": 80739259920678912,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-09",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1547032139628,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1547032139628,
      *                 "isValid": "1"
@@ -154,15 +154,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "80282449333977088",
      *                 "id": 80282449333977088,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-08",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1546923227497,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1546923227497,
      *                 "isValid": "1"
@@ -170,15 +170,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "79899354319552512",
      *                 "id": 79899354319552512,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-07",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1546831890528,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1546831890528,
      *                 "isValid": "1"
@@ -186,15 +186,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "78878228382482432",
      *                 "id": 78878228382482432,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-04",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1546588435133,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1546588435133,
      *                 "isValid": "1"
@@ -202,15 +202,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "78552166431719424",
      *                 "id": 78552166431719424,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-03",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1546510695906,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1546510695906,
      *                 "isValid": "1"
@@ -218,15 +218,15 @@ public class UserController extends BaseController {
      *             {
      *                 "idString": "78100464930914304",
      *                 "id": 78100464930914304,
-     *                 "userId": 68813259007852544,
+     *                 "userId": 68813260748488704,
      *                 "type": 2,
      *                 "title": "奖励-签到",
      *                 "date": "2019-01-02",
      *                 "time": 3,
-     *                 "createUser": 68813259007852544,
+     *                 "createUser": 68813260748488704,
      *                 "createUserName": "?",
      *                 "createTime": 1546403001876,
-     *                 "updateUser": 68813259007852544,
+     *                 "updateUser": 68813260748488704,
      *                 "updateUserName": "?",
      *                 "updateTime": 1546403001876,
      *                 "isValid": "1"
@@ -243,7 +243,7 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         //TODO redis
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             Map<String, Object> payments = userService.payments(user, ymString, option);
             result.setData(payments);
@@ -350,7 +350,7 @@ public class UserController extends BaseController {
     public Object publicWelfareList(String token, Long lastTime, Integer pageSize, Integer year) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             Map<String, Object> map = userService.publicWelfareList(user, lastTime, pageSize, year);
             result.setData(map);
@@ -381,10 +381,10 @@ public class UserController extends BaseController {
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154562668004844.png",
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/1545702131965137.png"
      *                     ],
-     *                     "createUser": 68813259007852544,
+     *                     "createUser": 68813260748488704,
      *                     "createUserName": "盖伦😂",
      *                     "createTime": 1550472167835,
-     *                     "updateUser": 68813259007852544,
+     *                     "updateUser": 68813260748488704,
      *                     "updateUserName": "盖伦😂",
      *                     "updateTime": 1550472167835,
      *                     "isValid": "1"
@@ -401,10 +401,10 @@ public class UserController extends BaseController {
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154502975982719.png",
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154443075139314.png"
      *                     ],
-     *                     "createUser": 68813259007852544,
+     *                     "createUser": 68813260748488704,
      *                     "createUserName": "盖伦😂",
      *                     "createTime": 1550470495483,
-     *                     "updateUser": 68813259007852544,
+     *                     "updateUser": 68813260748488704,
      *                     "updateUserName": "盖伦😂",
      *                     "updateTime": 1550472853539,
      *                     "isValid": "1"
@@ -452,7 +452,7 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             userService.skillAdd(user, skill);
             result.setSuccess(true);
@@ -489,7 +489,7 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             userService.skillModify(user, skill);
             result.setSuccess(true);
@@ -536,20 +536,19 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 收藏列表 还没写
+     * 收藏列表 还没测试
      * @param token
-     * @param lastTime 分页参数
+     * @param pageNum 分页参数
      * @param pageSize 每页条数
      * @return
      */
     @PostMapping("collect/list")
-    public Object collectList(String token, Long lastTime, Integer pageSize) {
+    public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
-            //TODO 调订单模块的收藏列表方法
-//            QueryResult<Map<String, Object>> queryResult = userService.collectList(user,lastTime,pageSize);
+            QueryResult<List<TOrder>> queryResult = userService.collectList(user,pageNum,pageSize);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("收藏列表异常: " + e.getMessage());
@@ -573,7 +572,7 @@ public class UserController extends BaseController {
     public Object collect(String token, Long orderId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             userService.collect(user,orderId);
             result.setSuccess(true);
@@ -593,13 +592,16 @@ public class UserController extends BaseController {
      * 查看用户基本信息
      * @param token
      * @param userId 用户id
+     *
+     * 略
+     *
      * @return
      */
     @PostMapping("info")
     public Object info(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             DesensitizedUserView userView = userService.info(user,userId);
             result.setData(userView);
@@ -929,10 +931,10 @@ public class UserController extends BaseController {
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154562668004844.png",
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/1545702131965137.png"
      *                     ],
-     *                     "createUser": 68813259007852544,
+     *                     "createUser": 68813260748488704,
      *                     "createUserName": "盖伦😂",
      *                     "createTime": 1550472167835,
-     *                     "updateUser": 68813259007852544,
+     *                     "updateUser": 68813260748488704,
      *                     "updateUserName": "盖伦😂",
      *                     "updateTime": 1550472167835,
      *                     "isValid": "1"
@@ -949,10 +951,10 @@ public class UserController extends BaseController {
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154502975982719.png",
      *                         "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154443075139314.png"
      *                     ],
-     *                     "createUser": 68813259007852544,
+     *                     "createUser": 68813260748488704,
      *                     "createUserName": "盖伦😂",
      *                     "createTime": 1550470495483,
-     *                     "updateUser": 68813259007852544,
+     *                     "updateUser": 68813260748488704,
      *                     "updateUserName": "盖伦😂",
      *                     "updateTime": 1550472853539,
      *                     "isValid": "1"
@@ -968,7 +970,7 @@ public class UserController extends BaseController {
     public Object page(String token,Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             UserPageView page = userService.page(user, userId);
             result.setData(page);
@@ -1113,7 +1115,7 @@ public class UserController extends BaseController {
     public Object pageService(String token,Long userId,Integer pageNum,Integer pageSize,boolean isService) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             QueryResult queryResult = userService.pageService(userId, pageNum, pageSize, isService);
             result.setData(queryResult);
@@ -1264,7 +1266,7 @@ public class UserController extends BaseController {
     public Object historyService(String token,Long userId,Integer pageNum,Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             QueryResult queryResult = userService.historyService(user, userId, pageNum, pageSize);
             result.setData(queryResult);
@@ -1282,7 +1284,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 加入的组织列表信息
+     * 加入的组织列表信息 没测
      * @param token
      * @param userId
      * @param pageNum
@@ -1293,7 +1295,7 @@ public class UserController extends BaseController {
     public Object companyList(String token,Long userId,Integer pageNum,Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
-        user.setId(68813259007852544l);
+        user.setId(68813260748488704l);
         try {
             QueryResult<StrUserCompanyView> companies = companyService.getCompanyList(user,userId,pageNum,pageSize);
             result.setData(companies);
@@ -1310,5 +1312,211 @@ public class UserController extends BaseController {
         return result;
     }
 
+
+    /**
+     * 用户信息修改(包括修改手机号码)
+     * @param name
+     * @param userTel
+     * @param userHeadPortraitPath
+     * @param userPicturePath
+     * @param occupation
+     * @param workPlace
+     * @param college
+     * @param age
+     * @param sex
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
+     * @return
+     */
+    @PostMapping("modify")
+    @Consume(TUser.class)
+    public Object modify(String token, String name,String userTel,String userHeadPortraitPath,String userPicturePath,String occupation,String workPlace,String college,Integer age,Integer sex) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) ConsumeHelper.getObj();
+        user.setId(68813260748488704l);
+        try {
+            token = userService.modify(token, user);
+            result.setData(token);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("用户信息修改异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("用户信息修改异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 预创建一个红包
+     * @param token
+     * @param description
+     * @param time
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "id": 102130274443198464,    //红包id
+     *         "userId": 68813260748488704, //用户id
+     *         "description": "张三牛逼",   //红包描述
+     *         "time": 7,   //红包金额
+     *         "createUser": 68813260748488704,
+     *         "createUserName": "",
+     *         "createTime": 1552132154916,
+     *         "updateUser": 68813260748488704,
+     *         "updateUserName": "",
+     *         "updateTime": 1552132154916,
+     *         "isValid": "0"
+     *     }
+     * }
+     *
+     * @return
+     */
+    @PostMapping("bonusPackage/preGenerate")
+    @Consume(TBonusPackage.class)
+    public Object bonusPackagePreGenerate(String token,String description,Long time) {
+        AjaxResult result = new AjaxResult();
+//      TUser user = (TUser) redisUtil.get(token);
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            TBonusPackage bonusPackage = (TBonusPackage) ConsumeHelper.getObj();
+            TBonusPackage bonus = userService.preGenerateBonusPackage(user,bonusPackage);
+            result.setData(bonus);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("预创建红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("预创建红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 创建一个红包
+     * @param token
+     * @param bonusPackageId
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
+     * @return
+     */
+    @PostMapping("bonusPackage/generate")
+    public Object bonusPackageGenerate(String token,Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            userService.generateBonusPackage(user,bonusPackageId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("创建红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("创建红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 查看一个红包
+     * @param token
+     * @param bonusPackageId
+     *
+     * {
+     *     "data": {
+     *         "id": 102130274443198464,
+     *         "userId": 68813260748488704,
+     *         "description": "张三牛逼",
+     *         "time": 7,
+     *         "createUser": 68813260748488704,
+     *         "createUserName": "",
+     *         "createTime": 1552132154916,
+     *         "updateUser": 68813260748488704,
+     *         "updateUserName": "马晓晨",
+     *         "updateTime": 1552132162244,
+     *         "isValid": "1"
+     *     }
+     * }
+     *
+     * @return
+     */
+    @PostMapping("bonusPackage/info")
+    public Object bonusPackageInfo(String token,Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            TBonusPackage bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
+            result.setData(bonusPackage);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查看红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 打开红包
+     * @param token
+     * @param bonusPackageId
+     *
+     * {
+     *     "success": false,
+     *     "errorCode": "",
+     *     "msg": "您不能领取自己的红包!",
+     *     "data": ""
+     * }
+     *
+     * @return
+     */
+    @PostMapping("bonusPackage/open")
+    public Object bonusPackageOpen(String token,Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            userService.openBonusPackage(user,bonusPackageId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("打开红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("打开红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
 }

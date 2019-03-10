@@ -26,25 +26,26 @@ public class OrderDaoImpl implements OrderDao {
     @Autowired
     OrderMapper orderMapper;
 
-	@Override
-	public int saveOneOrder(TOrder order) {
-		return MybatisOperaterUtil.getInstance().save(order);
-	}
+    @Override
+    public int saveOneOrder(TOrder order) {
+        return MybatisOperaterUtil.getInstance().save(order);
+    }
 
     @Override
-	public TOrder selectByPrimaryKey(Long id) {
-		return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getId, id));
-	}
+    public TOrder selectByPrimaryKey(Long id) {
+        return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getId, id));
+    }
 
     @Override
-	public int updateByPrimaryKey(TOrder order) {
-		return MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getId, order.getId()));
-	}
+    public int updateByPrimaryKey(TOrder order) {
+        return MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getId, order.getId()));
+    }
 
     /**
      * 查询指定userId发布的订单： 服务/求助
+     *
      * @param userId
      * @param isService
      * @return
@@ -88,47 +89,50 @@ public class OrderDaoImpl implements OrderDao {
         return result;
     }
 
-	@Override
-	public Page<TOrder> pageOrder(PageOrderParamView param) {
-		Page<TOrder> page = PageHelper.startPage(param.getPageNum(), param.getPageSize());
-		orderMapper.pageOrder(param);
-		return page;
-	}
+    @Override
+    public Page<TOrder> pageOrder(PageOrderParamView param) {
+        Page<TOrder> page = PageHelper.startPage(param.getPageNum(), param.getPageSize());
+        orderMapper.pageOrder(param);
+        return page;
+    }
 
-	@Override
-	public List<TOrder> selectOrderByOrderIds(List<Long> orderIds) {
-		return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-				.in(TOrder::getId, orderIds));
-	}
+    @Override
+    public List<TOrder> selectOrderByOrderIds(List<Long> orderIds) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .in(TOrder::getId, orderIds));
+    }
 
 
     /**
      * 查询指定用户Id的过往服务/求助记录
+     *
      * @param userId
      * @return
      */
     @Override
     public List<TOrder> selectPastByUserId(Long userId) {
-        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
-        .eq(TOrder::getCreateUser,userId)
-        .eq(TOrder::getStatus,OrderEnum.STATUS_END.getValue())
-        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getCreateUser, userId)
+                .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     /**
      * 根据订单id集合查找订单
+     *
      * @param orderIds
      * @return
      */
     @Override
     public List<TOrder> selectOrdersInOrderIds(List orderIds) {
-        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
-        .in(TOrder::getId,orderIds)
-        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .in(TOrder::getId, orderIds)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     /**
      * 根据来源、状态、用户id查找订单记录
+     *
      * @param sourceType
      * @param userId
      * @param availableStatusArray
@@ -136,29 +140,49 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectBySourceAndUserIdAndStatuses(Integer sourceType, Long userId, Integer[] availableStatusArray) {
-        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
-        .eq(TOrder::getSource,sourceType)
-        .eq(TOrder::getCreateUser,userId)
-        .in(TOrder::getStatus,availableStatusArray)
-        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getSource, sourceType)
+                .eq(TOrder::getCreateUser, userId)
+                .in(TOrder::getStatus, availableStatusArray)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
-	@Override
-	public void updateByServiceId(Long productId, Integer status) {
-		TOrder order = new TOrder();
-		order.setServiceStatus(status);
-		MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getServiceId,productId));
-	}
+    @Override
+    public void updateByServiceId(Long productId, Integer status) {
+        TOrder order = new TOrder();
+        order.setServiceStatus(status);
+        MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getServiceId, productId));
+    }
 
-	@Override
-	public Long countProductOrder(Long serviceId) {
-		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1"));
-	}
+    @Override
+    public Long countProductOrder(Long serviceId) {
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1"));
+    }
 
-	/**
+    /**
+     * 根据来源、用户id、状态、订单id集合查找
+     *
+     * @param sourceGroup
+     * @param userId
+     * @param availableStatusArray
+     * @param idList
+     * @return
+     */
+    @Override
+    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getSource, sourceGroup)
+                .eq(TOrder::getCreateUser, userId)
+                .in(TOrder::getStatus, availableStatusArray)
+                .in(TOrder::getId, idList)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 查询发布的所有记录
+     *
      * @param userId
      * @return
      */
@@ -167,6 +191,7 @@ public class OrderDaoImpl implements OrderDao {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                 .eq(TOrder::getCreateUser, userId)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime)));
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc((TOrder::getStatus))));
     }
 }
