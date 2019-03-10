@@ -98,6 +98,14 @@ public interface OrderDao {
 	 * @param status 商品状态  3、改为手动下架 4、改为自动下架
 	 */
 	void updateByServiceId(Long productId, Integer status);
+	/**
+	 * 功能描述:统计该商品派生了多少张订单
+	 * @author 马晓晨
+	 * @date 2019/3/10 13:50
+	 * @param serviceId 商品ID
+	 * @return
+	 */
+	Long countProductOrder(Long serviceId);
 
     /**
      * 根据来源、状态、用户id、订单id查找订单记录

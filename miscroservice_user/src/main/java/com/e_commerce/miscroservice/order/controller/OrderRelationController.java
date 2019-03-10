@@ -16,7 +16,6 @@ import java.util.List;
 /**
  * 功能描述:
  */
-//@RestController
 @RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
@@ -34,9 +33,11 @@ public class OrderRelationController extends BaseController {
      * @param userId    用户id
      * @param date      日期
      * @param serviceId 商品id
+     *
      *                  <p>
      *                  "success": true,
      *                  "msg": "报名成功"
+     *
      * @return
      */
     @PostMapping("/enroll")
@@ -65,9 +66,11 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId   订单id
      * @param nowUserId 当前用户id
+     *
      *                  <p>
      *                  "success": true,
      *                  "msg": "取消报名成功"
+     *
      * @return
      */
     @PostMapping("/removeEnroll")
@@ -97,6 +100,7 @@ public class OrderRelationController extends BaseController {
      * @param orderId   订单id
      * @param type      类型 1-选人 2-开始 7-支付 9-评价
      * @param nowUserId 操作用户id
+     *
      *                  <p>
      *                  {
      *                  "success": true,
@@ -116,6 +120,7 @@ public class OrderRelationController extends BaseController {
      *                  }
      *                  ]
      *                  }
+     *
      * @return
      */
     @PostMapping("/userList")
@@ -145,8 +150,10 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId sa
      * @param userIds  ss
+     *
      * "success": true,
      *                "msg": "报名成功"
+     *
      */
     @PostMapping("/test")
     public Object notices(Long orderId, String userIds) {

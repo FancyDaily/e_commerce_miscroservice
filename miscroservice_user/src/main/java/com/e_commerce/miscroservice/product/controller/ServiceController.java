@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.controller;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppMessageConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -75,19 +76,19 @@ public class ServiceController extends BaseController{
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SERVICE.getValue());
 			result.setData(list);
 			result.setSuccess(true);
-			result.setMsg("查询成功");
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
+			return result;
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("查询失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			return result;
 		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
+			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
 			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("查询失败");
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
+			return result;
 		}
-		return result;
 	}
 
 
@@ -110,19 +111,19 @@ public class ServiceController extends BaseController{
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
-			result.setMsg("删除服务成功");
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("删除服务失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("删除服务失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("删除服务失败" + errInfo(e));
+			logger.error(AppMessageConstant.PRODUCT_DEL_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("删除服务失败");
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR);
 			return result;
 		}
 	}
@@ -146,19 +147,19 @@ public class ServiceController extends BaseController{
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
-			result.setMsg("下架服务成功");
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("下架服务失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("下架服务失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("下架服务失败" + errInfo(e));
+			logger.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("下架服务失败");
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
 			return result;
 		}
 	}
@@ -169,7 +170,7 @@ public class ServiceController extends BaseController{
 	 * 作者:马晓晨
 	 * 创建时间:2018年11月20日 下午5:44:44
 	 * @return
-	 *//*
+	 */
 	@PostMapping("/submit")
 	public Object submitService(HttpServletRequest request) {
 		AjaxResult result = new AjaxResult();
@@ -182,24 +183,23 @@ public class ServiceController extends BaseController{
 		try {
 			productService.submitService(user, param, token);
 			result.setSuccess(true);
-			result.setMsg("发布服务成功");
+			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("发布服务失败，" + e.getMessage());
+			logger.warn(AppMessageConstant.SERVICE_SUBMIT_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("发布服务失败，" + e.getMessage());
+			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("发布服务失败" + errInfo(e));
+			logger.error(AppMessageConstant.SERVICE_SUBMIT_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("发布服务失败");
+			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_ERROR);
 			return result;
 		}
 	}
 
-*/
 
 
 }

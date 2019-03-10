@@ -554,6 +554,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
         //跟新用户冻结信息
         TUser tUser = userDao.selectByPrimaryKey(userId);
+        tUser.setUpdateTime(System.currentTimeMillis());
         tUser.setFreezeTime(tUser.getFreezeTime() + freeTime);
         userDao.updateByPrimaryKey(tUser);
         //创建用户冻结记录

@@ -155,6 +155,12 @@ public class OrderDaoImpl implements OrderDao {
                 .eq(TOrder::getServiceId, productId));
     }
 
+    @Override
+    public Long countProductOrder(Long serviceId) {
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1"));
+    }
+
     /**
      * 根据来源、用户id、状态、订单id集合查找
      *

@@ -33,7 +33,7 @@ public class FocusServiceImpl implements FocusService {
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
     /**
-     * 关注
+     * 关注/取消关注
      *
      * @param user
      * @param userFollowId

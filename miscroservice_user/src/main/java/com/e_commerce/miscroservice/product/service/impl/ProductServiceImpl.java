@@ -46,24 +46,70 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
-		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-			checkRepeatProductLegal(param.getService());
-		}
 		user = userService.getUserById(68813260748488704L);
+		//校验是否合规
+		checkProductLegal(user, param);
+		TService service = param.getService();
+		//互助时检测用余额是否足够
+		if (Objects.equals(service.getCollectType(), ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+			checkEnoughTimeCoin(user, service);
+		}
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		// 组织发布
 		if (isCompany) {
 			// TODO 从用户模块调用
 			// 查询当前用户所在的组织，写入到service中
 //			Long companyId = getOwnCompanyId(user.getId());
-//			param.getService().setCompanyId(companyId);
-			//这一层可以判断出是组织，将source字段值写为组织
+//			param.getService().setCompanyId(companyId);+
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
 			submitCompanySeekHelp(user, param);
 		} else {// 个人发布
-			//这一层可判断是个人发布，将source字段值写为个人
 			param.getService().setSource(ProductEnum.SOURCE_PERSONAL.getValue());
 			submitUserSeekHelp(user, param, token);
+		}
+	}
+
+	/**
+	 * 当前发布的产品是否合规
+	 * @param user
+	 * @param param
+	 */
+	private void checkProductLegal(TUser user, ServiceParamView param) {
+		TService service = param.getService();
+		//检测重复性
+		checkRepeat(user, service, param.getListServiceDescribe());
+		//校验重复性求助服务是否合规
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			checkRepeatProductLegal(param.getService());
+		}
+		//单次的求助服务是否合规
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < System.currentTimeMillis()) {
+			throw new MessageException("一次性求助的求助结束时间不能小于当前时间");
+		}
+		// 进行标题敏感词检测
+		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
+			throw new MessageException("求助名称包含敏感词");
+		}
+	}
+
+	/**
+	 * 功能描述: 查看用户时间币是否足够
+	 * @author 马晓晨
+	 * @date 2019/3/9 21:43
+	 * @param user
+	 * @param service
+	 * @return
+	 */
+	private void checkEnoughTimeCoin(TUser user, TService service) {
+		// 求助发布的单价
+		Long collectTime = service.getCollectTime();
+		// 求助需要的人员数量
+		Integer servicePersonnel = service.getServicePersonnel();
+		// 该求助需要的时间币
+		long seekHelpPrice = collectTime * servicePersonnel;
+		// 检测用户账户是否足够发布该求助
+		if (user.getSurplusTime() + user.getCreditLimit() - user.getFreezeTime() < seekHelpPrice) {
+			throw new MessageException("用户授信余额不足");
 		}
 	}
 
@@ -81,6 +127,22 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//校验重复时间
 		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			checkRepeatProductLegal(param.getService());
+		}
+		TService service = param.getService();
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < System.currentTimeMillis()) {
+			throw new MessageException("一次性服务的服务结束时间不能小于当前时间");
+		}
+		// 进行标题敏感词检测
+		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
+			throw new MessageException("服务名称包含敏感词");
+		}
+		// TODO 调用user模块
+/*		if (!userService.ifAlreadyCert(user.getId())) {
+			throw new MessageException("9527", "发布服务前请先进行实名认证");
+		}*/
+		//校验重复性服务是否合规
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			checkRepeatProductLegal(service);
 		}
 		// 组织发布
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
@@ -229,35 +291,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 */
 	private void submitCompanyService(TUser user, ServiceParamView param) {
 //		user = userDao.selectByPrimaryKey(user.getId());
-		// 这里做一层检测 检测用户是否是组织用户
-		if (!Objects.equals(user.getIsCompanyAccount(), 1)) {
-			logger.error("非法用户登录组织，用户ID为{}", user.getId());
-			throw new MessageException("用户不是组织用户，请重新登录");
-		}
 		// 做一层校验
 		if (param.getService().getCollectType() == null
 				|| param.getService().getCollectTime().equals(ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue())) {
 			logger.error("组织发布的服务传递时间币的类型错误或组织不能发布公益时的服务 {}", param.getService().getCollectType());
 			throw new MessageException("组织职能发布互助时的服务");
 		}
-		// TODO 组织发布服务
-/*		if (param.getService().getTimeType() == 1 && param.getService().getServicePersonnel() > 1) {
-			throw new MessageException("暂时无法发布一对多的重复性服务，请修改时间或人数后重新尝试");
-		}*/
-		long nowTime = System.currentTimeMillis();
 		TService service = param.getService();
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < nowTime) {
-			throw new MessageException("一次性服务的服务结束时间不能小于当前时间");
-		}
-		// 进行标题敏感词检测
-		String serviceName = service.getServiceName();
-		if (BadWordUtil.isContaintBadWord(serviceName, 2)) {
-			throw new MessageException("服务名称包含敏感词");
-		}
-		// 如果是上架,先将之前那条记录改为状态8手动下架
-		if (service.getId() != null && service.getId() != 0) {
-			delService(service);
-		}
 		setServiceCommonField(user, service);
 		// 服务的总分和总次数
 		// 总分
@@ -282,18 +322,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 					throw new MessageException("服务描述中包含敏感词");
 				}
 			}
-			desc.setId(snowflakeIdWorker.nextId());
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
-			desc.setCreateUser(user.getId());
 			setCommonServcieDescField(user, desc);
 		}
-		// 检测用户是否实名，没有实名的话就无法发布服务
-		// 组织发布服务需要实名检测
-		// TODO 调用用户模块
-/*		if (!userService.ifAlreadyCert(user.getId())) {
-			throw new MessageException("9527", "发布服务前请先进行实名认证");
-		}*/
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
 		checkRepeat(user, service, listServiceDescribe);
 		productDao.insert(service);
@@ -313,33 +345,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 */
 	private void submitUserService(TUser user, ServiceParamView param, String token) {
 //		user = userDao.selectByPrimaryKey(user.getId());
-		// 该用户没有被邀请
-/*		if (param.getService().getTimeType() == 1 && param.getService().getServicePersonnel() > 1) {
-			throw new MessageException("暂时无法发布一对多的重复性服务，请修改时间或人数后重新尝试");
-		}*/
-		long nowTime = System.currentTimeMillis();
 		TService service = param.getService();
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < nowTime) {
-			throw new MessageException("一次性服务的服务结束时间不能小于当前时间");
-		}
-		// 进行标题敏感词检测
-		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
-			throw new MessageException("服务名称包含敏感词");
-		}
-		//校验重复性服务是否合规
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-			checkRepeatProductLegal(service);
-		}
-		// TODO 上架新逻辑
-		// 如果是上架,先将之前那条记录改为状态8手动下架
-//		if (service.getId() != null && service.getId() != 0) {
-//			delService(service);
-//		}
-		service.setId(snowflakeIdWorker.nextId());
-		// TODO 审核暂时先拿掉
-//		service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
-		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
-		service.setUserId(user.getId());
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue()); // 互助时
 		setServiceCommonField(user, service);
 		// 总分
@@ -361,14 +367,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setId(snowflakeIdWorker.nextId());
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
-			desc.setCreateUser(user.getId());
 			setCommonServcieDescField(user, desc);
 		}
 		// 检测用户是否实名，没有实名的话就无法发布服务
-		// TODO 调用user模块
-/*		if (!userService.ifAlreadyCert(user.getId())) {
-			throw new MessageException("9527", "发布服务前请先进行实名认证");
-		}*/
+
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
 		checkRepeat(user, service, listServiceDescribe);
 		productDao.insert(service);
@@ -411,31 +413,172 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 	}
 
-
 	/**
-	 * 功能描述: 将service列表加载到map中 形成 map<用户id，该用户id下的service列表>
+	 * 功能描述:个人用户发布求助
 	 * 作者:马晓晨
-	 * 创建时间:2018年11月6日 下午5:08:14
+	 * 创建时间:2019年1月17日 下午3:52:52
 	 *
-	 * @param listService
+	 * @param user
+	 * @param param
+	 * @param token
 	 */
-	private Map<Long, List<TService>> loadUserService(List<TService> listService) {
-		Map<Long, List<TService>> userServiceInfo = new HashMap<>();
-		for (int i = 0; i < listService.size(); i++) {
-			// 在map中对用户进行分组
-			TService service = listService.get(i);
-			if (userServiceInfo.get(service.getUserId()) == null) {
-				List<TService> list = new ArrayList<>();
-				list.add(service);
-				userServiceInfo.put(service.getUserId(), list);
-			} else {
-				List<TService> list = userServiceInfo.get(service.getUserId());
-				list.add(service);
+	private void submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
+		TService service = param.getService();
+		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
+		setServiceCommonField(user, service);
+		// 插入求助服务图片及描述
+		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
+		for (TServiceDescribe desc : listServiceDescribe) {
+			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
+				throw new MessageException("求助描述中包含敏感词");
 			}
+			desc.setType(service.getType());
+			desc.setServiceId(service.getId()); // 求助id关联
+			setCommonServcieDescField(user, desc);
 		}
-		return userServiceInfo;
+		productDao.insert(service);
+		if (listServiceDescribe.size() > 0) {
+			productDescribeDao.batchInsert(listServiceDescribe);
+		}
+		//派生出第一张订单
+		boolean isSuccess = orderService.produceOrder(service);
+		if (!isSuccess) {
+			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
+			throw new MessageException("发布失败，请重新尝试");
+		}
+		// 3、扣除用户时间币，生成交易流水
+		isSuccess = userService.freezeTimeCoin(user.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
+		if (!isSuccess) {
+			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
+			throw new MessageException("冻结用户时间失败，请重新尝试");
+		}
+		// TODO 使用用户模块
+		// 增加成长值 刷新缓冲
+//		TUser addGrowthUser = growthValueService.addGrowthValue(user,
+//				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
+//		userService.flushRedisUser(token, addGrowthUser);
 	}
 
+
+	/**
+	 * 组织发布求助
+	 *
+	 * @param user  组织用户
+	 * @param param 发布参数view
+	 */
+	private void submitCompanySeekHelp(TUser user, ServiceParamView param) {
+		// 做一层校验
+//		if (param.getService().getCollectType() == null) {
+//			logger.error("组织发布的求助传递时间币的类型错误");
+//			throw new MessageException("请选择是互助时还是公益时");
+//		}
+		// 时间币类型为互助时
+		if (param.getService().getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+			companySubmitEachHelp(user, param);
+		} else { // 时间币类型为公益时
+			companySubmitCommonweal(user, param);
+		}
+	}
+
+
+	/**
+	 * 组织发布公益时求助
+	 *
+	 * @param user  当前组织用户
+	 * @param param 发布的参数view
+	 */
+	private void companySubmitCommonweal(TUser user, ServiceParamView param) {
+		/*
+		 * 公益时组织可以随便发，不需要检测组织是否有足够公益时 公益时不需要创建冻结流水
+		 */
+		TService service = param.getService();
+		if (!user.getUserType().equals(IS_PUBLIC_WELFARE_YES)) {
+			throw new MessageException("您不是公益组织，没有权限发布公益时的项目");
+		}
+		setServiceCommonField(user, service);
+		// 插入求助服务图片及描述
+		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
+		for (int i = 0; i < listServiceDescribe.size(); i++) {
+			TServiceDescribe desc = listServiceDescribe.get(i);
+			if (StringUtil.isNotEmpty(desc.getDepict())) {
+				if (BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
+					throw new MessageException("求助描述中包含敏感词");
+				}
+			}
+			desc.setServiceId(service.getId()); // 求助id关联
+			desc.setType(service.getType());
+			setCommonServcieDescField(user, desc);
+		}
+		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
+		checkRepeat(user, service, listServiceDescribe);
+		productDao.insert(service);
+		if (listServiceDescribe.size() > 0) {
+			productDescribeDao.batchInsert(listServiceDescribe);
+		}
+	}
+
+	/**
+	 * 功能描述:组织发布的互助时
+	 * 作者:马晓晨
+	 * 创建时间:2019年1月18日 下午3:28:53
+	 *
+	 * @param user
+	 * @param param
+	 */
+	private void companySubmitEachHelp(TUser user, ServiceParamView param) {
+		TService service = param.getService();
+		setServiceCommonField(user, service);
+		// 插入求助服务图片及描述
+		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
+		for (int i = 0; i < listServiceDescribe.size(); i++) {
+			TServiceDescribe desc = listServiceDescribe.get(i);
+			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
+				throw new MessageException("求助描述中包含敏感词");
+			}
+			desc.setServiceId(service.getId()); // 求助id关联
+			desc.setType(service.getType());
+			setCommonServcieDescField(user, desc);
+		}
+		productDao.insert(service);
+		if (listServiceDescribe.size() > 0) {
+			productDescribeDao.batchInsert(listServiceDescribe);
+		}
+		//派生出第一张订单
+		boolean isSuccess = orderService.produceOrder(service);
+		if (!isSuccess) {
+			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
+			throw new MessageException("发布失败，请重新尝试");
+		}
+		isSuccess = userService.freezeTimeCoin(user.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
+		if (!isSuccess) {
+			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
+			throw new MessageException("冻结用户时间失败，请重新尝试");
+		}
+	}
+
+	/**
+	 * 功能描述:检查是否和最新的一条重复
+	 * 作者:马晓晨
+	 * 创建时间:2019年1月18日 下午2:40:14
+	 *
+	 * @param user                当前用户
+	 * @param service             当前的service
+	 * @param listServiceDescribe 当前的service详情
+	 */
+	private void checkRepeat(TUser user, TService service, List<TServiceDescribe> listServiceDescribe) {
+		TService myNewService = productDao.selectUserNewOneRecord(user.getId(), service.getType());
+		if (myNewService != null) {
+			List<TServiceDescribe> listNewServiceDesc = productDescribeDao.selectDescByServiceId(myNewService.getId());
+			boolean isServiceEqual = isServiceEqual(service, listServiceDescribe, myNewService, listNewServiceDesc);
+			if (isServiceEqual) { //改为一样的提示
+				if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
+					throw new MessageException("您已发布相同的求助，请将之前的求助下架后再重新发布");
+				} else {
+					throw new MessageException("您已发布相同的服务，请将之前的服务下架后再重新发布");
+				}
+			}
+		}
+	}
 
 	/**
 	 * 功能描述:是否两个求助服务相同
@@ -520,310 +663,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 
 		return true;
-	}
-
-	/**
-	 * 功能描述:个人用户发布求助
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月17日 下午3:52:52
-	 *
-	 * @param user
-	 * @param param
-	 * @param token
-	 */
-	private void submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
-		// 用户剩余时间币
-		long currentTime = System.currentTimeMillis();
-		// 可用时间币 = 用户余额 + 授信额度 - 冻结时间
-		Long availableTime = user.getSurplusTime() + user.getCreditLimit() - user.getFreezeTime();
-		// 求助发布需要的时间币
-		TService service = param.getService();
-		// 该求助需要的时间币  求助单价 * 求助人数
-		long seekHelpPrice = service.getCollectTime() * service.getServicePersonnel();
-		// 检测用户账户是否足够发布该求助
-		if (availableTime < seekHelpPrice) {
-			throw new MessageException("用户余额不足");
-		}
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue()) && service.getEndTime() < currentTime) {
-			throw new MessageException("求助结束时间不能小于当前时间");
-		}
-		// 进行标题敏感词检测
-		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
-			throw new MessageException("求助名称包含敏感词");
-		}
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-			checkRepeatProductLegal(service);
-		}
-		// 如果是上架,先将之前那条记录改为状态8删除
-//		if (service.getId() != null) {
-//			delService(service);
-//		}
-		service.setId(snowflakeIdWorker.nextId());
-		// 待审核 TODO 暂时不做审核限制，直接是待开始
-//		service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
-		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
-		service.setUserId(user.getId());
-		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
-		setServiceCommonField(user, service);
-//		service.setTimeType(0); // 区分固定时间还是重复周期 所有求助都是固定时间，所以为0
-		// 插入求助服务图片及描述
-		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-		for (TServiceDescribe desc : listServiceDescribe) {
-			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
-				throw new MessageException("求助描述中包含敏感词");
-			}
-			desc.setId(snowflakeIdWorker.nextId());
-			desc.setType(service.getType());
-			desc.setServiceId(service.getId()); // 求助id关联
-			setCommonServcieDescField(user, desc);
-		}
-		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
-		productDao.insert(service);
-		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
-		}
-		//派生出第一张订单
-		boolean isSuccess = orderService.produceOrder(service);
-		if (!isSuccess) {
-			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
-			throw new MessageException("发布失败，请重新尝试");
-		}
-		// 3、扣除用户时间币，生成交易流水
-		// 将用户时间币冻结
-		user.setFreezeTime(user.getFreezeTime() + seekHelpPrice);
-		user.setUpdateTime(System.currentTimeMillis());
-		isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
-		if (!isSuccess) {
-			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
-			throw new MessageException("冻结用户时间失败，请重新尝试");
-		}
-		// TODO 使用用户模块
-		// 增加成长值 刷新缓冲
-//		TUser addGrowthUser = growthValueService.addGrowthValue(user,
-//				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
-//		userService.flushRedisUser(token, addGrowthUser);
-	}
-
-
-	/**
-	 * 组织发布求助
-	 *
-	 * @param user  组织用户
-	 * @param param 发布参数view
-	 */
-	private void submitCompanySeekHelp(TUser user, ServiceParamView param) {
-		// 做一层校验
-		if (param.getService().getCollectType() == null) {
-			logger.error("组织发布的求助传递时间币的类型错误");
-			throw new MessageException("请选择是互助时还是公益时");
-		}
-		// 时间币类型为互助时
-		if (param.getService().getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			companySubmitEachHelp(user, param);
-		} else { // 时间币类型为公益时
-			companySubmitCommonweal(user, param);
-		}
-	}
-
-
-	/**
-	 * 组织发布公益时求助
-	 *
-	 * @param user  当前组织用户
-	 * @param param 发布的参数view
-	 */
-	private void companySubmitCommonweal(TUser user, ServiceParamView param) {
-		/*
-		 * 公益时组织可以随便发，不需要检测组织是否有足够公益时 公益时不需要创建冻结流水
-		 */
-		long currentTime = System.currentTimeMillis();
-		TService service = param.getService();
-		if (service.getTimeType() == ProductEnum.TIME_TYPE_FIXED.getValue() && service.getEndTime() < currentTime) {
-			throw new MessageException("求助结束时间不能小于当前时间");
-		}
-		if (!user.getUserType().equals(IS_PUBLIC_WELFARE_YES)) {
-			throw new MessageException("您不是公益组织，没有权限发布公益时的项目");
-		}
-
-		// 进行标题敏感词检测
-		String serviceName = service.getServiceName();
-		if (BadWordUtil.isContaintBadWord(serviceName, 2)) {
-			throw new MessageException("求助名称包含敏感词");
-		}
-		// 如果是上架,先将之前那条记录改为状态8删除
-		// TODO 删除逻辑再定
-//		if (service.getId() != null) {
-//			delService(service);
-//		}
-		service.setId(snowflakeIdWorker.nextId());
-		// TODO 暂时不做审核限制，直接是待开始
-		// service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
-		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
-		service.setUserId(user.getId());
-		setServiceCommonField(user, service);
-		// 组织发布互助时还是公益时由前端传递参数
-		// service.setCollectType(1);
-//		service.setTimeType(0); // 区分固定时间还是重复周期 所有求助都是固定时间，所以为0
-		// 插入求助服务图片及描述
-		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-		for (int i = 0; i < listServiceDescribe.size(); i++) {
-			TServiceDescribe desc = listServiceDescribe.get(i);
-			if (StringUtil.isNotEmpty(desc.getDepict())) {
-				if (BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
-					throw new MessageException("求助描述中包含敏感词");
-				}
-			}
-			desc.setId(snowflakeIdWorker.nextId());
-			desc.setServiceId(service.getId()); // 求助id关联
-			desc.setType(service.getType());
-			setCommonServcieDescField(user, desc);
-		}
-		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
-		productDao.insert(service);
-		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
-		}
-	}
-
-	/**
-	 * 功能描述:组织发布的互助时
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月18日 下午3:28:53
-	 *
-	 * @param user
-	 * @param param
-	 */
-	private void companySubmitEachHelp(TUser user, ServiceParamView param) {
-		// 1、检查用户的时间币是否足够
-		long currentTime = System.currentTimeMillis();
-		// 用户剩余时间币
-		Long surplusTime = user.getSurplusTime();
-		// 用户冻结时间币
-		Long freezeTime = user.getFreezeTime();
-		// 求助发布需要的时间币
-		TService service = param.getService();
-		// 求助发布的单价
-		Long collectTime = service.getCollectTime();
-		// 求助需要的人员数量
-		Integer servicePersonnel = service.getServicePersonnel();
-		// 该求助需要的时间币
-		long seekHelpPrice = collectTime * servicePersonnel;
-		// 检测用户账户是否足够发布该求助
-		if (surplusTime - freezeTime < seekHelpPrice) {
-			throw new MessageException("用户余额不足");
-		}
-		// 一次性求助需要判断时间
-		if (Objects.equals(service.getTimeType(), ProductEnum.TIME_TYPE_FIXED.getValue())
-				&& service.getEndTime() < currentTime) {
-			throw new MessageException("求助结束时间不能小于当前时间");
-		}
-		// 进行标题敏感词检测
-		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
-			throw new MessageException("求助名称包含敏感词");
-		}
-		// 如果是上架,先将之前那条记录改为状态8删除
-		// TODO 删除逻辑再定
-//		if (service.getId() != null) {
-//			delService(service);
-//		}
-
-		setServiceCommonField(user, service);
-		// 插入求助服务图片及描述
-		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-		for (int i = 0; i < listServiceDescribe.size(); i++) {
-			TServiceDescribe desc = listServiceDescribe.get(i);
-			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
-				throw new MessageException("求助描述中包含敏感词");
-			}
-			desc.setId(snowflakeIdWorker.nextId());
-			desc.setServiceId(service.getId()); // 求助id关联
-			setCommonServcieDescField(user, desc);
-		}
-		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
-		productDao.insert(service);
-		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
-		}
-		//派生出第一张订单
-		boolean isSuccess = orderService.produceOrder(service);
-		if (!isSuccess) {
-			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
-			throw new MessageException("发布失败，请重新尝试");
-		}
-		// TODO 调用用户模块
-		isSuccess = userService.freezeTimeCoin(user.getId(), seekHelpPrice, service.getId(), service.getServiceName());
-		if (!isSuccess) {
-			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
-			throw new MessageException("冻结用户时间失败，请重新尝试");
-		}
-//		// 3、扣除用户时间币，生成交易流水
-//		// 将用户时间币冻结
-//		user.setFreezeTime(freezeTime + seekHelpPrice);
-//		user.setUpdateTime(currentTime);
-//		userDao.updateByPrimaryKeySelective(user);
-//		// 生成冻结记录
-//		TUserFreeze userFreeze = new TUserFreeze();
-//		userFreeze.setId(snowflakeIdWorker.nextId());
-//		userFreeze.setUserId(user.getId());
-//		userFreeze.setServiceId(service.getId());
-//		userFreeze.setServiceName(service.getServiceName());
-//		userFreeze.setFreezeTime(seekHelpPrice); // 冻结金额
-//		userFreeze.setCreateTime(System.currentTimeMillis());
-//		userFreeze.setCreateUser(user.getId());
-//		userFreeze.setCreateUserName(user.getName());
-//		userFreeze.setUpdateTime(System.currentTimeMillis());
-//		userFreeze.setUpdateUser(user.getId());
-//		userFreeze.setUpdateUserName(user.getName());
-//		userFreeze.setIsValid(IS_VALID_YES);
-//		userFreezeDao.insert(userFreeze);
-	}
-
-	/**
-	 * 功能描述:检查是否和最新的一条重复
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月18日 下午2:40:14
-	 *
-	 * @param user                当前用户
-	 * @param service             当前的service
-	 * @param listServiceDescribe 当前的service详情
-	 */
-	private void checkRepeat(TUser user, TService service, List<TServiceDescribe> listServiceDescribe) {
-		TService myNewService = productDao.selectUserNewOneRecord(user.getId(), service.getType());
-		if (myNewService != null) {
-			List<TServiceDescribe> listNewServiceDesc = productDescribeDao.selectDescByServiceId(myNewService.getId());
-			boolean isServiceEqual = isServiceEqual(service, listServiceDescribe, myNewService, listNewServiceDesc);
-			if (isServiceEqual) { //改为一样的提示
-				if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
-					throw new MessageException("您已发布相同的求助，请将之前的求助下架后再重新发布");
-				} else {
-					throw new MessageException("您已发布相同的服务，请将之前的服务下架后再重新发布");
-				}
-			}
-		}
-	}
-
-	/**
-	 * 功能描述:
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月17日 下午6:21:17
-	 *
-	 * @param service
-	 */
-	private void delService(TService service) {
-		Long id = service.getId();
-		TService lowerFrameService = productDao.selectByPrimaryKey(id);
-		// 将之前的service状态改为 8 下架不可见（已重新发布的）
-		Integer status = lowerFrameService.getStatus();
-		if (status != ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()
-				&& status != ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue()
-				&& status != ProductEnum.STATUS_EXAMINE_NOPASS.getValue()) {
-			throw new MessageException("当前状态不能上架，请重新尝试");
-		}
-		lowerFrameService.setStatus(ProductEnum.STATUS_DELETE.getValue());
-		productDao.updateByPrimaryKeySelective(lowerFrameService);
 	}
 
 }

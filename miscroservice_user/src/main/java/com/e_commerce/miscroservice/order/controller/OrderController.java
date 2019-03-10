@@ -26,6 +26,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @param orderId 用户订单
 	 * @param token   当前用户token
+	 *
 	 *                {
 	 *                "success": 是否成功,
 	 *                "msg": "成功失败的消息",
@@ -68,6 +69,7 @@ public class OrderController extends BaseController {
 	 *                ]
 	 *                }
 	 *                }
+	 *
 	 * @return
 	 */
 	@PostMapping("/detailMineOrder")
@@ -100,6 +102,7 @@ public class OrderController extends BaseController {
 	 * @param pageNum  分页页数
 	 * @param pageSize 每页数量
 	 * @param token    当前用户token
+	 *
 	 *                 {
 	 *                 "success": true,
 	 *                 "msg": "查询成功",
@@ -127,6 +130,7 @@ public class OrderController extends BaseController {
 	 *                 "totalCount": 2
 	 *                 }
 	 *                 }
+	 *
 	 * @return
 	 */
 	@PostMapping("/listMineOrder")
@@ -164,6 +168,7 @@ public class OrderController extends BaseController {
 	 * @param pageSize      每页数量
 	 * @param condition     查询条件
 	 * @param token         当前用户token
+	 *
 	 *                      {
 	 *                      "success": 是否成功,
 	 *                      "msg": 成功或失败的消息,
@@ -197,6 +202,7 @@ public class OrderController extends BaseController {
 	 *                      "totalCount": 总记录数
 	 *                      }
 	 *                      }
+	 *
 	 * @return
 	 */
 	@PostMapping("/list")
@@ -230,6 +236,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @param orderId 订单ID
 	 * @param token   用户token
+	 *
 	 *                {
 	 *                "success": 是否成功,
 	 *                "msg": "成功失败的消息",
@@ -266,6 +273,7 @@ public class OrderController extends BaseController {
 	 *                "serviceUserIdString": "68813260748488704"
 	 *                }
 	 *                }
+	 *
 	 * @return
 	 */
 	@PostMapping("/detail")
@@ -297,6 +305,7 @@ public class OrderController extends BaseController {
 	 * @param token    当前用户token
 	 * @param pageNum  分页页数
 	 * @param pageSize 每页数量
+	 *
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败的消息",
@@ -320,6 +329,7 @@ public class OrderController extends BaseController {
 	 *                 }
 	 *                 ]
 	 *                 }
+	 *
 	 * @return
 	 */
 	@PostMapping("/enrollList")

@@ -7,12 +7,17 @@ import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@RestController
+/**
+ * User共用Controller
+ * userController
+ */
+@Component
 public class UserCommonController {
+
 
     Log logger = Log.getInstance(UserCommonController.class);
 
@@ -25,6 +30,11 @@ public class UserCommonController {
     @Autowired
     private UserFreezeDao userFreezeDao;
 
+    /**
+     * 根据id获取用户
+     * @param userId
+     * @return
+     */
     public TUser getUserById(Long userId) {
         return userService.getUserbyId(userId);
     }

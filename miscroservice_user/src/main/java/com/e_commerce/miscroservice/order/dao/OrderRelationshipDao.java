@@ -187,10 +187,18 @@ public interface OrderRelationshipDao {
     List<TOrderRelationship> selectCollectList(Long id);
 
     /**
-     *
+     * 根据订单id集合、状态集合查找所有订单记录
      * @param idList
      * @param collectionAvailableStatusArray
      * @return
      */
     List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray);
+
+	/**
+	 * 更新收藏状态
+	 * @param orderRelationshipId
+	 * @param collectStatus
+	 * @return
+	 */
+	int updateCollectStatus(Long orderRelationshipId, int collectStatus);
 }
