@@ -33,6 +33,7 @@ public class ServiceController extends BaseController{
 	 * @param token    当前用户token
 	 * @param pageNum  页数
 	 * @param pageSize 每页数量
+	 *
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败消息",
@@ -63,6 +64,7 @@ public class ServiceController extends BaseController{
 	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
+	 *
 	 * @return
 	 */
 	@PostMapping("/pageMine")
@@ -93,10 +95,12 @@ public class ServiceController extends BaseController{
 	 * 删除服务
 	 * @param token 当前用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *     "success": 是否成功,
 	 *     "msg": "成功或错误消息"
 	 * }
+	 *
 	 * @return
 	 */
 	@PostMapping("/delService")
@@ -127,10 +131,12 @@ public class ServiceController extends BaseController{
 	 * 下架服务
 	 * @param token 用户token
 	 * @param productId 商品ID
+	 *
 	 *{
 	 *     "success": 是否成功,
 	 *     "msg": "成功或失败的消息"
 	 * }
+	 *
 	 * @return
 	 */
 	@PostMapping("/lowerFrameService")
@@ -163,7 +169,7 @@ public class ServiceController extends BaseController{
 	 * 作者:马晓晨
 	 * 创建时间:2018年11月20日 下午5:44:44
 	 * @return
-	 */
+	 *//*
 	@PostMapping("/submit")
 	public Object submitService(HttpServletRequest request) {
 		AjaxResult result = new AjaxResult();
@@ -193,7 +199,7 @@ public class ServiceController extends BaseController{
 		}
 	}
 
-
+*/
 
 
 }

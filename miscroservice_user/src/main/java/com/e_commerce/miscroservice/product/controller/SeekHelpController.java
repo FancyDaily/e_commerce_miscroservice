@@ -38,6 +38,7 @@ public class SeekHelpController extends BaseController {
 	 * @param token    当前用户token
 	 * @param pageNum  页数
 	 * @param pageSize 每页数量
+	 *
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败消息",
@@ -68,6 +69,7 @@ public class SeekHelpController extends BaseController {
 	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
+	 *
 	 * @return
 	 */
 	@PostMapping("/pageMine")
@@ -98,10 +100,12 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
+	 *
 	 * @return
 	 */
 	@PostMapping("/upperFrame")
@@ -134,10 +138,12 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
+	 *
 	 * @return
 	 */
 	@PostMapping("/delSeekHelp")
@@ -169,10 +175,12 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或失败的消息"
 	 *                  }
+	 *
 	 * @return
 	 */
 	@PostMapping("/lowerFrameSeekHelp")
