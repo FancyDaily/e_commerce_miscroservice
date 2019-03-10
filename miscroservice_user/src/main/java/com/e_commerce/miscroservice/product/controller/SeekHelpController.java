@@ -48,25 +48,24 @@ public class SeekHelpController extends BaseController {
 	 *                 "id": 商品ID,
 	 *                 "serviceName": "名称",
 	 *                 "servicePlace": 线上或线下,
-	 *                 "servicePersonnel": 1,
-	 *                 "startTime": 1544249700000,
-	 *                 "endTime": 1544253300000,
-	 *                 "timeType": 0,
-	 *                 "collectType": 1,
-	 *                 "collectTime": 30,
-	 *                 "nameAudioUrl": "",
-	 *                 "createUser": 68813260748488704,
-	 *                 "createUserName": "马晓晨",
-	 *                 "createTime": 1544192157901,
-	 *                 "updateUser": 1,
-	 *                 "updateUserName": "系统管理员",
-	 *                 "updateTime": 1544424600013,
-	 *                 "isValid": "1"
+	 *                 "servicePersonnel": 需要人数,
+	 *                 "startTime": 开始时间毫秒值（单次显示开始时间使用此字段）,
+	 *                 "endTime": 结束时间毫秒值(单词显示结束时间使用此字段),
+	 *                 "timeType": 是否重复 0、不重复 1、重复性,
+	 *                 "collectType": 收取分类, 1、互助时 2、公益时
+	 *                 "collectTime": 收取时长,
+	 *                 "nameAudioUrl": "音频地址",
+	 *                 "dateWeekNumber": "5,6",
+	 *                 "startDateS": 开始日期字符串  例："20190308",
+	 *                 "endDateS": 结束日期字符串  例："20190310",
+	 *                 "startTimeS": 开始时间字符串  例："1320",
+	 *                 "endTimeS": 结束时间字符串   例："1340",
+	 *                 "dateWeek":显示周X的字符串
 	 *                 },
-	 *                 "imgUrl": ""
+	 *                 "imgUrl": "封面图"
 	 *                 }
 	 *                 ],
-	 *                 "totalCount": 30
+	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
 	 * @return

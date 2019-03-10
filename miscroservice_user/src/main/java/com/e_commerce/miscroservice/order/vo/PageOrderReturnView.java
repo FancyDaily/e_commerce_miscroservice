@@ -36,6 +36,10 @@ public class PageOrderReturnView implements Serializable {
 	 * 封面图地址
 	 */
 	private String imgUrl;
+	/**
+	 * 我的订单前端显示的状态
+	 */
+	private String status;
 
 	public String getOrderIdString() {
 		if (order != null) {

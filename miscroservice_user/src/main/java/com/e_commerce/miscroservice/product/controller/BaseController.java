@@ -9,8 +9,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * 功能描述:Controller的公共方法
- *
+ * 'product 的公共Controller
  */
 public class BaseController {
 
