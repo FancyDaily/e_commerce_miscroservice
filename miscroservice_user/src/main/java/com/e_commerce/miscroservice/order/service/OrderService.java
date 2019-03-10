@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.order.vo.*;
@@ -73,4 +74,10 @@ public interface OrderService {
 	 * @return
 	 */
 	DetailMineOrderReturnView detailMineOrder(TUser user, Long orderId);
+
+	/**
+	 * 根据商品产出订单
+	 * @param service
+	 */
+	void produceOrder(TService service);
 }
