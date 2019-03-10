@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.order.dao;
 
-import com.e_commerce.miscroservice.order.po.TEvaluate;
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.product.controller;
 
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,8 +36,10 @@ public class ProductCommonController extends BaseController{
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
 		Map<Long, String> coverPic = new HashMap<>();
 		List<TServiceDescribe> listProductDesc = productService.getListProductDesc(serviceIds);
-		listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
-				.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
+		if (listProductDesc != null && listProductDesc.size() > 0) {
+			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
+					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
+		}
 		return coverPic;
 	}
 

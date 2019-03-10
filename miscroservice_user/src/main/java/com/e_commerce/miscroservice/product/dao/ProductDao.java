@@ -1,9 +1,9 @@
 package com.e_commerce.miscroservice.product.dao;
 
 
+import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 
-import com.e_commerce.miscroservice.order.po.TService;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import java.util.List;
 
 /**
@@ -60,4 +60,14 @@ public interface ProductDao {
 	 * @return 详情list（多张图片多个desc）
 	 */
 	List<TServiceDescribe> getProductDesc(Long serviceId);
+
+	/**
+	 * 根据用户查询所有的求助服务
+	 * @param userId 当前用户ID
+	 * @param pageNum 页数
+	 * @param pageSize 每页数量
+	 * @param type 类型 1、求助 2、服务
+	 * @return
+	 */
+	List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type);
 }

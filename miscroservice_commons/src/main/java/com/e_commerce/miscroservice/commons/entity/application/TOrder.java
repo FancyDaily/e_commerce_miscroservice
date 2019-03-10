@@ -13,7 +13,7 @@ public class TOrder implements Serializable {
 
     private String serviceName;
 
-    private Integer serveNum;
+    private Integer servicePersonnel;
 
     private Integer servicePlace;
 
@@ -111,12 +111,12 @@ public class TOrder implements Serializable {
         this.serviceName = serviceName == null ? null : serviceName.trim();
     }
 
-    public Integer getServeNum() {
-        return serveNum;
+    public Integer getServicePersonnel() {
+        return servicePersonnel;
     }
 
-    public void setServeNum(Integer serveNum) {
-        this.serveNum = serveNum;
+    public void setServicePersonnel(Integer servicePersonnel) {
+        this.servicePersonnel = servicePersonnel;
     }
 
     public Integer getServicePlace() {

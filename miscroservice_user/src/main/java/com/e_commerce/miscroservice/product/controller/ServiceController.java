@@ -14,14 +14,82 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * 服务controller
- * @author 马晓晨
- * @date 2019/3/4
+ * 服务模块
+ * 包含发布服务  下架服务  删除服务  上架服务
  */
 @RestController
-@RequestMapping("/api/v1/service")
+@RequestMapping("/api/v2/service")
 public class ServiceController extends BaseController{
 	Log logger = Log.getInstance(ServiceController.class);
+
+	/**
+	 * 删除服务
+	 * @param token 当前用户token
+	 * @param productId 商品ID
+	 *                  {
+	 *     "success": 是否成功,
+	 *     "msg": "成功或错误消息"
+	 * }
+	 * @return
+	 */
+	@PostMapping("/delService")
+	public Object delService(String token, Long productId) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			productService.del(user, productId);
+			result.setSuccess(true);
+			result.setMsg("删除服务成功");
+			return result;
+		} catch (MessageException e) {
+			logger.warn("删除服务失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode(e.getErrorCode());
+			result.setMsg("删除服务失败," + e.getMessage());
+			return result;
+		} catch (Exception e) {
+			logger.error("删除服务失败" + errInfo(e));
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("删除服务失败");
+			return result;
+		}
+	}
+
+	/**
+	 * 下架服务
+	 * @param token 用户token
+	 * @param productId 商品ID
+	 *{
+	 *     "success": 是否成功,
+	 *     "msg": "成功或失败的消息"
+	 * }
+	 * @return
+	 */
+	@PostMapping("/lowerFrameService")
+	public Object lowerFrameService(String token, Long productId) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			productService.lowerFrame(user, productId);
+			result.setSuccess(true);
+			result.setMsg("下架服务成功");
+			return result;
+		} catch (MessageException e) {
+			logger.warn("下架服务失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode(e.getErrorCode());
+			result.setMsg("下架服务失败," + e.getMessage());
+			return result;
+		} catch (Exception e) {
+			logger.error("下架服务失败" + errInfo(e));
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("下架服务失败");
+			return result;
+		}
+	}
+
 	/**
 	 *
 	 * 功能描述:发布服务

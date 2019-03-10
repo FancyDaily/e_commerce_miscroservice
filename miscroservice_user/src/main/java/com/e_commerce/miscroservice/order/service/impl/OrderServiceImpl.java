@@ -1,29 +1,24 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
-import com.e_commerce.miscroservice.order.po.TServiceDescribe;
 import com.e_commerce.miscroservice.order.service.OrderService;
-import com.e_commerce.miscroservice.order.vo.DetailOrderReturnView;
-import com.e_commerce.miscroservice.order.vo.PageEnrollAndChooseReturnView;
-import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
-import com.e_commerce.miscroservice.order.vo.PageOrderReturnView;
+import com.e_commerce.miscroservice.order.vo.*;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -35,6 +30,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	ProductCommonController productService;
 	@Autowired
 	OrderRelationshipDao orderRelationshipDao;
+	@Autowired
+	UserCommonController userService;
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -89,10 +86,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			PageOrderReturnView returnView = new PageOrderReturnView();
 			TOrder order = listOrder.get(i);
 			returnView.setOrder(order);
+			// TODO
+			order.setNameAudioUrl("");
 			//设置封面图
-			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
+			// TODO 封面图先给前端显示出字段
+			returnView.setImgUrl("");
+//			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
 			//TODO 获取发布者的信息
 //			TUser tUser = usersInfo.get(service.getUserId());
+			// TODO 先将用户信息new 出来
+			BaseUserView userView = new BaseUserView();
+			userView.setUserHeadPortraitPath("");
+			userView.setName("");
+			returnView.setUser(userView);
 //			// 进行部分字段映射
 //			PageServiceUserView userView = BeanUtil.copy(tUser, PageServiceUserView.class);
 //			returnView.setUser(userView);
@@ -107,12 +113,24 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	public DetailOrderReturnView orderDetail(Long orderId, TUser user) {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
+		order.setNameAudioUrl("");
+		returnView.setOrder(order);
 		// TODO 获取发布者信息
+		BaseUserView userView = new BaseUserView();
+		userView.setId(0L);
+		userView.setName("");
+		returnView.setUser(userView);
 		// TODO 获取发布者关注信息
+		returnView.setCareStatus(true);
+
 		//详情页面展示举报状态 收藏状态 报名状态
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
-			returnView.setOrder(order);
+			if (tOrderRelationship == null) {
+				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+				tOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+				tOrderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+			}
 			returnView.setOrderRelationship(tOrderRelationship);
 		} else {
 			TOrderRelationship orderRelationship = new TOrderRelationship();
@@ -135,6 +153,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public List<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user) {
+		// TODO 写死用户
+		user = userService.getUserById(68813260748488704L);
 		List<PageEnrollAndChooseReturnView> listReturnView = new ArrayList<>();
 		List<TOrderRelationship> pageEnrollAndChooseList = orderRelationshipDao.pageEnrollAndChooseList(pageNum, pageSize, user.getId());
 		//所有的orderid
@@ -168,6 +188,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		return listReturnView;
 	}
 
+	@Override
+	public void SynOrderServiceStatus(Long productId, Integer status) {
+		orderDao.updateByServiceId(productId, status);
+	}
+
 	/**
 	 * 获取报名选人的显示状态
 	 * @param user 当前用户
@@ -183,7 +208,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else {
 				returnView.setStatus("待选人");
 			}
-		} else if (orderRelationship.getReceiptUserId().equals(user.getId())){ //当前用户是接单者
+		} else if (Objects.equals(orderRelationship.getReceiptUserId(), user.getId())){ //当前用户是接单者
 			if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())) {
 				returnView.setStatus("被拒绝");
 			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())) {

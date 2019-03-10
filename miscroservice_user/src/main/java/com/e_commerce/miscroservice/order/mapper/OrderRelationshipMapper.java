@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.order.mapper;
 
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

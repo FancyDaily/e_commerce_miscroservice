@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.order.po;
+package com.e_commerce.miscroservice.commons.entity.application;
 
 import java.io.Serializable;
 

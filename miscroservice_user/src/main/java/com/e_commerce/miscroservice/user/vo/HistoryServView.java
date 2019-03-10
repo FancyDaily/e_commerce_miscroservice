@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import com.e_commerce.miscroservice.order.po.TEvaluate;
-import com.e_commerce.miscroservice.order.po.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;

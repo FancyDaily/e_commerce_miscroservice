@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.user.vo;
 
 
-import com.e_commerce.miscroservice.order.po.TService;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
 
 /**
  * 功能描述:

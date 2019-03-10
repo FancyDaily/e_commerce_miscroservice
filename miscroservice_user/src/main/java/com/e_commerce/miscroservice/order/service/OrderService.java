@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.order.service;
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.order.po.TOrder;
 import com.e_commerce.miscroservice.order.vo.DetailOrderReturnView;
 import com.e_commerce.miscroservice.order.vo.PageEnrollAndChooseReturnView;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
@@ -52,4 +52,11 @@ public interface OrderService {
 	 * @param user 当前用户
 	 */
 	List<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user);
+
+	/**
+	 * 同步商品和订单的状态
+	 * @param productId 商品ID
+	 * @param status  要同步称为的状态
+	 */
+	void SynOrderServiceStatus(Long productId, Integer status);
 }

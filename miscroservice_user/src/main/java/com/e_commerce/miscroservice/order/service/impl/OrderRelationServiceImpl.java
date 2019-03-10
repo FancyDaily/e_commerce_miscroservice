@@ -10,6 +10,8 @@ import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
@@ -25,6 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -259,6 +267,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             throw new MessageException("499", "对不起，您不可以对非自己发布对互助进行操作");
         }
         List<Integer> statusList = new ArrayList<>();
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        long canChooseUserSum = order.getServicePersonnel() - order.getConfirmNum();
+        int chooseUserSum = 0;
         long canChooseUserSum = order.getServeNum() - order.getConfirmNum();
         if (userIdList.size() > canChooseUserSum) {
             if (canChooseUserSum == 0){

@@ -1,15 +1,15 @@
 package com.e_commerce.miscroservice.order.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.order.po.TEvaluate;
-import com.e_commerce.miscroservice.order.po.TOrder;
-import com.e_commerce.miscroservice.order.po.TOrderRelationship;
-import com.e_commerce.miscroservice.order.po.TService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,6 +50,7 @@ public class OrderCommonController extends BaseController {
         order.setEnrollNum(0);
         order.setMainId(order.getId());
         order.setServiceId(service.getId());
+        order.setStatus(1);
         //重复的订单的话  根据商品的重复时间生成第一张订单
         if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
             //TODO 将int类型的星期几改为字符串型  逗号分隔数字  1是星期一  7是星期日
@@ -61,27 +62,29 @@ public class OrderCommonController extends BaseController {
             String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
             //获取商品开始的时间是星期X
             int startWeekDay = DateUtil.getWeekDay(serviceStartTimeString);
-            //获取今天是周几
-            int currentWeek = DateUtil.getWeekDay(DateUtil.format(System.currentTimeMillis()));
+            //TODO 这里可以提取公共的方法  传递一个开始时间（上一条订单结束日期，加上周X的数值， 得到下一张订单的生成时间）
+            // 然后生成下一张订单 如果超过的结束时间，就进行停止派生，并下架处理
+            //获取订单开始的事件是星期X  离商品开始星期X最近的星期Y
+            int orderWeekDay = DateUtil.getMostNearWeekDay(WeekDayNumberArray, startWeekDay);
             //订单开始的星期X  有可能商品是 3,4,5 但是周三已过 只能从周四生成
-            int orderWeekDay = 0;
+//            int orderWeekDay = 0;
             //订单开始的下一个星期
-            int orderNextWeekDay = 0;
+            int orderNextWeekDay = DateUtil.getNextWeekDay(WeekDayNumberArray, orderWeekDay);
             //获取最近可以发布的周 商品周一开始，当前已经超过了周一，然后看看周二可不可以
-            for (int i = 0; i < WeekDayNumberArray.length; i++) {
-                if (startWeekDay <= WeekDayNumberArray[i]) {
-                    orderWeekDay = WeekDayNumberArray[i];
-                    if (i + 1 >= WeekDayNumberArray.length) {
-                        orderNextWeekDay = WeekDayNumberArray[0];
-                    } else {
-                        orderNextWeekDay = WeekDayNumberArray[i + 1];
-                    }
-                    break;
-                }
-                //TODO 后几个都不可以  就从第0个开始
-            }
+//            for (int i = 0; i < WeekDayNumberArray.length; i++) {
+//                if (startWeekDay <= WeekDayNumberArray[i]) {
+//                    orderWeekDay = WeekDayNumberArray[i];
+//                    if (i + 1 >= WeekDayNumberArray.length) {
+//                        orderNextWeekDay = WeekDayNumberArray[0];
+//                    } else {
+//                        orderNextWeekDay = WeekDayNumberArray[i + 1];
+//                    }
+//                    break;
+//                }
+//                //TODO 后几个都不可以  就从第0个开始
+//            }
             //需要增加的天数
-            int addDays = orderWeekDay - startWeekDay;
+            int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
             //订单开始的时间戳
             Long startTimestamp = DateUtil.parse(serviceStartTimeString);
             Calendar cal = Calendar.getInstance();
@@ -91,7 +94,10 @@ public class OrderCommonController extends BaseController {
             String currentDayEndTime = service.getStartDateS() + service.getEndTimeS();
             //如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
             if (addDays == 0 && DateUtil.parse(currentDayEndTime) < System.currentTimeMillis()) {
-                addDays = orderNextWeekDay - startWeekDay;
+                addDays = (orderNextWeekDay + 7 - startWeekDay) % 7;
+                if (addDays == 0) {
+                    addDays = 7;
+                }
                 cal.add(Calendar.DAY_OF_YEAR, addDays);
             }
             String endDateTime = service.getEndDateS() + service.getEndTimeS();
@@ -116,7 +122,7 @@ public class OrderCommonController extends BaseController {
 
     /**
      * 插入订单，供其他模块调用
-     *
+     * @author 马晓晨
      * @return
      */
     public int saveOrder(TOrder order) {
@@ -125,7 +131,7 @@ public class OrderCommonController extends BaseController {
 
     /**
      * 将字符串数组转换为int数组
-     *
+     * @author 马晓晨
      * @param weekDayArray 字符串数值数组
      * @return int数组
      */
@@ -209,4 +215,19 @@ public class OrderCommonController extends BaseController {
         return evaluateDao.selectEvaluateInOrderIds(orderIds);
     }
 
+    /**
+     * 同步商品和订单的状态
+     * @param productId 商品ID
+     * @param status  要同步成的状态
+     * @return 是否成功同步
+     */
+    public boolean SynOrderServiceStatus(Long productId, Integer status) {
+        try {
+            orderService.SynOrderServiceStatus(productId, status);
+        } catch (Exception e) {
+            logger.error("下架商品的订单错误");
+            return false;
+        }
+        return true;
+    }
 }
