@@ -20,6 +20,8 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.sun.xml.internal.ws.api.pipe.Tube;
+import org.apache.commons.collections.set.ListOrderedSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -130,8 +132,6 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         if (orderRelationship.getServiceType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务，那么取消报名要解冻时间币
             //TODO 解冻时间币（根据用户和订单编号找出该冻结信息，然后修改更新）
-            TUserFreeze userFreeze = userCommonController.selectUserFreezeByUserIdAndOrderId(nowUser.getId() , orderId);
-
             unFreezeTime(orderRelationship.getCollectTime(), nowTime, nowUser);
 
         }
@@ -350,7 +350,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
                 //TODO 发送通知
                 if (order.getType() == 2) {
                     //如果是服务,解冻时间币
-                    unFreezeTime(order.getCollectTime(), nowTime, toUser);
+                    unFreezeTime(order.getCollectTime(), nowTime, toUser , orderId);
                 }
             } else {
                 errorMsg.add("用户" + toUser.getName() + "已被您操作");
@@ -364,15 +364,58 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         return errorMsg;
     }
-//TODO 标记开始 等订单关系表更新上来再写
- /*   public List<String> startOrder(Long orderId , List<Long> userIdList){
-        TOrder order = orderDao.selectByPrimaryKey(orderId);
+
+    /**
+     * 开始订单（签到）
+     * @param orderId
+     * @param userIdList
+     * @param nowUserId
+     * @return
+     */
+    public List<String> startOrder(Long orderId , List<Long> userIdList , Long nowUserId){
+        TUser nowUser = userCommonController.getUserById(nowUserId);
+        long nowTime = System.currentTimeMillis();
+        List<String> errorMsg = new ArrayList<>();
         if (userIdList.size() == 1){
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , userIdList.get(0));
-            if (orderRelationship.get)
+            if (orderRelationship.getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()){
+                //如果用户已经被签到过了
+                throw new MessageException("499", "该用户已经被签到过了～");
+            }
+            //将该用户标记为签到状态
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_YES.getType());
+            orderRelationship.setUpdateTime(nowTime);
+            orderRelationship.setUpdateUser(nowUser.getId());
+            orderRelationship.setUpdateUserName(nowUser.getName());
+            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        } else {
+            List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIdList);
+            List<Long> orderRelationshipIdList = new ArrayList<>();
+            for (int i = 0 ;i < orderRelationshipList.size() ; i++){
+                if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()){
+                    //如果用户已经被签到过了
+                    for (int j =0 ; j < toUserList.size() ; j++){
+                        if (toUserList.get(j).getId() == orderRelationshipList.get(i).getReceiptUserId().longValue()){
+                            errorMsg.add( "用户"+toUserList.get(j).getName()+"已经被签到过了～");
+                        }
+                        break;
+                    }
+
+                } else {
+                    //将该用户标记为签到状态
+                    orderRelationshipList.get(i).setSignType(OrderRelationshipEnum.SIGN_TYPE_YES.getType());
+                    orderRelationshipList.get(i).setUpdateTime(nowTime);
+                    orderRelationshipList.get(i).setUpdateUser(nowUser.getId());
+                    orderRelationshipList.get(i).setUpdateUserName(nowUser.getName());
+                    orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
+                }
+            }
+            //将修改完签到状态的订单关系表批量进行更新
+            orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList , orderRelationshipIdList);
         }
-        List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList()
-    }*/
+        return errorMsg;
+    }
 
 
     /**
@@ -434,7 +477,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         //查看是否还有待支付的人，没有则将发布用户状态置为待评价
         long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         if ( count == 0){
-            //如果没有要支付的人，就将发布者订单关系置为待支付
+            //如果没有要支付的人，就将发布者订单关系置为待评价
             TOrderRelationship publishOrderRela = orderRelationshipDao.selectByOrderIdAndUserId(orderId,publishUserId);
             publishOrderRela.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
             publishOrderRela.setUpdateTime(nowTime);
@@ -445,7 +488,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
 
         //解冻时间币，解冻数量是支付成功人数量*时间币单价
-        //unFreezeTime(orderRelationship.getCollectTime() , nowTime , nowUser); TODO 暂时标注
+        unFreezeTime(order.getCollectTime() * seekHelpDoneNum , nowTime , nowUser , orderId);
 
 
         return msgList;
@@ -473,7 +516,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             //如果是首次完成互助
             //TODO 奖励互助时 增加成长值
         }
+        //更新被支付用户的时间，并且将其完成求助数量+1
         toUser.setSurplusTime(toUser.getSurplusTime() + payment);
+        toUser.setnum
         toUser.setUpdateUserName(nowUser.getName());
         toUser.setUpdateUser(nowUser.getId());
         toUser.setUpdateTime(nowTime);
@@ -573,8 +618,9 @@ public class OrderRelationServiceImpl implements OrderRelationService {
      * @param nowTime
      * @param nowUser
      */
-    private void unFreezeTime(long unfreezeTime, long nowTime, TUser nowUser) {
-        TUserFreeze userFreeze = null;//TODO 调用冻结dao来查询冻结表
+    private void unFreezeTime(long unfreezeTime, long nowTime, TUser nowUser , Long orderId) {
+        TUserFreeze userFreeze = null;
+        userFreeze = userCommonController.selectUserFreezeByUserIdAndOrderId(nowUser.getId() , orderId);
         if (userFreeze == null) {
             //如果没有冻结信息，说明订单有问题，取消失败
             throw new MessageException("499", "冻结信息表更新失败，请后退刷新重试");
@@ -586,12 +632,12 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         if (userFreeze.getFreezeTime() == 0) {
             userFreeze.setIsValid("0");
         }
-        //TODO 更新冻结表
+        userCommonController.updateUserFreeze(userFreeze);
         nowUser.setFreezeTime(nowUser.getFreezeTime() - unfreezeTime);
         nowUser.setUpdateTime(nowTime);
         nowUser.setUpdateUser(nowUser.getId());
         nowUser.setUpdateUserName(nowUser.getName());
-        //TODO 更新用户表
+        userCommonController.updateByPrimaryKey(nowUser);
     }
 
     /**
