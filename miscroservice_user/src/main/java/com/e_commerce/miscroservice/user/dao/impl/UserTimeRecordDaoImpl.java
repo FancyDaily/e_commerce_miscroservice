@@ -15,4 +15,9 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     public List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord(), new MybatisSqlWhereBuild(TUserTimeRecord.class).eq(TUserTimeRecord::getUserId, userId).between(TUserTimeRecord::getCreateTime, begin, end).eq(TUserTimeRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public int insert(TUserTimeRecord record) {
+        return MybatisOperaterUtil.getInstance().save(record);
+    }
 }

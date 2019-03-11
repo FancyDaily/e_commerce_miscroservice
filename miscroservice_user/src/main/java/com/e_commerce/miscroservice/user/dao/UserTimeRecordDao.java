@@ -8,4 +8,6 @@ import java.util.List;
 @Component
 public interface UserTimeRecordDao {
     List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end);
+
+    int insert(TUserTimeRecord record);
 }

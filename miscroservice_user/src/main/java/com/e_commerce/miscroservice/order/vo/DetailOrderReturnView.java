@@ -40,10 +40,6 @@ public class DetailOrderReturnView {
 	 * 封面图地址
 	 */
 	private String coverImgUrl;
-	/**
-	 * 是否关注 true 已关注
-	 */
-	private boolean careStatus;
 
 	public String getServiceIdString() {
 		if (order != null) {

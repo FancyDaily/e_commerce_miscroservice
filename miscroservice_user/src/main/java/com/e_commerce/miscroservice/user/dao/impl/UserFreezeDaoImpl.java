@@ -23,13 +23,45 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
     @Override
     public List<TUserFreeze> queryUserFreeze(Long userId, Long lastTime, MybatisSqlWhereBuild.ORDER order) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
-                .eq(TUserFreeze::getCreateTime, lastTime)
+                .lt(TUserFreeze::getCreateTime, lastTime)
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFreeze::getCreateTime)));
     }
 
+    /**
+     * 插入冻结记录
+     * @param userFreeze
+     * @return
+     */
     @Override
     public int insert(TUserFreeze userFreeze) {
         return MybatisOperaterUtil.getInstance().save(userFreeze);
     }
+
+    /**
+     * 根据用户id和订单id查找冻结记录
+     * @param userId
+     * @param orderId
+     * @return
+     */
+    @Override
+    public TUserFreeze selectUserFreezeByUserIdAndOrderId(Long userId, Long orderId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUserFreeze(),new MybatisSqlWhereBuild(TUserFreeze.class)
+        .eq(TUserFreeze::getUserId,userId)
+        .eq(TUserFreeze::getOrderId,orderId)
+        .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 更新冻结记录
+     * @param userFreeze
+     * @return
+     */
+    @Override
+    public int update(TUserFreeze userFreeze) {
+        return MybatisOperaterUtil.getInstance().update(userFreeze,new MybatisSqlWhereBuild(TUserFreeze.class)
+        .eq(TUserFreeze::getId,userFreeze.getId())
+        .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }

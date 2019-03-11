@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -71,7 +72,7 @@ public class DesensitizedUserView implements Serializable {
 
 	private String vxOpenId;
 
-	private String occupation;
+	private String occupation;	//职业
 
 	private String workPlace;	//公司
 
@@ -129,6 +130,7 @@ public class DesensitizedUserView implements Serializable {
 
 	private String userType;	//用户类型
 
+	@JsonProperty(defaultValue = "")
 	private String extend;
 
 	private Long createUser;

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import com.github.pagehelper.Page;
 
@@ -76,15 +77,48 @@ public interface OrderDao {
      */
     List<TOrder> selectPastByUserId(Long userId);
 
+    /**
+     * 根据订单id查找订单记录
+     * @param orderIds
+     * @return
+     */
+    List<TOrder> selectOrdersInOrderIds(List orderIds);
+
+    /**
+     * 根据来源、状态、用户id查找订单记录
+     * @param sourceType
+     * @param userId
+     * @param availableStatusArray
+     * @return
+     */
+    List<TOrder> selectBySourceAndUserIdAndStatuses(Integer sourceType, Long userId, Integer[] availableStatusArray);
 	/**
 	 * 同步商品和订单的状态
 	 * @param productId 商品ID
 	 * @param status 商品状态  3、改为手动下架 4、改为自动下架
 	 */
 	void updateByServiceId(Long productId, Integer status);
+	/**
+	 * 功能描述:统计该商品派生了多少张订单
+	 * @author 马晓晨
+	 * @date 2019/3/10 13:50
+	 * @param serviceId 商品ID
+	 * @return
+	 */
+	Long countProductOrder(Long serviceId);
+
+    /**
+     * 根据来源、状态、用户id、订单id查找订单记录
+     * @param sourceGroup
+     * @param userId
+     * @param availableStatusArray
+     * @param idList
+     * @return
+     */
+    List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList);
 
 
-	//TODO NEW!!!!!!EMD
+    //TODO NEW!!!!!!EMD
 
 
 }

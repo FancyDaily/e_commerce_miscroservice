@@ -19,6 +19,7 @@ import java.util.List;
  * 订单关系controller
  *
  */
+//@RestController
 @RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {

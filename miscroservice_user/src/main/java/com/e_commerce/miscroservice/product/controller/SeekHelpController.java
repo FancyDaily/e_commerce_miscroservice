@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppMessageConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -48,25 +49,24 @@ public class SeekHelpController extends BaseController {
 	 *                 "id": 商品ID,
 	 *                 "serviceName": "名称",
 	 *                 "servicePlace": 线上或线下,
-	 *                 "servicePersonnel": 1,
-	 *                 "startTime": 1544249700000,
-	 *                 "endTime": 1544253300000,
-	 *                 "timeType": 0,
-	 *                 "collectType": 1,
-	 *                 "collectTime": 30,
-	 *                 "nameAudioUrl": "",
-	 *                 "createUser": 68813260748488704,
-	 *                 "createUserName": "马晓晨",
-	 *                 "createTime": 1544192157901,
-	 *                 "updateUser": 1,
-	 *                 "updateUserName": "系统管理员",
-	 *                 "updateTime": 1544424600013,
-	 *                 "isValid": "1"
+	 *                 "servicePersonnel": 需要人数,
+	 *                 "startTime": 开始时间毫秒值（单次显示开始时间使用此字段）,
+	 *                 "endTime": 结束时间毫秒值(单词显示结束时间使用此字段),
+	 *                 "timeType": 是否重复 0、不重复 1、重复性,
+	 *                 "collectType": 收取分类, 1、互助时 2、公益时
+	 *                 "collectTime": 收取时长,
+	 *                 "nameAudioUrl": "音频地址",
+	 *                 "dateWeekNumber": "5,6",
+	 *                 "startDateS": 开始日期字符串  例："20190308",
+	 *                 "endDateS": 结束日期字符串  例："20190310",
+	 *                 "startTimeS": 开始时间字符串  例："1320",
+	 *                 "endTimeS": 结束时间字符串   例："1340",
+	 *                 "dateWeek":显示周X的字符串
 	 *                 },
-	 *                 "imgUrl": ""
+	 *                 "imgUrl": "封面图"
 	 *                 }
 	 *                 ],
-	 *                 "totalCount": 30
+	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
 	 * @return
@@ -79,17 +79,17 @@ public class SeekHelpController extends BaseController {
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SEEK_HELP.getValue());
 			result.setData(list);
 			result.setSuccess(true);
-			result.setMsg("查询成功");
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("查询失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
+			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("查询失败");
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
 		}
 		return result;
 	}
@@ -112,19 +112,19 @@ public class SeekHelpController extends BaseController {
 		try {
 			productService.upperFrame(user, productId);
 			result.setSuccess(true);
-			result.setMsg("上架成功");
+			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("上架失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("上架失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("上架失败" + errInfo(e));
+			logger.error(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("上架失败");
+			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR);
 			return result;
 		}
 	}
@@ -148,19 +148,19 @@ public class SeekHelpController extends BaseController {
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
-			result.setMsg("删除成功");
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("删除失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("删除失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("删除失败" + errInfo(e));
+			logger.error(AppMessageConstant.PRODUCT_DEL_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("删除失败");
+			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR);
 			return result;
 		}
 	}
@@ -183,19 +183,19 @@ public class SeekHelpController extends BaseController {
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
-			result.setMsg("下架成功");
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("下架失败," + e.getMessage());
+			logger.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("下架失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("下架失败" + errInfo(e));
+			logger.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("下架失败");
+			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
 			return result;
 		}
 	}
@@ -225,19 +225,19 @@ public class SeekHelpController extends BaseController {
 		try {
 			productService.submitSeekHelp(user, param, token);
 			result.setSuccess(true);
-			result.setMsg("发布求助成功");
+			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn("发布求助失败," + e.getMessage());
+			logger.warn(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
-			result.setMsg("发布求助失败," + e.getMessage());
+			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error("发布求助失败" + errInfo(e));
+			logger.error(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + errInfo(e));
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("发布求助失败");
+			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_ERROR);
 			return result;
 		}
 

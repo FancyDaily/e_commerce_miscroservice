@@ -54,7 +54,7 @@
         1
         ELSE
         0
-        END DESC
+        END ASC
 
     </select>
 </mapper>
