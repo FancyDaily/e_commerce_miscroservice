@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -12,7 +13,7 @@ import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 用户Controller
+ * 用户模块
  *
  * 功能描述:用户Controller
  */
@@ -545,7 +546,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 收藏列表 还没测试
+     * 收藏列表
      *
      * @param token
      * @param pageNum  分页参数
@@ -621,19 +622,27 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 收藏/取消收藏 还没写
+     * 收藏/取消收藏
      *
      * @param token
-     * @param orderRelationshipId 订单id
+     * @param orderId 订单id
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @RequestMapping("collect")
-    public Object collect(String token, Long orderRelationshipId) {
+    public Object collect(String token, Long orderId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            userService.collect(user, orderRelationshipId);
+            userService.collect(user, orderId);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("收藏/取消收藏异常: " + e.getMessage());
@@ -1430,8 +1439,8 @@ public class UserController extends BaseController {
      *                 "companyId": 80363494481854464,
      *                 "userId": 68813260748488704,
      *                 "companyName": "黑龙江现观商业管理有限公司",  //组织名
-     *                 "companyJob": "",
-     *                 "teamName": "",
+     *                 "companyJob": "",    //组内角色 0创建者 1成员
+     *                 "teamName": "",  //组织内昵称
      *                 "teamJob": "",
      *                 "teamUserCode": "",
      *                 "extend": "",
@@ -1691,7 +1700,7 @@ public class UserController extends BaseController {
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            userService.auth(user, cardId, cardName);
+            userService.auth(token,user, cardId, cardName);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("个人认证信息提交异常: " + e.getMessage());
@@ -1701,6 +1710,119 @@ public class UserController extends BaseController {
             e.printStackTrace();
             logger.error("个人认证信息提交异常", errInfo(e));
             result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 单位认证信息更新
+     * @param token
+     * @param type  组织类型
+     * @param name 组织名字
+     * @param province 省份
+     * @param city 城市
+     * @param country 区/县
+     * @param depict 描述
+     * @return
+     */
+    @Consume(TUserCompany.class)
+    @RequestMapping("companyAuth")
+    public Object companyAuth(String token, Integer type,String name,String province,String city,String country,String depict,String url) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        TCompany company = (TCompany) ConsumeHelper.getObj();
+        try {
+            userService.companyAuth(user,company);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("组织审核信息提交异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("组织审核信息提交异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 认证信息查询
+     * @param token
+     * @return
+     */
+    @PostMapping("company/info")
+    public Object companyInfo(String token) {
+        AjaxResult result = new AjaxResult();
+//        TUser user = (TUser) redisUtil.get(token);
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            TCompany companyInfo = companyService.companyInfo(user.getId());
+            result.setData(companyInfo);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("认证信息查询异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("认证信息查询异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 每日签到信息查询
+     * @param token
+     * @param ymString
+     * @return
+     */
+    @PostMapping("signUpInfo")
+    public Object signUpInfo(String token, String ymString) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        try {
+            SignUpInfoView signUpInfo = userService.signUpInfo(user, ymString);
+            result.setSuccess(true);
+            result.setData(signUpInfo);
+        } catch (MessageException e) {
+            logger.error("每日签到信息查询异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("每日签到信息查询异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 每日签到
+     * @param token
+     * @return
+     */
+    @PostMapping("/signUp")
+    public Object signUp(String token) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        try {
+            long reward = userService.signUp(token, user);
+            result.setSuccess(true);
+            result.setData(reward);
+        } catch (MessageException e) {
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
         }
         return result;
     }

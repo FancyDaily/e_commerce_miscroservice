@@ -151,19 +151,29 @@ public class DateUtil {
 
 	/**
 	 * 获取当前日期的周几
-	 * @param date
+	 * @param date 开始时间字符串 yyyyMMddHHmm
 	 * @return 周一为1  周日为7
 	 */
 	public static Integer getWeekDay(String date) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-		Calendar cal = Calendar.getInstance();
 		try {
 			Date parse = sdf.parse(date);
-			cal.setTime(parse);
+			return getWeekDay(parse.getTime());
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new MessageException("日期时间格式错误");
 		}
+
+	}
+
+	/**
+	 * 获取当前日期的周几
+	 * @param startTime 开始时间毫秒值
+	 * @return 周一为1  周日为7
+	 */
+	public static int getWeekDay(Long startTime) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(startTime);
 		int year = cal.get(Calendar.YEAR);
 		int month = cal.get(Calendar.MONTH) + 1;
 		int day = cal.get(Calendar.DAY_OF_MONTH);
@@ -180,5 +190,14 @@ public class DateUtil {
 		return week + 1;
 	}
 
-
+	/**
+	 * 获取时间戳的日期  年月日
+	 * @param timestamp 时间戳
+	 * @return  yyyyMMdd
+	 */
+	public static String getDate(Long timestamp) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String date = sdf.format(timestamp);
+		return date;
+	}
 }
