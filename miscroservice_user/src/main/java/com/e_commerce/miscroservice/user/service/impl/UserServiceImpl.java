@@ -925,12 +925,17 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param cardName
      */
     @Override
-    public void auth(String token,TUser user, String cardId, String cardName) {
+    public void auth(String token, TUser user, String cardId, String cardName) {
         // TODO 与数据库同步
         user = userDao.selectByPrimaryKey(user.getId());
 
+        // 判断是否以及提交过实名或者以及实名过
+        if (AppConstant.AUTH_STATUS_YES.equals(user.getAuthenticationStatus())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已经实名过！");
+        }
+
         // 判空
-        if (cardId==null || cardName==null) {
+        if (cardId == null || cardName == null) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必要身份证参数不全！");
         }
 
@@ -985,7 +990,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         user = userDao.selectByPrimaryKey(user.getId());
 
-        flushRedisUser(token, user);
+//        flushRedisUser(token, user);  //刷新缓存
     }
 
     /**
@@ -1034,7 +1039,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         Long id = company.getId();
 
         // 查询是否为审核中或已完成
-        List<TCompany> companies = companyDao.selectByUserId(user.getId());
+        List<TCompany> companies = companyDao.selectAllByUserId(user.getId());
 
         if (companies != null && !companies.isEmpty()) {
             for (TCompany type : companies) {
@@ -1085,6 +1090,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 功能描述: 是否已经实名
      * 作者: 许方毅
      * 创建时间: 2018年11月2日 下午4:28:36
+     *
      * @param id
      * @return
      */
@@ -1101,6 +1107,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 功能描述: 获取用户实名状态(默认为个人)
      * 作者: 许方毅
      * 创建时间: 2018年10月29日 下午2:58:42
+     *
      * @param id
      * @return
      */
@@ -1115,6 +1122,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 签到信息查询
+     *
      * @param user
      * @param ymString
      * @return
@@ -1140,7 +1148,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             Map<String, Object> betweenMap = DateUtil.ym2BetweenStamp(ymString);
             Long beginTimeStamp = Long.valueOf((String) betweenMap.get("begin")); // TODO
             Long endTimeStamp = Long.valueOf((String) betweenMap.get("end"));
-            userTasks = userTaskDao.queryOnesSignUpBetweenTime(user.getId(),beginTimeStamp,endTimeStamp);
+            userTasks = userTaskDao.queryOnesSignUpBetweenTime(user.getId(), beginTimeStamp, endTimeStamp);
         }
 
         // 如果为当月，减少查询次数
@@ -1150,7 +1158,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             Long thisBeginStamp = Long.valueOf((String) thisBetweenMap.get("begin"));
             Long thisEndStamp = Long.valueOf((String) thisBetweenMap.get("end"));
             // 基础签到信息(连续天数，签到状态)
-            userTasks = userTaskDao.queryOnessignUpBetweenTimeDesc(user.getId(),thisBeginStamp,thisEndStamp);
+            userTasks = userTaskDao.queryOnessignUpBetweenTimeDesc(user.getId(), thisBeginStamp, thisEndStamp);
 
             if (!userTasks.isEmpty()) {
                 TUserTask task = userTasks.get(0);
@@ -1173,7 +1181,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         int position = 1;
 
         // 查询最后签到记录
-        List<TUserTask> theUserTasks = userTaskDao.findlatestSignUps(user.getId(), TaskEnum.TASK_SIGNUP.getType());
+        List<TUserTask> theUserTasks = userTaskDao.findlatestSignUps(user.getId());
 
         if (!theUserTasks.isEmpty()) {
             // 获取最后一次的签到记录
@@ -1208,9 +1216,176 @@ public class UserServiceImpl extends BaseService implements UserService {
         return infoView;
     }
 
+    /**
+     * 每日签到
+     *
+     * @param token
+     * @param user
+     * @return
+     */
     @Override
     public long signUp(String token, TUser user) {
-        return 0;
+        // 判空
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
+        }
+
+        // id
+        Long id = user.getId();
+
+        // 判空
+        if (id == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
+        }
+
+        // TODO 从数据库获得即时的用户
+        user = userDao.selectByPrimaryKey(id);
+
+        // 从未签到标记
+        boolean flag = false;
+
+        // 查询签到相关记录
+        List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
+
+        TUserTask userTask = null;
+        if (tasks.isEmpty()) {
+            flag = true;
+        } else {
+            userTask = tasks.get(0); // 最后签到实体类
+        }
+
+        long reward = AppConstant.SIGN_UP_BONUS;
+        Integer targetNum = 1;
+        long special = 3;
+        if (!flag) {
+            // 查询连续签到天数与最后签到日
+            String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
+
+            // 计数器
+            int count = 0;
+
+            for (int i = 0; i < tasks.size(); i++) {
+                count++;
+                TUserTask thisDic = tasks.get(i);
+                Long thisTimeStamp = thisDic.getCreateTime();
+                TUserTask nextDic;
+                Long nextTimeStamp = 0l;
+                if (i != tasks.size() - 1) {
+                    nextDic = tasks.get(i + 1);
+                    nextTimeStamp = nextDic.getCreateTime();
+                }
+                if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
+                    break;
+                }
+            }
+
+            if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
+                count--;
+            }
+
+            targetNum = count % 7; // TODO 计算连续签到天数
+            // 最后签到日信息
+            String dayCountStr = String.valueOf(targetNum);
+
+            // 最后签到日为今天，提示 -> 请勿重复签到
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
+                throw new MessageException("请勿重复签到");
+            }
+
+            // 最后签到日为昨天
+            // -> 计数等于6，计数为7，给出特殊奖励
+            // -> 计数等于7，计数为0,给出普通奖励
+            // -> else，计数++，给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
+                // 处理计数
+                if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
+                    targetNum = 0;
+                } else {
+                    targetNum = targetNum + 1;
+                }
+
+                // 处理奖励
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
+                    // 特殊奖励
+                    special = new Random().nextInt(6) + 10; // 特殊奖励 //TODO
+                    reward = special;
+                }
+            }
+
+            // else,计数=1,给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
+                targetNum = 1;
+            }
+
+            userTask.setTargetNum(targetNum);
+            userTask.setId(idGenerator.nextId());
+            if (targetNum == 7) {
+                userTask.setValue(String.valueOf(special));
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            userTask.setCreateTime(currentTimeMillis);
+            userTask.setCreateUser(id);
+            userTask.setCreateUserName(user.getName());
+            userTask.setUpdateTime(currentTimeMillis);
+            userTask.setUpdateUser(id);
+            userTask.setUpdateUserName(user.getName());
+            userTask.setIsValid(AppConstant.IS_VALID_YES);
+            userTaskDao.insert(userTask);
+        }
+
+        // 从未签到
+        if (flag) {
+            // 插入一条新的记录
+            insertSignUpInfo(user);
+        }
+
+        // update & reward & growth
+//        reward(token, user, reward);  //TODO 完成奖励待添加
+
+        return reward;
+    }
+
+    /**
+     * 用户反馈
+     *
+     * @param token
+     * @param user
+     */
+    @Override
+    public void feedBack(String token, TUser user) {
+//        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
+    }
+
+    /**
+     * 功能描述: 插入一条签到记录(用户第一次签到)
+     * 作者: 许方毅
+     * 创建时间: 2018年11月12日 下午5:02:38
+     *
+     * @param user
+     */
+    private void insertSignUpInfo(TUser user) {
+        // id
+        Long id = user.getId();
+        // name
+        String name = user.getName();
+
+        //构建实体
+        TUserTask userTask = new TUserTask();
+        userTask.setId(snowflakeIdWorker.nextId());
+        userTask.setUserId(id);
+        userTask.setType(TaskEnum.TASK_SIGNUP.getType());
+        userTask.setTargetNum(1);
+        // creater & updater
+        long currentTimeMillis = System.currentTimeMillis();
+        userTask.setCreateTime(currentTimeMillis);
+        userTask.setCreateUser(id);
+        userTask.setCreateUserName(name);
+        userTask.setUpdateTime(currentTimeMillis);
+        userTask.setUpdateUser(id);
+        userTask.setUpdateUserName(name);
+        userTask.setIsValid(AppConstant.IS_VALID_YES);
+
+        userTaskDao.insert(userTask);
     }
 
 
@@ -1290,5 +1465,4 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
     }
-
 }

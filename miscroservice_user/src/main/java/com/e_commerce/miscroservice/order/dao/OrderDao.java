@@ -118,13 +118,13 @@ public interface OrderDao {
 
     /**
      * 根据来源、状态、用户id、订单id查找订单记录
-     * @param sourceGroup
+     * @param source
      * @param userId
      * @param availableStatusArray
      * @param idList
      * @return
      */
-    List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList);
+    List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList);
 
 	/**
 	 * 获取该商品生成的最后一张订单

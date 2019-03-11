@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
-import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -22,7 +21,7 @@ import java.util.Map;
 
 /**
  * 用户模块
- *
+ * <p>
  * 功能描述:用户Controller
  */
 @RestController
@@ -238,7 +237,6 @@ public class UserController extends BaseController {
      *                 "vacant": 26 //可用金额
      *                 }
      *                 }
-     *
      * @return
      */
     @RequestMapping("payments")
@@ -290,7 +288,6 @@ public class UserController extends BaseController {
      *                 ],
      *                 "totalCount": 1
      *                 }
-     *
      * @return
      */
     @RequestMapping("freezeList")
@@ -348,7 +345,6 @@ public class UserController extends BaseController {
      *                 "yearTotal": 7
      *                 }
      *                 }
-     *
      * @return
      */
     @RequestMapping("publicWelfareList")
@@ -416,7 +412,6 @@ public class UserController extends BaseController {
      *              "isValid": "1"
      *              }
      *              }
-     *
      * @return
      */
     @RequestMapping("skill/list")
@@ -446,12 +441,11 @@ public class UserController extends BaseController {
      * @param description 描述
      * @param headUrl     封面图
      * @param detailUrls  内容图,多张图片使用逗号分隔。
-     *
+     *                    <p>
      *                    {
      *                    "success": true, //成功
      *                    "msg": ""
      *                    }
-     *
      * @return
      */
     @RequestMapping("skill/add")
@@ -489,7 +483,6 @@ public class UserController extends BaseController {
      *                    "success": true, //成功
      *                    "msg": ""
      *                    }
-     *
      * @return
      */
     @RequestMapping("skill/modify")
@@ -524,7 +517,6 @@ public class UserController extends BaseController {
      *              "success": true, //成功
      *              "msg": ""
      *              }
-     *
      * @return
      */
     @RequestMapping("skill/delete")
@@ -551,14 +543,14 @@ public class UserController extends BaseController {
      * @param token
      * @param pageNum  分页参数
      * @param pageSize 每页条数
-     *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": {
-     *         "resultList": [
-     *             {
+     *                 <p>
+     *                 {
+     *                 "success": true,
+     *                 "errorCode": "",
+     *                 "msg": "",
+     *                 "data": {
+     *                 "resultList": [
+     *                 {
      *                 "id": 101675590041468928,
      *                 "serviceId": 101675589445877760, //服务id
      *                 "mainId": 101675590041468928,
@@ -592,12 +584,11 @@ public class UserController extends BaseController {
      *                 "updateTime": 1552023749565,
      *                 "companyId": "",
      *                 "isValid": "1"
-     *             }
-     *         ],
-     *         "totalCount": 1
-     *     }
-     * }
-     *
+     *                 }
+     *                 ],
+     *                 "totalCount": 1
+     *                 }
+     *                 }
      * @return
      */
     @RequestMapping("collect/list")
@@ -626,14 +617,13 @@ public class UserController extends BaseController {
      *
      * @param token
      * @param orderId 订单id
-     *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": ""
-     * }
-     *
+     *                <p>
+     *                {
+     *                "success": true,
+     *                "errorCode": "",
+     *                "msg": "",
+     *                "data": ""
+     *                }
      * @return
      */
     @RequestMapping("collect")
@@ -728,7 +718,6 @@ public class UserController extends BaseController {
      *               "idStr": "",
      *               "joinCompany": false
      *               }
-     *
      * @return
      */
     @RequestMapping("infos")
@@ -1098,7 +1087,6 @@ public class UserController extends BaseController {
      *               }
      *               }
      *               }
-     *
      * @return
      */
     @RequestMapping("page")
@@ -1243,7 +1231,6 @@ public class UserController extends BaseController {
      *                  "totalCount": 8
      *                  }
      *                  }
-     *
      * @return
      */
     @RequestMapping("page/service")
@@ -1280,23 +1267,23 @@ public class UserController extends BaseController {
      *                 "data": {
      *                 "resultList": [
      *                 {
-     *                 "order": {
-     *                 "id": 101433003871305728,
-     *                 "serviceId": 101433003401543680,
-     *                 "mainId": 101433003871305728,
-     *                 "serviceName": "新版本重复2",
-     *                 "servicePlace": 1,
-     *                 "labels": "hehe,haha",
-     *                 "type": 1,
-     *                 "status": 2,
-     *                 "source": 1,
-     *                 "serviceTypeId": 15000,
-     *                 "enrollNum": 0,
-     *                 "confirmNum": 0,
-     *                 "startTime": 1551936000000,
-     *                 "endTime": 1551937200000,
-     *                 "collectTime": 10,
-     *                 "collectType": 1,
+     *                 "order": {   //主体（1）
+     *                 "id": 101433003871305728,    //订单id
+     *                 "serviceId": 101433003401543680, //商品(服务/求助)的id
+     *                 "mainId": 101433003871305728,    //主订单id
+     *                 "serviceName": "新版本重复2", //名称
+     *                 "servicePlace": 1,   //类型，1线上2线下
+     *                 "labels": "hehe,haha",   //标签
+     *                 "type": 1,   //类型 1服务2求助
+     *                 "status": 2, //状态
+     *                 "source": 1, //来源 1个人2组织
+     *                 "serviceTypeId": 15000,  //服务类型代号
+     *                 "enrollNum": 0,  //报名人数
+     *                 "confirmNum": 0, //确认人数
+     *                 "startTime": 1551936000000,  //开始时间
+     *                 "endTime": 1551937200000,    //结束时间
+     *                 "collectTime": 10,   //收取价格
+     *                 "collectType": 1,    //收取类型 1互助时2公益时
      *                 "createUser": 68813260748488704,
      *                 "createUserName": "马晓晨",
      *                 "createTime": 1551965912545,
@@ -1305,17 +1292,17 @@ public class UserController extends BaseController {
      *                 "updateTime": 1551965912545,
      *                 "isValid": "1"
      *                 },
-     *                 "evaluates": [
+     *                 "evaluates": [   //附带的评价(多)
      *                 {
      *                 "id": 69864082542428160,
-     *                 "evaluateUserId": 68813258559062016,
-     *                 "userId": 68813260748488704,
-     *                 "orderId": 101433003871305728,
-     *                 "creditEvaluate": 5,
-     *                 "majorEvaluate": 5,
-     *                 "attitudeEvaluate": 5,
-     *                 "message": "贴膜贴得不错",
-     *                 "labels": "心灵手巧,行家里手",
+     *                 "evaluateUserId": 68813258559062016, //评价者id
+     *                 "userId": 68813260748488704, //被评价者id
+     *                 "orderId": 101433003871305728,   //订单id
+     *                 "creditEvaluate": 5, //信用评分
+     *                 "majorEvaluate": 5,  //专业评分
+     *                 "attitudeEvaluate": 5,   //态度评分
+     *                 "message": "贴膜贴得不错", //评价的内容
+     *                 "labels": "心灵手巧,行家里手",   //评价标签
      *                 "createUser": 68813258559062016,
      *                 "createUserName": "刘维",
      *                 "createTime": 1544439295290,
@@ -1341,7 +1328,7 @@ public class UserController extends BaseController {
      *                 "isValid": "1"
      *                 }
      *                 ],
-     *                 "user": {
+     *                 "user": {    //配套的用户信息
      *                 "id": 68813260748488704,
      *                 "name": "马晓晨",
      *                 "userTel": "15122843051",
@@ -1360,26 +1347,26 @@ public class UserController extends BaseController {
      *                 "level": 4,
      *                 "growthValue": 475,
      *                 "seekHelpNum": 18,
-     *                 "serveNum": 10,
+     *                 "serveNum": 10,  //作为服务者的被评分次数,各项平均分=单项服务总评分/作为服务者的被评分次数
      *                 "surplusTime": 47,
      *                 "freezeTime": 210,
      *                 "creditLimit": 200,
-     *                 "publicWelfareTime": 0,
+     *                 "publicWelfareTime": 0,  //公益时
      *                 "authenticationStatus": 2,
      *                 "authenticationType": 1,
-     *                 "totalEvaluate": 146,
-     *                 "creditEvaluate": 48,
-     *                 "majorEvaluate": 49,
-     *                 "attitudeEvaluate": 49,
+     *                 "serv_total_evaluate": 146,
+     *                 "serv_credit_evaluate": 48,  //服务总信用评分
+     *                 "serv_major_evaluate": 49,   //服务总专业评分
+     *                 "serv_attitude_evaluate": 49,    //服务总态度评分
      *                 "skill": "",
-     *                 "integrity": 100,
+     *                 "integrity": 100,    //用户信息完整度
      *                 "accreditStatus": 0,
-     *                 "masterStatus": 0,
-     *                 "authStatus": 1,
+     *                 "masterStatus": 0,   //达人标识
+     *                 "authStatus": 1, //基本信息授权状态
      *                 "inviteCode": "EuciNL",
-     *                 "avaliableStatus": "1",
-     *                 "isCompanyAccount": 0,
-     *                 "userType": "1",
+     *                 "avaliableStatus": "1",  //可用状态
+     *                 "isCompanyAccount": 0,   //是否为组织账号
+     *                 "userType": "1", //用户类型 1个人2公益组织3一般组织
      *                 "createUser": 68813260748488704,
      *                 "createUserName": "马晓晨",
      *                 "createTime": 1537941095000,
@@ -1391,10 +1378,9 @@ public class UserController extends BaseController {
      *                 }
      *                 }
      *                 ],
-     *                 "totalCount": 5
+     *                 "totalCount": 1
      *                 }
-     * }
-     *
+     *                 }
      * @return
      */
     @RequestMapping("historyService")
@@ -1419,7 +1405,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 加入的组织列表信息 没测
+     * 加入的组织列表信息
      *
      * @param token
      * @param userId
@@ -1427,12 +1413,12 @@ public class UserController extends BaseController {
      * @param pageSize
      *
      * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": {
-     *         "resultList": [
-     *             {
+     *                 "success": true,
+     *                 "errorCode": "",
+     *                 "msg": "",
+     *                 "data": {
+     *                 "resultList": [
+     *                 {
      *                 "num": 1,    //组织人数
      *                 "companyIdString": "80363494481854464",  //组织id
      *                 "id": 1111,
@@ -1451,12 +1437,11 @@ public class UserController extends BaseController {
      *                 "updateUserName": "",
      *                 "updateTime": 1231231231,
      *                 "isValid": "1"
-     *             }
-     *         ],
-     *         "totalCount": 1
-     *     }
-     * }
-     *
+     *                 }
+     *                 ],
+     *                 "totalCount": 1
+     *                 }
+     *                 }
      * @return
      */
     @RequestMapping("company/list")
@@ -1480,6 +1465,162 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 组织发布的活动列表
+     * @param token
+     * @param companyId 组织id
+     * @param pageNum   页码
+     * @param pageSize  每页条数
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "resultList": [
+     *             {
+     *                 "idString": "101430540338461080",
+     *                 "serviceIdString": "101430539319246848", //商品id
+     *                 "id": 101430540338461080,
+     *                 "serviceId": 101430539319246848,
+     *                 "mainId": 101430540338462720,
+     *                 "nameAudioUrl": "",
+     *                 "serviceName": "脏读READ UNCOMMITTED101010",   //名称
+     *                 "servicePersonnel": 3,   //预设人数
+     *                 "servicePlace": 1,   //线上线下  1线上2线下
+     *                 "labels": "hehe,haha",
+     *                 "type": 1,   //服务类型 1服务2求助
+     *                 "status": 1, //状态
+     *                 "source": 2, //来源 1个人 2组织
+     *                 "serviceTypeId": 15000,
+     *                 "addressName": "",   //地址
+     *                 "longitude": "",
+     *                 "latitude": "",
+     *                 "totalEvaluate": "",
+     *                 "enrollNum": 0,
+     *                 "confirmNum": 0,
+     *                 "startTime": 1552022400000,  //开始时间
+     *                 "endTime": 1552023600000,    //结束时间
+     *                 "serviceStatus": "",
+     *                 "openAuth": "",
+     *                 "timeType": 0,   //订单对应商品的重复属性 0指定时间1可重复
+     *                 "collectTime": 10,   //单价
+     *                 "collectType": 1,    //货币类型 1互助式2公益时
+     *                 "createUser": 68813260970786816,
+     *                 "createUserName": "马晓晨",
+     *                 "createTime": 1551965325000,
+     *                 "updateUser": 68813260970786816,
+     *                 "updateUserName": "马晓晨",
+     *                 "updateTime": 1551965325062,
+     *                 "companyId": "",
+     *                 "isValid": "1"
+     *             }
+     *         ],
+     *         "totalCount": 1
+     *     }
+     * }
+     *
+     * @return
+     */
+    @RequestMapping("company/social/list")
+    public Object companySocialList(String token, Long companyId, Integer pageNum, Integer pageSize) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            QueryResult<StrServiceView> activityList = companyService.getActivityList(companyId, pageNum, pageSize);
+            result.setData(activityList);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("组织发布的活动列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("组织发布的活动列表异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 组织发布的我参与的活动列表
+     * @param token
+     * @param companyId
+     * @param pageNum
+     * @param pageSize
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "resultList": [  //参考组织发布的活动接口
+     *             {
+     *                 "idString": "101430540338461080",
+     *                 "serviceIdString": "101430539319246848",
+     *                 "id": 101430540338461080,
+     *                 "serviceId": 101430539319246848,
+     *                 "mainId": 101430540338462720,
+     *                 "nameAudioUrl": "",
+     *                 "serviceName": "脏读READ UNCOMMITTED101010",
+     *                 "servicePersonnel": 3,
+     *                 "servicePlace": 1,
+     *                 "labels": "hehe,haha",
+     *                 "type": 1,
+     *                 "status": 1,
+     *                 "source": 2,
+     *                 "serviceTypeId": 15000,
+     *                 "addressName": "",
+     *                 "longitude": "",
+     *                 "latitude": "",
+     *                 "totalEvaluate": "",
+     *                 "enrollNum": 0,
+     *                 "confirmNum": 0,
+     *                 "startTime": 1552022400000,
+     *                 "endTime": 1552023600000,
+     *                 "serviceStatus": "",
+     *                 "openAuth": "",
+     *                 "timeType": 0,
+     *                 "collectTime": 10,
+     *                 "collectType": 1,
+     *                 "createUser": 68813260970786816,
+     *                 "createUserName": "马晓晨",
+     *                 "createTime": 1551965325000,
+     *                 "updateUser": 68813260970786816,
+     *                 "updateUserName": "马晓晨",
+     *                 "updateTime": 1551965325062,
+     *                 "companyId": "",
+     *                 "isValid": "1"
+     *             }
+     *         ],
+     *         "totalCount": 1
+     *     }
+     * }
+     *
+     * @return
+     */
+    @RequestMapping("company/social/list/mine")
+    public Object companySocialListMine(String token,Long companyId,Integer pageNum,Integer pageSize) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            QueryResult<StrServiceView> myActivityList = companyService.getMyActivityList(user.getId(), companyId, pageNum, pageSize);
+            result.setData(myActivityList);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("组织发布的活动列表异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("组织发布的活动列表异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
 
     /**
      * 用户信息修改(包括修改手机号码)
@@ -1498,7 +1639,7 @@ public class UserController extends BaseController {
      *                             "errorCode": "",
      *                             "msg": "",
      *                             "data": ""
-     *                             }
+     * }
      *
      * @return
      */
@@ -1548,7 +1689,6 @@ public class UserController extends BaseController {
      *                    "isValid": "0"
      *                    }
      *                    }
-     *
      * @return
      */
     @RequestMapping("bonusPackage/preGenerate")
@@ -1586,7 +1726,6 @@ public class UserController extends BaseController {
      *                       "msg": "",
      *                       "data": ""
      *                       }
-     *
      * @return
      */
     @RequestMapping("bonusPackage/generate")
@@ -1614,7 +1753,7 @@ public class UserController extends BaseController {
      *
      * @param token
      * @param bonusPackageId
-     *{
+     * {
      *                       "id": 102130274443198464,
      *                       "userId": 68813260748488704,
      *                       "description": "张三牛逼",
@@ -1626,8 +1765,7 @@ public class UserController extends BaseController {
      *                       "updateUserName": "马晓晨",
      *                       "updateTime": 1552132162244,
      *                       "isValid": "1"
-     *}
-     *
+     *                       }
      * @return
      */
     @RequestMapping("bonusPackage/infos")
@@ -1662,7 +1800,6 @@ public class UserController extends BaseController {
      *                       "msg": "您不能领取自己的红包!",
      *                       "data": ""
      *                       }
-     *
      * @return
      */
     @RequestMapping("bonusPackage/open")
@@ -1689,8 +1826,15 @@ public class UserController extends BaseController {
      * 用户认证信息更新(实名认证)
      *
      * @param token
-     * @param cardId
-     * @param cardName
+     * @param cardId   身份证号
+     * @param cardName 身份证名字
+     *                 <p>
+     *                 {
+     *                 "success": false,
+     *                 "errorCode": "",
+     *                 "msg": "必要身份证参数不全！",
+     *                 "data": ""
+     *                 }
      * @return
      */
     @RequestMapping("auth")
@@ -1700,7 +1844,7 @@ public class UserController extends BaseController {
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            userService.auth(token,user, cardId, cardName);
+            userService.auth(token, user, cardId, cardName);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("个人认证信息提交异常: " + e.getMessage());
@@ -1716,24 +1860,32 @@ public class UserController extends BaseController {
 
     /**
      * 单位认证信息更新
+     *
      * @param token
-     * @param type  组织类型
-     * @param name 组织名字
+     * @param type     组织类型
+     * @param name     组织名字
      * @param province 省份
-     * @param city 城市
-     * @param country 区/县
-     * @param depict 描述
+     * @param city     城市
+     * @param county   区/县
+     * @param depict   描述
+     *                 <p>
+     *                 {
+     *                 "success": false,
+     *                 "errorCode": "",
+     *                 "msg": "单位信息不能为空!",
+     *                 "data": ""
+     *                 }
      * @return
      */
-    @Consume(TUserCompany.class)
-    @RequestMapping("companyAuth")
-    public Object companyAuth(String token, Integer type,String name,String province,String city,String country,String depict,String url) {
+    @Consume(TCompany.class)
+    @RequestMapping("company/auth")
+    public Object companyAuth(String token, Integer type, String name, String province, String city, String county, String depict, String url, String contactsName, String contactsTel, String contactsCardId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
         user.setId(68813260748488704l);
         TCompany company = (TCompany) ConsumeHelper.getObj();
         try {
-            userService.companyAuth(user,company);
+            userService.companyAuth(user, company);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("组织审核信息提交异常: " + e.getMessage());
@@ -1749,7 +1901,40 @@ public class UserController extends BaseController {
 
     /**
      * 认证信息查询
+     *
      * @param token
+     * {
+     *              "success": true,
+     *              "errorCode": "",
+     *              "msg": "",
+     *              "data": {
+     *              "id": 102845147649146880,
+     *              "userId": 68813260748488704,
+     *              "type": 1,   //组织类型(广义) 1民办非企业组织，2社会团体，3事业单位，4政府机关，5企业
+     *              "status": 0, //认证进行中（待审核）
+     *              "name": "张三角发达公司",   //组织名
+     *              "depict": "张三角发达公司致力于发展发达文化，我们承诺绝不传销",   //组织描述
+     *              "province": "浙江省",   //省份
+     *              "city": "杭州市",   //城市
+     *              "county": "上城区", //区/县
+     *              "code": "",
+     *              "legalPerson": "",
+     *              "startTime": "",
+     *              "endTime": "",
+     *              "url": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/15446050826379.png",   //证明图片（多张图片请用分隔）
+     *              "contactsName": "马晓晨",
+     *              "contactsTel": "13546646541213",
+     *              "contactsCardId": "33102119940231515616",
+     *              "extend": "",
+     *              "createUser": 68813260748488704,
+     *              "createUserName": "",
+     *              "createTime": 1552302593970,
+     *              "updateUser": 68813260748488704,
+     *              "updateUserName": "",
+     *              "updateTime": 1552302593970,
+     *              "isValid": "1"
+     *              }
+     *              }
      * @return
      */
     @PostMapping("company/info")
@@ -1776,14 +1961,55 @@ public class UserController extends BaseController {
 
     /**
      * 每日签到信息查询
+     *
      * @param token
-     * @param ymString
+     * @param ymString 年月字符串,eg.2019-03
+     *
+     *                 <p>
+     *                 {
+     *                 "bonus7": "",    //特殊奖励金额
+     *                 "state": true,   //签到状态： true已签到，false未签到
+     *                 "count": 1,      //累计签到天数
+     *                 "cycleArray": [  //签到连续串示意数组
+     *                 "今日",
+     *                 "2019-03-12",
+     *                 "2019-03-13",
+     *                 "2019-03-14",
+     *                 "2019-03-15",
+     *                 "2019-03-16",
+     *                 "2019-03-17"
+     *                 ],
+     *                 "signUpList": [  //签到日历数组
+     *                 {
+     *                 "updateDate": "2019-03-11",  //表示签到的日期
+     *                 "createDate": "2019-03-11",
+     *                 "idString": "102816831982534656",
+     *                 "id": 102816831982534656,
+     *                 "entityId": "",
+     *                 "type": 3,
+     *                 "subType": "",
+     *                 "value": "",
+     *                 "targetId": "",
+     *                 "targetNum": "",
+     *                 "createUser": 68813260748488704,
+     *                 "createUserName": "马晓晨",
+     *                 "createTime": 1552295842989,
+     *                 "updateUser": 68813260748488704,
+     *                 "updateUserName": "马晓晨",
+     *                 "updateTime": 1552295842989,
+     *                 "isValid": "1"
+     *                 }
+     *                 ]
+     *                 }
+     *
      * @return
      */
     @PostMapping("signUpInfo")
     public Object signUpInfo(String token, String ymString) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+//        TUser user = (TUser) redisUtil.get(token);
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
         try {
             SignUpInfoView signUpInfo = userService.signUpInfo(user, ymString);
             result.setSuccess(true);
@@ -1802,30 +2028,65 @@ public class UserController extends BaseController {
 
     /**
      * 每日签到
+     *
      * @param token
+     *
+     * {
+     *              "success": true,
+     *              "errorCode": "",
+     *              "msg": "",
+     *              "data": 3    //本次获得奖励金额
+     *              }
+     *
      * @return
      */
     @PostMapping("/signUp")
     public Object signUp(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+//        TUser user = (TUser) redisUtil.get(token);
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
         try {
             long reward = userService.signUp(token, user);
             result.setSuccess(true);
             result.setData(reward);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
-            result.setSuccess(false);
-            result.setErrorCode(e.getErrorCode());
+            logger.error("每日签到异常: " + e.getMessage());
             result.setMsg(e.getMessage());
-        } catch (Exception e) {
-            logger.error(errInfo(e));
             result.setSuccess(false);
-            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
-            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("每日签到异常", errInfo(e));
+            result.setSuccess(false);
         }
         return result;
     }
 
+    /**
+     * 用户反馈 待联调
+     * @param token
+     * @param contact
+     * @param report
+     * @return
+     */
+    @RequestMapping("feedBack")
+    public Object feedBack(String token, String contact, TReport report) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            userService.feedBack(token, user);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("用户反馈异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("用户反馈异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
 }

@@ -6,8 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
@@ -123,6 +121,10 @@ public class CompanyServiceImpl implements CompanyService {
         //只有该单位的负责人才有发布权限。(后续可能会加入授权功能，与管理者等共享发布权限) => 2019.1.30 组织版上线后，只有组织账号才有发布权限
 
         // 判空
+        if (companyId == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"组织编号不能为空!");
+        }
+
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -197,6 +199,10 @@ public class CompanyServiceImpl implements CompanyService {
             idList.add(orderRelationship.getOrderId());
         }
 
+        if(idList.isEmpty()) {
+            return new QueryResult<StrServiceView>();
+        }
+
         // 查询单位申请人(OLD) => 直接查询组织账号
         Long masterId = null;
 
@@ -210,7 +216,7 @@ public class CompanyServiceImpl implements CompanyService {
         // PageHelper
         Page<Object> startPage = PageHelper.startPage(0, pageSize);
 
-        List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP, masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
+        List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP.getValue(), masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
 
         //String化
         List<StrServiceView> views = new ArrayList<StrServiceView>();
@@ -228,16 +234,15 @@ public class CompanyServiceImpl implements CompanyService {
         return queryResult;
     }
 
+
     /**
-     * 根据id查找TCompany记录
+     * 查询认证信息
      * @param id
      * @return
      */
     @Override
     public TCompany companyInfo(Long id) {
-        return MybatisOperaterUtil.getInstance().findOne(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
-        .eq(TCompany::getId,id)
-        .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
+        return companyDao.selectLatestByUserId(id); //查找最新的一条认证记录
     }
 
 

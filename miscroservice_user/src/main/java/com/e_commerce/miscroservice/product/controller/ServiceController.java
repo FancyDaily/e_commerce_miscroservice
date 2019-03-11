@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

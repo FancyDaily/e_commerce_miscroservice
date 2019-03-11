@@ -171,16 +171,16 @@ public class OrderDaoImpl implements OrderDao {
     /**
      * 根据来源、用户id、状态、订单id集合查找
      *
-     * @param sourceGroup
+     * @param source
      * @param userId
      * @param availableStatusArray
      * @param idList
      * @return
      */
     @Override
-    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList) {
+    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getSource, sourceGroup)
+                .eq(TOrder::getSource, source)
                 .eq(TOrder::getCreateUser, userId)
                 .in(TOrder::getStatus, availableStatusArray)
                 .in(TOrder::getId, idList)
