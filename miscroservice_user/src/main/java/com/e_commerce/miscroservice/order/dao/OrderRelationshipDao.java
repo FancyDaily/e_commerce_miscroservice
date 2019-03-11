@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationshi
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.github.pagehelper.Page;
 
+
 import java.util.List;
 import java.util.Map;
 
@@ -127,7 +128,6 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> selectByUserId(Long userId);
-
 	/**
 	 * 分页报名和选人列表
 	 *

@@ -418,7 +418,14 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public void collect(TUser user, Long orderRelationshipId) {
+        if(orderRelationshipId==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单关系Id不能为空!");
+        }
+
         TOrderRelationship orderRelationship = orderService.selectOrderById(orderRelationshipId);
+        if(orderRelationship==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单不存在!");
+        }
         if (OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType() != orderRelationship.getServiceCollectionType()) {    //当前业务为收藏
             orderService.updateCollectStatus(orderRelationshipId, OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
         } else { //当前业务为取消收藏
@@ -582,6 +589,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillDelete(Long id) {
+        if(id==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能id不能为空");
+        }
         userSkillDao.delete(id);
     }
 
@@ -591,7 +601,23 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
-        return BeanUtil.copy(findUser, DesensitizedUserView.class);
+        DesensitizedUserView view = BeanUtil.copy(findUser, DesensitizedUserView.class);
+        String companyNames = view.getCompanyNames();
+        StringBuilder stringBuilder = new StringBuilder();
+        int count = 0;
+        for(String companyName:companyNames.split(",")) {
+            if(count==2) {
+                break;
+            }
+            stringBuilder.append(companyName).append(",");
+            count ++;
+        }
+        String string = stringBuilder.toString();
+        if(string.endsWith(",")) {
+            string = string.substring(0,string.length()-1);
+        }
+        view.setLimitedCompanyNames(string);
+        return view;
     }
 
     /**
@@ -866,6 +892,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<Long> idList = new ArrayList<>();
         for (TOrderRelationship orderRelationship : orderRelationships) {
             idList.add(orderRelationship.getOrderId());
+        }
+
+        if(idList.isEmpty()) {
+            return new QueryResult<>();
         }
 
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);

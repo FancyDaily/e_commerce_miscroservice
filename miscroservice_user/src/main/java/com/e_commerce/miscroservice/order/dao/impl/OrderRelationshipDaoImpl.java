@@ -230,7 +230,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .in(TOrderRelationship::getStatus, statusList)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
         );
         return orderRelationshipList;
     }
@@ -248,8 +248,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                //.eq(TOrderRelationship::gets) TODO 实体类更新了之后 查签到状态未签到的
-                //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+                        .eq(TOrderRelationship::getSignType , OrderRelationshipEnum.SIGN_TYPE_NO.getType())
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
         );
         return orderRelationshipList;
     }
@@ -267,14 +267,13 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                //.orderBy(MybatisSqlWhereBuild.ORDER.ASC,TOrderRelationship::getCreateTime)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
         );
         return orderRelationshipList;
     }
 
     /**
-     * 根据statusList来查询参与者订单数量
-     *
+     * 根据statusList来查询未投诉参与者订单数量
      * @param orderId
      * @param status
      * @return
@@ -284,8 +283,10 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .count(TOrderRelationship::getId)
                 .eq(TOrderRelationship::getOrderId, orderId)
                 .isNotNull(TOrderRelationship::getReceiptUserId)
-                .eq(TOrderRelationship::getStatus, status));
-        return count;
+                .groupBefore().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
+                .or().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_SOLVE.getType()).groupAfter()
+                .eq(TOrderRelationship::getStatus , status));
+        return  count;
     }
     /*public long updateByOrderRelationshipList(List<TOrderRelationship> orderRelationshipList){
         long update = MybatisOperaterUtil.getInstance().update(orderRelationshipList,)

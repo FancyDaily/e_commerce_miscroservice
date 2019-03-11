@@ -10,7 +10,6 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,8 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 
 
 /**
- * 服务controller
- * @author 马晓晨
  * 服务模块
  * 包含发布服务  下架服务  删除服务  上架服务
  */
