@@ -21,7 +21,6 @@ import java.util.Map;
 
 /**
  * 用户模块
- * <p>
  * 功能描述:用户Controller
  */
 @RestController
@@ -1261,6 +1260,7 @@ public class UserController extends BaseController {
      * @param userId
      * @param pageNum
      * @param pageSize
+     *
      * {
      *                 "success": true,
      *                 "msg": "",
