@@ -68,8 +68,6 @@ public class BaseService {
 	protected ProductDao productDao;
 	@Autowired
 	protected ProductDescDao productDescribeDao;
-	@Autowired
-	protected OrderController orderController;
 
 //	@Autowired
 //	protected ObjectMapper objectMapper;

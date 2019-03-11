@@ -13,7 +13,7 @@ import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ProductSubmitParamView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +39,7 @@ public class SeekHelpController extends BaseController {
 	 * @param token    当前用户token
 	 * @param pageNum  页数
 	 * @param pageSize 每页数量
+	 *
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败消息",
@@ -69,9 +70,10 @@ public class SeekHelpController extends BaseController {
 	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
+	 *
 	 * @return
 	 */
-	@PostMapping("/pageMine")
+	@RequestMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -99,13 +101,15 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
+	 *
 	 * @return
 	 */
-	@PostMapping("/upperFrame")
+	@RequestMapping("/upperFrame")
 	public Object upperFrame(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -135,13 +139,15 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
+	 *
 	 * @return
 	 */
-	@PostMapping("/delSeekHelp")
+	@RequestMapping("/delSeekHelp")
 	public Object delSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -170,13 +176,15 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     用户token
 	 * @param productId 商品ID
+	 *
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或失败的消息"
 	 *                  }
+	 *
 	 * @return
 	 */
-	@PostMapping("/lowerFrameSeekHelp")
+	@RequestMapping("/lowerFrameSeekHelp")
 	public Object lowerFrameSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -209,7 +217,7 @@ public class SeekHelpController extends BaseController {
 	 * @param token
 	 * @return
 	 */
-	@PostMapping("/submit")
+	@RequestMapping("/submit")
 	@Consume(ProductSubmitParamView.class)
 	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param, String token) {
 		AjaxResult result = new AjaxResult();

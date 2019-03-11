@@ -35,7 +35,7 @@ public class OrderCommonController extends BaseController {
 	 * @param service 商品
 	 */
 	public boolean produceOrder(TService service) {
-		logger.info("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
+		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
 		//根据service生成出订单的属性
 		try {
 			orderService.produceOrder(service);
@@ -187,5 +187,23 @@ public class OrderCommonController extends BaseController {
      */
     public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer[] collectionAvailableStatusArray) {
         return orderRelationshipDao.selectOrdersInOrderIdsInStatus(idList,collectionAvailableStatusArray);
+    }
+
+    /**
+     * 根据id查找订单
+     * @param orderRelationshipId
+     * @return
+     */
+    public TOrderRelationship selectOrderById(Long orderRelationshipId) {
+        return orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
+    }
+
+    /**
+     * 根据订单关系id、收藏状态更新收藏状态
+     * @param orderRelationshipId
+     * @param collectStatus
+     */
+    public int updateCollectStatus(Long orderRelationshipId, int collectStatus) {
+        return orderRelationshipDao.updateCollectStatus(orderRelationshipId,collectStatus);
     }
 }

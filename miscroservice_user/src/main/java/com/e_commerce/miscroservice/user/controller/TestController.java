@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.user.controller;
 
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class TestController {
 
 //	@PostConstruct

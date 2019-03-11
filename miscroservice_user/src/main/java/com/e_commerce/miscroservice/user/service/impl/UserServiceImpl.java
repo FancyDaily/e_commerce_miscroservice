@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -18,6 +19,7 @@ import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -411,17 +413,29 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 收藏/取消收藏
      *
      * @param user
-     * @param orderId
+     * @param orderRelationshipId
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-    public void collect(TUser user, Long orderId) {
+    public void collect(TUser user, Long orderRelationshipId) {
+        if(orderRelationshipId==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单关系Id不能为空!");
+        }
 
-//TODO  orderService.updateOrderRelationship();
+        TOrderRelationship orderRelationship = orderService.selectOrderById(orderRelationshipId);
+        if(orderRelationship==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单不存在!");
+        }
+        if (OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType() != orderRelationship.getServiceCollectionType()) {    //当前业务为收藏
+            orderService.updateCollectStatus(orderRelationshipId, OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+        } else { //当前业务为取消收藏
+            orderService.updateCollectStatus(orderRelationshipId, OrderRelationshipEnum.SERVICE_COLLECTION_IS_CANCEL.getType());
+        }
     }
 
     /**
      * 个人主页
+     *
      * @param user
      * @param userId
      * @return
@@ -433,14 +447,14 @@ public class UserServiceImpl extends BaseService implements UserService {
         user = userDao.selectByPrimaryKey(userId);
         DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
         //关注状态
-        Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(),userId);
+        Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
         //求助列表
-        QueryResult<TOrder> helps = getOnesAvailableItems(userId,1,8,false);
+        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false);
 
         //服务列表
-        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1,8,true);
+        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true);
 
         //技能列表
         UserSkillListView skills = skills(user);
@@ -454,6 +468,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 发布的服务/求助
+     *
      * @param userId
      * @param pageNum
      * @param pageSize
@@ -462,11 +477,12 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService) {
-        return getOnesAvailableItems(userId,pageNum,pageSize,isService);
+        return getOnesAvailableItems(userId, pageNum, pageSize, isService);
     }
 
     /**
      * 获取历史互助记录列表
+     *
      * @param user
      * @param userId
      * @param pageNum
@@ -490,24 +506,24 @@ public class UserServiceImpl extends BaseService implements UserService {
         //查找符合条件的订单记录
         List<TOrder> orders = orderService.selectEndOrdersByUserId(userId);
         List<Long> orderIds = new ArrayList<>();
-        for(TOrder order:orders) {
+        for (TOrder order : orders) {
             orderIds.add(order.getId());
         }
 
-        Map<Long,Object> evaluateMap = new HashMap<>();
-        List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds,userId);
-        for(TEvaluate evaluate:evaluates) {
+        Map<Long, Object> evaluateMap = new HashMap<>();
+        List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds, userId);
+        for (TEvaluate evaluate : evaluates) {
             List<TEvaluate> evaluateList = (List<TEvaluate>) evaluateMap.get(evaluate.getOrderId());
-            if(evaluateList==null) {
+            if (evaluateList == null) {
                 evaluateList = new ArrayList<>();
             }
             evaluateList.add(evaluate);
-            evaluateMap.put(evaluate.getOrderId(),evaluateList);
+            evaluateMap.put(evaluate.getOrderId(), evaluateList);
         }
 
         //结果集
         List<HistoryServView> resultList = new ArrayList<>();
-        for(TOrder order:orders) {
+        for (TOrder order : orders) {
             HistoryServView historyServView = new HistoryServView();
             historyServView.setUser(userDao.selectByPrimaryKey(order.getCreateUser())); //查找用户信息
             historyServView.setOrder(order);
@@ -516,7 +532,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         //倒序输出
-        Collections.sort(resultList,new Comparator<HistoryServView>() {
+        Collections.sort(resultList, new Comparator<HistoryServView>() {
                     @Override
                     public int compare(HistoryServView o1, HistoryServView o2) {
                         return (int) (o2.getOrder().getCreateTime() - o1.getOrder().getCreateTime());
@@ -531,7 +547,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         return result;
     }
 
-    private QueryResult getOnesAvailableItems(Long userId,  Integer pageNum, Integer pageSize,boolean isService) {
+    private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService) {
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
         List<TOrder> orders = orderService.selectOdersByUserId(userId, isService);
         QueryResult queryResult = new QueryResult();
@@ -567,21 +583,41 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 删除技能
+     *
      * @param id
      */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillDelete(Long id) {
+        if(id==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能id不能为空");
+        }
         userSkillDao.delete(id);
     }
 
     @Override
     public DesensitizedUserView info(TUser user, Long userId) {
         TUser findUser = userDao.info(userId);
-        if(findUser==null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该用户不存在！");
+        if (findUser == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
-        return BeanUtil.copy(findUser,DesensitizedUserView.class);
+        DesensitizedUserView view = BeanUtil.copy(findUser, DesensitizedUserView.class);
+        String companyNames = view.getCompanyNames();
+        StringBuilder stringBuilder = new StringBuilder();
+        int count = 0;
+        for(String companyName:companyNames.split(",")) {
+            if(count==2) {
+                break;
+            }
+            stringBuilder.append(companyName).append(",");
+            count ++;
+        }
+        String string = stringBuilder.toString();
+        if(string.endsWith(",")) {
+            string = string.substring(0,string.length()-1);
+        }
+        view.setLimitedCompanyNames(string);
+        return view;
     }
 
     /**
@@ -594,7 +630,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public String modify(String token, TUser user) {
-      return "";
+        return "";
 /*
         TUser idHolder = (TUser) redisUtil.get(token);
         TUser updateData = user; // 原始数据
@@ -697,6 +733,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 生成红包
+     *
      * @param user
      * @param bonusPackageId
      */
@@ -705,11 +742,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void generateBonusPackage(TUser user, Long bonusPackageId) {
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
         //校验
-        if(bonusPackage==null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该红包不存在！");
+        if (bonusPackage == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在！");
         }
         //校验红包状态
-        if(AppConstant.IS_VALID_YES.equals(bonusPackage.getIsValid())) {
+        if (AppConstant.IS_VALID_YES.equals(bonusPackage.getIsValid())) {
             return;
         }
         Long time = bonusPackage.getTime();
@@ -754,6 +791,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 查看一个红包
+     *
      * @param user
      * @param bonusId
      * @return
@@ -765,10 +803,11 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 打开一个红包
+     *
      * @param user
      * @param bonusId
      */
-    @Transactional(propagation = Propagation.REQUIRED,rollbackFor = Throwable.class)
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void openBonusPackage(TUser user, Long bonusId) {
         long currentTimeMillis = System.currentTimeMillis();
@@ -784,12 +823,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         if (AppConstant.IS_VALID_NO.equals(bonusRecord.getIsValid())) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"红包已失效！");
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "红包已失效！");
         }
 
         //判权
-        if(bonusRecord.getCreateUser().equals(user.getId())) { //TODO
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"您不能领取自己的红包!");
+        if (bonusRecord.getCreateUser().equals(user.getId())) { //TODO
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您不能领取自己的红包!");
         }
 
         // 更新红包状态
@@ -832,6 +871,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 收藏列表
+     *
      * @param user
      * @param pageNum
      * @param pageSize
@@ -850,8 +890,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrderRelationship> orderRelationships = orderService.selectCollectList(user.getId());
 
         List<Long> idList = new ArrayList<>();
-        for(TOrderRelationship orderRelationship:orderRelationships) {
+        for (TOrderRelationship orderRelationship : orderRelationships) {
             idList.add(orderRelationship.getOrderId());
+        }
+
+        if(idList.isEmpty()) {
+            return new QueryResult<>();
         }
 
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
@@ -861,11 +905,23 @@ public class UserServiceImpl extends BaseService implements UserService {
         queryResult.setResultList(orders);
         queryResult.setTotalCount(startPage.getTotal());
 
-        return  queryResult;
+        return queryResult;
+    }
+
+    /**
+     * 用户认证信息更新(实名认证)
+     * @param user
+     * @param cardId
+     * @param cardName
+     */
+    @Override
+    public void auth(TUser user, String cardId, String cardName) {
+
     }
 
     /**
      * 刷勋缓存
+     *
      * @param token
      * @param user
      */
@@ -887,6 +943,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 通过手机号获取用户记录
+     *
      * @param telephone
      * @return
      */
@@ -896,6 +953,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 技能校验
+     *
      * @param user
      * @param skill
      * @param isModify

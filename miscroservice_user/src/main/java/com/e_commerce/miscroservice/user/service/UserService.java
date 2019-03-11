@@ -174,4 +174,12 @@ public interface UserService {
      * @return
      */
     QueryResult<List<TOrder>> collectList(TUser user, Integer pageNum, Integer pageSize);
+
+    /**
+     * 用户认证信息更新(实名认证)
+     * @param user
+     * @param cardId
+     * @param cardName
+     */
+    void auth(TUser user, String cardId, String cardName);
 }

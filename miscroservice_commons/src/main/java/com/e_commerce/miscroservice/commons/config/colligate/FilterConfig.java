@@ -100,16 +100,16 @@ public class FilterConfig {
                     if (cookieValue == null) {
                         cookieValue = (String) req.getSession().getAttribute(COOKIE_NAME_SESSION);
                     }
-                    logger.info("OldModelCookieValue 值={}",cookieValue);
+                    logger.error("OldModelCookieValue 值={}",cookieValue);
                     if (cookieValue!=null){
                         String result = AESUtil.decrypt(cookieValue, "UTF-8", COOKIE_ENCRYPT_KEY);
                         if (StringUtils.isNotBlank(result)) {
                             String[] oldModelValueKeyArray = StringUtils.split(result, COOKIE_PART_SPLIT);
-                            logger.info("oldModelValueKeyArray 值={}",oldModelValueKeyArray);
+                            logger.error("oldModelValueKeyArray 值={}",oldModelValueKeyArray);
                             if (oldModelValueKeyArray!=null&&oldModelValueKeyArray.length>0){
                                 String key = oldModelValueKeyArray[0];
                                 String oldModelId = userStrHashRedisTemplate.get(key);
-                                logger.info("oldModelId 值={}",oldModelValueKeyArray);
+                                logger.error("oldModelId 值={}",oldModelValueKeyArray);
                                 if (StringUtils.isNotEmpty(oldModelId)){
                                     IdUtil.setId(Integer.valueOf(oldModelId));
                                 }

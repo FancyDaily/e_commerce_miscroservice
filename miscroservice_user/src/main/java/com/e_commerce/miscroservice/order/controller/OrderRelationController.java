@@ -6,7 +6,7 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,9 +17,7 @@ import java.util.List;
  * 订单关系
  *
  * 订单关系controller
- *
  */
-//@RestController
 @RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
@@ -37,12 +35,14 @@ public class OrderRelationController extends BaseController {
      * @param userId    用户id
      * @param date      日期
      * @param serviceId 商品id
+     *
      *                  <p>
      *                  "success": true,
      *                  "msg": "报名成功"
+     *
      * @return
      */
-    @PostMapping("/enroll")
+    @RequestMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -74,7 +74,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/removeEnroll")
+    @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -101,6 +101,7 @@ public class OrderRelationController extends BaseController {
      * @param orderId   订单id
      * @param type      类型 1-选人 2-开始 7-支付 9-评价
      * @param nowUserId 操作用户id
+     *
      *                  <p>
      *                  {
      *                  "success": true,
@@ -120,9 +121,10 @@ public class OrderRelationController extends BaseController {
      *                  }
      *                  ]
      *                  }
+     *
      * @return
      */
-    @PostMapping("/userList")
+    @RequestMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -233,10 +235,12 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId sa
      * @param userIds  ss
+     *
      * "success": true,
      *                "msg": "报名成功"
+     *
      */
-    @PostMapping("/test")
+    @RequestMapping("/test")
     public Object notices(Long orderId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");

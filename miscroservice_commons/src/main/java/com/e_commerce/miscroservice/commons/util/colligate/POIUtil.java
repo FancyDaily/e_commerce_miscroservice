@@ -177,7 +177,7 @@ public class POIUtil {
                 workbook = new XSSFWorkbook(is);  
             }  
         } catch (IOException e) {  
-            logger.info(e.getMessage());  
+            logger.error(e.getMessage());
         }  
         return workbook;  
     }  
