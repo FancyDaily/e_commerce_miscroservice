@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.e_commerce.miscroservice.message.mapper.MessageMapper">
+    <resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.TMessage">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="message_user_id" jdbcType="BIGINT" property="messageUserId" />
+        <result column="user_id" jdbcType="BIGINT" property="userId" />
+        <result column="service_id" jdbcType="BIGINT" property="serviceId" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="message" jdbcType="VARCHAR" property="message" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+        <result column="special_id" jdbcType="BIGINT" property="specialId" />
+        <result column="extend" jdbcType="VARCHAR" property="extend" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="create_user_name" jdbcType="VARCHAR" property="createUserName" />
+        <result column="create_time" jdbcType="BIGINT" property="createTime" />
+        <result column="update_user" jdbcType="BIGINT" property="updateUser" />
+        <result column="update_user_name" jdbcType="VARCHAR" property="updateUserName" />
+        <result column="update_time" jdbcType="BIGINT" property="updateTime" />
+        <result column="is_valid" jdbcType="VARCHAR" property="isValid" />
+        <result column="parent" jdbcType="BIGINT" property="parent" />
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, message_user_id, user_id, service_id, type, message, url, special_id, extend,
+    create_user, create_user_name, create_time, update_user, update_user_name, update_time,
+    is_valid, parent
+  </sql>
+    <select id = "selectParentId"   resultType="long">
+
+	SELECT
+		parent
+	FROM
+		t_message
+	WHERE
+		(( user_id = #{userId} AND message_user_id = #{nowUserId} )
+		OR ( user_id = #{nowUserId} AND message_user_id = #{userId} ) )
+		AND is_valid = "1"
+  </select>
+    <select id="selectMessageList" resultMap="BaseResultMap">
+	  SELECT
+		*
+	FROM
+		t_message
+	WHERE
+		( ( user_id = #{nowUserId} ) OR ( message_user_id = #{nowUserId} ) )
+		AND is_valid = "1"
+		and
+		update_time in
+		(SELECT max(update_time)	FROM t_message GROUP BY parent ORDER BY update_time DESC)
+		AND update_time &lt; #{lastTime}
+	GROUP BY
+		parent
+	ORDER BY
+		update_time  DESC
+	</select>
+</mapper>

@@ -6,18 +6,18 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 功能描述
+ * 订单关系
  *
+ * 订单关系controller
  */
-@RestController
+//@RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
 
@@ -41,7 +41,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/enroll")
+    @PostMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -68,13 +68,12 @@ public class OrderRelationController extends BaseController {
      * @param orderId   订单id
      * @param nowUserId 当前用户id
      *
-     *                  <p>
      *                  "success": true,
      *                  "msg": "取消报名成功"
      *
      * @return
      */
-    @RequestMapping("/removeEnroll")
+    @PostMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -124,7 +123,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/userList")
+    @PostMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -142,6 +141,90 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
+        }
+        return result;
+    }
+
+    /**
+     * 选择用户
+     * @param orderId 订单id
+     * @param nowUserId 当前用户id
+     * @param userIds 被操作者id
+     *
+     * {
+     *     "success": true,
+     *     "msg": "选人成功",
+     *     "data": [
+     *         "用户刘维已被您操作"
+     *     ]
+     * }
+     *
+     * @return
+     */
+    @PostMapping("/chooseUser")
+    public Object chooseUser(Long orderId, Long nowUserId, String userIds) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.chooseUser(orderId , nowUserId , userIdList);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("选人成功");
+        } catch (MessageException e) {
+            logger.warn("选人失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("选人失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("选人失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("选人失败");
+        }
+        return result;
+    }
+
+    /**
+     * 拒绝用户
+     * @param orderId 订单ID
+     * @param nowUserId 当前用户ID
+     * @param userIds 被操作用户ID
+     *
+     *     "success": true,
+     *     "msg": "拒绝成功",
+     *     "data": []
+     *
+     * @return
+     */
+    @PostMapping("/unChooseUser")
+    public Object unChooseUser(Long orderId, Long nowUserId, String userIds) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.unChooseUser(orderId ,userIdList ,nowUserId);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("拒绝成功");
+        } catch (MessageException e) {
+            logger.warn("拒绝失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("拒绝失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("拒绝失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("拒绝失败");
         }
         return result;
     }

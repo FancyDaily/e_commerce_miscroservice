@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.order.service;
 
 
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,4 +52,22 @@ public interface OrderRelationService {
      * @return
      */
     List<UserInfoView> userListByPperation(Long orderId, int type, Long nowUserId);
+
+    /**
+     * 选择用户
+     *
+     * @param orderId
+     * @param nowUserId
+     * @param userIdList
+     * @return
+     */
+    List<String> chooseUser(Long orderId, Long nowUserId, List<Long> userIdList);
+    /**
+     * @return java.util.List<java.lang.String>
+     * @Author 姜修弘
+     * 功能描述:拒绝人选
+     * 创建时间:@Date 下午7:48 2019/3/6
+     * @Param [orderId, nowUserId]
+     **/
+    List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId);
 }

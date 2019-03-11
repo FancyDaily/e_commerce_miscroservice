@@ -107,6 +107,15 @@ public interface OrderDao {
 	 */
 	Long countProductOrder(Long serviceId);
 
+	/**
+	 * 功能描述:统计该商品在固定时间派生的订单数
+	 * @author 马晓晨
+	 * @date 2019/3/10 13:50
+	 * @param serviceId 商品ID
+	 * @return
+	 */
+	Long countProductOrder(Long serviceId, Long startTime, Long endTime);
+
     /**
      * 根据来源、状态、用户id、订单id查找订单记录
      * @param sourceGroup
@@ -117,8 +126,15 @@ public interface OrderDao {
      */
     List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList);
 
+	/**
+	 * 获取该商品生成的最后一张订单
+	 * @param serviceId
+	 * @return
+	 */
+	TOrder findOneLatestOrderByServiceId(Long serviceId);
 
-    //TODO NEW!!!!!!EMD
+
+	//TODO NEW!!!!!!EMD
 
 
 }
