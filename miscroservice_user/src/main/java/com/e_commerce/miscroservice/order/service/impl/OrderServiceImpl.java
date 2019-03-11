@@ -292,7 +292,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
-		order.setMainId(order.getId());
+//		order.setMainId(order.getId());
 		order.setServiceId(service.getId());
 		order.setStatus(OrderEnum.STATUS_NORMAL.getValue());
 		//重复的订单的话  根据商品的重复时间生成第一张订单
@@ -331,32 +331,29 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Arrays.sort(WeekDayNumberArray);
 		//查看该商品是否已经派生过订单
 		Long countOrder = orderDao.countProductOrder(service.getId());
-		if (countOrder.equals(0)) { //该商品没有派生过订单
+		if (countOrder == 0) { //该商品没有派生过订单
 			//获取商品开始时间的字符串形式 201803051434
 			String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
-			//获取商品开始的时间是星期X
-			int startWeekDay = DateUtil.getWeekDay(serviceStartTimeString);
-			//获取订单开始的事件是星期X  离商品开始星期X最近的星期Y
+			Long startTime = DateUtil.parse(serviceStartTimeString);
+			getOrderDay(service, order, WeekDayNumberArray, startTime, true);
+		} else { // 该商品之前派生过订单
+			TOrder tOrder = orderDao.findOneLatestOrderByServiceId(service.getId());
+			Long startTime = tOrder.getStartTime();
+
+			//获取上一张订单开始的时间是星期X
+			int startWeekDay = DateUtil.getWeekDay(startTime);
+			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
 			int orderWeekDay = DateUtil.getMostNearWeekDay(WeekDayNumberArray, startWeekDay);
-			//订单开始的下一个星期
-			int orderNextWeekDay = DateUtil.getNextWeekDay(WeekDayNumberArray, orderWeekDay);
 			//需要增加的天数
 			int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
-			//订单开始的时间戳
-			Long startTimestamp = DateUtil.parse(serviceStartTimeString);
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(new Date(startTimestamp));
-			cal.add(Calendar.DAY_OF_YEAR, addDays);
-			//第一天的结束时间
-			String currentDayEndTime = service.getStartDateS() + service.getEndTimeS();
-			//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
-			if (addDays == 0 && DateUtil.parse(currentDayEndTime) < System.currentTimeMillis()) {
-				addDays = (orderNextWeekDay + 7 - startWeekDay) % 7;
-				if (addDays == 0) {
-					addDays = 7;
-				}
-				cal.add(Calendar.DAY_OF_YEAR, addDays);
+			if (addDays == 0) {
+				addDays = 7;
 			}
+			String startDate = DateUtil.getDate(startTime);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(startTime);
+			cal.add(Calendar.DAY_OF_YEAR, addDays);
+			//校验商品是否超时
 			String endDateTime = service.getEndDateS() + service.getEndTimeS();
 			if (DateUtil.parse(endDateTime) < cal.getTimeInMillis()) {
 				throw new MessageException("订单生成超时，请修改时间后重新发布");
@@ -367,14 +364,49 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			order.setStartTime(DateUtil.parse(orderStartDate + service.getStartTimeS()));
 			//订单结束时间 = 订单开始的日期 + 商品的结束时间
 			order.setEndTime(DateUtil.parse(orderStartDate + service.getEndTimeS()));
-		} else { // 该商品之前派生过订单
-
 		}
+	}
 
-
-
-		//TODO 这里可以提取公共的方法  传递一个开始时间（上一条订单结束日期，加上周X的数值， 得到下一张订单的生成时间）
-		// 然后生成下一张订单 如果超过的结束时间，就进行停止派生，并下架处理
+	private void getOrderDay(TService service, TOrder order, int[] weekDayNumberArray, Long startTime,boolean isFirstOrder) {
+		//获取开始的时间是星期X
+		int startWeekDay = DateUtil.getWeekDay(startTime);
+		//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
+		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
+		//需要增加的天数
+		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+		//订单开始的时间戳
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(startTime);
+		cal.add(Calendar.DAY_OF_YEAR, addDays);
+		//第一天的结束时间
+		String currentDayEndTime = service.getStartDateS() + service.getEndTimeS();
+		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
+		if (DateUtil.parse(currentDayEndTime) < System.currentTimeMillis()) {
+			//参数星期的下一个星期X(不包含这个参数星期)
+			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+			addDays = (orderNextWeekDay + 7 - startWeekDay) % 7;
+			if (addDays == 0) {
+				addDays = 7;
+			}
+			cal.add(Calendar.DAY_OF_YEAR, addDays);
+			getOrderDay(service, order, weekDayNumberArray, cal.getTimeInMillis(), isFirstOrder);
+		}
+		//订单开始的日期
+		String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
+		//订单开始时间 = 订单开始的日期 + 商品的开始时间
+		Long orderStartTime = DateUtil.parse(orderStartDate + service.getStartTimeS());
+		//订单结束时间 = 订单开始的日期 + 商品的结束时间
+		Long orderEndTime = DateUtil.parse(orderStartDate + service.getEndTimeS());
+		Long countOrder = orderDao.countProductOrder(service.getId(), orderStartTime, orderEndTime);
+		if (countOrder != 0) {
+			// 不能生成订单 已有这个时间段的订单
+		}
+		order.setStartTime(orderStartTime);
+		order.setEndTime(orderEndTime);
+		String endDateTime = service.getEndDateS() + service.getEndTimeS();
+		if (DateUtil.parse(endDateTime) < cal.getTimeInMillis()) {
+			throw new MessageException("订单生成超时，请修改时间后重新发布");
+		}
 	}
 
 	/**
