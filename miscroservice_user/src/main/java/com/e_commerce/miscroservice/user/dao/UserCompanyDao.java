@@ -25,4 +25,11 @@ public interface UserCompanyDao {
      * @return
      */
     List<TUserCompany> findRecordOfCompanyAccount(Long companyId);
+
+    /**
+     * 根据用户id时间倒序查询UserCompany记录
+     * @param userIds
+     * @return
+     */
+    List<TUserCompany> queryByUserIdsDESC(Long... userIds);
 }

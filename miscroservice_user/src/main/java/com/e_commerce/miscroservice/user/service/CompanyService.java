@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.service;
 
+import com.e_commerce.miscroservice.commons.entity.application.TCompany;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.user.vo.StrServiceView;
@@ -19,4 +20,11 @@ public interface CompanyService {
     QueryResult<StrServiceView> getActivityList(Long companyId, Integer pageNum, Integer pageSize);
 
     QueryResult<StrServiceView> getMyActivityList(Long userId, Long companyId, Integer pageNum, Integer pageSize);
+
+    /**
+     * 根据主键查询TCompany记录
+     * @param id
+     * @return
+     */
+    TCompany companyInfo(Long id);
 }

@@ -13,6 +13,8 @@ public class TUserTask implements Serializable {
 
     private Integer targetNum;
 
+    private Integer type;
+
     private Long createUser;
 
     private String createUserName;
@@ -67,6 +69,14 @@ public class TUserTask implements Serializable {
 
     public void setTargetNum(Integer targetNum) {
         this.targetNum = targetNum;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public Long getCreateUser() {

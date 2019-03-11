@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
@@ -68,18 +70,19 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         //判断是否为组织的创建者
+        Long companyUserId = null;
         user = userDao.selectByPrimaryKey(userId);
         if(AppConstant.AUTH_TYPE_CORP.equals(user.getAuthenticationType())) {
             //寻找对应的组织账号
             TUser companyUser = userDao.queryDoppelganger(user);
             if(companyUser!=null) {
-                userId = companyUser.getId();
+                companyUserId = companyUser.getId();
             }
         }
 
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
-        List<TUserCompany> select = userCompanyDao.queryByUserIdDESC(userId);
+        List<TUserCompany> select = userCompanyDao.queryByUserIdsDESC(userId,companyUserId);
 
         //numberCountMap
         Map<Long,Integer> numberCountMap = new HashMap<>();
@@ -223,6 +226,18 @@ public class CompanyServiceImpl implements CompanyService {
         queryResult.setTotalCount(startPage.getTotal());
 
         return queryResult;
+    }
+
+    /**
+     * 根据id查找TCompany记录
+     * @param id
+     * @return
+     */
+    @Override
+    public TCompany companyInfo(Long id) {
+        return MybatisOperaterUtil.getInstance().findOne(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
+        .eq(TCompany::getId,id)
+        .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
 
 
