@@ -14,16 +14,14 @@ import java.util.List;
  * 创建时间:2018年11月3日 下午6:18:50
  */
 public class MessageShowLIstView {
-	private Long parent;
-	private String userName;
-	private String userUrl;
-	private String content;
-	private Long time;
-	private String parentToString;
-	private String serviceIdToString;
-	private String toUserIdToString;
-	private Integer status;
-	private Integer isNotice;
+	private Long parent;//分组id
+	private String userName;//用户姓名
+	private String userUrl;//用户头像链接
+	private String content;//内容
+	private Long time;//时间
+	private String parentToString;//string型的分组id
+	private String toUserIdToString;//stirng型的对方用户id
+	private Long unReadSum;//未读消息数量
 	public Long getParent() {
 		return parent;
 	}
@@ -60,29 +58,17 @@ public class MessageShowLIstView {
 	public void setParentToString(Long parentToString) {
 		this.parentToString = parentToString+"";
 	}
-	public String getServiceIdToString() {
-		return serviceIdToString;
-	}
-	public void setServiceIdToString(Long serviceIdToString) {
-		this.serviceIdToString = serviceIdToString + "";
-	}
 	public String getToUserIdToString() {
 		return toUserIdToString;
 	}
 	public void setToUserIdToString(Long toUserIdToString) {
 		this.toUserIdToString = toUserIdToString + "";
 	}
-	public Integer getStatus() {
-		return status;
+	public Long getUnReadSum() {
+		return unReadSum;
 	}
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-	public Integer getIsNotice() {
-		return isNotice;
-	}
-	public void setIsNotice(Integer isNotice) {
-		this.isNotice = isNotice;
+	public void setUnReadSum(Long unReadSum) {
+		this.unReadSum = unReadSum;
 	}
 	
 }

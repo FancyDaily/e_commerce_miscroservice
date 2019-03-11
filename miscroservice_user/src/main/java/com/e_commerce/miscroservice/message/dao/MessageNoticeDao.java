@@ -38,5 +38,17 @@ public interface MessageNoticeDao {
      * @return
      */
     long selectMessageNoticeCountByLastTime(Long lastTIme , Long userId);
+    /**
+     * 查找第一条系统消息
+     * @param userId
+     * @return
+     */
+    TMessageNotice selectFirstMessageNotice(Long userId);
+    /**
+     * 插入系统消息
+     * @param messageNotice
+     * @return
+     */
+    long insert(TMessageNotice messageNotice);
 
 }

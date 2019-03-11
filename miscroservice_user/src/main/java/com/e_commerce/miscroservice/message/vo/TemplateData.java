@@ -1,4 +1,4 @@
-package com.xiaoshitimebank.app.wechat.entity;
+package com.e_commerce.miscroservice.message.vo;
 
 import java.io.Serializable;
 

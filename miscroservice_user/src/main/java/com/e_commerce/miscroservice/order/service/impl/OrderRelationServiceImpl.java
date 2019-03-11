@@ -90,7 +90,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             if (canUseTime < order.getCollectTime()) {
                 throw new MessageException("499", "对不起，余额不足 不可以报名");
             }
-            //TODO 冻结时间（要看一下是不是有可以复用的，，没有新增）
+            userCommonController.freezeTimeCoin(nowUser.getId() , order.getCollectTime() , orderId , order.getServiceName());
             //修改用户表的冻结字段
             nowUser.setFreezeTime(nowUser.getFreezeTime() + order.getCollectTime());
             nowUser.setUpdateTime(nowTime);
@@ -130,6 +130,8 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         if (orderRelationship.getServiceType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务，那么取消报名要解冻时间币
             //TODO 解冻时间币（根据用户和订单编号找出该冻结信息，然后修改更新）
+            TUserFreeze userFreeze = userCommonController.selectUserFreezeByUserIdAndOrderId(nowUser.getId() , orderId);
+
             unFreezeTime(orderRelationship.getCollectTime(), nowTime, nowUser);
 
         }
@@ -266,7 +268,6 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         List<Integer> statusList = new ArrayList<>();
         long canChooseUserSum = order.getServicePersonnel() - order.getConfirmNum();
-        int chooseUserSum = 0;
         if (userIdList.size() > canChooseUserSum) {
             if (canChooseUserSum == 0){
                 throw new MessageException("499", "对不起，您已选满所需人数");

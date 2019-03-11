@@ -16,9 +16,8 @@ import java.util.List;
  * 创建时间:2018年11月3日 下午6:18:50
  */
 @Data
-public class MessagePageView {
+public class NoticesFirstView {
 	private Long sysTime;//最新一条系统消息时间
 	private Long sysUnReadSum;//系统消息未读数目
-	private Long messageTotal;//消息的总条数
 
 }

@@ -111,11 +111,26 @@ public class MessageDaoImpl implements MessageDao {
     /**
      * 消息列表
      * @param nowUser
-     * @param nowTime
+     * @param lastTime
      * @return
      */
-    public List<TMessage> messageShowList(Long nowUser , Long nowTime){
-        List<TMessage> messageList = messageMapper.selectMessageList(nowUser , nowTime);
+    public List<TMessage> messageShowList(Long nowUser , Long lastTime){
+        List<TMessage> messageList = messageMapper.selectMessageList(nowUser , lastTime);
         return messageList;
+    }
+
+    /**
+     * 根据lastTime查看未读消息数量
+     * @param parent
+     * @param lastTime
+     * @return
+     */
+    public long selectCountByUnreade(Long parent , Long lastTime){
+        long count = MybatisOperaterUtil.getInstance().count(
+                new MybatisSqlWhereBuild(TMessage.class)
+                        .eq(TMessage::getParent , parent)
+                        .eq(TMessage::getIsValid , "1")
+                        .gt(TMessage::getCreateTime , lastTime));
+        return count;
     }
 }

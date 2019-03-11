@@ -5,6 +5,8 @@ import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
+import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
+import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
 
 import java.util.List;
 
@@ -56,7 +58,35 @@ public interface MessageService {
      * @param userId
      */
     void insertFormId(String formId, Long userId);
-    List<TMessage>  list (Long nowUserId , Long lastTime );
+    /**
+     * 消息列表
+     *
+     * @param nowUserId
+     * @param lastTime
+     * @param pageSize
+     * @return
+     */
+    QueryResult<MessageShowLIstView> list (Long nowUserId , Long lastTime  , Integer pageSize);
+
+    /**
+     *
+     * 功能描述:查看系统消息第一条日期
+     * 作者:姜修弘
+     * 创建时间:2018年11月16日 下午8:48:01
+     * @param nowUserId
+     * @return
+     */
+    NoticesFirstView noticesFirstInfo(Long nowUserId);
+
+    /**
+     *
+     * 功能描述:是否有未读消息 有-1 没有-0
+     * 作者:姜修弘
+     * 创建时间:2018年12月28日 下午3:32:02
+     * @param nowUserId
+     * @return
+     */
+    int unReadMsg(Long nowUserId);
 
     String test(Long orderId, List<Long> userIdList);
 

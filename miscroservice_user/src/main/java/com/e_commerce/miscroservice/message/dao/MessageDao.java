@@ -56,8 +56,15 @@ public interface MessageDao {
     /**
      * 消息列表
      * @param nowUser
-     * @param nowTime
+     * @param lastTime
      * @return
      */
-    List<TMessage> messageShowList(Long nowUser , Long nowTime);
+    List<TMessage> messageShowList(Long nowUser , Long lastTime);
+    /**
+     * 根据lastTime查看未读消息数量
+     * @param parent
+     * @param lastTime
+     * @return
+     */
+    long selectCountByUnreade(Long parent , Long lastTime);
 }

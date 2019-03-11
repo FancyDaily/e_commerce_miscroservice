@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +43,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/enroll")
+    @PostMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -74,7 +75,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/removeEnroll")
+    @PostMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -124,7 +125,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @RequestMapping("/userList")
+    @PostMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {

@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TMessage;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
@@ -17,14 +18,14 @@ import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
 import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
-import com.e_commerce.miscroservice.order.service.OrderRelationService;
+import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
-import com.e_commerce.miscroservice.user.vo.PublishInterestView;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -62,9 +63,9 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 查看系统消息
-     * @param lastTime
-     * @param nowUserId
-     * @param pageSize
+     * @param lastTime 上次读取时间
+     * @param nowUserId 当前用户id
+     * @param pageSize 分页大小
      * @return
      */
     public QueryResult<TMessageNotice> notices(Long lastTime ,Long nowUserId,int pageSize ){
@@ -80,13 +81,14 @@ public class MessageServiceImpl implements MessageService {
 
     /**
      * 发送消息
-     * @param nowUserId
-     * @param messageUserId
-     * @param specialId
-     * @param type
+     * @param nowUserId 当前用户id
+     * @param messageUserId 对方用户id
+     * @param specialId 特殊操作id
+     * @param type 类型
      * @param message
      * @param url
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public void send(Long nowUserId , Long messageUserId ,  Long specialId , int type , String message , String url) {
         TUser nowUser = userCommonController.getUserById(nowUserId);
         Integer statusForMsg = 1;//默认发送服务通知
@@ -221,21 +223,24 @@ public class MessageServiceImpl implements MessageService {
         formidDao.insert(formid);
     }
 
-    @Override
-    public List<TMessage> list(Long nowUserId, Long lastTime) {
-        return null;
-    }
 
-
-    public QueryResult<MessageShowLIstView>  list (Long nowUserId , Long lastTime  , Integer pageSize){
-        TUser nowUser = userCommonController.getUserById(nowUserId);
+    /**
+     * 消息列表
+     *
+     * @param nowUserId
+     * @param lastTime
+     * @param pageSize
+     * @return
+     */
+    public QueryResult<MessageShowLIstView> list (Long nowUserId , Long lastTime  , Integer pageSize){
         QueryResult<MessageShowLIstView> result = new QueryResult<>();
+        TUser nowUser = userCommonController.getUserById(nowUserId);
         Page<TMessage> page = PageHelper.startPage(1, pageSize);
         List<TMessage> messageList = messageDao.messageShowList(nowUserId , lastTime);
         List<MessageShowLIstView> messageShowLIstViews = new ArrayList<>();
         //如果没有数据，返回空的list
         if (messageList == null || messageList.size() <= 0) {
-            result.setTotalCount(page.getTotal());
+            result.setTotalCount(0l);
             result.setResultList(messageShowLIstViews);
             return result;
         }
@@ -253,8 +258,8 @@ public class MessageServiceImpl implements MessageService {
             messageShowLIstView.setParent(messageList.get(i).getParent());
             messageShowLIstView.setParentToString(messageList.get(i).getParent());
             messageShowLIstView.setTime(messageList.get(i).getUpdateTime());
-           // messageShowLIstView.setIsNotice(unReadMsgSum(nowUser, messageList.get(i).getParent()));
-            if (messageList.get(i).getType() == 0) {
+            messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent()));
+            if (messageList.get(i).getType() == MessageEnum.TYPE_PHOTO.getType()) {
                 //如果是图片
                 messageShowLIstView.setContent("[图片]");
             } else {
@@ -262,12 +267,9 @@ public class MessageServiceImpl implements MessageService {
             }
             if (messageList.get(i).getUserId() == nowUser.getId().longValue()) {
                 //如果消息的发布者是当前用户
-                if (messageList.get(i).getMessageUserId() == nowUser.getId().longValue()) {
-                    messageShowLIstView.setUserName(nowUser.getName());
-                    messageShowLIstView.setUserUrl(nowUser.getUserHeadPortraitPath());
-                    messageShowLIstView.setToUserIdToString(nowUser.getId());
-                    break;
-                }
+                messageShowLIstView.setUserName(nowUser.getName());
+                messageShowLIstView.setUserUrl(nowUser.getUserHeadPortraitPath());
+                messageShowLIstView.setToUserIdToString(nowUser.getId());
             } else {
                 for (int j = 0; j < toUsersInfoList.size(); j++) {
                     if (messageList.get(i).getUserId() == toUsersInfoList.get(j).getId().longValue()) {
@@ -286,6 +288,22 @@ public class MessageServiceImpl implements MessageService {
         return result;
     }
 
+    /**
+     *
+     * 功能描述:查看系统消息第一条日期
+     * 作者:姜修弘
+     * 创建时间:2018年11月16日 下午8:48:01
+     * @param nowUserId
+     * @return
+     */
+    public NoticesFirstView noticesFirstInfo(Long nowUserId){
+        NoticesFirstView noticesFirstView = new NoticesFirstView();
+        TMessageNotice messageNotice = messageNoticeDao.selectFirstMessageNotice(nowUserId);
+        noticesFirstView.setSysTime(messageNotice.getCreateTime());
+        noticesFirstView.setSysUnReadSum(unReadNoticesSum(nowUserId));
+        return noticesFirstView;
+    }
+
 
     /**
      *
@@ -296,87 +314,53 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     public int unReadMsg(Long nowUserId) {
-        /*if (unReadNoticesSum(nowUserId) > 0) {
+        if (unReadNoticesSum(nowUserId) > 0) {
             return 1;
-        }*/
+        }
         //查看所有的消息分组的一条消息
         List<TMessage> messageList = messageDao.messageShowList(nowUserId , 9999999999999l);
         //对每个分组进行查看，是否有未读消息
         for (int i = 0; i < messageList.size(); i++) {
-            /*if (unReadMsgSum(nowUserId, messageList.get(i).getParent()) > 0) {
+            if (unReadMsgSum(messageList.get(i).getParent()) > 0) {
                 return 1 ;
-            }*/
+            }
         }
         return 0;
     }
 
+
     /**
      * 未读消息数量
      *
-     * @param nowUserId
-     * @param toUserId
-     * @param lastTime
+     * @param parent
      * @return
      */
-    private int unReadMsgSum(Long nowUserId , long toUserId , Long lastTime) {
+    private long unReadMsgSum(Long parent) {
         Long lastReadeTime = 0l;
         //Long lastReadeTime = (Long)redisUtil.get("msgReadeLastTime"+messageParent+nowUser.getId()); TODO 通过redis获取上次该分组读消息的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }
-        List<TMessage> messageList = messageDao.selectAllMessageByTwoUserId(nowUserId , toUserId , lastTime);
-        if (messageList != null && messageList.size() > 0) {
-            return messageList.size();
-        }
-        return 0 ;
+        Long unReadeSum = messageDao.selectCountByUnreade(parent , lastReadeTime);
+
+        return unReadeSum ;
     }
+
     /**
-     *
-     * 功能描述:查看系统消息第一条日期
-     * 作者:姜修弘
-     * 创建时间:2018年11月16日 下午8:48:01
-     * @param lastTime
+     * 功能描述:未读系统消息条数
      * @param nowUserId
      * @return
      */
-    /*public NoticesListView noticesList(TUser nowUser){
-        TMessageNoticeExample messageNoticeExample = new TMessageNoticeExample();
-        TMessageNoticeExample.Criteria criteria = messageNoticeExample.createCriteria();
-        criteria.andNoticeUserIdEqualTo(nowUser.getId());
-        criteria.andIsValidEqualTo("1");
-        messageNoticeExample.setOrderByClause("update_time DESC");
-        List<TMessageNotice> messageNotices = messageNoticeDao.selectByExample(messageNoticeExample);
-        NoticesListView noticesListView = new NoticesListView();
-        if (messageNotices != null && messageNotices.size() > 0) {
-            noticesListView.setTime(messageNotices.get(0).getCreateTime());
-            noticesListView.setIsNotice(unReadNoticesSum(nowUser));
-        } else {
-            noticesListView.setIsNotice(0);
-        }
-        return noticesListView;
-    }*/
-
-    /**
-     *
-     * 功能描述:未读系统消息条数
-     * 作者:姜修弘
-     * 创建时间:2018年12月28日 下午3:32:25
-     * @param nowUser
-     * @return
-     */
-    /*private int unReadNoticesSum(TUser nowUser) {
+    private Long unReadNoticesSum(Long nowUserId) {
         Long lastReadeTime = 0l;
         //Long lastReadeTime = (Long)redisUtil.get("noticeUserId"+nowUser.getId());TODO 通过redis获取上次系统消息读取的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }
+        long unReadNoticesSum = messageNoticeDao.selectMessageNoticeCountByLastTime(lastReadeTime , nowUserId);
+        return unReadNoticesSum;
+    }
 
-        List<TMessageNotice> messageNotices = messageNoticeDao.selectByExample(messageNoticeExample);
-        if (messageNotices != null && messageNotices.size() > 0) {
-            return messageNotices.size();
-        }
-        return 0;
-    }*/
 
     /**
      * @return java.lang.String

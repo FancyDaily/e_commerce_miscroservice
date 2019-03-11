@@ -1,19 +1,7 @@
-package com.xiaoshitimebank.app.wechat.entity;
+package com.e_commerce.miscroservice.message.vo;
 
 import java.util.Map;
 
-
-/**
- * 功能描述:小程序推送所需数据
- * 模块:
- * 项目:
- * 版本号:
- * 部门:技术研发部
- * 公司:浙江晓时信息技术有限公司
- * 作者:马晓晨
- * 邮箱: 747052172@qq.com
- * 创建时间:2018年11月21日 下午2:39:24
- */
 /**
  * 功能描述:
  * 模块:

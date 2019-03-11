@@ -41,7 +41,7 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
         List<TMessageNotice> messageNoticeList = MybatisOperaterUtil.getInstance().finAll(new TMessageNotice(),
                 new MybatisSqlWhereBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
-                        .lt(TMessageNotice::getCreateTime , lastTIme)
+                        .gt(TMessageNotice::getCreateTime , lastTIme)
                         .eq(TMessageNotice::getIsValid , "1")
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return messageNoticeList;
@@ -60,5 +60,28 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
                         .eq(TMessageNotice::getIsValid , "1")
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return count;
+    }
+
+    /**
+     * 查找第一条系统消息
+     * @param userId
+     * @return
+     */
+    public TMessageNotice selectFirstMessageNotice(Long userId){
+        TMessageNotice messageNotice = MybatisOperaterUtil.getInstance().findOne(new TMessageNotice(),
+                new MybatisSqlWhereBuild(TMessageNotice.class)
+                        .eq(TMessageNotice::getNoticeUserId , userId)
+                        .eq(TMessageNotice::getIsValid , "1")
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
+        return messageNotice;
+    }
+    /**
+     * 插入系统消息
+     * @param messageNotice
+     * @return
+     */
+    public long insert(TMessageNotice messageNotice){
+        long save = MybatisOperaterUtil.getInstance().save(messageNotice);
+        return save;
     }
 }

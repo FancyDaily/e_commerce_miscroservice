@@ -1,4 +1,4 @@
-package com.xiaoshitimebank.app.constant;
+package com.e_commerce.miscroservice.commons.enums;
 
 /**
  * 功能描述: formid枚举类
