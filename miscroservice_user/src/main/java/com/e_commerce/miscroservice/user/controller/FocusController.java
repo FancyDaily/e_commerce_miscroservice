@@ -9,7 +9,7 @@ import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
 import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +41,7 @@ public class FocusController extends BaseController {
      *
      * @return
      */
-    @PostMapping("submit")
+    @RequestMapping("submit")
     public Object submit(String token, Long userFollowId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -141,7 +141,7 @@ public class FocusController extends BaseController {
      *
      * @return
      */
-    @PostMapping("focusList")
+    @RequestMapping("focusList")
     public Object focusList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -242,7 +242,7 @@ public class FocusController extends BaseController {
      * }
      *
      */
-    @PostMapping("fanList")
+    @RequestMapping("fanList")
     public Object fanList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();

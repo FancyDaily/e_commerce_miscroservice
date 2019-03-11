@@ -178,7 +178,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Override
 	public void lowerFrame(TUser user, Long productId) {
 		user = userService.getUserById(68813260748488704L);
-		logger.info("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
+		logger.error("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
 			tService.setStatus(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
@@ -198,7 +198,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void del(TUser user, Long productId) {
 		user = userService.getUserById(68813260748488704L);
-		logger.info("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
+		logger.error("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
 			tService.setStatus(ProductEnum.STATUS_DELETE.getValue());
@@ -218,7 +218,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	public void upperFrame(TUser user, Long productId) {
 		// TODO 写死用户
 		user = userService.getUserById(68813260748488704L);
-		logger.info("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
+		logger.error("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
 			// TODO 判断时间段是否可以上架  上架后是否需要派生新的订单  进行状态判断
@@ -301,7 +301,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		setServiceCommonField(user, service);
 		// 服务的总分和总次数
 		// 总分
-		int evaSum = user.getTotalEvaluate();
+		int evaSum = user.getServTotalEvaluate();
 		// 总次数
 		int servSum = user.getServeNum();
 		if (servSum == 0) { // 0次服务
@@ -352,7 +352,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (user.getServeNum() == 0) { // 0次服务
 			service.setTotalEvaluate(0); // 用户的总分
 		} else { // 多次服务选平均
-			double average = (double) user.getTotalEvaluate() / user.getServeNum();
+			double average = (double) user.getServTotalEvaluate() / user.getServeNum();
 			average = average * 10000;
 			int round = (int) Math.round(average);
 			service.setTotalEvaluate(round); // 用户的总分

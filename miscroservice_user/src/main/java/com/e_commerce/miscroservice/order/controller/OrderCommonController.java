@@ -35,7 +35,7 @@ public class OrderCommonController extends BaseController {
 	 * @param service 商品
 	 */
 	public boolean produceOrder(TService service) {
-		logger.info("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
+		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
 		//根据service生成出订单的属性
 		try {
 			orderService.produceOrder(service);

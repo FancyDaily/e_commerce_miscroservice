@@ -6,7 +6,7 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 功能描述:
+ * 功能描述
+ *
  */
 @RestController
 @RequestMapping("/api/v2/orderRelation")
@@ -40,7 +41,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/enroll")
+    @RequestMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -73,7 +74,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/removeEnroll")
+    @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -123,7 +124,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/userList")
+    @RequestMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -155,7 +156,7 @@ public class OrderRelationController extends BaseController {
      *                "msg": "报名成功"
      *
      */
-    @PostMapping("/test")
+    @RequestMapping("/test")
     public Object notices(Long orderId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");

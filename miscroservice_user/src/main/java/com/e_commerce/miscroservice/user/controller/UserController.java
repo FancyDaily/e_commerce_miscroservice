@@ -12,7 +12,7 @@ import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -240,7 +240,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("payments")
+    @RequestMapping("payments")
     public Object payments(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
         //TODO redis
@@ -253,7 +253,7 @@ public class UserController extends BaseController {
         } catch (MessageException e) {
             logger.error("时间轨迹异常: " + e.getMessage());
         } catch (Exception e) {
-            logger.info("时间轨迹异常", errInfo(e));
+            logger.error("时间轨迹异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -292,7 +292,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("freezeList")
+    @RequestMapping("freezeList")
     public Object freezeList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -306,7 +306,7 @@ public class UserController extends BaseController {
             logger.error(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
-            logger.info("冻结明细异常", errInfo(e));
+            logger.error("冻结明细异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -350,7 +350,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("publicWelfareList")
+    @RequestMapping("publicWelfareList")
     public Object publicWelfareList(String token, Long lastTime, Integer pageSize, Integer year) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -363,7 +363,7 @@ public class UserController extends BaseController {
             logger.error("公益历程列表异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("公益历程列表异常", errInfo(e));
+            logger.error("公益历程列表异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -418,7 +418,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("skill/list")
+    @RequestMapping("skill/list")
     public Object skillList(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -431,7 +431,7 @@ public class UserController extends BaseController {
             logger.error("查看技能异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看技能异常", errInfo(e));
+            logger.error("查看技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -453,7 +453,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("skill/add")
+    @RequestMapping("skill/add")
     @Consume(TUserSkill.class)
     public Object skillAdd(String token, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
@@ -469,7 +469,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("添加技能异常", errInfo(e));
+            logger.error("添加技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -491,7 +491,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("skill/modify")
+    @RequestMapping("skill/modify")
     @Consume(TUserSkill.class)
     public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrl) {
         AjaxResult result = new AjaxResult();
@@ -507,7 +507,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("修改技能异常", errInfo(e));
+            logger.error("修改技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -526,7 +526,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("skill/delete")
+    @RequestMapping("skill/delete")
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
         try {
@@ -538,7 +538,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("删除技能异常", errInfo(e));
+            logger.error("删除技能异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -550,15 +550,63 @@ public class UserController extends BaseController {
      * @param token
      * @param pageNum  分页参数
      * @param pageSize 每页条数
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "resultList": [
+     *             {
+     *                 "id": 101675590041468928,
+     *                 "serviceId": 101675589445877760, //服务id
+     *                 "mainId": 101675590041468928,
+     *                 "nameAudioUrl": "",
+     *                 "serviceName": "新版本重复7", //服务名
+     *                 "servicePersonnel": 3,   //服务人数
+     *                 "servicePlace": 1,   //服务场景 1线上 2线下
+     *                 "labels": "hehe,haha",   //标签
+     *                 "type": 1,   //服务类型 1服务 2求助
+     *                 "status": 1, //服务状态
+     *                 "source": 1, //服务来源 1个人 2组织（来自于组织时，该次为活动）
+     *                 "serviceTypeId": 15000,
+     *                 "addressName": "",
+     *                 "longitude": "",
+     *                 "latitude": "",
+     *                 "totalEvaluate": "",
+     *                 "enrollNum": 4,  //报名人数
+     *                 "confirmNum": 2, //确认人数
+     *                 "startTime": 1552526400000,  //开始时间
+     *                 "endTime": 1552527600000,    //结束时间
+     *                 "serviceStatus": "",
+     *                 "openAuth": "",
+     *                 "timeType": 1,   //服务重复属性 1单次 2重复
+     *                 "collectTime": 10,   //收取金额
+     *                 "collectType": 1,    //收取类型 1互助时 2公益时
+     *                 "createUser": 68813260748488704,
+     *                 "createUserName": "马晓晨",
+     *                 "createTime": 1552023749565,
+     *                 "updateUser": 68813260748488704,
+     *                 "updateUserName": "马晓晨",
+     *                 "updateTime": 1552023749565,
+     *                 "companyId": "",
+     *                 "isValid": "1"
+     *             }
+     *         ],
+     *         "totalCount": 1
+     *     }
+     * }
+     *
      * @return
      */
-    @PostMapping("collect/list")
+    @RequestMapping("collect/list")
     public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
             QueryResult<List<TOrder>> queryResult = userService.collectList(user, pageNum, pageSize);
+            result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("收藏列表异常: " + e.getMessage());
@@ -566,7 +614,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("收藏列表异常", errInfo(e));
+            logger.error("收藏列表异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -579,7 +627,7 @@ public class UserController extends BaseController {
      * @param orderRelationshipId 订单id
      * @return
      */
-    @PostMapping("collect")
+    @RequestMapping("collect")
     public Object collect(String token, Long orderRelationshipId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -588,12 +636,12 @@ public class UserController extends BaseController {
             userService.collect(user, orderRelationshipId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("收藏列表异常: " + e.getMessage());
+            logger.error("收藏/取消收藏异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("收藏列表异常", errInfo(e));
+            logger.error("收藏/取消收藏异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -637,18 +685,24 @@ public class UserController extends BaseController {
      *               "growthValue": 475,
      *               "seekHelpNum": 18,
      *               "serveNum": 10,
-     *               "seekHelpDoneNum": "",
-     *               "serveDoneNum": "",
+     *               "seekHelpPublishNum": "",
+     *               "servePublishNum": "",
      *               "surplusTime": 53,   //账户总额
      *               "freezeTime": 210,   //冻结金额
      *               "creditLimit": 200,  //授信
      *               "publicWelfareTime": 0,  //公益时
      *               "authenticationStatus": 2,   //实名认证状态 1未实名 2已实名
      *               "authenticationType": 1, //实名认证类型 1个人 2组织
-     *               "totalEvaluate": 146,
-     *               "creditEvaluate": 48,
-     *               "majorEvaluate": 49,
-     *               "attitudeEvaluate": 49,
+     *               "servTotalEvaluate": 146,  //服务总分
+     *               "servCreditEvaluate": 48,  //服务信用评分
+     *               "servMajorEvaluate": 49,   //服务专业评分
+     *               "servAttitudeEvaluate": 49,    //服务态度评分
+     *               "helpTotalEvaluate": "",   //求助总分
+     *               "helpCreditEvaluate": "",  //求助信用评分
+     *               "helpMajorEvaluate": "",   //求助专业评分
+     *               "helpAttitudeEvaluate": "",    //求助态度评分
+     *               "companyNames": "晓时信息技术有限公司,长三角划水工程联盟,无偿献血公益",     //加入的组织名称
+     *               "limitedCompanyNames": "晓时信息技术有限公司,长三角划水工程联盟", //用于展示的组织标签
      *               "skill": "",
      *               "integrity": 100,    //用户信息完整度
      *               "isCompanyAccount": 0,
@@ -668,7 +722,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("info")
+    @RequestMapping("infos")
     public Object info(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -678,12 +732,12 @@ public class UserController extends BaseController {
             result.setData(userView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("收藏列表异常: " + e.getMessage());
+            logger.error("查看个人基本信息异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("收藏列表异常", errInfo(e));
+            logger.error("查看个人基本信息异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1053,7 +1107,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看个人主页异常", errInfo(e));
+            logger.error("查看个人主页异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1183,7 +1237,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("page/service")
+    @RequestMapping("page/service")
     public Object pageService(String token, Long userId, Integer pageNum, Integer pageSize, boolean isService) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1198,7 +1252,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看发布的服务/求助列表异常", errInfo(e));
+            logger.error("查看发布的服务/求助列表异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1334,7 +1388,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("historyService")
+    @RequestMapping("historyService")
     public Object historyService(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1349,7 +1403,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看历史互助记录列表异常", errInfo(e));
+            logger.error("查看历史互助记录列表异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1396,7 +1450,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("company/list")
+    @RequestMapping("company/list")
     public Object companyList(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1411,7 +1465,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("加入的组织列表信息异常", errInfo(e));
+            logger.error("加入的组织列表信息异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1439,7 +1493,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("modify")
+    @RequestMapping("modify")
     @Consume(TUser.class)
     public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex) {
         AjaxResult result = new AjaxResult();
@@ -1455,7 +1509,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("用户信息修改异常", errInfo(e));
+            logger.error("用户信息修改异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1488,7 +1542,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("bonusPackage/preGenerate")
+    @RequestMapping("bonusPackage/preGenerate")
     @Consume(TBonusPackage.class)
     public Object bonusPackagePreGenerate(String token, String description, Long time) {
         AjaxResult result = new AjaxResult();
@@ -1506,7 +1560,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("预创建红包异常", errInfo(e));
+            logger.error("预创建红包异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1526,7 +1580,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("bonusPackage/generate")
+    @RequestMapping("bonusPackage/generate")
     public Object bonusPackageGenerate(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1540,7 +1594,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("创建红包异常", errInfo(e));
+            logger.error("创建红包异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1567,7 +1621,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("bonusPackage/info")
+    @RequestMapping("bonusPackage/infos")
     public Object bonusPackageInfo(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1582,7 +1636,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("查看红包异常", errInfo(e));
+            logger.error("查看红包异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1602,7 +1656,7 @@ public class UserController extends BaseController {
      *
      * @return
      */
-    @PostMapping("bonusPackage/open")
+    @RequestMapping("bonusPackage/open")
     public Object bonusPackageOpen(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
@@ -1616,7 +1670,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("打开红包异常", errInfo(e));
+            logger.error("打开红包异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -1645,7 +1699,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("个人认证信息提交异常", errInfo(e));
+            logger.error("个人认证信息提交异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;

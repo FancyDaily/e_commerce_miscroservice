@@ -84,7 +84,7 @@ public class DesensitizedUserView implements Serializable {
 
 	private String maxEducation;
 
-	private Integer followNum;
+	private Integer followNum;	//粉丝数
 
 	private Integer receiptNum;
 
@@ -98,9 +98,9 @@ public class DesensitizedUserView implements Serializable {
 
 	private Integer serveNum;
 
-	private Integer seekHelpDoneNum;	//完成求助次数
+	private Integer seekHelpPublishNum;	//求助发布次数
 
-	private Integer serveDoneNum;	//完成服务次数
+	private Integer servePublishNum;	//服务发布次数
 
 	private Long surplusTime;
 
@@ -114,13 +114,25 @@ public class DesensitizedUserView implements Serializable {
 
 	private Integer authenticationType;
 
-	private Integer totalEvaluate;
+	private Integer servTotalEvaluate;		//服务总分
 
-	private Integer creditEvaluate;
+	private Integer servCreditEvaluate;		//服务信用总分
 
-	private Integer majorEvaluate;
+	private Integer servMajorEvaluate;		//服务专业总分
 
-	private Integer attitudeEvaluate;
+	private Integer servAttitudeEvaluate;	//服务态度总分
+
+	private Integer helpTotalEvaluate;	//求助总分
+
+	private Integer helpCreditEvaluate;	//求助信用总分
+
+	private Integer helpMajorEvaluate;	//求助专业总分
+
+	private Integer helpAttitudeEvaluate;	//求助态度总分
+
+	private String limitedCompanyNames;	//用于展示的组织标签(加入的组织名前几个)
+
+	private String companyNames;	//加入的组织名
 
 	private String skill;
 
@@ -130,7 +142,6 @@ public class DesensitizedUserView implements Serializable {
 
 	private String userType;	//用户类型
 
-	@JsonProperty(defaultValue = "")
 	private String extend;
 
 	private Long createUser;

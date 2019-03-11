@@ -10,7 +10,7 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -68,7 +68,7 @@ public class ServiceController extends BaseController{
 	 *
 	 * @return
 	 */
-	@PostMapping("/pageMine")
+	@RequestMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -104,7 +104,7 @@ public class ServiceController extends BaseController{
 	 *
 	 * @return
 	 */
-	@PostMapping("/delService")
+	@RequestMapping("/delService")
 	public Object delService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -140,7 +140,7 @@ public class ServiceController extends BaseController{
 	 *
 	 * @return
 	 */
-	@PostMapping("/lowerFrameService")
+	@RequestMapping("/lowerFrameService")
 	public Object lowerFrameService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -171,7 +171,7 @@ public class ServiceController extends BaseController{
 	 * 创建时间:2018年11月20日 下午5:44:44
 	 * @return
 	 */
-	@PostMapping("/submit")
+	@RequestMapping("/submit")
 	public Object submitService(HttpServletRequest request) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String

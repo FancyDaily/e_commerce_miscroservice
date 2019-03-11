@@ -51,9 +51,9 @@ public class TUser implements Serializable {
 
     private Integer serveNum;
 
-    private Integer seekHelpDoneNum;
+    private Integer seekHelpPublishNum;
 
-    private Integer serveDoneNum;
+    private Integer servePublishNum;
 
     private Long surplusTime;
 
@@ -67,13 +67,23 @@ public class TUser implements Serializable {
 
     private Integer authenticationType;
 
-    private Integer totalEvaluate;
+    private Integer servTotalEvaluate;
 
-    private Integer creditEvaluate;
+    private Integer servCreditEvaluate;
 
-    private Integer majorEvaluate;
+    private Integer servMajorEvaluate;
 
-    private Integer attitudeEvaluate;
+    private Integer servAttitudeEvaluate;
+
+    private Integer helpTotalEvaluate;
+
+    private Integer helpCreditEvaluate;
+
+    private Integer helpMajorEvaluate;
+
+    private Integer helpAttitudeEvaluate;
+
+    private String companyNames;
 
     private String skill;
 
@@ -307,20 +317,20 @@ public class TUser implements Serializable {
         this.serveNum = serveNum;
     }
 
-    public Integer getSeekHelpDoneNum() {
-        return seekHelpDoneNum;
+    public Integer getSeekHelpPublishNum() {
+        return seekHelpPublishNum;
     }
 
-    public void setSeekHelpDoneNum(Integer seekHelpDoneNum) {
-        this.seekHelpDoneNum = seekHelpDoneNum;
+    public void setSeekHelpPublishNum(Integer seekHelpPublishNum) {
+        this.seekHelpPublishNum = seekHelpPublishNum;
     }
 
-    public Integer getServeDoneNum() {
-        return serveDoneNum;
+    public Integer getServePublishNum() {
+        return servePublishNum;
     }
 
-    public void setServeDoneNum(Integer serveDoneNum) {
-        this.serveDoneNum = serveDoneNum;
+    public void setServePublishNum(Integer servePublishNum) {
+        this.servePublishNum = servePublishNum;
     }
 
     public Long getSurplusTime() {
@@ -371,36 +381,76 @@ public class TUser implements Serializable {
         this.authenticationType = authenticationType;
     }
 
-    public Integer getTotalEvaluate() {
-        return totalEvaluate;
+    public Integer getServTotalEvaluate() {
+        return servTotalEvaluate;
     }
 
-    public void setTotalEvaluate(Integer totalEvaluate) {
-        this.totalEvaluate = totalEvaluate;
+    public void setServTotalEvaluate(Integer servTotalEvaluate) {
+        this.servTotalEvaluate = servTotalEvaluate;
     }
 
-    public Integer getCreditEvaluate() {
-        return creditEvaluate;
+    public Integer getServCreditEvaluate() {
+        return servCreditEvaluate;
     }
 
-    public void setCreditEvaluate(Integer creditEvaluate) {
-        this.creditEvaluate = creditEvaluate;
+    public void setServCreditEvaluate(Integer servCreditEvaluate) {
+        this.servCreditEvaluate = servCreditEvaluate;
     }
 
-    public Integer getMajorEvaluate() {
-        return majorEvaluate;
+    public Integer getServMajorEvaluate() {
+        return servMajorEvaluate;
     }
 
-    public void setMajorEvaluate(Integer majorEvaluate) {
-        this.majorEvaluate = majorEvaluate;
+    public void setServMajorEvaluate(Integer servMajorEvaluate) {
+        this.servMajorEvaluate = servMajorEvaluate;
     }
 
-    public Integer getAttitudeEvaluate() {
-        return attitudeEvaluate;
+    public Integer getServAttitudeEvaluate() {
+        return servAttitudeEvaluate;
     }
 
-    public void setAttitudeEvaluate(Integer attitudeEvaluate) {
-        this.attitudeEvaluate = attitudeEvaluate;
+    public void setServAttitudeEvaluate(Integer servAttitudeEvaluate) {
+        this.servAttitudeEvaluate = servAttitudeEvaluate;
+    }
+
+    public Integer getHelpTotalEvaluate() {
+        return helpTotalEvaluate;
+    }
+
+    public void setHelpTotalEvaluate(Integer helpTotalEvaluate) {
+        this.helpTotalEvaluate = helpTotalEvaluate;
+    }
+
+    public Integer getHelpCreditEvaluate() {
+        return helpCreditEvaluate;
+    }
+
+    public void setHelpCreditEvaluate(Integer helpCreditEvaluate) {
+        this.helpCreditEvaluate = helpCreditEvaluate;
+    }
+
+    public Integer getHelpMajorEvaluate() {
+        return helpMajorEvaluate;
+    }
+
+    public void setHelpMajorEvaluate(Integer helpMajorEvaluate) {
+        this.helpMajorEvaluate = helpMajorEvaluate;
+    }
+
+    public Integer getHelpAttitudeEvaluate() {
+        return helpAttitudeEvaluate;
+    }
+
+    public void setHelpAttitudeEvaluate(Integer helpAttitudeEvaluate) {
+        this.helpAttitudeEvaluate = helpAttitudeEvaluate;
+    }
+
+    public String getCompanyNames() {
+        return companyNames;
+    }
+
+    public void setCompanyNames(String companyNames) {
+        this.companyNames = companyNames == null ? null : companyNames.trim();
     }
 
     public String getSkill() {

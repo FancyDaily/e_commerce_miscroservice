@@ -7,7 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.order.vo.*;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,7 +72,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @return
 	 */
-	@PostMapping("/detailMineOrder")
+	@RequestMapping("/detailMineOrder")
 	public Object detailMineOrder(Long orderId, String token) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -133,7 +133,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @return
 	 */
-	@PostMapping("/listMineOrder")
+	@RequestMapping("/listMineOrder")
 	public Object listMineOrder(Integer pageNum, Integer pageSize, String token) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -205,7 +205,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @return
 	 */
-	@PostMapping("/list")
+	@RequestMapping("/list")
 	@Consume(PageOrderParamView.class)
 	public Object list(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
 					   Integer pageSize, String condition, String token) {
@@ -276,7 +276,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @return
 	 */
-	@PostMapping("/detail")
+	@RequestMapping("/detail")
 	public Object detail(Long orderId, String token) {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
@@ -332,7 +332,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @return
 	 */
-	@PostMapping("/enrollList")
+	@RequestMapping("/enrollList")
 	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();

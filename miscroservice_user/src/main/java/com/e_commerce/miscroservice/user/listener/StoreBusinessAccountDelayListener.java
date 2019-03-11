@@ -20,7 +20,7 @@ public class StoreBusinessAccountDelayListener extends MqListenerConvert {
     
 	@Override
 	protected void transferTo(String transferData) {
-		logger.info("结算资金={}", transferData);
+		logger.error("结算资金={}", transferData);
 		if( transferData == null ) {
 			logger.warn("结算资金,解析参数为空={}", transferData);
 			return;
