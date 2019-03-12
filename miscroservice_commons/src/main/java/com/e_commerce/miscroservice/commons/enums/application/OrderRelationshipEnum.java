@@ -107,7 +107,11 @@ public enum OrderRelationshipEnum {
     /**
      * 订单投诉状态为已解决  状态值为3
      */
-    ORDER_REPORT_IS_SOLVE(3 ,"投诉解决"),
+    ORDER_REPORT_EACH_OTHER(3 ,"互相投诉"),
+    /**
+     * 订单投诉状态为已解决  状态值为4
+     */
+    ORDER_REPORT_IS_SOLVE(4 ,"投诉解决"),
     /**
      * 商品收藏状态为未收藏 初始状态  状态值为0
      */

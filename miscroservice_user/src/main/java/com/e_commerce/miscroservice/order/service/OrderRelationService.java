@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service;
 
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,4 +88,10 @@ public interface OrderRelationService {
      * @return
      */
     List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
+    /**
+     * 新增发布者订单关系
+     * @param serviceId
+     * @param order
+     */
+    void addTorderRelationship(Long serviceId , TOrder order);
 }

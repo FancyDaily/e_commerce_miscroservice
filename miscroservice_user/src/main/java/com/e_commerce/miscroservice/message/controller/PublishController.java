@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 键值模块
  *
- * 消息controller
+ * 键值controller
  **/
 @RestController
 @RequestMapping("/api/v2/publish")

@@ -253,7 +253,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     }
 
     /**
-     * 根据orderId和status来查询未开始（签到）报名者订单List  ---->（不用了
+     * 根据orderId和status来查询未投诉报名者订单List
      *
      * @param orderId
      * @param status
@@ -265,7 +265,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .eq(TOrderRelationship::getSignType , OrderRelationshipEnum.SIGN_TYPE_NO.getType())
+                        .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
                         .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
                         );
@@ -302,8 +302,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .count(TOrderRelationship::getId)
                 .eq(TOrderRelationship::getOrderId, orderId)
                 .isNotNull(TOrderRelationship::getReceiptUserId)
-                .groupBefore().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
-                .or().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_SOLVE.getType()).groupAfter()
+                .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
                 .eq(TOrderRelationship::getStatus , status)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return  count;

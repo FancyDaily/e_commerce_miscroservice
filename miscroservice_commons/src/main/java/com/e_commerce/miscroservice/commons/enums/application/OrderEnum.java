@@ -6,7 +6,7 @@ public enum OrderEnum {
 	TIME_TYPE_REPEAT(1,"可重复"),
 
 	COLLECT_TYPE_TIME(1 , "互助时"),
-	COLLECT_TYPE_WELFARE(1 , "公益时"),
+	COLLECT_TYPE_WELFARE(2 , "公益时"),
 
 	STATUS_END(2,"结束"),
 	STATUS_NORMAL(1, "正常产出的订单状态"),
