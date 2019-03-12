@@ -23,6 +23,8 @@ public class TOrderRelationship implements Serializable {
 
     private Integer serviceCollectionType;
 
+    private Long serviceCollectionTime;
+
     private Integer signType;
 
     private String serviceName;
@@ -133,6 +135,14 @@ public class TOrderRelationship implements Serializable {
 
     public void setServiceCollectionType(Integer serviceCollectionType) {
         this.serviceCollectionType = serviceCollectionType;
+    }
+
+    public Long getServiceCollectionTime() {
+        return serviceCollectionTime;
+    }
+
+    public void setServiceCollectionTime(Long serviceCollectionTime) {
+        this.serviceCollectionTime = serviceCollectionTime;
     }
 
     public Integer getSignType() {

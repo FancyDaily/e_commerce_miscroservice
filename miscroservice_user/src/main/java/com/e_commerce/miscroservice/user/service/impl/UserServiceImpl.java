@@ -1357,6 +1357,27 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
+     * 任务信息查询
+     * @param user
+     * @return
+     */
+    @Override
+    public Set<Integer> taskList(TUser user) {
+        List<Integer> resultList = new ArrayList<>();
+        Set<Integer> resultSet = new TreeSet<>();
+        List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
+        for(TUserTask userTask:userTasks) {
+            //签到 -> createTime为当日
+//            if(userTask.getType().equals(TaskEnum.TASK_SIGNUP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+//                continue;
+//            }
+            resultList.add(userTask.getType());
+            resultSet.add(userTask.getType());
+        }
+        return resultSet;
+    }
+
+    /**
      * 功能描述: 插入一条签到记录(用户第一次签到)
      * 作者: 许方毅
      * 创建时间: 2018年11月12日 下午5:02:38
