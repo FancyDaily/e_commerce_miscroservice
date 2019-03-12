@@ -148,10 +148,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     }
 
     @Override
-    public Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId) {
-        Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
-        relationshipMapper.pageEnrollAndChoose(userId);
-        return page;
+    public List<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId) {
+        return relationshipMapper.pageEnrollAndChoose(userId);
     }
 
     /**

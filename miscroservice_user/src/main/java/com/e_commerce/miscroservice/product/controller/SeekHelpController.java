@@ -13,7 +13,6 @@ import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ProductSubmitParamView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +50,7 @@ public class SeekHelpController extends BaseController {
 	 *                 "serviceName": "名称",
 	 *                 "servicePlace": 线上或线下,
 	 *                 "servicePersonnel": 需要人数,
+	 *                 "status":状态  1、待审核  2、上架中   3/4、已下架  6、审核未通过
 	 *                 "startTime": 开始时间毫秒值（单次显示开始时间使用此字段）,
 	 *                 "endTime": 结束时间毫秒值(单词显示结束时间使用此字段),
 	 *                 "timeType": 是否重复 0、不重复 1、重复性,
@@ -64,7 +64,8 @@ public class SeekHelpController extends BaseController {
 	 *                 "endTimeS": 结束时间字符串   例："1340",
 	 *                 "dateWeek":显示周X的字符串
 	 *                 },
-	 *                 "imgUrl": "封面图"
+	 *                 "imgUrl": "封面图",
+	 *                 "status": "显示的状态"
 	 *                 }
 	 *                 ],
 	 *                 "totalCount": 总条数

@@ -6,8 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.order.vo.*;
 
-import java.util.List;
-
 /**
  * 功能描述:
  * 模块:
@@ -49,7 +47,7 @@ public interface OrderService {
 	 * @param pageSize 每页数量
 	 * @param user 当前用户
 	 */
-	List<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user);
+	QueryResult<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user);
 
 	/**
 	 * 同步商品和订单的状态

@@ -164,7 +164,7 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Long countProductOrder(Long serviceId, Long startTime, Long endTime) {
         return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1")
+                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                 .eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime));
     }
 
@@ -191,7 +191,8 @@ public class OrderDaoImpl implements OrderDao {
 	public TOrder findOneLatestOrderByServiceId(Long serviceId) {
         // 非正常状态的订单的最新一条订单（已结束和被取消的订单）
         return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getServiceId, serviceId).neq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime)));
+                .eq(TOrder::getServiceId, serviceId).neq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime)));
 	}
 
 	/**
