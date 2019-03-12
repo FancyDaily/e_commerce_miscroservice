@@ -74,7 +74,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @return¶
      * @throws ParseException
      */
-    @Transactional(propagation = Propagation.MANDATORY, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public long enroll(Long orderId, Long userId, String date, Long serviceId) throws ParseException {
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
@@ -84,6 +84,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果错误消息不为空，说明该用户有部分问题不允许报名，抛出错误信息
             throw new MessageException("499", errorMsg);
         }
+        helpEnroll(order, nowUser, date, nowTime, serviceId);
         if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务
             long canUseTime = nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime();
@@ -100,7 +101,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             userCommonController.updateByPrimaryKey(nowUser);
 
         }
-        helpEnroll(order, nowUser, date, nowTime, serviceId);
+
         order.setEnrollNum(order.getEnrollNum() + 1);
         orderDao.updateByPrimaryKey(order);
         //TODO 报名的通知（第一个报名的，或者第一个参与的（就看刘维怎么定，一个人报了取消又报了是不是还通知））
@@ -430,7 +431,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         List<String> msgList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         long nowTime = System.currentTimeMillis();
-        //支付时间数默认为0
+        //支付时间总数默认为0
         long paymentSum = 0l;
         //支付公益时间数默认为0
         //long paymentByWelfareSum = 0l;
@@ -472,8 +473,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 if (msg != null) {
                     //支付失败，添加错误信息
                     msgList.add(msg);
-                } else {
-                    //支付成功，增加钱数，增加支付成功次数
+                } else if (paymentList.get(i) > 0) {
+                    //如果是有效支付，增加钱数，增加支付成功次数
                     if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
                         //如果收取的是互助时
                         paymentSum += paymentList.get(i);
@@ -507,32 +508,28 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (msg != null) {
                 throw new MessageException("499", "支付失败，"+msg);
             }
-            if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
-                //如果收取的是互助时
-                paymentSum += paymentList.get(0);
+            if (paymentList.get(0) > 0){
+                //如果是有效支付
+                if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
+                    //如果收取的是互助时
+                    paymentSum += paymentList.get(0);
+                }
+                seekHelpDoneNum++;
+                //服务记录内容
+                content = nowUser.getName()+" 支付了"+toUserList.get(0).getName()+collectType+timeChange(paymentSum);
             }
-            seekHelpDoneNum++;
-            //服务记录内容
-            content = nowUser.getName()+" 支付了"+toUserList.get(0).getName()+collectType+timeChange(paymentSum);
+
         }
 
-        //插入服务记录
-        recoreSave(orderId , content , nowUser , nowTime);
-
-
-        if (seekHelpDoneNum == 0){
+        if (userIdList.size() == msgList.size()){
+            //如果全错，返回错误消息，支付失败
             throw new MessageException("499", "支付失败，所选用户中没有可支付用户");
         }
         if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
-            //如果是互助时，执行与公益时不同的操作
-            if (nowUser.getPayNum() == 0 ){
-                //如果是首次完成互助，增加成长值
-                //TODO 如果是首次完成，那么要增加成长值
-            }
-            //解冻时间币，解冻数量是支付成功人数量*时间币单价
-            unFreezeTime(order.getCollectTime() * seekHelpDoneNum , nowTime , nowUser , orderId);
+            //解冻时间币，解冻数量是支付成功人数量(如果支付了0也算成功，虽然不显示，但是要解冻)*时间币单价
+            unFreezeTime(order.getCollectTime() * (userIdList.size() - msgList.size()) , nowTime , nowUser , orderId);
             //更新用户的信息
-            nowUser.setFreezeTime(nowUser.getFreezeTime() - order.getCollectTime() * seekHelpDoneNum);
+            nowUser.setFreezeTime(nowUser.getFreezeTime() - order.getCollectTime() * (userIdList.size() - msgList.size()));
             nowUser.setPayNum(nowUser.getPayNum() + Integer.parseInt(String.valueOf(seekHelpDoneNum)));
             nowUser.setSurplusTime(nowUser.getSurplusTime() - paymentSum);
             nowUser.setUpdateTime(nowTime);
@@ -540,20 +537,36 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             nowUser.setUpdateUserName(nowUser.getName());
             userCommonController.updateByPrimaryKey(nowUser);
             //TODO 插入互助时方面的成长值（查看今天支付多少次，然后再看加不加）有最高次数限制
+            logger.error("");
         }
 
-        long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
-        //查看是否还有待支付的人，没有则将发布用户状态置为待评价
-        if ( count == 0){
-            //没有要支付的人，就将发布者订单关系置为待评价
-            TOrderRelationship publishOrderRela = orderRelationshipDao.selectByOrderIdAndUserId(orderId,publishUserId);
-            publishOrderRela.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-            publishOrderRela.setUpdateTime(nowTime);
-            publishOrderRela.setUpdateUser(nowUserId);
-            publishOrderRela.setUpdateUserName(nowUser.getName());
+        if (seekHelpDoneNum > 0){
+            //如果有有效支付人数，那么要改变发布者订单关系表，插入服务记录，判断是否首次完成
+            long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+            //查看是否还有待支付的人，没有则将发布用户状态置为待评价
+            if ( count == 0){
+                //没有要支付的人，就将发布者订单关系置为待评价
+                TOrderRelationship publishOrderRela = orderRelationshipDao.selectByOrderIdAndUserId(orderId,publishUserId);
+                publishOrderRela.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+                publishOrderRela.setUpdateTime(nowTime);
+                publishOrderRela.setUpdateUser(nowUserId);
+                publishOrderRela.setUpdateUserName(nowUser.getName());
 
-            orderRelationshipDao.updateByPrimaryKey(publishOrderRela);
+                orderRelationshipDao.updateByPrimaryKey(publishOrderRela);
+            }
+            //插入服务记录
+            recoreSave(orderId , content , nowUser , nowTime);
+
+            if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
+                //如果是互助时，执行与公益时不同的操作
+                if (nowUser.getPayNum() == 0 ){
+                    //如果是首次完成互助，增加成长值
+                    //TODO 如果是首次完成，那么要增加成长值
+                    logger.error("//TODO 如果是首次完成，那么要增加成长值");
+                }
+            }
         }
+
 
 
         return msgList;
@@ -584,51 +597,58 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             msg = "支付失败：该订单已被投诉";
             return msg;
         }
-        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-        if (orderRelationship.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
-            //如果收取的是互助时，完成互助时相关事情
-            if (toUser.getPayNum() == 0) {
-                //如果是首次完成互助
-                //TODO 奖励互助时 增加成长值
+        if (payment > 0){
+            //如果是有时间支付完成的
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+            if (orderRelationship.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
+                //如果收取的是互助时，完成互助时相关事情
+                if (toUser.getPayNum() == 0) {
+                    //如果是首次完成互助
+                    //TODO 奖励互助时 增加成长值
+                    logger.error("//TODO 奖励互助时 增加成长值");
+                }
+                //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）
+                logger.error(" //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）");
+                //更新被支付用户的时间，并且将其完成求助数量+1
+                toUser.setSurplusTime(toUser.getSurplusTime() + payment);
+                toUser.setPayNum(toUser.getPayNum() + 1);
+                //TODO 发送互助时系统通知
+            } else {
+                //如果收取的是公益时，完成公益时相关事情
+                //TODO 看一下是不是第一次完成公益时 增加成长值
+                //TODO 看一下是不是今天第一次完成公益时 增加成长值
+                //更新被支付用户的公益时间
+                toUser.setPublicWelfareTime(toUser.getSurplusTime() + payment);
+                //TODO 发送公益时系统通知
             }
-            //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）
-            //更新被支付用户的时间，并且将其完成求助数量+1
-            toUser.setSurplusTime(toUser.getSurplusTime() + payment);
-            toUser.setPayNum(toUser.getPayNum() + 1);
-            //TODO 发送公益时系统通知
+            toUser.setUpdateUserName(nowUser.getName());
+            toUser.setUpdateUser(nowUser.getId());
+            toUser.setUpdateTime(nowTime);
+            toUser.setServeNum(toUser.getServeNum() + 1);
+            userCommonController.updateByPrimaryKey(toUser);
+
+            //插入支付流水
+            TUserTimeRecord userTimeRecord = new TUserTimeRecord();
+            userTimeRecord.setId(snowflakeIdWorker.nextId());
+            userTimeRecord.setUserId(toUser.getId());
+            userTimeRecord.setFromUserId(nowUser.getId());
+            userTimeRecord.setType(1);
+            userTimeRecord.setTargetId(orderRelationship.getOrderId());
+            userTimeRecord.setTime(payment);
+            userTimeRecord.setCreateUser(nowUser.getId());
+            userTimeRecord.setCreateUserName(nowUser.getName());
+            userTimeRecord.setUpdateTime(nowTime);
+            userTimeRecord.setUpdateUserName(nowUser.getName());
+            userTimeRecord.setUpdateTime(nowTime);
+            userTimeRecord.setIsValid("1");
+            //TODO 插入 支付流水
         } else {
-            //如果收取的是公益时，完成公益时相关事情
-            //TODO 看一下是不是第一次完成公益时 增加成长值
-            //TODO 看一下是不是今天第一次完成公益时 增加成长值
-            //更新被支付用户的公益时间
-            toUser.setPublicWelfareTime(toUser.getSurplusTime() + payment);
-            //TODO 发送互助时系统通知
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
         }
-
-
-
-
-        toUser.setUpdateUserName(nowUser.getName());
-        toUser.setUpdateUser(nowUser.getId());
-        toUser.setUpdateTime(nowTime);
-        toUser.setServeNum(toUser.getServeNum() + 1);
-        userCommonController.updateByPrimaryKey(toUser);
-
-        //插入支付流水
-        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setId(snowflakeIdWorker.nextId());
-        userTimeRecord.setUserId(toUser.getId());
-        userTimeRecord.setFromUserId(nowUser.getId());
-        userTimeRecord.setType(1);
-        userTimeRecord.setTargetId(orderRelationship.getOrderId());
-        userTimeRecord.setTime(payment);
-        userTimeRecord.setCreateUser(nowUser.getId());
-        userTimeRecord.setCreateUserName(nowUser.getName());
-        userTimeRecord.setUpdateTime(nowTime);
-        userTimeRecord.setUpdateUserName(nowUser.getName());
-        userTimeRecord.setUpdateTime(nowTime);
-        userTimeRecord.setIsValid("1");
-        //TODO 插入 支付流水
+        orderRelationship.setUpdateTime(nowTime);
+        orderRelationship.setUpdateUser(nowUser.getId());
+        orderRelationship.setUpdateUserName(nowUser.getName());
+        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
 
 
         return msg;
