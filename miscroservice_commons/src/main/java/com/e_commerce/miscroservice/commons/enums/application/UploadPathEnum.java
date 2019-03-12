@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * 功能描述: oss上传路径枚举类
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Component;
  * 1.
  * 2.
  */
-@Component
+//@Component
 public class UploadPathEnum {
 	/*
 	 * 读取配置文件

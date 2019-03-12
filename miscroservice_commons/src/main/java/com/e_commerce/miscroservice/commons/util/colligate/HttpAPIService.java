@@ -1,9 +1,5 @@
 package com.e_commerce.miscroservice.commons.util.colligate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -16,11 +12,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
-@Component
+//@Component
 public class HttpAPIService {
 
     @Autowired

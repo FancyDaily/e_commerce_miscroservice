@@ -1,9 +1,5 @@
 package com.e_commerce.miscroservice.user.service.apiImpl;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Calendar;
-import java.util.Map;
-
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -13,9 +9,12 @@ import com.e_commerce.miscroservice.commons.util.colligate.TextFormater;
 import com.e_commerce.miscroservice.user.service.api.APIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
+import java.util.Map;
 
 
 /**
@@ -39,7 +38,7 @@ import org.springframework.stereotype.Service;
 @Service("sendSmsService")
 public class SendSmsService implements APIService {
 	
-	@Autowired
+//	@Autowired
 	private HttpAPIService httpService;
 
 	private static Logger LOG = LoggerFactory.getLogger(SendSmsService.class);

@@ -20,7 +20,6 @@ import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,22 +85,22 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
-    @Value("${debug}")
+//    @Value("${debug}")
     private String debug;
 
-    @Value("${page.invite}")
+//    @Value("${page.invite}")
     private String pageValueInvite;
 
-    @Value("${page.person}") // TODO
+//    @Value("${page.person}") // TODO
     private String pageValuePerson;
 
-    @Value("${page.service}")
+//    @Value("${page.service}")
     private String pageValueService;
 
-    @Value("${page.help}")
+//    @Value("${page.help}")
     private String pageValueHelp;
 
-    @Value("${page.company}")
+//    @Value("${page.company}")
     private String pageValueCompany;
 
     /**
