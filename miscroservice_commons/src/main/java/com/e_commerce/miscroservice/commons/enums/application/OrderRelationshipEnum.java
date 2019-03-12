@@ -73,6 +73,10 @@ public enum OrderRelationshipEnum {
      */
     STATUS_HELPER_REMARK(12, "求助者评价"),
     /**
+     * 订单关系状态为求助者支付0分组，关系不成立  状态值为13
+     */
+    STATUS_NOT_ESTABLISHED(13, "关系不成立"),
+    /**
      * 商品投诉状态为未投诉 初始状态  状态值为0
      */
     SERVICE_REPORT_IS_NO(0 ,"未投诉"),

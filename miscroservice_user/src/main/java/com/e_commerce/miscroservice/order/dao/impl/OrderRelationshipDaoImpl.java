@@ -109,8 +109,12 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     public TOrderRelationship selectByOrderIdAndUserId(Long orderId, Long userId) {
         TOrderRelationship orderRelationship = MybatisOperaterUtil.getInstance().findOne(new TOrderRelationship(),
                 new MybatisSqlWhereBuild(TOrderRelationship.class)
-                        .groupBefore().eq(TOrderRelationship::getFromUserId, userId).or()
-                        .eq(TOrderRelationship::getReceiptUserId, userId).groupAfter()
+                        .groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).or()
+                            .groupBefore()
+                                .eq(TOrderRelationship::getFromUserId, userId)
+                                .isNull(TOrderRelationship::getReceiptUserId)
+                            .groupAfter()
+                        .groupAfter()
                         .eq(TOrderRelationship::getOrderId, orderId)
         .eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
         return orderRelationship;
@@ -140,13 +144,23 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     public List<TOrderRelationship> selectByUserId(Long userId) {
         List<TOrderRelationship> orderRelationshipList = MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),
                 new MybatisSqlWhereBuild(TOrderRelationship.class)
-                        .groupBefore().eq(TOrderRelationship::getFromUserId, userId)
-                        .or().eq(TOrderRelationship::getFromUserId, userId)
+                        .groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).or()
+                            .groupBefore()
+                                .eq(TOrderRelationship::getFromUserId, userId)
+                                .isNull(TOrderRelationship::getReceiptUserId)
+                            .groupAfter()
                         .groupAfter()
-                        .eq(TOrderRelationship::getIsValid, "1"));
+                        .eq(TOrderRelationship::getIsValid, AppConstant.ACCREDIT_STATUS_YES));
         return orderRelationshipList;
     }
 
+    /**
+     * 报名选人列表
+     * @param pageNum  分页页数
+     * @param pageSize 每页数量
+     * @param userId   当前用户id
+     * @return
+     */
     @Override
     public Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId) {
         Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
@@ -169,7 +183,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     }
 
     /**
-     * 查询用户相关订单关系记录
+     * 查询用户收藏的订单关系记录
      *
      * @param id
      * @return
@@ -177,14 +191,16 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     @Override
     public List<TOrderRelationship> selectCollectList(Long id) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
-                .groupBefore()
+                .groupBefore().eq(TOrderRelationship::getReceiptUserId, id).or()
                 .groupBefore()
                 .eq(TOrderRelationship::getFromUserId, id)
-                .groupAfter().or()
-                .groupBefore().eq(TOrderRelationship::getReceiptUserId, id)
-                .groupAfter().groupAfter()
+                .isNull(TOrderRelationship::getReceiptUserId)
+                .groupAfter()
+                .groupAfter()
                 .eq(TOrderRelationship::getServiceCollectionType, OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType())
-                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                //TODO 根据收藏时间来排序
+                );
 
     }
 
@@ -211,7 +227,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
      * @return
      */
     @Override
-    public int updateCollectStatus(Long orderRelationshipId, int collectStatus) {
+    public int updateCollectStatus(Long orderRelationshipId, int collectStatus) {//TODO 等收藏时间上来来 要更新收藏时间
         TOrderRelationship orderRelationship = new TOrderRelationship();
         orderRelationship.setId(orderRelationshipId);
         orderRelationship.setServiceCollectionType(collectStatus);
@@ -233,12 +249,12 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .in(TOrderRelationship::getStatus, statusList)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-        );
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationshipList;
     }
 
     /**
-     * 根据orderId和status来查询未开始（签到）报名者订单List
+     * 根据orderId和status来查询未开始（签到）报名者订单List  ---->（不用了
      *
      * @param orderId
      * @param status
@@ -252,7 +268,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .isNotNull(TOrderRelationship::getReceiptUserId)
                         .eq(TOrderRelationship::getSignType , OrderRelationshipEnum.SIGN_TYPE_NO.getType())
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-        );
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationshipList;
     }
 
@@ -270,12 +286,12 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-        );
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationshipList;
     }
 
     /**
-     * 根据statusList来查询未投诉参与者订单数量
+     * 根据status来查询未投诉参与者订单数量
      * @param orderId
      * @param status
      * @return
@@ -287,7 +303,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .isNotNull(TOrderRelationship::getReceiptUserId)
                 .groupBefore().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
                 .or().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_SOLVE.getType()).groupAfter()
-                .eq(TOrderRelationship::getStatus , status));
+                .eq(TOrderRelationship::getStatus , status)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return  count;
     }
     /*public long updateByOrderRelationshipList(List<TOrderRelationship> orderRelationshipList){
@@ -306,7 +323,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 new MybatisSqlWhereBuild(TOrderRelationship.class)
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getReceiptUserId, userId)
-                        .in(TOrderRelationship::getStatus, participationStatusList()));
+                        .in(TOrderRelationship::getStatus, participationStatusList())
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationship;
     }
 
@@ -324,6 +342,11 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         return count;
     }
 
+    /**
+     * 查询用户发布或报名的成立的订单关系
+     * @param userId
+     * @return
+     */
     @Override
     public List<TOrderRelationship> listRelationshipByUserId(Long userId) {
         //非订单的状态
@@ -335,18 +358,24 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType()).groupAfter()
-                .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).groupAfter()
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrderRelationship::getCreateTime)));
+                .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId).groupAfter()
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrderRelationship::getCreateTime))
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
+    /**
+     * 查询成立的订单关系
+     * @param orderId 订单ID
+     * @return
+     */
     @Override
     public List<TOrderRelationship> getReceiver(Long orderId) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
                 .isNotNull(TOrderRelationship::getReceiptUserId).neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
-                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
-                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType()));
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     /**

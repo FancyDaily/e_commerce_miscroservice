@@ -70,4 +70,21 @@ public interface OrderRelationService {
      * @Param [orderId, nowUserId]
      **/
     List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId);
+    /**
+     * 开始订单（签到）
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+    void startOrder(Long orderId , Long nowUserId);
+
+    /**
+     * 支付
+     * @param orderId
+     * @param userIdList
+     * @param paymentList
+     * @param nowUserId
+     * @return
+     */
+    List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
 }

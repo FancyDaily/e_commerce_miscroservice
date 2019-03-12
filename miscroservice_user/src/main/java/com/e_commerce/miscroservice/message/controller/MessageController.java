@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * 消息
+ * 消息模块
  *
  * 消息controller
  **/

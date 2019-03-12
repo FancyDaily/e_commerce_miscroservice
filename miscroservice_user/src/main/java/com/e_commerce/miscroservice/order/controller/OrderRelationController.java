@@ -8,16 +8,17 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 订单关系
+ * 订单模块
  *
  * 订单关系controller
  */
-//@RestController
+@RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
 
@@ -193,7 +194,7 @@ public class OrderRelationController extends BaseController {
      * 拒绝用户
      * @param orderId 订单ID
      * @param nowUserId 当前用户ID
-     * @param userIds 被操作用户ID
+     * @param userIds 用户id（多人逗号分割）
      *
      *     "success": true,
      *     "msg": "拒绝成功",
@@ -225,6 +226,77 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("拒绝失败");
+        }
+        return result;
+    }
+
+    /**
+     * 支付
+     *
+     * @param orderId 订单编号
+     * @param nowUserId 当前用户id
+     * @param userIds 被支付用户id（多人逗号分割）
+     * @param payments 支付钱数（多人逗号分割）
+     * @return
+     */
+    @PostMapping("/pay")
+    public Object pay(Long orderId, Long nowUserId, String userIds , String payments) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        String[] payment = payments.split(",");
+        List<Long> paymentList = new ArrayList<>();
+
+        for (int i = 0; i < payment.length; i++) {
+            paymentList.add(Long.parseLong(payment[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , nowUserId);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("支付成功");
+        } catch (MessageException e) {
+            logger.warn("支付失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("支付失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("支付失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("支付失败");
+        }
+        return result;
+    }
+
+    /**
+     * 开始订单
+     *
+     * @param orderId 订单编号
+     * @param nowUserId 当前用户
+     * @return
+     */
+    @PostMapping("/startOrder")
+    public Object startOrder(Long orderId, Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.startOrder(orderId , nowUserId);
+            result.setSuccess(true);
+            result.setMsg("开始成功");
+        } catch (MessageException e) {
+            logger.warn("开始失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("开始失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("开始失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("开始失败");
         }
         return result;
     }
