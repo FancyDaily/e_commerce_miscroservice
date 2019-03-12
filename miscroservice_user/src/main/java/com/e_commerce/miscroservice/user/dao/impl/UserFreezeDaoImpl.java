@@ -17,11 +17,10 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      *
      * @param userId   用户id
      * @param lastTime 最大时间
-     * @param order    排序规则
      * @return
      */
     @Override
-    public List<TUserFreeze> queryUserFreeze(Long userId, Long lastTime, MybatisSqlWhereBuild.ORDER order) {
+    public List<TUserFreeze> queryUserFreezeDESC(Long userId, Long lastTime) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
                 .lt(TUserFreeze::getCreateTime, lastTime)
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)

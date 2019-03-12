@@ -11,10 +11,9 @@ public interface UserFreezeDao {
      * 查询用户-冻结表记录
      * @param userId 用户id
      * @param lastTime 最大时间
-     * @param order 排序规则
      * @return
      */
-    List<TUserFreeze> queryUserFreeze(Long userId, Long lastTime, MybatisSqlWhereBuild.ORDER order);
+    List<TUserFreeze> queryUserFreezeDESC(Long userId, Long lastTime);
 
     /**
      * 插入用户冻结记录
@@ -31,4 +30,5 @@ public interface UserFreezeDao {
     TUserFreeze selectUserFreezeByUserIdAndOrderId(Long userId, Long orderId);
 
     int update(TUserFreeze userFreeze);
+
 }

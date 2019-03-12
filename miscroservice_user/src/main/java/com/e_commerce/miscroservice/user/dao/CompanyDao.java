@@ -14,4 +14,6 @@ public interface CompanyDao {
     int update(TCompany company);
 
     int insert(TCompany company);
+
+    TCompany selectByPrimaryKey(Long companyId);
 }

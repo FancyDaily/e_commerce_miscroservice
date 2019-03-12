@@ -45,4 +45,11 @@ public class CompanyDaoImpl implements CompanyDao {
     public int insert(TCompany company) {
         return MybatisOperaterUtil.getInstance().save(company);
     }
+
+    @Override
+    public TCompany selectByPrimaryKey(Long companyId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
+        .eq(TCompany::getId,companyId)
+        .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }
