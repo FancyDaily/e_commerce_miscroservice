@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTask;
+import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.dao.UserTaskDao;
@@ -23,6 +24,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, beginTimeStamp, endTimeStamp)
+                .eq(TUserTask::getType,TaskEnum.TASK_SIGNUP.getType())
                 .eq(TUserTask::getIsValid, AppConstant.IS_VALID_YES));
     }
 
@@ -38,6 +40,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, thisBeginStamp, thisEndStamp)
+                .eq(TUserTask::getType,TaskEnum.TASK_SIGNUP.getType())
                 .eq(TUserTask::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
     }
@@ -45,15 +48,19 @@ public class UserTaskDaoImpl implements UserTaskDao {
     /**
      * 获取最近的签到记录,倒序
      * @param id
-     * @param type
      * @return
      */
     @Override
-    public List<TUserTask> findlatestSignUps(Long id, Integer type) {
+    public List<TUserTask> findlatestSignUps(Long id) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
-        .eq(TUserTask::getType,type)
+        .eq(TUserTask::getType, TaskEnum.TASK_SIGNUP.getType())
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES)
         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
+    }
+
+    @Override
+    public int insert(TUserTask userTask) {
+        return MybatisOperaterUtil.getInstance().save(userTask);
     }
 }

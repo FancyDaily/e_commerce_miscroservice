@@ -164,23 +164,23 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public Long countProductOrder(Long serviceId, Long startTime, Long endTime) {
         return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1")
+                .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                 .eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime));
     }
 
     /**
      * 根据来源、用户id、状态、订单id集合查找
      *
-     * @param sourceGroup
+     * @param source
      * @param userId
      * @param availableStatusArray
      * @param idList
      * @return
      */
     @Override
-    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(ProductEnum sourceGroup, Long userId, Integer[] availableStatusArray, List<Long> idList) {
+    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getSource, sourceGroup)
+                .eq(TOrder::getSource, source)
                 .eq(TOrder::getCreateUser, userId)
                 .in(TOrder::getStatus, availableStatusArray)
                 .in(TOrder::getId, idList)
@@ -191,7 +191,8 @@ public class OrderDaoImpl implements OrderDao {
 	public TOrder findOneLatestOrderByServiceId(Long serviceId) {
         // 非正常状态的订单的最新一条订单（已结束和被取消的订单）
         return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-                .eq(TOrder::getServiceId, serviceId).neq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime)));
+                .eq(TOrder::getServiceId, serviceId).neq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime)));
 	}
 
 	/**

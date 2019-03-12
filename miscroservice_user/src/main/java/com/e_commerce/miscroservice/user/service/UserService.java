@@ -197,5 +197,18 @@ public interface UserService {
      */
     SignUpInfoView signUpInfo(TUser user, String ymString);
 
+    /**
+     * 每日签到
+     * @param token
+     * @param user
+     * @return
+     */
     long signUp(String token, TUser user);
+
+    /**
+     * 用户反馈
+     * @param token
+     * @param user
+     */
+    void feedBack(String token, TUser user);
 }

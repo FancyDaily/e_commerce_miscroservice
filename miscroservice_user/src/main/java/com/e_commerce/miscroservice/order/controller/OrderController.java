@@ -8,10 +8,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.order.vo.*;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 订单模块
@@ -325,9 +322,11 @@ public class OrderController extends BaseController {
 	 *                 "collectTime": 10,
 	 *                 "collectType": 1、 互助时  2、公益时,
 	 *                 },
-	 *                 "status": "显示状态"
+	 *                 "status": "显示状态",
+	 *                 "porductCoverPic":封面图
 	 *                 }
-	 *                 ]
+	 *                 ],
+	 *         			"totalCount": 总条数
 	 *                 }
 	 *
 	 * @return
@@ -337,7 +336,7 @@ public class OrderController extends BaseController {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
 		try {
-			List<PageEnrollAndChooseReturnView> data = orderService.enrollList(pageNum, pageSize, user);
+			QueryResult<PageEnrollAndChooseReturnView> data = orderService.enrollList(pageNum, pageSize, user);
 			result.setSuccess(true);
 			result.setData(data);
 			result.setMsg("获取报名列表成功");

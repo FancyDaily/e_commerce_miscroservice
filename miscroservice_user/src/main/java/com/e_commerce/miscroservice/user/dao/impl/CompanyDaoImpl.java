@@ -21,10 +21,18 @@ public class CompanyDaoImpl implements CompanyDao {
     }
 
     @Override
-    public List<TCompany> selectByUserId(Long id) {
-        return MybatisOperaterUtil.getInstance().finAll(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
+    public TCompany selectLatestByUserId(Long id) {
+        return MybatisOperaterUtil.getInstance().findOne(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
         .eq(TCompany::getUserId,id)
-        .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
+        .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES)
+        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TCompany::getCreateTime)));
+    }
+
+    @Override
+    public List<TCompany> selectAllByUserId(Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TCompany(),new MybatisSqlWhereBuild(TCompany.class)
+                .eq(TCompany::getUserId,id)
+                .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override

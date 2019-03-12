@@ -9,5 +9,7 @@ public interface UserTaskDao {
 
     List<TUserTask> queryOnessignUpBetweenTimeDesc(Long id, Long thisBeginStamp, Long thisEndStamp);
 
-    List<TUserTask> findlatestSignUps(Long id, Integer type);
+    List<TUserTask> findlatestSignUps(Long id);
+
+    int insert(TUserTask userTask);
 }
