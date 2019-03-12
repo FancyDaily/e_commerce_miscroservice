@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlW
 import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -51,14 +52,70 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
 
     /**
      * 根据多个用户id时间倒序查找UserCompany记录
-     * @param userIds
+     * @param ids
      * @return
      */
     @Override
-    public List<TUserCompany> queryByUserIdsDESC(Long... userIds) {
+    public List<TUserCompany> queryByUserIdsDESC(Long... ids) {
+        List<Long> userIds = new ArrayList<>();
+        for(Long id:ids) {
+            if(id!=null) {
+                userIds.add(id);
+            }
+        }
         return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
                 .in(TUserCompany::getUserId,userIds)
                 .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserCompany::getCreateTime)));
     }
+
+    /**
+     * 根据用户id、组织内角色查询UserCompany记录
+     * @param id
+     * @param role
+     * @return
+     */
+    @Override
+    public List<TUserCompany> selectByUserIdAndCompanyjob(Long id, Integer role) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+        .eq(TUserCompany::getUserId,id)
+        .eq(TUserCompany::getCompanyJob,role)
+        .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据用户id、组织id查询UserCompany记录
+     * @param id
+     * @param companyId
+     * @return
+     */
+    @Override
+    public List<TUserCompany> selectByUserIdAndCompanyId(Long id, Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+        .eq(TUserCompany::getUserId, id)
+        .eq(TUserCompany::getCompanyId,companyId)
+        .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 更新
+     * @param userCompany
+     */
+    @Override
+    public int updateByPrimaryKey(TUserCompany userCompany) {
+        return MybatisOperaterUtil.getInstance().update(userCompany,new MybatisSqlWhereBuild(TUserCompany.class)
+        .eq(TUserCompany::getId,userCompany.getId())
+        .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 插入
+     * @param userCompany
+     * @return
+     */
+    @Override
+    public int insert(TUserCompany userCompany) {
+        return MybatisOperaterUtil.getInstance().save(userCompany);
+    }
 }
+

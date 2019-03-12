@@ -5,7 +5,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
-import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -278,6 +277,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				listUserView.add(userView);
 				// TODO 异常状态
 				userView.setPointStatus(1);
+				userView.setCareStatus(1);
+				// TODO 根据用户是求助者还是服务者进行分数字段的选择
 			}
 			returnView.setListUserView(listUserView);
 		} else { //当前用户是接单者
@@ -296,6 +297,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		return returnView;
 	}
+	@Override
+	public DetailChooseReturnView chooseDetail(Long orderId, TUser user) {
+		//写死orderId
+		orderId = 101675891532234752L;
+		TOrder order = orderDao.selectByPrimaryKey(orderId);
+		//所有的报名者
+		List<TOrderRelationship> tOrderRelationships = orderRelationshipDao.selectListByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+		List<BaseUserView> listUser = new ArrayList<>();
+		for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
+			TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
+			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+			userView.setCareStatus(1);
+			listUser.add(userView);
+		}
+		DetailChooseReturnView result = new DetailChooseReturnView();
+		result.setOrder(order);
+		result.setListUser(listUser);
+		return result;
+		
+	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -309,7 +330,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		order.setStatus(OrderEnum.STATUS_NORMAL.getValue());
 		//重复的订单的话  根据商品的重复时间生成第一张订单
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-			generateOrderTime(service, order);
+//			generateOrderTime(service, order);
 		}
 		orderDao.saveOneOrder(order);
 	}
@@ -330,121 +351,224 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		return WeekDayNumberArray;
 	}
 
-	/**
-	 * 计算订单的开始结束时间毫秒值
-	 *
-	 * @param service 商品
-	 * @param order   订单
-	 */
-	private void generateOrderTime(TService service, TOrder order) {
+
+	private Integer generateOrderTime(TService service, TOrder order, int[] weekDayNumberArray, int type) {
 		String[] weekDayArray = service.getDateWeekNumber().split(",");
 		int[] WeekDayNumberArray = getIntArray(weekDayArray);
 		//对星期进行升序排序
 		Arrays.sort(WeekDayNumberArray);
-		//查看该商品是否已经派生过订单
-		Long countOrder = orderDao.countProductOrder(service.getId());
-		if (countOrder == 0) { //该商品没有派生过订单
-			//获取商品开始时间的字符串形式 201803051434
-			String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
-			Long startTime = DateUtil.parse(serviceStartTimeString);
-//			getOrderDay(service, order, WeekDayNumberArray, startTime, true);
-		} else { // 该商品之前派生过订单
-			TOrder tOrder = orderDao.findOneLatestOrderByServiceId(service.getId());
-			Long startTime = tOrder.getStartTime();
-
-			//获取上一张订单开始的时间是星期X
-			int startWeekDay = DateUtil.getWeekDay(startTime);
-			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
-			int orderWeekDay = DateUtil.getMostNearWeekDay(WeekDayNumberArray, startWeekDay);
-			//需要增加的天数
-			int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+		if (OrderEnum.PRODUCE_TYPE_SUBMIT.getValue() == type) {
+			//发布时候生成的订单
+			return produceOrderByPublish(service, order, weekDayNumberArray);
+		} else if (OrderEnum.PRODUCE_TYPE_UPPER.getValue() == type) {
+			//上架时候派生订单
+			return produceOrderByUpper(service,order, weekDayNumberArray);
+		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
+			/*
+			 * 传递一个serviceId 和 一个结束的日期
+			 * 根据这个商品的周  获取下一张订单的周
+			 * 加上这些天数获得新的订单的开始时间和结束时间
+			 * 查看数据库是否存在 ，存在则不派生
+			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
+			 */
+			TService product = productService.getProductById(service.getId());
+			String date = "20190312";
+			String startDateTime = date + service.getStartTimeS();
+			String endDateTime = date + service.getEndTimeS();
+			//报名人满的订单所在的周
+			Integer weekDay = DateUtil.getWeekDay(startDateTime);
+			int nextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, weekDay);
+			int addDays = (nextWeekDay + 7 - weekDay) % 7;
 			if (addDays == 0) {
 				addDays = 7;
 			}
-			String startDate = DateUtil.getDate(startTime);
-			Calendar cal = Calendar.getInstance();
-			cal.setTimeInMillis(startTime);
-			cal.add(Calendar.DAY_OF_YEAR, addDays);
-			//校验商品是否超时
-			String endDateTime = service.getEndDateS() + service.getEndTimeS();
-			if (DateUtil.parse(endDateTime) < cal.getTimeInMillis()) {
-				throw new MessageException("订单生成超时，请修改时间后重新发布");
+			Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
+			Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
+			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+			if (count == 0) { //没有这张订单，需要派生
+
+			} else { // 已经存在，不进行派生
+
 			}
-			//订单开始的日期
-			String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
-			//订单开始时间 = 订单开始的日期 + 商品的开始时间
-			order.setStartTime(DateUtil.parse(orderStartDate + service.getStartTimeS()));
-			//订单结束时间 = 订单开始的日期 + 商品的结束时间
-			order.setEndTime(DateUtil.parse(orderStartDate + service.getEndTimeS()));
+		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
+			//报名派生  判断是否已经存在，已经存在，则停止派生
+			/*
+			 * 传递一个serviceId 和 一个订单的日期
+			 * 查看数据库是否存在 ，存在则不派生
+			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，提示无法生成，时间超时
+			 */
+			TService product = productService.getProductById(service.getId());
+			//TODO 报名派生的日期
+			String startDate = "20190312";
+			String startDateTime = startDate + service.getStartTimeS();
+			String endDateTime = startDate + service.getEndTimeS();
+			Long startDateTimeMill = DateUtil.parse(startDateTime);
+			Long endDateTimeMill = DateUtil.parse(endDateTime);
+			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+			if (count == 0) { //没有这张订单，需要派生
+
+			} else { // 已经存在，不进行派生
+
+			}
+
+		} else {  //报名人满后派生
+			/*
+			 * 传递一个serviceId 和 一个结束的日期
+			 * 根据这个商品的周  获取下一张订单的周
+			 * 加上这些天数获得新的订单的开始时间和结束时间
+			 * 查看数据库是否存在 ，存在则不派生
+			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
+			 */
+			TService product = productService.getProductById(service.getId());
+			String date = "20190312";
+			String startDateTime = date + service.getStartTimeS();
+			String endDateTime = date + service.getEndTimeS();
+			//报名人满的订单所在的周
+			Integer weekDay = DateUtil.getWeekDay(startDateTime);
+			int nextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, weekDay);
+			int addDays = (nextWeekDay + 7 - weekDay) % 7;
+			if (addDays == 0) {
+				addDays = 7;
+			}
+			Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
+			Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
+			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+			if (count == 0) { //没有这张订单，需要派生
+
+			} else { // 已经存在，不进行派生
+
+			}
 		}
+		return 0;
 	}
 
-	private void getOrderDay(TService service, TOrder order, int[] weekDayNumberArray, int type) {
-
-		String[] weekDayArray = service.getDateWeekNumber().split(",");
-		int[] WeekDayNumberArray = getIntArray(weekDayArray);
-		//对星期进行升序排序
-		Arrays.sort(WeekDayNumberArray);
-		//获取开始的时间是星期X
-//		int startWeekDay = DateUtil.getWeekDay(startTime);
-//		//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
-//		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
-		//需要增加的天数
-//		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
-		if (OrderEnum.PRODUCE_TYPE_SUBMIT.getValue() == type) { //发布时候生成的订单
-			/*
-			 * 获取商品的开始的时间  然后获取商品的开始时间是周几
-			 * 然后获取离这个周最近的一个可以发布的周，可能会是当天
-			 * 如果是当天，就需要判断当天的结束时间是否在当前时间之前，如果在当前时间之前，已经过期，需要再重新寻找找下一个可发布日
-			 * 循环遍历，一直到结束时间在当前时间之前，并且没有超过商品的结束时间，才可以创建出订单
-			 * 如果超过商品的结束时间，则对商品进行下架处理
-			 */
-			//获取商品开始时间的字符串形式 201803051434
-			String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
-			String serviceEndTimeString = service.getStartDateS() + service.getEndTimeS();
-			// 商品开始的时间
-			Long productStartTime = DateUtil.parse(serviceStartTimeString);
-			//商品结束的时间
-			Long productEndTime = DateUtil.parse(serviceEndTimeString);
-//			//获取开始的时间是星期X
-			int startWeekDay = DateUtil.getWeekDay(productStartTime);
-//			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
-			int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
-			int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
-//			//订单开始的时间戳
-			Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
-			Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
-			//参数星期的下一个星期X(不包含这个参数星期)
-//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
-			//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
-			int orderNextWeekDay;
+	private Integer produceOrderByUpper(TService service,TOrder order, int[] weekDayNumberArray) {
+		/*
+		 * 重新上架，先找上一条已完成的订单，
+		 * {
+		 * 如果没有，则从商品开始时间进行派生，并进行开始时间的判断
+		 * 调用发布时候派生订单的部分逻辑，派生出一张当前时间之后的订单
+		 * 如果数据库已经存在正在进行的订单，则不继续派生
+		 * 如果数据库存在的是取消的订单，则再生成一张新的订单
+		 * 如果已经超时，则进行下架处理
+		 * }
+		 * 如果有最后一条结束的
+		 * {
+		 * 拿最后一条的时间作为开始结束时间
+		 * 进行遍历匹配时间，派生出一张当前时间之后的订单
+		 * 如果数据库已经存在正在进行的订单，则不继续派生
+		 * 如果数据库存在的是取消的订单，则再生成一张新的订单
+		 * 如果已经超时，则进行下架处理
+		 * }
+		 *
+		 */
+		// 重新上架，找最后一条结束的，如果没有，停止派生
+		TOrder latestOrder = orderDao.findOneLatestOrderByServiceId(service.getId());
+		if (latestOrder == null) { // 如果为空，则不需要派生，说明有一张订单还在执行
+			//调用重新发布时派生订单
+		} else {
+			Long latestOrderStartTime = latestOrder.getStartTime();
+			Long latestOrderEndTime = latestOrder.getEndTime();
+			Long orderStartTime = 0L;
+			Long orderEndTime = 0L;
 			while (true) {
-				if (endTimeMill >= System.currentTimeMillis()) {
-					break;
-				}
-				orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
-
-				addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
+				int latestOrderWeekDay = DateUtil.getWeekDay(latestOrderStartTime);
+				int latestOrderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, latestOrderWeekDay);
+				int addDays = (latestOrderNextWeekDay + 7 - latestOrderWeekDay) % 7;
 				if (addDays == 0) {
 					addDays = 7;
 				}
-				startTimeMill = DateUtil.addDays(startTimeMill, addDays);
-				endTimeMill = DateUtil.addDays(endTimeMill, addDays);
-				orderWeekDay = orderNextWeekDay;
+				//订单开始的时间戳
+				orderStartTime = DateUtil.addDays(latestOrderStartTime, addDays);
+				orderEndTime = DateUtil.addDays(latestOrderEndTime, addDays);
+				if (orderEndTime >= System.currentTimeMillis()) {
+					break;
+				}
+				latestOrderStartTime = orderStartTime;
 			}
+			//查看数据库是否有该时间派生出的订单， 如果有，则停止派生
+			//是否超过结束时间 如果超过结束时间，进行商品下架处理，不再派生
+			order.setStartTime(orderStartTime);
+			order.setEndTime(orderEndTime);
+			// 查看数据库防止有这一条
+			Long count = orderDao.countProductOrder(service.getId(), orderStartTime, orderEndTime);
+			if (count != 0) {
+				return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+			}
+			// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 			String endDateTime = service.getEndDateS() + service.getEndTimeS();
-			if (DateUtil.parse(endDateTime) < endTimeMill) {
-				throw new MessageException("订单生成超时，请修改时间后重新发布");
+			if (DateUtil.parse(endDateTime) < orderEndTime) {
+				return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
 			}
-			//TODO 查看数据库防止有这一条
-			// TODO 查看是否到结束时间，如果到结束时间，下架掉
-			order.setStartTime(startTimeMill);
-			order.setEndTime(endTimeMill);
-			//订单开始的日期
+		}
+		return 0;
+	}
+
+	/**
+	 * 发布派生订单
+	 * @param service
+	 * @param order
+	 * @param weekDayNumberArray
+	 * @return
+	 */
+	private Integer produceOrderByPublish(TService service, TOrder order, int[] weekDayNumberArray) {
+		/*
+		 * 获取商品的开始的时间  然后获取商品的开始时间是周几
+		 * 然后获取离这个周最近的一个可以发布的周，可能会是当天
+		 * 如果是当天，就需要判断当天的结束时间是否在当前时间之前，如果在当前时间之前，已经过期，需要再重新寻找找下一个可发布日
+		 * 循环遍历，一直到结束时间在当前时间之前，并且没有超过商品的结束时间，才可以创建出订单
+		 * 如果超过商品的结束时间，则对商品进行下架处理
+		 */
+		//获取商品开始时间的字符串形式 201803051434
+		String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
+		String serviceEndTimeString = service.getStartDateS() + service.getEndTimeS();
+		// 商品开始的时间
+		Long productStartTime = DateUtil.parse(serviceStartTimeString);
+		//商品结束的时间
+		Long productEndTime = DateUtil.parse(serviceEndTimeString);
+//			//获取开始的时间是星期X
+		int startWeekDay = DateUtil.getWeekDay(productStartTime);
+//			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
+		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
+		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+//			//订单开始的时间戳
+		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
+		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
+		//参数星期的下一个星期X(不包含这个参数星期)
+//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
+		int orderNextWeekDay;
+		while (true) {
+			if (endTimeMill >= System.currentTimeMillis()) {
+				break;
+			}
+			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+
+			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
+			if (addDays == 0) {
+				addDays = 7;
+			}
+			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
+			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
+			orderWeekDay = orderNextWeekDay;
+		}
+		order.setStartTime(startTimeMill);
+		order.setEndTime(endTimeMill);
+		// 查看数据库防止有这一条
+		Long count = orderDao.countProductOrder(service.getId(), startTimeMill, endTimeMill);
+		if (count != 0) {
+			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+		}
+		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
+		String endDateTime = service.getEndDateS() + service.getEndTimeS();
+		if (DateUtil.parse(endDateTime) < endTimeMill) {
+			return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
+		}
+		//订单开始的日期
 //			String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
-			//订单开始时间 = 订单开始的日期 + 商品的开始时间
+		//订单开始时间 = 订单开始的日期 + 商品的开始时间
 //			Long orderStartTime = DateUtil.parse(orderStartDate + service.getStartTimeS());
-			//订单结束时间 = 订单开始的日期 + 商品的结束时间
+		//订单结束时间 = 订单开始的日期 + 商品的结束时间
 //			Long orderEndTime = DateUtil.parse(orderStartDate + service.getEndTimeS());
 //			Long countOrder = orderDao.countProductOrder(service.getId(), orderStartTime, orderEndTime);
 //			if (countOrder != 0) {
@@ -452,94 +576,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 //			}
 //			order.setStartTime(startTimeMill);
 //			order.setEndTime(endTimeMill);
-//
-
-		} else if (OrderEnum.PRODUCE_TYPE_UPPER.getValue() == type) { //上架时候派生订单
-			/*
-			 * 重新上架，先找上一条已完成的订单，
-			 * {
-			 * 如果没有，则从商品开始时间进行派生，并进行开始时间的判断
-			 * 调用发布时候派生订单的部分逻辑，派生出一张当前时间之后的订单
-			 * 如果数据库已经存在正在进行的订单，则不继续派生
-			 * 如果数据库存在的是取消的订单，则再生成一张新的订单
-			 * 如果已经超时，则进行下架处理
-			 * }
-			 * 如果有最后一条结束的
-			 * {
-			 * 拿最后一条的时间作为开始结束时间
-			 * 进行遍历匹配时间，派生出一张当前时间之后的订单
-			 * 如果数据库已经存在正在进行的订单，则不继续派生
-			 * 如果数据库存在的是取消的订单，则再生成一张新的订单
-			 * 如果已经超时，则进行下架处理
-			 * }
-			 *
-			 */
-			// 重新上架，找最后一条结束的，如果没有，停止派生
-			TOrder latestOrder = orderDao.findOneLatestOrderByServiceId(service.getId());
-			if (latestOrder == null) { // 如果为空，则不需要派生，说明有一张订单还在执行
-				//调用重新发布时派生订单
-			} else {
-				Long latestOrderStartTime = latestOrder.getStartTime();
-				Long latestOrderEndTime = latestOrder.getEndTime();
-				Long orderStartTime = 0L;
-				Long orderEndTime = 0L;
-				while (true) {
-					int latestOrderWeekDay = DateUtil.getWeekDay(latestOrderStartTime);
-					int latestOrderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, latestOrderWeekDay);
-					int addDays = (latestOrderNextWeekDay + 7 - latestOrderWeekDay) % 7;
-					if (addDays == 0) {
-						addDays = 7;
-					}
-					//订单开始的时间戳
-					orderStartTime = DateUtil.addDays(latestOrderStartTime, addDays);
-					orderEndTime = DateUtil.addDays(latestOrderEndTime, addDays);
-//					String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
-//					orderStartTime = DateUtil.parse(orderStartDate + service.getStartTimeS());
-//					orderEndTime = DateUtil.parse(orderStartDate + service.getEndTimeS());
-					if (orderEndTime >= System.currentTimeMillis()) {
-						break;
-					}
-					latestOrderStartTime = orderStartTime;
-				}
-				//查看数据库是否有该时间派生出的订单， 如果有，则停止派生
-				//是否超过结束时间 如果超过结束时间，进行商品下架处理，不再派生
-				String endDateTime = service.getEndDateS() + service.getEndTimeS();
-				if (DateUtil.parse(endDateTime) < orderEndTime) {
-					throw new MessageException("订单生成超时，请修改时间后重新发布");
-				}
-			}
-//		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
-//			//订单任务上一张订单完成后派生下一张订单
-//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
-//			addDays = (orderNextWeekDay + 7 - startWeekDay) % 7;
-//			if (addDays == 0) {
-//				addDays = 7;
-//			}
-//			Calendar cal = Calendar.getInstance();
-//			cal.setTimeInMillis(startTime);
-//			cal.add(Calendar.DAY_OF_YEAR, addDays);
-//			// 判断数据库是否有这条记录， 如果有，说明生成过 不再派生
-//			// 判断结束时间是否超过当前时间，超过，则继续往下派单
-//			//订单开始的日期
-//			String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
-//			//订单开始时间 = 订单开始的日期 + 商品的开始时间
-//			Long orderStartTime = DateUtil.parse(orderStartDate + service.getStartTimeS());
-//			//订单结束时间 = 订单开始的日期 + 商品的结束时间
-//			Long orderEndTime = DateUtil.parse(orderStartDate + service.getEndTimeS());
-//			Long countOrder = orderDao.countProductOrder(service.getId(), orderStartTime, orderEndTime);
-//			if (countOrder != 0) {
-//				// 不能生成订单 已有这个时间段的订单
-//			}
-//
-//			order.setEndTime(orderEndTime);
-//			String endDateTime = service.getEndDateS() + service.getEndTimeS();
-//			if (DateUtil.parse(endDateTime) < cal.getTimeInMillis()) {
-//				throw new MessageException("订单生成超时，请修改时间后重新发布");
-//			}
-
-		} else {
-			//报名派生  判断是否已经存在，已经存在，则停止派生
-		}
+		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
 	/**

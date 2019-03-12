@@ -5,23 +5,25 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 
 
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
-import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
-import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
-import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
+import com.e_commerce.miscroservice.commons.wechat.service.WechatService;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.dao.*;
+import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +34,16 @@ import java.util.*;
 public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
+    private SendSmsService smsService;
+
+    @Autowired
     private OrderCommonController orderService;
+
+    @Autowired
+    private GrowthValueService growthValueService;
+
+    @Autowired
+    private WechatService wechatService;
 
     @Autowired
     private UserDao userDao;
@@ -65,9 +76,36 @@ public class UserServiceImpl extends BaseService implements UserService {
     private UserTaskDao userTaskDao;
 
     @Autowired
+    private TypeDictionariesDao typeDictionariesDao;
+
+    @Autowired
+    private UserCompanyDao userCompanyDao;
+
+    @Autowired
+    private GroupDao groupDao;
+
+    @Autowired
     private RedisUtil redisUtil;
 
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
+
+    @Value("${debug}")
+    private String debug;
+
+    @Value("${page.invite}")
+    private String pageValueInvite;
+
+    @Value("${page.person}") // TODO
+    private String pageValuePerson;
+
+    @Value("${page.service}")
+    private String pageValueService;
+
+    @Value("${page.help}")
+    private String pageValueHelp;
+
+    @Value("${page.company}")
+    private String pageValueCompany;
 
     /**
      * 时间轨迹
@@ -201,7 +239,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             pageSize = 0;
         }
 
-        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreeze(id, lastTime, MybatisSqlWhereBuild.ORDER.DESC);
+        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id,lastTime);
 
         // 如果列表为空
         if (userFreezes.isEmpty()) {
@@ -639,11 +677,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param user
      * @return
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public String modify(String token, TUser user) {
-        return "";
-/*
+//        return "";
         TUser idHolder = (TUser) redisUtil.get(token);
         TUser updateData = user; // 原始数据
 
@@ -685,9 +722,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 更新数据库
         userDao.updateByPrimaryKey(user);
 
-        // TODO 如果为修改昵称 -> 同步修改服务表里的创建者昵称
         user = userDao.selectByPrimaryKey(idHolder.getId());
-//        completeReward(user); //TODO 任务奖励
+        completeReward(user); //TODO 用户信息完整度任务奖励
 
         // 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
         if (updateData != null && updateData.getUserTel() != null) {
@@ -713,8 +749,113 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 刷新缓存
         flushRedisUser(token, user);
         return token;
- */
 
+    }
+
+
+    /**
+     * 功能描述: 获得完整度任务奖励(包含判断,包含账单)
+     * 作者: 许方毅
+     * 创建时间: 2018年11月12日 下午5:56:52
+     * @param user
+     */
+    private void completeReward(TUser user) {
+        Long userId = user.getId();
+
+        // TODO 与数据库同步
+        user = userDao.selectByPrimaryKey(userId);
+
+        // 查询是否有任务完成记录
+        List<TUserTask> pageTask = userTaskDao.findTasksByTypeAndUserId(TaskEnum.TASK_PAGE.getType(), user.getId());
+        if (!pageTask.isEmpty()) {
+            return;
+        }
+
+        // 完整度累计
+        Integer completeNum = 0;
+
+        // 任务完成所需 完整度
+        Integer completeTaskNum = AppConstant.COMPLETE_TASK_NUM;
+
+        // 汇总个人主页记录，计算完整度
+        // 封面图片
+        String userPicturePath = user.getUserPicturePath();
+
+        if (userPicturePath != null) {
+            int num = PersonalIntegrity.USER_PICTURE_PATH.getNum();
+            completeNum = completeNum + num;
+        }
+
+        String workPlace = user.getWorkPlace();
+        if (workPlace != null && !workPlace.isEmpty()) {
+            int num = PersonalIntegrity.WORK_TOTAL.getNum();
+            completeNum = completeNum + num;
+        }
+
+        String college = user.getCollege();
+        if (college != null && !college.isEmpty()) {
+            int num = PersonalIntegrity.EDU_TOTAL.getNum();
+            completeNum = completeNum + num;
+        }
+
+        if (completeNum >= completeTaskNum) {
+            // 获取任务奖励
+            Long reward = TaskEnum.TASK_PAGE.getReward();
+            rewardComplete(user, reward);
+            // 插入一条任务完成记录
+            TUserTask userTask = new TUserTask();
+            userTask.setId(idGenerator.nextId());
+            userTask.setUserId(userId);
+            userTask.setType(TaskEnum.TASK_PAGE.getType());
+            userTask.setTargetId(String.valueOf(AppConstant.TARGET_ID_TASK_PAGE));  //TODO targetId
+            long timeStamp = System.currentTimeMillis();
+            userTask.setCreateTime(timeStamp);
+            userTask.setCreateUser(userId);
+            userTask.setCreateUserName(user.getName());
+            userTask.setUpdateTime(timeStamp);
+            userTask.setUpdateUser(userId);
+            userTask.setUpdateUserName(user.getName());
+            userTask.setIsValid(AppConstant.IS_VALID_YES);
+
+            userTaskDao.insert(userTask);
+
+            //TODO 插入系统消息 REMARK:SYSMSG
+//            insertSysMsg(userId, SysMsgEnum.PAGE_COMPLETE.getTitle(), SysMsgEnum.PAGE_COMPLETE.getContent());
+        }
+
+        user.setIntegrity(completeNum);
+        userDao.updateByPrimaryKey(user);
+    }
+
+    private void rewardComplete(TUser user, Long reward) {
+        // id
+        Long id = user.getId();
+        // name
+        String name = user.getName();
+
+        // 插入账单流水
+        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
+        userTimeRecord.setId(snowflakeIdWorker.nextId());
+        userTimeRecord.setUserId(id);
+        userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_PRIVATE_PAGE_BONUS.getCode());
+        userTimeRecord.setTime(reward);
+        // creater & updater
+        userTimeRecord.setCreateTime(System.currentTimeMillis());
+        userTimeRecord.setCreateUser(id);
+        userTimeRecord.setCreateUserName(name);
+        userTimeRecord.setUpdateTime(System.currentTimeMillis());
+        userTimeRecord.setCreateUser(id);
+        userTimeRecord.setCreateUserName(name);
+        userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(userTimeRecord);
+
+        // 刷新用户信息(database) 余额
+        user.setSurplusTime(user.getSurplusTime() + reward); // 账户余额
+
+        // 更新数据库
+        userDao.updateByPrimaryKey(user);
+
+        // -----end---------
     }
 
     /**
@@ -1003,6 +1144,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param company
      */
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void companyAuth(TUser user, TCompany company) {
         if (!ifAlreadyCert(user.getId())) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户未实名！");
@@ -1351,11 +1493,10 @@ public class UserServiceImpl extends BaseService implements UserService {
     /**
      * 用户反馈
      *
-     * @param token
      * @param user
      */
     @Override
-    public void feedBack(String token, TUser user) {
+    public void feedBack(TUser user, TReport report) {
 //        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
     }
 
@@ -1371,9 +1512,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
         for(TUserTask userTask:userTasks) {
             //签到 -> createTime为当日
-//            if(userTask.getType().equals(TaskEnum.TASK_SIGNUP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
-//                continue;
-//            }
+            if(userTask.getType().equals(TaskEnum.TASK_SIGNUP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+                continue;
+            }
             resultList.add(userTask.getType());
             resultSet.add(userTask.getType());
         }
@@ -1383,6 +1524,552 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
 
+    }
+
+    /**
+     * 红包退回
+     * @param user
+     * @param bonusPackageId
+     */
+    @Override
+    public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
+        //修改红包记录
+        TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
+        bonusPackage.setId(bonusPackageId);
+        bonusPackage.setIsValid(AppConstant.IS_VALID_NO);
+        bonusPackageDao.updateByPrimaryKey(bonusPackage);
+        long currentTimeMillis = System.currentTimeMillis();
+        //插入退款流水
+        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
+        userTimeRecord.setId(idGenerator.nextId());
+        userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PAC_SEND_BACK.getCode());
+        userTimeRecord.setTime(bonusPackage.getTime());
+        userTimeRecord.setUserId(user.getId());
+        userTimeRecord.setTargetId(bonusPackageId);
+        userTimeRecord.setCreateUser(user.getId());
+        userTimeRecord.setCreateUserName(user.getName());
+        userTimeRecord.setCreateTime(currentTimeMillis);
+        userTimeRecord.setUpdateUser(user.getId());
+        userTimeRecord.setUpdateUserName(user.getName());
+        userTimeRecord.setUpdateTime(currentTimeMillis);
+        userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(userTimeRecord);
+
+        //返还红包金额
+        user = userDao.selectByPrimaryKey(user.getId());
+        user.setSurplusTime(user.getSurplusTime() + bonusPackage.getTime());
+        user.setCreateTime(currentTimeMillis);
+        user.setCreateUser(user.getId());
+        user.setCreateUserName(user.getName());
+        user.setUpdateTime(currentTimeMillis);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(user);
+    }
+
+    /**
+     * 获取key-value值
+     * @param key
+     * @return
+     */
+    @Override
+    public TPublish getPublishValue(String key) {
+//        return orderService.getPublishValue(keœy);
+        TPublish publish = new TPublish();
+        publish.setValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
+        return publish;
+    }
+
+    /**
+     * 发送短信
+     * @param telephone
+     * @return
+     */
+    @Override
+    public AjaxResult genrateSMSCode(String telephone) {
+        AjaxResult result = new AjaxResult();
+        // 如果存在
+        Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
+        if (redisUtil.hasKey("time" + telephone)) {
+            if (redisUtil.hasKey("count" + telephone)) {
+                long time = redisUtil.getExpire("time" + telephone);// 获取剩余时间
+                // 刷新次数
+                if (time < 1) {
+                    redisUtil.set("count" + telephone, 0, interval);
+                }
+                // 短信发送次数限制
+                int actualCount = (int) redisUtil.get("count" + telephone);
+                int count = AppConstant.SMS_SEND_LIMIT;
+                // 次数超过限制
+                if (actualCount > count) {
+                    throw new MessageException("你的短信次数已用完！请之后重试！");
+                }
+                redisUtil.set("count" + telephone, ++actualCount, interval);
+            }
+        }
+
+        // 查询是否未到预设的发送间隔 TODO 有效时间为600秒而发送间隔为60s
+        if (redisUtil.hasKey(telephone)) {
+            long expire = redisUtil.getExpire(telephone); // TODO 获取剩余时间(为0则永久有效)
+            long expectedTime = AppConstant.SMS_EXPIRED - AppConstant.SMS_INTERVAL_MILLIS / 1000;
+            if (expire > expectedTime) {
+                throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,
+                        AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码!");
+            }
+        }
+
+//        String debug = "debug"; //TODO 后续根据配置文件读取
+
+        // 生成6位随机数
+        String validCode = "666666";
+        if (StringUtil.equals(AppConstant.DEBUG_STATUS_FALSE, debug)) { // 表示当前运行环境为生产
+            validCode = UUIDGenerator.messageCode();
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("mobile", telephone);
+        params.put(AppConstant.VALID_CODE, validCode);
+
+        String resMsg;
+        if (StringUtil.equals(AppConstant.DEBUG_STATUS_TRUE, debug)) { // 表示当前运行环境为调试
+            resMsg = "true";
+        } else {
+            resMsg = smsService.execute(params);
+        }
+
+        if (StringUtil.equals("true", resMsg)) {
+            // 将验证码写入缓存
+            redisUtil.set(telephone, validCode, AppConstant.SMS_EXPIRED);
+
+            // 设置间隔与次数限制
+            redisUtil.set("time" + telephone, telephone, interval);
+            redisUtil.set("count" + telephone, 1, interval);
+
+            result.setMsg("发送成功");
+            result.setSuccess(true);
+        } else {
+            result.setErrorCode("发送失败");
+            result.setSuccess(false);
+        }
+
+        return result;
+    }
+
+    /**
+     * 校验短信验证码
+     * @param telephone
+     * @param validCode
+     */
+    @Override
+    public void checkSMS(String telephone, String validCode) {
+        if (StringUtil.equals(null, telephone)) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "手机号码不能为空！");
+        }
+        String content = (String) redisUtil.get(telephone);
+
+        if (content == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "短信验证码已过期！");
+        }
+
+        if (!StringUtil.equals(validCode, content)) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "短信校验未通过");
+        }
+
+        // 短信校验通过
+        // 将验证码失效
+        redisUtil.del(telephone);
+    }
+
+    /**
+     * 回馈邀请人
+     * @param inviterId
+     * @param mineId
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public void payInviter(Long inviterId, Long mineId) {
+        // 查询是否已经回馈完成
+        List<TTypeDictionaries> dics = typeDictionariesDao.selectInviteRecords(mineId,inviterId);
+        if (dics != null && !dics.isEmpty()) {
+            return;
+        }
+
+        // 加入邀请人记录
+        Long targetId = idGenerator.nextId();
+        TTypeDictionaries dictionaries = new TTypeDictionaries();
+        dictionaries.setId(targetId);
+        dictionaries.setEntityId(mineId);
+        dictionaries.setTargetId(inviterId);
+        dictionaries.setType(DictionaryEnum.INVITER.getType());
+        dictionaries.setSubType(DictionaryEnum.INVITER.getSubType());
+        long currentTimeMillis = System.currentTimeMillis();
+        dictionaries.setCreateTime(currentTimeMillis);
+        dictionaries.setCreateUser(mineId);
+        dictionaries.setCreateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
+        dictionaries.setUpdateTime(currentTimeMillis);
+        dictionaries.setUpdateUser(mineId);
+        dictionaries.setUpdateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
+        dictionaries.setIsValid(AppConstant.IS_VALID_YES);
+        typeDictionariesDao.insert(dictionaries);
+
+        // 插入一条邀请成功的系统消息 REMARK:SYSMSG
+        TUser me = userDao.selectByPrimaryKey(mineId);
+        /*insertSysMsg(inviterId, SysMsgEnum.INVITER.getTitle(),
+                String.format(SysMsgEnum.INVITER.getContent(), me.getName()));*/    //TODO 插入系统消息
+
+        // 回馈
+        // 插入账单流水
+        TUserTimeRecord record = new TUserTimeRecord();
+        Long bonus = PaymentEnum.PAYMENT_TYPE_INVITE_BONUS.getBonus();
+        record.setId(idGenerator.nextId());
+        record.setUserId(inviterId);
+        record.setType(PaymentEnum.PAYMENT_TYPE_INVITE_BONUS.getCode());
+        record.setTime(bonus);
+//		record.setTargetId(targetId); // 与邀请记录id关联
+        record.setTargetId(mineId); // 直接与被邀请人id关联
+        record.setCreateTime(currentTimeMillis);
+        record.setCreateUser(inviterId);
+        record.setCreateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
+        record.setUpdateTime(currentTimeMillis);
+        record.setUpdateUser(inviterId);
+        record.setUpdateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
+        record.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(record);
+
+        // 用户更新
+        TUser inviter = userDao.selectByPrimaryKey(inviterId);
+        inviter.setSurplusTime(inviter.getSurplusTime() + bonus);
+
+        // 使邀请人获得成长值奖励
+        inviter = growthValueService.addGrowthValue(inviter, GrowthValueEnum.GROWTH_TYPE_INVITE_BONUS.getCode());
+
+        userDao.updateByPrimaryKey(inviter); // TODO
+        // TODO 刷新缓存
+
+        String key = "str" + inviterId;
+        if (redisUtil.hasKey(key)) {
+            String inviterToken = (String) redisUtil.get(key);
+            flushRedisUser(inviterToken, inviter);
+        }
+    }
+
+    /**
+     * 分享（查看二维码）
+     * @param user
+     * @param serviceId
+     * @param option
+     * @param token
+     * @param userId
+     * @return
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public ShareServiceView share(TUser user, String serviceId, String option, String token, String userId) {
+        if ((option == "2" || option == "3") && serviceId == null || option == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "服务id和操作不能为空！");
+        }
+
+        Long inviterId = user.getId();
+
+        DetailServiceReturnView serviceDetail = null;
+
+        // scene & page
+        String scene = "";
+        String page = "";
+        Integer subType = 0;
+
+        switch (option) {
+            case "0": // 邀请好友
+                // 获取邀请码
+                user = userDao.selectByPrimaryKey(inviterId);
+                String inviteCode = user.getInviteCode();
+                scene = String.valueOf(inviterId) + "," + userId + "," + "" + "," + inviteCode;
+                page = pageValueInvite;
+                subType = DictionaryEnum.SHARE_INVITE.getSubType();
+                break;
+
+            case "1": // 个人分享
+                scene = String.valueOf(inviterId) + "," + userId + "," + "" + "," + "";
+                page = pageValuePerson;
+                subType = DictionaryEnum.SHARE_PERSON.getSubType();
+                break;
+
+            case "2":
+                scene = String.valueOf(inviterId) + "," + "" + "," + String.valueOf(serviceId);
+                page = pageValueService;
+//                serviceDetail = serviceService.serviceDetail(Long.valueOf(serviceId), user);  //TODO 调用订单模块的商品或者订单详情接口
+                subType = DictionaryEnum.SHARE_SERVICE.getSubType();
+                break;
+
+            case "3":
+                scene = String.valueOf(inviterId) + "," + "" + "," + String.valueOf(serviceId);
+                page = pageValueHelp;
+//                serviceDetail = serviceService.serviceDetail(Long.valueOf(serviceId), user);    //TODO 调用订单模块的商品或者订单详情接口
+                subType = DictionaryEnum.SHARE_HELP.getSubType();
+                break;
+
+            case "4":
+                scene = "" + "," + "" + "," + "" + "," + "" + "," + getOwnCompanyId(inviterId);
+                // TODO page企业申请页面
+                page = pageValueCompany;// TODO
+                subType = DictionaryEnum.SHARE_COMPANY.getSubType();
+                break;
+        }
+
+        if (scene == "" || page == "") {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "option有误！错误的option:" + option);
+        }
+
+        Long id = idGenerator.nextId();
+
+        TTypeDictionaries dictionaries = new TTypeDictionaries();
+        dictionaries.setId(id);
+        dictionaries.setEntityId(inviterId);
+        dictionaries.setValue(scene);
+        dictionaries.setType(DictionaryEnum.SHARE.getType());
+        dictionaries.setSubType(subType);
+        dictionaries.setTargetId(Long.valueOf(option));
+
+        // creater & updater
+        long currentTimeMillis = System.currentTimeMillis();
+        dictionaries.setCreateTime(currentTimeMillis);
+        dictionaries.setCreateUser(inviterId);
+        dictionaries.setCreateUserName(user.getName());
+        dictionaries.setUpdateTime(currentTimeMillis);
+        dictionaries.setUpdateUser(inviterId);
+        dictionaries.setUpdateUserName(user.getName());
+        dictionaries.setIsValid(AppConstant.IS_VALID_YES);
+        typeDictionariesDao.insert(dictionaries);
+
+        // 场景值
+        String recordId = String.valueOf(dictionaries.getId());
+
+        // 生成二维码
+        String imgUrl = wechatService.genQRCode(recordId, page);
+
+        ShareServiceView serviceView = new ShareServiceView();
+
+        serviceView.setDetailServiceReturnView(serviceDetail);
+
+        serviceView.setUrl(imgUrl);
+
+        // 获得分享奖励
+        user = growthValueService.addGrowthValue(user, GrowthValueEnum.GROWTH_TYPE_SHARE_BONUS.getCode());
+
+        // 刷新缓存
+        flushRedisUser(token, user);
+
+        return serviceView;
+    }
+
+    /**
+     * 微信授权基本信息更新
+     * @param user
+     * @param token
+     */
+    @Override
+    public void wechatInfoAuth(TUser user, String token) {
+        // 实名判断 TODO
+        if (ifAlreadyCert(user.getId())) {
+            user.setSex(null);
+        }
+
+        TUser idHolder = (TUser) redisUtil.get(token);
+        user.setId(idHolder.getId());
+        user.setAuthStatus(AppConstant.WECHAT_BASIC_AUTH_STATUS_YES);
+        userDao.updateByPrimaryKey(user);
+
+        user = userDao.selectByPrimaryKey(user.getId());
+
+        flushRedisUser(token, user);
+    }
+
+    /**
+     * 根据id获取场景值
+     * @param scene
+     * @return
+     */
+    @Override
+    public SceneView scene(Long scene) {
+        if (scene == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "scene不能为空！");
+        }
+        List<TTypeDictionaries> dictionaries = typeDictionariesDao.selectByIdAndIsValid(scene,AppConstant.IS_VALID_YES);
+        SceneView sceneView = new SceneView();
+        if (!dictionaries.isEmpty()) {
+            String inviterId = null;
+            String serviceId = null;
+            String userId = null;
+            String inviteCode = null;
+            String companyId = null;
+            TTypeDictionaries dic = dictionaries.get(0);
+            Integer subType = dic.getSubType();
+            String[] split = dic.getValue().split(",");
+            if (DictionaryEnum.SHARE_INVITE.getSubType().equals(subType)
+                    || DictionaryEnum.SHARE_PERSON.getSubType().equals(subType)) {
+                inviterId = split[0];
+                userId = split[1];
+                if (split.length == 4) {
+                    inviteCode = split[3];
+                    if (inviteCode == "") {
+                        inviteCode = null;
+                    }
+                }
+            } else if (DictionaryEnum.SHARE_COMPANY.getSubType().equals(subType)) {
+                companyId = split[4];
+            } else {
+                inviterId = split[0];
+                serviceId = split[2];
+            }
+            sceneView.setUserId(userId);
+            sceneView.setInviterId(inviterId);
+            sceneView.setServiceId(serviceId);
+            sceneView.setInviteCode(inviteCode);
+            sceneView.setCompanyId(companyId);
+        }
+        return sceneView;
+    }
+
+    /**
+     * 生成邀请码
+     * @param token
+     * @param inviteCode
+     */
+    @Override
+    public void generateInviteCode(String token, String inviteCode) {
+        TUser user = (TUser) redisUtil.get(token);
+        Long userId = user.getId();
+        if (checkInviteCode(inviteCode)) {
+            user = userDao.selectByPrimaryKey(userId);
+            // 未激活
+            if (user.getInviteCode() == null) {
+                // 激活
+                user.setInviteCode(RandomUtil.generateUniqueChars());
+                userDao.updateByPrimaryKey(user);
+                flushRedisUser(token, user);
+            }
+        }
+    }
+
+    /**
+     * 重置密码(组织)
+     * @param telephone
+     * @param validCode
+     * @param password
+     */
+    @Override
+    public void modifyPwd(String telephone, String validCode, String password) {
+        // 处理前端返回的密码(AES密码)
+        password = AESCommonUtil.encript(password);
+
+        // 校验
+        checkSMS(telephone, validCode);
+
+        TUser user = getCompanyAccountByTelephone(telephone);
+        user.setPassword(password);
+        userDao.updateByPrimaryKey(user);
+    }
+
+    /**
+     * 申请加入组织
+     * @param user
+     * @param companyId
+     */
+    @Override
+    public void joinCompany(TUser user, Long companyId) {
+        // 查询组织是否存在
+        TCompany company = companyDao.selectByPrimaryKey(companyId);
+
+        if (company == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该组织不存在,加入失败!");
+        }
+
+        boolean isUpdate = false;
+        // 查询是否有被拒绝记录TODO
+        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyId(user.getId(),companyId);
+        Long formerId = null;
+        if (!userCompanies.isEmpty()) {
+            for (TUserCompany userCompany : userCompanies) {
+                if (AppConstant.JOIN_STATE_COMPANY_PASS.equals(userCompany.getState())) { // 如果已经通过
+                    throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已经加入该组织！请勿重复申请！");
+                }
+                if (AppConstant.JOIN_STATE_COMPANY_NOT_YET.equals(userCompany.getState())) { // 如果待审核
+                    throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已经提交过申请！请耐心等待!");
+                }
+                if (AppConstant.JOIN_STATE_COMPANY_REFUSE.equals(userCompany.getState())) { // 已经有一条被拒绝记录
+                    formerId = userCompany.getId();
+                    isUpdate = true;
+                }
+            }
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        TUserCompany userCompany = new TUserCompany();
+        if (formerId == null) {
+            formerId = idGenerator.nextId();
+        }
+        userCompany.setId(formerId);
+        userCompany.setUserId(user.getId());
+        userCompany.setTeamName(user.getName());
+        userCompany.setCompanyId(companyId);
+        userCompany.setCompanyName(companyDao.selectByPrimaryKey(companyId).getName()); // 公司名
+        userCompany.setCompanyJob(AppConstant.JOB_COMPANY_MEMBER); // 成员类型
+        userCompany.setState(AppConstant.JOIN_STATE_COMPANY_NOT_YET); // 待审核
+        Long groupId = null;
+        // 查询默认分组
+        List<TGroup> groups = groupDao.selectByCompanyIdAndAuth(companyId,AppConstant.GROUP_AUTH_DEFAULT);
+        if (!groups.isEmpty()) {
+            groupId = groups.get(0).getId();
+        }
+        userCompany.setGroupId(groupId);
+        if (isUpdate) {
+            // updater
+            userCompany.setUpdateTime(currentTimeMillis);
+            userCompany.setUpdateUser(user.getId());
+            userCompany.setUpdateUserName(user.getName());
+            userCompanyDao.updateByPrimaryKey(userCompany);
+        } else {
+            // creater & updater
+            userCompany.setCreateTime(currentTimeMillis);
+            userCompany.setCreateUser(user.getId());
+            userCompany.setCreateUserName(user.getName());
+            userCompany.setUpdateTime(currentTimeMillis);
+            userCompany.setUpdateUser(user.getId());
+            userCompany.setUpdateUserName(user.getName());
+            userCompanyDao.insert(userCompany);
+        }
+    }
+
+    /**
+     * 通过手机号获取用户(组织账号)
+     * @param telephone
+     * @return
+     */
+    private TUser getCompanyAccountByTelephone(String telephone) {
+        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone,AppConstant.JURISDICTION_NORMAL,AppConstant.IS_COMPANY_ACCOUNT_YES);
+
+        TUser user = null;
+        if (userList != null && !userList.isEmpty()) {
+            user = userList.get(0);
+           /* if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+                throw new MessageException("当前用户被封禁!禁止登录！");
+            }*/
+        }
+        return user;
+    }
+
+    /**
+     * 校验邀请码
+     * @param inviteCode
+     * @return
+     */
+    private boolean checkInviteCode(String inviteCode) {
+        boolean flag = false;
+
+        List<TUser> userList = userDao.selectByInviteCode(inviteCode);
+        if (!userList.isEmpty()) {
+            flag = true;
+        }
+        return flag;
     }
 
     /**
@@ -1494,4 +2181,22 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
     }
+
+
+    /**
+     * 功能描述: 获取组织账号对应组织编号
+     * 作者: 许方毅
+     * 创建时间: 2019年1月14日 下午1:45:04
+     * @param id
+     * @return
+     */
+    private Long getOwnCompanyId(Long id) {
+        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyjob(id,AppConstant.JOB_COMPANY_CREATER);
+        if(userCompanies.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"没有对应组织！");
+        }
+        return userCompanies.get(0).getCompanyId();
+    }
+
+
 }

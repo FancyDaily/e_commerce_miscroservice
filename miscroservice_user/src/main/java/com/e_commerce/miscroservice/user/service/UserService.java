@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.service;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.transaction.annotation.Propagation;
@@ -208,10 +209,9 @@ public interface UserService {
 
     /**
      * 用户反馈
-     * @param token
      * @param user
      */
-    void feedBack(String token, TUser user);
+    void feedBack(TUser user,TReport report);
 
     /**
      * 任务信息查询
@@ -226,4 +226,80 @@ public interface UserService {
      * @param bonusPackageId
      */
     void sendBackBonusPackage(TUser user, Long bonusPackageId);
+
+    /**
+     * 获取key-value值
+     * @param key
+     * @return
+     */
+    TPublish getPublishValue(String key);
+
+    /**
+     * 发送短信
+     * @param telephone
+     * @return
+     */
+    AjaxResult genrateSMSCode(String telephone);
+
+    /**
+     * 校验短信验证码
+     * @param telephone
+     * @param validCode
+     */
+    void checkSMS(String telephone, String validCode);
+
+    /**
+     * 回馈邀请人
+     * @param inviterId
+     * @param mineId
+     */
+    void payInviter(Long inviterId, Long mineId);
+
+    /**
+     * 分享（查看二维码）
+     * @param user
+     * @param serviceId
+     * @param option
+     * @param token
+     * @param userId
+     * @return
+     */
+    ShareServiceView share(TUser user, String serviceId, String option, String token, String userId);
+
+    /**
+     * 微信授权基本信息更新
+     * @param user
+     * @param token
+     * @return
+     */
+    void wechatInfoAuth(TUser user, String token);
+
+    /**
+     * 根据id获取场景值
+     * @param scene
+     * @return
+     */
+    SceneView scene(Long scene);
+
+    /**
+     * 激活(生成邀请码)
+     * @param token
+     * @param inviteCode
+     */
+    void generateInviteCode(String token, String inviteCode);
+
+    /**
+     * 重置密码
+     * @param telephone
+     * @param validCode
+     * @param password
+     */
+    void modifyPwd(String telephone, String validCode, String password);
+
+    /**
+     * 申请加入组织
+     * @param user
+     * @param companyId
+     */
+    void joinCompany(TUser user, Long companyId);
 }

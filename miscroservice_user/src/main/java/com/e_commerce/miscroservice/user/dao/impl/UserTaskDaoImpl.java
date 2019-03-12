@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTask;
 import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlDefaultUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.dao.UserTaskDao;
 import org.springframework.stereotype.Repository;
@@ -70,5 +71,19 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(userTask ,new MybatisSqlWhereBuild(TUserTask.class)
                 .eq(TUserTask::getUserId,id)
                 .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据用户id查询指定类型的任务记录
+     * @param type
+     * @param id
+     * @return
+     */
+    @Override
+    public List<TUserTask> findTasksByTypeAndUserId(Integer type, Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        .eq(TUserTask::getUserId,id)
+        .eq(TUserTask::getType,type)
+        .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
     }
 }

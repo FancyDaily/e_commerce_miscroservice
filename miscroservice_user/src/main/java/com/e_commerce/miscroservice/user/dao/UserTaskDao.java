@@ -43,4 +43,12 @@ public interface UserTaskDao {
      * @return
      */
     List<TUserTask> findOnesTasks(Long id);
+
+    /**
+     * 根据用户id查询指定类型的任务记录
+     * @param type
+     * @param id
+     * @return
+     */
+    List<TUserTask> findTasksByTypeAndUserId(Integer type, Long id);
 }

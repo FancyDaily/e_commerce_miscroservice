@@ -58,4 +58,10 @@ dependencies {
     //扩展请添加在这下面-------------------------------------------------
     //------------------------------------------------------------------
     compile group: 'org.jodd', name: 'jodd-json', version: '5.0.5'
+    //UUID
+    compile group: 'com.fasterxml.uuid',name:'java-uuid-generator',version:'3.1.5'
+    //阿里云对象存储oss
+    compile group: 'com.aliyun.oss',name:'aliyun-sdk-oss',version:'2.8.3'
+    compile group: 'com.aliyun',name:'aliyun-java-sdk-sts',version:'3.0.0'
+    compile group: 'com.aliyun',name:'aliyun-java-sdk-core',version:'3.5.0'
 }

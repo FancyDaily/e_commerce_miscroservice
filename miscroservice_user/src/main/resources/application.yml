@@ -35,3 +35,33 @@ mq:
   openSend: false
   # 发送消息的集合管理  格式  消息名称:消息的类型(fanout,direct):接受的监听类的名称(首字母小写) eg msg:fanout:demoListener
   channels: timer_scheduler_timer_send_store_business_account_delay:fanout:storeBusinessAccountDelayListener
+
+
+---
+#一些配置
+#二维码 -> 小程序page值
+page:
+  #邀请好友
+  invite: pages/help/help
+  #个人主页
+  person: package/my/pages/home/home
+  #服务
+  service: package/service/pages/service_detail/service_detail
+  #求助
+  help: package/help/pages/help_detail/help_detail
+  #组织
+  company: package/my/pages/sureJoinOrganize/sureJoinOrganize
+
+---
+#debug
+debug: true
+
+---
+#微信正式
+wechat:
+  app_id: wx0fc132bec055b894
+  app_secret: d29e69777caab57d7aa0bc3000b5e220
+
+---
+#短信模版
+smsTemplate: \u0025\u0073\u662f\u60a8\u672c\u6b21\u7684\u9a8c\u8bc1\u7801\uff0c\u8bf7\u52ff\u6cc4\u9732\u7ed9\u4ed6\u4eba\uff0c\u5341\u5206\u949f\u4e4b\u5185\u6709\u6548\u3002\u3010\u58f9\u6653\u65f6\u3011

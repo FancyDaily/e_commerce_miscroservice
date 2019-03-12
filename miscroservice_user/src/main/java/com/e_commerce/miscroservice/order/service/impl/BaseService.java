@@ -1,8 +1,12 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
@@ -64,7 +68,6 @@ public class BaseService {
 	protected ProductDescDao productDescribeDao;
 	@Autowired
 	protected OrderDao orderDao;
-
 //	@Autowired
 //	protected ObjectMapper objectMapper;
 
