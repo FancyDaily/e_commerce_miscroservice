@@ -3,12 +3,8 @@ package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
-import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.github.pagehelper.Page;
-
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 功能描述:
@@ -136,7 +132,7 @@ public interface OrderRelationshipDao {
 	 * @param userId   当前用户id
 	 * @return
 	 */
-	Page<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
+	List<TOrderRelationship> pageEnrollAndChooseList(Integer pageNum, Integer pageSize, Long userId);
 
 	/**
 	 * @return com.e_commerce.miscroservice.order.po.TOrderRelationship

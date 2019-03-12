@@ -27,7 +27,7 @@ public class ServiceController extends BaseController{
 	Log logger = Log.getInstance(ServiceController.class);
 
 	/**
-	 * 我发布的求助
+	 * 我发布的服务
 	 *
 	 * @param token    当前用户token
 	 * @param pageNum  页数
@@ -42,13 +42,14 @@ public class ServiceController extends BaseController{
 	 *                 "service": {
 	 *                 "id": 商品ID,
 	 *                 "serviceName": "名称",
-	 *                 "servicePlace": 线上或线下,
+	 *                 "servicePlace": 线上或线下 1、线上 2、线下,
 	 *                 "servicePersonnel": 需要人数,
 	 *                 "startTime": 开始时间毫秒值（单次显示开始时间使用此字段）,
 	 *                 "endTime": 结束时间毫秒值(单词显示结束时间使用此字段),
 	 *                 "timeType": 是否重复 0、不重复 1、重复性,
 	 *                 "collectType": 收取分类, 1、互助时 2、公益时
 	 *                 "collectTime": 收取时长,
+	 *                 "addressName": 地址名称,
 	 *                 "nameAudioUrl": "音频地址",
 	 *                 "dateWeekNumber": "5,6",
 	 *                 "startDateS": 开始日期字符串  例："20190308",
