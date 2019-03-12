@@ -63,4 +63,12 @@ public class UserTaskDaoImpl implements UserTaskDao {
     public int insert(TUserTask userTask) {
         return MybatisOperaterUtil.getInstance().save(userTask);
     }
+
+    @Override
+    public List<TUserTask> findOnesTasks(Long id) {
+        TUserTask userTask = new TUserTask();
+        return MybatisOperaterUtil.getInstance().finAll(userTask ,new MybatisSqlWhereBuild(TUserTask.class)
+                .eq(TUserTask::getUserId,id)
+                .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

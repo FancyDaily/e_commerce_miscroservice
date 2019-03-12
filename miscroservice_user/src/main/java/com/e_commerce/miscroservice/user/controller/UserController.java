@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 用户模块
@@ -1823,6 +1824,34 @@ public class UserController extends BaseController {
     }
 
     /**
+     * 红包退回（超时）
+     * @param token
+     * @param bonusPackageId
+     * @return
+     */
+    @RequestMapping("bonusPackage/sendBack")
+    public Object bonusPackageSendBack(String token, Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            userService.sendBackBonusPackage(user,bonusPackageId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("红包退回异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("红包退回异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+
+
+    /**
      * 用户认证信息更新(实名认证)
      *
      * @param token
@@ -2084,6 +2113,42 @@ public class UserController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("用户反馈异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 任务信息查询
+     * @param token
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": [    //任务类型列表
+     *         3    //任务类型 0注册1实名2完善3签到4邀请好友5完成首次互助
+     *     ]
+     * }
+     *
+     * @return
+     */
+    @RequestMapping("taskList")
+    public Object taskList(String token) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            Set<Integer> taskIds = userService.taskList(user);
+            result.setData(taskIds);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("任务信息查询异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("任务信息查询异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;

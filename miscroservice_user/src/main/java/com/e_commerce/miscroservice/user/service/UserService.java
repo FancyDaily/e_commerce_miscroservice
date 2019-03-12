@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface UserService {
 
@@ -211,4 +212,18 @@ public interface UserService {
      * @param user
      */
     void feedBack(String token, TUser user);
+
+    /**
+     * 任务信息查询
+     * @param user
+     * @return
+     */
+    Set<Integer> taskList(TUser user);
+
+    /**
+     * 红包退回
+     * @param user
+     * @param bonusPackageId
+     */
+    void sendBackBonusPackage(TUser user, Long bonusPackageId);
 }
