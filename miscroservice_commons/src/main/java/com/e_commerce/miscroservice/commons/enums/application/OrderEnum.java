@@ -20,7 +20,8 @@ public enum OrderEnum {
 
 	PRODUCE_RESULT_CODE_SUCCESS(1, "可以派生订单"),
 	PRODUCE_RESULT_CODE_EXISTENCE(2, "订单已经存在，没有再继续派生订单"),
-	PRODUCE_RESULT_CODE_LOWER_FRAME(3, "订单派生已经超过商品的结束时间，需要进行下架处理"),
+	PRODUCE_RESULT_CODE_LOWER_FRAME(3, "订单派生已经超过商品的结束时间，停止派生订单，需要进行下架处理"),
+	PRODUCE_RESULT_CODE_END(4, "订单派生已经超过商品的结束时间，停止派生订单，但是不需要下架处理"),
 
 		//显示状态: 1、已结束  2、已取消 3、待选人 4、被拒绝  5、已报名 6、已入选
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END(1, "已结束"),

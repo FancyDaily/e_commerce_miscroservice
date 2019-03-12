@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,9 +47,14 @@ public class ProductCommonController extends BaseController{
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
 		Map<Long, String> coverPic = new HashMap<>();
 		List<TServiceDescribe> listProductDesc = productService.getListProductDesc(serviceIds);
-		if (listProductDesc != null && listProductDesc.size() > 0) {
-			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
-					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
+//		if (listProductDesc != null && listProductDesc.size() > 0) {
+//			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
+//					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
+//		}
+		for (TServiceDescribe tServiceDescribe : listProductDesc) {
+			if (tServiceDescribe.getIsCover().equals(IS_COVER_YES)) {
+				coverPic.put(tServiceDescribe.getServiceId(), tServiceDescribe.getUrl());
+			}
 		}
 		return coverPic;
 	}
@@ -60,4 +67,21 @@ public class ProductCommonController extends BaseController{
 	public List<TServiceDescribe> getProductDesc(Long serviceId) {
 		return productService.getProductDesc(serviceId);
 	}
+
+	public MsgResult autolowerFrameService(TService service) {
+		MsgResult result = new MsgResult();
+		try {
+			service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+			productService.autoLowerFrameService(service);
+			result.setCode("200");
+			result.setMessage("修改成功");
+			return result;
+		} catch (Exception e) {
+			result.setCode("500");
+			result.setMessage("修改失败");
+			return result;
+		}
+	}
+
+
 }

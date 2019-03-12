@@ -3,15 +3,12 @@ package com.e_commerce.miscroservice.user.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
-
-
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
 import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
@@ -573,9 +570,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUser tUser = userDao.selectByPrimaryKey(userId);
         tUser.setUpdateTime(System.currentTimeMillis());
         tUser.setFreezeTime(tUser.getFreezeTime() + freeTime);
-//        userDao.updateByPrimaryKey(tUser);
-        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
-                .eq(TUser::getAge, tUser.getId()));
+        userDao.updateByPrimaryKey(tUser);
+//        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+//                .eq(TUser::getAge, tUser.getId()));
         //创建用户冻结记录
         TUserFreeze userFreeze = new TUserFreeze();
         userFreeze.setId(idGenerator.nextId());

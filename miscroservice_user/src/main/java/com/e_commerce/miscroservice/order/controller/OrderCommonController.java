@@ -1,6 +1,11 @@
 package com.e_commerce.miscroservice.order.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -29,19 +34,29 @@ public class OrderCommonController extends BaseController {
 
 	/**
 	 * 根据service派生订单 供其他模块调用
-	 *
-	 * @param service 商品
+	 * @param serviceId 商品的ID
+	 * @param type 派生的类型
+	 * @param date 派生的日期
+	 * @return
 	 */
-	public boolean produceOrder(TService service) {
-		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
+	public MsgResult produceOrder(Long serviceId, Integer type, String date) {
+//		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
 		//根据service生成出订单的属性
+		MsgResult result = new MsgResult();
 		try {
-			orderService.produceOrder(service);
+			orderService.produceOrder(serviceId, type, date);
+			result.setCode("200");
+			result.setMessage("生成订单成功");
+			return result;
+		} catch (MessageException e) {
+			result.setCode(e.getErrorCode());
+			result.setMessage(e.getMessage());
+			return result;
 		} catch (Exception e) {
-			logger.error(errInfo(e), e);
-			return false;
+			result.setCode("500");
+			result.setMessage("生成订单错误");
+			return result;
 		}
-		return true;
 	}
 
     /**
@@ -131,9 +146,9 @@ public class OrderCommonController extends BaseController {
      * @param status  要同步成的状态
      * @return 是否成功同步
      */
-    public boolean SynOrderServiceStatus(Long productId, Integer status) {
+    public boolean synOrderServiceStatus(Long productId, Integer status) {
         try {
-            orderService.SynOrderServiceStatus(productId, status);
+            orderService.synOrderServiceStatus(productId, status);
         } catch (Exception e) {
             logger.error("下架商品的订单错误");
             return false;

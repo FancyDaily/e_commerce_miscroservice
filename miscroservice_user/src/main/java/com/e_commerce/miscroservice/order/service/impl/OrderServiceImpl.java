@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.exception.colligate.ErrorException;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -39,6 +42,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public int saveOrder(TOrder order) {
 		return orderDao.saveOneOrder(order);
+//		TOrderRelationship relationship = new TOrderRelationship();
+//		relationship.setId(idGenerator.nextId());
+//		relationship.setOrderId(order.getId());
+//		relationship.setServiceId(order.getServiceId());
+//		relationship.setServiceType(order.getType());
+//		relationship.setFromUserId(order.getCreateUser());
+//		relationship.setServiceReportType(OrderRelationshipEnum.re);
+//		relationship
+//		relationship.setStatus();
 	}
 
 	@Override
@@ -201,7 +213,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
-	public void SynOrderServiceStatus(Long productId, Integer status) {
+	public void synOrderServiceStatus(Long productId, Integer status) {
 		orderDao.updateByServiceId(productId, status);
 	}
 
@@ -319,129 +331,177 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public void produceOrder(TService service) {
+	@Transactional(rollbackFor = Throwable.class)
+	public void produceOrder(Long serviceId, Integer type, String date) {
+		TService service = productService.getProductById(serviceId);
+		MsgResult msgResult;
+		TUser tUser = userService.getUserById(service.getUserId());
+		if (!checkEnoughTimeCoin(tUser, service)) {
+			throw new MessageException("501", "用户授信不足");
+//			msgResult.setCode(501);
+//			msgResult.setMessage("用户授信不足");
+//			return msgResult;
+		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
 		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
+		// TODO 设置主ID 都关联了serviceID 感觉可以不设置主ID了
 //		order.setMainId(order.getId());
 		order.setServiceId(service.getId());
 		order.setStatus(OrderEnum.STATUS_NORMAL.getValue());
 		//重复的订单的话  根据商品的重复时间生成第一张订单
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-//			generateOrderTime(service, order);
+			// 生成订单的开始结束时间
+			Integer code = generateOrderTime(service, order, type, date);
+			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
+				//可以成功创建订单
+				saveOrder(order);
+				orderDao.saveOneOrder(order);
+				// 只有求助并且是互助时才冻结订单
+				if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+					msgResult = userService.freezeTimeCoin(tUser.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
+					if (!msgResult.equals("200")) {
+						throw new ErrorException(msgResult.getCode(), msgResult.getMessage());
+					}
+				}
+				// TODO 订单结束定时任务
+			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
+				// 订单已存在或者已经，不需要再派生
+				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
+
+			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
+				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
+				// 下架商品  同步所有订单状态
+				msgResult = productService.autolowerFrameService(service);
+				if (!msgResult.getCode().equals("200")) {
+					throw new ErrorException("500", "下架商品失败");
+				}
+
+			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_END.getValue())) {
+				//到最后一张，但是还没到结束时间（一般是报名人满生成的）
+				logger.info("商品ID为{} 的订单已经派生到最后一张，无法继续派生", service.getId());
+			}
+		} else {
+			orderDao.saveOneOrder(order);
+			if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+				msgResult = userService.freezeTimeCoin(tUser.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
+				if (!msgResult.equals("200")) {
+					throw new MessageException("500", "冻结用户金额失败");
+				}
+			}
 		}
-		orderDao.saveOneOrder(order);
 	}
 
 	/**
-	 * 将字符串数组转换为int数组
-	 *
-	 * @param weekDayArray 字符串数值数组
-	 * @return int数组
-	 * @author 马晓晨
+	 * 根据商品的抽象时间派生出订单具体的时间
+	 * @param service 要派生的商品
+	 * @param order 派生的订单
+	 * @param type 派生的类型，是发布时触发的派生还是重新上架时派生的订单
+	 * @param date 日期 报名或者报满时传递的日期进行派生
+	 * @return
 	 */
-	private int[] getIntArray(String[] weekDayArray) {
-		int[] WeekDayNumberArray = new int[weekDayArray.length];
-		for (int i = 0; i < weekDayArray.length; i++) {
-			Integer weekDay = Integer.parseInt(weekDayArray[i]);
-			WeekDayNumberArray[i] = weekDay;
-		}
-		return WeekDayNumberArray;
-	}
-
-
-	private Integer generateOrderTime(TService service, TOrder order, int[] weekDayNumberArray, int type) {
-		String[] weekDayArray = service.getDateWeekNumber().split(",");
-		int[] WeekDayNumberArray = getIntArray(weekDayArray);
-		//对星期进行升序排序
-		Arrays.sort(WeekDayNumberArray);
+	private Integer generateOrderTime(TService service, TOrder order, int type, String date) {
+		int[] weekDayNumberArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
 		if (OrderEnum.PRODUCE_TYPE_SUBMIT.getValue() == type) {
 			//发布时候生成的订单
 			return produceOrderByPublish(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_UPPER.getValue() == type) {
-			//上架时候派生订单
+			//上架时候派生订单  感觉可以调用发布生成订单的逻辑
 			return produceOrderByUpper(service,order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
-			/*
-			 * 传递一个serviceId 和 一个结束的日期
-			 * 根据这个商品的周  获取下一张订单的周
-			 * 加上这些天数获得新的订单的开始时间和结束时间
-			 * 查看数据库是否存在 ，存在则不派生
-			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
-			 */
-			TService product = productService.getProductById(service.getId());
-			String date = "20190312";
-			String startDateTime = date + service.getStartTimeS();
-			String endDateTime = date + service.getEndTimeS();
-			//报名人满的订单所在的周
-			Integer weekDay = DateUtil.getWeekDay(startDateTime);
-			int nextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, weekDay);
-			int addDays = (nextWeekDay + 7 - weekDay) % 7;
-			if (addDays == 0) {
-				addDays = 7;
-			}
-			Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
-			Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
-			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-			if (count == 0) { //没有这张订单，需要派生
-
-			} else { // 已经存在，不进行派生
-
-			}
+			//调用重新上架的逻辑
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
-			//报名派生  判断是否已经存在，已经存在，则停止派生
-			/*
-			 * 传递一个serviceId 和 一个订单的日期
-			 * 查看数据库是否存在 ，存在则不派生
-			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，提示无法生成，时间超时
-			 */
-			TService product = productService.getProductById(service.getId());
-			//TODO 报名派生的日期
-			String startDate = "20190312";
-			String startDateTime = startDate + service.getStartTimeS();
-			String endDateTime = startDate + service.getEndTimeS();
-			Long startDateTimeMill = DateUtil.parse(startDateTime);
-			Long endDateTimeMill = DateUtil.parse(endDateTime);
-			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-			if (count == 0) { //没有这张订单，需要派生
-
-			} else { // 已经存在，不进行派生
-
-			}
-
-		} else {  //报名人满后派生
-			/*
-			 * 传递一个serviceId 和 一个结束的日期
-			 * 根据这个商品的周  获取下一张订单的周
-			 * 加上这些天数获得新的订单的开始时间和结束时间
-			 * 查看数据库是否存在 ，存在则不派生
-			 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
-			 */
-			TService product = productService.getProductById(service.getId());
-			String date = "20190312";
-			String startDateTime = date + service.getStartTimeS();
-			String endDateTime = date + service.getEndTimeS();
-			//报名人满的订单所在的周
-			Integer weekDay = DateUtil.getWeekDay(startDateTime);
-			int nextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, weekDay);
-			int addDays = (nextWeekDay + 7 - weekDay) % 7;
-			if (addDays == 0) {
-				addDays = 7;
-			}
-			Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
-			Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
-			Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-			if (count == 0) { //没有这张订单，需要派生
-
-			} else { // 已经存在，不进行派生
-
-			}
+			return produceOrderByEnroll(service, date);
+		} else {
+			//报名人满后派生
+			return produceOrderByEnough(weekDayNumberArray, service, date, order);
 		}
-		return 0;
+		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
+	/**
+	 * 报名生成订单
+	 * @param service 商品
+	 * @param enrollDate 报名的日期
+	 * @return
+	 */
+	private Integer produceOrderByEnroll(TService service, String enrollDate) {
+		//报名派生  判断是否已经存在，已经存在，则停止派生
+		/*
+		 * 传递一个serviceId 和 一个订单的日期
+		 * 查看数据库是否存在 ，存在则不派生
+		 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作
+		 */
+		TService product = productService.getProductById(service.getId());
+		//TODO 报名派生的日期
+//		String startDate = "20190312";
+		String startDateTime = enrollDate + product.getStartTimeS();
+		String endDateTime = enrollDate + product.getEndTimeS();
+		Long startDateTimeMill = DateUtil.parse(startDateTime);
+		Long endDateTimeMill = DateUtil.parse(endDateTime);
+		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (count != 0) { //订单已存在
+			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+		}
+		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
+		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
+		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
+		}
+		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+	}
+
+	/**
+	 * 人选满了之后派生订单
+	 * @param weekDayNumberArray 商品周期的星期数组
+	 * @param service 要派生订单的商品
+	 * @param date 选满人的订单日期
+	 * @param order 要派生的订单
+	 * @return code码
+	 */
+	private Integer produceOrderByEnough(int[] weekDayNumberArray, TService service, String date, TOrder order) {
+		/*
+		 * 传递一个serviceId 和 一个结束的日期
+		 * 根据这个商品的周  获取下一张订单的周
+		 * 加上这些天数获得新的订单的开始时间和结束时间
+		 * 查看数据库是否存在 ，存在则不派生
+		 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
+		 */
+		date = "20190312";
+		String startDateTime = date + service.getStartTimeS();
+		String endDateTime = date + service.getEndTimeS();
+		//报名人满的订单所在的周
+		Integer weekDay = DateUtil.getWeekDay(startDateTime);
+		int nextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, weekDay);
+		int addDays = (nextWeekDay + 7 - weekDay) % 7;
+		if (addDays == 0) {
+			addDays = 7;
+		}
+		Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
+		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
+		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (count != 0) { //有这张订单，不需要派生
+			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+		}
+		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
+		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
+		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
+		}
+		order.setStartTime(startDateTimeMill);
+		order.setEndTime(endDateTimeMill);
+		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+
+	}
+
+	/**
+	 * 上架派生订单（可与发布派生订单合用）
+	 * @param service
+	 * @param order
+	 * @param weekDayNumberArray
+	 * @return
+	 */
 	private Integer produceOrderByUpper(TService service,TOrder order, int[] weekDayNumberArray) {
 		/*
 		 * 重新上架，先找上一条已完成的订单，
@@ -501,14 +561,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
 			}
 		}
-		return 0;
+		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
 	/**
 	 * 发布派生订单
-	 * @param service
-	 * @param order
-	 * @param weekDayNumberArray
+	 * @param service 要派生订单的商品
+	 * @param order 派生的订单
+	 * @param weekDayNumberArray 商品重复周期的星期数组
 	 * @return
 	 */
 	private Integer produceOrderByPublish(TService service, TOrder order, int[] weekDayNumberArray) {
@@ -605,4 +665,32 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 		}
 	}
+	/**
+	 * 功能描述: 查看用户时间币是否足够
+	 * @author 马晓晨
+	 * @date 2019/3/9 21:43
+	 * @param user
+	 * @param service
+	 * @return
+	 */
+	private boolean checkEnoughTimeCoin(TUser user, TService service) {
+		if (service.getType().equals(ProductEnum.TYPE_SERVICE.getValue())) {
+			return true;
+		}
+		if (service.getCollectType().equals(ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue())) {
+			return true;
+		}
+		// 求助发布的单价
+		Long collectTime = service.getCollectTime();
+		// 求助需要的人员数量
+		Integer servicePersonnel = service.getServicePersonnel();
+		// 该求助需要的时间币
+		long seekHelpPrice = collectTime * servicePersonnel;
+		// 检测用户账户是否足够发布该求助
+		if (user.getSurplusTime() + user.getCreditLimit() - user.getFreezeTime() < seekHelpPrice) {
+			return false;
+		}
+		return true;
+	}
+
 }

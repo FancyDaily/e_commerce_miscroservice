@@ -3,7 +3,9 @@ package com.e_commerce.miscroservice.product.service.impl;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
@@ -43,7 +45,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param
 	 * @return
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Throwable.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
 		user = userService.getUserById(68813260748488704L);
@@ -178,7 +180,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Override
 	public void lowerFrame(TUser user, Long productId) {
 		user = userService.getUserById(68813260748488704L);
-		logger.error("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
+		logger.info("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
 			tService.setStatus(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
@@ -187,7 +189,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			tService.setUpdateTime(System.currentTimeMillis());
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
-			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
+			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("下架失败");
@@ -207,7 +209,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			tService.setUpdateTime(System.currentTimeMillis());
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
-			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_DELETE.getValue());
+			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_DELETE.getValue());
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("删除失败");
@@ -228,7 +230,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			tService.setUpdateTime(System.currentTimeMillis());
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
-			orderService.SynOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
+			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("重新上架失败");
@@ -285,6 +287,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return productDao.selectByPrimaryKey(serviceId);
 	}
 
+	@Override
+	@Transactional(rollbackFor = Throwable.class)
+	public void autoLowerFrameService(TService service) {
+		productDao.updateByPrimaryKeySelective(service);
+		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务
@@ -337,6 +346,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe != null && listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		MsgResult msgResult = null;
+		//派生出第一张订单
+		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		if (!msgResult.getCode().equals("200")) {
+			throw new MessageException("派生订单失败");
+		}
 	}
 
 	/**
@@ -382,10 +397,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		//TODO 调用订单模块 生成订单
-		if (!orderService.produceOrder(service)) {
-			logger.error("调用订单模块失败>>>>>>");
-			throw new MessageException("发布超时，请重新发布");
+		MsgResult msgResult = null;
+		//派生出第一张订单
+		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		if (!msgResult.getCode().equals("200")) {
+			throw new MessageException("派生订单失败");
 		}
 		// 增加成长值  TODO  调用user模块
 //		TUser addGrowthValue = growthValueService.addGrowthValue(user,
@@ -445,17 +461,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		MsgResult msgResult = null;
 		//派生出第一张订单
-		boolean isSuccess = orderService.produceOrder(service);
-		if (!isSuccess) {
-			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
-			throw new MessageException("发布失败，请重新尝试");
-		}
-		// 3、扣除用户时间币，生成交易流水
-		isSuccess = userService.freezeTimeCoin(user.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
-		if (!isSuccess) {
-			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
-			throw new MessageException("冻结用户时间失败，请重新尝试");
+		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		if (!msgResult.getCode().equals("200")) {
+			throw new MessageException("派生订单失败");
 		}
 		// TODO 使用用户模块
 		// 增加成长值 刷新缓冲
@@ -520,6 +530,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		MsgResult msgResult = null;
+		//派生出第一张订单
+		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		if (!msgResult.getCode().equals("200")) {
+			throw new MessageException("派生订单失败");
+		}
 	}
 
 	/**
@@ -548,16 +564,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		MsgResult msgResult = null;
 		//派生出第一张订单
-		boolean isSuccess = orderService.produceOrder(service);
-		if (!isSuccess) {
-			logger.error("调用订单模块派生第一张订单时发生错误>>>>>>");
-			throw new MessageException("发布失败，请重新尝试");
-		}
-		isSuccess = userService.freezeTimeCoin(user.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
-		if (!isSuccess) {
-			logger.error("调用用户模块的冻结时间币方法错误>>>>>>");
-			throw new MessageException("冻结用户时间失败，请重新尝试");
+		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		if (!msgResult.getCode().equals("200")) {
+			throw new MessageException("派生订单失败");
 		}
 	}
 

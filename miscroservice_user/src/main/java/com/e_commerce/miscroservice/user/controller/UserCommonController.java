@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
@@ -46,14 +47,19 @@ public class UserCommonController {
      * @param serviceId 商品ID
      * @param serviceName 商品名称
      */
-    public boolean freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
+    public MsgResult freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
+        MsgResult result = new MsgResult();
         try {
             userService.freezeTimeCoin(userId, freeTime, serviceId, serviceName);
-            return true;
+            result.setCode("200");
+            result.setMessage("冻结金额成功");
+            return result;
         } catch (Exception e) {
             logger.error(e.getMessage());
+            result.setCode("500");
+            result.setMessage("冻结金额失败");
+            return result;
         }
-        return false;
     }
 
     /**
