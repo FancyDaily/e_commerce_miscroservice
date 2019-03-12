@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
+import org.redisson.api.annotation.REntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/enroll")
+    @RequestMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -74,7 +75,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/removeEnroll")
+    @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -124,7 +125,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/userList")
+    @RequestMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -162,7 +163,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/chooseUser")
+    @RequestMapping("/chooseUser")
     public Object chooseUser(Long orderId, Long nowUserId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
@@ -202,7 +203,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/unChooseUser")
+    @RequestMapping("/unChooseUser")
     public Object unChooseUser(Long orderId, Long nowUserId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");

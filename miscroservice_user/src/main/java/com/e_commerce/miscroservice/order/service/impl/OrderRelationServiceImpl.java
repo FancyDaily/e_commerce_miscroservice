@@ -14,6 +14,8 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -101,6 +103,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
         }
         order.setEnrollNum(order.getEnrollNum() + 1);
         orderDao.updateByPrimaryKey(order);
+
         //TODO 报名的通知（第一个报名的，或者第一个参与的（就看刘维怎么定，一个人报了取消又报了是不是还通知））
         return serviceId;
     }
@@ -662,6 +665,7 @@ public class OrderRelationServiceImpl implements OrderRelationService {
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
             orderRelationship.setUpdateUser(nowUser.getId());
             orderRelationship.setUpdateUserName(nowUser.getName());
+       
             orderRelationshipDao.updateByPrimaryKey(orderRelationship);
         } else {
             orderRelationship=new TOrderRelationship();
