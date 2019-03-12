@@ -29,6 +29,15 @@ public class ProductCommonController extends BaseController{
 	}
 
 	/**
+	 * 根据商品ID获取商品
+	 * @param serviceId 商品ID
+	 * @return 商品
+	 */
+	public TService getProductById(Long serviceId) {
+		return productService.getProductById(serviceId);
+	}
+
+	/**
 	 * 获取商品封面图
 	 * @param serviceIds  需要获取封面图的商品ID
 	 * @return key:商品ID  value:封面图

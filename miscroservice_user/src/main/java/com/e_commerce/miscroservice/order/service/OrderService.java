@@ -78,4 +78,12 @@ public interface OrderService {
 	 * @param service
 	 */
 	void produceOrder(TService service);
+
+	/**
+	 * 我选人的详情页面
+	 * @param orderId 订单ID
+	 * @param user 用户
+	 * @return 选人列表详情
+	 */
+	DetailChooseReturnView chooseDetail(Long orderId, TUser user);
 }

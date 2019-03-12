@@ -7,7 +7,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.util.colligate.JsonUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -164,20 +163,18 @@ public class ServiceController extends BaseController{
 	}
 
 	/**
-	 *
-	 * 功能描述:发布服务
-	 * 作者:马晓晨
-	 * 创建时间:2018年11月20日 下午5:44:44
+	 * 发布服务
+	 * @param request
 	 * @return
 	 */
 	@PostMapping("/submit")
-	public Object submitService(HttpServletRequest request) {
+	public Object submitService(HttpServletRequest request, String token, ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
-		String paramString = (String)request.getAttribute("paramString");
-		request.removeAttribute("paramString");
-		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
-		String token = param.getToken();
+//		String paramString = (String)request.getAttribute("paramString");
+//		request.removeAttribute("paramString");
+//		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
+//		String token = param.getToken();
 		TUser user = (TUser) redisUtil.get(token);
 		try {
 			productService.submitService(user, param, token);

@@ -165,7 +165,7 @@ public class OrderDaoImpl implements OrderDao {
     public Long countProductOrder(Long serviceId, Long startTime, Long endTime) {
         return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
                 .eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
-                .eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime));
+                .eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime).eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()));
     }
 
     /**
