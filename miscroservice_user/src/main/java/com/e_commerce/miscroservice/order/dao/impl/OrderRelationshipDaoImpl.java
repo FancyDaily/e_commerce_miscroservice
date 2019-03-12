@@ -111,7 +111,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 new MybatisSqlWhereBuild(TOrderRelationship.class)
                         .groupBefore().eq(TOrderRelationship::getFromUserId, userId).or()
                         .eq(TOrderRelationship::getReceiptUserId, userId).groupAfter()
-                        .eq(TOrderRelationship::getOrderId, orderId));
+                        .eq(TOrderRelationship::getOrderId, orderId)
+        .eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
         return orderRelationship;
     }
 
@@ -212,7 +213,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         TOrderRelationship orderRelationship = new TOrderRelationship();
         orderRelationship.setId(orderRelationshipId);
         orderRelationship.setServiceCollectionType(collectStatus);
-        return MybatisOperaterUtil.getInstance().update(orderRelationship, new MybatisSqlWhereBuild(TOrderRelationship.class));
+        return MybatisOperaterUtil.getInstance().update(orderRelationship, new MybatisSqlWhereBuild(TOrderRelationship.class)
+        .eq(TOrderRelationship::getId,orderRelationshipId));
     }
 
     /**

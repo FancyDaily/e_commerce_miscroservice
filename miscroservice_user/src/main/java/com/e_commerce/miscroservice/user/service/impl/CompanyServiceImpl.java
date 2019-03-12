@@ -68,18 +68,19 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         //判断是否为组织的创建者
+        Long companyUserId = null;
         user = userDao.selectByPrimaryKey(userId);
         if(AppConstant.AUTH_TYPE_CORP.equals(user.getAuthenticationType())) {
             //寻找对应的组织账号
             TUser companyUser = userDao.queryDoppelganger(user);
             if(companyUser!=null) {
-                userId = companyUser.getId();
+                companyUserId = companyUser.getId();
             }
         }
 
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
-        List<TUserCompany> select = userCompanyDao.queryByUserIdDESC(userId);
+        List<TUserCompany> select = userCompanyDao.queryByUserIdsDESC(userId,companyUserId);
 
         //numberCountMap
         Map<Long,Integer> numberCountMap = new HashMap<>();
@@ -120,6 +121,10 @@ public class CompanyServiceImpl implements CompanyService {
         //只有该单位的负责人才有发布权限。(后续可能会加入授权功能，与管理者等共享发布权限) => 2019.1.30 组织版上线后，只有组织账号才有发布权限
 
         // 判空
+        if (companyId == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"组织编号不能为空!");
+        }
+
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -194,6 +199,10 @@ public class CompanyServiceImpl implements CompanyService {
             idList.add(orderRelationship.getOrderId());
         }
 
+        if(idList.isEmpty()) {
+            return new QueryResult<StrServiceView>();
+        }
+
         // 查询单位申请人(OLD) => 直接查询组织账号
         Long masterId = null;
 
@@ -207,7 +216,7 @@ public class CompanyServiceImpl implements CompanyService {
         // PageHelper
         Page<Object> startPage = PageHelper.startPage(0, pageSize);
 
-        List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP, masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
+        List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP.getValue(), masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
 
         //String化
         List<StrServiceView> views = new ArrayList<StrServiceView>();
@@ -223,6 +232,17 @@ public class CompanyServiceImpl implements CompanyService {
         queryResult.setTotalCount(startPage.getTotal());
 
         return queryResult;
+    }
+
+
+    /**
+     * 查询认证信息
+     * @param id
+     * @return
+     */
+    @Override
+    public TCompany companyInfo(Long id) {
+        return companyDao.selectLatestByUserId(id); //查找最新的一条认证记录
     }
 
 

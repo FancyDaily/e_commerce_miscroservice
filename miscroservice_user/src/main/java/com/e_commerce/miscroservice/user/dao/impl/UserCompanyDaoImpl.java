@@ -48,4 +48,17 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
         .eq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_CREATER)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    /**
+     * 根据多个用户id时间倒序查找UserCompany记录
+     * @param userIds
+     * @return
+     */
+    @Override
+    public List<TUserCompany> queryByUserIdsDESC(Long... userIds) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+                .in(TUserCompany::getUserId,userIds)
+                .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserCompany::getCreateTime)));
+    }
 }

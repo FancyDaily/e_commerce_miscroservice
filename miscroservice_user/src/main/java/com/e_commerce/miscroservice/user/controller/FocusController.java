@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 关注Controller
+ * 关注模块
  * 关注Controller层
  */
 @RestController
@@ -77,7 +77,7 @@ public class FocusController extends BaseController {
      *             {
      *                 "idString": "",
      *                 "age": "",
-     *                 "isAtten": 0,
+     *                 "isAtten": 0,    //是否互关 0不是互关 1互关
      *                 "authStatus": 1,
      *                 "vxId": "无",
      *                 "masterStatus": "",
@@ -88,9 +88,9 @@ public class FocusController extends BaseController {
      *                 "timeStamp": "1545979786284",
      *                 "id": 73714097408966656,
      *                 "userAccount": "57210364",
-     *                 "name": "Lilian",
+     *                 "name": "Lilian",    //姓名
      *                 "jurisdiction": 0,
-     *                 "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1545633406569112.png",
+     *                 "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1545633406569112.png",    //头像
      *                 "userPicturePath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_background.png",
      *                 "vxOpenId": "",
      *                 "occupation": "无业游民",
@@ -179,7 +179,7 @@ public class FocusController extends BaseController {
      *             {
      *                 "idString": "",
      *                 "age": 25,
-     *                 "isAtten": 0,
+     *                 "isAtten": 0,   //是否互关， 0否 1互关
      *                 "authStatus": 1,
      *                 "vxId": "无",
      *                 "masterStatus": "",
@@ -190,9 +190,9 @@ public class FocusController extends BaseController {
      *                 "timeStamp": "1544328132064",
      *                 "id": 68813258559062016,
      *                 "userAccount": "",
-     *                 "name": "刘维",
+     *                 "name": "刘维",    //姓名
      *                 "jurisdiction": 0,
-     *                 "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544189745461122.png",
+     *                 "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544189745461122.png",    //头像
      *                 "userPicturePath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544938083123131.png",
      *                 "vxOpenId": "oMgmu4qydMEoA_2s0X5txM_HeZcc",
      *                 "occupation": "",

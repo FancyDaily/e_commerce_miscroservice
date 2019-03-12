@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.commons.entity.application;
 import java.io.Serializable;
 
 public class TUserTask implements Serializable {
-    private String id;
+    private Long id;
 
     private Long userId;
 
@@ -12,6 +12,8 @@ public class TUserTask implements Serializable {
     private String targetId;
 
     private Integer targetNum;
+
+    private Integer type;
 
     private Long createUser;
 
@@ -29,12 +31,12 @@ public class TUserTask implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getUserId() {
@@ -67,6 +69,14 @@ public class TUserTask implements Serializable {
 
     public void setTargetNum(Integer targetNum) {
         this.targetNum = targetNum;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public Long getCreateUser() {

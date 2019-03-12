@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
+import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
@@ -19,7 +20,6 @@ import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -53,6 +53,15 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private BonusPackageDao bonusPackageDao;
+
+    @Autowired
+    private UserAuthDao userAuthDao;
+
+    @Autowired
+    private CompanyDao companyDao;
+
+    @Autowired
+    private UserTaskDao userTaskDao;
 
     @Autowired
     private RedisUtil redisUtil;
@@ -413,23 +422,23 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 收藏/取消收藏
      *
      * @param user
-     * @param orderRelationshipId
+     * @param orderId
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-    public void collect(TUser user, Long orderRelationshipId) {
-        if(orderRelationshipId==null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单关系Id不能为空!");
+    public void collect(TUser user, Long orderId) {
+        if (orderId == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单关系Id不能为空!");
         }
 
-        TOrderRelationship orderRelationship = orderService.selectOrderById(orderRelationshipId);
-        if(orderRelationship==null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单不存在!");
+        TOrderRelationship orderRelationship = orderService.selectOrdertionshipByuserIdAndOrderId(user.getId(), orderId);
+        if (orderRelationship == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
         }
         if (OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType() != orderRelationship.getServiceCollectionType()) {    //当前业务为收藏
-            orderService.updateCollectStatus(orderRelationshipId, OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+            orderService.updateCollectStatus(orderRelationship.getId(), OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
         } else { //当前业务为取消收藏
-            orderService.updateCollectStatus(orderRelationshipId, OrderRelationshipEnum.SERVICE_COLLECTION_IS_CANCEL.getType());
+            orderService.updateCollectStatus(orderRelationship.getId(), OrderRelationshipEnum.SERVICE_COLLECTION_IS_CANCEL.getType());
         }
     }
 
@@ -589,7 +598,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillDelete(Long id) {
-        if(id==null) {
+        if (id == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能id不能为空");
         }
         userSkillDao.delete(id);
@@ -605,16 +614,16 @@ public class UserServiceImpl extends BaseService implements UserService {
         String companyNames = view.getCompanyNames();
         StringBuilder stringBuilder = new StringBuilder();
         int count = 0;
-        for(String companyName:companyNames.split(",")) {
-            if(count==2) {
+        for (String companyName : companyNames.split(",")) {
+            if (count == 2) {
                 break;
             }
             stringBuilder.append(companyName).append(",");
-            count ++;
+            count++;
         }
         String string = stringBuilder.toString();
-        if(string.endsWith(",")) {
-            string = string.substring(0,string.length()-1);
+        if (string.endsWith(",")) {
+            string = string.substring(0, string.length() - 1);
         }
         view.setLimitedCompanyNames(string);
         return view;
@@ -894,7 +903,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             idList.add(orderRelationship.getOrderId());
         }
 
-        if(idList.isEmpty()) {
+        if (idList.isEmpty()) {
             return new QueryResult<>();
         }
 
@@ -910,14 +919,475 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 用户认证信息更新(实名认证)
+     *
      * @param user
      * @param cardId
      * @param cardName
      */
     @Override
-    public void auth(TUser user, String cardId, String cardName) {
+    public void auth(String token, TUser user, String cardId, String cardName) {
+        // TODO 与数据库同步
+        user = userDao.selectByPrimaryKey(user.getId());
 
+        // 判断是否以及提交过实名或者以及实名过
+        if (AppConstant.AUTH_STATUS_YES.equals(user.getAuthenticationStatus())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已经实名过！");
+        }
+
+        // 判空
+        if (cardId == null || cardName == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必要身份证参数不全！");
+        }
+
+        // 判断是否已经有记录
+        List<TUserAuth> auths = userAuthDao.findAllByCardId(cardId);
+        if (!auths.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该身份证已被使用！");
+        }
+
+        // insert
+        TUserAuth userAuth = new TUserAuth();
+        userAuth.setId(String.valueOf(idGenerator.nextId()));
+        // creater
+        Long timeStamp = System.currentTimeMillis();
+        userAuth.setUserId(user.getId());
+        userAuth.setCreateTime(timeStamp);
+        userAuth.setCreateUser(user.getId());
+        userAuth.setCreateUserName(user.getName());
+        userAuth.setUpdateTime(timeStamp);
+        userAuth.setUpdateUser(user.getId());
+        userAuth.setUpdateUserName(user.getName());
+        userAuth.setIsValid(AppConstant.IS_VALID_YES);
+        userAuthDao.insert(userAuth);
+
+        // 认证状态
+        user.setAuthenticationStatus(AppConstant.AUTH_STATUS_YES);
+        user.setAuthenticationType(AppConstant.AUTH_TYPE_PERSON);
+
+        /*
+         * // 性别 user.setSex(userAuth.getSex());
+         */
+
+        // 生日
+//        user.setBirthday(userAuth.getBirthday());
+
+        // updater
+        user.setUpdateTime(timeStamp);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+
+        // 插入系统消息
+//        insertSysMsg(user.getId(), SysMsgEnum.AUTH.getTitle(), SysMsgEnum.AUTH.getContent()); //TODO 插入系统消息
+
+        // 实名认证奖励(插入账单流水记录)
+//        insertReward(user, PaymentEnum.PAYMENT_TYPE_CERT_BONUS);  //TODO 插入实名认证奖励(插入账单流水记录)
+
+        // 实名认证任务完成(插入任务记录)
+//        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
+//                AppConstant.TARGET_ID_TASK_AUTH);
+
+        userDao.updateByPrimaryKey(user);
+
+        user = userDao.selectByPrimaryKey(user.getId());
+
+//        flushRedisUser(token, user);  //刷新缓存
     }
+
+    /**
+     * 单位认证信息更新
+     *
+     * @param user
+     * @param company
+     */
+    @Override
+    public void companyAuth(TUser user, TCompany company) {
+        if (!ifAlreadyCert(user.getId())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户未实名！");
+        }
+
+        if (company.getName() == null || company.getType() == null || company.getProvince() == null
+                || company.getCity() == null || company.getCounty() == null || company.getDepict() == null
+                || company.getContactsName() == null || company.getContactsTel() == null
+                || company.getContactsCardId() == null || company.getUrl() == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "单位信息不能为空!");
+        }
+        // 单位是否已认证过
+        // ，如果有，则提示联系管理员加入（返回单位已存在，更新失败）。
+        if (ifAuthCompany(user, company)) {
+            // 插入或更新一条待审核的企业记录
+            insertOrUpdateCompany(user, company);
+        }
+    }
+
+    private boolean ifAuthCompany(TUser user, TCompany company) {
+        boolean result = false;
+//		String code = company.getCode();
+        String name = company.getName();
+        if (StringUtil.isEmpty(name)) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "公司名称不能为空");
+        }
+
+        List<TCompany> companies = companyDao.selectExistUserCompany(name, user.getId(), AppConstant.CORP_CERT_STATUS_YES);
+        if (companies != null && companies.size() > 0) {
+            throw new MessageException("公司已存在!请联系管理员邀请加入!");
+        }
+        result = true;
+        return result;
+    }
+
+    private void insertOrUpdateCompany(TUser user, TCompany company) {
+        Long id = company.getId();
+
+        // 查询是否为审核中或已完成
+        List<TCompany> companies = companyDao.selectAllByUserId(user.getId());
+
+        if (companies != null && !companies.isEmpty()) {
+            for (TCompany type : companies) {
+                if (AppConstant.CORP_CERT_STATUS_NOT_YET.equals(type.getStatus())) {
+                    throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "你已经有审核中的认证，请耐心等待！");
+                }
+                if (AppConstant.CORP_CERT_STATUS_YES.equals(type.getStatus())) {
+                    throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "每个人只能审核一个组织认证！");
+                }
+            }
+
+        }
+
+        // 修改
+        if (id != null) {
+            company.setStatus(AppConstant.CORP_CERT_STATUS_NOT_YET);
+            // updater
+            company.setUpdateTime(System.currentTimeMillis());
+            company.setUpdateUser(user.getId());
+            company.setUpdateUserName(user.getName());
+            companyDao.update(company); // TODO ifSelective
+            return;
+        }
+
+        // 创建公司
+        company.setId(idGenerator.nextId());
+        company.setUserId(user.getId());
+
+        // 默认待审核
+        company.setStatus(AppConstant.CORP_CERT_STATUS_NOT_YET);
+
+        // creater & updater
+        company.setCreateTime(System.currentTimeMillis());
+        company.setCreateUser(user.getId());
+        company.setCreateUserName(user.getName());
+        company.setUpdateTime(System.currentTimeMillis());
+        company.setUpdateUser(user.getId());
+        company.setUpdateUserName(user.getName());
+
+        // valid
+        company.setIsValid(AppConstant.IS_VALID_YES);
+
+        // insert
+        companyDao.insert(company);
+    }
+
+    /**
+     * 功能描述: 是否已经实名
+     * 作者: 许方毅
+     * 创建时间: 2018年11月2日 下午4:28:36
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public boolean ifAlreadyCert(Long id) {
+        boolean result = false;
+        if (StringUtil.equals(String.valueOf(AppConstant.AUTH_STATUS_YES), getCertStatus(id))) {
+            result = true;
+        }
+        return result;
+    }
+
+    /**
+     * 功能描述: 获取用户实名状态(默认为个人)
+     * 作者: 许方毅
+     * 创建时间: 2018年10月29日 下午2:58:42
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public String getCertStatus(Long id) {
+        TUser user = userDao.selectByPrimaryKey(id);
+        if (user != null) {
+            return String.valueOf(user.getAuthenticationStatus());
+        }
+        return String.valueOf(AppConstant.DEFAULT_AUTH_STATUS);
+    }
+
+    /**
+     * 签到信息查询
+     *
+     * @param user
+     * @param ymString
+     * @return
+     */
+    @Override
+    public SignUpInfoView signUpInfo(TUser user, String ymString) {
+        SignUpInfoView infoView = new SignUpInfoView();
+        // 连续天数
+        Integer bonus7 = null;
+        long count = 0l;
+        boolean state = false;
+
+        String thisYmString = DateUtil.getThisYmString().substring(0, 7);
+
+        if (ymString == null || ymString.isEmpty()) {
+            ymString = thisYmString;
+        }
+
+        List<TUserTask> userTasks = new ArrayList<>();
+
+        // 签到日历
+        if (ymString != null && !ymString.equals(thisYmString)) { // 若不为当月
+            Map<String, Object> betweenMap = DateUtil.ym2BetweenStamp(ymString);
+            Long beginTimeStamp = Long.valueOf((String) betweenMap.get("begin")); // TODO
+            Long endTimeStamp = Long.valueOf((String) betweenMap.get("end"));
+            userTasks = userTaskDao.queryOnesSignUpBetweenTime(user.getId(), beginTimeStamp, endTimeStamp);
+        }
+
+        // 如果为当月，减少查询次数
+        if (ymString == null || ymString.equals(thisYmString)) {
+            // 获取时间戳区间
+            Map<String, Object> thisBetweenMap = DateUtil.ym2BetweenStamp(thisYmString);
+            Long thisBeginStamp = Long.valueOf((String) thisBetweenMap.get("begin"));
+            Long thisEndStamp = Long.valueOf((String) thisBetweenMap.get("end"));
+            // 基础签到信息(连续天数，签到状态)
+            userTasks = userTaskDao.queryOnessignUpBetweenTimeDesc(user.getId(), thisBeginStamp, thisEndStamp);
+
+            if (!userTasks.isEmpty()) {
+                TUserTask task = userTasks.get(0);
+                if (DateUtil.isToday(task.getCreateTime())) {
+                    state = true;
+                }
+            }
+        }
+        List<DateTypeDictionaryView> resultList = new ArrayList<>();
+        // 处理成日期格式
+        for (TUserTask signUPInfo : userTasks) {
+            DateTypeDictionaryView view = BeanUtil.copy(signUPInfo, DateTypeDictionaryView.class);
+            view.setCreateDate(DateUtil.timeStamp2Date(view.getCreateTime()));
+            view.setUpdateDate(DateUtil.timeStamp2Date(view.getUpdateTime()));
+            view.setIdString(String.valueOf(view.getId()));
+            resultList.add(view);
+        }
+
+        // position
+        int position = 1;
+
+        // 查询最后签到记录
+        List<TUserTask> theUserTasks = userTaskDao.findlatestSignUps(user.getId());
+
+        if (!theUserTasks.isEmpty()) {
+            // 获取最后一次的签到记录
+            TUserTask lastSignUp = theUserTasks.get(0);
+            Long timeStamp = lastSignUp.getCreateTime();
+            count = lastSignUp.getTargetNum();
+            if (DateUtil.isToday(timeStamp)) { // 若为今日
+                position = Integer.parseInt(String.valueOf(count));
+                // 如果为第七天
+                if (count == 7) {
+                    bonus7 = Integer.valueOf(lastSignUp.getValue());
+                }
+            } else if (DateUtil.oneMillesVsAnother(System.currentTimeMillis(), timeStamp)) { // 若为昨日
+                if (count < 7) {
+                    position = Integer.parseInt(String.valueOf(count)) + 1;
+                }
+            } else { // 断签
+                count = 0;
+            }
+        }
+
+        // 周期内日期字符数组
+        String[] listWithinSeven = DateUtil.getDateListWithinSeven(position);
+
+        // 装载返回信息
+        infoView.setBonus7(bonus7);
+        infoView.setCount(count);
+        infoView.setState(state);
+        infoView.setSignUpList(resultList);
+        infoView.setCycleArray(listWithinSeven);
+
+        return infoView;
+    }
+
+    /**
+     * 每日签到
+     *
+     * @param token
+     * @param user
+     * @return
+     */
+    @Override
+    public long signUp(String token, TUser user) {
+        // 判空
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
+        }
+
+        // id
+        Long id = user.getId();
+
+        // 判空
+        if (id == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
+        }
+
+        // TODO 从数据库获得即时的用户
+        user = userDao.selectByPrimaryKey(id);
+
+        // 从未签到标记
+        boolean flag = false;
+
+        // 查询签到相关记录
+        List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
+
+        TUserTask userTask = null;
+        if (tasks.isEmpty()) {
+            flag = true;
+        } else {
+            userTask = tasks.get(0); // 最后签到实体类
+        }
+
+        long reward = AppConstant.SIGN_UP_BONUS;
+        Integer targetNum = 1;
+        long special = 3;
+        if (!flag) {
+            // 查询连续签到天数与最后签到日
+            String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
+
+            // 计数器
+            int count = 0;
+
+            for (int i = 0; i < tasks.size(); i++) {
+                count++;
+                TUserTask thisDic = tasks.get(i);
+                Long thisTimeStamp = thisDic.getCreateTime();
+                TUserTask nextDic;
+                Long nextTimeStamp = 0l;
+                if (i != tasks.size() - 1) {
+                    nextDic = tasks.get(i + 1);
+                    nextTimeStamp = nextDic.getCreateTime();
+                }
+                if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
+                    break;
+                }
+            }
+
+            if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
+                count--;
+            }
+
+            targetNum = count % 7; // TODO 计算连续签到天数
+            // 最后签到日信息
+            String dayCountStr = String.valueOf(targetNum);
+
+            // 最后签到日为今天，提示 -> 请勿重复签到
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
+                throw new MessageException("请勿重复签到");
+            }
+
+            // 最后签到日为昨天
+            // -> 计数等于6，计数为7，给出特殊奖励
+            // -> 计数等于7，计数为0,给出普通奖励
+            // -> else，计数++，给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
+                // 处理计数
+                if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
+                    targetNum = 0;
+                } else {
+                    targetNum = targetNum + 1;
+                }
+
+                // 处理奖励
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
+                    // 特殊奖励
+                    special = new Random().nextInt(6) + 10; // 特殊奖励 //TODO
+                    reward = special;
+                }
+            }
+
+            // else,计数=1,给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
+                targetNum = 1;
+            }
+
+            userTask.setTargetNum(targetNum);
+            userTask.setId(idGenerator.nextId());
+            if (targetNum == 7) {
+                userTask.setValue(String.valueOf(special));
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            userTask.setCreateTime(currentTimeMillis);
+            userTask.setCreateUser(id);
+            userTask.setCreateUserName(user.getName());
+            userTask.setUpdateTime(currentTimeMillis);
+            userTask.setUpdateUser(id);
+            userTask.setUpdateUserName(user.getName());
+            userTask.setIsValid(AppConstant.IS_VALID_YES);
+            userTaskDao.insert(userTask);
+        }
+
+        // 从未签到
+        if (flag) {
+            // 插入一条新的记录
+            insertSignUpInfo(user);
+        }
+
+        // update & reward & growth
+//        reward(token, user, reward);  //TODO 完成奖励待添加
+
+        return reward;
+    }
+
+    /**
+     * 用户反馈
+     *
+     * @param token
+     * @param user
+     */
+    @Override
+    public void feedBack(String token, TUser user) {
+//        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
+    }
+
+    /**
+     * 功能描述: 插入一条签到记录(用户第一次签到)
+     * 作者: 许方毅
+     * 创建时间: 2018年11月12日 下午5:02:38
+     *
+     * @param user
+     */
+    private void insertSignUpInfo(TUser user) {
+        // id
+        Long id = user.getId();
+        // name
+        String name = user.getName();
+
+        //构建实体
+        TUserTask userTask = new TUserTask();
+        userTask.setId(snowflakeIdWorker.nextId());
+        userTask.setUserId(id);
+        userTask.setType(TaskEnum.TASK_SIGNUP.getType());
+        userTask.setTargetNum(1);
+        // creater & updater
+        long currentTimeMillis = System.currentTimeMillis();
+        userTask.setCreateTime(currentTimeMillis);
+        userTask.setCreateUser(id);
+        userTask.setCreateUserName(name);
+        userTask.setUpdateTime(currentTimeMillis);
+        userTask.setUpdateUser(id);
+        userTask.setUpdateUserName(name);
+        userTask.setIsValid(AppConstant.IS_VALID_YES);
+
+        userTaskDao.insert(userTask);
+    }
+
 
     /**
      * 刷勋缓存
@@ -995,5 +1465,4 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
     }
-
 }

@@ -1,14 +1,8 @@
 package com.e_commerce.miscroservice.user.service;
 
-import com.e_commerce.miscroservice.commons.entity.application.TBonusPackage;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
-import com.e_commerce.miscroservice.user.vo.UserFreezeView;
-import com.e_commerce.miscroservice.user.vo.UserPageView;
-import com.e_commerce.miscroservice.user.vo.UserSkillListView;
+import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,9 +171,44 @@ public interface UserService {
 
     /**
      * 用户认证信息更新(实名认证)
+     * @param token
      * @param user
      * @param cardId
      * @param cardName
      */
-    void auth(TUser user, String cardId, String cardName);
+    void auth(String token, TUser user, String cardId, String cardName);
+
+    /**
+     * 提交组织审核信息
+     * @param user
+     * @param company
+     */
+    void companyAuth(TUser user, TCompany company);
+
+    boolean ifAlreadyCert(Long id);
+
+    String getCertStatus(Long id);
+
+    /**
+     * 签到信息查询
+     * @param user
+     * @param ymString
+     * @return
+     */
+    SignUpInfoView signUpInfo(TUser user, String ymString);
+
+    /**
+     * 每日签到
+     * @param token
+     * @param user
+     * @return
+     */
+    long signUp(String token, TUser user);
+
+    /**
+     * 用户反馈
+     * @param token
+     * @param user
+     */
+    void feedBack(String token, TUser user);
 }
