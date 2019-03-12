@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.order.vo.*;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +24,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @param orderId 用户订单
 	 * @param token   当前用户token
-	 *
+	 *                <p>
 	 *                {
 	 *                "success": 是否成功,
 	 *                "msg": "成功失败的消息",
@@ -66,10 +67,9 @@ public class OrderController extends BaseController {
 	 *                ]
 	 *                }
 	 *                }
-	 *
 	 * @return
 	 */
-	@RequestMapping("/detailMineOrder")
+	@PostMapping("/detailMineOrder")
 	public Object detailMineOrder(Long orderId, String token) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -99,7 +99,7 @@ public class OrderController extends BaseController {
 	 * @param pageNum  分页页数
 	 * @param pageSize 每页数量
 	 * @param token    当前用户token
-	 *
+	 *                 <p>
 	 *                 {
 	 *                 "success": true,
 	 *                 "msg": "查询成功",
@@ -127,7 +127,6 @@ public class OrderController extends BaseController {
 	 *                 "totalCount": 2
 	 *                 }
 	 *                 }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/listMineOrder")
@@ -144,11 +143,6 @@ public class OrderController extends BaseController {
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
-		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
-			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("查询失败");
 		}
 		return result;
 	}
@@ -165,7 +159,7 @@ public class OrderController extends BaseController {
 	 * @param pageSize      每页数量
 	 * @param condition     查询条件
 	 * @param token         当前用户token
-	 *
+	 *                      <p>
 	 *                      {
 	 *                      "success": 是否成功,
 	 *                      "msg": 成功或失败的消息,
@@ -199,7 +193,6 @@ public class OrderController extends BaseController {
 	 *                      "totalCount": 总记录数
 	 *                      }
 	 *                      }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/list")
@@ -219,11 +212,6 @@ public class OrderController extends BaseController {
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
-		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
-			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("查询失败");
 		}
 		return result;
 	}
@@ -233,7 +221,7 @@ public class OrderController extends BaseController {
 	 *
 	 * @param orderId 订单ID
 	 * @param token   用户token
-	 *
+	 *                <p>
 	 *                {
 	 *                "success": 是否成功,
 	 *                "msg": "成功失败的消息",
@@ -270,7 +258,6 @@ public class OrderController extends BaseController {
 	 *                "serviceUserIdString": "68813260748488704"
 	 *                }
 	 *                }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/detail")
@@ -302,7 +289,7 @@ public class OrderController extends BaseController {
 	 * @param token    当前用户token
 	 * @param pageNum  分页页数
 	 * @param pageSize 每页数量
-	 *
+	 *                 <p>
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败的消息",
@@ -326,12 +313,11 @@ public class OrderController extends BaseController {
 	 *                 "porductCoverPic":封面图
 	 *                 }
 	 *                 ],
-	 *         			"totalCount": 总条数
+	 *                 "totalCount": 总条数
 	 *                 }
-	 *
 	 * @return
 	 */
-	@RequestMapping("/enrollList")
+	@PostMapping("/enrollList")
 	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
@@ -350,6 +336,69 @@ public class OrderController extends BaseController {
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取报名选人列表失败");
+		}
+		return result;
+	}
+
+	/**
+	 * 选人详情
+	 *
+	 * @param token   用户token
+	 * @param orderId 订单ID
+	 *                {
+	 *                "success": 是否成功,
+	 *                "errorCode": "",
+	 *                "msg": "获取报名列表成功",
+	 *                "data": {
+	 *                "order": {
+	 *                "nameAudioUrl": "音频地址",
+	 *                "serviceName": "名称",
+	 *                "servicePersonnel": 要求人数,
+	 *                "servicePlace": 平台 1、线上 2、线下,
+	 *                "labels": "hehe,haha",
+	 *                "type": 1,
+	 *                "status": 1,
+	 *                "source": 1,
+	 *                "serviceTypeId": 15000,
+	 *                "addressName": "地址",
+	 *                "longitude": "经度",
+	 *                "latitude": "纬度",
+	 *                "startTime": 开始时间,
+	 *                "endTime": 结束时间,
+	 *                "collectTime": 收取时长,
+	 *                "collectType": 收取分类 1、互助时  2、公益时,
+	 *                },
+	 *                "listUser": [  "报名者列表"
+	 *                {
+	 *                "id": 68813259653775360,
+	 *                "name": "左岸",
+	 *                "userHeadPortraitPath": 头像地址,
+	 *                "careStatus": 关注状态 1、显示关注 2、显示已关注,
+	 *                }
+	 *                ]
+	 *                }
+	 *                }
+	 * @return
+	 */
+	@PostMapping("/chooseDetail")
+	public Object chooseDetail(String token, Long orderId) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			DetailChooseReturnView data = orderService.chooseDetail(orderId, user);
+			result.setSuccess(true);
+			result.setData(data);
+			result.setMsg("获取详情成功");
+		} catch (MessageException e) {
+			logger.warn("获取详情失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败," + e.getMessage());
+		} catch (Exception e) {
+			logger.error("获取详情失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败");
 		}
 		return result;
 	}

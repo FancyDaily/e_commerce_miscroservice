@@ -85,4 +85,11 @@ public interface ProductService {
 	 * @return
 	 */
 	QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type);
+
+	/**
+	 * 根据商品ID获取商品
+	 * @param serviceId 商品ID
+	 * @return 商品
+	 */
+	TService getProductById(Long serviceId);
 }

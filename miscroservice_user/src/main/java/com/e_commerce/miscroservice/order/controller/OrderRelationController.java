@@ -5,19 +5,21 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
+import org.redisson.api.annotation.REntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 订单关系
+ * 订单模块
  *
  * 订单关系controller
  */
-//@RestController
+@RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
 
@@ -41,7 +43,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/enroll")
+    @RequestMapping("/enroll")
     public Object enroll(Long orderId, long userId, String date, Long serviceId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -73,7 +75,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/removeEnroll")
+    @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -107,23 +109,17 @@ public class OrderRelationController extends BaseController {
      *                  "msg": "查看成功",
      *                  "data": [
      *                  {
-     *                  "name": "刘维",
-     *                  "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544189745461122.png",
+     *                  "name": "刘维", 名字
+     *                  "userHeadPortraitPath": "https://timebank。。。.png",头像
      *                  "status": 1,
-     *                  "toStringId": "68813258559062016"
-     *                  },
-     *                  {
-     *                  "name": "左岸",
-     *                  "userHeadPortraitPath": "https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTI0PmHoNhhs1zvJdDYGT8ddTLkCXzLk6fO1mWiaYwFrBRaoh6wqicWVXoECbOC00khkXwzWhIjoGflg/132",
-     *                  "status": 1,
-     *                  "toStringId": "68813259653775360"
+     *                  "toStringId": "68813258559062016" 用户id
      *                  }
      *                  ]
      *                  }
      *
      * @return
      */
-    @PostMapping("/userList")
+    @RequestMapping("/userList")
     public Object userList(Long orderId, int type, Long nowUserId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -161,7 +157,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/chooseUser")
+    @RequestMapping("/chooseUser")
     public Object chooseUser(Long orderId, Long nowUserId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
@@ -193,7 +189,7 @@ public class OrderRelationController extends BaseController {
      * 拒绝用户
      * @param orderId 订单ID
      * @param nowUserId 当前用户ID
-     * @param userIds 被操作用户ID
+     * @param userIds 用户id（多人逗号分割）
      *
      *     "success": true,
      *     "msg": "拒绝成功",
@@ -201,7 +197,7 @@ public class OrderRelationController extends BaseController {
      *
      * @return
      */
-    @PostMapping("/unChooseUser")
+    @RequestMapping("/unChooseUser")
     public Object unChooseUser(Long orderId, Long nowUserId, String userIds) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
@@ -230,17 +226,16 @@ public class OrderRelationController extends BaseController {
     }
 
     /**
-     * 测试
+     * 支付
      *
-     * @param orderId sa
-     * @param userIds  ss
-     *
-     * "success": true,
-     *                "msg": "报名成功"
-     *
+     * @param orderId 订单编号
+     * @param nowUserId 当前用户id
+     * @param userIds 被支付用户id（多人逗号分割）
+     * @param payments 支付钱数（多人逗号分割）
+     * @return
      */
-    @RequestMapping("/test")
-    public Object notices(Long orderId, String userIds) {
+    @PostMapping("/pay")
+    public Object pay(Long orderId, Long nowUserId, String userIds , String payments) {
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -248,19 +243,62 @@ public class OrderRelationController extends BaseController {
         for (int i = 0; i < userId.length; i++) {
             userIdList.add(Long.parseLong(userId[i]));
         }
+        String[] payment = payments.split(",");
+        List<Long> paymentList = new ArrayList<>();
+
+        for (int i = 0; i < payment.length; i++) {
+            paymentList.add(Long.parseLong(payment[i]));
+        }
         try {
-            String msg = orderRelationService.test(orderId, userIdList);
+            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , nowUserId);
             result.setSuccess(true);
-            result.setMsg("查看成功");
-            result.setData(msg);
-            ;
-            return result;
+            result.setData(errorMsgList);
+            result.setMsg("支付成功");
+        } catch (MessageException e) {
+            logger.warn("支付失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("支付失败," + e.getMessage());
         } catch (Exception e) {
+            logger.error("支付失败" + errInfo(e), e);
             result.setSuccess(false);
             result.setErrorCode("500");
-            result.setMsg("失败");
-            e.printStackTrace();
-            return result;
+            result.setMsg("支付失败");
         }
+        return result;
     }
+
+    /**
+     * 开始订单
+     *
+     * @param orderId 订单编号
+     * @param nowUserId 当前用户
+     *
+     *     "success": false,
+     *     "errorCode": "499",
+     *     "msg": "开始失败,您已经签到过了～", 错误消息
+     *
+     * @return
+     */
+    @PostMapping("/startOrder")
+    public Object startOrder(Long orderId, Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.startOrder(orderId , nowUserId);
+            result.setSuccess(true);
+            result.setMsg("开始成功");
+        } catch (MessageException e) {
+            logger.warn("开始失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("开始失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("开始失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("开始失败");
+        }
+        return result;
+    }
+
 }

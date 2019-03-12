@@ -280,6 +280,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return result;
 	}
 
+	@Override
+	public TService getProductById(Long serviceId) {
+		return productDao.selectByPrimaryKey(serviceId);
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务

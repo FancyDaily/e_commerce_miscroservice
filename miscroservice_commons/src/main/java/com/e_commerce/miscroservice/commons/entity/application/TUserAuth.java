@@ -1,8 +1,11 @@
 package com.e_commerce.miscroservice.commons.entity.application;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+
 import java.io.Serializable;
 
 public class TUserAuth implements Serializable {
+    @Id
     private String id;
 
     private Long userId;
