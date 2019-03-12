@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -9,6 +10,7 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.CompanyService;
+import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class UserController extends BaseController {
 
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private GrowthValueService growthValueService;
 
     /**
      * 时间轨迹
@@ -2092,19 +2097,29 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 用户反馈 待联调
+     * 用户反馈
      * @param token
-     * @param contact
-     * @param report
+     * @param labelsId key-value表中的对应id
+     * @param message  回馈内容
+     * @param voucherUrl    图片信息(多张使用逗号分隔)
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": ""
+     * }
+     *
      * @return
      */
     @RequestMapping("feedBack")
-    public Object feedBack(String token, String contact, TReport report) {
+    @Consume(TReport.class)
+    public Object feedBack(String token, long labelsId, String message, String voucherUrl) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
         user.setId(68813260748488704l);
+        TReport report = (TReport) ConsumeHelper.getObj();
         try {
-            userService.feedBack(token, user);
+            userService.feedBack(user,report);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("用户反馈异常: " + e.getMessage());
@@ -2153,5 +2168,274 @@ public class UserController extends BaseController {
         }
         return result;
     }
+
+    /**
+     * 获取key—value值 样本
+     * @param key feedback
+     * @return
+     */
+    @PostMapping("/get")
+    public Object get(String key) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TPublish publish = userService.getPublishValue(key);
+            result.setData(publish);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("获取key—value值失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("获取key—value值失败" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 功能描述: 发送短信验证码
+     * 作者: 许方毅
+     * 创建时间: 2018年10月30日 下午3:59:07
+     * @param telephone
+     * @return
+     */
+    @PostMapping("generateSMS")
+    public Object generateSMS(String telephone) {
+        AjaxResult result = new AjaxResult();
+        try {
+            if (userService.genrateSMSCode(telephone).isSuccess()) { // 生成并发送成功
+                result.setSuccess(true);
+            } else {
+                result.setSuccess(false);
+                result.setErrorCode(AppErrorConstant.ERROR_SENDING_SMS);
+                result.setMsg(AppErrorConstant.SMS_NOT_SEND_MESSAGE);
+            }
+        } catch (MessageException e) {
+            logger.error("发送短信验证码异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("发送短信验证码异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 获取成长值明细
+     * @param token
+     * @param ymString
+     * @param option
+     * @return
+     */
+    @RequestMapping("scoreList")
+    public Object scoreList(String token,String ymString,String option) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        try {
+            Map<String, Object> queryResult = growthValueService.scoreList(user, ymString, option);
+            result.setSuccess(true);
+            result.setData(queryResult);
+        } catch (MessageException e) {
+            logger.error("发送短信验证码异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("发送短信验证码异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 校验短信验证码
+     * @param telephone
+     * @param validCode
+     * @return
+     */
+    @PostMapping("checkSMS")
+    public Object checkSMS(String telephone, String validCode) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.checkSMS(telephone, validCode);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("发送短信验证码异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("发送短信验证码异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 回馈邀请人
+     * @param token
+     * @param inviterId
+     * @return
+     */
+    @PostMapping("payInviter")
+    public Object payInviter(String token, Long inviterId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        Long mineId = user.getId();
+        try {
+            userService.payInviter(inviterId, mineId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("回馈邀请人异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("回馈邀请人异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 分享（查看二维码)
+     * @param token
+     * @param option 1个人分享、2服务分享、3求助分享 4加入组织
+     * @return
+     */
+    @PostMapping("share")
+    public Object share(String token, String serviceId, String option, String userId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        try {
+            ShareServiceView shareServiceView = userService.share(user, serviceId, option, token, userId);
+            result.setSuccess(true);
+            result.setData(shareServiceView);
+        } catch (MessageException e) {
+            logger.error("分享（查看二维码)异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("分享（查看二维码)异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 功能描述: 微信授权基本信息更新
+     * 作者: 许方毅
+     * 创建时间: 2018年11月27日 下午1:28:25
+     * @return
+     */
+    @RequestMapping("wechat/infosAuth")
+    public Object wechatInfosAuth(TUser user, String token) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.wechatInfoAuth(user, token);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("微信授权基本信息更新异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("微信授权基本信息更新异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 获取scene值
+     * @param scene
+     * @return
+     */
+    @PostMapping("scene")
+    public Object scene(Long scene) {
+        AjaxResult result = new AjaxResult();
+        try {
+            SceneView sceneView = userService.scene(scene);
+            result.setData(sceneView);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("获取scene值异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("获取scene值异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 激活（生成邀请码）
+     * @param token
+     * @param inviteCode
+     * @return
+     */
+    @PostMapping("invite/activate")
+    public Object generateInviteCode(String token, String inviteCode) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.generateInviteCode(token, inviteCode);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("激活（生成邀请码）异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("激活（生成邀请码）异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 重置密码（组织）
+     * @param telephone
+     * @param validCode
+     * @param password
+     * @return
+     */
+    @PostMapping("modifyPwd")
+    public Object modifyPwd(String telephone, String validCode, String password) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.modifyPwd(telephone, validCode, password);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("重置密码异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("重置密码异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 申请加入组织
+     * @param token
+     * @param companyId
+     * @return
+     */
+    @PostMapping("company/join")
+    public Object joinCompany(String token, Long companyId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            userService.joinCompany(user,companyId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("重置密码异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("重置密码异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
 
 }

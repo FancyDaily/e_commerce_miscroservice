@@ -514,7 +514,7 @@ public interface AppConstant {
     /**
      * 个人信息完整度任务 -> 80(百分比)
      */
-    public Integer COMPLETE_TASK_NUM = 80;
+    public Integer COMPLETE_TASK_NUM = 100;
 
     /**
      * 未知的创建者

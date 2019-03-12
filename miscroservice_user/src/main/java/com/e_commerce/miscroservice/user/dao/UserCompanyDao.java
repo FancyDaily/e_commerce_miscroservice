@@ -28,8 +28,36 @@ public interface UserCompanyDao {
 
     /**
      * 根据用户id时间倒序查询UserCompany记录
-     * @param userIds
+     * @param ids
      * @return
      */
-    List<TUserCompany> queryByUserIdsDESC(Long... userIds);
+    List<TUserCompany> queryByUserIdsDESC(Long... ids);
+
+    /**
+     * 根据用户id、组织内角色查询UserCompany记录
+     * @param id
+     * @param role
+     * @return
+     */
+    List<TUserCompany> selectByUserIdAndCompanyjob(Long id, Integer role);
+
+    /**
+     * 根据用户id、组织id获取UserCompany记录
+     * @param id
+     * @param companyId
+     * @return
+     */
+    List<TUserCompany> selectByUserIdAndCompanyId(Long id, Long companyId);
+
+    /**
+     * 更新
+     * @param userCompany
+     */
+    int updateByPrimaryKey(TUserCompany userCompany);
+
+    /**
+     * 插入
+     * @param userCompany
+     */
+    int insert(TUserCompany userCompany);
 }

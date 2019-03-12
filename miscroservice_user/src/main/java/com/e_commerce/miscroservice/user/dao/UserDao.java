@@ -17,4 +17,8 @@ public interface UserDao {
     TUser queryDoppelganger(TUser user);
 
     List<TUser> queryUsersByTelephone(String telephone);
+
+    List<TUser> selectByInviteCode(String inviteCode);
+
+    List<TUser> selectUserTelByJurisdictionAndIsCompany(String telephone, Integer jurisdictionNormal, Integer isCompanyAccountYes);
 }

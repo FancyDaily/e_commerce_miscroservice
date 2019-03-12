@@ -1,11 +1,9 @@
-/*
 package com.e_commerce.miscroservice.commons.util.colligate;
 
 import com.fasterxml.uuid.EthernetAddress;
 import com.fasterxml.uuid.Generators;
 import com.fasterxml.uuid.impl.TimeBasedGenerator;
 
-*/
 /**
  * 功能描述:
  * 模块:
@@ -23,8 +21,7 @@ import com.fasterxml.uuid.impl.TimeBasedGenerator;
  * 修改内容:
  * 1.
  * 2.
- *//*
-
+ */
 public class StrongUuidGenerator {
 	protected static TimeBasedGenerator timeBasedGenerator;
 	static{
@@ -56,4 +53,3 @@ public class StrongUuidGenerator {
 		  System.out.println(UUIDGenerator.getNextId());
 	  }
 }
-*/
