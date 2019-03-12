@@ -246,8 +246,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .in(TOrderRelationship::getStatus, statusList)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                        );
         return orderRelationshipList;
     }
 
@@ -265,8 +266,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
                         .eq(TOrderRelationship::getSignType , OrderRelationshipEnum.SIGN_TYPE_NO.getType())
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                        );
         return orderRelationshipList;
     }
 
@@ -283,8 +285,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                        );
         return orderRelationshipList;
     }
 
@@ -357,8 +360,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType()).groupAfter()
                 .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId).groupAfter()
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrderRelationship::getCreateTime))
-                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                );
     }
 
     /**

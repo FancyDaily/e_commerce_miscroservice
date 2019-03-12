@@ -109,16 +109,10 @@ public class OrderRelationController extends BaseController {
      *                  "msg": "查看成功",
      *                  "data": [
      *                  {
-     *                  "name": "刘维",
-     *                  "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/1544189745461122.png",
+     *                  "name": "刘维", 名字
+     *                  "userHeadPortraitPath": "https://timebank。。。.png",头像
      *                  "status": 1,
-     *                  "toStringId": "68813258559062016"
-     *                  },
-     *                  {
-     *                  "name": "左岸",
-     *                  "userHeadPortraitPath": "https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTI0PmHoNhhs1zvJdDYGT8ddTLkCXzLk6fO1mWiaYwFrBRaoh6wqicWVXoECbOC00khkXwzWhIjoGflg/132",
-     *                  "status": 1,
-     *                  "toStringId": "68813259653775360"
+     *                  "toStringId": "68813258559062016" 用户id
      *                  }
      *                  ]
      *                  }
@@ -279,6 +273,11 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId 订单编号
      * @param nowUserId 当前用户
+     *
+     *     "success": false,
+     *     "errorCode": "499",
+     *     "msg": "开始失败,您已经签到过了～", 错误消息
+     *
      * @return
      */
     @PostMapping("/startOrder")
@@ -302,38 +301,4 @@ public class OrderRelationController extends BaseController {
         return result;
     }
 
-    /**
-     * 测试
-     *
-     * @param orderId sa
-     * @param userIds  ss
-     *
-     * "success": true,
-     *                "msg": "报名成功"
-     *
-     */
-    @RequestMapping("/test")
-    public Object notices(Long orderId, String userIds) {
-        AjaxResult result = new AjaxResult();
-        String[] userId = userIds.split(",");
-        List<Long> userIdList = new ArrayList<>();
-
-        for (int i = 0; i < userId.length; i++) {
-            userIdList.add(Long.parseLong(userId[i]));
-        }
-        try {
-            String msg = orderRelationService.test(orderId, userIdList);
-            result.setSuccess(true);
-            result.setMsg("查看成功");
-            result.setData(msg);
-            ;
-            return result;
-        } catch (Exception e) {
-            result.setSuccess(false);
-            result.setErrorCode("500");
-            result.setMsg("失败");
-            e.printStackTrace();
-            return result;
-        }
-    }
 }

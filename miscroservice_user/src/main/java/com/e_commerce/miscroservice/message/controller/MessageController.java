@@ -91,7 +91,7 @@ public class MessageController extends BaseController {
             result.setData(messageNotices);;
             return result;
         } catch (MessageException e) {
-            logger.error("查看失败," + e.getMessage());
+            logger.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
@@ -140,7 +140,7 @@ public class MessageController extends BaseController {
             result.setMsg("发送成功");
             return result;
         } catch (MessageException e) {
-            logger.error("发送失败," + e.getMessage());
+            logger.warn("发送失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("发送失败," + e.getMessage());
@@ -184,7 +184,7 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(messageDetailViewQueryResult);
         } catch (MessageException e) {
-            logger.error("查看失败," + e.getMessage());
+            logger.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
@@ -193,7 +193,6 @@ public class MessageController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
-            e.printStackTrace();
         }
             return result;
     }
@@ -227,7 +226,7 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(list);
         } catch (MessageException e) {
-            logger.error("查看失败," + e.getMessage());
+            logger.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
@@ -236,7 +235,6 @@ public class MessageController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
-            e.printStackTrace();
         }
         return result;
     }
@@ -259,7 +257,7 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(noticesFirstView);
         } catch (MessageException e) {
-            logger.error("查看失败," + e.getMessage());
+            logger.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
@@ -268,7 +266,6 @@ public class MessageController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
-            e.printStackTrace();
         }
         return result;
     }
@@ -293,7 +290,7 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(unReadMsg);
         } catch (MessageException e) {
-            logger.error("查看失败," + e.getMessage());
+            logger.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
@@ -302,7 +299,6 @@ public class MessageController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
-            e.printStackTrace();
         }
         return result;
     }
