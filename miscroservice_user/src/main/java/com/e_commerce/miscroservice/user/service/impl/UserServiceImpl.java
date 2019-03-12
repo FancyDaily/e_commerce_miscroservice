@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
 import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
@@ -572,7 +573,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUser tUser = userDao.selectByPrimaryKey(userId);
         tUser.setUpdateTime(System.currentTimeMillis());
         tUser.setFreezeTime(tUser.getFreezeTime() + freeTime);
-        userDao.updateByPrimaryKey(tUser);
+//        userDao.updateByPrimaryKey(tUser);
+        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+                .eq(TUser::getAge, tUser.getId()));
         //创建用户冻结记录
         TUserFreeze userFreeze = new TUserFreeze();
         userFreeze.setId(idGenerator.nextId());
@@ -1354,6 +1357,32 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void feedBack(String token, TUser user) {
 //        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
+    }
+
+    /**
+     * 任务信息查询
+     * @param user
+     * @return
+     */
+    @Override
+    public Set<Integer> taskList(TUser user) {
+        List<Integer> resultList = new ArrayList<>();
+        Set<Integer> resultSet = new TreeSet<>();
+        List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
+        for(TUserTask userTask:userTasks) {
+            //签到 -> createTime为当日
+//            if(userTask.getType().equals(TaskEnum.TASK_SIGNUP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+//                continue;
+//            }
+            resultList.add(userTask.getType());
+            resultSet.add(userTask.getType());
+        }
+        return resultSet;
+    }
+
+    @Override
+    public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
+
     }
 
     /**

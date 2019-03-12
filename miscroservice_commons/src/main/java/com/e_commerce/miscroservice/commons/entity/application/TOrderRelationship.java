@@ -1,8 +1,11 @@
 package com.e_commerce.miscroservice.commons.entity.application;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+
 import java.io.Serializable;
 
 public class TOrderRelationship implements Serializable {
+    @Id
     private Long id;
 
     private Long serviceId;
@@ -22,6 +25,8 @@ public class TOrderRelationship implements Serializable {
     private Integer orderReportType;
 
     private Integer serviceCollectionType;
+
+    private Long serviceCollectionTime;
 
     private Integer signType;
 
@@ -133,6 +138,14 @@ public class TOrderRelationship implements Serializable {
 
     public void setServiceCollectionType(Integer serviceCollectionType) {
         this.serviceCollectionType = serviceCollectionType;
+    }
+
+    public Long getServiceCollectionTime() {
+        return serviceCollectionTime;
+    }
+
+    public void setServiceCollectionTime(Long serviceCollectionTime) {
+        this.serviceCollectionTime = serviceCollectionTime;
     }
 
     public Integer getSignType() {
