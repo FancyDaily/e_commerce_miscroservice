@@ -1,12 +1,10 @@
 package com.e_commerce.miscroservice.order.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
+import com.e_commerce.miscroservice.order.vo.DetailOrderReturnView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -206,4 +204,15 @@ public class OrderCommonController extends BaseController {
     public int updateCollectStatus(Long orderRelationshipId, int collectStatus) {
         return orderRelationshipDao.updateCollectStatus(orderRelationshipId,collectStatus);
     }
+
+	/**
+	 * 订单详情
+	 * @param orderId 订单ID
+	 * @param token 用户token
+	 * @return
+	 */
+	public DetailOrderReturnView detailIndexOrder(Long orderId, String token) {
+		TUser user = (TUser) redisUtil.get(token);
+		return orderService.orderDetail(orderId, user);
+	}
 }
