@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.jar.JarEntry;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
@@ -12,21 +13,27 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.application.ReportEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.env.ServiceEnv;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
+import com.e_commerce.miscroservice.order.dao.ReportDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.sun.xml.internal.ws.api.pipe.Tube;
+import org.omg.CORBA.IRObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -64,7 +71,14 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     private UserCommonController userCommonController;
 
     @Autowired
+    private MessageCommonController messageCommonController;
+
+
+    @Autowired
     private OrderRecordDao orderRecordDao;
+
+    @Autowired
+    private ReportDao reportDao;
 
     /**
      * 报名
@@ -180,14 +194,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
         if (type == 9) {
             //默认是服务者发布者 找求助者评价服务者未评价
-            statusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
             statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-            if (order.getType() == 1  ) {
-                //改为求助者-如果是求助的发布者
-                statusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
-                statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-            }
-            //orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
         }
         List<Long> userIdList = new ArrayList<>();
         List<UserInfoView> userInfoViewList = new ArrayList<>();
@@ -209,17 +218,17 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     userInfoView.setName(userlist.get(j).getName());
                     userInfoView.setUserHeadPortraitPath(userlist.get(j).getUserHeadPortraitPath());
                     userInfoView.setStatus(1);//默认为已到
-                    if (orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()
-                            || orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()) {
-                        //如果订单内被举报了，状态置为异常
-                        userInfoView.setStatus(2);
-                    }
                     if (type == 7) {
                         //如果是是支付，还要看一下未到人员
                         if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()) {
                             //如果是未签到，将状态置为未到
                             userInfoView.setStatus(3);
                         }
+                    }
+                    if (orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()
+                            || orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()) {
+                        //如果订单内被举报了，状态置为异常
+                        userInfoView.setStatus(2);
                     }
                     userInfoViewList.add(userInfoView);
                     break;
@@ -514,7 +523,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
             String msg = payOrderPri(orderRelationship, paymentList.get(0), nowUser, nowTime, toUserList.get(0));
             if (msg != null) {
-                throw new MessageException("499", "支付失败，"+msg);
+                throw new MessageException("499", msg);
             }
             if (paymentList.get(0) > 0){
                 //如果是有效支付
@@ -531,7 +540,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         if (userIdList.size() == msgList.size()){
             //如果全错，返回错误消息，支付失败
-            throw new MessageException("499", "支付失败，所选用户中没有可支付用户");
+            throw new MessageException("499", "所选用户中没有可支付用户");
         }
         if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
             //解冻时间币，解冻数量是支付成功人数量(如果支付了0也算成功，虽然不显示，但是要解冻)*时间币单价
@@ -625,128 +634,176 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationshipDao.insert(orderRelationship);
     }
 
-  /* @Transactional(rollbackFor = Throwable.class)
+    /**
+     * 批量投诉
+     *
+     * @param orderId
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
+     * @param nowUserId
+     * @param userIds
+     * @return
+     */
+    @Transactional(rollbackFor = Throwable.class)
     public List<String> repors (long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , List<Long> userIds) {
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         TUser nowUser = userCommonController.getUserById(nowUserId);
+        List<String> errorMsgList = new ArrayList<>();
         if (order.getCreateUser() == nowUser.getId().longValue()){
             //如果是发布者,投诉放到对方数据里
             List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIds);
+            List<TUser> toUserList = userCommonController.selectUserByIds(userIds);
+            for (int i = 0 ;i < orderRelationshipList.size() ; i++){
+                TUser toUser = null ;
+                for (int j = 0 ; j < toUserList.size() ; j++){
+                    if (orderRelationshipList.get(i).getReceiptUserId() == toUserList.get(j).getId().longValue()){
+                        toUser = toUserList.get(j);
+                        break;
+                    }
+                }
+                if (toUser == null){
+                    errorMsgList.add("找不到用户"+userIds.get(i)+"的数据");
+                } else {
+                    String msg = report(orderRelationshipList.get(i) , labelsId ,message , voucherUrl , nowUser , toUser ,nowTime , false);
+                    if (msg != null){
+                        errorMsgList.add(msg);
+                    }
+                }
 
+            }
         } else {
             //如果不是发布者，那么只会投诉一个人，然后这个投诉记录在自己的订单关系上
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
-        }
-        TServiceReceiptExample serviceReceiptExample = new TServiceReceiptExample();
-        TServiceReceiptExample.Criteria serviceRecCriteria = serviceReceiptExample.createCriteria();
-        serviceRecCriteria.andIsValidEqualTo("1");
-        serviceRecCriteria.andParentEqualTo(associationId);
-        List<TServiceReceipt> serviceReceipts = serviceReceiptDao.selectByExample(serviceReceiptExample);
-        if (serviceReceipts == null || serviceReceipts.size() <= 0) {
-            throw new MessageException("499", "对不起，没有该订单信息，无法发起举报");
-        }
-        TUser adminUser = new TUser();
-        adminUser.setId(1l);
-        adminUser.setName("系统管理员");
-
-        TUserExample userExample = new TUserExample();
-        TUserExample.Criteria userCriteria = userExample.createCriteria();
-        userCriteria.andIdIn(userIds);
-        List<TUser> toUserList = userDao.selectByExample(userExample);
-        for (int i = 0; i < userIds.size(); i++) {
-            TUser toUser = null;
-            for (int j = 0; j < toUserList.size(); j++) {
-                if (toUserList.get(j).getId() == userIds.get(i).longValue()) {
-                    toUser = toUserList.get(j);
-                    break;
-                }
-            }
-            if (toUser  == null) {
-                throw new MessageException("499","对不起，找不到投诉用户的账户信息");
-            }
-            TReportExample reportExample = new TReportExample();
-            TReportExample.Criteria criteria = reportExample.createCriteria();
-            criteria.andTypeEqualTo(type);
-            criteria.andAssociationIdEqualTo(associationId);
-            criteria.andReportUserIdEqualTo(userIds.get(i));
-            criteria.andCreateUserEqualTo(user.getId());
-            List<TReport> reports = reportDao.selectByExample(reportExample);
-            if (reports != null && reports.size() > 0) {
-                throw new MessageException("499", "对不起，您已对其中用户发起过投诉，请勿多次投诉");
-            }
-
-            TReport report = new TReport();
-            report.setId(snowflakeIdWorker.nextId());
-            report.setReportUserId(userIds.get(i));
-            report.setAssociationId(associationId);
-            report.setType(type);
-            report.setLabelsId(labelsId);
-            report.setMessage(message);
-            report.setVoucherUrl(voucherUrl);
-            report.setCreateTime(nowTime);
-            report.setCreateUser(user.getId());
-            report.setCreateUserName(user.getName());
-            report.setUpdateTime(nowTime);
-            report.setUpdateUser(user.getId());
-            report.setUpdateUserName(user.getName());
-            report.setIsValid("1");
-            try {
-                reportDao.insert(report);
-            } catch (Exception e) {
-                logger.error("插入用户"+userIds.get(i)+"的举报消息失败");
-                e.printStackTrace();
-                throw new MessageException("500", "对不起，举报失败，请后退刷新重试");
-            }
-            String serContent = user.getName()+" 投诉了"+toUser.getName()+"，客服将在12小时内进行处理，如有疑问请联系客服";
-            setServiceRecord(associationId, serContent, user);
-            String title1 = "收到投诉提醒";
-            String content1 = "在“"+serviceReceipts.get(0).getServiceName()+"”的互助事项中，"+user.getName()+"已对您发起投诉，投诉理由："+getReportValue(labelsId)+"。如果您对投诉有异议，请于2个工作日内联系平台在线客服。";
-            message(associationId, adminUser, title1, content1, userIds.get(i));
-
-            TFormid formid = findFormId(nowTime, toUser);
-            if (formid != null) {
-                try {
-                    List<String> msg = new ArrayList<>();
-                    msg.add(getReportValue(labelsId));
-                    msg.add(serviceReceipts.get(0).getServiceName());
-                    msg.add(user.getName());
-                    msg.add(changeTime(nowTime));
-                    msg.add("如果您对该投诉有异议，请于2个工作日内联系平台在线客服。");
-                    String orderType = "1";
-                    if (toUser.getId() == serviceReceipts.get(0).getReceiptUserId().longValue()) {
-                        //如果是服务通知接收者是报名者
-                        orderType = "2";
-                    }
-                    String parameter = "?orderId="+serviceReceipts.get(0).getId()+"&returnHome=true&orderType="+orderType;
-                    wechatService.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.other_setTemplate_3,parameter);
-                    formid.setIsValid("0");
-                    formidDao.updateByPrimaryKey(formid);
-                    break;
-                } catch (Exception e) {
-                    logger.error("发送服务通知失败");
-                }
+            TUser touser = userCommonController.getUserById(userIds.get(0));
+            String msg = report(orderRelationship , labelsId , message , voucherUrl , nowUser , touser, nowTime , true);
+            if (msg != null){
+                throw new MessageException("499", msg);
             }
         }
+        if (userIds.size() == errorMsgList.size()){
+            //如果全错，返回错误消息，支付失败
+            throw new MessageException("499", "所选用户中没有可投诉用户");
+        }
+        //系统通知，投诉受理
         String title = "投诉受理通知";
         String content = "平台将尽快核实您的投诉事项，并在3-5个工作日内向您反馈处理结果。";
-        message(associationId, adminUser, title, content, user.getId());
+        messageCommonController.messageSave(orderId , nowUser , title , content , nowUser.getId() , nowTime);
+        return errorMsgList;
     }
 
-    private String report (TOrderRelationship orderRelationship , long labelsId , String message ,   String voucherUrl , Long nowUserId , Long toUserId , boolean isOwn){
-        String msg;
-        if (isOwn){
-            //如果订单关系是自己的
-            if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType()){
-                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType());
-            } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()){
-                msg = "您已发起过投诉，请勿多次投诉";
-            } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()){
-                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
+    /*    public List<String> remarkOrder(Long nowUserId , List<Long> userIdList , Long orderId){
+        List<String> errorMsgList = new ArrayList<>();
+        TUser nowUser = userCommonController.getUserById(nowUserId);
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        if (order.getCreateUser() == nowUser.getId().longValue()){
+            //如果是发布者，要评价很多人，要该对方的状态
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(userIdList);
+            //for ()
+        }
+    }
+
+    private String remark(TOrderRelationship orderRelationship , TUser nowUser , long toUserId , boolean isOwn){
+        String msg = null ;
+        if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_WAIT_REMARK.getType()){
+            //如果是双方未评价
+            if (isOwn){
+                //如果是改的是自己的订单关系
+                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+            } else {
+                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+            }
+        } else if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_IS_REMARK.getType()){
+            //如果是已评价
+            if (isOwn){
+                //如果是改的是自己的订单关系
+                msg = "对不起，您已发表过评价";
             }
         }
-
     }*/
+    /**
+     * 投诉
+     * @param orderRelationship
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
+     * @param nowUser
+     * @param toUser
+     * @param nowTime
+     * @param isOwn
+     * @return
+     */
+    private String report (TOrderRelationship orderRelationship , long labelsId , String message , String voucherUrl , TUser nowUser , TUser toUser  , Long nowTime , boolean isOwn){
+        String msg = null ;
+        if (orderRelationship.getStatus() != OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()){
+            msg = "对不起，"+orderRelationship.getServiceName()+"的订单已无法进行投诉";
+        }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType()){
+            if (isOwn){
+                //如果订单关系是自己的
+                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType());
+            } else {
+                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType());
+            }
+        } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType()){
+            if (isOwn){
+                //如果订单关系是自己的
+                msg = "您已对"+toUser.getName()+"发起过投诉，请勿多次投诉";
+            } else {
+                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
+            }
+            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
+        } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()){
+            if (isOwn){
+                //如果订单关系是自己的
+                orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
+            } else {
+                msg = "您已对"+toUser.getName()+"发起过投诉，请勿多次投诉";
+            }
+        } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType()){
+            msg = "您已对"+toUser.getName()+"发起过投诉，请勿多次投诉";
+        } else {
+            msg = "您已无法发起对"+orderRelationship.getServiceName()+"订单发起投诉";
+        }
+        if (msg != null){
+            return msg;
+        }
+        orderRelationship.setUpdateUserName(nowUser.getName());
+        orderRelationship.setUpdateUser(nowUser.getId());
+        orderRelationship.setUpdateTime(nowTime);
+        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+
+        TReport report = new TReport();
+        report.setId(snowflakeIdWorker.nextId());
+        report.setReportUserId(toUser.getId());
+        report.setType(ReportEnum.TYPE_ORDER.getType());
+        report.setAssociationId(orderRelationship.getOrderId());
+        report.setLabelsId(labelsId);
+        report.setMessage(message);
+        report.setVoucherUrl(voucherUrl);
+        report.setStatus(ReportEnum.STATUS_PENDING_DISPOSAL.getType());
+        report.setCreateTime(nowTime);
+        report.setCreateUser(nowUser.getId());
+        report.setCreateUserName(nowUser.getName());
+        report.setUpdateTime(nowTime);
+        report.setUpdateUser(nowUser.getId());
+        report.setUpdateUserName(nowUser.getName());
+        report.setIsValid(AppConstant.IS_VALID_YES);
+        reportDao.saveOneOrder(report);
+
+        //TODO 服务通知
+        //系统通知
+        String title = "收到投诉提醒";
+        String content = new  StringBuilder().append("在“").append(orderRelationship.getServiceName())
+                .append("”的互助事项中，").append(nowUser.getName()).append("已对您发起投诉，投诉理由：")
+                .append(messageCommonController.getValue(labelsId , "complaint"))
+                .append("。如果您对投诉有异议，请于2个工作日内联系平台在线客服。").toString();
+
+        messageCommonController.messageSave(orderRelationship.getId() , nowUser , title , content , toUser.getId() , nowTime);
+        return msg;
+    }
+
     /**
      * 支付私有方法
      * @param orderRelationship
@@ -1057,8 +1114,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
         return orderRelationshipStatusList;
     }
 

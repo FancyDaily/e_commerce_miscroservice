@@ -32,6 +32,14 @@ public enum ReportEnum {
      * 投诉关系状态为系统反馈和建议 状态值为2
      */
     TYPE_SYSTEM(2, "反馈和建议"),
+    /**
+     * 投诉状态为待处理 状态值为1
+     */
+    STATUS_PENDING_DISPOSAL(1,"待处理"),
+    /**
+     * 投诉状态为已处理 状态值为2
+     */
+    STATUS_AREADY_DISPOSAL(2,"已处理"),
     ;
 
     private String value;

@@ -42,4 +42,11 @@ public interface PublishService {
      * @return
      */
     TPublish publishGet(String key);
+    /**
+     * 通过key和标签id 获取值
+     * @param labelsId
+     * @param key
+     * @return
+     */
+    String getValue(long labelsId , String key);
 }

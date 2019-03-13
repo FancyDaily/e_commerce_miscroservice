@@ -94,4 +94,16 @@ public interface OrderRelationService {
      * @param order
      */
     void addTorderRelationship(Long serviceId , TOrder order);
+    /**
+     * 批量投诉
+     *
+     * @param orderId
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
+     * @param nowUserId
+     * @param userIds
+     * @return
+     */
+    List<String> repors (long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , List<Long> userIds);
 }

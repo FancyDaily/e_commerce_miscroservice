@@ -8,11 +8,16 @@ import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.PublishDao;
 
 import com.e_commerce.miscroservice.message.service.PublishService;
+import com.e_commerce.miscroservice.message.vo.PublisValueView;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -37,6 +42,7 @@ public class PublishServicempl implements PublishService {
 
     @Autowired
     private PublishDao publishDao;
+
 
     /**
      * 插入key-value
@@ -75,6 +81,31 @@ public class PublishServicempl implements PublishService {
      */
     public TPublish publishGet(String key) {
         return publishDao.selecePublish(key);
+    }
+
+    /**
+     * 通过key和标签id 获取值
+     * @param labelsId
+     * @param key
+     * @return
+     */
+    public String getValue(long labelsId , String key){
+        String value = publishDao.selecePublish(key).getValue();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<PublisValueView> listType = objectMapper.readValue(value,new TypeReference<List<PublisValueView>>() { });
+            for (int i = 0; i < listType.size(); i++) {
+                PublisValueView jsonEntity = listType.get(i);
+                if (Long.parseLong(jsonEntity.getId()) == labelsId) {
+                    return jsonEntity.getName();
+                }
+            }
+            return "";
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表"+key+"关键字的json出错，" + e.getMessage());
+            return "";
+        }
     }
 
 }

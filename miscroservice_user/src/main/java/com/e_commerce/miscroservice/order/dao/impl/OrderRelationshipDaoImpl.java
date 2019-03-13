@@ -390,8 +390,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
         return orderRelationshipStatusList;
     }
 

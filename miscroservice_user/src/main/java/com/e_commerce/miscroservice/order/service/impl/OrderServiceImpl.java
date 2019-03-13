@@ -258,8 +258,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public DetailMineOrderReturnView detailMineOrder(TUser user, Long orderId) {
-		// TODO 写死订单ID
-		orderId = 101675590041468928L;
 		DetailMineOrderReturnView returnView = new DetailMineOrderReturnView();
 		//TODO 写死用户
 		user = userService.getUserById(68813260748488704L);
@@ -311,8 +309,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 	@Override
 	public DetailChooseReturnView chooseDetail(Long orderId, TUser user) {
-		//写死orderId
-		orderId = 101675891532234752L;
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		//所有的报名者
 		List<TOrderRelationship> tOrderRelationships = orderRelationshipDao.selectListByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());

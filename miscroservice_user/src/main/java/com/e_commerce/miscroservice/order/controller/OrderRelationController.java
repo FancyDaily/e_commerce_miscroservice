@@ -301,4 +301,48 @@ public class OrderRelationController extends BaseController {
         return result;
     }
 
+    /**
+     * 批量投诉
+     *
+     * @param orderId 订单id
+     * @param labelsId 标签id
+     * @param message 内容
+     * @param voucherUrl 图片，多个逗号分割
+     * @param nowUserId 当前用户
+     * @param userIds 用户id 多个逗号分割
+     *
+     *      "success": false,
+     *      "errorCode": "499",
+     *      "msg": "投诉失败,您已经发起过投诉", 错误消息
+     *
+     * @return
+     */
+    @PostMapping("/reports")
+    public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , String userIds) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.repors(orderId , labelsId , message , voucherUrl , nowUserId , userIdList);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("投诉成功");
+        } catch (MessageException e) {
+            logger.warn("投诉失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("投诉失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("投诉失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("投诉失败");
+        }
+        return result;
+    }
+
 }
