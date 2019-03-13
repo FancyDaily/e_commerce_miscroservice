@@ -106,4 +106,17 @@ public interface OrderRelationService {
      * @return
      */
     List<String> repors (long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , List<Long> userIds);
+    /**
+     * 评价订单
+     * @param nowUserId
+     * @param userIdList
+     * @param orderId
+     * @param credit
+     * @param major
+     * @param attitude
+     * @param message
+     * @param labels
+     * @return
+     */
+    List<String> remarkOrder(Long nowUserId, List<Long> userIdList, Long orderId , int credit, int major, int attitude, String message, String labels);
 }

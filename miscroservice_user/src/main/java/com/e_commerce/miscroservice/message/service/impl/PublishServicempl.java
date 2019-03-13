@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.PublishDao;
 
 import com.e_commerce.miscroservice.message.service.PublishService;
+import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.PublisValueView;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -108,4 +110,23 @@ public class PublishServicempl implements PublishService {
         }
     }
 
+
+    /**
+     * 根据分辨率返回不同类型封面图
+     * @param length
+     * @param width
+     * @return
+     */
+    public List<BroadcastView> getBroadcast(String length , String width){
+        String value = publishDao.selecePublish("broadcast").getValue();
+        List<BroadcastView> broadcastViewList = new ArrayList<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            broadcastViewList = objectMapper.readValue(value,new TypeReference<List<BroadcastView>>() { });
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表broadcast关键字的json出错，" + e.getMessage());
+        }
+        return broadcastViewList;
+    }
 }
