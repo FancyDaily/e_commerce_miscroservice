@@ -90,8 +90,7 @@ public interface OrderRelationService {
     List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
     /**
      * 新增发布者订单关系
-     * @param serviceId
      * @param order
      */
-    void addTorderRelationship(Long serviceId , TOrder order);
+    int addTorderRelationship(TOrder order);
 }

@@ -1,25 +1,12 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
-import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.env.ServiceEnv;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
@@ -29,9 +16,14 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -594,13 +586,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
     /**
      * 新增发布者订单关系
-     * @param serviceId
      * @param order
      */
-    public void addTorderRelationship(Long serviceId , TOrder order){
+    public int addTorderRelationship(TOrder order){
         TOrderRelationship orderRelationship = new TOrderRelationship();
         orderRelationship.setId(snowflakeIdWorker.nextId());
-        orderRelationship.setServiceId(serviceId);
+        orderRelationship.setServiceId(order.getServiceId());
         orderRelationship.setOrderId(order.getId());
         orderRelationship.setServiceType(order.getType());
         orderRelationship.setFromUserId(order.getCreateUser());
@@ -622,7 +613,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setUpdateUserName(order.getCreateUserName());
         orderRelationship.setUpdateTime(order.getCreateTime());
         orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
-        orderRelationshipDao.insert(orderRelationship);
+        return orderRelationshipDao.insert(orderRelationship);
     }
 
   /* @Transactional(rollbackFor = Throwable.class)

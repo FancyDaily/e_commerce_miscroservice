@@ -1,11 +1,15 @@
 package com.e_commerce.miscroservice.order.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRecord;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 功能描述:
@@ -43,6 +47,12 @@ public class OrderRecordDaoImpl implements OrderRecordDao {
         int save = MybatisOperaterUtil.getInstance()
                 .save(orderRecord);
         return save;
+    }
+
+    @Override
+    public List<TOrderRecord> selectRecordByOrderId(Long orderId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRecord(), new MybatisSqlWhereBuild(TOrderRecord.class)
+                .eq(TOrderRecord::getOrderId, orderId).eq(TOrderRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
 
 

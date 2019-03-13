@@ -8,8 +8,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -376,6 +374,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .eq(TOrder::getId, orderId)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 

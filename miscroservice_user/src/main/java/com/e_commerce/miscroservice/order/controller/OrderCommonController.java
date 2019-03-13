@@ -1,9 +1,6 @@
 package com.e_commerce.miscroservice.order.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
@@ -34,17 +31,17 @@ public class OrderCommonController extends BaseController {
 
 	/**
 	 * 根据service派生订单 供其他模块调用
-	 * @param serviceId 商品的ID
+	 * @param service 商品
 	 * @param type 派生的类型
 	 * @param date 派生的日期
 	 * @return
 	 */
-	public MsgResult produceOrder(Long serviceId, Integer type, String date) {
+	public MsgResult produceOrder(TService service, Integer type, String date) {
 //		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
 		//根据service生成出订单的属性
 		MsgResult result = new MsgResult();
 		try {
-			orderService.produceOrder(serviceId, type, date);
+			orderService.produceOrder(service, type, date);
 			result.setCode("200");
 			result.setMessage("生成订单成功");
 			return result;

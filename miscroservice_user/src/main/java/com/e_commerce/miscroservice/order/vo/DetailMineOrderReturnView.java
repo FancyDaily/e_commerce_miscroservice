@@ -27,9 +27,13 @@ public class DetailMineOrderReturnView {
 	 */
 	private List<BaseUserView> listUserView;
 	/**
-	 * 订单状态
+	 * 订单状态  0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中
 	 */
-	private String status;
+	private Integer status;
+	/**
+	 * 举报行为 1、投诉 2、举报
+	 */
+	private Integer reportAction;
 	/**
 	 * 详情
 	 */

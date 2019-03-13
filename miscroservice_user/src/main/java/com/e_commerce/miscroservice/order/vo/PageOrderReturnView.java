@@ -39,12 +39,16 @@ public class PageOrderReturnView implements Serializable {
 	/**
 	 * 我的订单前端显示的状态
 	 */
-	private String status;
+	private Integer status;
+	/**
+	 * 用户类型 1、个人 2、公益组织 3、一般组织
+	 */
+	private String userType;
 
-	public String getOrderIdString() {
-		if (order != null) {
-			return order.getId() + "";
-		}
-		return "";
-	}
+//	public String getOrderIdString() {
+//		if (order != null) {
+//			return order.getId() + "";
+//		}
+//		return "";
+//	}
 }

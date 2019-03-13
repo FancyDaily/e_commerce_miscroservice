@@ -57,7 +57,8 @@ public class OrderController extends BaseController {
 	 *                "pointStatus": 显示状态  待看到UI图定,
 	 *                "idString": "68813258559062016"
 	 *                ],
-	 *                "status": "显示订单状态",
+	 *                "status": "显示订单状态", 订单状态: 0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中，
+	 *                 "reportAction": 举报行为 1、投诉 2、举报，
 	 *                "listDesc": [
 	 *                {
 	 *                "depict": "服务求助详情",
@@ -120,7 +121,7 @@ public class OrderController extends BaseController {
 	 *                 "collectType": 收取类型  1、互助时 2、公益时,
 	 *                 },
 	 *                 "imgUrl": "封面图",
-	 *                 "status": 状态字符串,
+	 *                 "status": 订单状态: 0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中，
 	 *                 "orderIdString": "101675590041468928"
 	 *                 }
 	 *                 ],
@@ -167,8 +168,11 @@ public class OrderController extends BaseController {
 	 *                      "resultList": [
 	 *                      {
 	 *                      "user": {
+	 *                      "id": 用户ID,
 	 *                      "name": "用户名称",
 	 *                      "userHeadPortraitPath": "用户头像",
+	 *                      "userType":"authStatus": 1、已实名 2、未实名，
+	 *                      用户类型 1、个人 2、公益组织 3、一般组织
 	 *                      "idString": "用户ID"
 	 *                      },
 	 *                      "order": {
@@ -195,7 +199,7 @@ public class OrderController extends BaseController {
 	 *                      }
 	 * @return
 	 */
-	@RequestMapping("/list")
+	@PostMapping("/list")
 	@Consume(PageOrderParamView.class)
 	public Object list(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
 					   Integer pageSize, String condition, String token) {
