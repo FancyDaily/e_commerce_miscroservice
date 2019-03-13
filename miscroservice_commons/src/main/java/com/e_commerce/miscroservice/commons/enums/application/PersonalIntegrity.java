@@ -17,19 +17,22 @@ package com.e_commerce.miscroservice.commons.enums.application;
  * 1.
  * 2.
  */
-public enum PersonalIntegrity { //TODO
-	USER_PICTURE_PATH(0,5),
-	SKILL(1,35),
-	COMPANY(2,10),
-	POST(3,5),
-	EDUCATION(4,5),
-	JOIN_TIME(5,10),
-	
-	EDU_TOTAL(10,30),
-	WORK_TOTAL(10,30);
-	
-	private int code;
-	private int num;
+public enum PersonalIntegrity {
+	//个人主页背景
+	USER_PICTURE_PATH(30,30),
+	//昵称
+	NAME(10,10),
+	//教育
+	EDUCATION(20,20),
+	//公司
+	COMPANY(20,20),
+	//职位
+	POST(10,10),
+	//描述
+	REMARKS(10,10);
+
+	private int code;	//单次
+	private int num;	//总
 	public int getCode() {
 		return code;
 	}

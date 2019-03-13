@@ -18,4 +18,50 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
         .between(TTypeRecord::getCreateTime,begin,end)
         .eq(TTypeRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TTypeRecord> selectIncomeByUserIdBetween(Long id, Long beginStamp, Long endStamp) {
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(),new MybatisSqlWhereBuild(TTypeRecord.class)
+        .eq(TTypeRecord::getUserId,id)
+                .between(TTypeRecord::getCreateTime,beginStamp,endStamp)
+                .gt(TTypeRecord::getNum,0l)
+                .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public int insert(TTypeRecord record) {
+        return MybatisOperaterUtil.getInstance().save(record);
+    }
+
+    @Override
+    public List<TTypeRecord> selectByType(int code) {
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(),new MybatisSqlWhereBuild(TTypeRecord.class)
+        .eq(TTypeRecord::getType,code)
+        .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据用户id、类型查找成长值记录
+     * @param code
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TTypeRecord> selectByTypeAndUserId(int code, Long userId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(),new MybatisSqlWhereBuild(TTypeRecord.class)
+                .eq(TTypeRecord::getType,code)
+                .eq(TTypeRecord::getUserId,userId)
+                .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TTypeRecord> selectByTypeAndUserId(int code, int code1, Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(),new MybatisSqlWhereBuild(TTypeRecord.class)
+                .groupBefore()
+        .eq(TTypeRecord::getType,code)
+        .or().eq(TTypeRecord::getType,code)
+                .groupAfter()
+                .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }

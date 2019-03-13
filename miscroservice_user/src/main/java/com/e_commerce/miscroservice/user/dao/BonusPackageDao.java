@@ -10,4 +10,6 @@ public interface BonusPackageDao {
     TBonusPackage info(Long bonusId);
 
     TBonusPackage selectByPrimaryKey(Long bonusPackageId);
+
+    boolean isMine(Long id, Long bonusPackageId);
 }

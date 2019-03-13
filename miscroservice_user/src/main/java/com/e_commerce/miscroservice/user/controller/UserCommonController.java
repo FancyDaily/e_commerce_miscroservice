@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
+import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
@@ -93,5 +94,12 @@ public class UserCommonController {
         return userFreezeDao.update(userFreeze);
     }
 
-
+    /**
+     * 批量任务完成(包含增加成长值、等级提升、根据用户等级修改用户授信额度、任务记录)
+     * @param user
+     * @param growthValueEnum
+     */
+    public void taskComplete(TUser user, GrowthValueEnum growthValueEnum,Integer counts) {
+        userService.taskComplete(user,growthValueEnum,counts);
+    }
 }

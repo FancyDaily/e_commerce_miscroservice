@@ -85,6 +85,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     private GroupDao groupDao;
 
     @Autowired
+    private TypeRecordDao typeRecordDao;
+
+    @Autowired
     private RedisUtil redisUtil;
 
     private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
@@ -722,6 +725,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 更新数据库
         userDao.updateByPrimaryKey(user);
 
+        // TODO 如果为修改昵称 -> 同步修改服务表里的创建者昵称
+        String name = user.getName();
+        if (name != null) {
+            //TODO 调用订单模块的方法
+        }
+
         user = userDao.selectByPrimaryKey(idHolder.getId());
         completeReward(user); //TODO 用户信息完整度任务奖励
 
@@ -785,23 +794,24 @@ public class UserServiceImpl extends BaseService implements UserService {
             int num = PersonalIntegrity.USER_PICTURE_PATH.getNum();
             completeNum = completeNum + num;
         }
-
+        //
         String workPlace = user.getWorkPlace();
         if (workPlace != null && !workPlace.isEmpty()) {
-            int num = PersonalIntegrity.WORK_TOTAL.getNum();
+            int num = PersonalIntegrity.COMPANY.getNum();
             completeNum = completeNum + num;
         }
 
         String college = user.getCollege();
         if (college != null && !college.isEmpty()) {
-            int num = PersonalIntegrity.EDU_TOTAL.getNum();
+            int num = PersonalIntegrity.EDUCATION.getNum();
             completeNum = completeNum + num;
         }
 
         if (completeNum >= completeTaskNum) {
             // 获取任务奖励
             Long reward = TaskEnum.TASK_PAGE.getReward();
-            rewardComplete(user, reward);
+//            rewardComplete(user, reward);
+            taskComplete(user,GrowthValueEnum.GROWTH_TYPE_UNREP_PAGE);  //成长值相关
             // 插入一条任务完成记录
             TUserTask userTask = new TUserTask();
             userTask.setId(idGenerator.nextId());
@@ -868,7 +878,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public TBonusPackage preGenerateBonusPackage(TUser user, TBonusPackage bonusPackage) {
-        //TODO 判穷(含授信)
+        //TODO 判穷
 
         long currentTimeMillis = System.currentTimeMillis();
         bonusPackage.setId(idGenerator.nextId());
@@ -904,7 +914,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         Long time = bonusPackage.getTime();
         Long currentMills = System.currentTimeMillis();
-        //TODO 判穷(含授信)
+        //TODO 判穷
 
         //余额变动
         user = userDao.selectByPrimaryKey(user.getId());    //最新数据
@@ -947,11 +957,36 @@ public class UserServiceImpl extends BaseService implements UserService {
      *
      * @param user
      * @param bonusId
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "id": 103524652990595072,    //红包id
+     *         "userId": 68813260748488704, //发布人id
+     *         "description": "766468686",  //描述
+     *         "time": 100, //金额
+     *         "createTime": 1552464600668,
+     *         "isValid": "1",
+     *         "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/15446050826379.png",  //头像
+     *         "name": "马晓晨"    //名字
+     *     }
+     * }
+     *
      * @return
      */
     @Override
-    public TBonusPackage bonusPackageInfo(TUser user, Long bonusId) {
-        return bonusPackageDao.info(bonusId);
+    public BonusPackageVIew bonusPackageInfo(TUser user, Long bonusId) {
+        TBonusPackage info = bonusPackageDao.info(bonusId);
+        if(info==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该红包不存在！");
+        }
+        BonusPackageVIew copy = BeanUtil.copy(info, BonusPackageVIew.class);
+        TUser theUser = userDao.selectByPrimaryKey(info.getCreateUser());
+        copy.setUserHeadPortraitPath(theUser.getUserHeadPortraitPath());
+        copy.setName(theUser.getName());
+        return copy;
     }
 
     /**
@@ -1112,8 +1147,9 @@ public class UserServiceImpl extends BaseService implements UserService {
          * // 性别 user.setSex(userAuth.getSex());
          */
 
-        // 生日
-//        user.setBirthday(userAuth.getBirthday());
+        // 生日 //TODO 从身份证中识别出生日信息
+        Map<String, Object> birAgeSex = IDCardUtil.getBirAgeSex(cardId);
+        user.setBirthday((Long) birAgeSex.get("birthday"));
 
         // updater
         user.setUpdateTime(timeStamp);
@@ -1130,11 +1166,14 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
 //                AppConstant.TARGET_ID_TASK_AUTH);
 
+        //成长值记录
+        taskComplete(user,GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
+
         userDao.updateByPrimaryKey(user);
 
         user = userDao.selectByPrimaryKey(user.getId());
 
-//        flushRedisUser(token, user);  //刷新缓存
+//      flushRedisUser(token, user);  //刷新缓存
     }
 
     /**
@@ -1512,18 +1551,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
         for(TUserTask userTask:userTasks) {
             //签到 -> createTime为当日
-            if(userTask.getType().equals(TaskEnum.TASK_SIGNUP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+            if(userTask.getType().equals(TaskEnum.TASK_SIGN_UP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
                 continue;
             }
             resultList.add(userTask.getType());
             resultSet.add(userTask.getType());
         }
         return resultSet;
-    }
-
-    @Override
-    public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
-
     }
 
     /**
@@ -1741,7 +1775,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         inviter.setSurplusTime(inviter.getSurplusTime() + bonus);
 
         // 使邀请人获得成长值奖励
-        inviter = growthValueService.addGrowthValue(inviter, GrowthValueEnum.GROWTH_TYPE_INVITE_BONUS.getCode());
+        inviter = growthValueService.addGrowthValue(inviter, GrowthValueEnum.GROWTH_TYPE_REP_INVITE.getCode());
 
         userDao.updateByPrimaryKey(inviter); // TODO
         // TODO 刷新缓存
@@ -1854,7 +1888,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         serviceView.setUrl(imgUrl);
 
         // 获得分享奖励
-        user = growthValueService.addGrowthValue(user, GrowthValueEnum.GROWTH_TYPE_SHARE_BONUS.getCode());
+        user = growthValueService.addGrowthValue(user, GrowthValueEnum.GROWTH_TYPE_REP_SHARE_PRODUCT.getCode());
 
         // 刷新缓存
         flushRedisUser(token, user);
@@ -2040,6 +2074,316 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
+     * 组织时间轨迹
+     * @param user
+     * @param year
+     * @param month
+     * @param type
+     * @return
+     */
+    @Override
+    public CompanyPaymentView queryPayment(TUser user, String year, String month, String type) {
+        return null;    //TODO 后续补充
+    }
+
+    /**
+     * 等级提升(不包括更新数据库)
+     * @param user
+     * @return
+     */
+    @Override
+    public TUser levelUp(TUser user) {
+        return null;    //TODO 待补充
+    }
+
+    /**
+     * 任务完成
+     * @param user  成长值增加对象
+     * @param growthValueEnum   枚举类型
+     */
+    @Override
+    public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum) {
+        //根据类型校验最大值、当日最大值
+        growthValueEnum = checkMax(growthValueEnum,user.getId());
+
+        //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
+        Integer price = growthValueEnum.getPrice(); //数额
+
+        //插入一条成长值流水
+        insertGrowthValueRecords(user,growthValueEnum);
+
+        //成长值 & 等级提升 & 授信额度提升
+        return levelUp(user,price);
+    }
+
+    /**
+     * 任务完成(批量)
+     * @param user  成长值增加对象
+     * @param growthValueEnum   枚举类型
+     */
+    @Override
+    public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
+        //根据类型校验最大值、当日最大值
+        counts = checkMax(growthValueEnum,user,counts);
+
+        //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
+        Integer price = growthValueEnum.getPrice() * counts; //数额
+
+        //插入多条成长值流水
+        for(int i=0;i<counts;i++) { //TODO 可能修改为批量插入
+            insertGrowthValueRecords(user,growthValueEnum);
+        }
+
+        //成长值 & 等级提升 & 授信额度提升
+        return levelUp(user,price);
+    }
+
+    @Override
+    public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("isMine",bonusPackageDao.isMine(user.getId(),bonusPackageId));
+        return resultMap;
+    }
+
+    private Integer checkMax(GrowthValueEnum growthValueEnum, TUser user, Integer counts) {
+        //判空
+        if(growthValueEnum == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型为空！");
+        }
+
+        if(counts<1) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"数量不合法！");
+        }
+
+        int code = growthValueEnum.getCode();
+
+        Integer superCountTotal = 0;
+        Integer superCountToday = 0;
+        Integer countTotal = 0;
+        Integer countToday = 0;
+        GrowthValueEnum superGrowthValueEnum = null;
+
+        // 日期信息
+        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
+        Long beginStamp = Long.valueOf((String)ym2BetweenStamp.get("begin"));
+        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+
+        List<Integer> needTOConfirmList = Arrays.asList(AppConstant.GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY);
+        //如果为特定类型
+        if(needTOConfirmList.contains(code)) {
+            if (code == GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE.getCode() || code == GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE.getCode()) {  //如果为互助完成
+                superGrowthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_ITEM_DONE;
+            } else if (code == GrowthValueEnum.GROWTH_TYPE_REP_COMMENT.getCode()) {
+                superGrowthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_COMMENT;
+            } else if (code == GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE.getCode()) {
+                superGrowthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_PUBLIC_WELFARE_ACTY_DONE;
+            }
+        }
+        List<TTypeRecord> typeRecords = null;
+
+        if(superGrowthValueEnum!=null) {
+            typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(), superGrowthValueEnum.getCode(), user.getId());
+        } else {
+            typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),user.getId());
+        }
+
+        //遍历筛选次数
+        for(TTypeRecord typeRecord:typeRecords) {
+            if(typeRecord.getType().equals(growthValueEnum.getCode())) {    //重复
+                superCountTotal++;
+                if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) {
+                    superCountToday++;
+                }
+            } else {    //一次型
+                countTotal++;
+                if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) {
+                    countToday++;
+                }
+            }
+        }
+
+        boolean flag = false;
+        Integer dailyMaxIn = growthValueEnum.getDailyMaxIn();//TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
+        if(countTotal>growthValueEnum.getMaxIn() ||  countToday>dailyMaxIn) {   //总或者今日达到上限
+            counts = 0;
+        } else {
+            int inteval = dailyMaxIn - countToday;
+            if(inteval>0 && counts-inteval>0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
+                flag = true;
+            }
+            counts = counts<inteval?counts:inteval;
+        }
+
+        boolean superFlag = false;
+        if(superGrowthValueEnum!=null) {
+            if(superCountTotal<superGrowthValueEnum.getMaxIn() && superCountToday<superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
+                //插入一条成长值流水
+                insertGrowthValueRecords(user,growthValueEnum);
+                counts--; //消耗掉一次插入机会
+                superFlag = true;
+                //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
+
+                //TODO 插入一条任务完成的流水。superGrowthValueEnum对应的任务类型
+            }
+            if(!superFlag && flag) { //次数不被消耗的前提下(已完成首次任务)能够完成任务
+                //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
+            }
+        } else if(flag){
+            //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
+        }
+        return counts;
+    }
+
+    private TUser levelUp(TUser user, Integer price) {
+        Long growthValue = user.getGrowthValue();
+
+        //成长值增加
+        user.setGrowthValue(growthValue + price);
+
+        //等级提升
+        Integer level = user.getLevel();
+        if (growthValue >= LevelEnum.LEVEL_ONE.getMin() && growthValue < LevelEnum.LEVEL_ONE.getMax()) {
+            level = LevelEnum.LEVEL_ONE.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
+            level = LevelEnum.LEVEL_TWO.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_THREE.getMin() && growthValue < LevelEnum.LEVEL_THREE.getMax()) {
+            level = LevelEnum.LEVEL_THREE.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_FOUR.getMin() && growthValue < LevelEnum.LEVEL_FOUR.getMax()) {
+            level = LevelEnum.LEVEL_FOUR.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_FIVE.getMin() && growthValue < LevelEnum.LEVEL_FIVE.getMax()) {
+            level = LevelEnum.LEVEL_FIVE.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_SIX.getMin() && growthValue < LevelEnum.LEVEL_SIX.getMax()) {
+            level = LevelEnum.LEVEL_SIX.getLevel();
+        }
+        if (growthValue >= LevelEnum.LEVEL_SEVEN.getMin()) {
+            level = LevelEnum.LEVEL_SEVEN.getLevel();
+        }
+
+        user.setLevel(level);
+
+        //TODO 授信总额提升 等待规则出来
+
+        //更新
+        //updater
+        user.setUpdateTime(System.currentTimeMillis());
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(user);
+        return user;
+    }
+
+    private GrowthValueEnum checkMax(GrowthValueEnum growthValueEnum,Long userId) {
+        //判空
+        if(growthValueEnum == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型为空！");
+        }
+
+        int code = growthValueEnum.getCode();
+
+        // 日期信息
+        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
+        Long beginStamp = Long.valueOf((String)ym2BetweenStamp.get("begin"));
+        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+
+        List<Integer> needTOConfirmList = Arrays.asList(AppConstant.GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY);
+
+        //如果为特定类型
+        if(needTOConfirmList.contains(code)) {
+            if(code == GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE.getCode() || code == GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE.getCode()) {  //如果为互助完成
+                growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_ITEM_DONE;
+            } else if(code == GrowthValueEnum.GROWTH_TYPE_REP_COMMENT.getCode()) {
+                growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_COMMENT;
+            } else if(code == GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE.getCode()) {
+                growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_PUBLIC_WELFARE_ACTY_DONE;
+            }
+                boolean flag = true;
+                //查询成长值记录
+                List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),userId);
+
+                Integer maxIn = growthValueEnum.getMaxIn();
+                Integer dayMaxIn = growthValueEnum.getDailyMaxIn();
+                Long total = 0l;
+                Long dayTotal = 0l;
+                //判断总额
+                for(TTypeRecord typeRecord:typeRecords) {
+                    total += typeRecord.getNum();
+                    if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) { //统计今日的成长值流水
+                        dayTotal += typeRecord.getNum();
+                    }
+                }
+
+                //判断是否超出总额
+                if(maxIn!=-1 && total >= maxIn) {
+                    flag = false;
+                }
+
+                //判断是否超出今日总额
+                if(dayMaxIn!=-1 && dayTotal >= dayMaxIn) {
+                   flag = false;
+                }
+
+                if(flag) {
+                    return growthValueEnum;
+                }
+        }
+
+        //查询成长值记录
+        List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),userId);
+
+        Integer maxIn = growthValueEnum.getMaxIn();
+        Integer dayMaxIn = growthValueEnum.getDailyMaxIn();
+        Long total = 0l;
+        Long dayTotal = 0l;
+        //判断总额
+        for(TTypeRecord typeRecord:typeRecords) {
+            total += typeRecord.getNum();
+            if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) { //统计今日的成长值流水
+                dayTotal += typeRecord.getNum();
+            }
+        }
+
+        //判断是否超出总额
+        if(maxIn!=-1 && total >= maxIn) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该类型已经达到成长值获取上限！");
+        }
+
+        //判断是否超出今日总额
+        if(dayMaxIn!=-1 && dayTotal >= dayMaxIn) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该类型已经达到成长值获取今日上限！");
+        }
+
+        return growthValueEnum;
+    }
+
+    private int insertGrowthValueRecords(TUser user, GrowthValueEnum growthValueEnum) {
+        long currentTimeMillis = System.currentTimeMillis();
+        TTypeRecord typeRecord = new TTypeRecord();
+        typeRecord.setId(idGenerator.nextId());
+        typeRecord.setUserId(user.getId());
+        typeRecord.setType(growthValueEnum.getCode());
+        typeRecord.setSubType(growthValueEnum.getSubCode());
+        typeRecord.setTitle(growthValueEnum.getMessage());
+        typeRecord.setContent(growthValueEnum.getMessage());
+        typeRecord.setNum(Long.valueOf(growthValueEnum.getPrice()));
+        //creater & updater
+        typeRecord.setCreateTime(currentTimeMillis);
+        typeRecord.setCreateUser(user.getId());
+        typeRecord.setCreateUserName(user.getName());
+        typeRecord.setUpdateTime(currentTimeMillis);
+        typeRecord.setUpdateUser(user.getId());
+        typeRecord.setUpdateUserName(user.getName());
+        typeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        return typeRecordDao.insert(typeRecord);
+    }
+
+    /**
      * 通过手机号获取用户(组织账号)
      * @param telephone
      * @return
@@ -2050,9 +2394,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             user = userList.get(0);
-           /* if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
                 throw new MessageException("当前用户被封禁!禁止登录！");
-            }*/
+            }
         }
         return user;
     }
@@ -2089,7 +2433,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUserTask userTask = new TUserTask();
         userTask.setId(snowflakeIdWorker.nextId());
         userTask.setUserId(id);
-        userTask.setType(TaskEnum.TASK_SIGNUP.getType());
+        userTask.setType(TaskEnum.TASK_SIGN_UP.getType());
         userTask.setTargetNum(1);
         // creater & updater
         long currentTimeMillis = System.currentTimeMillis();
@@ -2197,6 +2541,5 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         return userCompanies.get(0).getCompanyId();
     }
-
 
 }

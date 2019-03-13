@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.commons.util.colligate;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;

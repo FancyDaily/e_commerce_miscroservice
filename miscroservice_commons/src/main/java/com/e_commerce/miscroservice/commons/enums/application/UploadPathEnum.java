@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
  * 2.
  */
 @Component
+@PropertySource("properties/config-environ-test.properties")
 public class UploadPathEnum {
 	/*
 	 * 读取配置文件
