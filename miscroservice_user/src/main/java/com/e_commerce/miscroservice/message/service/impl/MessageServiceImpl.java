@@ -171,6 +171,7 @@ public class MessageServiceImpl implements MessageService {
             messageDetailView.setMessage(messageList.get(i).getMessage());
             messageDetailView.setUrl(messageList.get(i).getUrl());
             messageDetailView.setTime(messageList.get(i).getCreateTime());
+            messageDetailView.setCreateTime(messageList.get(i).getCreateTime());
             messageDetailView.setType(messageList.get(i).getType());
             //如果发布用户是当前用户
             if (messageList.get(i).getUserId() == nowUser.getId().longValue()) {
@@ -256,8 +257,9 @@ public class MessageServiceImpl implements MessageService {
         for (int i = 0; i < messageList.size(); i++) {
             MessageShowLIstView messageShowLIstView = new MessageShowLIstView();
             messageShowLIstView.setParent(messageList.get(i).getParent());
-            messageShowLIstView.setParentToString(messageList.get(i).getParent());
+            messageShowLIstView.setParent(messageList.get(i).getParent());
             messageShowLIstView.setTime(messageList.get(i).getUpdateTime());
+            messageShowLIstView.setCreateTime(messageList.get(i).getCreateTime());
             messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent()));
             if (messageList.get(i).getType() == MessageEnum.TYPE_PHOTO.getType()) {
                 //如果是图片
@@ -269,13 +271,13 @@ public class MessageServiceImpl implements MessageService {
                 //如果消息的发布者是当前用户
                 messageShowLIstView.setUserName(nowUser.getName());
                 messageShowLIstView.setUserUrl(nowUser.getUserHeadPortraitPath());
-                messageShowLIstView.setToUserIdToString(nowUser.getId());
+                messageShowLIstView.setToUserId(nowUser.getId());
             } else {
                 for (int j = 0; j < toUsersInfoList.size(); j++) {
                     if (messageList.get(i).getUserId() == toUsersInfoList.get(j).getId().longValue()) {
                         messageShowLIstView.setUserName(toUsersInfoList.get(j).getName());
                         messageShowLIstView.setUserUrl(toUsersInfoList.get(j).getUserHeadPortraitPath());
-                        messageShowLIstView.setToUserIdToString(toUsersInfoList.get(j).getId());
+                        messageShowLIstView.setToUserId(toUsersInfoList.get(j).getId());
                         break;
                     }
                 }

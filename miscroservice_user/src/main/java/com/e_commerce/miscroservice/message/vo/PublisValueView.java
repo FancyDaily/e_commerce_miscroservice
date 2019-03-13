@@ -2,8 +2,6 @@ package com.e_commerce.miscroservice.message.vo;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * 功能描述:key-value 权益view
  * 模块:
@@ -16,16 +14,14 @@ import java.util.List;
  * 创建时间:2018年11月3日 下午6:18:50
  */
 @Data
-public class MessageDetailView {
-	private Long id;
-	private String userName;
-	private String userUrl;
-	private Long userId;
-	private Long time;
-	private Long createTime;
-	private int status;
-	private String message;
-	private int type;
-	private String url;
-
+public class PublisValueView {
+	/**
+	 * id
+	 */
+	private String id;
+	/**
+	 * 名字
+	 */
+	private String name;
+	
 }

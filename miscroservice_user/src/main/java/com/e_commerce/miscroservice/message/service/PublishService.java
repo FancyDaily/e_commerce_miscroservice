@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.message.service;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
@@ -42,4 +43,18 @@ public interface PublishService {
      * @return
      */
     TPublish publishGet(String key);
+    /**
+     * 通过key和标签id 获取值
+     * @param labelsId
+     * @param key
+     * @return
+     */
+    String getValue(long labelsId , String key);
+    /**
+     * 根据分辨率返回不同类型封面图
+     * @param length
+     * @param width
+     * @return
+     */
+    List<BroadcastView> getBroadcast(String length , String width);
 }

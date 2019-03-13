@@ -232,6 +232,13 @@ public class OrderRelationController extends BaseController {
      * @param nowUserId 当前用户id
      * @param userIds 被支付用户id（多人逗号分割）
      * @param payments 支付钱数（多人逗号分割）
+     *
+     *      "success": true,
+     *      "msg": "支付成功",
+     *      "data": [
+     *         "用户刘维已被您支付"
+     *     ]
+     *
      * @return
      */
     @PostMapping("/pay")
@@ -273,18 +280,27 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId 订单编号
      * @param nowUserId 当前用户
+     * @param userIds 被开始用户，逗号分割
      *
-     *     "success": false,
-     *     "errorCode": "499",
-     *     "msg": "开始失败,您已经签到过了～", 错误消息
+     *     "success": true,
+     *     "msg": "开始成功",
+     *     "data": [
+     *         "用户刘维已被您操作"
+     *     ]
      *
      * @return
      */
     @PostMapping("/startOrder")
-    public Object startOrder(Long orderId, Long nowUserId) {
+    public Object startOrder(Long orderId, Long nowUserId ,String userIds) {
         AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
         try {
-            orderRelationService.startOrder(orderId , nowUserId);
+            orderRelationService.startOrder(orderId , nowUserId , userIdList);
             result.setSuccess(true);
             result.setMsg("开始成功");
         } catch (MessageException e) {
@@ -297,6 +313,100 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("开始失败");
+        }
+        return result;
+    }
+
+    /**
+     * 批量投诉
+     *
+     * @param orderId 订单id
+     * @param labelsId 标签id
+     * @param message 内容
+     * @param voucherUrl 图片，多个逗号分割
+     * @param nowUserId 当前用户
+     * @param userIds 用户id 多个逗号分割
+     *
+     *     "success": true,
+     *     "msg": "投诉成功",
+     *     "data": [
+     *         "用户刘维已被您投诉"
+     *     ]
+     *
+     * @return
+     */
+    @PostMapping("/reports")
+    public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , String userIds) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.repors(orderId , labelsId , message , voucherUrl , nowUserId , userIdList);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("投诉成功");
+        } catch (MessageException e) {
+            logger.warn("投诉失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("投诉失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("投诉失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("投诉失败");
+        }
+        return result;
+    }
+
+    /**
+     * 批量评价
+     *
+     * @param nowUserId 当前用户ID
+     * @param userIds 用户id 多个逗号分割
+     * @param orderId 订单id
+     * @param credit 信用评分
+     * @param major 专业评分
+     * @param attitude 题阿杜评分
+     * @param message 评价内容
+     * @param labels 评价标签
+     *
+     *     "success": true,
+     *     "msg": "评价成功",
+     *     "data": [
+     *         "用户刘维已被您评价"
+     *     ]
+     *
+     * @return
+     */
+    @PostMapping("/remark")
+    public Object remark(Long nowUserId, String userIds, Long orderId , int credit, int major, int attitude, String message, String labels) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.remarkOrder(nowUserId , userIdList , orderId , credit , major , attitude , message , labels);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("评价成功");
+        } catch (MessageException e) {
+            logger.warn("评价失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("评价失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("投诉失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("评价失败");
         }
         return result;
     }

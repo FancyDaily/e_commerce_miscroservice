@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +25,10 @@ public class EvaluateDaoImpl implements EvaluateDao {
                 .in(TEvaluate::getOrderId,orderIds)
                 .eq(TEvaluate::getUserId,userId)
                 .eq(TEvaluate::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public long save(TEvaluate evaluate){
+        return MybatisOperaterUtil.getInstance().save(evaluate);
     }
 }

@@ -65,13 +65,13 @@ public enum OrderRelationshipEnum {
      */
     STATUS_IS_COMPLETED(10, "已完成"),
     /**
-     * 订单关系状态为服务者评价，即求助者还未评价  状态值为11
+     * 订单关系状态为已发布评价  状态值为11
      */
-    STATUS_SERVER_REMARK(11, "服务者评价"),
+    STATUS_IS_REMARK(11, "已评价"),
     /**
-     * 订单关系状态为求助者评价，即服务者还未评价  状态值为12
+     * 订单关系状态被对方评价  状态值为12
      */
-    STATUS_HELPER_REMARK(12, "求助者评价"),
+    STATUS_BE_REMARK(12, "被评价"),
     /**
      * 订单关系状态为求助者支付0分组，关系不成立  状态值为13
      */
