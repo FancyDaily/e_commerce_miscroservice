@@ -52,9 +52,9 @@ public interface OrderService {
 	/**
 	 * 同步商品和订单的状态
 	 * @param productId 商品ID
-	 * @param status  要同步称为的状态
+	 * @param status  要同步成为的状态
 	 */
-	void SynOrderServiceStatus(Long productId, Integer status);
+	void synOrderServiceStatus(Long productId, Integer status);
 
 	/**
 	 * 查询自己的订单列表
@@ -74,10 +74,12 @@ public interface OrderService {
 	DetailMineOrderReturnView detailMineOrder(TUser user, Long orderId);
 
 	/**
-	 * 根据商品产出订单
-	 * @param service
+	 * 根据商品派生订单
+	 * @param service 商品ID
+	 * @param type 类型 是发布派生还是报名派生
+	 * @param date 报名或者选满人派生的日期
 	 */
-	void produceOrder(TService service);
+	void produceOrder(TService service, Integer type, String date);
 
 	/**
 	 * 我选人的详情页面

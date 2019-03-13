@@ -8,8 +8,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -246,14 +244,14 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .in(TOrderRelationship::getStatus, statusList)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
                         );
         return orderRelationshipList;
     }
 
     /**
-     * 根据orderId和status来查询未开始（签到）报名者订单List  ---->（不用了
+     * 根据orderId和status来查询未投诉报名者订单List
      *
      * @param orderId
      * @param status
@@ -265,8 +263,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .eq(TOrderRelationship::getSignType , OrderRelationshipEnum.SIGN_TYPE_NO.getType())
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
                         );
         return orderRelationshipList;
@@ -285,7 +283,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getStatus, status)
                         .isNotNull(TOrderRelationship::getReceiptUserId)
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
                         );
         return orderRelationshipList;
@@ -302,10 +300,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .count(TOrderRelationship::getId)
                 .eq(TOrderRelationship::getOrderId, orderId)
                 .isNotNull(TOrderRelationship::getReceiptUserId)
-                .groupBefore().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
-                .or().eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_SOLVE.getType()).groupAfter()
+                .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
                 .eq(TOrderRelationship::getStatus , status)
-                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
         return  count;
     }
     /*public long updateByOrderRelationshipList(List<TOrderRelationship> orderRelationshipList){
@@ -325,7 +322,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .eq(TOrderRelationship::getOrderId, orderId)
                         .eq(TOrderRelationship::getReceiptUserId, userId)
                         .in(TOrderRelationship::getStatus, participationStatusList())
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationship;
     }
 
@@ -360,7 +357,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType()).groupAfter()
                 .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId).groupAfter()
-                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrderRelationship::getCreateTime))
                 );
     }
@@ -377,7 +374,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
-                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+                .eq(TOrderRelationship::getOrderId , orderId)
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     /**
@@ -391,8 +389,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
         orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_SERVER_REMARK.getType());
-        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_HELPER_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+        orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
         return orderRelationshipStatusList;
     }
 

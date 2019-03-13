@@ -9,8 +9,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlW
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -90,10 +88,8 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     @Override
-    public Page<TOrder> pageOrder(PageOrderParamView param) {
-        Page<TOrder> page = PageHelper.startPage(param.getPageNum(), param.getPageSize());
-        orderMapper.pageOrder(param);
-        return page;
+    public List<TOrder> pageOrder(PageOrderParamView param) {
+        return orderMapper.pageOrder(param);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
+import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.message.vo.WxMssVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class MessageCommonController extends BaseController {
 
     @Autowired
     private MessageNoticeDao messageNoticeDao;
+
+    @Autowired
+    private PublishService publishService;
 
 
     /**
@@ -101,4 +105,13 @@ public class MessageCommonController extends BaseController {
         return responseEntity.getBody();
     }
 
+    /**
+     * 通过labelsId和key获取key
+     * @param labelsId
+     * @param key
+     * @return
+     */
+    public String getValue(long labelsId , String key){
+        return publishService.getValue(labelsId , key);
+    }
 }

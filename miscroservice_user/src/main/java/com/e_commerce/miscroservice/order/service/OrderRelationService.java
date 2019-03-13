@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service;
 
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +77,7 @@ public interface OrderRelationService {
      * @param nowUserId
      * @return
      */
-    void startOrder(Long orderId , Long nowUserId);
+    List<String> startOrder(Long orderId  , Long nowUserId , List<Long> userIdList);
 
     /**
      * 支付
@@ -87,4 +88,35 @@ public interface OrderRelationService {
      * @return
      */
     List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
+    /**
+     * 新增发布者订单关系
+     * @param order
+     */
+    int addTorderRelationship(TOrder order);
+
+    /**
+     * 批量投诉
+     *
+     * @param orderId
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
+     * @param nowUserId
+     * @param userIds
+     * @return
+     */
+    List<String> repors (long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , List<Long> userIds);
+    /**
+     * 评价订单
+     * @param nowUserId
+     * @param userIdList
+     * @param orderId
+     * @param credit
+     * @param major
+     * @param attitude
+     * @param message
+     * @param labels
+     * @return
+     */
+    List<String> remarkOrder(Long nowUserId, List<Long> userIdList, Long orderId , int credit, int major, int attitude, String message, String labels);
 }

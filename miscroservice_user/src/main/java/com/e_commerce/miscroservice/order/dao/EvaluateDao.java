@@ -19,4 +19,11 @@ public interface EvaluateDao {
      * @return
      */
     List<TEvaluate> selectEvaluateInOrderIdsAndByUserId(List orderIds, Long userId);
+
+    /**
+     * 保存评价
+     * @param evaluate
+     * @return
+     */
+    long save(TEvaluate evaluate);
 }

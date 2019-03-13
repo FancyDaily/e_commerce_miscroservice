@@ -76,7 +76,7 @@ public interface OrderRelationshipDao {
      */
     List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId , List<Long> userIdList);
     /**
-     * 根据orderId和status来查询未开始（签到）报名者订单List
+     * 根据orderId和status来查询未投诉报名者订单List
      * @param orderId
      * @param status
      * @return

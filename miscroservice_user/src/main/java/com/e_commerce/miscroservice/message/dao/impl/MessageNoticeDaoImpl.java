@@ -56,7 +56,7 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
         long count = MybatisOperaterUtil.getInstance().count(
                 new MybatisSqlWhereBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
-                        .lt(TMessageNotice::getCreateTime , lastTIme)
+                        .gt(TMessageNotice::getCreateTime , lastTIme)
                         .eq(TMessageNotice::getIsValid , "1")
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return count;

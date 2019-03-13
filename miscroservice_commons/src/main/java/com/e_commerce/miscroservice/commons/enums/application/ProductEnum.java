@@ -25,7 +25,7 @@ public enum ProductEnum {
      */
     STATUS_LOWER_FRAME_MANUAL(3, "手动下架"),
     /**
-     * 求助服务状态为自动超时下架
+     * 求助服务状态为自动下架 , 超时或者互助时不够
      */
     STATUS_LOWER_FRAME_TIME_OUT(4, "自动下架"),
     /**

@@ -92,4 +92,11 @@ public interface ProductService {
 	 * @return 商品
 	 */
 	TService getProductById(Long serviceId);
+
+	/**
+	 * 根据主键修改信息
+	 * @param service 要修改的实体类，需要带主键ID
+	 * @return
+	 */
+	void autoLowerFrameService(TService service);
 }

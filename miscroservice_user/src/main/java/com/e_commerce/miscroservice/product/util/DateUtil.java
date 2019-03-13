@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -212,5 +213,29 @@ public class DateUtil {
 		cal.setTimeInMillis(timestamp);
 		cal.add(Calendar.DAY_OF_YEAR, addDays);
 		return cal.getTimeInMillis();
+	}
+
+	public static int[] getWeekDayArray(String dateWeekNumber) {
+		String[] weekDayArray = dateWeekNumber.split(",");
+		int[] WeekDayNumberArray = getIntArray(weekDayArray);
+		//对星期进行升序排序
+		Arrays.sort(WeekDayNumberArray);
+		return WeekDayNumberArray;
+	}
+
+	/**
+	 * 将字符串数组转换为int数组
+	 *
+	 * @param weekDayArray 字符串数值数组
+	 * @return int数组
+	 * @author 马晓晨
+	 */
+	private static int[] getIntArray(String[] weekDayArray) {
+		int[] WeekDayNumberArray = new int[weekDayArray.length];
+		for (int i = 0; i < weekDayArray.length; i++) {
+			Integer weekDay = Integer.parseInt(weekDayArray[i]);
+			WeekDayNumberArray[i] = weekDay;
+		}
+		return WeekDayNumberArray;
 	}
 }

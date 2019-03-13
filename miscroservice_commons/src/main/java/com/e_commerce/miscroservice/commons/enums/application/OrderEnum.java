@@ -6,7 +6,7 @@ public enum OrderEnum {
 	TIME_TYPE_REPEAT(1,"可重复"),
 
 	COLLECT_TYPE_TIME(1 , "互助时"),
-	COLLECT_TYPE_WELFARE(1 , "公益时"),
+	COLLECT_TYPE_WELFARE(2 , "公益时"),
 
 	STATUS_END(2,"结束"),
 	STATUS_NORMAL(1, "正常产出的订单状态"),
@@ -20,7 +20,19 @@ public enum OrderEnum {
 
 	PRODUCE_RESULT_CODE_SUCCESS(1, "可以派生订单"),
 	PRODUCE_RESULT_CODE_EXISTENCE(2, "订单已经存在，没有再继续派生订单"),
-	PRODUCE_RESULT_CODE_LOWER_FRAME(3, "订单派生已经超过商品的结束时间，需要进行下架处理"),
+	PRODUCE_RESULT_CODE_LOWER_FRAME(3, "订单派生已经超过商品的结束时间，停止派生订单，需要进行下架处理"),
+	PRODUCE_RESULT_CODE_END(4, "订单派生已经超过商品的结束时间，停止派生订单，但是不需要下架处理"),
+
+	DETAIL_SHOW_STATUS_WAIT_PAY(1, "待支付"),
+	DETAIL_SHOW_STATUS_WAIT_BEGIN(2, "待开始"),
+	DETAIL_SHOW_STATUS_WAIT_OTHER_PAY(3, "待对方支付"),
+	DETAIL_SHOW_STATUS_WAIT_REMARK(4, "待评价"),
+	DETAIL_SHOW_STATUS_WAIT_OTHER_REMARK(5, "待对方评价"),
+	DETAIL_SHOW_STATUS__ALREADY_CANCEL(6, "已取消"),
+	DETAIL_SHOW_STATUS_OTHER_CANCEL(7, "被取消"),
+	DETAIL_SHOW_STATUS_ALREADY_END(8, "已完成"),
+	DETAIL_SHOW_STATUS_COMPLAINT(9, "投诉中"),
+
 
 		//显示状态: 1、已结束  2、已取消 3、待选人 4、被拒绝  5、已报名 6、已入选
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END(1, "已结束"),

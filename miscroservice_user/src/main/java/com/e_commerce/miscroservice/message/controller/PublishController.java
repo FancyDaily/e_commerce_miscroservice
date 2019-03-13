@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.service.PublishService;
+import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
@@ -16,12 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sun.security.util.Length;
+
+import java.util.List;
 
 
 /**
  * 键值模块
  *
- * 消息controller
+ * 键值controller
  **/
 @RestController
 @RequestMapping("/api/v2/publish")
@@ -97,6 +101,38 @@ public class PublishController extends BaseController {
             result.setSuccess(true);
             result.setMsg("查询成功！");
             result.setData(publish);
+            return result;
+        } catch (MessageException e) {
+            logger.warn("查询失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查询失败," + e.getMessage());
+            return result;
+        } catch (Exception e) {
+            logger.error("查询失败" + errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("查询失败");
+            e.printStackTrace();
+            return result;
+        }
+    }
+
+    /**
+     * 获取broadcast
+     *
+     * @param length
+     * @param width
+     * @return
+     */
+    @PostMapping("/publishGetBroadcast")
+    public Object publishGetBroadcast(String length , String width) {
+        AjaxResult result = new AjaxResult();
+        try {
+            List<BroadcastView> broadcastViewList = publishService.getBroadcast(length , width);
+            result.setSuccess(true);
+            result.setMsg("查询成功！");
+            result.setData(broadcastViewList);
             return result;
         } catch (MessageException e) {
             logger.warn("查询失败," + e.getMessage());
