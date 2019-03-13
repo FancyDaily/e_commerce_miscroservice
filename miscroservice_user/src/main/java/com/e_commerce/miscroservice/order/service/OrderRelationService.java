@@ -77,7 +77,7 @@ public interface OrderRelationService {
      * @param nowUserId
      * @return
      */
-    void startOrder(Long orderId , Long nowUserId);
+    List<String> startOrder(Long orderId  , Long nowUserId , List<Long> userIdList);
 
     /**
      * 支付

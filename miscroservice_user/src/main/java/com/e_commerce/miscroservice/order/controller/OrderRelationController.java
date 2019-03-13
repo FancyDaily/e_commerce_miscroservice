@@ -273,7 +273,7 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId 订单编号
      * @param nowUserId 当前用户
-     *
+     * @param userIds 被开始用户，逗号分割
      *     "success": false,
      *     "errorCode": "499",
      *     "msg": "开始失败,您已经签到过了～", 错误消息
@@ -281,10 +281,16 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/startOrder")
-    public Object startOrder(Long orderId, Long nowUserId) {
+    public Object startOrder(Long orderId, Long nowUserId ,String userIds) {
         AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
         try {
-            orderRelationService.startOrder(orderId , nowUserId);
+            orderRelationService.startOrder(orderId , nowUserId , userIdList);
             result.setSuccess(true);
             result.setMsg("开始成功");
         } catch (MessageException e) {

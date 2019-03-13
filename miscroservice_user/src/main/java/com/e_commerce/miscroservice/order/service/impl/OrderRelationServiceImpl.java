@@ -25,14 +25,12 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
-import com.e_commerce.miscroservice.order.dao.OrderDao;
-import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
-import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
-import com.e_commerce.miscroservice.order.dao.ReportDao;
+import com.e_commerce.miscroservice.order.dao.*;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.sun.xml.internal.ws.api.pipe.Tube;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.omg.CORBA.IRObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,6 +77,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
     @Autowired
     private ReportDao reportDao;
+
+    @Autowired
+    private EvaluateDao evaluateDao;
 
     /**
      * 报名
@@ -391,36 +392,27 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @return
      */
     @Transactional(rollbackFor = Throwable.class)
-    public void startOrder(Long orderId  , Long nowUserId){
+    public List<String> startOrder(Long orderId  , Long nowUserId , List<Long> userIdList){
+        List<String> errorMsg = new ArrayList<>();
         TUser nowUser = userCommonController.getUserById(nowUserId);
         long nowTime = System.currentTimeMillis();
-        //如果是求助的报名者，改自己的开始状态，并且该状态的订单只有一个
-        TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
-        if (orderRelationship.getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()){
-            //如果用户已经被签到过了
-            throw new MessageException("499", "您已经签到过了～");
-        }
-        //将该用户标记为签到状态
-        orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_YES.getType());
-        orderRelationship.setUpdateTime(nowTime);
-        orderRelationship.setUpdateUser(nowUser.getId());
-        orderRelationship.setUpdateUserName(nowUser.getName());
-        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-            /*else if (order.getType() == ProductEnum.TYPE_SERVICE.getValue() && isPublish){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        if (order.getCreateUser() == nowUser.getId().longValue()){
             //如果是服务的发布者，改报名者状态
+            List<Long> orderRelationshipIdList = new ArrayList<>();
             List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
             List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIdList);
-            List<Long> orderRelationshipIdList = new ArrayList<>();
             for (int i = 0 ;i < orderRelationshipList.size() ; i++){
+                TUser toUser = new TUser();
+                for (int j =0 ; j < toUserList.size() ; j++){
+                    if (toUserList.get(j).getId() == orderRelationshipList.get(i).getReceiptUserId().longValue()){
+                        toUser = toUserList.get(j);
+                    }
+                    break;
+                }
                 if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()){
                     //如果用户已经被签到过了
-                    for (int j =0 ; j < toUserList.size() ; j++){
-                        if (toUserList.get(j).getId() == orderRelationshipList.get(i).getReceiptUserId().longValue()){
-                            errorMsg.add( "用户"+toUserList.get(j).getName()+"已经被签到过了～");
-                        }
-                        break;
-                    }
-
+                    errorMsg.add( "您已确认为"+toUser.getName()+"开始服务～");
                 } else {
                     //将该用户标记为签到状态
                     orderRelationshipList.get(i).setSignType(OrderRelationshipEnum.SIGN_TYPE_YES.getType());
@@ -429,9 +421,23 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     orderRelationshipList.get(i).setUpdateUserName(nowUser.getName());
                     orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
                 }
-            }*/
-            //将修改完签到状态的订单关系表批量进行更新
-
+            }
+            orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList , orderRelationshipIdList);
+        } else {
+            //如果是报名者，改自己的开始状态，并且该状态的订单只有一个
+            TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
+            if (orderRelationship.getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()){
+                //如果用户已经被签到过了
+                throw new MessageException("499", "您已经签到过了～");
+            }
+            //将该用户标记为签到状态
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_YES.getType());
+            orderRelationship.setUpdateTime(nowTime);
+            orderRelationship.setUpdateUser(nowUser.getId());
+            orderRelationship.setUpdateUserName(nowUser.getName());
+            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        }
+        return errorMsg;
     }
 
 
@@ -466,14 +472,14 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             collectType = "公益时";
         }
         List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
-        if (order.getCreateUser() == nowUserId.longValue()){
+        if (order.getCreateUser() == nowUser.getId().longValue()){
             //如果当前用户是发布者，那么就查找报名者即可
             publishUserId = nowUserId;
             List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
 
             for (int i = 0; i < userIdList.size(); i++) {
-                TOrderRelationship orderRelationship = new TOrderRelationship();
-                TUser toUser = new TUser();
+                TOrderRelationship orderRelationship = null;
+                TUser toUser = null;
                 for (int j = 0; j < orderRelationshipList.size(); j++) {
                     if (userIdList.get(i) == orderRelationshipList.get(j).getReceiptUserId().longValue()) {
                         orderRelationship = orderRelationshipList.get(j);
@@ -486,27 +492,33 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         break;
                     }
                 }
-                String msg = payOrderPri(orderRelationship, paymentList.get(i), nowUser, nowTime, toUser);
-                if (msg != null) {
-                    //支付失败，添加错误信息
-                    msgList.add(msg);
-                } else if (paymentList.get(i) > 0) {
-                    //如果是有效支付，增加钱数，增加支付成功次数
-                    if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
-                        //如果收取的是互助时
-                        paymentSum += paymentList.get(i);
-                    } else {
-                        //如果是公益时，那么公益时数量要加
-                        //paymentByWelfareSum += paymentList.get(i);
-                    }
-                    seekHelpDoneNum++;
-                    //对服务记录的人的名字进行合并处理
-                    if (seekHelpDoneNum == 1){
-                        payUserName = payUserName + toUser.getName();
-                    } else if (seekHelpDoneNum == 2 || seekHelpDoneNum == 3){
-                        payUserName = payUserName +"、" + toUser.getName();
-                    } else if (seekHelpDoneNum == 4){
-                        payUserName = payUserName +"等";
+                if (toUser == null){
+                    msgList.add("找不到用户"+userIdList.get(i)+"的账号信息");
+                } else if ( orderRelationship == null ){
+                    msgList.add("找不到用户"+toUser.getName()+"的订单信息");
+                } else {
+                    String msg = payOrderPri(orderRelationship, paymentList.get(i), nowUser, nowTime, toUser);
+                    if (msg != null) {
+                        //支付失败，添加错误信息
+                        msgList.add(msg);
+                    } else if (paymentList.get(i) > 0) {
+                        //如果是有效支付，增加钱数，增加支付成功次数
+                        if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
+                            //如果收取的是互助时
+                            paymentSum += paymentList.get(i);
+                        } else {
+                            //如果是公益时，那么公益时数量要加
+                            //paymentByWelfareSum += paymentList.get(i);
+                        }
+                        seekHelpDoneNum++;
+                        //对服务记录的人的名字进行合并处理
+                        if (seekHelpDoneNum == 1) {
+                            payUserName = payUserName + toUser.getName();
+                        } else if (seekHelpDoneNum == 2 || seekHelpDoneNum == 3) {
+                            payUserName = payUserName + "、" + toUser.getName();
+                        } else if (seekHelpDoneNum == 4) {
+                            payUserName = payUserName + "等";
+                        }
                     }
                 }
             }
@@ -693,18 +705,102 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         return errorMsgList;
     }
 
-    /*    public List<String> remarkOrder(Long nowUserId , List<Long> userIdList , Long orderId){
+        /*public List<String> remarkOrder(Long nowUserId , List<Long> userIdList , Long orderId){
         List<String> errorMsgList = new ArrayList<>();
         TUser nowUser = userCommonController.getUserById(nowUserId);
+        Long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
+            List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
         if (order.getCreateUser() == nowUser.getId().longValue()){
-            //如果是发布者，要评价很多人，要该对方的状态
-            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(userIdList);
-            //for ()
-        }
-    }
+            //如果是发布者，要评价很多人，查报名者，要改对方的状态
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId , userIdList);
+            for (int i = 0; i < userIdList.size(); i++) {
+                TOrderRelationship orderRelationship = null;
+                TUser toUser = null;
+                for (int j = 0; j < orderRelationshipList.size(); j++) {
+                    if (userIdList.get(i) == orderRelationshipList.get(j).getReceiptUserId().longValue()) {
+                        orderRelationship = orderRelationshipList.get(j);
+                        break;
+                    }
+                }
+                for (int j = 0; j < toUserList.size(); j++) {
+                    if (userIdList.get(i) == toUserList.get(j).getId().longValue()) {
+                        toUser = toUserList.get(j);
+                        break;
+                    }
+                }
+                if (toUser == null){
+                    errorMsgList.add("找不到用户"+userIdList.get(i)+"的账号信息");
+                } else if ( orderRelationship == null ){
+                    errorMsgList.add("找不到用户"+toUser.getName()+"的订单信息");
+                } else {
+                    String msg = remark(orderRelationship , nowUser , toUser , nowTime , false);
+                    if (msg != null) {
+                        //更新状态表失败失败，添加错误信息
+                        errorMsgList.add(msg);
+                    } else if (paymentList.get(i) > 0) {
+                        //如果是有效支付，增加钱数，增加支付成功次数
+                        if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
+                            //如果收取的是互助时
+                            paymentSum += paymentList.get(i);
+                        } else {
+                            //如果是公益时，那么公益时数量要加
+                            //paymentByWelfareSum += paymentList.get(i);
+                        }
+                        seekHelpDoneNum++;
+                        //对服务记录的人的名字进行合并处理
+                        if (seekHelpDoneNum == 1) {
+                            payUserName = payUserName + toUser.getName();
+                        } else if (seekHelpDoneNum == 2 || seekHelpDoneNum == 3) {
+                            payUserName = payUserName + "、" + toUser.getName();
+                        } else if (seekHelpDoneNum == 4) {
+                            payUserName = payUserName + "等";
+                        }
+                    }
+                }
+            }
+            //服务记录内容
+            if (seekHelpDoneNum > 3){
+                content = nowUser.getName()+" 支付了" + payUserName + seekHelpDoneNum +"人"+ collectType+ timeChange(paymentSum);
+            } else {
+                content = nowUser.getName()+" 支付了" + payUserName +collectType+timeChange(paymentSum);
+            }
 
-    private String remark(TOrderRelationship orderRelationship , TUser nowUser , long toUserId , boolean isOwn){
+        } else {
+            //如果是报名者支付，要修改自己的订单状态
+            publishUserId = userIdList.get(0);
+            TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
+            String msg = payOrderPri(orderRelationship, paymentList.get(0), nowUser, nowTime, toUserList.get(0));
+            if (msg != null) {
+                throw new MessageException("499", msg);
+            }
+            if (paymentList.get(0) > 0){
+                //如果是有效支付
+                if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()){
+                    //如果收取的是互助时
+                    paymentSum += paymentList.get(0);
+                }
+                seekHelpDoneNum++;
+                //服务记录内容
+                content = nowUser.getName()+" 支付了"+toUserList.get(0).getName()+collectType+timeChange(paymentSum);
+            }
+
+        }
+
+
+
+    }*/
+
+    /**
+     * 修改订单状态表
+     * @param orderRelationship
+     * @param nowUser
+     * @param toUser
+     * @param nowTime
+     * @param isOwn
+     * @return
+     */
+    private String remark(TOrderRelationship orderRelationship , TUser nowUser , TUser toUser , Long nowTime ,  boolean isOwn){
         String msg = null ;
         if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_WAIT_REMARK.getType()){
             //如果是双方未评价
@@ -718,10 +814,59 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是已评价
             if (isOwn){
                 //如果是改的是自己的订单关系
+                msg = "对不起，您已对"+toUser.getName()+"发表过评价";
+            } else {
+                //如果不是自己的，那么就完成了全部的评价
+                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+            }
+        } else if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_BE_REMARK.getType()){
+            //如果是被评价
+            if (isOwn){
+                //如果是改的是自己的订单关系 ，那么就完成了全部的评价
+                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+            } else {
+                //如果不是自己的，那么就完成了全部的评价
                 msg = "对不起，您已发表过评价";
             }
+        } else {
+            msg = "对不起，您已发表过评价";
         }
-    }*/
+
+        if (msg != null){
+            //更行订单关系表
+            orderRelationship.setUpdateTime(nowTime);
+            orderRelationship.setUpdateUser(nowUser.getId());
+            orderRelationship.setUpdateUserName(nowUser.getName());
+            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        }
+        return msg;
+    }
+
+    private void insertRemarkAndUpdateUser(TUser nowUser , Long touserId , TOrder order , int credit , int major , int attitude , String message , String labels , Long nowTime){
+        TEvaluate evaluate = new TEvaluate();
+        evaluate.setId(snowflakeIdWorker.nextId());
+        evaluate.setEvaluateUserId(nowUser.getId());
+        evaluate.setUserId(touserId);
+        evaluate.setOrderId(order.getId());
+        evaluate.setCreditEvaluate(credit);
+        evaluate.setMajorEvaluate(major);
+        evaluate.setAttitudeEvaluate(attitude);
+        evaluate.setMessage(message);
+        evaluate.setLabels(labels);
+        evaluate.setCreateTime(nowTime);
+        evaluate.setCreateUser(nowUser.getId());
+        evaluate.setCreateUserName(nowUser.getName());
+        evaluate.setUpdateTime(nowTime);
+        evaluate.setUpdateUser(nowUser.getId());
+        evaluate.setUpdateUserName(nowUser.getName());
+        evaluate.setIsValid(AppConstant.IS_VALID_YES);
+
+        evaluateDao.save(evaluate);
+
+        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+            //如果是求助，更行用户表求助的
+        }
+    }
     /**
      * 投诉
      * @param orderRelationship
