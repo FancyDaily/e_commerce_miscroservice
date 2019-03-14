@@ -68,7 +68,7 @@ public class ProductCommonController extends BaseController{
 		return productService.getProductDesc(serviceId);
 	}
 
-	public MsgResult autolowerFrameService(TService service) {
+	public MsgResult autoLowerFrameService(TService service) {
 		MsgResult result = new MsgResult();
 		try {
 			service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());

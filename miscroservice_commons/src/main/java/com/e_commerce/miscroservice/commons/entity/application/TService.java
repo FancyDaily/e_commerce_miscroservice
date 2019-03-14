@@ -82,6 +82,16 @@ public class TService implements Serializable {
 
     private String isValid;
 
+    private String enrollDate;
+
+    public String getEnrollDate() {
+        return enrollDate;
+    }
+
+    public void setEnrollDate(String enrollDate) {
+        this.enrollDate = enrollDate;
+    }
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
