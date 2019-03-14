@@ -131,6 +131,20 @@ public interface OrderDao {
 	 */
 	TOrder findOneLatestOrderByServiceId(Long serviceId);
 
+	/**
+	 * 查找该商品下的唯一一条正常状态的可见订单
+	 * @param serviceId
+	 * @return
+	 */
+	TOrder selectVisiableOrder(Long serviceId);
+
+	/**
+	 * 查找最早的一条正常状态的不可见的订单
+	 * @param serviceId
+	 * @return
+	 */
+	TOrder selectNearNotVisiable(Long serviceId);
+
 
 	//TODO NEW!!!!!!EMD
 
