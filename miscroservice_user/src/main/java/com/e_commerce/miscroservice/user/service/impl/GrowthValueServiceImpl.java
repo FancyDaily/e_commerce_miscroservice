@@ -239,7 +239,7 @@ public class GrowthValueServiceImpl implements GrowthValueService {
 
         result = growthValue + growthNum;
         user.setGrowthValue(result);
-        user = userService.levelUp(user);	//升级并更新 LEVEL_UP REMARK
+//        user = userService.levelUp(user);	//升级并更新 LEVEL_UP REMARK
         //TODO 更新数据库
         userDao.updateByPrimaryKey(user);
 

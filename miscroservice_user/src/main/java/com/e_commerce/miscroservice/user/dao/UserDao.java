@@ -21,4 +21,6 @@ public interface UserDao {
     List<TUser> selectByInviteCode(String inviteCode);
 
     List<TUser> selectUserTelByJurisdictionAndIsCompany(String telephone, Integer jurisdictionNormal, Integer isCompanyAccountYes);
+
+    List<TUser> selectByTelephone(String telephone);
 }

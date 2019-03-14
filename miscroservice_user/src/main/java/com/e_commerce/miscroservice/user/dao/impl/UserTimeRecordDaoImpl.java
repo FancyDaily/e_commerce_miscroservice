@@ -2,9 +2,13 @@ package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.mapper.MybatisBaseMapper;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlDefaultUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
+import org.apache.ibatis.session.SqlSessionManager;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,7 +21,9 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     }
 
     @Override
-    public int insert(TUserTimeRecord record) {
-        return MybatisOperaterUtil.getInstance().save(record);
+    public Long insert(TUserTimeRecord record) {
+        MybatisOperaterUtil.getInstance().save(record);
+        return record.getId();
     }
+
 }

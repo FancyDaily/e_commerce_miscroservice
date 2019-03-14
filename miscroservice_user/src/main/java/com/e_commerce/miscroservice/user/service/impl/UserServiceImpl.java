@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -239,7 +240,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             pageSize = 0;
         }
 
-        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id,lastTime);
+        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id, lastTime);
 
         // 如果列表为空
         if (userFreezes.isEmpty()) {
@@ -411,7 +412,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         //校验
         skillPass(user, skill, false);
 
-        skill.setId(idGenerator.nextId()); // 生成主键
+//        skill.setId(idGenerator.nextId()); // 生成主键
         skill.setUserId(user.getId()); // 创建者id
 
         // craeter & updater
@@ -424,6 +425,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         skill.setUpdateUserName(user.getName());
         skill.setIsValid(AppConstant.IS_VALID_YES);
         userSkillDao.insert(skill);
+
+        //成长值
+        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
     }
 
     /**
@@ -616,7 +620,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 //                .eq(TUser::getAge, tUser.getId()));
         //创建用户冻结记录
         TUserFreeze userFreeze = new TUserFreeze();
-        userFreeze.setId(idGenerator.nextId());
+//        userFreeze.setId(idGenerator.nextId());
         userFreeze.setUserId(userId);
         userFreeze.setOrderId(serviceId);
         userFreeze.setServiceName(serviceName);
@@ -725,7 +729,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // TODO 如果为修改昵称 -> 同步修改服务表里的创建者昵称
         String name = user.getName();
         if (name != null) {
-            //TODO 调用订单模块的方法
+            //TODO 调用订单模块的方法 同步修改订单相关昵称
         }
 
         user = userDao.selectByPrimaryKey(idHolder.getId());
@@ -763,6 +767,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 功能描述: 获得完整度任务奖励(包含判断,包含账单)
      * 作者: 许方毅
      * 创建时间: 2018年11月12日 下午5:56:52
+     *
      * @param user
      */
     private void completeReward(TUser user) {
@@ -771,11 +776,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         // TODO 与数据库同步
         user = userDao.selectByPrimaryKey(userId);
 
+/*
         // 查询是否有任务完成记录
         List<TUserTask> pageTask = userTaskDao.findTasksByTypeAndUserId(TaskEnum.TASK_PAGE.getType(), user.getId());
         if (!pageTask.isEmpty()) {
             return;
         }
+*/
 
         // 完整度累计
         Integer completeNum = 0;
@@ -807,62 +814,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (completeNum >= completeTaskNum) {
             // 获取任务奖励
             Long reward = TaskEnum.TASK_PAGE.getReward();
-//            rewardComplete(user, reward);
-            taskComplete(user,GrowthValueEnum.GROWTH_TYPE_UNREP_PAGE);  //成长值相关
-            // 插入一条任务完成记录
-            TUserTask userTask = new TUserTask();
-            userTask.setId(idGenerator.nextId());
-            userTask.setUserId(userId);
-            userTask.setType(TaskEnum.TASK_PAGE.getType());
-            userTask.setTargetId(String.valueOf(AppConstant.TARGET_ID_TASK_PAGE));  //TODO targetId
-            long timeStamp = System.currentTimeMillis();
-            userTask.setCreateTime(timeStamp);
-            userTask.setCreateUser(userId);
-            userTask.setCreateUserName(user.getName());
-            userTask.setUpdateTime(timeStamp);
-            userTask.setUpdateUser(userId);
-            userTask.setUpdateUserName(user.getName());
-            userTask.setIsValid(AppConstant.IS_VALID_YES);
-
-            userTaskDao.insert(userTask);
-
-            //TODO 插入系统消息 REMARK:SYSMSG
-//            insertSysMsg(userId, SysMsgEnum.PAGE_COMPLETE.getTitle(), SysMsgEnum.PAGE_COMPLETE.getContent());
+            taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_PAGE);  //TODO 成长值相关
         }
 
         user.setIntegrity(completeNum);
         userDao.updateByPrimaryKey(user);
-    }
-
-    private void rewardComplete(TUser user, Long reward) {
-        // id
-        Long id = user.getId();
-        // name
-        String name = user.getName();
-
-        // 插入账单流水
-        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setId(snowflakeIdWorker.nextId());
-        userTimeRecord.setUserId(id);
-        userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_PRIVATE_PAGE_BONUS.getCode());
-        userTimeRecord.setTime(reward);
-        // creater & updater
-        userTimeRecord.setCreateTime(System.currentTimeMillis());
-        userTimeRecord.setCreateUser(id);
-        userTimeRecord.setCreateUserName(name);
-        userTimeRecord.setUpdateTime(System.currentTimeMillis());
-        userTimeRecord.setCreateUser(id);
-        userTimeRecord.setCreateUserName(name);
-        userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
-        userTimeRecordDao.insert(userTimeRecord);
-
-        // 刷新用户信息(database) 余额
-        user.setSurplusTime(user.getSurplusTime() + reward); // 账户余额
-
-        // 更新数据库
-        userDao.updateByPrimaryKey(user);
-
-        // -----end---------
     }
 
     /**
@@ -878,7 +834,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         //TODO 判穷
 
         long currentTimeMillis = System.currentTimeMillis();
-        bonusPackage.setId(idGenerator.nextId());
+//        bonusPackage.setId(idGenerator.nextId());
         bonusPackage.setUserId(user.getId());
         bonusPackage.setCreateTime(currentTimeMillis);
         bonusPackage.setUpdateTime(currentTimeMillis);
@@ -924,7 +880,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         //流水
         TUserTimeRecord record = new TUserTimeRecord();
-        record.setId(idGenerator.nextId());
+//        record.setId(idGenerator.nextId());
         record.setFromUserId(user.getId());
         record.setTime(time);
         record.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_OUT.getCode());
@@ -953,31 +909,28 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 查看一个红包
      *
      * @param user
-     * @param bonusId
-     *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": {
-     *         "id": 103524652990595072,    //红包id
-     *         "userId": 68813260748488704, //发布人id
-     *         "description": "766468686",  //描述
-     *         "time": 100, //金额
-     *         "createTime": 1552464600668,
-     *         "isValid": "1",
-     *         "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/15446050826379.png",  //头像
-     *         "name": "马晓晨"    //名字
-     *     }
-     * }
-     *
+     * @param bonusId {
+     *                "success": true,
+     *                "errorCode": "",
+     *                "msg": "",
+     *                "data": {
+     *                "id": 103524652990595072,    //红包id
+     *                "userId": 68813260748488704, //发布人id
+     *                "description": "766468686",  //描述
+     *                "time": 100, //金额
+     *                "createTime": 1552464600668,
+     *                "isValid": "1",
+     *                "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/15446050826379.png",  //头像
+     *                "name": "马晓晨"    //名字
+     *                }
+     *                }
      * @return
      */
     @Override
     public BonusPackageVIew bonusPackageInfo(TUser user, Long bonusId) {
         TBonusPackage info = bonusPackageDao.info(bonusId);
-        if(info==null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该红包不存在！");
+        if (info == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在！");
         }
         BonusPackageVIew copy = BeanUtil.copy(info, BonusPackageVIew.class);
         TUser theUser = userDao.selectByPrimaryKey(info.getCreateUser());
@@ -1004,7 +957,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         TBonusPackage bonusRecord = bonusPackageDao.selectByPrimaryKey(bonusId);
 
         if (bonusRecord == null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在!");
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包已失效!");
         }
 
         if (AppConstant.IS_VALID_NO.equals(bonusRecord.getIsValid())) {
@@ -1031,7 +984,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 记录收入流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setId(snowflakeIdWorker.nextId());
+//        userTimeRecord.setId(snowflakeIdWorker.nextId());
+        userTimeRecord.setUserId(user.getId());
         userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_IN.getCode());
         userTimeRecord.setTargetId(bonusId); // 关联红包记录
         userTimeRecord.setTime(bonusRecord.getTime());
@@ -1123,7 +1077,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // insert
         TUserAuth userAuth = new TUserAuth();
-        userAuth.setId(String.valueOf(idGenerator.nextId()));
+//        userAuth.setId(String.valueOf(idGenerator.nextId()));
         // creater
         Long timeStamp = System.currentTimeMillis();
         userAuth.setUserId(user.getId());
@@ -1144,7 +1098,7 @@ public class UserServiceImpl extends BaseService implements UserService {
          * // 性别 user.setSex(userAuth.getSex());
          */
 
-        // 生日 //TODO 从身份证中识别出生日信息
+        // 生日
         Map<String, Object> birAgeSex = IDCardUtil.getBirAgeSex(cardId);
         user.setBirthday((Long) birAgeSex.get("birthday"));
 
@@ -1163,8 +1117,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
 //                AppConstant.TARGET_ID_TASK_AUTH);
 
-        //成长值记录
-        taskComplete(user,GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
+        //TODO 成长值记录
+        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
 
         userDao.updateByPrimaryKey(user);
 
@@ -1194,14 +1148,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 单位是否已认证过
         // ，如果有，则提示联系管理员加入（返回单位已存在，更新失败）。
-        if (ifAuthCompany(user, company)) {
-            // 插入或更新一条待审核的企业记录
-            insertOrUpdateCompany(user, company);
-        }
+        ifAuthCompany(user, company);
+        // 插入或更新一条待审核的企业记录
+        insertOrUpdateCompany(user, company);
     }
 
-    private boolean ifAuthCompany(TUser user, TCompany company) {
-        boolean result = false;
+    private void ifAuthCompany(TUser user, TCompany company) {
 //		String code = company.getCode();
         String name = company.getName();
         if (StringUtil.isEmpty(name)) {
@@ -1212,8 +1164,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (companies != null && companies.size() > 0) {
             throw new MessageException("公司已存在!请联系管理员邀请加入!");
         }
-        result = true;
-        return result;
     }
 
     private void insertOrUpdateCompany(TUser user, TCompany company) {
@@ -1246,7 +1196,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         // 创建公司
-        company.setId(idGenerator.nextId());
+//        company.setId(idGenerator.nextId());
         company.setUserId(user.getId());
 
         // 默认待审核
@@ -1499,7 +1449,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
 
             userTask.setTargetNum(targetNum);
-            userTask.setId(idGenerator.nextId());
+//            userTask.setId(idGenerator.nextId());
             if (targetNum == 7) {
                 userTask.setValue(String.valueOf(special));
             }
@@ -1520,10 +1470,67 @@ public class UserServiceImpl extends BaseService implements UserService {
             insertSignUpInfo(user);
         }
 
-        // update & reward & growth
-//        reward(token, user, reward);  //TODO 完成奖励待添加
+        //TODO 完成奖励待添加 JK
+        //插入一条成长值流水
+        insertGrowthValueRecords(user, GrowthValueEnum.GROWTH_TYPE_REP_SIGN_UP, reward);
+
+        //成长值 & 等级提升 & 授信额度提升
+        levelUp(user, (int) reward);
 
         return reward;
+    }
+
+    /**
+     * 插入一条任务记录
+     *
+     * @param user
+     * @param taskEnum
+     * @param special
+     */
+    private void insertTaskRecords(TUser user, TaskEnum taskEnum, Long special) {
+        long currentTimeMillis = System.currentTimeMillis();
+        TUserTask userTask = new TUserTask();
+//        userTask.setId(idGenerator.nextId());
+        userTask.setUserId(user.getId());
+        userTask.setType(taskEnum.getType());
+        //creater & updater
+        userTask.setCreateTime(currentTimeMillis);
+        userTask.setCreateUser(user.getId());
+        userTask.setCreateUserName(user.getName());
+        userTask.setUpdateTime(currentTimeMillis);
+        userTask.setUpdateUser(user.getId());
+        userTask.setUpdateUserName(user.getName());
+        userTask.setIsValid(AppConstant.IS_VALID_YES);
+        userTaskDao.insert(userTask);
+    }
+
+    /**
+     * 插入一条成长值记录
+     *
+     * @param user
+     * @param growthValueEnum
+     * @param reward
+     */
+    private void insertGrowthValueRecords(TUser user, GrowthValueEnum growthValueEnum, Long reward) {
+        long currentTimeMillis = System.currentTimeMillis();
+        TTypeRecord typeRecord = new TTypeRecord();
+//        typeRecord.setId(idGenerator.nextId());
+        typeRecord.setUserId(user.getId());
+        typeRecord.setType(growthValueEnum.getCode());
+        typeRecord.setSubType(growthValueEnum.getSubCode());
+        if (reward == null) {
+            reward = Long.valueOf(growthValueEnum.getPrice());
+        }
+        typeRecord.setNum(reward);
+        //creater & updater
+        typeRecord.setCreateTime(currentTimeMillis);
+        typeRecord.setCreateUser(user.getId());
+        typeRecord.setCreateUserName(user.getName());
+        typeRecord.setUpdateTime(currentTimeMillis);
+        typeRecord.setUpdateUser(user.getId());
+        typeRecord.setUpdateUserName(user.getName());
+        typeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        typeRecordDao.insert(typeRecord);
     }
 
     /**
@@ -1538,6 +1545,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 任务信息查询
+     *
      * @param user
      * @return
      */
@@ -1546,9 +1554,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<Integer> resultList = new ArrayList<>();
         Set<Integer> resultSet = new TreeSet<>();
         List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
-        for(TUserTask userTask:userTasks) {
+        for (TUserTask userTask : userTasks) {
             //签到 -> createTime为当日
-            if(userTask.getType().equals(TaskEnum.TASK_SIGN_UP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+            if (userTask.getType().equals(TaskEnum.TASK_SIGN_UP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
                 continue;
             }
             resultList.add(userTask.getType());
@@ -1560,6 +1568,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 红包退回
+     *
      * @param user
      * @param bonusPackageId
      */
@@ -1573,7 +1582,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         long currentTimeMillis = System.currentTimeMillis();
         //插入退款流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setId(idGenerator.nextId());
+//        userTimeRecord.setId(idGenerator.nextId());
         userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PAC_SEND_BACK.getCode());
         userTimeRecord.setTime(bonusPackage.getTime());
         userTimeRecord.setUserId(user.getId());
@@ -1601,6 +1610,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 获取key-value值
+     *
      * @param key
      * @return
      */
@@ -1614,6 +1624,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 发送短信
+     *
      * @param telephone
      * @return
      */
@@ -1689,6 +1700,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 校验短信验证码
+     *
      * @param telephone
      * @param validCode
      */
@@ -1714,6 +1726,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 回馈邀请人
+     *
      * @param inviterId
      * @param mineId
      */
@@ -1721,15 +1734,15 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void payInviter(Long inviterId, Long mineId) {
         // 查询是否已经回馈完成
-        List<TTypeDictionaries> dics = typeDictionariesDao.selectInviteRecords(mineId,inviterId);
+        List<TTypeDictionaries> dics = typeDictionariesDao.selectInviteRecords(mineId, inviterId);
         if (dics != null && !dics.isEmpty()) {
             return;
         }
 
         // 加入邀请人记录
-        Long targetId = idGenerator.nextId();
+//        Long targetId = idGenerator.nextId();
         TTypeDictionaries dictionaries = new TTypeDictionaries();
-        dictionaries.setId(targetId);
+//        dictionaries.setId(targetId);
         dictionaries.setEntityId(mineId);
         dictionaries.setTargetId(inviterId);
         dictionaries.setType(DictionaryEnum.INVITER.getType());
@@ -1744,40 +1757,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         dictionaries.setIsValid(AppConstant.IS_VALID_YES);
         typeDictionariesDao.insert(dictionaries);
 
-        // 插入一条邀请成功的系统消息 REMARK:SYSMSG
-        TUser me = userDao.selectByPrimaryKey(mineId);
-        /*insertSysMsg(inviterId, SysMsgEnum.INVITER.getTitle(),
-                String.format(SysMsgEnum.INVITER.getContent(), me.getName()));*/    //TODO 插入系统消息
-
         // 回馈
-        // 插入账单流水
-        TUserTimeRecord record = new TUserTimeRecord();
-        Long bonus = PaymentEnum.PAYMENT_TYPE_INVITE_BONUS.getBonus();
-        record.setId(idGenerator.nextId());
-        record.setUserId(inviterId);
-        record.setType(PaymentEnum.PAYMENT_TYPE_INVITE_BONUS.getCode());
-        record.setTime(bonus);
-//		record.setTargetId(targetId); // 与邀请记录id关联
-        record.setTargetId(mineId); // 直接与被邀请人id关联
-        record.setCreateTime(currentTimeMillis);
-        record.setCreateUser(inviterId);
-        record.setCreateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
-        record.setUpdateTime(currentTimeMillis);
-        record.setUpdateUser(inviterId);
-        record.setUpdateUserName(AppConstant.CREATE_USER_NAME_UNKNOWN);
-        record.setIsValid(AppConstant.IS_VALID_YES);
-        userTimeRecordDao.insert(record);
-
-        // 用户更新
-        TUser inviter = userDao.selectByPrimaryKey(inviterId);
-        inviter.setSurplusTime(inviter.getSurplusTime() + bonus);
-
         // 使邀请人获得成长值奖励
-        inviter = growthValueService.addGrowthValue(inviter, GrowthValueEnum.GROWTH_TYPE_REP_INVITE.getCode());
+        TUser inviter = userDao.selectByPrimaryKey(inviterId);
+        inviter= taskComplete(inviter, GrowthValueEnum.GROWTH_TYPE_REP_INVITE);//TODO 任务完成
 
-        userDao.updateByPrimaryKey(inviter); // TODO
         // TODO 刷新缓存
-
         String key = "str" + inviterId;
         if (redisUtil.hasKey(key)) {
             String inviterToken = (String) redisUtil.get(key);
@@ -1787,6 +1772,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 分享（查看二维码）
+     *
      * @param user
      * @param serviceId
      * @param option
@@ -1831,6 +1817,8 @@ public class UserServiceImpl extends BaseService implements UserService {
                 page = pageValueService;
 //                serviceDetail = serviceService.serviceDetail(Long.valueOf(serviceId), user);  //TODO 调用订单模块的商品或者订单详情接口
                 subType = DictionaryEnum.SHARE_SERVICE.getSubType();
+                //成长值
+                taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_SHARE_PRODUCT);
                 break;
 
             case "3":
@@ -1838,6 +1826,8 @@ public class UserServiceImpl extends BaseService implements UserService {
                 page = pageValueHelp;
 //                serviceDetail = serviceService.serviceDetail(Long.valueOf(serviceId), user);    //TODO 调用订单模块的商品或者订单详情接口
                 subType = DictionaryEnum.SHARE_HELP.getSubType();
+                //成长值
+                taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_SHARE_PRODUCT);
                 break;
 
             case "4":
@@ -1852,10 +1842,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "option有误！错误的option:" + option);
         }
 
-        Long id = idGenerator.nextId();
+//        Long id = idGenerator.nextId();
 
         TTypeDictionaries dictionaries = new TTypeDictionaries();
-        dictionaries.setId(id);
+//        dictionaries.setId(id);
         dictionaries.setEntityId(inviterId);
         dictionaries.setValue(scene);
         dictionaries.setType(DictionaryEnum.SHARE.getType());
@@ -1896,6 +1886,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 微信授权基本信息更新
+     *
      * @param user
      * @param token
      */
@@ -1918,6 +1909,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 根据id获取场景值
+     *
      * @param scene
      * @return
      */
@@ -1926,7 +1918,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (scene == null) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "scene不能为空！");
         }
-        List<TTypeDictionaries> dictionaries = typeDictionariesDao.selectByIdAndIsValid(scene,AppConstant.IS_VALID_YES);
+        List<TTypeDictionaries> dictionaries = typeDictionariesDao.selectByIdAndIsValid(scene, AppConstant.IS_VALID_YES);
         SceneView sceneView = new SceneView();
         if (!dictionaries.isEmpty()) {
             String inviterId = null;
@@ -1964,6 +1956,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 生成邀请码
+     *
      * @param token
      * @param inviteCode
      */
@@ -1985,6 +1978,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 重置密码(组织)
+     *
      * @param telephone
      * @param validCode
      * @param password
@@ -2004,6 +1998,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 申请加入组织
+     *
      * @param user
      * @param companyId
      */
@@ -2018,7 +2013,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         boolean isUpdate = false;
         // 查询是否有被拒绝记录TODO
-        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyId(user.getId(),companyId);
+        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyId(user.getId(), companyId);
         Long formerId = null;
         if (!userCompanies.isEmpty()) {
             for (TUserCompany userCompany : userCompanies) {
@@ -2036,10 +2031,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         long currentTimeMillis = System.currentTimeMillis();
         TUserCompany userCompany = new TUserCompany();
-        if (formerId == null) {
+       /* if (formerId == null) {
             formerId = idGenerator.nextId();
         }
-        userCompany.setId(formerId);
+        userCompany.setId(formerId);*/
         userCompany.setUserId(user.getId());
         userCompany.setTeamName(user.getName());
         userCompany.setCompanyId(companyId);
@@ -2048,7 +2043,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userCompany.setState(AppConstant.JOIN_STATE_COMPANY_NOT_YET); // 待审核
         Long groupId = null;
         // 查询默认分组
-        List<TGroup> groups = groupDao.selectByCompanyIdAndAuth(companyId,AppConstant.GROUP_AUTH_DEFAULT);
+        List<TGroup> groups = groupDao.selectByCompanyIdAndAuth(companyId, AppConstant.GROUP_AUTH_DEFAULT);
         if (!groups.isEmpty()) {
             groupId = groups.get(0).getId();
         }
@@ -2073,6 +2068,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 组织时间轨迹
+     *
      * @param user
      * @param year
      * @param month
@@ -2085,72 +2081,238 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
-     * 等级提升(不包括更新数据库)
-     * @param user
-     * @return
-     */
-    @Override
-    public TUser levelUp(TUser user) {
-        return null;    //TODO 待补充
-    }
-
-    /**
-     * 任务完成
-     * @param user  成长值增加对象
-     * @param growthValueEnum   枚举类型
+     * 任务完成(增加成长值，并未插入任务记录)
+     *
+     * @param user            成长值增加对象
+     * @param growthValueEnum 枚举类型
      */
     @Override
     public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum) {
         //根据类型校验最大值、当日最大值
-        growthValueEnum = checkMax(growthValueEnum,user.getId());
+        growthValueEnum = checkMax(growthValueEnum, user);
 
         //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
         Integer price = growthValueEnum.getPrice(); //数额
 
         //插入一条成长值流水
-        insertGrowthValueRecords(user,growthValueEnum);
+        insertGrowthValueRecords(user, growthValueEnum);
 
         //成长值 & 等级提升 & 授信额度提升
-        return levelUp(user,price);
+        return levelUp(user, price);
     }
 
     /**
-     * 任务完成(批量)
-     * @param user  成长值增加对象
-     * @param growthValueEnum   枚举类型
+     * 任务完成(批量) -> 增加成长值、插入任务记录等
+     *
+     * @param user            成长值增加对象
+     * @param growthValueEnum 枚举类型
      */
     @Override
     public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
         //根据类型校验最大值、当日最大值
-        counts = checkMax(growthValueEnum,user,counts);
+        counts = checkMax(growthValueEnum, user, counts);
 
         //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
         Integer price = growthValueEnum.getPrice() * counts; //数额
 
         //插入多条成长值流水
-        for(int i=0;i<counts;i++) { //TODO 可能修改为批量插入
-            insertGrowthValueRecords(user,growthValueEnum);
+        for (int i = 0; i < counts; i++) { //TODO 可能修改为批量插入
+            insertGrowthValueRecords(user, growthValueEnum);
         }
 
         //成长值 & 等级提升 & 授信额度提升
-        return levelUp(user,price);
+        return levelUp(user, price);
     }
 
     @Override
     public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
-        Map<String,Object> resultMap = new HashMap<>();
-        resultMap.put("isMine",bonusPackageDao.isMine(user.getId(),bonusPackageId));
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("isMine", bonusPackageDao.isMine(user.getId(), bonusPackageId));
         return resultMap;
     }
 
+    @Override
+    public Map<String, Object> loginGroupByPwd(String telephone, String password) {
+        return null;
+    }
+
+    /**
+     * 手机号验证码登录(个人账号)
+     * @param telephone
+     * @param validCode
+     * @return
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public Map<String, Object> loginUserBySMS(String telephone, String validCode) {
+        checkSMS(telephone, validCode);
+        TUser user = new TUser();
+        if (!isUser(telephone)) { // 注册并登录
+            user.setUserTel(telephone);
+            // 注册
+            rigester(user);
+        }
+        user = getUserAccountByTelephone(telephone);
+        if (AppConstant.IS_FAKE_YES.equals(user.getIsFake())) { // 如果为假用户
+            user.setIsFake(AppConstant.IS_FAKE_NO); // TODO 真实用户
+            userDao.updateByPrimaryKey(user);
+        }
+
+        // 登录
+        Long userId = user.getId();
+
+        // 使得之前的token失效 //TODO
+        String redisKey = "str" + userId;
+        if (redisUtil.hasKey(redisKey)) {
+            String lastToken = (String) redisUtil.get(redisKey);
+            redisUtil.del(lastToken);
+        }
+
+        String token = genToken(user);
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
+
+        redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put(AppConstant.USER_TOKEN, token);
+        // String化
+        DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
+        userView.setIdStr(String.valueOf(userView.getId()));
+        resultMap.put(AppConstant.USER, userView);
+        return resultMap;
+    }
+
+    /**
+     * 注册用户
+     * @param user
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public TUser rigester(TUser user) {
+        // 默认昵称
+        String defaultName = RandomUtil.getDefaultName();
+        // 默认账号
+        String defaultAccount = defaultName.substring(2);
+
+        if (user == null) {
+            user = new TUser();
+        }
+        user.setId(idGenerator.nextId());
+        user.setUserAccount(defaultAccount);
+        user.setJurisdiction(AppConstant.JURISDICTION_NORMAL);
+        user.setAccreditStatus(AppConstant.ACCREDIT_STATUS_DEFAULT);
+        user.setRemarks("");
+
+        // 头像、性别、昵称等从微信获取的字段
+        if (StringUtil.isEmpty(user.getUserHeadPortraitPath())) {
+            user.setUserHeadPortraitPath(AppConstant.DEFAULT_HEADURL); // TODO
+        }
+
+        if (!(user.getSex() != null && user.getSex() > -1)) {
+            user.setSex(AppConstant.DEFAULT_SEX);
+        }
+
+        if (StringUtil.isEmpty(user.getName())) {
+            user.setName(RandomUtil.getDefaultName());
+        }
+
+        // nums
+        user.setGrowthValue(0l); // 成长值
+        user.setFollowNum(0);
+        user.setReceiptNum(0);
+
+        user.setSeekHelpNum(0);
+        user.setServeNum(0);
+        user.setSeekHelpPublishNum(0);
+        user.setServePublishNum(0);
+        user.setSeekHelpCommentNum(0);
+        user.setServCommentNum(0);
+        user.setPayNum(0);
+
+        user.setServTotalEvaluate(0);
+        user.setServCreditEvaluate(0);
+        user.setServMajorEvaluate(0);
+        user.setServAttitudeEvaluate(0);
+        user.setHelpTotalEvaluate(0);
+        user.setHelpCreditEvaluate(0);
+        user.setHelpMajorEvaluate(0);
+        user.setHelpAttitudeEvaluate(0);
+
+        // 冻结金额
+        user.setFreezeTime(0L);
+        // 总余额
+        user.setSurplusTime(PaymentEnum.PAYMENT_TYPE_RIGESTER_BONUS.getBonus());
+
+        // 实名相关
+        user.setAuthenticationStatus(AppConstant.DEFAULT_AUTH_STATUS);
+        user.setAuthenticationType(AppConstant.DEFAULT_AUTH_TYPE);
+
+        // others
+        user.setUserPicturePath(AppConstant.DEFAULT_BACKGROUNDPIC);
+        user.setOccupation(AppConstant.DEFAULT_OCCUPATION);
+        user.setMaxEducation(AppConstant.DEFAULT_EDUCATION);
+        user.setLevel(AppConstant.DEFAULT_LEVEL);
+        user.setMasterStatus(AppConstant.MASTER_STATUS_DEFAULT); // 达人标记
+
+        // create&update //存储时间戳 TODO
+        user.setCreateTime(System.currentTimeMillis());
+        user.setCreateUser(user.getId());
+        user.setCreateUserName(user.getName());
+        user.setUpdateTime(System.currentTimeMillis());
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+
+        // 有效性
+        user.setIsValid(AppConstant.IS_VALID_YES);
+
+      /*  // 插入注册的系统消息
+        insertRigesterSysMsg(user);
+
+        // 插入一条注册完成奖励
+        insertRigesterReward(user);
+
+        // 插入“注册完成”的任务信息
+        rigesterTaskComplete(user);
+
+        // 插入一条通用权益（获取互助时）
+        addMedal(user, DictionaryEnum.INTEREST_EARN.getType(), DictionaryEnum.INTEREST_EARN.getSubType(),
+                DictionaryEnum.INTEREST_EARN.getReward());// TODO可能会将target_id分离出去
+
+        // 插入一条用户记录
+        userDao.insertSelective(user);*/
+
+        return user;
+    }
+
+    private String genToken(TUser user) {
+        String val = String.valueOf(user.getId());
+        String token = TokenUtil.genToken(val);
+        return token;
+    }
+
+    /**
+     * 是否为已注册用户(不区分个人还是组织账号)
+     * @param telephone
+     * @return
+     */
+    private boolean isUser(String telephone) {
+        boolean result = false;
+        List<TUser> userList = userDao.selectByTelephone(telephone);
+        if (userList != null && !userList.isEmpty()) {
+            result = true;
+        }
+        return result;
+    }
+
     private Integer checkMax(GrowthValueEnum growthValueEnum, TUser user, Integer counts) {
+
         //判空
-        if(growthValueEnum == null) {
+        if (growthValueEnum == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型为空！");
         }
 
-        if(counts<1) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"数量不合法！");
+        if (counts < 1) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "数量不合法！");
         }
 
         int code = growthValueEnum.getCode();
@@ -2164,12 +2326,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 日期信息
         String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
         Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
-        Long beginStamp = Long.valueOf((String)ym2BetweenStamp.get("begin"));
+        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
         Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
 
         List<Integer> needTOConfirmList = Arrays.asList(AppConstant.GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY);
         //如果为特定类型
-        if(needTOConfirmList.contains(code)) {
+        if (needTOConfirmList.contains(code)) {
             if (code == GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE.getCode() || code == GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE.getCode()) {  //如果为互助完成
                 superGrowthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_ITEM_DONE;
             } else if (code == GrowthValueEnum.GROWTH_TYPE_REP_COMMENT.getCode()) {
@@ -2180,57 +2342,84 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         List<TTypeRecord> typeRecords = null;
 
-        if(superGrowthValueEnum!=null) {
+        if (superGrowthValueEnum != null) {
             typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(), superGrowthValueEnum.getCode(), user.getId());
         } else {
-            typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),user.getId());
+            typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(), user.getId());
         }
 
         //遍历筛选次数
-        for(TTypeRecord typeRecord:typeRecords) {
-            if(typeRecord.getType().equals(growthValueEnum.getCode())) {    //重复
-                superCountTotal++;
-                if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) {
-                    superCountToday++;
+        for (TTypeRecord typeRecord : typeRecords) {
+            Integer num = typeRecord.getNum().intValue();
+            if (typeRecord.getType().equals(growthValueEnum.getCode())) {    //重复
+                superCountTotal += num;
+                if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) {
+                    superCountToday += num;
                 }
             } else {    //一次型
-                countTotal++;
-                if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) {
-                    countToday++;
+                countTotal += num;
+                if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) {
+                    countToday += num;
                 }
             }
         }
 
         boolean flag = false;
         Integer dailyMaxIn = growthValueEnum.getDailyMaxIn();//TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
-        if(countTotal>growthValueEnum.getMaxIn() ||  countToday>dailyMaxIn) {   //总或者今日达到上限
+        Integer maxIn = growthValueEnum.getMaxIn();
+        if (countTotal > maxIn || countToday > dailyMaxIn) {   //总或者今日达到上限
             counts = 0;
         } else {
             int inteval = dailyMaxIn - countToday;
-            if(inteval>0 && counts-inteval>0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
+            int countsNum = counts * growthValueEnum.getPrice();
+            int resultCounts = inteval / growthValueEnum.getPrice();
+            if (inteval > 0 && countsNum - inteval > 0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
                 flag = true;
             }
-            counts = counts<inteval?counts:inteval;
+            counts = countsNum < inteval ? counts : resultCounts;
         }
 
         boolean superFlag = false;
-        if(superGrowthValueEnum!=null) {
-            if(superCountTotal<superGrowthValueEnum.getMaxIn() && superCountToday<superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
+        if (superGrowthValueEnum != null) { //特定类型
+            if (superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
                 //插入一条成长值流水
-                insertGrowthValueRecords(user,growthValueEnum);
+                insertGrowthValueRecords(user, growthValueEnum);
                 counts--; //消耗掉一次插入机会
                 superFlag = true;
                 //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
 
                 //TODO 插入一条任务完成的流水。superGrowthValueEnum对应的任务类型
+                insertTaskRecords(user, superGrowthValueEnum.getTaskCode());
             }
-            if(!superFlag && flag) { //次数不被消耗的前提下(已完成首次任务)能够完成任务
+            if (!superFlag && flag) { //次数不被消耗的前提下(已完成首次任务)能够完成任务
                 //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
+                insertTaskRecords(user, growthValueEnum.getTaskCode());
             }
-        } else if(flag){
-            //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
+        } else {
+            if (flag) {
+                //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
+                insertTaskRecords(user, growthValueEnum.getTaskCode());
+            }
         }
         return counts;
+    }
+
+    private void insertTaskRecords(TUser user, int taskCode) {
+        //只要是能插入记录，就是没完成，在上一级以及校验过任务完成情况
+        long currentTimeMillis = System.currentTimeMillis();
+        TUserTask userTask = new TUserTask();
+//        userTask.setId(idGenerator.nextId());
+        userTask.setUserId(user.getId());
+        userTask.setType(taskCode);
+        //creater & updater
+        userTask.setCreateTime(currentTimeMillis);
+        userTask.setCreateUser(user.getId());
+        userTask.setCreateUserName(user.getName());
+        userTask.setUpdateTime(currentTimeMillis);
+        userTask.setUpdateUser(user.getId());
+        userTask.setUpdateUserName(user.getName());
+        userTask.setIsValid(AppConstant.IS_VALID_YES);
+        userTaskDao.insert(userTask);
     }
 
     private TUser levelUp(TUser user, Integer price) {
@@ -2243,27 +2432,23 @@ public class UserServiceImpl extends BaseService implements UserService {
         Integer level = user.getLevel();
         if (growthValue >= LevelEnum.LEVEL_ONE.getMin() && growthValue < LevelEnum.LEVEL_ONE.getMax()) {
             level = LevelEnum.LEVEL_ONE.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
+        } else if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
             level = LevelEnum.LEVEL_TWO.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_THREE.getMin() && growthValue < LevelEnum.LEVEL_THREE.getMax()) {
+        } else if (growthValue >= LevelEnum.LEVEL_THREE.getMin() && growthValue < LevelEnum.LEVEL_THREE.getMax()) {
             level = LevelEnum.LEVEL_THREE.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_FOUR.getMin() && growthValue < LevelEnum.LEVEL_FOUR.getMax()) {
+        } else if (growthValue >= LevelEnum.LEVEL_FOUR.getMin() && growthValue < LevelEnum.LEVEL_FOUR.getMax()) {
             level = LevelEnum.LEVEL_FOUR.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_FIVE.getMin() && growthValue < LevelEnum.LEVEL_FIVE.getMax()) {
+        } else if (growthValue >= LevelEnum.LEVEL_FIVE.getMin() && growthValue < LevelEnum.LEVEL_FIVE.getMax()) {
             level = LevelEnum.LEVEL_FIVE.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_SIX.getMin() && growthValue < LevelEnum.LEVEL_SIX.getMax()) {
+        } else if (growthValue >= LevelEnum.LEVEL_SIX.getMin() && growthValue < LevelEnum.LEVEL_SIX.getMax()) {
             level = LevelEnum.LEVEL_SIX.getLevel();
-        }
-        if (growthValue >= LevelEnum.LEVEL_SEVEN.getMin()) {
+        } else if (growthValue >= LevelEnum.LEVEL_SEVEN.getMin() && growthValue < LevelEnum.LEVEL_SEVEN.getMax()) {
             level = LevelEnum.LEVEL_SEVEN.getLevel();
+        } else if (growthValue >= LevelEnum.LEVEL_EIGHT.getMin()) {
+            level = LevelEnum.LEVEL_EIGHT.getLevel();
         }
 
-        user.setLevel(level);
+            user.setLevel(level);
 
         //TODO 授信总额提升 等待规则出来
 
@@ -2276,9 +2461,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         return user;
     }
 
-    private GrowthValueEnum checkMax(GrowthValueEnum growthValueEnum,Long userId) {
+    private GrowthValueEnum checkMax(GrowthValueEnum growthValueEnum, TUser user) {
+        Long userId = user.getId();
         //判空
-        if(growthValueEnum == null) {
+        if (growthValueEnum == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型为空！");
         }
 
@@ -2287,74 +2473,88 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 日期信息
         String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
         Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
-        Long beginStamp = Long.valueOf((String)ym2BetweenStamp.get("begin"));
+        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
         Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
 
         List<Integer> needTOConfirmList = Arrays.asList(AppConstant.GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY);
 
         //如果为特定类型
-        if(needTOConfirmList.contains(code)) {
-            if(code == GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE.getCode() || code == GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE.getCode()) {  //如果为互助完成
+        if (needTOConfirmList.contains(code)) {
+            if (code == GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE.getCode() || code == GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE.getCode()) {  //如果为互助完成
                 growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_ITEM_DONE;
-            } else if(code == GrowthValueEnum.GROWTH_TYPE_REP_COMMENT.getCode()) {
+            } else if (code == GrowthValueEnum.GROWTH_TYPE_REP_COMMENT.getCode()) {
                 growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_COMMENT;
-            } else if(code == GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE.getCode()) {
+            } else if (code == GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE.getCode()) {
                 growthValueEnum = GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_PUBLIC_WELFARE_ACTY_DONE;
             }
-                boolean flag = true;
-                //查询成长值记录
-                List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),userId);
+            boolean flag = true;
+            //查询成长值记录
+            List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(), userId);
 
-                Integer maxIn = growthValueEnum.getMaxIn();
-                Integer dayMaxIn = growthValueEnum.getDailyMaxIn();
-                Long total = 0l;
-                Long dayTotal = 0l;
-                //判断总额
-                for(TTypeRecord typeRecord:typeRecords) {
-                    total += typeRecord.getNum();
-                    if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) { //统计今日的成长值流水
-                        dayTotal += typeRecord.getNum();
-                    }
+            Integer maxIn = growthValueEnum.getMaxIn();
+            Integer dayMaxIn = growthValueEnum.getDailyMaxIn();
+            Long total = 0l;
+            Long dayTotal = 0l;
+            //判断总额
+            for (TTypeRecord typeRecord : typeRecords) {
+                total += typeRecord.getNum();
+                if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) { //统计今日的成长值流水
+                    dayTotal += typeRecord.getNum();
                 }
+            }
 
-                //判断是否超出总额
-                if(maxIn!=-1 && total >= maxIn) {
-                    flag = false;
-                }
+            //判断是否超出总额
+            if (maxIn != -1 && total >= maxIn) {
+                flag = false;
+            }
 
-                //判断是否超出今日总额
-                if(dayMaxIn!=-1 && dayTotal >= dayMaxIn) {
-                   flag = false;
-                }
+            //判断是否超出今日总额
+            if (dayMaxIn != -1 && dayTotal >= dayMaxIn) {
+                flag = false;
+            }
 
-                if(flag) {
-                    return growthValueEnum;
+            if (dayMaxIn != -1) {
+                if (dayMaxIn - dayTotal < growthValueEnum.getPrice()) { //本次将要完成任务 super
+                    //TODO 插入一条任务完成的记录
+                    insertTaskRecords(user, growthValueEnum.getTaskCode());
                 }
+            }
+
+            if (flag) {
+                return growthValueEnum;
+            }
         }
 
         //查询成长值记录
-        List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(),userId);
+        List<TTypeRecord> typeRecords = typeRecordDao.selectByTypeAndUserId(growthValueEnum.getCode(), userId);
 
         Integer maxIn = growthValueEnum.getMaxIn();
         Integer dayMaxIn = growthValueEnum.getDailyMaxIn();
         Long total = 0l;
         Long dayTotal = 0l;
         //判断总额
-        for(TTypeRecord typeRecord:typeRecords) {
+        for (TTypeRecord typeRecord : typeRecords) {
             total += typeRecord.getNum();
-            if(typeRecord.getCreateTime()>=beginStamp && typeRecord.getCreateTime()<endStamp) { //统计今日的成长值流水
+            if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) { //统计今日的成长值流水
                 dayTotal += typeRecord.getNum();
             }
         }
 
         //判断是否超出总额
-        if(maxIn!=-1 && total >= maxIn) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该类型已经达到成长值获取上限！");
+        if (maxIn != -1 && total >= maxIn) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该类型已经达到成长值获取上限！");
         }
 
         //判断是否超出今日总额
-        if(dayMaxIn!=-1 && dayTotal >= dayMaxIn) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该类型已经达到成长值获取今日上限！");
+        if (dayMaxIn != -1 && dayTotal >= dayMaxIn) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该类型已经达到成长值获取今日上限！");
+        }
+
+        if (dayMaxIn != -1) {
+            if (dayMaxIn - dayTotal < growthValueEnum.getPrice()) { //本次将要完成任务
+                //TODO 插入一条任务完成的记录
+                insertTaskRecords(user, growthValueEnum.getTaskCode());
+            }
         }
 
         return growthValueEnum;
@@ -2363,7 +2563,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     private int insertGrowthValueRecords(TUser user, GrowthValueEnum growthValueEnum) {
         long currentTimeMillis = System.currentTimeMillis();
         TTypeRecord typeRecord = new TTypeRecord();
-        typeRecord.setId(idGenerator.nextId());
+//        typeRecord.setId(idGenerator.nextId());
         typeRecord.setUserId(user.getId());
         typeRecord.setType(growthValueEnum.getCode());
         typeRecord.setSubType(growthValueEnum.getSubCode());
@@ -2383,11 +2583,12 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 通过手机号获取用户(组织账号)
+     *
      * @param telephone
      * @return
      */
     private TUser getCompanyAccountByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone,AppConstant.JURISDICTION_NORMAL,AppConstant.IS_COMPANY_ACCOUNT_YES);
+        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone, AppConstant.JURISDICTION_NORMAL, AppConstant.IS_COMPANY_ACCOUNT_YES);
 
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
@@ -2401,6 +2602,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 校验邀请码
+     *
      * @param inviteCode
      * @return
      */
@@ -2429,7 +2631,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         //构建实体
         TUserTask userTask = new TUserTask();
-        userTask.setId(snowflakeIdWorker.nextId());
+//        userTask.setId(snowflakeIdWorker.nextId());
         userTask.setUserId(id);
         userTask.setType(TaskEnum.TASK_SIGN_UP.getType());
         userTask.setTargetNum(1);
@@ -2480,6 +2682,28 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
+     * 根据手机号获取个人账号
+     * @param telephone
+     * @return
+     */
+    @Override
+    public TUser getUserAccountByTelephone(String telephone) {
+        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone,AppConstant.JURISDICTION_NORMAL,IS_COMPANY_ACCOUNT_YES);
+        TUser user = null;
+        if (userList != null && !userList.isEmpty()) {
+            for (TUser thisUser : userList) {
+                if (!AppConstant.IS_COMPANY_ACCOUNT_YES.equals(thisUser.getIsCompanyAccount())) {
+                    user = thisUser;
+                }
+            }
+           /* if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {   //TODO 封禁
+                throw new MessageException("当前用户被封禁!禁止登录！");
+            }*/
+        }
+        return user;
+    }
+
+    /**
      * 技能校验
      *
      * @param user
@@ -2524,18 +2748,18 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
     }
 
-
     /**
      * 功能描述: 获取组织账号对应组织编号
      * 作者: 许方毅
      * 创建时间: 2019年1月14日 下午1:45:04
+     *
      * @param id
      * @return
      */
     private Long getOwnCompanyId(Long id) {
-        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyjob(id,AppConstant.JOB_COMPANY_CREATER);
-        if(userCompanies.isEmpty()) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"没有对应组织！");
+        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyjob(id, AppConstant.JOB_COMPANY_CREATER);
+        if (userCompanies.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有对应组织！");
         }
         return userCompanies.get(0).getCompanyId();
     }

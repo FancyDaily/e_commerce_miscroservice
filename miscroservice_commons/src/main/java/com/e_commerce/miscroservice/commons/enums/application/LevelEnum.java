@@ -20,13 +20,13 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum LevelEnum {	//TODO 待给出细则
 
-	LEVEL_ONE(1,"互助公民", 0l, 15l), LEVEL_TWO(2,"互助顾问", 15l, 100l), LEVEL_THREE(3,"互助议员", 100l, 300l), LEVEL_FOUR(4,"互助市长", 300l, 800l),
-	LEVEL_FIVE(5,"互助部长", 800l, 1500l), LEVEL_SIX(6,"互助公务员", 1500l, 2500l), LEVEL_SEVEN(7,"互助英雄", 2500l, -1l);
+	LEVEL_ONE(1,"爱心人士", 0l, 3l), LEVEL_TWO(2,"爱心义工", 3l, 5l), LEVEL_THREE(3,"爱心先锋", 5l, 7l), LEVEL_FOUR(4,"公益志愿者", 7l, 10l),
+	LEVEL_FIVE(5,"公益达人", 10l, 30l), LEVEL_SIX(6,"公益先锋", 30l, 60l), LEVEL_SEVEN(7,"公益使者", 60l, 120l) ,LEVEL_EIGHT(8,"厚德流光",120l,-1l);
 
-	private Integer level;
-	private String name;
-	private Long min;
-	private Long max;
+	private Integer level;	//等级
+	private String name;	//等级名
+	private Long min;	//下限
+	private Long max;	//上限
 	public Integer getLevel() {
 		return level;
 	}
