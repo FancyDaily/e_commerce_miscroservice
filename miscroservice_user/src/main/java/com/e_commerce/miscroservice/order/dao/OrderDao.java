@@ -145,6 +145,13 @@ public interface OrderDao {
 	 */
 	TOrder selectNearNotVisiable(Long serviceId);
 
+	/**
+	 * 跟新order表中用户的名称
+	 * @param userId 用户ID
+	 * @param userName 用户名称
+	 */
+	void updateUserName(Long userId, String userName);
+
 
 	//TODO NEW!!!!!!EMD
 

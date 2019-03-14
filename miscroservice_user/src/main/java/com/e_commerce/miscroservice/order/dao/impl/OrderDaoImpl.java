@@ -195,9 +195,7 @@ public class OrderDaoImpl implements OrderDao {
 	public TOrder selectVisiableOrder(Long serviceId) {
 		return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
 				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
-				.eq(TOrder::getVisiableStatus, OrderEnum.VISIABLE_YES.getValue())
-				// TODO 此处再加字段相等条件
-				);
+				.eq(TOrder::getVisiableStatus, OrderEnum.VISIABLE_YES.getValue()).eq(TOrder::getConfirmNum, TOrder::getServicePersonnel));
 	}
 
 	@Override
@@ -205,6 +203,14 @@ public class OrderDaoImpl implements OrderDao {
 		return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
 				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
 				.eq(TOrder::getVisiableStatus, OrderEnum.VISIABLE_NO.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrder::getEndTime)));
+	}
+
+	@Override
+	public void updateUserName(Long userId, String userName) {
+		TOrder order = new TOrder();
+		order.setCreateUserName(userName);
+		MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
+				.eq(TOrder::getCreateUser, userId));
 	}
 
 	/**

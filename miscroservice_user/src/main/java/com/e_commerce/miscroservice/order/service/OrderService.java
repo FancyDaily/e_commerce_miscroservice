@@ -95,4 +95,11 @@ public interface OrderService {
 	 * @param type 类型 1、由亏到盈 2、由盈到亏
 	 */
 	void changeOrderVisiableStatus(Long orderId, Integer type);
+
+	/**
+	 * 同步订单表中用户修改后的名称
+	 * @param userId 要修改的用户ID
+	 * @param userName 修改后的名称
+	 */
+	void synOrderCreateUserName(Long userId, String userName);
 }

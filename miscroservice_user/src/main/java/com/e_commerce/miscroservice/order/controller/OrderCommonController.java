@@ -56,6 +56,11 @@ public class OrderCommonController extends BaseController {
 		}
 	}
 
+	/**
+	 * 报名满人或者从满人的订单取消改变订单的可见和不可见状态
+	 * @param orderId 订单ID
+	 * @param type 类型
+	 */
 	public void changeOrderVisiableStatus(Long orderId, Integer type) {
 		orderService.changeOrderVisiableStatus(orderId, type);
 	}
@@ -230,5 +235,14 @@ public class OrderCommonController extends BaseController {
 	public DetailOrderReturnView detailIndexOrder(Long orderId, String token) {
 		TUser user = (TUser) redisUtil.get(token);
 		return orderService.orderDetail(orderId, user);
+	}
+
+	/**
+	 * 为了模糊查询，用户修改名称同步订单表中创建人的名称
+	 * @param userId
+	 * @param userName
+	 */
+	public void synOrderCreateUserName(Long userId, String userName) {
+		orderService.synOrderCreateUserName(userId, userName);
 	}
 }
