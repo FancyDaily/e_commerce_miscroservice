@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
+import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
@@ -313,6 +314,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
 	}
 
+	@Override
+	public DetailProductView detail(TUser user, Long serviceId) {
+		DetailProductView productView = new DetailProductView();
+		TService service = productDao.selectByPrimaryKey(serviceId);
+		List<TServiceDescribe> productDesc = productDao.getProductDesc(serviceId);
+		productView.setService(service);
+		productView.setDesc(productDesc);
+		return productView;
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务
@@ -476,7 +487,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
 		}
-//		DateUtil.getEnrollDate();
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			service.setEnrollDate(getEnrollDate(service));
+		}
 		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
@@ -492,6 +505,28 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		TUser addGrowthUser = growthValueService.addGrowthValue(user,
 //				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
 //		userService.flushRedisUser(token, addGrowthUser);
+	}
+
+	/**
+	 * 获取可以报名的日期
+	 * @param service
+	 * @return
+	 */
+	private String getEnrollDate(TService service) {
+		// 判断开始
+		// 将当前日期往后延七天，是否超过结束时间，如果没有超过结束时间，用延迟七天的时间作为结束时间，否则使用商品的结束时间
+		// 获取这一时间段内的可以报名的日期
+		//商品开始时间
+//		String startTime = service.getStartTimeS();
+		//商品结束时间
+//		String endTime = service.getEndTimeS();
+//		int[] weekDayArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
+//		List<String> enrollDateList = new ArrayList<>();
+
+
+//		DateUtil.get
+//		String enrollDate = DateUtil.getEnrollDate(service);
+		return "";
 	}
 
 

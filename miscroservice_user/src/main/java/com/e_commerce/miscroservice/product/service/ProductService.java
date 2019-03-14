@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 
@@ -99,4 +100,12 @@ public interface ProductService {
 	 * @return
 	 */
 	void autoLowerFrameService(TService service);
+
+	/**
+	 * 查看商品详情
+	 * @param user 当前用户
+	 * @param serviceId 服务求助ID
+	 * @return
+	 */
+	DetailProductView detail(TUser user, Long serviceId);
 }

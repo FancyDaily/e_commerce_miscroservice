@@ -67,9 +67,13 @@ public class BaseUserView implements Serializable {
 	 */
 	private Integer integrity;
 	/**
-	 * 1、实名 2、未实名
+	 *  实名状态 1、未实名 2、已实名
 	 */
-	private Integer authStatus;
+	private Integer authenticationStatus;
+	/**
+	 * 用户类型：用户性质(1个人，2公益组织、3一般组织)
+	 */
+	private String userType;
 
 	/**
 	 * 获取字符串类型ID

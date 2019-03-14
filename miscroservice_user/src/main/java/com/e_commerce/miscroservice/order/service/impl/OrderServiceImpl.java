@@ -97,10 +97,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setOrder(order);
 			//设置封面图
 			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
-			//TODO 获取发布者的信息
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
-			userView.setAuthStatus(1);
 			returnView.setUser(userView);
 			// 用户类型
 			listReturn.add(returnView);
@@ -114,17 +112,23 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	public DetailOrderReturnView orderDetail(Long orderId, TUser user) {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
-		order.setNameAudioUrl("");
 		returnView.setOrder(order);
-		// TODO 获取发布者信息
-		BaseUserView userView = new BaseUserView();
-		userView.setId(0L);
-		userView.setName("");
-		returnView.setUser(userView);
+		Long publisherId = order.getCreateUser();
+		TUser tUser = userService.getUserById(publisherId);
+		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+		// 求助 展示求助者评分
+		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
+			userView.setTotalEvaluate(tUser.getServTotalEvaluate());
+			userView.setServeNum(tUser.getServeNum());
+		} else {
+			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
+			userView.setServeNum(tUser.getSeekHelpNum());
+		}
 		// TODO 获取发布者关注信息
 		// 关注状态 1、显示关注 2、显示已关注
+		userView.setCareStatus(1);
+		returnView.setUser(userView);
 		returnView.getUser().setCareStatus(1);
-
 		//详情页面展示举报状态 收藏状态 报名状态
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
@@ -136,9 +140,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setOrderRelationship(tOrderRelationship);
 		} else {
 			TOrderRelationship orderRelationship = new TOrderRelationship();
-			orderRelationship.setStatus(0);
+			orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 			orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
 			orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+			returnView.setOrderRelationship(orderRelationship);
 		}
 		List<TServiceDescribe> listDesc = productService.getProductDesc(order.getServiceId());
 		//将详情汇中的封面图取出来
@@ -146,7 +151,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (listDesc.get(i).getIsCover().equals(IS_COVER_YES)) {
 				//将封面图取出来单独存
 				returnView.setCoverImgUrl(listDesc.get(i).getUrl());
-				listDesc.remove(i);
 			}
 		}
 		returnView.setListServiceDescribe(listDesc);
@@ -478,7 +482,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			List<BaseUserView> listUserView = new ArrayList<>();
 			listUserView.add(userView);
 			returnView.setListUserView(listUserView);
-
 		}
 		return returnView;
 	}
@@ -543,7 +546,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
 				// 下架商品  同步所有订单状态
-				msgResult = productService.autolowerFrameService(service);
+				msgResult = productService.autoLowerFrameService(service);
 				if (!msgResult.getCode().equals("200")) {
 					throw new ErrorException("500", "下架商品失败");
 				}

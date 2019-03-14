@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,36 @@ public class SeekHelpController extends BaseController {
 		}
 		return result;
 	}
+
+	/**
+	 *
+	 * @param token 用户token
+	 * @param serviceId 商品ID
+	 * @return
+	 */
+	@PostMapping("/productDetail")
+	public Object detail(String token, Long serviceId) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			DetailProductView detailProductView = productService.detail(user, serviceId);
+			result.setData(detailProductView);
+			result.setSuccess(true);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
+			return result;
+		} catch (MessageException e) {
+			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			result.setSuccess(false);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			return result;
+		} catch (Exception e) {
+			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
+			result.setSuccess(false);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
+			return result;
+		}
+	}
+
 
 	/**
 	 * 上架求助服务
