@@ -630,7 +630,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setServiceType(order.getType());
         orderRelationship.setFromUserId(order.getCreateUser());
         orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
-        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
         orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
         orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
         orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());

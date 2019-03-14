@@ -18,6 +18,9 @@ public enum OrderEnum {
 	PRODUCE_TYPE_ENROLL(4, "在报名时候派生"),
 	PRODUCE_TYPE_ENOUGH(5, "在报名人满的时候派生"),
 
+	VISIABLE_YES("1", "可见"),
+	VISIABLE_NO("0","不可见"),
+
 	PRODUCE_RESULT_CODE_SUCCESS(1, "可以派生订单"),
 	PRODUCE_RESULT_CODE_EXISTENCE(2, "订单已经存在，没有再继续派生订单"),
 	PRODUCE_RESULT_CODE_LOWER_FRAME(3, "订单派生已经超过商品的结束时间，停止派生订单，需要进行下架处理"),
@@ -43,9 +46,14 @@ public enum OrderEnum {
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CHOOSED(6, "已入选");
 	private int value;
 	private String desc;
+	private String stringValue;
 
 	OrderEnum(int value, String desc) {
 		this.value = value;
+		this.desc = desc;
+	}
+	OrderEnum(String value, String desc) {
+		this.stringValue = value;
 		this.desc = desc;
 	}
 
@@ -55,4 +63,5 @@ public enum OrderEnum {
 	public String getDesc() {
 		return desc;
 	}
+	public String getStringValue() {return stringValue;}
 }

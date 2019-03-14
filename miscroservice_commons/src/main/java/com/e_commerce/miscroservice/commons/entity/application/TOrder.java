@@ -71,8 +71,20 @@ public class TOrder implements Serializable {
     private Long companyId;
 
     private String isValid;
+    /**
+     * 可见状态 1、可见 2、不可见
+     */
+    private String visiableStatus;
 
     private static final long serialVersionUID = 1L;
+
+    public String getVisiableStatus() {
+        return visiableStatus;
+    }
+
+    public void setVisiableStatus(String visiableStatus) {
+        this.visiableStatus = visiableStatus;
+    }
 
     public Long getId() {
         return id;

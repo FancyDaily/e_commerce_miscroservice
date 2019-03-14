@@ -56,6 +56,10 @@ public class OrderCommonController extends BaseController {
 		}
 	}
 
+	public void changeOrderVisiableStatus(Long orderId, Integer type) {
+		orderService.changeOrderVisiableStatus(orderId, type);
+	}
+
     /**
      * 插入订单，供其他模块调用
      * @author 马晓晨

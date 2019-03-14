@@ -88,4 +88,11 @@ public interface OrderService {
 	 * @return 选人列表详情
 	 */
 	DetailChooseReturnView chooseDetail(Long orderId, TUser user);
+
+	/**
+	 * 修改订单的可见状态
+	 * @param orderId 订单ID
+	 * @param type 类型 1、由亏到盈 2、由盈到亏
+	 */
+	void changeOrderVisiableStatus(Long orderId, Integer type);
 }
