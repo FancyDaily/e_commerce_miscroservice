@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
@@ -555,8 +556,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	@Transactional(rollbackFor = Throwable.class)
-	public void produceOrder(TService service, Integer type, String date) {
+	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());
+		if (!checkEnoughTimeCoin(tUser, service)) {
+			throw new MessageException("501", "用户授信不足");
+		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
 		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
@@ -572,23 +576,29 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//可以成功创建订单
 				saveOrder(order);
 				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+				return order;
 				// TODO 订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
+				return null;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
 				// 下架商品  同步所有订单状态
 				productService.autoLowerFrameService(service);
+				return null;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_END.getValue())) {
 				//到最后一张，但是还没到结束时间（一般是报名人满生成的）
 				logger.info("商品ID为{} 的订单已经派生到最后一张，无法继续派生", service.getId());
+				return null;
 			}
 		} else {
 			saveOrder(order);
+			return order;
 		}
+		return order;
 	}
 
 	/**
