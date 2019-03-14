@@ -2468,7 +2468,8 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("loginGroupByPwd")
-    public Object loginGroupByPwd(String telephone, String password) { // TODO 在配置文件中加入拦截白名单
+    public Object loginGroupByPwd(String telephone, String password) {
+        // TODO 在配置文件中加入拦截白名单
         AjaxResult result = new AjaxResult();
         try {
             Map<String, Object> loginGroupByPwdMap = userService.loginGroupByPwd(telephone, password);

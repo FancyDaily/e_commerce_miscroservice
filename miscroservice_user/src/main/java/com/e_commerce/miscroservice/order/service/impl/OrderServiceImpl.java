@@ -48,6 +48,28 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public int saveOrder(TOrder order) {
+		// 如果
+		/*
+		 * 已完成的订单是可以显示的 可见状态还是为1
+		 * 正常状态为1的订单 只能有一条可见的订单 只能有一套visiable的订单 到完成时间的时候改状态并且改可见状态
+		 * 查看之前是否有能可见的订单
+		 * 		—— 如果有的话，进行判断哪一条的开始时间在前
+		 * 				—— 数据库的那条在前，新插入的就不可见
+		 * 			 	—— 新插入的时间在前，数据库那条就不可见，新插入的就可见
+		 *		—— 如果没有的话，新插入的就是可见的
+		 */
+		TOrder visiableOrder = orderDao.selectVisiableOrder(order.getServiceId());
+		if (visiableOrder != null) { //之前有可见的订单
+			if (visiableOrder.getEndTime() < order.getEndTime()) {// 数据库那条在前,当前插入的为不可见
+				order.setVisiableStatus(OrderEnum.VISIABLE_NO.getStringValue());
+			} else { // 当前这条在前， 数据库那条可见状态改为不可见
+				order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+				visiableOrder.setVisiableStatus(OrderEnum.VISIABLE_NO.getStringValue());
+				orderDao.updateByPrimaryKey(visiableOrder);
+			}
+		} else { //新插入的是可见的
+			order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+		}
 		orderDao.saveOneOrder(order);
 		return orderRelationService.addTorderRelationship(order);
 	}
@@ -263,7 +285,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 					//已完成
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 					// 发布者已取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 				}
@@ -297,10 +319,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 					//已完成
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 					// 发布者已取消,当前是接单者 所以是被取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_OTHER_CANCEL.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISHER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType(), relationship.getStatus())) {
 					// 接单者已取消， 当前是接单者 所以是已取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 				}
@@ -380,7 +402,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 				//已完成
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 				// 发布者已取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 			}
@@ -451,10 +473,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 				//已完成
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 				// 发布者已取消,当前是接单者 所以是被取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_OTHER_CANCEL.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISHER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType(), relationship.getStatus())) {
 				// 接单者已取消， 当前是接单者 所以是已取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 			}
@@ -506,9 +528,29 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
+	public void changeOrderVisiableStatus(Long orderId, Integer type) {
+		TOrder tOrder = orderDao.selectByPrimaryKey(orderId);
+		if (type == 1) { // 盈到亏 满人到少人的时候
+			TOrder order = orderDao.selectVisiableOrder(tOrder.getServiceId());
+			if (order == null) { //数据库没有
+				tOrder.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+				orderDao.updateByPrimaryKey(tOrder);
+			}
+			//数据库有其他可见， 那么不做修改
+		} else { //亏到盈 满人的时候
+			String visiableStatus = tOrder.getVisiableStatus();
+			if (Objects.equals(OrderEnum.VISIABLE_YES.getStringValue(), visiableStatus)) {
+				TOrder order = orderDao.selectNearNotVisiable(tOrder.getServiceId());
+			} else { // 满人的订单为不可见 现在置位可见
+				tOrder.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+				orderDao.updateByPrimaryKey(tOrder);
+			}
+		}
+	}
+
+	@Override
 	@Transactional(rollbackFor = Throwable.class)
 	public void produceOrder(TService service, Integer type, String date) {
-//		TService service = productService.getProductById(serviceId);
 		MsgResult msgResult;
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
@@ -530,6 +572,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
+				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 //				orderDao.saveOneOrder(order);
 				// 只有求助并且是互助时才冻结订单
 				if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
@@ -556,7 +599,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				logger.info("商品ID为{} 的订单已经派生到最后一张，无法继续派生", service.getId());
 			}
 		} else {
-//			orderDao.saveOneOrder(order);
 			saveOrder(order);
 			if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
 				msgResult = userService.freezeTimeCoin(tUser.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
@@ -830,7 +872,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (orderRelationship.getFromUserId().equals(user.getId())) { //当前用户是发布者
 			if (orderRelationship.getEndTime() < System.currentTimeMillis()) {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
-			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType())) {
+			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())) {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CANCEL.getValue());
 			} else {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_WAIT_CHOOSE.getValue());
