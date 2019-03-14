@@ -79,7 +79,7 @@ public interface OrderService {
 	 * @param type 类型 是发布派生还是报名派生
 	 * @param date 报名或者选满人派生的日期
 	 */
-	void produceOrder(TService service, Integer type, String date);
+	TOrder  produceOrder(TService service, Integer type, String date);
 
 	/**
 	 * 我选人的详情页面
