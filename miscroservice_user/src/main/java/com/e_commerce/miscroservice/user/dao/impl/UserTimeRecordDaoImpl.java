@@ -17,7 +17,7 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     }
 
     @Override
-    public int insert(TUserTimeRecord record) {
+    public long insert(TUserTimeRecord record) {
         return MybatisOperaterUtil.getInstance().save(record);
     }
 }

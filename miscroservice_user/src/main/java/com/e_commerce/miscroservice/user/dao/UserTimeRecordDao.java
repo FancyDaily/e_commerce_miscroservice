@@ -9,5 +9,5 @@ import java.util.List;
 public interface UserTimeRecordDao {
     List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end);
 
-    int insert(TUserTimeRecord record);
+    long insert(TUserTimeRecord record);
 }

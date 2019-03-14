@@ -1,9 +1,12 @@
 package com.e_commerce.miscroservice.message.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
+import com.e_commerce.miscroservice.message.dao.EventDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
+import com.e_commerce.miscroservice.message.service.EventService;
 import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.message.vo.WxMssVo;
@@ -30,6 +33,9 @@ public class MessageCommonController extends BaseController {
 
     @Autowired
     private PublishService publishService;
+
+    @Autowired
+    private EventService eventService;
 
 
     /**
@@ -113,5 +119,32 @@ public class MessageCommonController extends BaseController {
      */
     public String getValue(long labelsId , String key){
         return publishService.getValue(labelsId , key);
+    }
+
+    /**
+     * 插入事件
+     * @param event
+     * @return
+     */
+    public long insertTevent(TEvent event){
+        return eventService.insertTevent(event);
+    }
+
+    /**
+     * 更新事件
+     * @param event
+     * @return
+     */
+    public long updateTevent(TEvent event){
+        return eventService.updateTevent(event);
+    }
+
+    /**
+     * 查找事件
+     * @param id
+     * @return
+     */
+    public TEvent selectTeventById(Long id){
+        return eventService.selectTeventById(id);
     }
 }

@@ -43,11 +43,11 @@ public enum OrderRelationshipEnum {
     /**
      * 订单关系状态为报名者取消订单，  状态值为5
      */
-    STATUS_PUBLISHER_CANCEL(5, "报名者取消"),
+    STATUS_ENROLL_CANCEL(5, "报名者取消"),
     /**
      * 订单关系状态为发布者取消订单  状态值为6
      */
-    STATUS_ENROLLER_CANCEL(6, "发布者取消"),
+    STATUS_PUBLISH_CANCEL(6, "发布者取消"),
     /**
      * 订单关系状态为进行中，本版本不用  状态值为7
      */
