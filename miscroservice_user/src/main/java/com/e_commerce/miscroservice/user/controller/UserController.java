@@ -1631,15 +1631,17 @@ public class UserController extends BaseController {
     /**
      * 用户信息修改(包括修改手机号码)
      *
-     * @param name
-     * @param userTel
-     * @param userHeadPortraitPath
-     * @param userPicturePath
-     * @param occupation
-     * @param workPlace
-     * @param college
-     * @param age
-     * @param sex
+     * @param name 昵称
+     * @param userTel 手机号
+     * @param userHeadPortraitPath  头像
+     * @param userPicturePath   背景
+     * @param occupation    职业
+     * @param workPlace 公司
+     * @param college   学校
+     * @param age   年龄
+     * @param sex   性别 1男 2女
+     * @param vxId  微信号
+     * @param remarks 个人宣言
      * {
      *                             "success": true,
      *                             "errorCode": "",
@@ -1651,7 +1653,7 @@ public class UserController extends BaseController {
      */
     @RequestMapping("modify")
     @Consume(TUser.class)
-    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex) {
+    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex,String vxId,String remarks) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
         user.setId(68813260748488704l);
@@ -1780,7 +1782,7 @@ public class UserController extends BaseController {
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            TBonusPackage bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
+            BonusPackageVIew bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
             result.setData(bonusPackage);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -1854,6 +1856,32 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 查看是否为我的红包
+     * @param token
+     * @param bonusPackageId
+     * @return
+     */
+    @RequestMapping("bonusPackage/isMine")
+    public Object isMyBonusPackage(String token, Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            Map<String,Object> resultMap = userService.isMyBonusPackage(user,bonusPackageId);
+            result.setData(resultMap);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看是否为我的红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查看是否为我的红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
 
     /**
@@ -2437,5 +2465,34 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 组织时间轨迹查询
+     * @param token
+     * @param year
+     * @param month
+     * @param type
+     * @return
+     */
+    @PostMapping("queryPayments")
+    public Object queryPayments(String token, String year, String month, String type) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            CompanyPaymentView view = userService.queryPayment(user, year, month, type);
+            result.setData(view);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
 
 }

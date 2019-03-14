@@ -32,4 +32,12 @@ public class BonusPackageDaoImpl implements BonusPackageDao {
         return MybatisOperaterUtil.getInstance().findOne(new TBonusPackage(),new MybatisSqlWhereBuild(TBonusPackage.class)
         .eq(TBonusPackage::getId,bonusPackageId));
     }
+
+    @Override
+    public boolean isMine(Long id, Long bonusPackageId) {
+        return !MybatisOperaterUtil.getInstance().finAll(new TBonusPackage(),new MybatisSqlWhereBuild(TBonusPackage.class)
+        .eq(TBonusPackage::getUserId,id)
+        .eq(TBonusPackage::getId,bonusPackageId)
+                .eq(TBonusPackage::getIsValid,AppConstant.IS_VALID_YES)).isEmpty();
+    }
 }

@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.user.service;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,7 +154,7 @@ public interface UserService {
      * @param bonusId
      * @return
      */
-    TBonusPackage bonusPackageInfo(TUser user, Long bonusId);
+    BonusPackageVIew bonusPackageInfo(TUser user, Long bonusId);
 
     /**
      * 打开一个红包
@@ -302,4 +303,39 @@ public interface UserService {
      * @param companyId
      */
     void joinCompany(TUser user, Long companyId);
+
+    /**
+     * 组织时间轨迹
+     * @param user
+     * @param year
+     * @param month
+     * @param type
+     * @return
+     */
+    CompanyPaymentView queryPayment(TUser user, String year, String month, String type);
+
+
+    /**
+     * 等级提升(不包括更新数据库)
+     * @param user
+     * @return
+     */
+    TUser levelUp(TUser user);
+
+    /**
+     * 任务完成
+     * @param user
+     * @param growthValueEnum
+     */
+    TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum);
+
+    TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts);
+
+    /**
+     * 是自己的红包
+     * @param user
+     * @param bonusPackageId
+     * @return
+     */
+    Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId);
 }

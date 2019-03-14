@@ -1,8 +1,5 @@
 package com.e_commerce.miscroservice.commons.wechat.service;
 
-import java.util.List;
-
-import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.wechat.entity.WechatSession;
 
 /**
@@ -53,27 +50,5 @@ public interface WechatService {
 	 * @return
 	 */
 	public String getPhoneNumber(String encryptedData, String iv, WechatSession session);
-	/**
-	 * 
-	 * 功能描述:推送微信消息
-	 * 作者:马晓晨
-	 * 创建时间:2018年11月21日 下午3:50:57
-	 * @param openid
-	 * @param formid
-	 * @return
-	 */
-	public String pushOneUser(String openid, String formid); 
-	
-	/**
-	 * 
-	 * 功能描述:发送服务通知
-	 * 作者:姜修弘
-	 * 创建时间:2018年11月24日 下午5:02:24
-	 * @param openid
-	 * @param formid
-	 * @param msg
-	 * @param type
-	 * @return
-	 */
-	 public String pushOneUserMsg(String openid, String formid, List<String> msg, SetTemplateIdEnum setTemplateIdEnum, String parameter);
+
 }

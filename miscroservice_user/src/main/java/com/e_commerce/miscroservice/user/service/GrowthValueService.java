@@ -17,9 +17,9 @@ public interface GrowthValueService {
 
     /**
      * 增加成长值
-     * @param inviter
-     * @param code
+     * @param user
+     * @param type
      * @return
      */
-    TUser addGrowthValue(TUser inviter, int code);
+    TUser addGrowthValue(TUser user, int type);
 }
