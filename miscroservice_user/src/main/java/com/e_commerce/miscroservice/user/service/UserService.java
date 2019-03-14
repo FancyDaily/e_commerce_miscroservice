@@ -314,14 +314,6 @@ public interface UserService {
      */
     CompanyPaymentView queryPayment(TUser user, String year, String month, String type);
 
-
-    /**
-     * 等级提升(不包括更新数据库)
-     * @param user
-     * @return
-     */
-    TUser levelUp(TUser user);
-
     /**
      * 任务完成
      * @param user
@@ -338,4 +330,25 @@ public interface UserService {
      * @return
      */
     Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId);
+
+    /**
+     * 组织版登录(密码)
+     * @param telephone
+     * @param password
+     * @return
+     */
+    Map<String, Object> loginGroupByPwd(String telephone, String password);
+
+    /**
+     * 手机号验证码登录
+     * @param telephone
+     * @param validCode
+     * @return
+     */
+    Map<String, Object> loginUserBySMS(String telephone, String validCode);
+
+    @Transactional(rollbackFor = Throwable.class)
+    TUser rigester(TUser user);
+
+    TUser getUserAccountByTelephone(String telephone);
 }

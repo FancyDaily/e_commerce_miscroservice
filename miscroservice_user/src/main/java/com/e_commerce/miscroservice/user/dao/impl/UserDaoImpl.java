@@ -73,6 +73,13 @@ public class UserDaoImpl implements UserDao {
         .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 
+    @Override
+    public List<TUser> selectByTelephone(String telephone) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserTel,telephone)
+        .eq(TUser::getIsValid,AppConstant.IS_ATTEN_YES));
+    }
+
     /**
      * 获取该账号的分身
      *

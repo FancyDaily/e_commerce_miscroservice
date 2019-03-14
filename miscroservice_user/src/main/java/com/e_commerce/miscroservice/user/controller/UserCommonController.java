@@ -2,11 +2,14 @@ package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
+import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
+import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
+import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +34,9 @@ public class UserCommonController {
 
     @Autowired
     private UserFreezeDao userFreezeDao;
+
+    @Autowired
+    private UserTimeRecordDao userTimeRecordDao;
 
     /**
      * 根据id获取用户
@@ -107,5 +113,14 @@ public class UserCommonController {
      */
     public void taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
         userService.taskComplete(user,growthValueEnum,counts);
+    }
+
+    /**
+     * 插入一条流水
+     * @param record
+     * @return
+     */
+    public Long insertUserTimeRecords(TUserTimeRecord record) {
+        return userTimeRecordDao.insert(record);
     }
 }

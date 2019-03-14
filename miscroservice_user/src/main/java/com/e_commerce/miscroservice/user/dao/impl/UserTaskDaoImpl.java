@@ -86,4 +86,12 @@ public class UserTaskDaoImpl implements UserTaskDao {
         .eq(TUserTask::getType,type)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TUserTask> findOnesTasksByType(Long id, int taskCode) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        .eq(TUserTask::getUserId,id)
+        .eq(TUserTask::getType,taskCode)
+        .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }
