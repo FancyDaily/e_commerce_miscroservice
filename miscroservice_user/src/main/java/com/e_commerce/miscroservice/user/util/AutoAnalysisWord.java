@@ -66,7 +66,7 @@ public class AutoAnalysisWord {
     private Pattern timePayPattern = Pattern.compile("(花|用|给|互助时|支付|付)(\\d+|一|两|二|三|四|五|六|七|八|九|十)(分钟|刻钟|分|小时)((\\d+|一|两|二|三|四|五|六|七|八|九|十)(分钟|分))?");
 
 
-    private Pattern pushTypePattern = Pattern.compile("(发布)(求助|服务)");
+    private Pattern pushTypePattern = Pattern.compile("(发布|.*)(求助|服务|需要)");
 
 
     private Map<String, String> characterToNumberRelation = new HashMap<>();
@@ -241,7 +241,8 @@ public class AutoAnalysisWord {
     }
 
     public static void main(String[] args) {
-        test();
+        System.out.println(new AutoAnalysisWord().parse("我需要有人上午10点在上城赞成中心帮我带早餐,我可以支付十分钟"));
+//        test();
     }
 
     /**
@@ -1372,7 +1373,7 @@ public class AutoAnalysisWord {
 
         try {
             List<String> allRegions = Files.readAllLines(Paths
-                    .get(AutoAnalysisWord.class.getResource("/" + ADDRESS_NAME).toURI()));
+                    .get(AutoAnalysisWord.class.getResource("/properties/" + ADDRESS_NAME).toURI()));
 
             allRegionCache = HashBasedTable.create();
 
@@ -1453,6 +1454,7 @@ public class AutoAnalysisWord {
         dateCharacterToNumberRelation.put("十", 10);
         dateCharacterToNumberRelation.put("求助", 1);
         dateCharacterToNumberRelation.put("服务", 2);
+        dateCharacterToNumberRelation.put("需要", 1);
 
 
         monthAndDayRelation.put("1", 31);
