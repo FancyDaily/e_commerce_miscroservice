@@ -119,4 +119,19 @@ public interface OrderRelationService {
      * @return
      */
     List<String> remarkOrder(Long nowUserId, List<Long> userIdList, Long orderId , int credit, int major, int attitude, String message, String labels);
+
+    /**
+     * 取消订单弹窗提醒每人扣除时间数
+     * @param orderId
+     * @return
+     */
+    long removeOrderTips(Long orderId , Long nowUserId);
+    /**
+     * 取消订单
+     * @param orderId
+     * @param userIdList
+     * @param nowUserId
+     * @return
+     */
+    List<String> removeOrder(Long orderId , List<Long> userIdList , Long nowUserId);
 }

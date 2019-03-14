@@ -263,7 +263,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 					//已完成
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 					// 发布者已取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 				}
@@ -297,10 +297,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 					//已完成
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 					// 发布者已取消,当前是接单者 所以是被取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_OTHER_CANCEL.getValue());
-				} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISHER_CANCEL.getType(), relationship.getStatus())) {
+				} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType(), relationship.getStatus())) {
 					// 接单者已取消， 当前是接单者 所以是已取消
 					returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 				}
@@ -380,7 +380,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 				//已完成
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 				// 发布者已取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 			}
@@ -451,10 +451,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
 				//已完成
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_ALREADY_END.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType(), relationship.getStatus())) {
 				// 发布者已取消,当前是接单者 所以是被取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_OTHER_CANCEL.getValue());
-			} else if (Objects.equals(OrderRelationshipEnum.STATUS_PUBLISHER_CANCEL.getType(), relationship.getStatus())) {
+			} else if (Objects.equals(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType(), relationship.getStatus())) {
 				// 接单者已取消， 当前是接单者 所以是已取消
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS__ALREADY_CANCEL.getValue());
 			}
@@ -830,7 +830,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (orderRelationship.getFromUserId().equals(user.getId())) { //当前用户是发布者
 			if (orderRelationship.getEndTime() < System.currentTimeMillis()) {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
-			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_ENROLLER_CANCEL.getType())) {
+			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())) {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CANCEL.getValue());
 			} else {
 				returnView.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_WAIT_CHOOSE.getValue());
