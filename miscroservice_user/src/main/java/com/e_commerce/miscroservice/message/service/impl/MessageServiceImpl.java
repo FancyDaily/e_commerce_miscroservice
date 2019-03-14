@@ -189,13 +189,13 @@ public class MessageServiceImpl implements MessageService {
             }
             messageDetailViews.add(messageDetailView);
         }
-        /*//倒叙
+        //倒叙
         List<MessageDetailView> messageDetailViews2 = new ArrayList<>();
         for (int i = messageDetailViews.size() - 1; i >= 0; i--) {
             messageDetailViews2.add(messageDetailViews.get(i));
-        }*/
+        }
         result.setTotalCount(page.getTotal());
-        result.setResultList(messageDetailViews);
+        result.setResultList(messageDetailViews2);
         //redisUtil.set("msgReadeLastTime"+parents.get(0)+nowUser.getId(), nowTime);TODO 插入上次阅读时间
         return result;
     }

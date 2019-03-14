@@ -1,5 +1,9 @@
 package com.e_commerce.miscroservice.commons.util.colligate;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
+
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
@@ -8,11 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
 
 /**
  * 功能描述:进行oss的简单上传
@@ -25,7 +27,7 @@ import java.util.UUID;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年11月17日 下午5:38:35
  */
-//@Component
+@Component
 public class AliOSSUtil {
 
 	private static Logger logger = LoggerFactory.getLogger(AliOSSUtil.class);

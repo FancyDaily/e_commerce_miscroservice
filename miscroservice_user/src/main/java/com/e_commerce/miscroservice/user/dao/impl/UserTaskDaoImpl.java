@@ -25,7 +25,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, beginTimeStamp, endTimeStamp)
-                .eq(TUserTask::getType,TaskEnum.TASK_SIGNUP.getType())
+                .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
                 .eq(TUserTask::getIsValid, AppConstant.IS_VALID_YES));
     }
 
@@ -41,7 +41,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, thisBeginStamp, thisEndStamp)
-                .eq(TUserTask::getType,TaskEnum.TASK_SIGNUP.getType())
+                .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
                 .eq(TUserTask::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
     }
@@ -54,7 +54,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
     @Override
     public List<TUserTask> findlatestSignUps(Long id) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
-        .eq(TUserTask::getType, TaskEnum.TASK_SIGNUP.getType())
+        .eq(TUserTask::getType, TaskEnum.TASK_SIGN_UP.getType())
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES)
         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
@@ -84,6 +84,14 @@ public class UserTaskDaoImpl implements UserTaskDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getType,type)
+        .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUserTask> findOnesTasksByType(Long id, int taskCode) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        .eq(TUserTask::getUserId,id)
+        .eq(TUserTask::getType,taskCode)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
     }
 }

@@ -1,9 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
-import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
-import com.github.pagehelper.Page;
 
 import java.util.List;
 
@@ -50,7 +48,7 @@ public interface OrderDao {
      * @param param
      * @return
      */
-    Page<TOrder> pageOrder(PageOrderParamView param);
+    List<TOrder> pageOrder(PageOrderParamView param);
 
     //TODO NEW!!!!!!START
 

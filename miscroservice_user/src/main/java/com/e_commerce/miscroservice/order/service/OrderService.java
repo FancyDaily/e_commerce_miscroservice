@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.order.vo.*;
@@ -74,11 +75,11 @@ public interface OrderService {
 
 	/**
 	 * 根据商品派生订单
-	 * @param serviceId 商品ID
+	 * @param service 商品ID
 	 * @param type 类型 是发布派生还是报名派生
 	 * @param date 报名或者选满人派生的日期
 	 */
-	void produceOrder(Long serviceId, Integer type, String date);
+	void produceOrder(TService service, Integer type, String date);
 
 	/**
 	 * 我选人的详情页面

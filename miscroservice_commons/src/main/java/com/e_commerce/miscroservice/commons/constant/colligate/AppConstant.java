@@ -749,4 +749,14 @@ public interface AppConstant {
      * //收藏列表中的订单状态
      */
     Integer[] COLLECTION_AVAILABLE_STATUS_ARRAY = AVAILABLE_STATUS_ARRAY; //TODO 收藏列表中的订单状态
+
+    /**
+     * 需要增加次数的codes
+     */
+    Integer[] GROWTH_VALUE_ENUM_CODES_ADD_NUMS_ARRAY = {14,15,16,17};
+
+    /**
+     * 需要区分第一次的code数组
+     */
+    Integer[] GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY = {32,33,34};
 }

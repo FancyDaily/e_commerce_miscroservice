@@ -83,7 +83,7 @@ public class FocusServiceImpl implements FocusService {
         //本次业务为关注
         // 插入新记录
         TUserFollow userFollow = new TUserFollow();
-        userFollow.setId(idGenerator.nextId());
+//        userFollow.setId(idGenerator.nextId());
         userFollow.setIsValid(AppConstant.IS_VALID_YES);
         userFollow.setUserId(id);
         userFollow.setUserFollowId(userFollowId);

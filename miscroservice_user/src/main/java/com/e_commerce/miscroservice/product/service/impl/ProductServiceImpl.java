@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
+import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
@@ -176,13 +177,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return productDao.getProductDesc(serviceId);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Throwable.class)
 	@Override
 	public void lowerFrame(TUser user, Long productId) {
+		// TODO 写死的用户
 		user = userService.getUserById(68813260748488704L);
 		logger.info("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
+			boolean upperStatus = tService.getStatus().equals(ProductEnum.STATUS_WAIT_EXAMINE.getValue())
+					|| tService.getStatus().equals(ProductEnum.STATUS_UPPER_FRAME.getValue());
+			if (!upperStatus) {
+				throw new MessageException("当前状态无法进行下架");
+			}
 			tService.setStatus(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
 			tService.setUpdateUser(user.getId());
 			tService.setUpdateUserName(user.getName());
@@ -203,6 +210,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		logger.error("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
+			boolean lowerStatus = tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
+					|| tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+					|| tService.getStatus().equals(ProductEnum.STATUS_EXAMINE_NOPASS.getValue());
+			if (!lowerStatus) {
+				throw new MessageException("当前状态无法删除");
+			}
 			tService.setStatus(ProductEnum.STATUS_DELETE.getValue());
 			tService.setUpdateUser(user.getId());
 			tService.setUpdateUserName(user.getName());
@@ -223,6 +236,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		logger.error("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
+			boolean lowerStatus = tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
+					|| tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+					|| tService.getStatus().equals(ProductEnum.STATUS_EXAMINE_NOPASS.getValue());
+			if (!lowerStatus) {
+				throw new MessageException("当前状态无法上架");
+			}
 			// TODO 判断时间段是否可以上架  上架后是否需要派生新的订单  进行状态判断
 			tService.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
 			tService.setUpdateUser(user.getId());
@@ -231,6 +250,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
 			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
+			orderService.produceOrder(tService, OrderEnum.PRODUCE_TYPE_UPPER.getValue(), "");
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("重新上架失败");
@@ -294,6 +314,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
 	}
 
+	@Override
+	public DetailProductView detail(TUser user, Long serviceId) {
+		DetailProductView productView = new DetailProductView();
+		TService service = productDao.selectByPrimaryKey(serviceId);
+		List<TServiceDescribe> productDesc = productDao.getProductDesc(serviceId);
+		productView.setService(service);
+		productView.setDesc(productDesc);
+		return productView;
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务
@@ -348,7 +378,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		if (!msgResult.getCode().equals("200")) {
 			throw new MessageException("派生订单失败");
 		}
@@ -399,7 +429,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		if (!msgResult.getCode().equals("200")) {
 			throw new MessageException("派生订单失败");
 		}
@@ -457,13 +487,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
 		}
+		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			service.setEnrollDate(getEnrollDate(service));
+		}
 		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		if (!msgResult.getCode().equals("200")) {
 			throw new MessageException("派生订单失败");
 		}
@@ -472,6 +505,28 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		TUser addGrowthUser = growthValueService.addGrowthValue(user,
 //				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
 //		userService.flushRedisUser(token, addGrowthUser);
+	}
+
+	/**
+	 * 获取可以报名的日期
+	 * @param service
+	 * @return
+	 */
+	private String getEnrollDate(TService service) {
+		// 判断开始
+		// 将当前日期往后延七天，是否超过结束时间，如果没有超过结束时间，用延迟七天的时间作为结束时间，否则使用商品的结束时间
+		// 获取这一时间段内的可以报名的日期
+		//商品开始时间
+//		String startTime = service.getStartTimeS();
+		//商品结束时间
+//		String endTime = service.getEndTimeS();
+//		int[] weekDayArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
+//		List<String> enrollDateList = new ArrayList<>();
+
+
+//		DateUtil.get
+//		String enrollDate = DateUtil.getEnrollDate(service);
+		return "";
 	}
 
 
@@ -532,7 +587,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		if (!msgResult.getCode().equals("200")) {
 			throw new MessageException("派生订单失败");
 		}
@@ -566,7 +621,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service.getId(), OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		if (!msgResult.getCode().equals("200")) {
 			throw new MessageException("派生订单失败");
 		}

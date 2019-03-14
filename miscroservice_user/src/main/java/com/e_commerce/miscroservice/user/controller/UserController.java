@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.product.controller.BaseController;
+import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
@@ -40,6 +41,35 @@ public class UserController extends BaseController {
 
     @Autowired
     private GrowthValueService growthValueService;
+
+    @Autowired
+    private UserTimeRecordDao userTimeRecordDao;
+
+    /**
+     * 功能描述: 手机号验证码登录
+     * 作者: 许方毅
+     * 创建时间: 2018年10月30日 下午2:46:29
+     * @param telephone
+     * @param validCode
+     * @return
+     */
+    @PostMapping("loginBySMS")
+    public Object loginUserBySMS(String telephone, String validCode) {
+        AjaxResult result = new AjaxResult();
+        try {
+            Map<String, Object> resultMap = userService.loginUserBySMS(telephone, validCode);
+            result.setSuccess(true);
+            result.setData(resultMap);
+        } catch (MessageException e) {
+            result.setMsg("手机号验证码登录异常: " + e.getMessage());
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            logger.error("手机号验证码登录异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
     /**
      * 时间轨迹
@@ -1631,15 +1661,17 @@ public class UserController extends BaseController {
     /**
      * 用户信息修改(包括修改手机号码)
      *
-     * @param name
-     * @param userTel
-     * @param userHeadPortraitPath
-     * @param userPicturePath
-     * @param occupation
-     * @param workPlace
-     * @param college
-     * @param age
-     * @param sex
+     * @param name 昵称
+     * @param userTel 手机号
+     * @param userHeadPortraitPath  头像
+     * @param userPicturePath   背景
+     * @param occupation    职业
+     * @param workPlace 公司
+     * @param college   学校
+     * @param age   年龄
+     * @param sex   性别 1男 2女
+     * @param vxId  微信号
+     * @param remarks 个人宣言
      * {
      *                             "success": true,
      *                             "errorCode": "",
@@ -1651,7 +1683,7 @@ public class UserController extends BaseController {
      */
     @RequestMapping("modify")
     @Consume(TUser.class)
-    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex) {
+    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex,String vxId,String remarks) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
         user.setId(68813260748488704l);
@@ -1780,7 +1812,7 @@ public class UserController extends BaseController {
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            TBonusPackage bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
+            BonusPackageVIew bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
             result.setData(bonusPackage);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -1809,12 +1841,13 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("bonusPackage/open")
-    public Object bonusPackageOpen(String token, Long bonusPackageId) {
+    public Object bonusPackageOpen(String token, String bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = new TUser();
         user.setId(68813260748488704l);
         try {
-            userService.openBonusPackage(user, bonusPackageId);
+            Long bonusId =Long.valueOf(bonusPackageId);
+            userService.openBonusPackage(user, bonusId);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("打开红包异常: " + e.getMessage());
@@ -1854,7 +1887,32 @@ public class UserController extends BaseController {
         return result;
     }
 
-
+    /**
+     * 查看是否为我的红包
+     * @param token
+     * @param bonusPackageId
+     * @return
+     */
+    @RequestMapping("bonusPackage/isMine")
+    public Object isMyBonusPackage(String token, Long bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = new TUser();
+        user.setId(68813260748488704l);
+        try {
+            Map<String,Object> resultMap = userService.isMyBonusPackage(user,bonusPackageId);
+            result.setData(resultMap);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("查看是否为我的红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查看是否为我的红包异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
     /**
      * 用户认证信息更新(实名认证)
@@ -2170,6 +2228,20 @@ public class UserController extends BaseController {
     }
 
     /**
+     * 插入一条流水
+     * @param record
+     * @return
+     */
+    @RequestMapping("time")
+    public Long insertUserTimeRecords(TUserTimeRecord record) {
+        record.setType(1);
+        record.setTime(1l);
+        record.setCreateTime(13131313131313l);
+        record.setIsValid("1");
+        return userTimeRecordDao.insert(record);
+    }
+
+    /**
      * 获取key—value值 样本
      * @param key feedback
      * @return
@@ -2390,6 +2462,30 @@ public class UserController extends BaseController {
     }
 
     /**
+     * 组织版登录（密码）
+     * @param telephone
+     * @param password
+     * @return
+     */
+    @PostMapping("loginGroupByPwd")
+    public Object loginGroupByPwd(String telephone, String password) { // TODO 在配置文件中加入拦截白名单
+        AjaxResult result = new AjaxResult();
+        try {
+            Map<String, Object> loginGroupByPwdMap = userService.loginGroupByPwd(telephone, password);
+            result.setData(loginGroupByPwdMap);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("组织版登录（密码）" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("组织版登录（密码）" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
      * 重置密码（组织）
      * @param telephone
      * @param validCode
@@ -2437,5 +2533,34 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 组织时间轨迹查询
+     * @param token
+     * @param year
+     * @param month
+     * @param type
+     * @return
+     */
+    @PostMapping("queryPayments")
+    public Object queryPayments(String token, String year, String month, String type) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            CompanyPaymentView view = userService.queryPayment(user, year, month, type);
+            result.setData(view);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
 
 }

@@ -8,12 +8,16 @@ import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.user.dao.TypeRecordDao;
+import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
+import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.SingleGrowthValueView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -22,6 +26,14 @@ public class GrowthValueServiceImpl implements GrowthValueService {
 
     @Autowired
     private TypeRecordDao typeRecordDao;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserDao userDao;
+
+    private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
     /**
      * 成长值记录明细
@@ -140,13 +152,119 @@ public class GrowthValueServiceImpl implements GrowthValueService {
     }
 
     /**
-     * 增加成长值记录
-     * @param inviter
-     * @param code
+     * 增加成长值记录 //TODO 由于权益不确定是否保留，生日加倍板块待定
+     * @param user
+     * @param type
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     @Override
-    public TUser addGrowthValue(TUser inviter, int code) {
-        return null;
+    public TUser addGrowthValue(TUser user, int type) {
+        // 判空
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空!");
+        }
+
+        // 日期信息
+        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
+        Long beginStamp = Long.valueOf((String)ym2BetweenStamp.get("begin"));
+        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+
+       /*
+       //判断是否为生日
+        Long birth = user.getBirthday();
+        String birthDay = "";
+        if(birth!=null) {
+            String birthStr = String.valueOf(birth);
+            birthDay = birthStr.substring(0,4) + "-" + birthStr.substring(4,6) + "-" + birthStr.substring(6,8); //生日格式
+        }
+        boolean eaquals = today.equals(birthDay);
+        */
+
+        // 成长值明细标题
+        String title = "";
+
+        // 获取的成长值
+        long growthNum = 0L;
+        Integer inOut = 0; // 扣减
+        Integer rate = AppConstant.GROWTH_VALUE_RATE_BIRTHDAY; // 倍率
+
+        // 获取当日成长值收入记录
+        List<TTypeRecord> records = typeRecordDao.selectIncomeByUserIdBetween(user.getId(),beginStamp,endStamp);
+        Long dayTotal = 0l;
+
+        //统计当日各类型总收入
+        for(TTypeRecord record:records) {
+            if(record.getType().equals(type)) {
+                dayTotal += record.getNum();
+            }
+        }
+
+        // 根据type获取得到的成长值
+        for (GrowthValueEnum growthEnum : GrowthValueEnum.values()) {
+            if (growthEnum.getCode() == type) {
+                Integer maxIn = growthEnum.getMaxIn();
+
+                /*
+                //判断是否加倍
+                if(eaquals) {
+                    maxIn = maxIn * rate;
+                }
+                */
+
+                // 判断是否达到上限
+                if(dayTotal > maxIn) {
+                    return user;	//结束
+                }
+                growthNum = growthEnum.getPrice();
+                inOut = growthEnum.getInOut();
+                title = growthEnum.getMessage();
+            }
+        }
+
+        /*
+        // 生日成长值加倍
+        if (eaquals) {
+            growthNum = growthNum * rate;
+        }
+        */
+
+        // 计算成长值
+        Long growthValue = user.getGrowthValue();
+        Long result = growthValue;
+        if (inOut.equals(0)) {
+            growthNum = -growthNum;
+        }
+
+        result = growthValue + growthNum;
+        user.setGrowthValue(result);
+//        user = userService.levelUp(user);	//升级并更新 LEVEL_UP REMARK
+        //TODO 更新数据库
+        userDao.updateByPrimaryKey(user);
+
+        // 插入成长值明细
+        TTypeRecord record = new TTypeRecord();
+        record.setId(idGenerator.nextId());
+        record.setUserId(user.getId());
+        record.setType(type);
+        record.setSubType(0);
+        record.setTitle(title);
+        record.setContent(title);
+        record.setNum(growthNum);
+        // updater & creater
+        record.setCreateTime(System.currentTimeMillis());
+        record.setCreateUser(user.getId());
+        record.setCreateUserName(user.getName());
+        record.setUpdateTime(System.currentTimeMillis());
+        record.setUpdateUser(user.getId());
+        record.setUpdateUserName(user.getName());
+        record.setSubType(0);
+
+        record.setIsValid(AppConstant.IS_VALID_YES);
+        typeRecordDao.insert(record);
+
+        return user;
     }
+
 }

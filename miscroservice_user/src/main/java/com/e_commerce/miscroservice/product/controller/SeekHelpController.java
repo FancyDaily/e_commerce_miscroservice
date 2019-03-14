@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.product.controller;
 
-import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppMessageConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
@@ -9,10 +8,11 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
-import com.e_commerce.miscroservice.product.vo.ProductSubmitParamView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -96,6 +96,36 @@ public class SeekHelpController extends BaseController {
 		}
 		return result;
 	}
+
+	/**
+	 *
+	 * @param token 用户token
+	 * @param serviceId 商品ID
+	 * @return
+	 */
+	@PostMapping("/productDetail")
+	public Object detail(String token, Long serviceId) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			DetailProductView detailProductView = productService.detail(user, serviceId);
+			result.setData(detailProductView);
+			result.setSuccess(true);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
+			return result;
+		} catch (MessageException e) {
+			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			result.setSuccess(false);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			return result;
+		} catch (Exception e) {
+			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
+			result.setSuccess(false);
+			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
+			return result;
+		}
+	}
+
 
 	/**
 	 * 上架求助服务
@@ -185,7 +215,7 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @return
 	 */
-	@RequestMapping("/lowerFrameSeekHelp")
+	@PostMapping("/lowerFrameSeekHelp")
 	public Object lowerFrameSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -218,8 +248,8 @@ public class SeekHelpController extends BaseController {
 	 * @param token
 	 * @return
 	 */
-	@RequestMapping("/submit")
-	@Consume(ProductSubmitParamView.class)
+	@PostMapping("/submit")
+//	@Consume(ProductSubmitParamView.class)
 	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param, String token) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String

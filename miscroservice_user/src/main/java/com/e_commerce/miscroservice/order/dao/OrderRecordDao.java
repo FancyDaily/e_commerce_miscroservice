@@ -3,6 +3,8 @@ package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRecord;
 
+import java.util.List;
+
 /**
  * 功能描述:
  * 模块:
@@ -31,4 +33,10 @@ public interface OrderRecordDao {
 	 */
 	int insert(TOrderRecord orderRecord);
 
+	/**
+	 * 查询订单的服务记录
+	 * @param orderId 订单ID
+	 * @return
+	 */
+	List<TOrderRecord> selectRecordByOrderId(Long orderId);
 }
