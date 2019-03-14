@@ -417,6 +417,12 @@ public class OrderRelationController extends BaseController {
      *
      * @param nowUserId 当前用户id
      * @param orderId 订单ID
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "查看成功",
+     *     "data": 0 如果是0 就直接取消或者去选人页面，如果不是零 弹一个弹窗，告诉他每个人要赔付这个数值的前，问是否继续
+     *
      * @return
      */
     @PostMapping("/removeOrderTips")

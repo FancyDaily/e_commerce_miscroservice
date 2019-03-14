@@ -2225,8 +2225,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setServeNum(0);
         user.setSeekHelpPublishNum(0);
         user.setServePublishNum(0);
-        user.setSeekHelpCommentNum(0);
-        user.setServCommentNum(0);
         user.setPayNum(0);
 
         user.setServTotalEvaluate(0);

@@ -55,10 +55,6 @@ public class TUser implements Serializable {
 
     private Integer servePublishNum;
 
-    private Integer seekHelpCommentNum;
-
-    private Integer servCommentNum;
-
     private Integer payNum;
 
     private Long surplusTime;
@@ -88,6 +84,8 @@ public class TUser implements Serializable {
     private Integer helpMajorEvaluate;
 
     private Integer helpAttitudeEvaluate;
+
+    private String companyIds;
 
     private String companyNames;
 
@@ -339,22 +337,6 @@ public class TUser implements Serializable {
         this.servePublishNum = servePublishNum;
     }
 
-    public Integer getSeekHelpCommentNum() {
-        return seekHelpCommentNum;
-    }
-
-    public void setSeekHelpCommentNum(Integer seekHelpCommentNum) {
-        this.seekHelpCommentNum = seekHelpCommentNum;
-    }
-
-    public Integer getServCommentNum() {
-        return servCommentNum;
-    }
-
-    public void setServCommentNum(Integer servCommentNum) {
-        this.servCommentNum = servCommentNum;
-    }
-
     public Integer getPayNum() {
         return payNum;
     }
@@ -473,6 +455,14 @@ public class TUser implements Serializable {
 
     public void setHelpAttitudeEvaluate(Integer helpAttitudeEvaluate) {
         this.helpAttitudeEvaluate = helpAttitudeEvaluate;
+    }
+
+    public String getCompanyIds() {
+        return companyIds;
+    }
+
+    public void setCompanyIds(String companyIds) {
+        this.companyIds = companyIds == null ? null : companyIds.trim();
     }
 
     public String getCompanyNames() {
