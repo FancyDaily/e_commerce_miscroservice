@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
-import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +16,13 @@ import java.util.Map;
  * @date 2019/3/6
  */
 @Component
-public class ProductCommonController extends BaseController{
+public class ProductCommonController extends BaseController {
 	@Autowired
 	ProductService productService;
 
 	/**
 	 * 根据ID批量查询所有商品
+	 *
 	 * @param serviceIds 需要查询的商品ID
 	 * @return 所有这些ID的service
 	 */
@@ -32,6 +32,7 @@ public class ProductCommonController extends BaseController{
 
 	/**
 	 * 根据商品ID获取商品
+	 *
 	 * @param serviceId 商品ID
 	 * @return 商品
 	 */
@@ -41,7 +42,8 @@ public class ProductCommonController extends BaseController{
 
 	/**
 	 * 获取商品封面图
-	 * @param serviceIds  需要获取封面图的商品ID
+	 *
+	 * @param serviceIds 需要获取封面图的商品ID
 	 * @return key:商品ID  value:封面图
 	 */
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
@@ -61,6 +63,7 @@ public class ProductCommonController extends BaseController{
 
 	/**
 	 * 获取服务详情（图片及详情）
+	 *
 	 * @param serviceId
 	 * @return
 	 */
@@ -68,19 +71,9 @@ public class ProductCommonController extends BaseController{
 		return productService.getProductDesc(serviceId);
 	}
 
-	public MsgResult autoLowerFrameService(TService service) {
-		MsgResult result = new MsgResult();
-		try {
-			service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
-			productService.autoLowerFrameService(service);
-			result.setCode("200");
-			result.setMessage("修改成功");
-			return result;
-		} catch (Exception e) {
-			result.setCode("500");
-			result.setMessage("修改失败");
-			return result;
-		}
+	public void autoLowerFrameService(TService service) {
+		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+		productService.autoLowerFrameService(service);
 	}
 
 

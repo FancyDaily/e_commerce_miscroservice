@@ -1,12 +1,10 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
-import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
-import com.e_commerce.miscroservice.commons.exception.colligate.ErrorException;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -48,7 +46,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public int saveOrder(TOrder order) {
-		// 如果
 		/*
 		 * 已完成的订单是可以显示的 可见状态还是为1
 		 * 正常状态为1的订单 只能有一条可见的订单 只能有一套visiable的订单 到完成时间的时候改状态并且改可见状态
@@ -71,6 +68,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 		}
 		orderDao.saveOneOrder(order);
+		// 只有求助并且是互助时才冻结订单
+		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+			userService.freezeTimeCoin(order.getId(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
+		}
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -549,9 +550,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
+	public void synOrderCreateUserName(Long userId, String userName) {
+		orderDao.updateUserName(userId, userName);
+	}
+
+	@Override
 	@Transactional(rollbackFor = Throwable.class)
-	public void produceOrder(TService service, Integer type, String date) {
-		MsgResult msgResult;
+	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
 			throw new MessageException("501", "用户授信不足");
@@ -560,8 +565,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
-		// TODO 设置主ID 都关联了serviceID 感觉可以不设置主ID了
-//		order.setMainId(order.getId());
 		order.setServiceId(service.getId());
 		order.setStatus(OrderEnum.STATUS_NORMAL.getValue());
 		order.setServiceStatus(service.getStatus());
@@ -573,40 +576,29 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//可以成功创建订单
 				saveOrder(order);
 				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-//				orderDao.saveOneOrder(order);
-				// 只有求助并且是互助时才冻结订单
-				if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-					msgResult = userService.freezeTimeCoin(tUser.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
-					if (!msgResult.getCode().equals("200")) {
-						throw new ErrorException(msgResult.getCode(), msgResult.getMessage());
-					}
-				}
+				return order;
 				// TODO 订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
+				return null;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
 				// 下架商品  同步所有订单状态
-				msgResult = productService.autoLowerFrameService(service);
-				if (!msgResult.getCode().equals("200")) {
-					throw new ErrorException("500", "下架商品失败");
-				}
+				productService.autoLowerFrameService(service);
+				return null;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_END.getValue())) {
 				//到最后一张，但是还没到结束时间（一般是报名人满生成的）
 				logger.info("商品ID为{} 的订单已经派生到最后一张，无法继续派生", service.getId());
+				return null;
 			}
 		} else {
 			saveOrder(order);
-			if (service.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && service.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-				msgResult = userService.freezeTimeCoin(tUser.getId(), service.getCollectTime() * service.getServicePersonnel(), service.getId(), service.getServiceName());
-				if (!msgResult.equals("200")) {
-					throw new MessageException("500", "冻结用户金额失败");
-				}
-			}
+			return order;
 		}
+		return order;
 	}
 
 	/**
