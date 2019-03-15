@@ -2153,7 +2153,6 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param validCode
      * @return
      */
-    @Transactional(rollbackFor = Throwable.class)
     @Override
     public Map<String, Object> loginUserBySMS(String telephone, String validCode) {
         checkSMS(telephone, validCode);
@@ -2205,7 +2204,6 @@ public class UserServiceImpl extends BaseService implements UserService {
      *
      * @param user
      */
-    @Transactional(rollbackFor = Throwable.class)
     @Override
     public TUser rigester(TUser user) {
         // 默认昵称
@@ -2300,9 +2298,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 插入一条用户记录
         userDao.insert(user);
-
-        // 注册完成任务
-        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
+//
+//        // 注册完成任务
+//        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
         return user;
     }

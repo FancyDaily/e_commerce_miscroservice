@@ -121,7 +121,6 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 	 * @param validCode
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> validSmsCode(String openid, String validCode) {
 		if (!StringUtil.isNotEmpty(validCode)) {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "验证码不能为空！");
