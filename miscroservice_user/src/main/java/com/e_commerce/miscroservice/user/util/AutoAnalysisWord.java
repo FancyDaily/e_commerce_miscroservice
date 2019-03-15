@@ -1,9 +1,12 @@
-package com.other;
+package com.e_commerce.miscroservice.user.util;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.huaban.analysis.jieba.JiebaSegmenter;
 import lombok.Data;
+import org.ansj.domain.Result;
+import org.ansj.domain.Term;
+import org.ansj.splitWord.analysis.ToAnalysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +80,7 @@ public class AutoAnalysisWord {
     private DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
     private DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy"+DATE_LINE+"MM"+DATE_LINE+"dd");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy" + DATE_LINE + "MM" + DATE_LINE + "dd");
     private DateTimeFormatter weekDayFormatter = DateTimeFormatter.ofPattern("EEEE");
 
 
@@ -245,9 +248,9 @@ public class AutoAnalysisWord {
     }
 
     public static void main(String[] args) {
-//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟"));
-//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在上城赞成中心帮我带早餐,我可以支付十分钟"));
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在张北县百货大楼帮我带早餐,我可以支付十分钟"));
+        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
+        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
+
 
 //        test();
     }
@@ -268,24 +271,25 @@ public class AutoAnalysisWord {
     /**
      * 解析文本消息
      *
-     * @param text 文本
-     *             {
-     *             "startDate":2019-03-25, //开始日期
-     *             "endDate":2019-03-25, //结束日期
-     *             "startTime":14：00, //24小时制的开始时间
-     *             "endTime":14：00, //24小时制的结束时间
-     *             "work":"xxx",//需要做什么
-     *             "weekDay":"1,4,5",//周期性的时间
-     *             "location":xxxx,//发布活动的地址名称
-     *             "latitude":xxxx,//纬度
-     *             "longitude":xxxx,//经度
-     *             "payCount":200,//支付的总的分钟数量
-     *             "personCount":30,//参加需要总的人数
-     *             "pushType":1,//服务的服务类型 1 求助 2服务
-     *             }
+     * @param text     文本
+     * @param cityName 城市名称
+     *                 {
+     *                 "startDate":2019-03-25, //开始日期
+     *                 "endDate":2019-03-25, //结束日期
+     *                 "startTime":14：00, //24小时制的开始时间
+     *                 "endTime":14：00, //24小时制的结束时间
+     *                 "work":"xxx",//需要做什么
+     *                 "weekDay":"1,4,5",//周期性的时间
+     *                 "location":xxxx,//发布活动的地址名称
+     *                 "latitude":xxxx,//纬度
+     *                 "longitude":xxxx,//经度
+     *                 "payCount":200,//支付的总的分钟数量
+     *                 "personCount":30,//参加需要总的人数
+     *                 "pushType":1,//服务的服务类型 1 求助 2服务
+     *                 }
      * @return
      */
-    public Map<String, Object> parse(String text) {
+    public Map<String, Object> parse(String text, String cityName) {
 
 
         Map<String, Object> resultMap = new HashMap<>();
@@ -345,21 +349,65 @@ public class AutoAnalysisWord {
 
 
         //解析地点
-        TextInfo location = getLocation(text);
+        TextInfo location = getLocation(text, cityName);
 
         if (location.getLocation() != null) {
             resultMap.put("location", location.getLocation().getLocation());
             resultMap.put("longitude", location.getLocation().getLongitude());
             resultMap.put("latitude", location.getLocation().getLatitude());
-
+            StringBuilder workBuild = new StringBuilder();
             if (location.getHeadInfo() != null) {
-                text = String.join("", location.getHeadInfo());
-            }
-            if (location.getTailInfo() != null) {
-                if (text != null && !text.isEmpty()) {
-                    text = String.join("", location.getTailInfo());
+                for (WordInfo wordInfo : location.getHeadInfo()) {
+                    workBuild.append(wordInfo.getWordName());
                 }
             }
+
+
+            if (location.getTailInfo() != null) {
+                workBuild.delete(0, workBuild.length());
+                for (WordInfo wordInfo : location.getTailInfo()) {
+                    workBuild.append(wordInfo.getWordName());
+                }
+            }
+            text = workBuild.toString();
+
+
+//            StringBuilder workBuild = new StringBuilder();
+//            if (location.getHeadInfo() != null) {
+//                for (WordInfo wordInfo : location.getHeadInfo()) {
+//                    workBuild.append(wordInfo.getWordName());
+//                }
+//            }
+//
+//
+//            StringBuilder newWorkBuild = new StringBuilder();
+//            //动词 +名次+形容词
+//            if (workBuild.length() != 0) {
+//
+//                List<WordInfo> wordGroup = getWordGroup(workBuild.toString(), Boolean.TRUE);
+//
+//                System.out.println(wordGroup);
+//                workBuild.delete(0, workBuild.length());
+//            }
+//
+//
+//            if (location.getTailInfo() != null) {
+//
+//
+//                for (WordInfo wordInfo : location.getTailInfo()) {
+//                    workBuild.append(wordInfo.getWordName());
+//                }
+//
+//            }
+//            System.out.println("___________");
+//            System.out.println("___________");
+//            System.out.println("___________");
+//
+//            if (workBuild.length() != 0) {
+//                List<WordInfo> wordGroup = getWordGroup(workBuild.toString(), Boolean.TRUE);
+//                System.out.println(wordGroup);
+//
+//            }
 
         } else {
             resultMap.put("location", "");
@@ -557,7 +605,7 @@ public class AutoAnalysisWord {
 
         }
 
-        Boolean isSingleDateFlag=Boolean.FALSE;
+        Boolean isSingleDateFlag = Boolean.FALSE;
 
         if (startTime.isEmpty()) {
             //三种情况，一种是全文字，一种是半文字半时间 一种是只有一个时间
@@ -581,15 +629,15 @@ public class AutoAnalysisWord {
 
 
             } else if (tmpTime.equals(_tmpTime) || tmpTime.isEmpty()) {
-                isSingleDateFlag=Boolean.TRUE;
+                isSingleDateFlag = Boolean.TRUE;
                 //只有一个时间
                 //判断是否只有一个时间,那么默认当前开始时候到结束时间
                 startTime = timeFormatter.format(LocalDateTime.now());
                 endTime = _tmpTime;
                 //进行字符串的替换,去除时间
                 replaceAllStr = "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
-                originalStartTime=endTime;
-                originalEndime="";
+                originalStartTime = endTime;
+                originalEndime = "";
 
             } else {
                 //半文字半时间
@@ -653,10 +701,10 @@ public class AutoAnalysisWord {
         timeInfo.setEndTime(endTime);
         DateInfo dateInfo = getDate(text, originalStartTime, originalEndime);
         timeInfo.setWeekDay(dateInfo.getPeriodWeekDay());
-        if(isSingleDateFlag){
+        if (isSingleDateFlag) {
             timeInfo.setStartDate(dateFormatter.format(LocalDateTime.now()));
             timeInfo.setEndDate(dateInfo.getStartDate());
-        }else {
+        } else {
 
             timeInfo.setStartDate(dateInfo.getStartDate());
             timeInfo.setEndDate(dateInfo.getEndDate());
@@ -1060,22 +1108,23 @@ public class AutoAnalysisWord {
      */
     @Data
     private class TextInfo {
-        private List<String> headInfo;
+        private List<WordInfo> headInfo;
         private LocationInfo location;
-        private List<String> tailInfo;
+        private List<WordInfo> tailInfo;
 
     }
 
     /**
      * 根据输入文本获取地址
      *
-     * @param text 需要输入的文本
+     * @param text     需要输入的文本
+     * @param cityName 城市名称
      */
-    private TextInfo getLocation(String text) {
+    private TextInfo getLocation(String text, String cityName) {
         TextInfo textInfo = new TextInfo();
 
         //获取分组
-        List<String> wordGroup = getWordGroup(text);
+        List<WordInfo> wordGroup = getWordGroup(text, Boolean.FALSE);
 
         if (wordGroup == null || wordGroup.isEmpty()) {
             logger.warn("词语={}获取不到分组", text);
@@ -1083,20 +1132,21 @@ public class AutoAnalysisWord {
         }
 
         //获取地理位置以及后面的词汇的集合
-        List<String> regionNames = getRegionName(wordGroup);
+        List<WordInfo> regionNames = getRegionName(wordGroup);
 
         if (regionNames == null || regionNames.isEmpty()) {
-            //TODO:还有一种情况 用户只输入了地理位置没有输入城市名称
-            logger.warn("词语={}获取不城市名称位置", text);
-            return textInfo;
+            //这里有一种情况 用户只输入了地理位置没有输入城市名称
+            regionNames = wordGroup;
+        } else {
+            //首个市城市名称并且去除城市集合
+            cityName = regionNames.get(0).getWordName();
+            regionNames.remove(0);
+
         }
 
-        //首个市城市名称并且去除城市集合
-        String ciyName = regionNames.get(0);
-        regionNames.remove(0);
 
         //获取输入文本中该城市的详细地址并且去除该地址的集合
-        LocationInfo address = getAddress(ciyName, regionNames);
+        LocationInfo address = getAddress(cityName, regionNames);
         if (address == null || address.getLocation() == null || address.getLocation().isEmpty()) {
             logger.warn("词语={}获取不地理位置", text);
             return textInfo;
@@ -1108,14 +1158,50 @@ public class AutoAnalysisWord {
     }
 
 
+    @Data
+    private class WordInfo {
+        private String wordName;
+        private String wordNature;
+    }
+
     /**
      * 获取词分组
      *
      * @param text 代分组的字符串
      * @return
      */
-    private List<String> getWordGroup(String text) {
-        return new JiebaSegmenter().sentenceProcess(text);
+    private List<WordInfo> getWordGroup(String text, Boolean needParse) {
+        List<WordInfo> list = new ArrayList<>();
+
+        if (needParse) {
+            Result parse = ToAnalysis.parse(text);
+            List<Term> terms = parse.getTerms();
+
+            for (Term term : terms) {
+                WordInfo wordInfo = new WordInfo();
+                wordInfo.setWordName(term.getName());
+                wordInfo.setWordNature(AnsjUtil.getPartOfSpeech(term.getNatureStr()));
+                list.add(wordInfo);
+
+            }
+
+        } else {
+
+            List<String> results = new JiebaSegmenter().sentenceProcess(text);
+
+
+            for (String str : results) {
+
+                WordInfo wordInfo = new WordInfo();
+
+                wordInfo.setWordName(str);
+
+                list.add(wordInfo);
+            }
+        }
+
+
+        return list;
     }
 
 
@@ -1124,26 +1210,27 @@ public class AutoAnalysisWord {
      *
      * @param allAreas 所有的带检查的地址
      */
-    private List<String> getRegionName(List<String> allAreas) {
+    private List<WordInfo> getRegionName(List<WordInfo> allAreas) {
 
-        List<String> result = new LinkedList<>();
+        List<WordInfo> result = new LinkedList<>();
 
-
-        for (Iterator<String> iterator = allAreas.iterator(); iterator.hasNext(); ) {
-            String area = iterator.next();
+        WordInfo wordInfo;
+        for (Iterator<WordInfo> iterator = allAreas.iterator(); iterator.hasNext(); ) {
+            wordInfo = iterator.next();
+            String area = wordInfo.getWordName();
             //先精准匹配
             if (result.isEmpty()) {
 
                 if (allRegionCache.containsRow(area)
                         || allRegionCache.containsColumn(area)) {
-                    result.add(area);
+                    result.add(wordInfo);
                     iterator.remove();
                 } else {
                     continue;
                 }
 
             } else {
-                result.add(area);
+                result.add(wordInfo);
                 iterator.remove();
             }
 
@@ -1154,11 +1241,12 @@ public class AutoAnalysisWord {
             return result;
         }
 
-        for (Iterator<String> iterator = allAreas.iterator(); iterator.hasNext(); ) {
-            String area = iterator.next();
+        for (Iterator<WordInfo> iterator = allAreas.iterator(); iterator.hasNext(); ) {
+            wordInfo = iterator.next();
+            String area = wordInfo.getWordName();
 
             if (!result.isEmpty()) {
-                result.add(area);
+                result.add(wordInfo);
                 iterator.remove();
                 continue;
             }
@@ -1193,7 +1281,7 @@ public class AutoAnalysisWord {
             }
 
             if (!collect.isEmpty()) {
-                result.add(area);
+                result.add(wordInfo);
                 iterator.remove();
             }
 
@@ -1211,7 +1299,7 @@ public class AutoAnalysisWord {
      * @param allAreas 所有输入的分组信息
      * @return
      */
-    private LocationInfo getAddress(String cityName, List<String> allAreas) {
+    private LocationInfo getAddress(String cityName, List<WordInfo> allAreas) {
 
         LocationInfo address = null;
 
@@ -1228,20 +1316,21 @@ public class AutoAnalysisWord {
             }
 
 
-            address = isAddress(allAreas.get(i), cityName);
+            address = isAddress(allAreas.get(i).getWordName(), cityName);
+
             if (address.getLocation() == null || address.getLocation().isEmpty()) {
-                suffixBuild.append(allAreas.get(i));
+                suffixBuild.append(allAreas.get(i).getWordName());
 
                 for (int j = i + 1; j < len; j++) {
 
-                    String _otherAddress = allAreas.get(j);
+                    String _otherAddress = allAreas.get(j).getWordName();
                     suffixBuild.append(_otherAddress);
                     address = isAddress(suffixBuild.toString(), cityName);
                     if (address.getLocation() != null && !address.getLocation().isEmpty()) {
 
                         //保留剩余的集合
                         if (j + 1 != len) {
-                            List<String> newList = new ArrayList<>(allAreas.subList(j + 1, len));
+                            List<WordInfo> newList = new ArrayList<>(allAreas.subList(j + 1, len));
                             allAreas.clear();
                             if (!newList.isEmpty()) {
                                 allAreas.addAll(newList);
@@ -1256,7 +1345,7 @@ public class AutoAnalysisWord {
             } else {
 
                 if (i + 1 != len) {
-                    List<String> newList = new ArrayList<>(allAreas.subList(i + 1, len));
+                    List<WordInfo> newList = new ArrayList<>(allAreas.subList(i + 1, len));
                     allAreas.clear();
                     if (!newList.isEmpty()) {
                         allAreas.addAll(newList);
@@ -1264,8 +1353,8 @@ public class AutoAnalysisWord {
                 } else {
                     allAreas.clear();
                 }
+                break;
             }
-            break;
 
 
         }
