@@ -267,4 +267,23 @@ public class GrowthValueServiceImpl implements GrowthValueService {
         return user;
     }
 
+    /**
+     * 查找日常成长值记录
+     * @param id
+     */
+    @Override
+    public List<TTypeRecord> findOnesDailyGrowthRecords(Long id) {
+        return typeRecordDao.selectDailyGrowthRecords(id);
+    }
+
+    /**
+     * 查找所有成长流水
+     * @param id
+     * @return
+     */
+    @Override
+    public List<TTypeRecord> findOnesGrowthRecords(Long id) {
+        return typeRecordDao.selectGrowthRecords(id);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 
 import java.util.List;
@@ -66,16 +67,16 @@ public interface OrderDao {
      * @param isService
      * @return
      */
-    List<TOrder> selectPublishedByUserId(Long userId, boolean isService);
+    List<TOrder> selectPublishedByUserId(Long userId, boolean isService, TUser beenViewer);
 
     /**
      * 根据userId查找特定订单列表 (历史服务/求助)
      * @param userId
      * @return
      */
-    List<TOrder> selectPastByUserId(Long userId);
+	List<TOrder> selectPastByUserId(Long userId, TUser user);
 
-    /**
+	/**
      * 根据订单id查找订单记录
      * @param orderIds
      * @return

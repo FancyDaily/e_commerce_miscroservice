@@ -19,13 +19,15 @@ import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import net.bytebuddy.implementation.bytecode.Throw;
+import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
+import javafx.concurrent.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 @Service
@@ -503,10 +505,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
         //求助列表
-        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false);
+        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false,user);
 
         //服务列表
-        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true);
+        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true,user);
 
         //技能列表
         UserSkillListView skills = skills(user);
@@ -528,8 +530,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService) {
-        return getOnesAvailableItems(userId, pageNum, pageSize, isService);
+    public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
+        return getOnesAvailableItems(userId, pageNum, pageSize, isService,me);
     }
 
     /**
@@ -556,7 +558,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         //查找符合条件的订单记录
-        List<TOrder> orders = orderService.selectEndOrdersByUserId(userId);
+        List<TOrder> orders = orderService.selectEndOrdersByUserId(userId,user);
         List<Long> orderIds = new ArrayList<>();
         for (TOrder order : orders) {
             orderIds.add(order.getId());
@@ -599,9 +601,14 @@ public class UserServiceImpl extends BaseService implements UserService {
         return result;
     }
 
-    private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService) {
-        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-        List<TOrder> orders = orderService.selectOdersByUserId(userId, isService);
+    private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService,TUser me) {
+        List<TOrder> orders = new ArrayList<>();
+        Page<Object> startPage = new Page<>();
+        if(userId!=me.getId()) {    //查看别人的主页
+            TUser beenViewer = userDao.selectByPrimaryKey(userId);
+            startPage = PageHelper.startPage(pageNum, pageSize);
+            orders = orderService.selectOdersByUserId(userId, isService, beenViewer);
+        }
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
         queryResult.setResultList(orders);
@@ -684,7 +691,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(rollbackFor = Throwable.class)
     @Override
     public String modify(String token, TUser user) {
-//        return "";
         TUser idHolder = (TUser) redisUtil.get(token);
         TUser updateData = user; // 原始数据
 
@@ -1543,28 +1549,32 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
     }
 
+    @Override
+    public Set<Integer> taskList(TUser user) {
+        return null;
+    }
+
     /**
      * 任务信息查询
      *
      * @param user
      * @return
      */
-    @Override
+   /* @Override
     public Set<Integer> taskList(TUser user) {
-        List<Integer> resultList = new ArrayList<>();
         Set<Integer> resultSet = new TreeSet<>();
         List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
+        //每日的类型集合
+        Integer[] dailyTaskArray = AppConstant.DAILY_TASK_ARRAY;
+        List<Integer> includeList = Arrays.asList(dailyTaskArray);
         for (TUserTask userTask : userTasks) {
-            //签到 -> createTime为当日
-            if (userTask.getType().equals(TaskEnum.TASK_SIGN_UP.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {
+            if (includeList.contains(userTask.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {  //如果是日常任务，判断是否为今天
                 continue;
             }
-            resultList.add(userTask.getType());
             resultSet.add(userTask.getType());
         }
         return resultSet;
-    }
-
+    }*/
 
     /**
      * 红包退回
@@ -1760,7 +1770,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 回馈
         // 使邀请人获得成长值奖励
         TUser inviter = userDao.selectByPrimaryKey(inviterId);
-        inviter= taskComplete(inviter, GrowthValueEnum.GROWTH_TYPE_REP_INVITE);//TODO 任务完成
+        inviter = taskComplete(inviter, GrowthValueEnum.GROWTH_TYPE_REP_INVITE);//TODO 任务完成
 
         // TODO 刷新缓存
         String key = "str" + inviterId;
@@ -2134,10 +2144,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public Map<String, Object> loginGroupByPwd(String telephone, String password) {
         return null;
-    }
+    }   //TODO 后续补充
 
     /**
      * 手机号验证码登录(个人账号)
+     *
      * @param telephone
      * @param validCode
      * @return
@@ -2153,6 +2164,13 @@ public class UserServiceImpl extends BaseService implements UserService {
             rigester(user);
         }
         user = getUserAccountByTelephone(telephone);
+
+        //处理封禁
+        if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            throw new MessageException("当前用户被封禁!禁止登录！");
+        }
+
+        //激活假用户
         if (AppConstant.IS_FAKE_YES.equals(user.getIsFake())) { // 如果为假用户
             user.setIsFake(AppConstant.IS_FAKE_NO); // TODO 真实用户
             userDao.updateByPrimaryKey(user);
@@ -2184,6 +2202,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 注册用户
+     *
      * @param user
      */
     @Transactional(rollbackFor = Throwable.class)
@@ -2197,10 +2216,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (user == null) {
             user = new TUser();
         }
-        user.setId(idGenerator.nextId());
         user.setUserAccount(defaultAccount);
         user.setJurisdiction(AppConstant.JURISDICTION_NORMAL);
         user.setAccreditStatus(AppConstant.ACCREDIT_STATUS_DEFAULT);
+        user.setAvaliableStatus(AppConstant.AVALIABLE_STATUS_AVALIABLE);
         user.setRemarks("");
 
         // 头像、性别、昵称等从微信获取的字段
@@ -2225,8 +2244,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setServeNum(0);
         user.setSeekHelpPublishNum(0);
         user.setServePublishNum(0);
-        user.setSeekHelpCommentNum(0);
-        user.setServCommentNum(0);
         user.setPayNum(0);
 
         user.setServTotalEvaluate(0);
@@ -2254,7 +2271,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setLevel(AppConstant.DEFAULT_LEVEL);
         user.setMasterStatus(AppConstant.MASTER_STATUS_DEFAULT); // 达人标记
 
-        // create&update //存储时间戳 TODO
+        // creater & updater
         user.setCreateTime(System.currentTimeMillis());
         user.setCreateUser(user.getId());
         user.setCreateUserName(user.getName());
@@ -2265,9 +2282,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 有效性
         user.setIsValid(AppConstant.IS_VALID_YES);
 
-      /*  // 插入注册的系统消息
-        insertRigesterSysMsg(user);
+        // 插入注册的系统消息
+//        insertRigesterSysMsg(user);   //TODO 调用订单模块的接口
 
+
+      /*
         // 插入一条注册完成奖励
         insertRigesterReward(user);
 
@@ -2277,9 +2296,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 插入一条通用权益（获取互助时）
         addMedal(user, DictionaryEnum.INTEREST_EARN.getType(), DictionaryEnum.INTEREST_EARN.getSubType(),
                 DictionaryEnum.INTEREST_EARN.getReward());// TODO可能会将target_id分离出去
+        */
 
         // 插入一条用户记录
-        userDao.insertSelective(user);*/
+        userDao.insert(user);
+
+        // 注册完成任务
+        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
         return user;
     }
@@ -2292,6 +2315,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 是否为已注册用户(不区分个人还是组织账号)
+     *
      * @param telephone
      * @return
      */
@@ -2411,6 +2435,15 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        userTask.setId(idGenerator.nextId());
         userTask.setUserId(user.getId());
         userTask.setType(taskCode);
+
+        // 遍历枚举
+        Integer value = null;
+        for(GrowthValueEnum growthValueEnum:GrowthValueEnum.values()) {
+            if(growthValueEnum.getCode() == taskCode) {
+                value = growthValueEnum.getPrice();
+            }
+        }
+        userTask.setValue(String.valueOf(value));
         //creater & updater
         userTask.setCreateTime(currentTimeMillis);
         userTask.setCreateUser(user.getId());
@@ -2448,7 +2481,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             level = LevelEnum.LEVEL_EIGHT.getLevel();
         }
 
-            user.setLevel(level);
+        user.setLevel(level);
 
         //TODO 授信总额提升 等待规则出来
 
@@ -2677,18 +2710,172 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param telephone
      * @return
      */
-    private List<TUser> getUserByTelephone(String telephone) {
+    public List<TUser> getUserByTelephone(String telephone) {
         return userDao.queryUsersByTelephone(telephone);
     }
 
     /**
+     * 任务大厅
+     * @param user
+     * @return
+     */
+    @Override
+    public TaskHallView taskHall(TUser user) {
+        //TODO 等级信息
+        user = userDao.selectByPrimaryKey(user.getId());
+        LevelView levelView = new LevelView();
+        levelView.setGrowthValue(user.getGrowthValue());
+        Integer level = user.getLevel();
+        levelView.setLevelNum(level);
+        LevelEnum currentLevel = null;
+        LevelEnum nextLevel = null;
+        boolean flag = false;
+        for(LevelEnum levelEnum:LevelEnum.values()) {
+            if(levelEnum.getLevel().equals(level)) {
+                currentLevel = levelEnum;
+                flag = true;
+            }
+            if(flag) {
+                nextLevel = levelEnum;
+                break;
+            }
+        }
+        levelView.setLevelName(currentLevel.getName());
+        if(nextLevel!=null) {
+            levelView.setUpToLevelUp(nextLevel.getMin() - user.getGrowthValue());
+        }
+        TaskHallView taskHallView = new TaskHallView();
+        taskHallView.setLevelView(levelView);
+
+        //任务信息
+        Map<String, Object> taskMap = queryTasks(user);
+        List<NoobTask> noobTasks = (List<NoobTask>) taskMap.get("noobTasks");
+        List<DailyTask> dailyTasks = (List<DailyTask>) taskMap.get("dailyTasks");
+
+        taskHallView.setNoobTasks(noobTasks);
+        taskHallView.setDailyTasks(dailyTasks);
+
+        return taskHallView;
+    }
+
+    private Map<String,Object> queryTasks(TUser user) {
+        Map<Integer,TaskEnum> taskEnumMap = new HashMap<>();
+        for(TaskEnum taskEnum: TaskEnum.values()) {
+            taskEnumMap.put(taskEnum.getType(),taskEnum);
+        }
+
+        //结果
+        Map<String,Object> resultMap = new HashMap<>();
+        List<NoobTask> noobTasks = new ArrayList<>();
+        List<DailyTask> dailyTasks = new ArrayList<>();
+        Integer[] noobTaskArray = AppConstant.NOOB_TASK_ARRAY;
+//      Integer[] dailyTaskArray = AppConstant.DAILY_TASK_ARRAY;
+        List<Integer> noobTaskList = Arrays.asList(noobTaskArray);
+//      List<Integer> dailyTaskList = Arrays.asList(dailyTaskArray);
+
+        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
+        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
+        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+
+        List<TTypeRecord> dailyGrowthRecords = growthValueService.findOnesGrowthRecords(user.getId());
+        //map
+        Map<Integer,Integer> map = new HashMap<>();
+        Map<Integer,NoobTask> noobTaskMap = new HashMap<>();
+        Map<Integer,DailyTask> dailyTaskMap = new HashMap<>();
+        //遍历装载map
+        for(TTypeRecord dailyGrowthRecord:dailyGrowthRecords) {
+            if(!noobTaskList.contains(dailyGrowthRecord.getType())) {   //如果为非菜鸟类型
+                if(!(dailyGrowthRecord.getCreateTime()>beginStamp && dailyGrowthRecord.getCreateTime()<endStamp)) { //如果不是今天
+                    continue;
+                }
+            }
+            Integer counts = map.get(dailyGrowthRecord.getType());
+            if(counts==null) {
+                counts = 0;
+            }
+            map.put(dailyGrowthRecord.getType(), ++counts);
+        }
+
+        List<TUserTask> tasks = userTaskDao.findOnesTasks(user.getId());
+        //遍历筛选出新手任务、日常任务
+        for(TUserTask task:tasks) {
+            Integer type = task.getType();
+            TaskEnum taskEnum = taskEnumMap.get(type);
+            String targetId = task.getTargetId();
+            if(noobTaskList.contains(type)) {
+                NoobTask noobTask = new NoobTask();
+                noobTask.setTargetId(Long.valueOf(targetId));
+                noobTask.setName(taskEnum.getDesc());
+                noobTask.setBonus(taskEnum.getReward().intValue());
+                noobTask.setDone(true);
+                noobTaskMap.put(type,noobTask);
+                continue;
+            }
+            DailyTask dailyTask = new DailyTask();
+            if(targetId!=null) {
+                dailyTask.setTargetId(Long.valueOf(targetId));
+            }
+            dailyTask.setName(taskEnum.getDesc());
+            dailyTask.setBonus(taskEnum.getReward().intValue());
+            dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
+            dailyTask.setCurrentNum(taskEnum.getDailyMaxNum());
+            dailyTaskMap.put(type,dailyTask);
+        }
+
+        for(TaskEnum taskEnum:TaskEnum.values()) {
+            Integer type = taskEnum.getType();
+            NoobTask noobTask = noobTaskMap.get(type);  //菜鸟任务
+            DailyTask dailyTask = dailyTaskMap.get(type);
+            if(noobTask!=null) {
+                noobTasks.add(noobTask);
+            }
+            if(dailyTask!=null) {
+                dailyTasks.add(dailyTask);
+            }
+            //如果两者都不存在
+            Integer counts = map.get(type); //成长值记录
+            if(noobTask==null && dailyTask==null) {
+                if(noobTaskList.contains(type)) { //菜鸟任务
+                    noobTask = new NoobTask();
+                    if(counts!=null && counts!=0) {
+                        noobTask.setTargetId(taskEnum.getTargetId());
+                        noobTask.setName(taskEnum.getDesc());
+                        noobTask.setBonus(taskEnum.getReward().intValue());
+                        noobTask.setDone(true);
+                        noobTasks.add(noobTask);
+                    }
+                } else {    //日常任务
+                    if(counts!=null && counts!=0) {
+                        Integer dailyMaxNum = taskEnum.getDailyMaxNum();
+                        dailyTask = new DailyTask();
+                        dailyTask.setTargetId(taskEnum.getTargetId());
+                        dailyTask.setName(taskEnum.getDesc());
+                        dailyTask.setBonus(taskEnum.getReward().intValue());
+                        dailyTask.setCurrentNum(counts);
+                        dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
+                        if(counts>=dailyMaxNum) {
+                            dailyTask.setDone(true);
+                        }
+                        dailyTasks.add(dailyTask);
+                    }
+                }
+            }
+        }
+        resultMap.put("noobTasks",noobTasks);
+        resultMap.put("dailyTasks",dailyTasks);
+        return resultMap;
+    }
+
+    /**
      * 根据手机号获取个人账号
+     *
      * @param telephone
      * @return
      */
     @Override
     public TUser getUserAccountByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone,AppConstant.JURISDICTION_NORMAL,IS_COMPANY_ACCOUNT_YES);
+        List<TUser> userList = userDao.selectUserTelByJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL);
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             for (TUser thisUser : userList) {
@@ -2701,6 +2888,21 @@ public class UserServiceImpl extends BaseService implements UserService {
             }*/
         }
         return user;
+    }
+
+    /**
+     * 用户登出
+     *
+     * @param token
+     */
+    @Override
+    public void logOut(String token) {
+        if (StringUtil.isNotEmpty(token) && redisUtil.hasKey(token)) {
+            TUser user = (TUser) redisUtil.get(token);
+            String redisKey = "str" + user.getId();
+            redisUtil.del(redisKey);// 删除登录凭证
+            redisUtil.del(token);// 删除访问凭证
+        }
     }
 
     /**

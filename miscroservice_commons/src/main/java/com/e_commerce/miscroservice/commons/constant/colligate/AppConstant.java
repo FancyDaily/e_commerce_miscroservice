@@ -743,7 +743,7 @@ public interface AppConstant {
     /**
      * 可用的服务/求助状态(可报名)
      */
-    Integer[] AVAILABLE_STATUS_ARRAY = {0, 1, 2, 3};    //TODO 可用服务状态待确定
+    Integer[] AVAILABLE_STATUS_ARRAY = {1, 2};    //TODO 可用服务状态待确定
 
     /**
      * //收藏列表中的订单状态
@@ -758,5 +758,15 @@ public interface AppConstant {
     /**
      * 需要区分第一次的code数组
      */
-    Integer[] GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY = {32,33,34};
+    Integer[] GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY = {32,33,34,35};
+
+    /**
+     * 重复性任务
+     */
+    Integer[] DAILY_TASK_ARRAY = {20,21,22,23,24,25,26};
+
+    /**
+     * 一次性任务
+     */
+    Integer[] NOOB_TASK_ARRAY = {0,1,2,3,4,5,6,7,8,9};
 }

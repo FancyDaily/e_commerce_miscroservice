@@ -92,9 +92,10 @@ public interface UserService {
      * @param pageNum
      * @param pageSize
      * @param isService
+     * @param me
      * @return
      */
-    QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService);
+    QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me);
 
     /**
      * 历史服务和求助
@@ -347,8 +348,27 @@ public interface UserService {
      */
     Map<String, Object> loginUserBySMS(String telephone, String validCode);
 
-    @Transactional(rollbackFor = Throwable.class)
     TUser rigester(TUser user);
 
     TUser getUserAccountByTelephone(String telephone);
+
+    /**
+     * 用户登出
+     * @param token
+     */
+    void logOut(String token);
+
+    /**
+     * 通过手机号获取用户
+     * @param telephone
+     * @return
+     */
+    List<TUser> getUserByTelephone(String telephone);
+
+    /**
+     * 任务大厅
+     * @param user
+     * @return
+     */
+    TaskHallView taskHall(TUser user);
 }

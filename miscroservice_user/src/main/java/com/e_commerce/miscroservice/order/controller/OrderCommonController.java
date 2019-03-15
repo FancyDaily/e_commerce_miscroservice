@@ -113,19 +113,21 @@ public class OrderCommonController extends BaseController {
     /**
      * 根据用户id获取订单列表
      * @param userId
+     * @param beenViewer
      * @return
      */
-    public List<TOrder> selectOdersByUserId(Long userId,boolean isService) {
-        return orderDao.selectPublishedByUserId(userId,isService);
+    public List<TOrder> selectOdersByUserId(Long userId, boolean isService, TUser beenViewer) {
+        return orderDao.selectPublishedByUserId(userId,isService,beenViewer);
     }
 
     /**
      * 查询指定用户id过往订单记录
      * @param userId
+     * @param user
      * @return
      */
-    public List<TOrder> selectEndOrdersByUserId(Long userId) {
-        return  orderDao.selectPastByUserId(userId);
+    public List<TOrder> selectEndOrdersByUserId(Long userId, TUser user) {
+        return  orderDao.selectPastByUserId(userId,user);
     }
 
     /**
