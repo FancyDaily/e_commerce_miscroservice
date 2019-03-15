@@ -12,11 +12,32 @@ public enum OrderEnum {
 	STATUS_NORMAL(1, "正常产出的订单状态"),
 	STATUS_CANCEL(3, "已取消"),
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	PRODUCE_TYPE_SUBMIT(1, "在发布时派生订单"),
 	PRODUCE_TYPE_UPPER(2, "在重新上架的时候派生订单"),
 	PRODUCE_TYPE_AUTO(3, "在上一张订单结束时下架"),
 	PRODUCE_TYPE_ENROLL(4, "在报名时候派生"),
 	PRODUCE_TYPE_ENOUGH(5, "在报名人满的时候派生"),
+
+	VISIABLE_YES("1", "可见"),
+	VISIABLE_NO("0","不可见"),
 
 	PRODUCE_RESULT_CODE_SUCCESS(1, "可以派生订单"),
 	PRODUCE_RESULT_CODE_EXISTENCE(2, "订单已经存在，没有再继续派生订单"),
@@ -43,9 +64,14 @@ public enum OrderEnum {
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CHOOSED(6, "已入选");
 	private int value;
 	private String desc;
+	private String stringValue;
 
 	OrderEnum(int value, String desc) {
 		this.value = value;
+		this.desc = desc;
+	}
+	OrderEnum(String value, String desc) {
+		this.stringValue = value;
 		this.desc = desc;
 	}
 
@@ -55,4 +81,5 @@ public enum OrderEnum {
 	public String getDesc() {
 		return desc;
 	}
+	public String getStringValue() {return stringValue;}
 }

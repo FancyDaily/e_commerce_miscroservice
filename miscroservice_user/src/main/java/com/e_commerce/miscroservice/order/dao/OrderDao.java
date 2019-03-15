@@ -60,7 +60,9 @@ public interface OrderDao {
      */
     List<TOrder> selectPublishedByUserId(Long userId);
 
-    /**
+	List<TOrder> selectPublishedByUserId(Long userId, boolean isService);
+
+	/**
      * 根据userId查找指定类型订单列表（发布服务/求助）
      *
      * @param userId
@@ -76,7 +78,9 @@ public interface OrderDao {
      */
 	List<TOrder> selectPastByUserId(Long userId, TUser user);
 
-	/**
+    List<TOrder> selectPastByUserId(Long userId);
+
+    /**
      * 根据订单id查找订单记录
      * @param orderIds
      * @return
@@ -131,6 +135,27 @@ public interface OrderDao {
 	 * @return
 	 */
 	TOrder findOneLatestOrderByServiceId(Long serviceId);
+
+	/**
+	 * 查找该商品下的唯一一条正常状态的可见订单
+	 * @param serviceId
+	 * @return
+	 */
+	TOrder selectVisiableOrder(Long serviceId);
+
+	/**
+	 * 查找最早的一条正常状态的不可见的订单
+	 * @param serviceId
+	 * @return
+	 */
+	TOrder selectNearNotVisiable(Long serviceId);
+
+	/**
+	 * 跟新order表中用户的名称
+	 * @param userId 用户ID
+	 * @param userName 用户名称
+	 */
+	void updateUserName(Long userId, String userName);
 
 
 	//TODO NEW!!!!!!EMD

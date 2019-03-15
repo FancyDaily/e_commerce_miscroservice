@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -174,6 +176,23 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             orderRelationshipList = orderRelationshipDao.selectListByStatusForNotSignByEnroll(orderId
                     , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         }
+        if (type == 5){
+            //状态为5代表取消
+            long nowTime = System.currentTimeMillis();
+            if (order.getStartTime() - nowTime < 0){
+                throw new MessageException("499", "对不起，订单临近开始，不允许取消订单");
+            }
+            nowUser = userCommonController.getUserById(nowUserId);
+            if (nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime() < 0){
+                //可用时间为负，说明该用户已经取消过一次，并且没有还清欠款
+                throw new MessageException("499", "对不起，您可用余额不足，不允许取消订单");
+            }
+            if (order.getCollectType() == ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue()){
+                //如果是公益时
+                throw new MessageException("499", "对不起，公益活动不可取消");
+            }
+            orderRelationshipList = orderRelationshipDao.selectCanRemoveEnrollUser(orderId);
+        }
         if (type == 7) {
             //状态为7代表支付
             orderRelationshipList = orderRelationshipDao.selectListByStatusByEnroll(orderId
@@ -205,7 +224,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     userInfoView.setName(userlist.get(j).getName());
                     userInfoView.setUserHeadPortraitPath(userlist.get(j).getUserHeadPortraitPath());
                     userInfoView.setStatus(1);//默认为已到
-                    if (type == 7) {
+                    if (type == 7 || type == 5) {
                         //如果是是支付，还要看一下未到人员
                         if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()) {
                             //如果是未签到，将状态置为未到
@@ -611,7 +630,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setServiceType(order.getType());
         orderRelationship.setFromUserId(order.getCreateUser());
         orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
-        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
         orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
         orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
         orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
@@ -757,11 +776,220 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         return errorMsgList;
     }
 
-
-    public void removeOrder(){
+    /**
+     * 取消订单弹窗提醒每人扣除时间数
+     * @param orderId
+     * @return
+     */
+    public long removeOrderTips(Long orderId , Long nowUserId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        long nowTime = System.currentTimeMillis();
+        if (order.getStartTime() - nowTime < 0){
+            throw new MessageException("499", "对不起，订单临近开始，不允许取消订单");
+        }
+        TUser nowUser = userCommonController.getUserById(nowUserId);
+        if (nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime() < 0){
+            //可用时间为负，说明该用户已经取消过一次，并且没有还清欠款
+            throw new MessageException("499", "对不起，您可用余额不足，不允许取消订单");
+        }
+        if (order.getCollectType() == ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue()){
+            //如果是公益时
+            throw new MessageException("499", "对不起，公益活动不可取消");
+        }
+        return removeOrderTimeCoin(order , nowTime );
 
     }
 
+    /**
+     * 取消订单
+     * @param orderId
+     * @param userIdList
+     * @param nowUserId
+     * @return
+     */
+    public List<String> removeOrder(Long orderId , List<Long> userIdList , Long nowUserId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        long nowTime = System.currentTimeMillis();
+        if (order.getStartTime() - nowTime < removeOrderLimitTime(order , nowTime)){
+            throw new MessageException("499", "对不起，订单临近开始，不允许取消订单");
+        }
+        long payment = removeOrderTimeCoin(order , nowTime);
+        TUser nowUser = userCommonController.getUserById(nowUserId);
+        if (nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime() < 0){
+            //可用时间为负，说明该用户已经取消过一次，并且没有还清欠款
+            throw new MessageException("499", "对不起，您可用余额不足，不允许取消订单");
+        }
+        if (order.getCollectType() == ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue()){
+            //如果是公益时
+            throw new MessageException("499", "对不起，公益活动不可取消");
+        }
+        List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
+        List<String> errorMsgList = new ArrayList<>();
+        if (order.getCreateUser() == nowUser.getId().longValue()) {
+            //如果是发布者，要取消很多人，查报名者，要改对方的状态
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
+            for (int i = 0; i < userIdList.size(); i++) {
+                TOrderRelationship orderRelationship = null;
+                TUser toUser = null;
+                for (int j = 0; j < orderRelationshipList.size(); j++) {
+                    if (userIdList.get(i) == orderRelationshipList.get(j).getReceiptUserId().longValue()) {
+                        orderRelationship = orderRelationshipList.get(j);
+                        break;
+                    }
+                }
+                for (int j = 0; j < toUserList.size(); j++) {
+                    if (userIdList.get(i) == toUserList.get(j).getId().longValue()) {
+                        toUser = toUserList.get(j);
+                        break;
+                    }
+                }
+                if (toUser == null) {
+                    errorMsgList.add("找不到用户" + userIdList.get(i) + "的账号信息");
+                } else if (orderRelationship == null) {
+                    errorMsgList.add("找不到用户" + toUser.getName() + "的订单信息");
+                } else {
+                    String msg = removeOrderPri(orderRelationship, nowUser, toUser, nowTime, false);
+                    if (msg != null) {
+                        //更新状态表失败失败，添加错误信息
+                        errorMsgList.add(msg);
+                    } else {
+                        //插入赔付流水，并且插入弹窗事件
+                        removeOrderPunishment(nowUser , toUser , payment , orderRelationship.getId() , nowTime);
+                        if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+                            //如果是服务，要将报名者时间解冻
+                            unFreezeTime(order.getCollectTime() , nowTime , toUser , orderId);
+                        }
+                    }
+                }
+            }
+            if (errorMsgList.size() == toUserList.size()){
+                throw new MessageException("499", "对不起，没有可以操作的用户");
+            }
+            //将用户支付的钱支付出去
+            nowUser.setSurplusTime(nowUser.getSurplusTime() - payment * (toUserList.size() - errorMsgList.size()));
+            nowUser.setUpdateUser(nowUser.getId());
+            nowUser.setUpdateUserName(nowUser.getName());
+            nowUser.setUpdateTime(nowTime);
+            userCommonController.updateByPrimaryKey(nowUser);
+        } else {
+            //如果是报名者，要修改自己的订单状态
+            TUser toUser = userCommonController.getUserById(userIdList.get(0));
+            TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
+            String msg = removeOrderPri(orderRelationship, nowUser, toUser, nowTime, false);
+            if (msg != null) {
+                throw new MessageException("499", msg);
+            }
+            //插入赔付流水，并且插入弹窗事件
+            removeOrderPunishment(nowUser , toUser , payment , orderRelationship.getId() , nowTime);
+            //将用户支付的钱支付出去
+            long surplusTime = nowUser.getSurplusTime();
+            if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+                //如果是服务，那么要将报名者时间币解冻
+                unFreezeTime(order.getCollectTime() , nowTime , nowUser , orderId);
+                surplusTime = surplusTime + order.getCollectTime();
+                nowUser.setFreezeTime(nowUser.getFreezeTime() - order.getCollectTime());
+            }
+            nowUser.setSurplusTime(surplusTime - payment);
+            nowUser.setUpdateUser(nowUser.getId());
+            nowUser.setUpdateUserName(nowUser.getName());
+            nowUser.setUpdateTime(nowTime);
+            userCommonController.updateByPrimaryKey(nowUser);
+        }
+        if (userIdList.size() == errorMsgList.size()){
+            throw new MessageException("499", "所选用户中没有可取消用户");
+        }
+        return errorMsgList;
+    }
+
+    /**
+     * 取消订单私有方法
+     * @param orderRelationship
+     * @param nowUser
+     * @param toUser
+     * @param nowTiem
+     * @param isPublish
+     * @return
+     */
+    private String removeOrderPri(TOrderRelationship orderRelationship , TUser nowUser , TUser toUser , long nowTiem , boolean isPublish){
+        String msg = null;
+        if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType()){
+            //如果是报名者取消
+            if (isPublish){
+               //如果操作用户是发布者
+                msg = "对不起，用户"+toUser.getName()+"已将该订单取消";
+            } else {
+                msg = "对不起，您已将"+toUser.getName()+"的订单取消";
+            }
+            return msg;
+        } else if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType()){
+            //如果是发布者取消
+            if (isPublish){
+                //如果操作用户是发布者
+                msg = "对不起，您已将"+toUser.getName()+"的订单取消";
+            } else {
+                msg = "对不起，用户"+toUser.getName()+"已将该订单取消";
+            }
+            return msg;
+        } else if (orderRelationship.getStatus() != OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()){
+            msg = "对不起，用户"+toUser.getName()+"的订单已完成，无法取消";
+            return  msg;
+        }
+        if (isPublish){
+            //如果操作用户是发布者，订单改为发布者取消
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType());
+        } else {
+            //如果是报名者，订单改为报名者取消
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType());
+        }
+        orderRelationship.setUpdateUserName(nowUser.getName());
+        orderRelationship.setUpdateUser(nowUser.getId());
+        orderRelationship.setUpdateTime(nowTiem);
+        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        return msg;
+    }
+
+    /**
+     * 插入赔付流水，并且增加事件
+     * @param nowUser
+     * @param toUser
+     * @param payment
+     * @param orderRelationshipId
+     * @param nowTime
+     */
+    private void removeOrderPunishment(TUser nowUser , TUser toUser , Long payment , Long orderRelationshipId , long nowTime){
+        //插入支付流水
+        TUserTimeRecord userTimeRecord = new TUserTimeRecord();
+        userTimeRecord.setId(snowflakeIdWorker.nextId());
+        userTimeRecord.setUserId(toUser.getId());
+        userTimeRecord.setFromUserId(nowUser.getId());
+        userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_OUT.getCode());
+        userTimeRecord.setTargetId(orderRelationshipId);
+        userTimeRecord.setTime(payment);
+        userTimeRecord.setCreateUser(nowUser.getId());
+        userTimeRecord.setCreateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setUpdateUserName(nowUser.getName());
+        userTimeRecord.setUpdateTime(nowTime);
+        userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
+        //TODO 插入流水表
+
+        userCommonController.insertUserTimeRecords(userTimeRecord);
+        long userTimeRecordId = userTimeRecord.getId();//插入方法返回流水表主键
+        //插入触发事件数据
+        TEvent event = new TEvent();
+        event.setUserId(toUser.getId());
+        event.setTemplateId(EventEnum.TEMPLATE_ID_REMOVE_ORDER.getType());
+        event.setTiggerId(orderRelationshipId);
+        event.setParameter("userTimeRecord="+userTimeRecordId);
+        event.setPriority(2);
+        event.setText("用户"+toUser.getName()+"已取消订单，并向你支付致歉礼：互助时+"+timeChange(payment));
+        event.setCreateTime(nowTime);
+        event.setCreateUser(nowUser.getId());
+        event.setCreateUserName(nowUser.getName());
+        event.setIsValid(AppConstant.IS_VALID_YES);
+
+        messageCommonController.insertTevent(event);
+    }
     /**
      * 判断限制时间
      * @param order
@@ -780,13 +1008,14 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * 判断扣除时间数
      * @param order
      * @param nowTime
-     * @param limitTime
      * @return
      */
-    private long removeOrderTimeCoin(TOrder order , long nowTime , Long limitTime){
+    private long removeOrderTimeCoin(TOrder order , long nowTime){
+        long limitTime = removeOrderLimitTime(order , nowTime);
+        int magnification = 100;
         if (order.getStartTime() - nowTime < limitTime){
             //如果开始时间距离现在的时间小于限制时间,返回扣除时间数为
-            return order.getCollectTime();
+            return order.getCollectTime() * magnification / 100;
         }
         return 0l;
     }
@@ -1140,19 +1369,19 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      *
      * @param unfreezeTime
      * @param nowTime
-     * @param nowUser
+     * @param changeUser
      */
-    private void unFreezeTime(long unfreezeTime, long nowTime, TUser nowUser, Long orderId) {
+    private void unFreezeTime(long unfreezeTime, long nowTime, TUser changeUser, Long orderId) {
         TUserFreeze userFreeze = null;
-        userFreeze = userCommonController.selectUserFreezeByUserIdAndOrderId(nowUser.getId(), orderId);
+        userFreeze = userCommonController.selectUserFreezeByUserIdAndOrderId(changeUser.getId(), orderId);
         if (userFreeze == null) {
             //如果没有冻结信息，说明订单有问题，取消失败
             throw new MessageException("499", "冻结信息表更新失败，请后退刷新重试");
         }
         userFreeze.setFreezeTime(userFreeze.getFreezeTime() - unfreezeTime);
         userFreeze.setUpdateTime(nowTime);
-        userFreeze.setUpdateUser(nowUser.getId());
-        userFreeze.setUpdateUserName(nowUser.getName());
+        userFreeze.setUpdateUser(changeUser.getId());
+        userFreeze.setUpdateUserName(changeUser.getName());
         if (userFreeze.getFreezeTime() == 0) {
             userFreeze.setIsValid("0");
         }

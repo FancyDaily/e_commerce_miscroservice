@@ -441,6 +441,8 @@ public interface AppConstant {
 
     public String LAST_SIGN_UP_DAY_OTHERS = "-1";
 
+    public String SIGN_UP_ALMOST_HALF_EDGE = "2";
+
     public String SIGN_UP_ALMOST_EDGE = "6";
 
     public String SIGN_UP_EDGE = "7";
@@ -448,7 +450,7 @@ public interface AppConstant {
     /**
      * 签到奖励 -> 普通
      */
-    public long SIGN_UP_BONUS = 3;
+    public long SIGN_UP_BONUS = 1;
 
     public long LEVEL_ONE_MIN = 0;
 

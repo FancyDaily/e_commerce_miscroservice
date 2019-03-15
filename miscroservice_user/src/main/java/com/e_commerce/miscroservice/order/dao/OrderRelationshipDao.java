@@ -197,4 +197,10 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	int updateCollectStatus(Long orderRelationshipId, int collectStatus);
+	/**
+	 * 可以取消订单的报名者关系表
+	 * @param orderId
+	 * @return
+	 */
+	List<TOrderRelationship> selectCanRemoveEnrollUser(Long orderId);
 }

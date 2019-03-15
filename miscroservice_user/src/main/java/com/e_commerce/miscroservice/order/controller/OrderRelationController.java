@@ -411,4 +411,70 @@ public class OrderRelationController extends BaseController {
         return result;
     }
 
+
+    /**
+     * 查看取消报名的应扣除时间币
+     *
+     * @param nowUserId 当前用户id
+     * @param orderId 订单ID
+     * @return
+     */
+    @PostMapping("/removeOrderTips")
+    public Object removeOrderTips(Long nowUserId , Long orderId ) {
+        AjaxResult result = new AjaxResult();
+        try {
+            long coin = orderRelationService.removeOrderTips(orderId , nowUserId);
+            result.setSuccess(true);
+            result.setData(coin);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查看失败");
+        }
+        return result;
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param orderId 订单ID
+     * @param userIds 被操作用户ID（多个逗号拼接）
+     * @param nowUserId 当前用户ID
+     * @return
+     */
+    @PostMapping("/removeOrder")
+    public Object removeOrder(Long orderId , String userIds , Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        String[] userId = userIds.split(",");
+        List<Long> userIdList = new ArrayList<>();
+
+        for (int i = 0; i < userId.length; i++) {
+            userIdList.add(Long.parseLong(userId[i]));
+        }
+        try {
+            List<String> errorMsgList = orderRelationService.removeOrder(orderId, userIdList , nowUserId);
+            result.setSuccess(true);
+            result.setData(errorMsgList);
+            result.setMsg("取消成功");
+        } catch (MessageException e) {
+            logger.warn("取消失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("取消失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("取消失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("取消失败");
+        }
+        return result;
+    }
+
 }

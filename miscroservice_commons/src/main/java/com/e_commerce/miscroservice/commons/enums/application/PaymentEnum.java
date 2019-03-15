@@ -23,6 +23,7 @@ public enum PaymentEnum {
 	 */
 	PAYMENT_TYPE_ACEPT_SERV(1,"接受一次服务",-1l),	
 	PAYMENT_TYPE_BONUS_PACKAGE_OUT(9,"生成红包",-1l),
+	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_OUT(11,"取消订单赔付",-1l),	//订单违约赔款
 	
 	/**
 	 * 收入
@@ -40,7 +41,9 @@ public enum PaymentEnum {
 	/**
 	 * 特殊收入
 	 */
-	PAYMENT_TYPE_BONUS_PAC_SEND_BACK(90,"退款-红包超时",-1l),	//红包超时退款
+	PAYMENT_TYPE_BONUS_PAC_SEND_BACK(900,"退款-红包超时",-1l),	//红包超时退款
+	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_BACK(901,"退款-赔付领取超时",-1l),	//赔付超时退款
+	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_IN(902,"被取消订单致歉礼",-1l),	//订单违约赔款
 	PAYMENT_TYPE_OTHERS(999,"特殊奖励",-1l);	//活动或者其他非常驻收入类型
 	
 	private int code;

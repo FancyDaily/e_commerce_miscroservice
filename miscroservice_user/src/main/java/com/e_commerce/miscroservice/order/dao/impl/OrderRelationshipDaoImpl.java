@@ -379,6 +379,20 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     }
 
     /**
+     * 可以取消订单的报名者关系表
+     * @param orderId
+     * @return
+     */
+    public List<TOrderRelationship> selectCanRemoveEnrollUser(Long orderId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .isNotNull(TOrderRelationship::getReceiptUserId)
+                .eq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())
+                .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
+                .eq(TOrderRelationship::getOrderId , orderId)
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 参与的订单的状态
      *
      * @return

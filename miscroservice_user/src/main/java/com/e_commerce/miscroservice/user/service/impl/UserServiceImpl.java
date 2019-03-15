@@ -1442,9 +1442,16 @@ public class UserServiceImpl extends BaseService implements UserService {
                 }
 
                 // 处理奖励
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 6 -> 特殊
+                    // 特殊奖励
+                    special = 3; // 特殊奖励 //TODO
+                    reward = special;
+                }
+
+                // 处理奖励
                 if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
                     // 特殊奖励
-                    special = new Random().nextInt(6) + 10; // 特殊奖励 //TODO
+                    special = 5; // 特殊奖励 //TODO
                     reward = special;
                 }
             }
