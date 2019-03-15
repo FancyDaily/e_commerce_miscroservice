@@ -19,7 +19,6 @@ import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -2225,8 +2224,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setServeNum(0);
         user.setSeekHelpPublishNum(0);
         user.setServePublishNum(0);
-        user.setSeekHelpCommentNum(0);
-        user.setServCommentNum(0);
+//        user.setSeekHelpCommentNum(0);
+//        user.setServCommentNum(0);
         user.setPayNum(0);
 
         user.setServTotalEvaluate(0);

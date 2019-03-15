@@ -2,12 +2,7 @@ package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
-import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
-import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
-import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
-import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
-import com.e_commerce.miscroservice.commons.enums.application.ReportEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
@@ -1110,7 +1105,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 || (order.getType() == ProductEnum.TYPE_SERVICE.getValue()
                 && order.getCreateUser() != toUser.getId().longValue())) {
             //如果是被评价用户求助的发布者, 或者服务的报名者，更行用户表求助的评分数据
-            toUser.setSeekHelpNum(toUser.getSeekHelpCommentNum()+1);
+            toUser.setSeekHelpNum(toUser.getSeekHelpNum()+1);
             toUser.setHelpAttitudeEvaluate(toUser.getHelpAttitudeEvaluate() + attitude);
             toUser.setHelpCreditEvaluate(toUser.getHelpCreditEvaluate() + credit);
             toUser.setHelpMajorEvaluate(toUser.getMasterStatus() + major);

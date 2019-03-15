@@ -72,7 +72,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			userService.freezeTimeCoin(order.getId(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
+			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
 		}
 		return orderRelationService.addTorderRelationship(order);
 	}
@@ -574,11 +574,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			// 生成订单的开始结束时间
 			Integer code = generateOrderTime(service, order, type, date);
-			if (Objects.equals(type, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue())
-					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_UPPER.getValue())
-					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_AUTO.getValue())) {
-				productService.update(service);
-			}
+//			if (Objects.equals(type, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_UPPER.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_AUTO.getValue())) {
+//				productService.update(service);
+//			}
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
@@ -626,14 +626,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//上架时候派生订单  感觉可以调用发布生成订单的逻辑
 			return produceOrderByUpper(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
-			//调用报名人满派生的逻辑
+			//调用发布派生的逻辑
+			return produceOrderByPublish(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
 			return produceOrderByEnroll(service, date);
 		} else {
 			//报名人满后派生
 			return produceOrderByEnough(weekDayNumberArray, service, date, order);
 		}
-		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
 	/**
@@ -806,7 +807,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long productStartTime = DateUtil.parse(serviceStartTimeString);
 		//商品结束的时间
 		Long productEndTime = DateUtil.parse(serviceEndTimeString);
-		DateResult dr = DateUtil.getNextOrderBeginAndEndTime(productStartTime, productEndTime, weekDayNumberArray);
+		DateResult dr = DateUtil.getNextOrderBeginAndEndTime(productStartTime, productEndTime, weekDayNumberArray, true);
 ////			//获取开始的时间是星期X
 //		int startWeekDay = DateUtil.getWeekDay(productStartTime);
 ////			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
@@ -845,17 +846,25 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
 		}
 		List<String> enrollDate = new ArrayList<>();
-		enrollDate.add(DateUtil.getDate(startTimeMill));
-		dr.setDays(0);
+//		enrollDate.add(DateUtil.getDate(startTimeMill));
+		dr.setDays(1);
+		long tempStart = startTimeMill;
+		long tempEnd = endTimeMill;
+		String startDate = DateUtil.getDate(startTimeMill);
 		//计算第一张订单后六天的可报名时间
 		DateResult tempResult;
 		while (dr.getDays() <= 6) {
-			tempResult = DateUtil.getNextOrderBeginAndEndTime(startTimeMill, endTimeMill, weekDayNumberArray);
+			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
 			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
 				break;
 			}
+			if (tempResult.getDays() == 0) {
+				break;
+			}
 			dr.setDays(dr.getDays() + tempResult.getDays());
-			enrollDate.add(DateUtil.getDate(dr.getStartTimeMill()));
+			enrollDate.add(DateUtil.getDate(tempStart));
+			tempStart = tempResult.getStartTimeMill();
+			tempEnd = tempResult.getEndTimeMill();
 		}
 		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条

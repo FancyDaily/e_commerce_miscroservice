@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 
@@ -47,7 +49,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param
 	 * @return
 	 */
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
 		user = userService.getUserById(68813260748488704L);
@@ -231,10 +233,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Throwable.class)
 	public void upperFrame(TUser user, Long productId) {
 		// TODO 写死用户
 		user = userService.getUserById(68813260748488704L);
-		logger.error("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
+		logger.info("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
 			boolean lowerStatus = tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
@@ -244,14 +247,21 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				throw new MessageException("当前状态无法上架");
 			}
 			// TODO 判断时间段是否可以上架  上架后是否需要派生新的订单  进行状态判断
+			checkRepeatProductLegal(tService);
 			tService.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
 			tService.setUpdateUser(user.getId());
 			tService.setUpdateUserName(user.getName());
 			tService.setUpdateTime(System.currentTimeMillis());
-			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
-			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCommit() {
+					super.afterCommit();
+					orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_UPPER_FRAME.getValue());
+				}
+			});
 			orderService.produceOrder(tService, OrderEnum.PRODUCE_TYPE_UPPER.getValue(), "");
+			productDao.updateByPrimaryKeySelective(tService);
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("重新上架失败");
@@ -448,6 +458,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//是否包含用户选择的周期
 		boolean isContainWeek = false;
 		String[] weekDayArray = service.getDateWeekNumber().split(",");
+		String startBeginDate;
+		if (DateUtil.parse(service.getStartDateS() + service.getEndTimeS()) < System.currentTimeMillis()) {
+			startBeginDate = DateUtil.getDate(System.currentTimeMillis());
+		} else {
+			startBeginDate = service.getStartDateS();
+		}
+
 		for (int i = 0; i < weekDayArray.length; i++) {
 			int weekDay = Integer.parseInt(weekDayArray[i]);
 			long countWeek = DateUtil.countWeek(service.getStartDateS(), service.getEndDateS(), weekDay);
@@ -487,12 +504,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			service.setEnrollDate(getEnrollDate(service));
 		}
 //		service.setEnrollDate("");
+		//派生出第一张订单
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		// 增加成长值
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 		// TODO 加发布次数
