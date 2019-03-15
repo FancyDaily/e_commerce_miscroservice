@@ -644,7 +644,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作
 		 */
 		TService product = productService.getProductById(service.getId());
-		//TODO 报名派生的日期
 //		String startDate = "20190312";
 		String startDateTime = enrollDate + product.getStartTimeS();
 		String endDateTime = enrollDate + product.getEndTimeS();
@@ -679,7 +678,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 查看数据库是否存在 ，存在则不派生
 		 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
 		 */
-		date = "20190312";
+//		date = "20190312";
 		String startDateTime = date + service.getStartTimeS();
 		String endDateTime = date + service.getEndTimeS();
 		//报名人满的订单所在的周

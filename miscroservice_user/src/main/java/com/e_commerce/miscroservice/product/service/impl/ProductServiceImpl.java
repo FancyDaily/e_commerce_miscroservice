@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -376,12 +378,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe != null && listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		if (!msgResult.getCode().equals("200")) {
-			throw new MessageException("派生订单失败");
-		}
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 	}
 
 	/**
@@ -419,24 +417,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
 		}
-		// 检测用户是否实名，没有实名的话就无法发布服务
-
+		// TODO 检测用户是否实名，没有实名的话就无法发布服务
+		if (user.getAuthenticationStatus().equals(AppConstant.AUTH_STATUS_NO)) {
+			throw new MessageException("请先实名后再发布服务");
+		}
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
 		checkRepeat(user, service, listServiceDescribe);
 		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		if (!msgResult.getCode().equals("200")) {
-			throw new MessageException("派生订单失败");
-		}
-		// 增加成长值  TODO  调用user模块
-//		TUser addGrowthValue = growthValueService.addGrowthValue(user,
-//				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_SERVICE.getCode());
-//		userService.flushRedisUser(token, addGrowthValue);
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 	}
 
 	/**
@@ -496,15 +489,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		if (!msgResult.getCode().equals("200")) {
-			throw new MessageException("派生订单失败");
-		}
-		// TODO 使用用户模块
-		// 增加成长值 刷新缓冲
-//		TUser addGrowthUser = growthValueService.addGrowthValue(user,
-//				GrowthValueEnum.GROWTH_TYPE_PUBLISH_SERV_REQUIRE.getCode());
-//		userService.flushRedisUser(token, addGrowthUser);
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		// 增加成长值
+		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 	}
 
 	/**
@@ -585,12 +572,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		if (!msgResult.getCode().equals("200")) {
-			throw new MessageException("派生订单失败");
-		}
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 	}
 
 	/**
@@ -619,12 +602,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		MsgResult msgResult = null;
 		//派生出第一张订单
-		msgResult = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		if (!msgResult.getCode().equals("200")) {
-			throw new MessageException("派生订单失败");
-		}
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 	}
 
 	/**
