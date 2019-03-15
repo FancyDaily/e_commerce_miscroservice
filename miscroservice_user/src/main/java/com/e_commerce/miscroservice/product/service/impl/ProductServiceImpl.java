@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
@@ -326,6 +325,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return productView;
 	}
 
+	@Override
+	public void updateServiceByKey(TService service) {
+		productDao.updateByPrimaryKeySelective(service);
+	}
+
 
 	/**
 	 * 功能描述:组织用来发布服务
@@ -417,8 +421,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
 		}
-		// TODO 检测用户是否实名，没有实名的话就无法发布服务
-		if (user.getAuthenticationStatus().equals(AppConstant.AUTH_STATUS_NO)) {
+		if (Objects.equals(user.getAuthenticationStatus(), AppConstant.AUTH_STATUS_NO)) {
 			throw new MessageException("请先实名后再发布服务");
 		}
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
@@ -466,7 +469,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param param
 	 * @param token
 	 */
-	private void submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
+	private void  submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
 		TService service = param.getService();
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
 		setServiceCommonField(user, service);
@@ -483,15 +486,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			service.setEnrollDate(getEnrollDate(service));
 		}
+//		service.setEnrollDate("");
 		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
-		MsgResult msgResult = null;
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		// 增加成长值
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
+		// TODO 加发布次数
 	}
 
 	/**
@@ -509,10 +513,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		String endTime = service.getEndTimeS();
 //		int[] weekDayArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
 //		List<String> enrollDateList = new ArrayList<>();
-
-
-//		DateUtil.get
-//		String enrollDate = DateUtil.getEnrollDate(service);
+		List<String> enrollDate = new ArrayList<>();
 		return "";
 	}
 
