@@ -110,7 +110,7 @@ public class OrderDaoImpl implements OrderDao {
                 companyIds.add(Integer.valueOf(str));
             }
         }
-        if (isService) {
+        if (isService) {	//TODO 权限
             if(!companyIds.isEmpty()) {
                 result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
                         .groupBefore()
@@ -217,12 +217,23 @@ public class OrderDaoImpl implements OrderDao {
         }
         if(!companyIds.isEmpty()) {
             return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+					.groupBefore()
+                    .in(TOrder::getCompanyId,companyIds)
+					.or()
+					.eq(TOrder::getOpenAuth,ProductEnum.OPEN_AUTH_OPEN.getValue())
+					.or()
+					.isNull(TOrder::getCompanyId)
+					.groupAfter()
                     .eq(TOrder::getCreateUser, userId)
                     .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
-                    .in(TOrder::getCompanyId,companyIds)
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         } else {
             return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+					.groupBefore()
+					.isNull(TOrder::getCompanyId)
+					.or()
+					.eq(TOrder::getOpenAuth,ProductEnum.OPEN_AUTH_OPEN.getValue())
+					.groupAfter()
                     .eq(TOrder::getCreateUser, userId)
                     .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));

@@ -8,4 +8,6 @@ public interface UserAuthDao {
     List<TUserAuth> findAllByCardId(String cardId);
 
     int insert(TUserAuth userAuth);
+
+    List<TUserAuth> selectByUserId(Long id);
 }

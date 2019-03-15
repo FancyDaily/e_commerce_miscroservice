@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.user.vo.StrServiceView;
 import com.e_commerce.miscroservice.user.vo.StrUserCompanyView;
 
+import java.util.Map;
+
 public interface CompanyService {
     /**
      * 加入的组织列表
@@ -26,5 +28,5 @@ public interface CompanyService {
      * @param id
      * @return
      */
-    TCompany companyInfo(Long id);
+    Map<String, Object> companyInfo(TUser user);
 }

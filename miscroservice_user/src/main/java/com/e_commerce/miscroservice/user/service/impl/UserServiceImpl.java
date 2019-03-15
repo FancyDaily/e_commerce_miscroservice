@@ -564,6 +564,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             orderIds.add(order.getId());
         }
 
+        if(orderIds.isEmpty()) {
+            return new QueryResult();
+        }
+
         Map<Long, Object> evaluateMap = new HashMap<>();
         List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds, userId);
         for (TEvaluate evaluate : evaluates) {
@@ -664,20 +668,22 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         DesensitizedUserView view = BeanUtil.copy(findUser, DesensitizedUserView.class);
         String companyNames = view.getCompanyNames();
-        StringBuilder stringBuilder = new StringBuilder();
-        int count = 0;
-        for (String companyName : companyNames.split(",")) {
-            if (count == 2) {
-                break;
+        if(companyNames!=null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            int count = 0;
+            for (String companyName : companyNames.split(",")) {
+                if (count == 2) {
+                    break;
+                }
+                stringBuilder.append(companyName).append(",");
+                count++;
             }
-            stringBuilder.append(companyName).append(",");
-            count++;
+            String string = stringBuilder.toString();
+            if (string.endsWith(",")) {
+                string = string.substring(0, string.length() - 1);
+            }
+            view.setLimitedCompanyNames(string);
         }
-        String string = stringBuilder.toString();
-        if (string.endsWith(",")) {
-            string = string.substring(0, string.length() - 1);
-        }
-        view.setLimitedCompanyNames(string);
         return view;
     }
 
@@ -1087,6 +1093,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         // creater
         Long timeStamp = System.currentTimeMillis();
         userAuth.setUserId(user.getId());
+        userAuth.setCardId(cardId);
+        userAuth.setCardName(cardName);
         userAuth.setCreateTime(timeStamp);
         userAuth.setCreateUser(user.getId());
         userAuth.setCreateUserName(user.getName());
@@ -1106,7 +1114,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 生日
         Map<String, Object> birAgeSex = IDCardUtil.getBirAgeSex(cardId);
-        user.setBirthday((Long) birAgeSex.get("birthday"));
+        user.setBirthday(Long.valueOf((String) birAgeSex.get("birthday")));
 
         // updater
         user.setUpdateTime(timeStamp);
@@ -1297,7 +1305,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             // 基础签到信息(连续天数，签到状态)
             userTasks = userTaskDao.queryOnessignUpBetweenTimeDesc(user.getId(), thisBeginStamp, thisEndStamp);
 
-            if (!userTasks.isEmpty()) {
+            boolean flag = userTasks.isEmpty();
+            if (!flag) {
                 TUserTask task = userTasks.get(0);
                 if (DateUtil.isToday(task.getCreateTime())) {
                     state = true;
@@ -1442,7 +1451,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 }
 
                 // 处理奖励
-                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 6 -> 特殊
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 2 -> 特殊
                     // 特殊奖励
                     special = 3; // 特殊奖励 //TODO
                     reward = special;
@@ -2143,6 +2152,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
+        if(bonusPackageId==null) {
+            return null;
+        }
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put("isMine", bonusPackageDao.isMine(user.getId(), bonusPackageId));
         return resultMap;
@@ -2305,9 +2317,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 插入一条用户记录
         userDao.insert(user);
-//
-//        // 注册完成任务
-//        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
+
+        // 注册完成任务
+        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
         return user;
     }

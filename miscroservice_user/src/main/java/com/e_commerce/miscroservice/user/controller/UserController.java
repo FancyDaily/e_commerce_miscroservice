@@ -1899,6 +1899,9 @@ public class UserController extends BaseController {
             Map<String, Object> resultMap = userService.isMyBonusPackage(user, bonusPackageId);
             result.setData(resultMap);
             result.setSuccess(true);
+            if(resultMap==null) {
+                result.setSuccess(false);
+            }
         } catch (MessageException e) {
             logger.error("查看是否为我的红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
@@ -1926,9 +1929,9 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("auth")
+    @RequestMapping("cert")
     @Consume(TUserAuth.class)
-    public Object auth(String token, String cardId, String cardName) {
+    public Object cert(String token, String cardId, String cardName) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
@@ -1966,7 +1969,7 @@ public class UserController extends BaseController {
      * @return
      */
     @Consume(TCompany.class)
-    @RequestMapping("company/auth")
+    @RequestMapping("company/cert")
     public Object companyAuth(String token, Integer type, String name, String province, String city, String county, String depict, String url, String contactsName, String contactsTel, String contactsCardId) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
@@ -2024,13 +2027,13 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @PostMapping("company/info")
+    @PostMapping("company/infos")
     public Object companyInfo(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-            TCompany companyInfo = companyService.companyInfo(user.getId());
-            result.setData(companyInfo);
+            Map<String, Object> map = companyService.companyInfo(user);
+            result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("认证信息查询异常: " + e.getMessage());
