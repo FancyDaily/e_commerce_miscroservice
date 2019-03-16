@@ -557,7 +557,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
@@ -588,7 +588,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
-				return null;
+				return order;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
@@ -629,7 +629,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//调用发布派生的逻辑
 			return produceOrderByPublish(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
-			return produceOrderByEnroll(service, date);
+			return produceOrderByEnroll(service, date, order);
 		} else {
 			//报名人满后派生
 			return produceOrderByEnough(weekDayNumberArray, service, date, order);
@@ -642,9 +642,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
+	 * @param order 新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
 	 * @return
 	 */
-	private Integer produceOrderByEnroll(TService service, String enrollDate) {
+	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {
 		//报名派生  判断是否已经存在，已经存在，则停止派生
 		/*
 		 * 传递一个serviceId 和 一个订单的日期
@@ -657,13 +658,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String endDateTime = enrollDate + product.getEndTimeS();
 		Long startDateTimeMill = DateUtil.parse(startDateTime);
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
-		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-		if (count != 0) { //订单已存在
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (oldOrder != null) { //订单已存在
+			order = oldOrder;
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
 		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
@@ -698,13 +701,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
 		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
-		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-		if (count != 0) { //有这张订单，不需要派生
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (oldOrder != null) { //有这张订单，不需要派生
+			order = oldOrder;
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		order.setStartTime(startDateTimeMill);
@@ -862,14 +867,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				break;
 			}
 			dr.setDays(dr.getDays() + tempResult.getDays());
-			enrollDate.add(DateUtil.getDate(tempStart));
+			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
+			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
+			if (temOrder == null) {
+				enrollDate.add(DateUtil.getDate(tempStart));
+			}
 			tempStart = tempResult.getStartTimeMill();
 			tempEnd = tempResult.getEndTimeMill();
 		}
 		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条
-		Long count = orderDao.countProductOrder(service.getId(), startTimeMill, endTimeMill);
-		if (count != 0) {
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startTimeMill, endTimeMill);
+		if (oldOrder != null) {
+			order = oldOrder;
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 
