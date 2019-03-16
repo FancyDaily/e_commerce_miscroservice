@@ -67,13 +67,14 @@ public interface OrderRelationService {
      */
     List<String> chooseUser(Long orderId, Long nowUserId, List<Long> userIdList);
     /**
-     * @return java.util.List<java.lang.String>
-     * @Author 姜修弘
-     * 功能描述:拒绝人选
-     * 创建时间:@Date 下午7:48 2019/3/6
-     * @Param [orderId, nowUserId]
-     **/
-    List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId);
+     * 拒绝人选
+     * @param orderId
+     * @param userIdList
+     * @param nowUserId
+     * @param type 0-手动拒绝 1- 自动下架拒绝
+     * @return
+     */
+    List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId , int type);
     /**
      * 开始订单（签到）
      * @param orderId
@@ -157,4 +158,10 @@ public interface OrderRelationService {
      * @return
      */
     void reoprtOrder(Long orderId , Long nowUserId);
+    /**
+     * 移除可报名日期
+     * @param date
+     * @param serviceId
+     */
+    void removeCanEnrollDate(String date , Long serviceId);
 }

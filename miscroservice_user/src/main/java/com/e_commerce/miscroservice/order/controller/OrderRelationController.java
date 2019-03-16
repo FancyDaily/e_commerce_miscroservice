@@ -52,9 +52,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("报名成功");
         } catch (MessageException e) {
+            if (e.getErrorCode().equals("401")){
+                orderRelationService.removeCanEnrollDate(date ,serviceId);
+            }
             logger.warn("报名失败," + e.getMessage());
             result.setSuccess(false);
-            result.setErrorCode("499");
+            result.setErrorCode(e.getErrorCode());
             result.setMsg("报名失败," + e.getMessage());
         } catch (Exception e) {
             logger.error("报名失败" + errInfo(e), e);
@@ -208,7 +211,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.unChooseUser(orderId ,userIdList ,nowUserId);
+            List<String> errorMsgList = orderRelationService.unChooseUser(orderId ,userIdList ,nowUserId , 0);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("拒绝成功");
@@ -562,8 +565,13 @@ public class OrderRelationController extends BaseController {
     /**
      * 举报订单详情
      *
-     * @param orderId
-     * @param nowUserId
+     * @param orderId 订单ID
+     * @param nowUserId 当前用户ID
+     *
+     *       "success": true,
+     *       "errorCode": "",
+     *       "msg": "拒绝赠礼成功",
+     *
      * @return
      */
     @PostMapping("/reportOrder")

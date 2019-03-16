@@ -14,10 +14,12 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.text.ParseException;
@@ -25,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
 
 /**
@@ -88,8 +91,22 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     public long enroll(Long orderId, Long userId, String date, Long serviceId) throws ParseException {
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
-        TOrder order = orderDao.selectByPrimaryKey(orderId);//TODO 之后用马晓晨的方法根据serviceId配合日期查出，如果没有就新建一个订单，然后拿过来
-        String errorMsg = canEnroll(nowUser, date, order, orderId, nowTime);
+        TOrder order = new TOrder();
+        TService service = productCommonController.getProductById(serviceId);
+        try {
+            order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
+        } catch (Exception e){
+            throw new MessageException("401", "对方余额不足");
+        }
+        if(order == null){
+            throw new MessageException("401", "改日期已超出报名日期");
+        }
+        String errorMsg = enrollCantByOrder(order , nowTime);
+        if (errorMsg != null){
+            //如果错误消息不为空，说明该订单有部分问题不允许报名，抛出错误信息，并在外面接到这个异常后将报名日历移除
+            throw new MessageException("401", errorMsg);
+        }
+        errorMsg = canEnroll(nowUser, date, order, orderId, nowTime);
         if (errorMsg != null) {
             //如果错误消息不为空，说明该用户有部分问题不允许报名，抛出错误信息
             throw new MessageException("499", errorMsg);
@@ -97,6 +114,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         helpEnroll(order, nowUser, date, nowTime, serviceId);
         if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务
+
             long canUseTime = nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime();
             if (canUseTime < order.getCollectTime()) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -110,6 +128,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             nowUser.setUpdateUserName(nowUser.getName());
             userCommonController.updateByPrimaryKey(nowUser);
 
+        } else {
+            //如果是求助
+            //TODO 如果未实名
         }
 
         order.setEnrollNum(order.getEnrollNum() + 1);
@@ -315,7 +336,20 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
-                //TODO 发送通知
+                //发送通知
+                String title ="恭喜您已被求助者选定";
+                String serviceType = ProductEnum.TYPE_SERVICE.getDesc();
+                if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                    serviceType = ProductEnum.TYPE_SEEK_HELP.getDesc();
+                }
+                String content = new StringBuilder().append("在“").append(order.getServiceName())
+                        .append("的").append(serviceType).append("中，您已被求助者").append(nowUser.getName())
+                        .append("选定为服务者啦！感谢您的热心，请与求助者保持联系并准时提供服务哦～").toString();
+                messageCommonController.messageSave(orderId ,nowUser , title , content , orderRelationshipList.get(i).getReceiptUserId() , nowTime);
+                if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
+                    //TODO 如果是互助时，发送短信
+                    String msgContent = "【壹晓时】"+content;
+                }
             } else {
                 for (int j = 0; j < userList.size(); j++) {
                     if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId().longValue()) {
@@ -329,8 +363,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果选满人了，那么判断是否有下周期的订单，如果有不处理，没有就派生订单
             TService service = productCommonController.getProductById(orderRelationshipList.get(0).getServiceId());
             String date = DateUtil.getDate(orderRelationshipList.get(0).getStartTime());
+            //将该订单设置为可见，并调用方法修改订单可见状态
+            orderCommonController.changeOrderVisiableStatus(orderId, 1);
+            //派生下一张订单
             orderCommonController.produceOrder( service ,OrderEnum.PRODUCE_TYPE_ENOUGH.getValue(),date);
-            //TODO 移除可报名日期
+            //移除可报名日期
+            removeCanEnrollDate(date , service.getId());
         }
         if (orderRelationshipIdList.size() > 0) {
             //如果有更新的人批量更新
@@ -348,14 +386,15 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 
     /**
-     * @return java.util.List<java.lang.String>
-     * @Author 姜修弘
-     * 功能描述:拒绝人选
-     * 创建时间:@Date 下午7:48 2019/3/6
-     * @Param [orderId, nowUserId]
-     **/
+     * 拒绝人选
+     * @param orderId
+     * @param userIdList
+     * @param nowUserId
+     * @param type 0-手动拒绝 1- 自动下架拒绝
+     * @return
+     */
     @Transactional(rollbackFor = Throwable.class)
-    public List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId) {
+    public List<String> unChooseUser(Long orderId, List<Long> userIdList, Long nowUserId , int type) {
         TUser nowUser = userCommonController.getUserById(nowUserId);
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         if (order.getCreateUser() != nowUserId.longValue()) {
@@ -381,6 +420,21 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
                 //TODO 发送通知
+                String title = "";
+                String content = "";
+                String serviceType = ProductEnum.TYPE_SERVICE.getDesc();
+                if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                    serviceType = ProductEnum.TYPE_SEEK_HELP.getDesc();
+                }
+                if (type == 0){
+                    //如果是手动拒绝
+
+                } else {
+                    title = "求助下架通知";
+                    content =new StringBuilder().append("您报名的求助“").append(serviceType)
+                            .append(order.getServiceName()).append("”因求助者长时间未选定服务者，已默认下架处理啦~不过还有更多晓主等待您的帮助哦！").toString();
+                }
+                messageCommonController.messageSave(orderId ,nowUser , title , content , toUser.getId() , nowTime);
                 if (order.getType() == 2) {
                     //如果是服务,解冻时间币
                     unFreezeTime(order.getCollectTime(), nowTime, toUser, orderId);
@@ -580,7 +634,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             nowUser.setUpdateUserName(nowUser.getName());
             userCommonController.updateByPrimaryKey(nowUser);
             //TODO 插入互助时方面的成长值（查看今天支付多少次，然后再看加不加）有最高次数限制
-            logger.error("");
         }
         //查看待支付人数，如果和支付人数相等，将发布用户状态置为待评价或已无效
         long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
@@ -950,10 +1003,16 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             TService service = productCommonController.getProductById(order.getServiceId());
             String date = DateUtil.getDate(order.getStartTime());
             service.setEnrollDate(service.getEnrollDate()+","+date);
+            productCommonController.update(service);
             order.setVisiableStatus(OrderEnum.VISIABLE_NO.getStringValue());
             orderDao.updateByPrimaryKey(order);
-            //productCommonController
-            //TransactionSynchronizationManager.registerSynchronization(orderCommonController.changeOrderVisiableStatus(orderId, 2));
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    super.afterCommit();
+                    orderCommonController.changeOrderVisiableStatus(orderId, 2);
+                }
+            });
         } else {
             orderDao.updateByPrimaryKey(order);
         }
@@ -1557,37 +1616,19 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 
     /**
-     * 功能描述:报名的各种限制
+     * 因为自己的关系无法报名
      * 作者:姜修弘
      * 创建时间:2019年2月25日 下午2:38:44
      */
     private String canEnroll(TUser nowUser, String date, TOrder order, Long orderId, long nowTime) throws ParseException {
 
         String msg = null;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startDate = simpleDateFormat.parse(date + " 00:00:00");
-        Date endDate = simpleDateFormat.parse(date + " 23:59:59");
-        long startTime = startDate.getTime();
-        long endTime = endDate.getTime();
 
-        TOrderRelationship orderRelationship = null;
-        //查询出传入日期是否有参与的订单关系
-        orderRelationship = orderRelationshipDao.selectOrderRelationshipByJoinIn(orderId, nowUser.getId());
-
+        TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(order.getId() , nowUser.getId());
         if (orderRelationship != null) {
             //如果有参加的订单关系，则不允许报名
             msg = "对不起，您已报名，请勿多次报名";
             return msg;
-        }
-        if (order.getEndTime().longValue() < nowTime) {
-            msg = "对不起，该项目已经结束，无法报名";
-            return msg;
-        }
-        if (order.getServiceStatus() != ProductEnum.STATUS_UPPER_FRAME.getValue()) {
-            throw new MessageException("499", "对不起，该订单已无法报名，请后退刷新重试");
-        }
-        if (order.getConfirmNum() == order.getServicePersonnel().longValue()) {
-            throw new MessageException("499", "对不起，该订单已选满需要人数");
         }
         if (order.getCreateUser() == nowUser.getId().longValue()) {
             // 如果用户报名的是自己的需求
@@ -1607,6 +1648,27 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
         return msg;
 
+    }
+
+    /**
+     * 因为订单的关系无法报名
+     * @param order
+     * @param nowTime
+     * @return
+     */
+    private String enrollCantByOrder(TOrder order , Long nowTime){
+        String msg = null;
+        if (order.getEndTime().longValue() < nowTime) {
+            msg = "对不起，该项目已经结束，无法报名";
+            return msg;
+        }
+        if (order.getServiceStatus() != ProductEnum.STATUS_UPPER_FRAME.getValue()) {
+            throw new MessageException("499", "对不起，该订单已无法报名，请后退刷新重试");
+        }
+        if (order.getConfirmNum() == order.getServicePersonnel().longValue()) {
+            throw new MessageException("499", "对不起，该订单已选满需要人数");
+        }
+        return msg;
     }
 
     /**
@@ -1773,5 +1835,25 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
         //更新发布者状态
         orderRelationshipDao.updateByPrimaryKey(orderRelationshipForPublish);
+    }
+
+    /**
+     * 移除可报名日期
+     * @param date
+     * @param serviceId
+     */
+    public void removeCanEnrollDate(String date , Long serviceId){
+        TService service = productCommonController.getProductById(serviceId);
+        String enrollDate = service.getEnrollDate();
+        List<String> canEnrollDateList = new ArrayList<>();
+        String[] enrollDates = enrollDate.split(",");
+        for (int i = 0; i < enrollDates.length; i++) {
+            if (! enrollDates[i].equals(date)){
+                canEnrollDateList.add(enrollDates[i]);
+            }
+        }
+        enrollDate = Joiner.on(",").join(canEnrollDateList);
+        service.setEnrollDate(enrollDate);
+        productCommonController.update(service);
     }
 }
