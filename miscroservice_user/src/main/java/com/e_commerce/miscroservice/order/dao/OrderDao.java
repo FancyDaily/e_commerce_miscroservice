@@ -112,7 +112,7 @@ public interface OrderDao {
 	 * @param serviceId 商品ID
 	 * @return
 	 */
-	Long countProductOrder(Long serviceId, Long startTime, Long endTime);
+	TOrder findProductOrder(Long serviceId, Long startTime, Long endTime);
 
     /**
      * 根据来源、状态、用户id、订单id查找订单记录
@@ -151,6 +151,15 @@ public interface OrderDao {
 	 * @param userName 用户名称
 	 */
 	void updateUserName(Long userId, String userName);
+
+	/**
+	 * 查找该时间段没满人的订单
+	 * @param serviceId  商品ID
+	 * @param tempStart 开始时间
+	 * @param tempEnd 结束时间
+	 * @return 找到的order 可能为null
+	 */
+	TOrder findProductOrderEnough(Long serviceId, long tempStart, long tempEnd);
 
 
 	//TODO NEW!!!!!!EMD

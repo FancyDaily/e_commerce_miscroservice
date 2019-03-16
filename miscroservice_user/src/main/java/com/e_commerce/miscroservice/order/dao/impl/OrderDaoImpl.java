@@ -154,12 +154,12 @@ public class OrderDaoImpl implements OrderDao {
 	@Override
 	public Long countProductOrder(Long serviceId) {
 		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, "1"));
+				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
-	public Long countProductOrder(Long serviceId, Long startTime, Long endTime) {
-		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrder.class)
+	public TOrder findProductOrder(Long serviceId, Long startTime, Long endTime) {
+		return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
 				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
 				.eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime).eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()));
 	}
@@ -211,6 +211,15 @@ public class OrderDaoImpl implements OrderDao {
 		order.setCreateUserName(userName);
 		MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TOrder.class)
 				.eq(TOrder::getCreateUser, userId));
+	}
+
+	@Override
+	public TOrder findProductOrderEnough(Long serviceId, long startTime, long endTime) {
+		return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+				.eq(TOrder::getServiceId, serviceId).eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+				.eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime)
+				.eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
+				.eq(TOrder::getServicePersonnel, TOrder::getConfirmNum));
 	}
 
 	/**
