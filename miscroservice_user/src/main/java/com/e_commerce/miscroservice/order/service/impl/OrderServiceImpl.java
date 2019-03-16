@@ -72,8 +72,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
+			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
+		// 为发布者增加一条订单关系
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -149,9 +150,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 			userView.setServeNum(tUser.getSeekHelpNum());
 		}
-		// TODO 获取发布者关注信息
-		// 关注状态 1、显示关注 2、显示已关注
-		userView.setCareStatus(1);
+		// 是否关注该用户
+		boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+		if (isCare) {
+			// 关注状态 1、显示关注 2、显示已关注
+			userView.setCareStatus(2);
+		} else {
+			userView.setCareStatus(1);
+		}
 		returnView.setUser(userView);
 		returnView.getUser().setCareStatus(1);
 		//详情页面展示举报状态 收藏状态 报名状态
@@ -212,7 +218,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		//商品封面图
 		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
-		//遍历组织view
+		//遍历组成view
 		for (TOrderRelationship orderRelationship : pageEnrollAndChooseList) {
 			PageEnrollAndChooseReturnView returnView = new PageEnrollAndChooseReturnView();
 			//显示的订单列表
@@ -420,8 +426,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				Long userId = listRelationship.get(0).getReceiptUserId();
 				TUser receiver = userService.getUserById(userId);
 				BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
-				// TODO 查询用户的关注状态
-				userView.setCareStatus(1);
+				// 是否关注该用户
+				boolean isCare = userService.isCareUser(user.getId(), userId);
+				if (isCare) {
+					// 关注状态 1、显示关注 2、显示已关注
+					userView.setCareStatus(2);
+				} else {
+					userView.setCareStatus(1);
+				}
 				// 求助 展示求助者评分
 				if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 					userView.setTotalEvaluate(receiver.getServTotalEvaluate());
@@ -439,9 +451,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				for (TOrderRelationship tOrderRelationship : listRelationship) {
 					TUser receiver = userService.getUserById(tOrderRelationship.getReceiptUserId());
 					BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
-					// TODO 查询用户的关注状态
-					userView.setCareStatus(1);
-//				userView.setPointStatus(1);
+					// 是否关注该用户
+					boolean isCare = userService.isCareUser(user.getId(), receiver.getId());
+					if (isCare) {
+						// 关注状态 1、显示关注 2、显示已关注
+						userView.setCareStatus(2);
+					} else {
+						userView.setCareStatus(1);
+					}
 				}
 				returnView.setListUserView(listUserView);
 			}
@@ -494,8 +511,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			Long fromUserId = relationship.getFromUserId();
 			TUser tUser = userService.getUserById(fromUserId);
 			BaseUserView userView = BeanUtil.copy(user, BaseUserView.class);
-			// TODO 查询用户的关注状态
-			userView.setCareStatus(1);
+			// 是否关注该用户
+			boolean isCare = userService.isCareUser(user.getId(), tUser.getId());
+			if (isCare) {
+				// 关注状态 1、显示关注 2、显示已关注
+				userView.setCareStatus(2);
+			} else {
+				userView.setCareStatus(1);
+			}
 			// 求助 展示求助者评分
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
@@ -584,7 +607,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				saveOrder(order);
 				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				return order;
-				// TODO 订单结束定时任务
+				// TODO 调用订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
@@ -606,6 +629,67 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			return order;
 		}
 		return order;
+	}
+
+	/**
+	 * 到结束时间下架订单
+	 *
+	 * @param orderId 订单ID
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void lowerFrameOrder(Long orderId) {
+		/*
+		 * 找到该订单，进行下架处理，
+		 * 进行是求助还是服务的判断，将时间币退还给发布人或者报名人
+		 * 调用其他方法派生下一张订单
+		 */
+		//下架订单  并将状态置为可见状态
+		TOrder order = orderDao.selectByPrimaryKey(orderId);
+		order.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
+		order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+		order.setUpdateTime(System.currentTimeMillis());
+		orderDao.updateByPrimaryKey(order);
+		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
+			lowerFrameSeekHelpOrder(order);
+		} else { // 是服务
+			lowerFrameServiceOrder(order);
+		}
+	}
+
+	/**
+	 * 下架服务订单
+	 *
+	 * @param order 订单
+	 */
+	private void lowerFrameServiceOrder(TOrder order) {
+		// TODO 拒绝求助者的报名 解冻求助者的时间币 并发送消息
+	}
+
+	/**
+	 * 下架求助订单
+	 *
+	 * @param order 订单
+	 */
+	private void lowerFrameSeekHelpOrder(TOrder order) {
+		//找到用户关联的这张订单,把冻结的金额减去剩余没选的人数（解冻）
+		TUserFreeze userFreeze = userService.getUserFreeze(order.getCreateUser(), order.getId());
+		// 解冻金额  = 该订单冻结金额 - 单价 * 没被选择的人数
+		long thawTime = userFreeze.getFreezeTime() - order.getCollectTime() * (order.getServicePersonnel() - order.getConfirmNum());
+		//更新用户冻结表的冻结金额
+		userFreeze.setFreezeTime(userFreeze.getFreezeTime() - thawTime);
+		// 解冻用户表中的冻结信息
+		TUser user = userService.getUserById(order.getCreateUser());
+		user.setFreezeTime(user.getFreezeTime() - thawTime);
+		long currentTime = System.currentTimeMillis();
+		user.setUpdateTime(currentTime);
+		user.setUpdateUser(user.getId());
+		user.setUpdateUserName(user.getName());
+		userService.updateByPrimaryKey(user);
+		userFreeze.setUpdateTime(currentTime);
+		userFreeze.setUpdateUser(user.getId());
+		userFreeze.setUpdateUserName(user.getName());
+		userService.updateUserFreeze(userFreeze);
+		// TODO  调用方法拒绝所有服务者
 	}
 
 	/**
@@ -642,7 +726,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
-	 * @param order 新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
+	 * @param order      新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
 	 * @return
 	 */
 	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {

@@ -49,10 +49,6 @@ public class ProductCommonController extends BaseController {
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
 		Map<Long, String> coverPic = new HashMap<>();
 		List<TServiceDescribe> listProductDesc = productService.getListProductDesc(serviceIds);
-//		if (listProductDesc != null && listProductDesc.size() > 0) {
-//			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
-//					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
-//		}
 		for (TServiceDescribe tServiceDescribe : listProductDesc) {
 			if (tServiceDescribe.getIsCover().equals(IS_COVER_YES)) {
 				coverPic.put(tServiceDescribe.getServiceId(), tServiceDescribe.getUrl());

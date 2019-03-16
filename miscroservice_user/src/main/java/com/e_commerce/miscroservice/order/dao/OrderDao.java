@@ -50,8 +50,6 @@ public interface OrderDao {
      */
     List<TOrder> pageOrder(PageOrderParamView param);
 
-    //TODO NEW!!!!!!START
-
     /**
      * 根据userId查找订单列表
      * @param userId
@@ -160,9 +158,5 @@ public interface OrderDao {
 	 * @return 找到的order 可能为null
 	 */
 	TOrder findProductOrderEnough(Long serviceId, long tempStart, long tempEnd);
-
-
-	//TODO NEW!!!!!!EMD
-
 
 }

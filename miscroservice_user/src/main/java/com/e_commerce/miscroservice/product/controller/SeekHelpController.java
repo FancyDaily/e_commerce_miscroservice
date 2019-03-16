@@ -280,7 +280,7 @@ public class SeekHelpController extends BaseController {
 
 
 	/**
-	 * 发布求助
+	 * 发布
 	 *
 	 * @param request
 	 * @param param
@@ -288,7 +288,6 @@ public class SeekHelpController extends BaseController {
 	 * @return
 	 */
 	@PostMapping("/submit")
-//	@Consume(ProductSubmitParamView.class)
 	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param, String token) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
@@ -299,9 +298,13 @@ public class SeekHelpController extends BaseController {
 
 		TUser user = (TUser) redisUtil.get(token);
 		//这一层可判断出是求助，手动设置type参数
-		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
+//		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
-			productService.submitSeekHelp(user, param, token);
+			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
+				productService.submitSeekHelp(user, param, token);
+			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
+				productService.submitService(user, param, token);
+			}
 			result.setSuccess(true);
 			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 			return result;

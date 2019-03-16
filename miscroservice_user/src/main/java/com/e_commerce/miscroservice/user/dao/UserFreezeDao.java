@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 
 import java.util.List;
 
@@ -30,5 +29,11 @@ public interface UserFreezeDao {
     TUserFreeze selectUserFreezeByUserIdAndOrderId(Long userId, Long orderId);
 
     int update(TUserFreeze userFreeze);
-
+    /**
+     * 查询用户再某条订单下的冻结记录
+     * @param createUser 用户ID
+     * @param orderId 订单ID
+     * @return 冻结记录
+     */
+	TUserFreeze getUserFreeze(Long createUser, Long orderId);
 }
