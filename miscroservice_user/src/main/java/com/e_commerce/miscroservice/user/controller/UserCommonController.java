@@ -127,4 +127,32 @@ public class UserCommonController {
 	 */
 	public TUserTimeRecord selectUserTimeRecordById(Long id){return userTimeRecordDao.selectById(id);}
 
+	/**
+	 * 查询用户再某条订单下的冻结记录
+	 * @param createUser 用户ID
+	 * @param orderId 订单ID
+	 * @return 冻结记录
+	 */
+	public TUserFreeze getUserFreeze(Long createUser, Long orderId) {
+		return userFreezeDao.getUserFreeze(createUser, orderId);
+	}
+
+	/**
+	 * 增加用户发布次数
+	 * @param user 用户
+	 * @param type 类型 1、求助 2、服务
+	 */
+	public void addPublishTimes(TUser user, int type) {
+		userService.addPublishTimes(user, type);
+	}
+
+	/**
+	 * 是否关注了该用户
+	 * @param userId 当前用户ID
+	 * @param userFollowId 被关注用户ID
+	 * @return
+	 */
+	public boolean isCareUser(Long userId, Long userFollowId) {
+		return userService.isCareUser(userId, userFollowId);
+	}
 }

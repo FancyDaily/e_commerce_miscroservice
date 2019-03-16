@@ -63,4 +63,10 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
         .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
     }
 
+    @Override
+    public TUserFreeze getUserFreeze(Long createUser, Long orderId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class)
+                .eq(TUserFreeze::getUserId, createUser).eq(TUserFreeze::getOrderId, orderId));
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFollow;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
@@ -146,5 +147,12 @@ public class UserFollowDaoImpl implements UserFollowDao {
         }
 
         return status;
+    }
+
+    @Override
+    public Long countUserFollow(Long userId, Long userFollowId) {
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TUserFollow.class)
+                .eq(TUserFollow::getUserId, userId).eq(TUserFollow::getUserFollowId, userFollowId)
+                .eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES));
     }
 }

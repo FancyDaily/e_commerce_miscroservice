@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUserFollow;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 
 import java.util.List;
 import java.util.Map;
@@ -61,4 +60,12 @@ public interface UserFollowDao {
      * @return
      */
     Integer queryAttenStatus(Long id, Long userId);
+
+    /**
+     * 是否有该用户的关注信息
+     * @param userId 关注用户
+     * @param userFollowId 被关注用户
+     * @return
+     */
+    Long countUserFollow(Long userId, Long userFollowId);
 }

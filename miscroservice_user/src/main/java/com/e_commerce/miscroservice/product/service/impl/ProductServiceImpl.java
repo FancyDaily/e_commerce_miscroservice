@@ -142,10 +142,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (BadWordUtil.isContaintBadWord(service.getServiceName(), 2)) {
 			throw new MessageException("服务名称包含敏感词");
 		}
-		// TODO 调用user模块
-/*		if (!userService.ifAlreadyCert(user.getId())) {
+		if (!user.getAuthenticationStatus().equals(AppConstant.AUTH_STATUS_YES)) {
 			throw new MessageException("9527", "发布服务前请先进行实名认证");
-		}*/
+		}
 		//校验重复性服务是否合规
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			checkRepeatProductLegal(service);
@@ -246,7 +245,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (!lowerStatus) {
 				throw new MessageException("当前状态无法上架");
 			}
-			// TODO 判断时间段是否可以上架  上架后是否需要派生新的订单  进行状态判断
 			checkRepeatProductLegal(tService);
 			tService.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
 			tService.setUpdateUser(user.getId());
@@ -394,6 +392,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 	}
 
 	/**
@@ -443,6 +442,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
+		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 	}
 
 	/**
@@ -500,10 +500,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
 		}
-		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
-			service.setEnrollDate(getEnrollDate(service));
-		}
-//		service.setEnrollDate("");
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		productDao.insert(service);
@@ -512,27 +508,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		// 增加成长值
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
-		// TODO 加发布次数
+		//增加发布次数
+		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 	}
 
-	/**
-	 * 获取可以报名的日期
-	 * @param service
-	 * @return
-	 */
-	private String getEnrollDate(TService service) {
-		// 判断开始
-		// 将当前日期往后延七天，是否超过结束时间，如果没有超过结束时间，用延迟七天的时间作为结束时间，否则使用商品的结束时间
-		// 获取这一时间段内的可以报名的日期
-		//商品开始时间
-//		String startTime = service.getStartTimeS();
-		//商品结束时间
-//		String endTime = service.getEndTimeS();
-//		int[] weekDayArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
-//		List<String> enrollDateList = new ArrayList<>();
-		List<String> enrollDate = new ArrayList<>();
-		return "";
-	}
 
 
 	/**
@@ -592,6 +571,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 	}
 
 	/**
@@ -622,6 +602,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 	}
 
 	/**

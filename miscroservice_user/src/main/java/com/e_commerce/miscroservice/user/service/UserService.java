@@ -351,4 +351,18 @@ public interface UserService {
     TUser rigester(TUser user);
 
     TUser getUserAccountByTelephone(String telephone);
+
+    /**
+     * 为用户增加发布次数
+     * @param user 当前用户
+     * @param type 类型 1、求助 2、服务
+     */
+	void addPublishTimes(TUser user, int type);
+    /**
+     * 是否关注了该用户
+     * @param userId 当前用户ID
+     * @param userFollowId 被关注用户ID
+     * @return
+     */
+    boolean isCareUser(Long userId, Long userFollowId);
 }
