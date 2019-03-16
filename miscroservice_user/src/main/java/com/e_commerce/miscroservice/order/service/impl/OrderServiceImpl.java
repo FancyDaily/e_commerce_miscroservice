@@ -14,10 +14,12 @@ import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.order.vo.*;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.product.util.DateResult;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -70,7 +72,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			userService.freezeTimeCoin(order.getId(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
+			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
 		}
 		return orderRelationService.addTorderRelationship(order);
 	}
@@ -572,6 +574,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			// 生成订单的开始结束时间
 			Integer code = generateOrderTime(service, order, type, date);
+//			if (Objects.equals(type, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_UPPER.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_AUTO.getValue())) {
+//				productService.update(service);
+//			}
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
@@ -619,14 +626,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//上架时候派生订单  感觉可以调用发布生成订单的逻辑
 			return produceOrderByUpper(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
-			//调用重新上架的逻辑
+			//调用发布派生的逻辑
+			return produceOrderByPublish(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
 			return produceOrderByEnroll(service, date);
 		} else {
 			//报名人满后派生
 			return produceOrderByEnough(weekDayNumberArray, service, date, order);
 		}
-		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
 	/**
@@ -799,44 +807,72 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long productStartTime = DateUtil.parse(serviceStartTimeString);
 		//商品结束的时间
 		Long productEndTime = DateUtil.parse(serviceEndTimeString);
-//			//获取开始的时间是星期X
-		int startWeekDay = DateUtil.getWeekDay(productStartTime);
-//			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
-		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
-		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
-//			//订单开始的时间戳
-		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
-		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
-		//参数星期的下一个星期X(不包含这个参数星期)
-//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
-		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
-		int orderNextWeekDay;
-		while (true) {
-			if (endTimeMill >= System.currentTimeMillis()) {
-				break;
-			}
-			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+		DateResult dr = DateUtil.getNextOrderBeginAndEndTime(productStartTime, productEndTime, weekDayNumberArray, true);
+////			//获取开始的时间是星期X
+//		int startWeekDay = DateUtil.getWeekDay(productStartTime);
+////			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
+//		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
+//		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+////			//订单开始的时间戳
+//		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
+//		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
+//		//参数星期的下一个星期X(不包含这个参数星期)
+////			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+//		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
+//		int orderNextWeekDay;
+//		while (true) {
+//			if (endTimeMill >= System.currentTimeMillis()) {
+//				break;
+//			}
+//			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+//
+//			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
+//			if (addDays == 0) {
+//				addDays = 7;
+//			}
+//			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
+//			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
+//			orderWeekDay = orderNextWeekDay;
+//		}
 
-			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
-			if (addDays == 0) {
-				addDays = 7;
-			}
-			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
-			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
-			orderWeekDay = orderNextWeekDay;
-		}
+		Long startTimeMill = dr.getStartTimeMill();
+		Long endTimeMill = dr.getEndTimeMill();
 		order.setStartTime(startTimeMill);
 		order.setEndTime(endTimeMill);
+		// 整个商品的结束时间
+		String endDateTime = service.getEndDateS() + service.getEndTimeS();
+		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
+		if (DateUtil.parse(endDateTime) < endTimeMill) {
+			return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
+		}
+		List<String> enrollDate = new ArrayList<>();
+//		enrollDate.add(DateUtil.getDate(startTimeMill));
+		dr.setDays(1);
+		long tempStart = startTimeMill;
+		long tempEnd = endTimeMill;
+		String startDate = DateUtil.getDate(startTimeMill);
+		//计算第一张订单后六天的可报名时间
+		DateResult tempResult;
+		while (dr.getDays() <= 6) {
+			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
+			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
+				break;
+			}
+			if (tempResult.getDays() == 0) {
+				break;
+			}
+			dr.setDays(dr.getDays() + tempResult.getDays());
+			enrollDate.add(DateUtil.getDate(tempStart));
+			tempStart = tempResult.getStartTimeMill();
+			tempEnd = tempResult.getEndTimeMill();
+		}
+		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条
 		Long count = orderDao.countProductOrder(service.getId(), startTimeMill, endTimeMill);
 		if (count != 0) {
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
-		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
-		String endDateTime = service.getEndDateS() + service.getEndTimeS();
-		if (DateUtil.parse(endDateTime) < endTimeMill) {
-			return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
-		}
+
 		//订单开始的日期
 //			String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
 		//订单开始时间 = 订单开始的日期 + 商品的开始时间

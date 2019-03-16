@@ -71,9 +71,21 @@ public class ProductCommonController extends BaseController {
 		return productService.getProductDesc(serviceId);
 	}
 
+	/**
+	 * 超时或者互助时不足自动下架
+	 * @param service 商品
+	 */
 	public void autoLowerFrameService(TService service) {
 		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
 		productService.autoLowerFrameService(service);
+	}
+
+	/**
+	 * 更新商品信息
+	 * @param service
+	 */
+	public void update(TService service) {
+		productService.updateServiceByKey(service);
 	}
 
 

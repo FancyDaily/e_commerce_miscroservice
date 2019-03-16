@@ -108,4 +108,10 @@ public interface ProductService {
 	 * @return
 	 */
 	DetailProductView detail(TUser user, Long serviceId);
+
+	/**
+	 * 更新商品信息
+	 * @param service
+	 */
+	void updateServiceByKey(TService service);
 }

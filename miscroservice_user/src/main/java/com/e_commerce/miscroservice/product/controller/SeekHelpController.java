@@ -8,6 +8,10 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.product.util.AutoAnalysisWord;
+import com.e_commerce.miscroservice.product.util.DateUtil;
+import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
@@ -18,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 求助模块
@@ -38,7 +44,7 @@ public class SeekHelpController extends BaseController {
 	 * @param token    当前用户token
 	 * @param pageNum  页数
 	 * @param pageSize 每页数量
-	 *
+	 *                 <p>
 	 *                 {
 	 *                 "success": 是否成功,
 	 *                 "msg": "成功或失败消息",
@@ -71,7 +77,6 @@ public class SeekHelpController extends BaseController {
 	 *                 "totalCount": 总条数
 	 *                 }
 	 *                 }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/pageMine")
@@ -98,9 +103,46 @@ public class SeekHelpController extends BaseController {
 	}
 
 	/**
-	 *
-	 * @param token 用户token
+	 * @param token     用户token
 	 * @param serviceId 商品ID
+	 *                  {
+	 *                  "success": 是否成功,
+	 *                  "msg": "查询成功",
+	 *                  "data": {
+	 *                  "service": {
+	 *                  "id": 103460827004141568,
+	 *                  "type": 1、求助 2、服务,
+	 *                  "status": 状态：1、待审核  2、上架中（可以选择上架） 3/4 已下架 （可以选择上架或删除）,
+	 *                  "source": 来源 1、个人 2、组织,
+	 *                  "serviceName": "标题",
+	 *                  "servicePlace": 1、线上 2、线下,
+	 *                  "labels": 标签,
+	 *                  "servicePersonnel": 需要人数,
+	 *                  "startTime": 开始时间毫秒值,
+	 *                  "endTime": 结束时间毫秒值,
+	 *                  "timeType": 0、固定时间 1、可重复,
+	 *                  "dateWeekNumber": 周  字符串用逗号隔开  1、周一 2、周二  7、周日,
+	 *                  "startDateS":  开始日期，"20190308",
+	 *                  "endDateS": 结束日期 "20190330",
+	 *                  "startTimeS": 开始时间 "0920",
+	 *                  "endTimeS": 结束时间 "0940",
+	 *                  "addressName": "地址名称",
+	 *                  "longitude": "经度",
+	 *                  "latitude": "纬度",
+	 *                  "collectType": 收取类型  1、互助时 2、公益时,
+	 *                  "collectTime": 收取时长,
+	 *                  "nameAudioUrl": "音频地址",
+	 *                  },
+	 *                  "desc": [
+	 *                  {
+	 *                  "sort": 排序序号,
+	 *                  "depict": "详情",
+	 *                  "url": "图片地址",
+	 *                  "isCover": "0",
+	 *                  }
+	 *                  ]
+	 *                  }
+	 *                  }
 	 * @return
 	 */
 	@PostMapping("/productDetail")
@@ -132,12 +174,11 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
-	 *
+	 *                  <p>
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/upperFrame")
@@ -170,12 +211,11 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     当前用户token
 	 * @param productId 商品ID
-	 *
+	 *                  <p>
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或错误消息"
 	 *                  }
-	 *
 	 * @return
 	 */
 	@RequestMapping("/delSeekHelp")
@@ -207,12 +247,11 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param token     用户token
 	 * @param productId 商品ID
-	 *
+	 *                  <p>
 	 *                  {
 	 *                  "success": 是否成功,
 	 *                  "msg": "成功或失败的消息"
 	 *                  }
-	 *
 	 * @return
 	 */
 	@PostMapping("/lowerFrameSeekHelp")
@@ -279,6 +318,107 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_ERROR);
 			return result;
 		}
+	}
 
+	/**
+	 * 发布求助
+	 *
+	 * @param text 解析后的文本内容
+	 * @param city 左上角的地址
+	 *             {
+	 *             "title": ",标题",
+	 *             "startDateS": "开始日期： 如 20190315",
+	 *             "endDateS": " 结束日期 如 20190316",
+	 *             "startTimeS": "开始时间  如 1442",
+	 *             "endTimeS": "结束时间 1100",
+	 *             "longitude": 经度  101.777813,
+	 *             "latitude": 纬度  36.630599,
+	 *             "collectTime": 收取时间  10,
+	 *             "addressName": "地址",
+	 *             "type": 类型，1求助  2、服务,
+	 *             "personCount": "人数",
+	 *             "timeType": 重复周期  0、固定时间  1、可重复,
+	 *             "dateWeekNumber": "周几"  如1,2,3,4,
+	 *             "startTime": 具体的开始时间  固定时间时 传的开始时间 1552632120000,
+	 *             "endTime": 具体的结束时间    1552705200000
+	 *             }
+	 * @return
+	 */
+	@PostMapping("/analysisWord")
+	public AnalysisAudioView analysisWord(String text, String city) {
+		AnalysisAudioView resultView = new AnalysisAudioView();
+		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
+		Map<String, Object> map = analysisWord.parse(text, city);
+		System.out.println(map);
+		// 地址名称
+		resultView.setAddressName((String) map.get("location"));
+		//标题
+		resultView.setTitle((String) map.get("work"));
+		//开始日期
+		resultView.setStartDateS((String) map.get("startDate"));
+		// 结束日期
+		resultView.setEndDateS((String) map.get("endDate"));
+		// 开始时间
+		resultView.setStartTimeS((String) map.get("startTime"));
+		// 结束时间
+		resultView.setEndTimeS((String) map.get("endTime"));
+		resultView.setDateWeekNumber((String) map.get("weekDay"));
+		// 经度
+		try {
+			resultView.setLongitude((Double) map.get("longitude"));
+		} catch (Exception e) {
+		}
+		// 纬度
+		try {
+			resultView.setLatitude((Double) map.get("latitude"));
+		} catch (Exception e) {
+		}
+		// 收取时间
+		try {
+			resultView.setCollectTime((Integer) map.get("payCount"));
+		} catch (Exception e) {
+		}
+		// 发布类型 1、求助 2、服务
+		try {
+			resultView.setType((Integer) map.get("pushType"));
+		} catch (Exception e) {
+		}
+		// 需要的人数
+		try {
+			resultView.setPersonCount((Integer) map.get("personCount"));
+		} catch (Exception e) {
+		}
+
+		//如果weekDay为null 则是单次  若weekDay不为null，则是重复性
+		if (resultView.getDateWeekNumber() == null || Objects.equals(resultView.getDateWeekNumber(), "null")) {
+			resultView.setTimeType(ProductEnum.TIME_TYPE_FIXED.getValue());
+		} else {
+			resultView.setTimeType(ProductEnum.TIME_TYPE_REPEAT.getValue());
+		}
+
+		//如果是单次的，开始和结束时间都不为null或“” 就将开始时间和结束时间传回去
+//		if (StringUtil.isNotEmpty(resultView.getStartDateS())) {
+////			resultView.setStartDateS(resultView.getStartDateS().replaceAll("-", ""));
+//		} else {
+//			resultView.setStartDateS(DateUtil.format(System.currentTimeMillis()));
+//		}
+//		if (StringUtil.isNotEmpty(resultView.getEndDateS())) {
+////			resultView.setEndDateS(resultView.getEndDateS().replaceAll("-", ""));
+//		}
+//		if (StringUtil.isNotEmpty(resultView.getStartTimeS())) {
+//			resultView.setStartTimeS(resultView.getStartTimeS().replaceAll(":", ""));
+//		}
+//		if (StringUtil.isNotEmpty(resultView.getEndTimeS())) {
+//			resultView.setEndTimeS(resultView.getEndTimeS().replaceAll(":", ""));
+//		}
+		if (resultView.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue())) { //单次的求助服务
+			if (StringUtil.isNotEmpty(resultView.getStartTimeS()) && StringUtil.isNotEmpty(resultView.getStartTimeS())) {
+				resultView.setStartTime(DateUtil.parse(resultView.getStartDateS() + resultView.getStartTimeS()));
+			}
+			if (StringUtil.isNotEmpty(resultView.getEndDateS()) && StringUtil.isNotEmpty(resultView.getEndTimeS())) {
+				resultView.setEndTime(DateUtil.parse(resultView.getEndDateS() + resultView.getEndTimeS()));
+			}
+		}
+		return resultView;
 	}
 }
