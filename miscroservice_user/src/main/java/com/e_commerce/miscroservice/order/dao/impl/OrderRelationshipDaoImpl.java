@@ -393,6 +393,20 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     }
 
     /**
+     * 根据orderId来查询未投诉参与者订单
+     * @param orderId
+     * @return
+     */
+    public List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long orderId) {
+        return   MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .eq(TOrderRelationship::getOrderId, orderId)
+                .isNotNull(TOrderRelationship::getReceiptUserId)
+                .eq(TOrderRelationship::getOrderReportType , OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 参与的订单的状态
      *
      * @return

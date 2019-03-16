@@ -203,4 +203,10 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> selectCanRemoveEnrollUser(Long orderId);
+	/**
+	 * 根据orderId来查询未投诉参与者订单
+	 * @param orderId
+	 * @return
+	 */
+	List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long orderId);
 }

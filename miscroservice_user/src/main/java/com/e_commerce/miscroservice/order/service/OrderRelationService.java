@@ -2,6 +2,9 @@ package com.e_commerce.miscroservice.order.service;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,4 +137,24 @@ public interface OrderRelationService {
      * @return
      */
     List<String> removeOrder(Long orderId , List<Long> userIdList , Long nowUserId);
+    /**
+     * 接受时间赠礼
+     * @param userTimeRecordId
+     * @param eventId
+     */
+    void acceptGiftForRemove(Long userTimeRecordId , Long eventId);
+    /**
+     * 拒绝时间赠礼
+     * @param userTimeRecordId
+     * @param eventId
+     */
+    void unAcceptGiftForRemove( Long userTimeRecordId , Long eventId);
+
+    /**
+     * 举报详情
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+    void reoprtOrder(Long orderId , Long nowUserId);
 }

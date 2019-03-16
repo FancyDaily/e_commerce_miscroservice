@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
-import com.e_commerce.miscroservice.commons.entity.colligate.MsgResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
@@ -23,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -334,6 +334,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             TService service = productCommonController.getProductById(orderRelationshipList.get(0).getServiceId());
             String date = DateUtil.getDate(orderRelationshipList.get(0).getStartTime());
             orderCommonController.produceOrder( service ,OrderEnum.PRODUCE_TYPE_ENOUGH.getValue(),date);
+            //TODO 移除可报名日期
         }
         if (orderRelationshipIdList.size() > 0) {
             //如果有更新的人批量更新
@@ -635,7 +636,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      */
     public int addTorderRelationship(TOrder order){
         TOrderRelationship orderRelationship = new TOrderRelationship();
-        orderRelationship.setId(snowflakeIdWorker.nextId());
         orderRelationship.setServiceId(order.getServiceId());
         orderRelationship.setOrderId(order.getId());
         orderRelationship.setServiceType(order.getType());
@@ -717,6 +717,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         String title = "投诉受理通知";
         String content = "平台将尽快核实您的投诉事项，并在3-5个工作日内向您反馈处理结果。";
         messageCommonController.messageSave(orderId, nowUser, title, content, nowUser.getId(), nowTime);
+        //修改发布者订单关系状态
+        changePublishOrderRela(order , order.getCreateUser());
         return errorMsgList;
     }
 
@@ -780,10 +782,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 throw new MessageException("499", msg);
             }
         }
+        //修改发布者订单关系状态
+        changePublishOrderRela(order , order.getCreateUser());
         if (userIdList.size() == errorMsgList.size()){
             throw new MessageException("499", "所选用户中没有可评价用户");
         }
-        //增加成长值，增加数量是userlist数量减去错误数量
+        //TODO 增加成长值，增加数量是userlist数量减去错误数量
         return errorMsgList;
     }
 
@@ -864,10 +868,23 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         //更新状态表失败失败，添加错误信息
                         errorMsgList.add(msg);
                     } else {
+                        String title = "TA取消了本次互助";
+                        String typeName = ProductEnum.TYPE_SEEK_HELP.getDesc();
+                        if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+                            typeName = ProductEnum.TYPE_SERVICE.getDesc();
+                        }
+                        String content = new StringBuilder().append("很遗憾，在“").append(orderRelationship.getServiceName())
+                                .append("”的").append(typeName).append("事项中，").append(nowUser.getName())
+                                .append("已经取消本次互助。您可以去报名其他互助，或者继续选定其他已报名的小伙伴～").toString();
                         if (payment > 0){
                             //插入赔付流水，并且插入弹窗事件
-                            removeOrderPunishment(nowUser , toUser , payment , orderRelationship.getId() , nowTime);
+                            removeOrderPunishment(nowUser , toUser , payment , orderId , nowTime);
+                            content = new StringBuilder().append("很遗憾，在“").append(orderRelationship.getServiceName())
+                                    .append("”的").append(typeName).append("事项中，").append(nowUser.getName())
+                                    .append("已经取消本次互助。临时取消实在抱歉，TA为您准备了一份致歉礼，请您前往本订单页面查收～").toString();
                         }
+                        //发送消息
+                        messageCommonController.messageSave(orderId , nowUser , title , content , toUser.getId() , nowTime);
                         if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
                             //如果是服务，要将报名者时间解冻
                             unFreezeTime(order.getCollectTime() , nowTime , toUser , orderId);
@@ -878,6 +895,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (errorMsgList.size() == toUserList.size()){
                 throw new MessageException("499", "对不起，没有可以操作的用户");
             }
+
             //将用户支付的钱支付出去
             nowUser.setSurplusTime(nowUser.getSurplusTime() - payment * (toUserList.size() - errorMsgList.size()));
             nowUser.setUpdateUser(nowUser.getId());
@@ -892,10 +910,24 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (msg != null) {
                 throw new MessageException("499", msg);
             }
+            String title = "TA取消了本次互助";
+            String typeName = ProductEnum.TYPE_SEEK_HELP.getDesc();
+            if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+                typeName = ProductEnum.TYPE_SERVICE.getDesc();
+            }
+            String content = new StringBuilder().append("很遗憾，在“").append(orderRelationship.getServiceName())
+                    .append("”的").append(typeName).append("事项中，").append(nowUser.getName())
+                    .append("已经取消本次互助。您可以去报名其他互助，或者继续选定其他已报名的小伙伴～").toString();
             if (payment > 0){
                 //插入赔付流水，并且插入弹窗事件
-                removeOrderPunishment(nowUser , toUser , payment , orderRelationship.getId() , nowTime);
+                removeOrderPunishment(nowUser , toUser , payment , orderId , nowTime);
+                //改变消息名字
+                content = new StringBuilder().append("很遗憾，在“").append(orderRelationship.getServiceName())
+                        .append("”的").append(typeName).append("事项中，").append(nowUser.getName())
+                        .append("已经取消本次互助。临时取消实在抱歉，TA为您准备了一份致歉礼，请您前往本订单页面查收～").toString();
             }
+            //发送消息
+            messageCommonController.messageSave(orderId , nowUser , title , content , toUser.getId() , nowTime);
             //将用户支付的钱支付出去
             long surplusTime = nowUser.getSurplusTime();
             if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
@@ -908,13 +940,139 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             nowUser.setUpdateUser(nowUser.getId());
             nowUser.setUpdateUserName(nowUser.getName());
             nowUser.setUpdateTime(nowTime);
-            long aa = userCommonController.updateByPrimaryKey(nowUser);
+            userCommonController.updateByPrimaryKey(nowUser);
         }
         if (userIdList.size() == errorMsgList.size()){
             throw new MessageException("499", "所选用户中没有可取消用户");
         }
+        //修改发布者订单关系状态
+        changePublishOrderRela(order , order.getCreateUser());
+        order.setConfirmNum(order.getConfirmNum() - toUserList.size() + errorMsgList.size());
+        if (order.getConfirmNum() == order.getServicePersonnel()){
+            //如果确认人选数量和需要人数量相等
+            //改为可见，修改可报名日期
+            TService service = productCommonController.getProductById(order.getServiceId());
+            String date = DateUtil.getDate(order.getStartTime());
+            service.setEnrollDate(service.getEnrollDate()+","+date);
+            order.setVisiableStatus(OrderEnum.VISIABLE_NO.getStringValue());
+            orderDao.updateByPrimaryKey(order);
+            //productCommonController
+            //TransactionSynchronizationManager.registerSynchronization(orderCommonController.changeOrderVisiableStatus(orderId, 2));
+        } else {
+            orderDao.updateByPrimaryKey(order);
+        }
         return errorMsgList;
     }
+
+
+    /**
+     * 接受时间赠礼
+     * @param userTimeRecordId
+     * @param eventId
+     */
+    public void acceptGiftForRemove(Long userTimeRecordId , Long eventId){
+        TUserTimeRecord userTimeRecord = userCommonController.selectUserTimeRecordById(userTimeRecordId);
+        TUser getUser = userCommonController.getUserById(userTimeRecord.getUserId());
+        getGiftForRemove(getUser , userTimeRecordId , eventId , userTimeRecord , PaymentEnum.PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_IN.getCode());
+    }
+    /**
+     * 拒绝时间赠礼
+     * @param userTimeRecordId
+     * @param eventId
+     */
+    public void unAcceptGiftForRemove( Long userTimeRecordId , Long eventId){
+        TUserTimeRecord userTimeRecord = userCommonController.selectUserTimeRecordById(userTimeRecordId);
+        TUser getUser = userCommonController.getUserById(userTimeRecord.getFromUserId());
+        getGiftForRemove(getUser , userTimeRecordId , eventId , userTimeRecord , PaymentEnum.PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_BACK.getCode());
+    }
+
+    /**
+     * 举报详情
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+        public void reoprtOrder(Long orderId , Long nowUserId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        if(order.getCreateUser() == nowUserId.longValue()){
+            throw new MessageException("499", "这是您自己的订单～");
+        }
+        TOrderRelationship orderRelationship = null;
+        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUserId);
+        if (orderRelationship == null){
+            //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
+            orderRelationship = new TOrderRelationship();
+            orderRelationship.setServiceId(order.getServiceId());
+            orderRelationship.setOrderId(order.getId());
+            orderRelationship.setServiceType(order.getType());
+            orderRelationship.setFromUserId(order.getCreateUser());
+            orderRelationship.setReceiptUserId(nowUserId);
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
+            orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+            orderRelationship.setServiceName(order.getServiceName());
+            orderRelationship.setStartTime(order.getStartTime());
+            orderRelationship.setEndTime(order.getEndTime());
+            orderRelationship.setTimeType(order.getTimeType());
+            orderRelationship.setCollectTime(order.getCollectTime());
+            orderRelationship.setCollectType(order.getCollectType());
+            orderRelationship.setCreateUser(order.getCreateUser());
+            orderRelationship.setCreateUserName(order.getCreateUserName());
+            orderRelationship.setCreateTime(order.getCreateTime());
+            orderRelationship.setUpdateUser(order.getCreateUser());
+            orderRelationship.setUpdateUserName(order.getCreateUserName());
+            orderRelationship.setUpdateTime(order.getCreateTime());
+            orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+            orderRelationshipDao.insert(orderRelationship);
+        } else {
+            if (orderRelationship.getServiceReportType() == OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType()){
+                throw new MessageException("499", "您已投诉，请勿多次投诉");
+            }
+            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        }
+
+    }
+    /**
+     * 获取时间赠礼（接受或者拒绝）
+     * @param getUser
+     * @param userTimeRecordId
+     * @param eventId
+     */
+    private void getGiftForRemove(TUser getUser , Long userTimeRecordId , Long eventId , TUserTimeRecord userTimeRecord , int type){
+        long nowTime = System.currentTimeMillis();
+        //移除事件
+        TEvent event = messageCommonController.selectTeventById(eventId);
+        event.setIsValid(AppConstant.IS_VALID_NO);
+        messageCommonController.updateTevent(event);
+        //增加流水
+        TUserTimeRecord myUserTimeRecord = new TUserTimeRecord();
+        myUserTimeRecord.setUserId(getUser.getId());
+        myUserTimeRecord.setFromUserId(userTimeRecord.getUserId());
+        myUserTimeRecord.setType(type);
+        myUserTimeRecord.setTargetId(userTimeRecord.getTargetId());
+        myUserTimeRecord.setTime(userTimeRecord.getTime());
+        myUserTimeRecord.setCreateTime(nowTime);
+        myUserTimeRecord.setCreateUser(getUser.getId());
+        myUserTimeRecord.setCreateUserName(getUser.getName());
+        myUserTimeRecord.setUpdateTime(nowTime);
+        myUserTimeRecord.setUpdateUserName(getUser.getName());
+        myUserTimeRecord.setUpdateUser(getUser.getId());
+        myUserTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
+
+        userCommonController.insertUserTimeRecords(myUserTimeRecord);
+
+        //增加个人时间
+        getUser.setSurplusTime(getUser.getSurplusTime() + userTimeRecord.getTime());
+        getUser.setUpdateTime(nowTime);
+        getUser.setUpdateUser(getUser.getId());
+        getUser.setUpdateUserName(getUser.getName());
+
+        userCommonController.updateByPrimaryKey(getUser);
+    }
+
 
     /**
      * 取消订单私有方法
@@ -968,17 +1126,16 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param nowUser
      * @param toUser
      * @param payment
-     * @param orderRelationshipId
+     * @param orderId
      * @param nowTime
      */
-    private void removeOrderPunishment(TUser nowUser , TUser toUser , Long payment , Long orderRelationshipId , long nowTime){
+    private void removeOrderPunishment(TUser nowUser , TUser toUser , Long payment , Long orderId , long nowTime){
         //插入支付流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setId(snowflakeIdWorker.nextId());
         userTimeRecord.setUserId(toUser.getId());
         userTimeRecord.setFromUserId(nowUser.getId());
         userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_OUT.getCode());
-        userTimeRecord.setTargetId(orderRelationshipId);
+        userTimeRecord.setTargetId(orderId);
         userTimeRecord.setTime(payment);
         userTimeRecord.setCreateUser(nowUser.getId());
         userTimeRecord.setCreateUserName(nowUser.getName());
@@ -994,8 +1151,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TEvent event = new TEvent();
         event.setUserId(toUser.getId());
         event.setTemplateId(EventEnum.TEMPLATE_ID_REMOVE_ORDER.getType());
-        event.setTiggerId(orderRelationshipId);
-        event.setParameter("userTimeRecord="+userTimeRecordId);
+        event.setTiggerId("orderId"+orderId);
+        event.setParameter("userTimeRecordId="+userTimeRecordId);
         event.setPriority(2);
         event.setText("用户"+toUser.getName()+"已取消订单，并向你支付致歉礼：互助时"+timeChange(payment));
         event.setCreateTime(nowTime);
@@ -1003,7 +1160,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         event.setCreateUserName(nowUser.getName());
         event.setIsValid(AppConstant.IS_VALID_YES);
 
-        long aa = messageCommonController.insertTevent(event);
+        messageCommonController.insertTevent(event);
     }
     /**
      * 判断限制时间
@@ -1570,5 +1727,55 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRecord.setUpdateUserName(nowUser.getName());
         orderRecord.setIsValid(AppConstant.IS_VALID_YES);
         orderRecordDao.insert(orderRecord);
+    }
+
+    /**
+     * 修改发布者状态
+     * @param order
+     * @param publishOrderRelaId
+     */
+    private void changePublishOrderRela(TOrder order , Long publishOrderRelaId){
+        TOrderRelationship orderRelationshipForPublish = orderRelationshipDao.selectByOrderIdAndUserId(order.getId() , publishOrderRelaId);
+        List<TOrderRelationship> orderRelationshipEnrollList = orderRelationshipDao.selectOrderRelaByStatusByEnrollNoReport(order.getId());
+        int typeToPay = 0;
+        int typeToRemark = 0;
+        int typeNoPay = 0;
+        int typeCompleted = 0;
+        for (int i = 0 ; i < orderRelationshipEnrollList.size() ; i++ ){
+            if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()){
+                //如果有人还未支付，那么发布者状态就要变成待支付
+                typeToPay++;
+                break;
+            }
+            if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_REMARK.getType()){
+                typeToRemark++;
+            } else if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_IS_REMARK.getType()){
+                typeToRemark++;
+            }
+            if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_IS_COMPLETED.getType()){
+                typeCompleted++;
+            }
+            if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType()){
+                typeNoPay++;
+            }
+        }
+        if (typeToPay > 0){
+            //如果有未支付的
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+        } else if (typeToRemark > 0 ){
+            //如果有待评价的
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        } else if (typeCompleted > 0){
+            //如果有已完成的
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+        } else if (typeNoPay > 0){
+            //如果有交易不成立的
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
+        } else {
+            //如果以上都没有，设为初始状态
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+        }
+        //更新发布者状态
+        orderRelationshipDao.updateByPrimaryKey(orderRelationshipForPublish);
     }
 }

@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
@@ -118,5 +119,12 @@ public class UserCommonController {
 	public Long insertUserTimeRecords(TUserTimeRecord record) {
 		return userTimeRecordDao.insert(record);
 	}
+
+	/**
+	 * 根据主键查找流水表
+	 * @param id
+	 * @return
+	 */
+	public TUserTimeRecord selectUserTimeRecordById(Long id){return userTimeRecordDao.selectById(id);}
 
 }

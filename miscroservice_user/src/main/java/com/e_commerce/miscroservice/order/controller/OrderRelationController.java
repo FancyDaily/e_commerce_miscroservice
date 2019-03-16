@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.order.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -453,6 +454,12 @@ public class OrderRelationController extends BaseController {
      * @param orderId 订单ID
      * @param userIds 被操作用户ID（多个逗号拼接）
      * @param nowUserId 当前用户ID
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "取消成功",
+     *     "data": []
+     *
      * @return
      */
     @PostMapping("/removeOrder")
@@ -479,6 +486,103 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("取消失败");
+        }
+        return result;
+    }
+
+    /**
+     * 接受时间赠礼
+     *
+     * @param userTimeRecordId 流水ID
+     * @param eventId 事件ID
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "接受赠礼成功", 成功消息
+     *     "data": ""
+     *
+     * @return
+     */
+    @PostMapping("/acceptGiftForRemove")
+    public Object acceptGiftForRemove(Long userTimeRecordId , Long eventId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.acceptGiftForRemove(userTimeRecordId , eventId);
+            result.setSuccess(true);
+            result.setMsg("接受赠礼成功");
+        } catch (MessageException e) {
+            logger.warn("接受赠礼失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("接受赠礼失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("接受赠礼失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("接受赠礼失败");
+        }
+        return result;
+    }
+
+
+    /**
+     * 拒绝时间赠礼
+     *
+     * @param userTimeRecordId 支付流水id
+     * @param eventId 事件ID
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "拒绝赠礼成功",
+     *     "data": ""
+     *
+     * @return
+     */
+    @PostMapping("/unAcceptGiftForRemove")
+    public Object unAcceptGiftForRemove(Long userTimeRecordId , Long eventId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.unAcceptGiftForRemove(userTimeRecordId , eventId);
+            result.setSuccess(true);
+            result.setMsg("拒绝赠礼成功");
+        } catch (MessageException e) {
+            logger.warn("拒绝赠礼失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("拒绝赠礼失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("拒绝赠礼失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("拒绝赠礼失败");
+        }
+        return result;
+    }
+
+    /**
+     * 举报订单详情
+     *
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+    @PostMapping("/reportOrder")
+    public Object reportOrder(Long orderId , Long nowUserId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            orderRelationService.reoprtOrder(orderId , nowUserId);
+            result.setSuccess(true);
+            result.setMsg("举报成功");
+        } catch (MessageException e) {
+            logger.warn("举报失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("举报失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("举报失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("举报失败");
         }
         return result;
     }

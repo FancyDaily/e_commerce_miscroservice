@@ -75,7 +75,7 @@ public class EventDaoImpl implements EventDao {
      * @param tiggerId
      * @return
      */
-    public List<TEvent> selectByUserIdAndTiggetId(Long userId , Long tiggerId){
+    public List<TEvent> selectByUserIdAndTiggetId(Long userId , String tiggerId){
         List<TEvent> events = MybatisOperaterUtil.getInstance().finAll(new TEvent() ,
                 new MybatisSqlWhereBuild(TEvent.class)
                         .eq(TEvent::getUserId , userId)

@@ -1,3 +1,4 @@
+/*
 package com.other;
 
 import com.google.common.collect.HashBasedTable;
@@ -31,7 +32,9 @@ public class AutoAnalysisWord {
     private final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
     private Logger logger = LoggerFactory.getLogger(AutoAnalysisWord.class);
 
-    /****省:<市:区>**/
+    */
+/****省:<市:区>**//*
+
     private Table<String, String, List<String>> allRegionCache;
 
 
@@ -85,9 +88,11 @@ public class AutoAnalysisWord {
         init();
     }
 
-    /**
+    */
+/**
      * 初始化配置
-     */
+     *//*
+
     private void init() {
 
         loadAddress();
@@ -252,9 +257,11 @@ public class AutoAnalysisWord {
 //        test();
     }
 
-    /**
+    */
+/**
      * 时间返回类
-     */
+     *//*
+
     @Data
     private class TimeInfo {
         private String startDate;
@@ -265,7 +272,8 @@ public class AutoAnalysisWord {
         private String weekDay;
     }
 
-    /**
+    */
+/**
      * 解析文本消息
      *
      * @param text 文本
@@ -284,7 +292,8 @@ public class AutoAnalysisWord {
      *             "pushType":1,//服务的服务类型 1 求助 2服务
      *             }
      * @return
-     */
+     *//*
+
     public Map<String, Object> parse(String text) {
 
 
@@ -395,12 +404,14 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 获取发布类型
      *
      * @param text 原始数据
      * @return
-     */
+     *//*
+
     private PushInfo getPushType(String text) {
 
         PushInfo pushInfo = new PushInfo();
@@ -426,12 +437,14 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 获取支付
      *
      * @param text 原始数据
      * @return
-     */
+     *//*
+
     private PayInfo getPayCount(String text) {
 
         PayInfo payInfo = new PayInfo();
@@ -482,11 +495,13 @@ public class AutoAnalysisWord {
 
     }
 
-    /**
+    */
+/**
      * 获取人数
      *
      * @param text 原数据
-     */
+     *//*
+
     private PersonInfo getPersonCount(String text) {
 
         PersonInfo personInfo = new PersonInfo();
@@ -511,12 +526,14 @@ public class AutoAnalysisWord {
 
     }
 
-    /**
+    */
+/**
      * 获取时间
      *
      * @param text 原数据
      * @return
-     */
+     *//*
+
     private TimeInfo getTime(String text) {
 
         String originalStartTime = "";
@@ -676,12 +693,14 @@ public class AutoAnalysisWord {
         private String replaceStr;
     }
 
-    /**
+    */
+/**
      * 获取周期性任务
      *
      * @param text 文本
      * @return
-     */
+     *//*
+
     private DateInfo getPeriodDate(String text) {
         DateInfo periodDateInfo = new DateInfo();
         StringBuilder resultBuild = new StringBuilder();
@@ -797,14 +816,16 @@ public class AutoAnalysisWord {
 
     }
 
-    /**
+    */
+/**
      * 根据原始的文本信息和原始的开始时间获取执行的周期
      *
      * @param text              原始文本
      * @param originalStartTime 原始的开始时间
      * @param originalStartTime 原始的结束时间
      * @return
-     */
+     *//*
+
     private DateInfo getDate(String text, String originalStartTime, String originalEndTime) {
         String result = "";
         DateInfo dateInfo;
@@ -856,12 +877,14 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 获取详细的时间
      *
      * @param dataStr 时间字符串
      * @return
-     */
+     *//*
+
     private String getDetailsDate(String dataStr) {
         StringBuilder dateBuild = new StringBuilder();
 
@@ -1045,19 +1068,23 @@ public class AutoAnalysisWord {
         return dateBuild.toString();
     }
 
-    /**
+    */
+/**
      * 判断是否是数字
      *
      * @param str 需要带判断的类型
      * @return
-     */
+     *//*
+
     private boolean isNumeric(String str) {
         return isNumPattern.matcher(str).matches();
     }
 
-    /**
+    */
+/**
      * 文本信息
-     */
+     *//*
+
     @Data
     private class TextInfo {
         private List<String> headInfo;
@@ -1066,11 +1093,13 @@ public class AutoAnalysisWord {
 
     }
 
-    /**
+    */
+/**
      * 根据输入文本获取地址
      *
      * @param text 需要输入的文本
-     */
+     *//*
+
     private TextInfo getLocation(String text) {
         TextInfo textInfo = new TextInfo();
 
@@ -1108,22 +1137,26 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 获取词分组
      *
      * @param text 代分组的字符串
      * @return
-     */
+     *//*
+
     private List<String> getWordGroup(String text) {
         return new JiebaSegmenter().sentenceProcess(text);
     }
 
 
-    /**
+    */
+/**
      * 根据所有地理位置获取区域名称
      *
      * @param allAreas 所有的带检查的地址
-     */
+     *//*
+
     private List<String> getRegionName(List<String> allAreas) {
 
         List<String> result = new LinkedList<>();
@@ -1204,13 +1237,15 @@ public class AutoAnalysisWord {
 
     }
 
-    /**
+    */
+/**
      * 根据输入的分粗信息获取详细城市的地区
      *
      * @param cityName 城市的名称
      * @param allAreas 所有输入的分组信息
      * @return
-     */
+     *//*
+
     private LocationInfo getAddress(String cityName, List<String> allAreas) {
 
         LocationInfo address = null;
@@ -1275,9 +1310,11 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 地理位置的信息
-     */
+     *//*
+
     @Data
     private class LocationInfo {
         private Double longitude;
@@ -1285,13 +1322,15 @@ public class AutoAnalysisWord {
         private String location;
     }
 
-    /**
+    */
+/**
      * 判断输入的是否是地址
      *
      * @param address 查询的地址
      * @param city    查询的城市
      * @return
-     */
+     *//*
+
     private LocationInfo isAddress(String address, String city) {
 
         LocationInfo locationInfo = new LocationInfo();
@@ -1345,12 +1384,14 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 获取经纬度
      *
      * @param result 结果
      * @return
-     */
+     *//*
+
     private void getPoint(String result, LocationInfo locationInfo) {
 
         if (ADDRESS_URL.contains("baidu")) {
@@ -1378,13 +1419,15 @@ public class AutoAnalysisWord {
         }
     }
 
-    /**
+    */
+/**
      * 根据结果判断是否返回成功
      *
      * @param result  结果
      * @param address 地理位置
      * @return
-     */
+     *//*
+
     private boolean isResultOk(String result, String address) {
         if (ADDRESS_URL.contains("baidu")) {
             return !result.contains("UNKNOWN");
@@ -1397,9 +1440,11 @@ public class AutoAnalysisWord {
     }
 
 
-    /**
+    */
+/**
      * 加载所有地址
-     */
+     *//*
+
     private void loadAddress() {
 
         try {
@@ -1431,9 +1476,11 @@ public class AutoAnalysisWord {
         }
     }
 
-    /**
+    */
+/**
      * 加载转换的关系
-     */
+     *//*
+
     private void loadConfig() {
         characterToNumberRelation.put("整", "00");
         characterToNumberRelation.put("一刻", "15");
@@ -1516,3 +1563,4 @@ public class AutoAnalysisWord {
     }
 
 }
+*/
