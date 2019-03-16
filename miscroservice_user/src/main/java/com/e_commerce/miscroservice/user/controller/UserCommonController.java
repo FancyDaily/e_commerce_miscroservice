@@ -5,7 +5,6 @@ import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;

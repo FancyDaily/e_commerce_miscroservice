@@ -329,7 +329,7 @@ public class SeekHelpController extends BaseController {
 	 * @param text 解析后的文本内容
 	 * @param city 左上角的地址
 	 *             {
-	 *             "title": ",标题",
+	 *             "serviceName": ",标题",
 	 *             "startDateS": "开始日期： 如 20190315",
 	 *             "endDateS": " 结束日期 如 20190316",
 	 *             "startTimeS": "开始时间  如 1442",
@@ -352,11 +352,10 @@ public class SeekHelpController extends BaseController {
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
 		Map<String, Object> map = analysisWord.parse(text, city);
-		System.out.println(map);
 		// 地址名称
 		resultView.setAddressName((String) map.get("location"));
 		//标题
-		resultView.setTitle((String) map.get("work"));
+		resultView.setServiceName((String) map.get("work"));
 		//开始日期
 		resultView.setStartDateS((String) map.get("startDate"));
 		// 结束日期
@@ -388,8 +387,9 @@ public class SeekHelpController extends BaseController {
 		}
 		// 需要的人数
 		try {
-			resultView.setPersonCount((Integer) map.get("personCount"));
+			resultView.setServicePerson((Integer) map.get("personCount"));
 		} catch (Exception e) {
+			resultView.setServicePerson(1);
 		}
 
 		//如果weekDay为null 则是单次  若weekDay不为null，则是重复性

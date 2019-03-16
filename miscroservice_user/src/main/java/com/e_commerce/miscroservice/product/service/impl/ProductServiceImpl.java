@@ -330,6 +330,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		List<TServiceDescribe> productDesc = productDao.getProductDesc(serviceId);
 		productView.setService(service);
 		productView.setDesc(productDesc);
+		for (TServiceDescribe tServiceDescribe : productDesc) {
+			if (Objects.equals(tServiceDescribe.getIsCover(), IS_COVER_YES)) {
+				productView.setImgUrl(tServiceDescribe.getUrl());
+				break;
+			}
+		}
 		return productView;
 	}
 
