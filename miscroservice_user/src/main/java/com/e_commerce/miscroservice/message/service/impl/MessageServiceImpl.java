@@ -138,7 +138,7 @@ public class MessageServiceImpl implements MessageService {
                 public void afterCommit() {
                     super.afterCommit();
                     sendMessge.setParent(sendMessge.getId());
-                    messageDao.
+                    messageDao.updateUpdate(sendMessge);
                 }
             });
         }
