@@ -167,6 +167,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 			if (tOrderRelationship == null) {
+				tOrderRelationship = new TOrderRelationship();
 				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
