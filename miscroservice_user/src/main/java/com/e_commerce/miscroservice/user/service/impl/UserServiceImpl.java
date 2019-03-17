@@ -2602,7 +2602,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         if (dayMaxIn != -1) {
-            if (dayMaxIn - dayTotal < growthValueEnum.getPrice()) { //本次将要完成任务
+            if (dayMaxIn - dayTotal <= growthValueEnum.getPrice()) { //本次将要完成任务
                 //TODO 插入一条任务完成的记录
                 insertTaskRecords(user, growthValueEnum.getTaskCode());
             }
