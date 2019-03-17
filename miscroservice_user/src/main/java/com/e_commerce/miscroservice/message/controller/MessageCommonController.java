@@ -55,7 +55,6 @@ public class MessageCommonController extends BaseController {
      */
     public Long messageSave (Long relevanceId , TUser nowUser , String title , String content , Long toUserId , Long nowTime){
         TMessageNotice messageNotice = new TMessageNotice();
-        messageNotice.setId(snowflakeIdWorker.nextId());
         messageNotice.setNoticeUserId(toUserId);
         messageNotice.setRelevanceId(relevanceId);
         messageNotice.setType(1);// 1 代表系统通知

@@ -88,4 +88,5 @@ public interface MessageService {
      */
     int unReadMsg(Long nowUserId);
 
+
 }

@@ -60,7 +60,6 @@ public class PublishServicempl implements PublishService {
             id = snowflakeIdWorker.nextId();
         }
         long nowTime = System.currentTimeMillis();
-        publish.setId(id);
         publish.setMainKey(key);
         publish.setValue(value);
         publish.setExtend(extend);
