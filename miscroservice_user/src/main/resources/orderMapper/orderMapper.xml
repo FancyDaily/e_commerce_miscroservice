@@ -49,6 +49,7 @@
         t_order
         WHERE
         is_valid = 1
+        and  (status = 1 or status = 2)
         AND (
         source = 1
         OR (source = 2 AND open_auth = 1)
@@ -72,7 +73,7 @@
             OR create_user_name LIKE "%${condition}%"
             )
         </if>
-        ORDER BY  FIELD(`status`, 5, 4) DESC
+        ORDER BY  STATUS
         <if test="currentUserId != null">
             ,CASE
             WHEN create_user = #{currentUserId} THEN
