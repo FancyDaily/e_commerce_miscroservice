@@ -32,7 +32,7 @@ public class MessageController extends BaseController {
     /**
      * 收集formid
      * @param formId formid
-     * @param userId
+     * @param userId 用户id
      *
      *     "success": true,
      *     "errorCode": "",

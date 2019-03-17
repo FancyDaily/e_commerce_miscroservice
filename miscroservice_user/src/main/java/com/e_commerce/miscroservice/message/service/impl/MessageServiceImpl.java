@@ -88,7 +88,7 @@ public class MessageServiceImpl implements MessageService {
      * @param message
      * @param url
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void send(Long nowUserId , Long messageUserId ,  Long specialId , int type , String message , String url) {
         TUser nowUser = userCommonController.getUserById(nowUserId);
         Integer statusForMsg = 1;//默认发送服务通知
@@ -205,6 +205,7 @@ public class MessageServiceImpl implements MessageService {
      * @param formId
      * @param userId
      */
+    @Transactional(rollbackFor = Throwable.class)
     public void insertFormId(String formId, Long userId) {
         TUser user = userCommonController.getUserById(userId);
         //当前时间
@@ -362,19 +363,4 @@ public class MessageServiceImpl implements MessageService {
         long unReadNoticesSum = messageNoticeDao.selectMessageNoticeCountByLastTime(lastReadeTime , nowUserId);
         return unReadNoticesSum;
     }
-
-
-    /**
-     * @return java.lang.String
-     * @Author 姜修弘
-     * 功能描述:
-     * 创建时间:@Date 下午5:04 2019/3/6
-     * @Param [userId, orderRelationshipId]
-     **/
-    public String test(Long orderId ,List<Long> userIdList) {
-
-        return "ok";
-    }
-
-
 }

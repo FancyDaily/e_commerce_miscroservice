@@ -108,6 +108,7 @@ public class MessageCommonController extends BaseController {
 //		if (setTemplateIdEnum.getEnlarge() != 0) {
 //			wxMssVo.setEmphasis_keyword("keyword" + setTemplateIdEnum.getEnlarge()+".DATA");
 //		}
+
         logger.info("小程序推送结果={}", url);
         logger.info("小程序推送结果={}", wxMssVo.toString());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, wxMssVo, String.class);

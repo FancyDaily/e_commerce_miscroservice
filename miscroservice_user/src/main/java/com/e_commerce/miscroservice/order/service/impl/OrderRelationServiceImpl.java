@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -15,7 +16,6 @@ import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.google.common.base.Joiner;
-import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +100,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             throw new MessageException("401", "对方余额不足");
         }
         if(order == null){
-            throw new MessageException("401", "改日期已超出报名日期");
+            throw new MessageException("401", "该日期已超出报名日期");
         }
         String errorMsg = enrollCantByOrder(order , nowTime);
         if (errorMsg != null){
@@ -138,6 +138,92 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderDao.updateByPrimaryKey(order);
 
         //TODO 报名的通知（第一个报名的，或者第一个参与的（就看刘维怎么定，一个人报了取消又报了是不是还通知））
+
+        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){//TODO 第一个报名的人
+            //如果是求助
+            if (orderRelationshipDao.selectJoinUser(orderId) == 0){
+                //如果是首次报名
+                String title = "您的求助收到报名啦";
+                String content = new StringBuilder().append("您的求助“").append(order.getServiceName())
+                        .append("”已经有小天使报名啦，快去看看吧！会有更多人报名的，记得及时选定您需要的人哦～").toString();
+                messageCommonController.messageSave(orderId , nowUser , title , content , order.getCreateUser() , nowTime);
+
+                TUser toUser = userCommonController.getUserById(order.getCreateUser());
+                TFormid formid = findFormId(nowTime, toUser);
+                if (formid != null) {
+                    try {
+                        List<String> msg = new ArrayList<>();
+                        String orderType = "2";//服务通知的接收者是报名者
+                        String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                        msg.add("已有一位小天使报名帮助你哦");
+                        msg.add(order.getServiceName());
+                        msg.add(nowUser.getName());
+                        msg.add("会有更多人报名的，持续关注并及时选定您需要的人哦～");
+                        messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+                        formid.setIsValid("0");
+                        messageCommonController.updateFormId(formid);
+                    } catch (Exception e) {
+                        logger.error("发送服务通知失败");
+                    }
+                }
+            }
+        } else {
+            //如果是服务
+            if (order.getServicePersonnel() == 1){
+                //如果是一对一的服务
+                String title = "服务有新订单了";
+                String content = new StringBuilder().append("您发布的“").append(order.getServiceName())
+                        .append("”服务，已有小伙伴").append(nowUser.getName()).append("对此感兴趣咯，赶快去看看吧！").toString();
+                messageCommonController.messageSave(orderId , nowUser , title , content , order.getCreateUser() , nowTime);
+
+                TUser toUser = userCommonController.getUserById(order.getCreateUser());
+                TFormid formid = findFormId(nowTime, toUser);
+                if (formid != null) {
+                    try {
+                        List<String> msg = new ArrayList<>();
+                        String orderType = "2";//服务通知的接收者是报名者
+                        String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                        msg.add(order.getServiceName());
+                        msg.add(nowUser.getName());
+                        msg.add(changeTime(nowTime));
+                        msg.add("有人需要你的帮助！重复，有人需要你的帮助！");
+                        messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.serv_setTemplate_3 , parameter);
+                        formid.setIsValid("0");
+                        messageCommonController.updateFormId(formid);
+                    } catch (Exception e) {
+                        logger.error("发送服务通知失败");
+                    }
+                }
+            } else {
+                //如果是一对多的服务
+                String title = "服务有新订单了";
+                if (orderRelationshipDao.selectJoinUser(orderId) == 0){
+                    //如果是首次报名
+                    String content = new StringBuilder().append("您发布的“").append(order.getServiceName())
+                            .append("”服务，已有小伙伴报名了。记得关注并联系他哦").toString();
+                    messageCommonController.messageSave(orderId , nowUser , title , content , order.getCreateUser() , nowTime);
+
+                    TUser toUser = userCommonController.getUserById(order.getCreateUser());
+                    TFormid formid = findFormId(nowTime, toUser);
+                    if (formid != null) {
+                        try {
+                            List<String> msg = new ArrayList<>();
+                            String orderType = "2";//服务通知的接收者是报名者
+                            String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                            msg.add(order.getServiceName());
+                            msg.add(nowUser.getName());
+                            msg.add(changeTime(nowTime));
+                            msg.add("第一位有需要的小伙伴已就位，更多的正在路上，请持续关注哦。");
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.serv_setTemplate_4 , parameter);
+                            formid.setIsValid("0");
+                            messageCommonController.updateFormId(formid);
+                        } catch (Exception e) {
+                            logger.error("发送服务通知失败");
+                        }
+                    }
+                }
+            }
+        }
         return serviceId;
     }
 
@@ -331,60 +417,71 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
         List<Long> orderRelationshipIdList = new ArrayList<>();
         for (int i = 0; i < orderRelationshipList.size(); i++) {
+            TUser toUser = null;
+            for (int j = 0; j < userList.size(); j++) {
+                if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId().longValue()) {
+                    toUser = userList.get(i);
+                    break;
+                }
+            }
             if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()) {
                 orderRelationshipList.get(i).setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
                 orderRelationshipList.get(i).setCreateTime(nowTime);
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
-                //发送通知
+
+                //发送通知,默认为求助
                 String title ="恭喜您已被求助者选定";
-                String serviceType = ProductEnum.TYPE_SERVICE.getDesc();
-                if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
-                    serviceType = ProductEnum.TYPE_SEEK_HELP.getDesc();
-                }
+
                 String content = new StringBuilder().append("在“").append(order.getServiceName())
-                        .append("的").append(serviceType).append("中，您已被求助者").append(nowUser.getName())
+                        .append("的求助中，您已被求助者").append(nowUser.getName())
                         .append("选定为服务者啦！感谢您的热心，请与求助者保持联系并准时提供服务哦～").toString();
+                if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+                    //如果是服务
+                    title = "服务者已经接单";
+                    content = new StringBuilder().append("您报名的“").append(order.getServiceName())
+                            .append("服务，小伙伴").append(nowUser.getName())
+                            .append("已确认接单咯。记得关注动态和保持与他的联系哦！").toString();
+                }
+
                 messageCommonController.messageSave(orderId ,nowUser , title , content , orderRelationshipList.get(i).getReceiptUserId() , nowTime);
                 if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
                     //TODO 如果是互助时，发送短信
                     String msgContent = "【壹晓时】"+content;
                 }
 
-                TUser toUser = null;
-                for (int j = 0; j < userList.size(); j++) {
-                    if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId().longValue()) {
-                        toUser = userList.get(i);
-                        break;
-                    }
-                }
-                /*TFormid formid = findFormId(nowTime, toUser);
+                TFormid formid = findFormId(nowTime, toUser);
                 if (formid != null) {
                     try {
-                        if (order.getType())
                         List<String> msg = new ArrayList<>();
-                        msg.add("您已被求助者选定");
-                        msg.add(serviceReceipts.get(0).getServiceName());
-                        msg.add(user.getName());
-                        msg.add(changeTime(nowTime));
-                        msg.add("如果您对该投诉有异议，请于2个工作日内联系平台在线客服。");
-                        String orderType = "1";
-                        if (toUser.getId() == serviceReceipts.get(0).getReceiptUserId().longValue()) {
-                            //如果是服务通知接收者是报名者
-                            orderType = "2";
+                        String orderType = "2";//服务通知的接收者是报名者
+                        String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                            //如果是求助
+                            msg.add("您已被求助者选定");
+                            msg.add(order.getServiceName());
+                            msg.add(changeTime(order.getStartTime()));
+                            msg.add(changeAddress(order.getAddressName()));
+                            msg.add("万物遇见了阳光，而我遇见了热心的你，真好");
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                        } else {
+                            //如果是服务
+                            msg.add("服务者确认接单啦！");
+                            msg.add(order.getServiceName());
+                            msg.add(nowUser.getName());
+                            msg.add(changeTime(order.getStartTime()));
+                            msg.add("Ta说了Yes！趁这一刻，还不主动出击保持联系？");
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.serv_setTemplate_5 , parameter);
                         }
-                        String parameter = "?orderId="+serviceReceipts.get(0).getId()+"&returnHome=true&orderType="+orderType;
-                        wechatService.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.other_setTemplate_3,parameter);
                         formid.setIsValid("0");
-                        formidDao.updateByPrimaryKey(formid);
-                        break;
+                        messageCommonController.updateFormId(formid);
                     } catch (Exception e) {
                         logger.error("发送服务通知失败");
-                    }*/
+                    }
                 }
             } else {
-                errorMsg.add("用户" + userList.get(j).getName() + "已被您操作");
+                errorMsg.add("用户" + toUser.getName() + "已被您操作");
             }
         }
         if ((canChooseUserSum - orderRelationshipIdList.size()) == 0) {
@@ -450,17 +547,67 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //TODO 发送通知
                 String title = "";
                 String content = "";
-                String serviceType = ProductEnum.TYPE_SERVICE.getDesc();
-                if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
-                    serviceType = ProductEnum.TYPE_SEEK_HELP.getDesc();
-                }
                 if (type == 0){
                     //如果是手动拒绝
-
+                    TFormid formid = findFormId(nowTime, toUser);
+                    if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                        //如果是求助
+                        if (formid != null) {
+                            try {
+                                List<String> msg = new ArrayList<>();
+                                String orderType = "2";//服务通知的接收者是报名者
+                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                msg.add("很遗憾，您未被求助者选中");
+                                msg.add(order.getServiceName());
+                                msg.add(toUser.getName());
+                                msg.add("我们相信，这一次的错过，是为了彼此更好的相遇");
+                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_8 , parameter);
+                                formid.setIsValid("0");
+                                messageCommonController.updateFormId(formid);
+                            } catch (Exception e) {
+                                logger.error("发送服务通知失败");
+                            }
+                        }
+                        title = "很遗憾，您未被求助者选中";
+                        content = new StringBuilder().append("您报名的“").append(order.getServiceName())
+                                .append("”求助，求助者").append(nowUser.getName())
+                                .append("已选定其他人提供服务。不过没关系~还有更多晓主需要你的帮助，不如去看看吧～").toString();
+                    } else {
+                        //如果是服务
+                        if (formid != null) {
+                            try {
+                                List<String> msg = new ArrayList<>();
+                                String orderType = "2";//服务通知的接收者是报名者
+                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                msg.add("啊喔…TA似乎不太方便");
+                                msg.add(order.getServiceName());
+                                msg.add(nowUser.getName());
+                                msg.add(changeTime(order.getStartTime()));
+                                msg.add("很遗憾，您没有和TA成为小伙伴。但有更多人也发布了服务，下一个也许会更好呢？");
+                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.serv_setTemplate_6 , parameter);
+                                formid.setIsValid("0");
+                                messageCommonController.updateFormId(formid);
+                            } catch (Exception e) {
+                                logger.error("发送服务通知失败");
+                            }
+                        }
+                        title = "很遗憾，服务者未接受交换";
+                        content = new StringBuilder().append("您报名的“").append(order.getServiceName())
+                                .append("”服务，小伙伴").append(nowUser.getName())
+                                .append("未接受请求。您的互助时已解除冻结。错过是为了更好的相遇哦，不要灰心~").toString();
+                    }
                 } else {
-                    title = "求助下架通知";
-                    content =new StringBuilder().append("您报名的求助“").append(serviceType)
-                            .append(order.getServiceName()).append("”因求助者长时间未选定服务者，已默认下架处理啦~不过还有更多晓主等待您的帮助哦！").toString();
+                    //如果是自动拒绝（超时下架）
+                    if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                        //如果是求助
+                        title = "求助下架通知";
+                        content =new StringBuilder().append("您报名的求助“").append(order.getServiceName())
+                                .append("”因求助者长时间未选定服务者，已默认下架处理啦~不过还有更多晓主等待您的帮助哦！").toString();
+                    } else {
+                        //如果是服务
+                        //TODO 文本没有
+                    }
+
                 }
                 messageCommonController.messageSave(orderId ,nowUser , title , content , toUser.getId() , nowTime);
                 if (order.getType() == 2) {
@@ -516,6 +663,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     orderRelationshipList.get(i).setUpdateUser(nowUser.getId());
                     orderRelationshipList.get(i).setUpdateUserName(nowUser.getName());
                     orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
+                    //发送消息
                 }
             }
             orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList, orderRelationshipIdList);
@@ -811,6 +959,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param labels
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public List<String> remarkOrder(Long nowUserId, List<Long> userIdList, Long orderId , int credit, int major, int attitude, String message, String labels) {
         List<String> errorMsgList = new ArrayList<>();
         TUser nowUser = userCommonController.getUserById(nowUserId);
@@ -873,6 +1022,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param orderId
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public long removeOrderTips(Long orderId , Long nowUserId){
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         long nowTime = System.currentTimeMillis();
@@ -899,6 +1049,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param nowUserId
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public List<String> removeOrder(Long orderId , List<Long> userIdList , Long nowUserId){
         TOrder order = orderDao.selectByPrimaryKey(orderId);
         long nowTime = System.currentTimeMillis();
@@ -1053,6 +1204,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param userTimeRecordId
      * @param eventId
      */
+    @Transactional(rollbackFor = Throwable.class)
     public void acceptGiftForRemove(Long userTimeRecordId , Long eventId){
         TUserTimeRecord userTimeRecord = userCommonController.selectUserTimeRecordById(userTimeRecordId);
         TUser getUser = userCommonController.getUserById(userTimeRecord.getUserId());
@@ -1075,47 +1227,48 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param nowUserId
      * @return
      */
-        public void reoprtOrder(Long orderId , Long nowUserId){
-        TOrder order = orderDao.selectByPrimaryKey(orderId);
-        if(order.getCreateUser() == nowUserId.longValue()){
-            throw new MessageException("499", "这是您自己的订单～");
+    @Transactional(rollbackFor = Throwable.class)
+    public void reoprtOrder(Long orderId , Long nowUserId){
+    TOrder order = orderDao.selectByPrimaryKey(orderId);
+    if(order.getCreateUser() == nowUserId.longValue()){
+        throw new MessageException("499", "这是您自己的订单～");
+    }
+    TOrderRelationship orderRelationship = null;
+    orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUserId);
+    if (orderRelationship == null){
+        //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
+        orderRelationship = new TOrderRelationship();
+        orderRelationship.setServiceId(order.getServiceId());
+        orderRelationship.setOrderId(order.getId());
+        orderRelationship.setServiceType(order.getType());
+        orderRelationship.setFromUserId(order.getCreateUser());
+        orderRelationship.setReceiptUserId(nowUserId);
+        orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
+        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+        orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+        orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
+        orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+        orderRelationship.setServiceName(order.getServiceName());
+        orderRelationship.setStartTime(order.getStartTime());
+        orderRelationship.setEndTime(order.getEndTime());
+        orderRelationship.setTimeType(order.getTimeType());
+        orderRelationship.setCollectTime(order.getCollectTime());
+        orderRelationship.setCollectType(order.getCollectType());
+        orderRelationship.setCreateUser(order.getCreateUser());
+        orderRelationship.setCreateUserName(order.getCreateUserName());
+        orderRelationship.setCreateTime(order.getCreateTime());
+        orderRelationship.setUpdateUser(order.getCreateUser());
+        orderRelationship.setUpdateUserName(order.getCreateUserName());
+        orderRelationship.setUpdateTime(order.getCreateTime());
+        orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+        orderRelationshipDao.insert(orderRelationship);
+    } else {
+        if (orderRelationship.getServiceReportType() == OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType()){
+            throw new MessageException("499", "您已投诉，请勿多次投诉");
         }
-        TOrderRelationship orderRelationship = null;
-        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUserId);
-        if (orderRelationship == null){
-            //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
-            orderRelationship = new TOrderRelationship();
-            orderRelationship.setServiceId(order.getServiceId());
-            orderRelationship.setOrderId(order.getId());
-            orderRelationship.setServiceType(order.getType());
-            orderRelationship.setFromUserId(order.getCreateUser());
-            orderRelationship.setReceiptUserId(nowUserId);
-            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
-            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
-            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
-            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
-            orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
-            orderRelationship.setServiceName(order.getServiceName());
-            orderRelationship.setStartTime(order.getStartTime());
-            orderRelationship.setEndTime(order.getEndTime());
-            orderRelationship.setTimeType(order.getTimeType());
-            orderRelationship.setCollectTime(order.getCollectTime());
-            orderRelationship.setCollectType(order.getCollectType());
-            orderRelationship.setCreateUser(order.getCreateUser());
-            orderRelationship.setCreateUserName(order.getCreateUserName());
-            orderRelationship.setCreateTime(order.getCreateTime());
-            orderRelationship.setUpdateUser(order.getCreateUser());
-            orderRelationship.setUpdateUserName(order.getCreateUserName());
-            orderRelationship.setUpdateTime(order.getCreateTime());
-            orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
-            orderRelationshipDao.insert(orderRelationship);
-        } else {
-            if (orderRelationship.getServiceReportType() == OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType()){
-                throw new MessageException("499", "您已投诉，请勿多次投诉");
-            }
-            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
-            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-        }
+        orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+    }
 
     }
     /**
@@ -1235,7 +1388,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         event.setUserId(toUser.getId());
         event.setTemplateId(EventEnum.TEMPLATE_ID_REMOVE_ORDER.getType());
         event.setTiggerId("orderId"+orderId);
-        event.setParameter("userTimeRecordId="+userTimeRecordId);
+        event.setParameter(""+userTimeRecordId);
         event.setPriority(2);
         event.setText("用户"+toUser.getName()+"已取消订单，并向你支付致歉礼：互助时"+timeChange(payment));
         event.setCreateTime(nowTime);

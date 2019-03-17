@@ -17,9 +17,8 @@ import java.util.List;
 
 
 /**
- * 键值模块
- *
- * 键值controller
+ * 事件模块
+ * 事件controller
  **/
 @RestController
 @RequestMapping("/api/v2/event")
@@ -35,7 +34,6 @@ public class EventController extends BaseController {
      *
      * @param nowUserId 当前用户id
      * @param tiggerId 触发id
-     *
      *
      *             "id": 2, 编号
      *             "userId": 68813259653775360, 用户编号

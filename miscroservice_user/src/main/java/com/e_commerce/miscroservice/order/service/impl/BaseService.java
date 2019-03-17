@@ -320,4 +320,19 @@ public class BaseService {
 		return formid;
 	}
 
+	/**
+	 *
+	 * 功能描述:修改服务通知地址
+	 * 作者:姜修弘
+	 * 创建时间:2019年1月23日 下午4:38:38
+	 * @param address
+	 * @return
+	 */
+	public String changeAddress(String address) {
+		if (address.isEmpty()) {
+			return "线上";
+		}
+		return address.replace("&" , "");
+	}
+
 }

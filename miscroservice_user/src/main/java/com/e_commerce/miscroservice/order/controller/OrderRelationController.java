@@ -436,17 +436,17 @@ public class OrderRelationController extends BaseController {
             long coin = orderRelationService.removeOrderTips(orderId , nowUserId);
             result.setSuccess(true);
             result.setData(coin);
-            result.setMsg("查看成功");
+            result.setMsg("取消成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            logger.warn("取消失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
-            result.setMsg("查看失败," + e.getMessage());
+            result.setMsg("取消失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            logger.error("取消失败" + errInfo(e), e);
             result.setSuccess(false);
             result.setErrorCode("500");
-            result.setMsg("查看失败");
+            result.setMsg("取消失败");
         }
         return result;
     }
