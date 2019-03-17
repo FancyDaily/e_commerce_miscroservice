@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.*;
@@ -16,7 +15,6 @@ import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.google.common.base.Joiner;
-import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +23,8 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.function.ToDoubleBiFunction;
 
 
 /**
@@ -48,8 +43,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
 
     Log logger = Log.getInstance(com.e_commerce.miscroservice.order.service.impl.OrderRelationServiceImpl.class);
-
-    private SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
     @Autowired
     private OrderRelationshipDao orderRelationshipDao;
@@ -1275,7 +1268,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 
         TReport report = new TReport();
-        report.setId(snowflakeIdWorker.nextId());
         report.setReportUserId(0l);
         report.setType(ReportEnum.TPYE_SERVICE.getType());
         report.setAssociationId(orderId);
@@ -1516,7 +1508,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      */
     private void insertRemarkAndUpdateUser(TUser nowUser, TUser toUser, TOrder order, int credit, int major, int attitude, String message, String labels, Long nowTime) {
         TEvaluate evaluate = new TEvaluate();
-        evaluate.setId(snowflakeIdWorker.nextId());
         evaluate.setEvaluateUserId(nowUser.getId());
         evaluate.setUserId(toUser.getId());
         evaluate.setOrderId(order.getId());
@@ -1620,7 +1611,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationshipDao.updateByPrimaryKey(orderRelationship);
 
         TReport report = new TReport();
-        report.setId(snowflakeIdWorker.nextId());
         report.setReportUserId(toUser.getId());
         report.setType(ReportEnum.TYPE_ORDER.getType());
         report.setAssociationId(orderRelationship.getOrderId());
@@ -1707,7 +1697,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
             //插入支付流水
             TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-            userTimeRecord.setId(snowflakeIdWorker.nextId());
             userTimeRecord.setUserId(toUser.getId());
             userTimeRecord.setFromUserId(nowUser.getId());
             userTimeRecord.setType(1);
@@ -1899,7 +1888,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         } else {
             orderRelationship = new TOrderRelationship();
             //没有可以复用的订单关系，那么就新建订单关系
-            orderRelationship.setId(snowflakeIdWorker.nextId());
             orderRelationship.setServiceId(serviceId);
             orderRelationship.setOrderId(order.getId());
             orderRelationship.setServiceType(order.getType());
@@ -1978,7 +1966,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      */
     private void recoreSave(Long orderId, String content, TUser nowUser, Long nowTime) {
         TOrderRecord orderRecord = new TOrderRecord();
-        orderRecord.setId(snowflakeIdWorker.nextId());
         orderRecord.setOrderId(orderId);
         orderRecord.setContent(content);
         orderRecord.setCreatTime(nowTime);

@@ -81,9 +81,20 @@ public class MessageDaoImpl implements MessageDao {
      * @param message
      * @return
      */
-    public long insert(TMessage message){
-        long save = MybatisOperaterUtil.getInstance().save(message);
-        return save;
+    public TMessage insert(TMessage message){
+        MybatisOperaterUtil.getInstance().save(message);
+        return message;
+    }
+
+    /**
+     * 更新消息
+     * @param message
+     * @return
+     */
+    public long updateUpdate(TMessage message){
+        return MybatisOperaterUtil.getInstance().update(message,
+                new MybatisSqlWhereBuild(TMessage.class)
+                        .eq(TMessage::getId, message.getId()));
     }
     /**
      * 根据两个用户查看全部消息，时间降序

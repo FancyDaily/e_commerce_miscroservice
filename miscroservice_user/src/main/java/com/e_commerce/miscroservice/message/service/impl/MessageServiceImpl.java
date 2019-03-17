@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageDao;
@@ -26,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 
 /**
@@ -95,23 +98,23 @@ public class MessageServiceImpl implements MessageService {
         Long nowTime = System.currentTimeMillis();
         TMessage messageForParent = null;
         messageForParent = messageDao.selectNewMessageByTwoUserId(nowUserId , messageUserId);
-        long messageId = snowflakeIdWorker.nextId();
-        long parentId = messageId;
+        long parentId = 0l;
         if (messageForParent != null) {
-            //如果有消息。证明不是第一次发送消息，看一下是否是当天发的第一条消息。
+            //如果有消息。证明不是第一次发送消息，那么就有分组id。
             parentId = messageForParent.getParent();
-            TMessage firstMessage = messageDao.selectNewMessageByOneUserId(parentId ,nowUserId);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-            String nowDay = simpleDateFormat.format(nowTime);
-            String firstDay = simpleDateFormat.format(firstMessage.getCreateTime());
-            if (nowDay.equals(firstDay)) {
-                //相等证明今天发过消息了（不可能发消息日期比当前时间早）就不发系统消息了
-                statusForMsg = 0 ;
+            TMessage firstMessage = null;
+            firstMessage = messageDao.selectNewMessageByOneUserId(parentId ,nowUserId);
+            if (firstMessage != null){
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+                String nowDay = simpleDateFormat.format(nowTime);
+                String firstDay = simpleDateFormat.format(firstMessage.getCreateTime());
+                if (nowDay.equals(firstDay)) {
+                    //相等证明今天发过消息了（不可能发消息日期比当前时间早）就不发系统消息了
+                    statusForMsg = 0 ;
+                }
             }
-
         }
         TMessage sendMessge = new TMessage();
-        sendMessge.setId(messageId);
         sendMessge.setParent(parentId);
         sendMessge.setMessageUserId(messageUserId);
         sendMessge.setUserId(nowUser.getId());
@@ -128,6 +131,21 @@ public class MessageServiceImpl implements MessageService {
         sendMessge.setIsValid("1");
 
         messageDao.insert(sendMessge);
+        sendMessge.setParent(sendMessge.getId());
+        if (messageForParent == null){
+            //如果是第一次发消息
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCompletion(int status) {
+
+                    if(status<0){
+                        return;
+                    }
+                    messageDao.updateUpdate(sendMessge);
+                    super.afterCommit();
+                }
+            });
+        }
         //TODO 发送通知
 
     }
@@ -212,7 +230,6 @@ public class MessageServiceImpl implements MessageService {
         long currentTime = System.currentTimeMillis();
         //formid实体数据
         TFormid formid = new TFormid();
-        formid.setId(snowflakeIdWorker.nextId());
         formid.setIsValid("1");
         formid.setCreateUser(user.getId());
         formid.setCreateUserName(user.getName());

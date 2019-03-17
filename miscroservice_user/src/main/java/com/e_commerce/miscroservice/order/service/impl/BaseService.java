@@ -46,15 +46,9 @@ public class BaseService {
 	 * 用户类型为公益组织
 	 */
 	protected String USER_TYPE_ORGANIZATION = "2";
-	/**
-	 * 主键生成器
-	 */
-	protected SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
 	@Autowired
 	protected OrderServiceImpl orderServiceImpl;
-
-	protected SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
 	@Autowired
 	protected RedisUtil redisUtil;
@@ -71,8 +65,6 @@ public class BaseService {
 	protected ProductDescDao productDescribeDao;
 	@Autowired
 	protected OrderDao orderDao;
-//	@Autowired
-//	protected ObjectMapper objectMapper;
 
 
 
