@@ -27,310 +27,309 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
-    @Autowired
-    private SendSmsService smsService;
+	@Autowired
+	private SendSmsService smsService;
 
-    @Autowired
-    private OrderCommonController orderService;
+	@Autowired
+	private OrderCommonController orderService;
 
-    @Autowired
-    private GrowthValueService growthValueService;
+	@Autowired
+	private GrowthValueService growthValueService;
 
-    @Autowired
-    private WechatService wechatService;
+	@Autowired
+	private WechatService wechatService;
 
-    @Autowired
-    private UserDao userDao;
+	@Autowired
+	private UserDao userDao;
 
-    @Autowired
-    private UserTimeRecordDao userTimeRecordDao;
+	@Autowired
+	private UserTimeRecordDao userTimeRecordDao;
 
-    @Autowired
-    private UserFreezeDao userFreezeDao;
+	@Autowired
+	private UserFreezeDao userFreezeDao;
 
-    @Autowired
-    private PublicWelfareDao publicWelfareDao;
+	@Autowired
+	private PublicWelfareDao publicWelfareDao;
 
-    @Autowired
-    private UserSkillDao userSkillDao;
+	@Autowired
+	private UserSkillDao userSkillDao;
 
-    @Autowired
-    private UserFollowDao userFollowDao;
+	@Autowired
+	private UserFollowDao userFollowDao;
 
-    @Autowired
-    private BonusPackageDao bonusPackageDao;
+	@Autowired
+	private BonusPackageDao bonusPackageDao;
 
-    @Autowired
-    private UserAuthDao userAuthDao;
+	@Autowired
+	private UserAuthDao userAuthDao;
 
-    @Autowired
-    private CompanyDao companyDao;
+	@Autowired
+	private CompanyDao companyDao;
 
-    @Autowired
-    private UserTaskDao userTaskDao;
+	@Autowired
+	private UserTaskDao userTaskDao;
 
-    @Autowired
-    private TypeDictionariesDao typeDictionariesDao;
+	@Autowired
+	private TypeDictionariesDao typeDictionariesDao;
 
-    @Autowired
-    private UserCompanyDao userCompanyDao;
+	@Autowired
+	private UserCompanyDao userCompanyDao;
 
-    @Autowired
-    private GroupDao groupDao;
+	@Autowired
+	private GroupDao groupDao;
 
-    @Autowired
-    private TypeRecordDao typeRecordDao;
+	@Autowired
+	private TypeRecordDao typeRecordDao;
 
-    @Autowired
-    private RedisUtil redisUtil;
+	@Autowired
+	private RedisUtil redisUtil;
 
-    private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
+	private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
 
-    @Value("${debug}")
-    private String debug;
+	@Value("${debug}")
+	private String debug;
 
-    @Value("${page.invite}")
-    private String pageValueInvite;
+	@Value("${page.invite}")
+	private String pageValueInvite;
 
-    @Value("${page.person}") // TODO
-    private String pageValuePerson;
+	@Value("${page.person}") // TODO
+	private String pageValuePerson;
 
-    @Value("${page.service}")
-    private String pageValueService;
+	@Value("${page.service}")
+	private String pageValueService;
 
-    @Value("${page.help}")
-    private String pageValueHelp;
+	@Value("${page.help}")
+	private String pageValueHelp;
 
-    @Value("${page.company}")
-    private String pageValueCompany;
+	@Value("${page.company}")
+	private String pageValueCompany;
 
-    /**
-     * 时间轨迹
-     *
-     * @param user
-     * @param ymString
-     * @param option
-     * @return
-     */
-    @Override
-    public Map<String, Object> payments(TUser user, String ymString, String option) {
-        // id
-        Long id = user.getId();
+	/**
+	 * 时间轨迹
+	 *
+	 * @param user
+	 * @param ymString
+	 * @param option
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> payments(TUser user, String ymString, String option) {
+		// id
+		Long id = user.getId();
 
-        // 同步
-        user = userDao.selectByPrimaryKey(id);  //TODO
+		// 同步
+		user = userDao.selectByPrimaryKey(id);  //TODO
 
-        // 结果
-        List<SingleUserTimeRecordView> resultList = new ArrayList<SingleUserTimeRecordView>();
+		// 结果
+		List<SingleUserTimeRecordView> resultList = new ArrayList<SingleUserTimeRecordView>();
 
-        // 判空
-        if (StringUtil.isEmpty(ymString)) {
-            ymString = DateUtil.timeStamp2Date(System.currentTimeMillis());
-        }
+		// 判空
+		if (StringUtil.isEmpty(ymString)) {
+			ymString = DateUtil.timeStamp2Date(System.currentTimeMillis());
+		}
 
-        if (!StringUtil.isEmpty(ymString) && !ymString.contains("-")) {
-            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "日期参数格式不正确!");
-        }
+		if (!StringUtil.isEmpty(ymString) && !ymString.contains("-")) {
+			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "日期参数格式不正确!");
+		}
 
-        // 当前月份
-        String[] split = ymString.split("-");
-        String month = split[1].toString();
+		// 当前月份
+		String[] split = ymString.split("-");
+		String month = split[1].toString();
 
-        // 处理请求参数 ymString
-        Map<String, Object> map = DateUtil.ym2BetweenStamp(ymString);
-        String beginStr = (String) map.get("begin");
-        String endStr = (String) map.get("end");
-        Long begin = Long.valueOf(beginStr);
-        Long end = Long.valueOf(endStr);
+		// 处理请求参数 ymString
+		Map<String, Object> map = DateUtil.ym2BetweenStamp(ymString);
+		String beginStr = (String) map.get("begin");
+		String endStr = (String) map.get("end");
+		Long begin = Long.valueOf(beginStr);
+		Long end = Long.valueOf(endStr);
 
-        // 返回结果
-        List<TUserTimeRecord> totalList = userTimeRecordDao.selectMonthlyTimeRecord(id, begin, end);   //TODO
+		// 返回结果
+		List<TUserTimeRecord> totalList = userTimeRecordDao.selectMonthlyTimeRecord(id, begin, end);   //TODO
 
-        // 计算月度总计，并分组：收入、支出
-        List<SingleUserTimeRecordView> inList = new ArrayList<SingleUserTimeRecordView>();
-        List<SingleUserTimeRecordView> outList = new ArrayList<SingleUserTimeRecordView>();
-        Long totalIn = 0L;
-        Long totalOut = 0L;
+		// 计算月度总计，并分组：收入、支出
+		List<SingleUserTimeRecordView> inList = new ArrayList<SingleUserTimeRecordView>();
+		List<SingleUserTimeRecordView> outList = new ArrayList<SingleUserTimeRecordView>();
+		Long totalIn = 0L;
+		Long totalOut = 0L;
 
-        // 筛选数据、统计总和
-        for (TUserTimeRecord record : totalList) {
-            SingleUserTimeRecordView view = BeanUtil.copy(record, SingleUserTimeRecordView.class);
-            view.setIdString(String.valueOf(view.getId()));
-            view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
-            Integer type = record.getType();
-            for (PaymentEnum payType : PaymentEnum.values()) {
-                if (type.equals(payType.getCode())) {
-                    view.setTitle(payType.getMessage());
-                    break;
-                }
-            }
+		// 筛选数据、统计总和
+		for (TUserTimeRecord record : totalList) {
+			SingleUserTimeRecordView view = BeanUtil.copy(record, SingleUserTimeRecordView.class);
+			view.setIdString(String.valueOf(view.getId()));
+			view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
+			Integer type = record.getType();
+			for (PaymentEnum payType : PaymentEnum.values()) {
+				if (type.equals(payType.getCode())) {
+					view.setTitle(payType.getMessage());
+					break;
+				}
+			}
 
-            // 流水名目
-            if (id.equals(record.getUserId())) { // 收入
-                if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getCode())) {
-                    view.setTitle(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getMessage());
-                }
-                resultList.add(view);
-                totalIn += record.getTime();
-                inList.add(view);
-            }
+			// 流水名目
+			if (id.equals(record.getUserId())) { // 收入
+				if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getCode())) {
+					view.setTitle(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getMessage());
+				}
+				resultList.add(view);
+				totalIn += record.getTime();
+				inList.add(view);
+			}
 
-            if (id.equals(record.getFromUserId())) { // 支出
-                if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())) {
-                    view.setTitle(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getMessage());
-                }
-                view.setTime(-view.getTime());
-                resultList.add(view);
-                totalOut += record.getTime();
-                outList.add(view);
-            }
-        }
+			if (id.equals(record.getFromUserId())) { // 支出
+				if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())) {
+					view.setTitle(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getMessage());
+				}
+				view.setTime(-view.getTime());
+				resultList.add(view);
+				totalOut += record.getTime();
+				outList.add(view);
+			}
+		}
 
-        if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_IN, option)) { // 收入
-            resultList = inList;
-        }
+		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_IN, option)) { // 收入
+			resultList = inList;
+		}
 
-        if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 收入
-            resultList = outList;
-        }
+		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 收入
+			resultList = outList;
+		}
 
-        Collections.sort(resultList, new Comparator<SingleUserTimeRecordView>() {
+		Collections.sort(resultList, new Comparator<SingleUserTimeRecordView>() {
 
-            @Override
-            public int compare(SingleUserTimeRecordView o1, SingleUserTimeRecordView o2) {
-                return (int) (o2.getCreateTime() - o1.getCreateTime());
-            }
-        });
+			@Override
+			public int compare(SingleUserTimeRecordView o1, SingleUserTimeRecordView o2) {
+				return (int) (o2.getCreateTime() - o1.getCreateTime());
+			}
+		});
 
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        Long surplusTime = user.getSurplusTime(); // 总额
-        Long freezeTime = user.getFreezeTime(); // 冻结
-        Long vacantTime = surplusTime - freezeTime; // 可用
-        resultMap.put("total", surplusTime); // 总额
-        resultMap.put("vacant", vacantTime);
-        resultMap.put("frozen", freezeTime);
-        resultMap.put("month", month);
-        resultMap.put("monthTotalIn", totalIn);
-        resultMap.put("monthTotalOut", totalOut);
-        resultMap.put("monthList", resultList);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		Long surplusTime = user.getSurplusTime(); // 总额
+		Long freezeTime = user.getFreezeTime(); // 冻结
+		Long vacantTime = surplusTime - freezeTime; // 可用
+		resultMap.put("total", surplusTime); // 总额
+		resultMap.put("vacant", vacantTime);
+		resultMap.put("frozen", freezeTime);
+		resultMap.put("month", month);
+		resultMap.put("monthTotalIn", totalIn);
+		resultMap.put("monthTotalOut", totalOut);
+		resultMap.put("monthList", resultList);
 
-        return resultMap;
-    }
+		return resultMap;
+	}
 
-    /**
-     * 冻结明细
-     *
-     * @param id
-     * @param lastTime
-     * @param pageSize
-     * @return
-     */
-    @Override
-    public QueryResult<UserFreezeView> frozenList(Long id, Long lastTime, Integer pageSize) {
-        // 判空
-        if (lastTime == null) {
-            lastTime = System.currentTimeMillis();
-        }
+	/**
+	 * 冻结明细
+	 *
+	 * @param id
+	 * @param lastTime
+	 * @param pageSize
+	 * @return
+	 */
+	@Override
+	public QueryResult<UserFreezeView> frozenList(Long id, Long lastTime, Integer pageSize) {
+		// 判空
+		if (lastTime == null) {
+			lastTime = System.currentTimeMillis();
+		}
 
-        if (pageSize == null) {
-            pageSize = 0;
-        }
+		if (pageSize == null) {
+			pageSize = 0;
+		}
 
-        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id, lastTime);
+		List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id, lastTime);
 
-        // 如果列表为空
-        if (userFreezes.isEmpty()) {
-            return new QueryResult<UserFreezeView>();
-        }
+		// 如果列表为空
+		if (userFreezes.isEmpty()) {
+			return new QueryResult<UserFreezeView>();
+		}
 
-        // idList
-        List<Long> idList = new ArrayList<Long>();
-        // 结果集list
-        List<UserFreezeView> resultList = new ArrayList<UserFreezeView>();
-        // 结果集list
-        List<UserFreezeView> finalResultList = new ArrayList<UserFreezeView>();
-        // 遍历装载 -> 冻结金额、分页时间、服务id
-        for (TUserFreeze userFreeze : userFreezes) {
-            idList.add(userFreeze.getOrderId());
-            UserFreezeView result = BeanUtil.copy(userFreeze, UserFreezeView.class); //TODO 装载分页时间戳、冻结时间、订单id
-            resultList.add(result);
-        }
+		// idList
+		List<Long> idList = new ArrayList<Long>();
+		// 结果集list
+		List<UserFreezeView> resultList = new ArrayList<UserFreezeView>();
+		// 结果集list
+		List<UserFreezeView> finalResultList = new ArrayList<UserFreezeView>();
+		// 遍历装载 -> 冻结金额、分页时间、服务id
+		for (TUserFreeze userFreeze : userFreezes) {
+			idList.add(userFreeze.getOrderId());
+			UserFreezeView result = BeanUtil.copy(userFreeze, UserFreezeView.class); //TODO 装载分页时间戳、冻结时间、订单id
+			resultList.add(result);
+		}
 
-        // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
+		// PageHelper
+		Page<Object> startPage = PageHelper.startPage(0, pageSize);
 
-        // 服务集
-        // 查找订单表
-        List<TOrder> orders = orderService.selectOrdersInOrderIds(idList);//TODO 调用订单模块的controller() 入餐 -> orderId
-        //建立订单id-订单实体映射
-        Map<Long, TOrder> orderMap = new HashMap<Long, TOrder>();
-        for (TOrder order : orders) {
-            orderMap.put(order.getId(), order);
-        }
+		// 服务集
+		// 查找订单表
+		List<TOrder> orders = orderService.selectOrdersInOrderIds(idList);//TODO 调用订单模块的controller() 入餐 -> orderId
+		//建立订单id-订单实体映射
+		Map<Long, TOrder> orderMap = new HashMap<Long, TOrder>();
+		for (TOrder order : orders) {
+			orderMap.put(order.getId(), order);
+		}
 
-        // 遍历装载
-        for (UserFreezeView result : resultList) {
-            TOrder order = orderMap.get(result.getOrderId());
-            if (order != null) {
-                result.setAddressName(order.getAddressName());
-                result.setServiceName(order.getServiceName());
-                result.setStartTime(order.getStartTime());
-                result.setEndTime(order.getEndTime());
-                result.setServicePersonnel(order.getServicePersonnel());
-                result.setType(order.getType());
-                result.setServiceIdString(String.valueOf(order.getServiceId()));
-                result.setOrderIdString(String.valueOf(order.getId()));
-                finalResultList.add(result);
-            }
-        }
+		// 遍历装载
+		for (UserFreezeView result : resultList) {
+			TOrder order = orderMap.get(result.getOrderId());
+			if (order != null) {
+				result.setAddressName(order.getAddressName());
+				result.setServiceName(order.getServiceName());
+				result.setStartTime(order.getStartTime());
+				result.setEndTime(order.getEndTime());
+				result.setServicePersonnel(order.getServicePersonnel());
+				result.setType(order.getType());
+				result.setServiceIdString(String.valueOf(order.getServiceId()));
+				result.setOrderIdString(String.valueOf(order.getId()));
+				finalResultList.add(result);
+			}
+		}
 
-        QueryResult<UserFreezeView> queryResult = new QueryResult<UserFreezeView>();
-        queryResult.setResultList(finalResultList);
-        queryResult.setTotalCount(startPage.getTotal());
+		QueryResult<UserFreezeView> queryResult = new QueryResult<UserFreezeView>();
+		queryResult.setResultList(finalResultList);
+		queryResult.setTotalCount(startPage.getTotal());
 
-        return queryResult;
-    }
+		return queryResult;
+	}
 
-    /**
-     * 公益历程列表
-     *
-     * @param user
-     * @param lastTime
-     * @param pageSize
-     * @param year
-     * @return
-     */
-    @Override
-    public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
-        // 判空
-        if (lastTime == null) {
-            lastTime = System.currentTimeMillis();
-        }
+	/**
+	 * 公益历程列表
+	 *
+	 * @param user
+	 * @param lastTime
+	 * @param pageSize
+	 * @param year
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
+		// 判空
+		if (lastTime == null) {
+			lastTime = System.currentTimeMillis();
+		}
 
-        if (pageSize == null) {
-            pageSize = 0;
-        }
+		if (pageSize == null) {
+			pageSize = 0;
+		}
 
-        if (year == null) {
-            long timeStamp = System.currentTimeMillis();
-            String timeStamp2Date = DateUtil.timeStamp2Date(timeStamp);
-            String[] split = timeStamp2Date.split("-");
-            year = Integer.valueOf(split[0]);
-        }
+		if (year == null) {
+			long timeStamp = System.currentTimeMillis();
+			String timeStamp2Date = DateUtil.timeStamp2Date(timeStamp);
+			String[] split = timeStamp2Date.split("-");
+			year = Integer.valueOf(split[0]);
+		}
 
-        // between
-        Map<String, Object> betMap = DateUtil.y2BetweenStamp(year);
-        Long betLeft = (Long) betMap.get("betLeft");
-        Long betRight = (Long) betMap.get("betRight");
+		// between
+		Map<String, Object> betMap = DateUtil.y2BetweenStamp(year);
+		Long betLeft = (Long) betMap.get("betLeft");
+		Long betRight = (Long) betMap.get("betRight");
 
-        // id
-        Long id = user.getId();
+		// id
+		Long id = user.getId();
 
         WelfareParamView param = new WelfareParamView();
         param.setId(id);
@@ -562,10 +561,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<Long> orderIds = new ArrayList<>();
         for (TOrder order : orders) {
             orderIds.add(order.getId());
-        }
-
-        if(orderIds.isEmpty()) {
-            return new QueryResult();
         }
 
         Map<Long, Object> evaluateMap = new HashMap<>();
@@ -1305,8 +1300,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             // 基础签到信息(连续天数，签到状态)
             userTasks = userTaskDao.queryOnessignUpBetweenTimeDesc(user.getId(), thisBeginStamp, thisEndStamp);
 
-            boolean flag = userTasks.isEmpty();
-            if (!flag) {
+            if (!userTasks.isEmpty()) {
                 TUserTask task = userTasks.get(0);
                 if (DateUtil.isToday(task.getCreateTime())) {
                     state = true;
