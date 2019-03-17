@@ -22,4 +22,11 @@ public class UserAuthDaoImpl implements UserAuthDao {
     public int insert(TUserAuth userAuth) {
         return MybatisOperaterUtil.getInstance().save(userAuth);
     }
+
+    @Override
+    public List<TUserAuth> selectByUserId(Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserAuth(),new MybatisSqlWhereBuild(TUserAuth.class)
+        .eq(TUserAuth::getUserId,id)
+        .eq(TUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

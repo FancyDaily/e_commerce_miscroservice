@@ -4,10 +4,12 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TTypeRecord;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.user.dao.TypeRecordDao;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class TypeRecordDaoImpl implements TypeRecordDao {
@@ -61,6 +63,26 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
         .eq(TTypeRecord::getType,code)
         .or().eq(TTypeRecord::getType,code)
                 .groupAfter()
+                .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TTypeRecord> selectDailyGrowthRecords(Long id) {
+        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
+        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
+        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(), new MybatisSqlWhereBuild(TTypeRecord.class)
+        .eq(TTypeRecord::getUserId,id)
+                .between(TTypeRecord::getCreateTime,beginStamp,endStamp)
+        .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TTypeRecord> selectGrowthRecords(Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(), new MybatisSqlWhereBuild(TTypeRecord.class)
+                .eq(TTypeRecord::getUserId,id)
                 .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
 

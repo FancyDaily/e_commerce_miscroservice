@@ -9,7 +9,6 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.product.controller.BaseController;
-import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
@@ -42,15 +41,11 @@ public class UserController extends BaseController {
     @Autowired
     private GrowthValueService growthValueService;
 
-    @Autowired
-    private UserTimeRecordDao userTimeRecordDao;
-
     /**
-     * 功能描述: 手机号验证码登录
-     * 作者: 许方毅
-     * 创建时间: 2018年10月30日 下午2:46:29
-     * @param telephone
-     * @param validCode
+     * 手机号验证码登录
+     *
+     * @param telephone 手机号
+     * @param validCode 短信验证码
      * @return
      */
     @PostMapping("loginBySMS")
@@ -65,7 +60,30 @@ public class UserController extends BaseController {
             logger.error(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("手机号验证码登录异常", errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 用户登出
+     * @param token
+     * @return
+     */
+    @PostMapping("logOut")
+    public Object logOut(String token) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.logOut(token);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            result.setMsg("用户登出 (旧版迁移)异常: " + e.getMessage());
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            logger.error("手用户登出 (旧版迁移)异常", errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -277,9 +295,7 @@ public class UserController extends BaseController {
     @RequestMapping("payments")
     public Object payments(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
-        //TODO redis
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             Map<String, Object> payments = userService.payments(user, ymString, option);
             result.setData(payments);
@@ -296,7 +312,7 @@ public class UserController extends BaseController {
     /**
      * 冻结明细
      *
-     * @param token
+     * @param token    登录凭证
      * @param lastTime 分页参数(说明：返回数据的按时间倒序排列。以下时间指代创建时间create_time: 向上翻页时，把当前最大的时间给我；向下翻页时，把当前最小的时间给我)
      * @param pageSize 每页最大条数
      *                 <p>
@@ -328,8 +344,7 @@ public class UserController extends BaseController {
     @RequestMapping("freezeList")
     public Object freezeList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<UserFreezeView> queryResult = userService.frozenList(user.getId(), lastTime, pageSize);
             result.setSuccess(true);
@@ -348,7 +363,7 @@ public class UserController extends BaseController {
     /**
      * 公益历程列表
      *
-     * @param token
+     * @param token    登录凭证
      * @param lastTime 参考冻结明细说明
      * @param pageSize 参考冻结明细说明
      * @param year     年份
@@ -385,8 +400,7 @@ public class UserController extends BaseController {
     @RequestMapping("publicWelfareList")
     public Object publicWelfareList(String token, Long lastTime, Integer pageSize, Integer year) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             Map<String, Object> map = userService.publicWelfareList(user, lastTime, pageSize, year);
             result.setData(map);
@@ -404,8 +418,8 @@ public class UserController extends BaseController {
     /**
      * 查看技能（包含详细信息）
      *
-     * @param token
-     * {
+     * @param token 登录凭证
+     *              {
      *              {
      *              "idString": "95167783989411840",
      *              "id": 95167783989411840,
@@ -452,8 +466,7 @@ public class UserController extends BaseController {
     @RequestMapping("skill/list")
     public Object skillList(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             UserSkillListView skillView = userService.skills(user);
             result.setData(skillView);
@@ -471,7 +484,7 @@ public class UserController extends BaseController {
     /**
      * 增加技能
      *
-     * @param token
+     * @param token       登录凭证
      * @param name        技能名
      * @param description 描述
      * @param headUrl     封面图
@@ -488,8 +501,7 @@ public class UserController extends BaseController {
     public Object skillAdd(String token, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.skillAdd(user, skill);
             result.setSuccess(true);
@@ -508,7 +520,7 @@ public class UserController extends BaseController {
     /**
      * 修改技能
      *
-     * @param token
+     * @param token       登录凭证
      * @param name        技能名
      * @param description 描述
      * @param headUrl     封面图
@@ -525,8 +537,7 @@ public class UserController extends BaseController {
     public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrl) {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.skillModify(user, skill);
             result.setSuccess(true);
@@ -545,7 +556,7 @@ public class UserController extends BaseController {
     /**
      * 删除技能
      *
-     * @param token
+     * @param token 登录凭证
      * @param id    技能id
      *              <p>
      *              {
@@ -557,6 +568,7 @@ public class UserController extends BaseController {
     @RequestMapping("skill/delete")
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.skillDelete(id);
             result.setSuccess(true);
@@ -575,7 +587,7 @@ public class UserController extends BaseController {
     /**
      * 收藏列表
      *
-     * @param token
+     * @param token    登录凭证
      * @param pageNum  分页参数
      * @param pageSize 每页条数
      *                 <p>
@@ -629,8 +641,7 @@ public class UserController extends BaseController {
     @RequestMapping("collect/list")
     public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<List<TOrder>> queryResult = userService.collectList(user, pageNum, pageSize);
             result.setData(queryResult);
@@ -650,7 +661,7 @@ public class UserController extends BaseController {
     /**
      * 收藏/取消收藏
      *
-     * @param token
+     * @param token   登录凭证
      * @param orderId 订单id
      *                <p>
      *                {
@@ -664,8 +675,7 @@ public class UserController extends BaseController {
     @RequestMapping("collect")
     public Object collect(String token, Long orderId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.collect(user, orderId);
             result.setSuccess(true);
@@ -684,7 +694,7 @@ public class UserController extends BaseController {
     /**
      * 查看用户基本信息
      *
-     * @param token
+     * @param token  登录凭证
      * @param userId 用户id
      *               <p>
      *               {
@@ -758,8 +768,7 @@ public class UserController extends BaseController {
     @RequestMapping("infos")
     public Object info(String token, Long userId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             DesensitizedUserView userView = userService.info(user, userId);
             result.setData(userView);
@@ -1127,8 +1136,7 @@ public class UserController extends BaseController {
     @RequestMapping("page")
     public Object page(String token, Long userId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             UserPageView page = userService.page(user, userId);
             result.setData(page);
@@ -1148,12 +1156,12 @@ public class UserController extends BaseController {
     /**
      * 查看发布的服务/求助列表(个人主页)
      *
-     * @param token
-     * @param userId
-     * @param pageNum
-     * @param pageSize
-     * @param isService
-     * {
+     * @param token     登录凭证
+     * @param userId    用户编号
+     * @param pageNum   分页页码
+     * @param pageSize  分页大小
+     * @param isService 是否为服务
+     *                  {
      *                  "success": true,
      *                  "msg": "",
      *                  "data": {
@@ -1271,10 +1279,9 @@ public class UserController extends BaseController {
     @RequestMapping("page/service")
     public Object pageService(String token, Long userId, Integer pageNum, Integer pageSize, boolean isService) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            QueryResult queryResult = userService.pageService(userId, pageNum, pageSize, isService);
+            QueryResult queryResult = userService.pageService(userId, pageNum, pageSize, isService,user);
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -1292,12 +1299,12 @@ public class UserController extends BaseController {
     /**
      * 历史互助记录
      *
-     * @param token
-     * @param userId
-     * @param pageNum
-     * @param pageSize
-     *
-     * {
+     * @param token    登录凭证
+     * @param userId   用户编号
+     * @param pageNum  分页页码
+     * @param pageSize 分页大小
+     *                 <p>
+     *                 {
      *                 "success": true,
      *                 "msg": "",
      *                 "data": {
@@ -1422,8 +1429,7 @@ public class UserController extends BaseController {
     @RequestMapping("historyService")
     public Object historyService(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult queryResult = userService.historyService(user, userId, pageNum, pageSize);
             result.setData(queryResult);
@@ -1443,12 +1449,12 @@ public class UserController extends BaseController {
     /**
      * 加入的组织列表信息
      *
-     * @param token
-     * @param userId
-     * @param pageNum
-     * @param pageSize
-     *
-     * {
+     * @param token    登录凭证
+     * @param userId   用户编号
+     * @param pageNum  分页页码
+     * @param pageSize 分页大小
+     *                 <p>
+     *                 {
      *                 "success": true,
      *                 "errorCode": "",
      *                 "msg": "",
@@ -1483,8 +1489,7 @@ public class UserController extends BaseController {
     @RequestMapping("company/list")
     public Object companyList(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<StrUserCompanyView> companies = companyService.getCompanyList(user, userId, pageNum, pageSize);
             result.setData(companies);
@@ -1503,66 +1508,65 @@ public class UserController extends BaseController {
 
     /**
      * 组织发布的活动列表
-     * @param token
+     *
+     * @param token     登录凭证
      * @param companyId 组织id
      * @param pageNum   页码
      * @param pageSize  每页条数
-     *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": {
-     *         "resultList": [
-     *             {
-     *                 "idString": "101430540338461080",
-     *                 "serviceIdString": "101430539319246848", //商品id
-     *                 "id": 101430540338461080,
-     *                 "serviceId": 101430539319246848,
-     *                 "mainId": 101430540338462720,
-     *                 "nameAudioUrl": "",
-     *                 "serviceName": "脏读READ UNCOMMITTED101010",   //名称
-     *                 "servicePersonnel": 3,   //预设人数
-     *                 "servicePlace": 1,   //线上线下  1线上2线下
-     *                 "labels": "hehe,haha",
-     *                 "type": 1,   //服务类型 1服务2求助
-     *                 "status": 1, //状态
-     *                 "source": 2, //来源 1个人 2组织
-     *                 "serviceTypeId": 15000,
-     *                 "addressName": "",   //地址
-     *                 "longitude": "",
-     *                 "latitude": "",
-     *                 "totalEvaluate": "",
-     *                 "enrollNum": 0,
-     *                 "confirmNum": 0,
-     *                 "startTime": 1552022400000,  //开始时间
-     *                 "endTime": 1552023600000,    //结束时间
-     *                 "serviceStatus": "",
-     *                 "openAuth": "",
-     *                 "timeType": 0,   //订单对应商品的重复属性 0指定时间1可重复
-     *                 "collectTime": 10,   //单价
-     *                 "collectType": 1,    //货币类型 1互助式2公益时
-     *                 "createUser": 68813260970786816,
-     *                 "createUserName": "马晓晨",
-     *                 "createTime": 1551965325000,
-     *                 "updateUser": 68813260970786816,
-     *                 "updateUserName": "马晓晨",
-     *                 "updateTime": 1551965325062,
-     *                 "companyId": "",
-     *                 "isValid": "1"
-     *             }
-     *         ],
-     *         "totalCount": 1
-     *     }
-     * }
-     *
+     *                  <p>
+     *                  {
+     *                  "success": true,
+     *                  "errorCode": "",
+     *                  "msg": "",
+     *                  "data": {
+     *                  "resultList": [
+     *                  {
+     *                  "idString": "101430540338461080",
+     *                  "serviceIdString": "101430539319246848", //商品id
+     *                  "id": 101430540338461080,
+     *                  "serviceId": 101430539319246848,
+     *                  "mainId": 101430540338462720,
+     *                  "nameAudioUrl": "",
+     *                  "serviceName": "脏读READ UNCOMMITTED101010",   //名称
+     *                  "servicePersonnel": 3,   //预设人数
+     *                  "servicePlace": 1,   //线上线下  1线上2线下
+     *                  "labels": "hehe,haha",
+     *                  "type": 1,   //服务类型 1服务2求助
+     *                  "status": 1, //状态
+     *                  "source": 2, //来源 1个人 2组织
+     *                  "serviceTypeId": 15000,
+     *                  "addressName": "",   //地址
+     *                  "longitude": "",
+     *                  "latitude": "",
+     *                  "totalEvaluate": "",
+     *                  "enrollNum": 0,
+     *                  "confirmNum": 0,
+     *                  "startTime": 1552022400000,  //开始时间
+     *                  "endTime": 1552023600000,    //结束时间
+     *                  "serviceStatus": "",
+     *                  "openAuth": "",
+     *                  "timeType": 0,   //订单对应商品的重复属性 0指定时间1可重复
+     *                  "collectTime": 10,   //单价
+     *                  "collectType": 1,    //货币类型 1互助式2公益时
+     *                  "createUser": 68813260970786816,
+     *                  "createUserName": "马晓晨",
+     *                  "createTime": 1551965325000,
+     *                  "updateUser": 68813260970786816,
+     *                  "updateUserName": "马晓晨",
+     *                  "updateTime": 1551965325062,
+     *                  "companyId": "",
+     *                  "isValid": "1"
+     *                  }
+     *                  ],
+     *                  "totalCount": 1
+     *                  }
+     *                  }
      * @return
      */
     @RequestMapping("company/social/list")
     public Object companySocialList(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<StrServiceView> activityList = companyService.getActivityList(companyId, pageNum, pageSize);
             result.setData(activityList);
@@ -1581,66 +1585,65 @@ public class UserController extends BaseController {
 
     /**
      * 组织发布的我参与的活动列表
-     * @param token
-     * @param companyId
-     * @param pageNum
-     * @param pageSize
      *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": {
-     *         "resultList": [  //参考组织发布的活动接口
-     *             {
-     *                 "idString": "101430540338461080",
-     *                 "serviceIdString": "101430539319246848",
-     *                 "id": 101430540338461080,
-     *                 "serviceId": 101430539319246848,
-     *                 "mainId": 101430540338462720,
-     *                 "nameAudioUrl": "",
-     *                 "serviceName": "脏读READ UNCOMMITTED101010",
-     *                 "servicePersonnel": 3,
-     *                 "servicePlace": 1,
-     *                 "labels": "hehe,haha",
-     *                 "type": 1,
-     *                 "status": 1,
-     *                 "source": 2,
-     *                 "serviceTypeId": 15000,
-     *                 "addressName": "",
-     *                 "longitude": "",
-     *                 "latitude": "",
-     *                 "totalEvaluate": "",
-     *                 "enrollNum": 0,
-     *                 "confirmNum": 0,
-     *                 "startTime": 1552022400000,
-     *                 "endTime": 1552023600000,
-     *                 "serviceStatus": "",
-     *                 "openAuth": "",
-     *                 "timeType": 0,
-     *                 "collectTime": 10,
-     *                 "collectType": 1,
-     *                 "createUser": 68813260970786816,
-     *                 "createUserName": "马晓晨",
-     *                 "createTime": 1551965325000,
-     *                 "updateUser": 68813260970786816,
-     *                 "updateUserName": "马晓晨",
-     *                 "updateTime": 1551965325062,
-     *                 "companyId": "",
-     *                 "isValid": "1"
-     *             }
-     *         ],
-     *         "totalCount": 1
-     *     }
-     * }
-     *
+     * @param token     登录凭证
+     * @param companyId 组织编号
+     * @param pageNum   分页页码
+     * @param pageSize  分页大小
+     *                  <p>
+     *                  {
+     *                  "success": true,
+     *                  "errorCode": "",
+     *                  "msg": "",
+     *                  "data": {
+     *                  "resultList": [  //参考组织发布的活动接口
+     *                  {
+     *                  "idString": "101430540338461080",
+     *                  "serviceIdString": "101430539319246848",
+     *                  "id": 101430540338461080,
+     *                  "serviceId": 101430539319246848,
+     *                  "mainId": 101430540338462720,
+     *                  "nameAudioUrl": "",
+     *                  "serviceName": "脏读READ UNCOMMITTED101010",
+     *                  "servicePersonnel": 3,
+     *                  "servicePlace": 1,
+     *                  "labels": "hehe,haha",
+     *                  "type": 1,
+     *                  "status": 1,
+     *                  "source": 2,
+     *                  "serviceTypeId": 15000,
+     *                  "addressName": "",
+     *                  "longitude": "",
+     *                  "latitude": "",
+     *                  "totalEvaluate": "",
+     *                  "enrollNum": 0,
+     *                  "confirmNum": 0,
+     *                  "startTime": 1552022400000,
+     *                  "endTime": 1552023600000,
+     *                  "serviceStatus": "",
+     *                  "openAuth": "",
+     *                  "timeType": 0,
+     *                  "collectTime": 10,
+     *                  "collectType": 1,
+     *                  "createUser": 68813260970786816,
+     *                  "createUserName": "马晓晨",
+     *                  "createTime": 1551965325000,
+     *                  "updateUser": 68813260970786816,
+     *                  "updateUserName": "马晓晨",
+     *                  "updateTime": 1551965325062,
+     *                  "companyId": "",
+     *                  "isValid": "1"
+     *                  }
+     *                  ],
+     *                  "totalCount": 1
+     *                  }
+     *                  }
      * @return
      */
     @RequestMapping("company/social/list/mine")
-    public Object companySocialListMine(String token,Long companyId,Integer pageNum,Integer pageSize) {
+    public Object companySocialListMine(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<StrServiceView> myActivityList = companyService.getMyActivityList(user.getId(), companyId, pageNum, pageSize);
             result.setData(myActivityList);
@@ -1661,32 +1664,31 @@ public class UserController extends BaseController {
     /**
      * 用户信息修改(包括修改手机号码)
      *
-     * @param name 昵称
-     * @param userTel 手机号
-     * @param userHeadPortraitPath  头像
-     * @param userPicturePath   背景
-     * @param occupation    职业
-     * @param workPlace 公司
-     * @param college   学校
-     * @param age   年龄
-     * @param sex   性别 1男 2女
-     * @param vxId  微信号
-     * @param remarks 个人宣言
-     * {
+     * @param token                登录凭证
+     * @param name                 昵称
+     * @param userTel              手机号
+     * @param userHeadPortraitPath 头像
+     * @param userPicturePath      背景
+     * @param occupation           职业
+     * @param workPlace            公司
+     * @param college              学校
+     * @param age                  年龄
+     * @param sex                  性别 1男 2女
+     * @param vxId                 微信号
+     * @param remarks              个人宣言
+     *                             {
      *                             "success": true,
      *                             "errorCode": "",
      *                             "msg": "",
      *                             "data": ""
-     * }
-     *
+     *                             }
      * @return
      */
     @RequestMapping("modify")
     @Consume(TUser.class)
-    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex,String vxId,String remarks) {
+    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex, String vxId, String remarks) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
-        user.setId(68813260748488704l);
         try {
             token = userService.modify(token, user);
             result.setData(token);
@@ -1706,10 +1708,10 @@ public class UserController extends BaseController {
     /**
      * 预创建一个红包
      *
-     * @param token
-     * @param description
-     * @param time
-     * {
+     * @param token       登录凭证
+     * @param description 描述
+     * @param time        金额
+     *                    {
      *                    "success": true,
      *                    "errorCode": "",
      *                    "msg": "",
@@ -1733,9 +1735,7 @@ public class UserController extends BaseController {
     @Consume(TBonusPackage.class)
     public Object bonusPackagePreGenerate(String token, String description, Long time) {
         AjaxResult result = new AjaxResult();
-//      TUser user = (TUser) redisUtil.get(token);
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             TBonusPackage bonusPackage = (TBonusPackage) ConsumeHelper.getObj();
             TBonusPackage bonus = userService.preGenerateBonusPackage(user, bonusPackage);
@@ -1756,8 +1756,8 @@ public class UserController extends BaseController {
     /**
      * 创建一个红包
      *
-     * @param token
-     * @param bonusPackageId
+     * @param token          登录凭证
+     * @param bonusPackageId    红包编号
      * {
      *                       "success": true,
      *                       "errorCode": "",
@@ -1769,8 +1769,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/generate")
     public Object bonusPackageGenerate(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.generateBonusPackage(user, bonusPackageId);
             result.setSuccess(true);
@@ -1789,9 +1788,9 @@ public class UserController extends BaseController {
     /**
      * 查看一个红包
      *
-     * @param token
-     * @param bonusPackageId
-     * {
+     * @param token          登录凭证
+     * @param bonusPackageId 红包编号
+     *                       {
      *                       "id": 102130274443198464,
      *                       "userId": 68813260748488704,
      *                       "description": "张三牛逼",
@@ -1809,8 +1808,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/infos")
     public Object bonusPackageInfo(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             BonusPackageVIew bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
             result.setData(bonusPackage);
@@ -1830,9 +1828,9 @@ public class UserController extends BaseController {
     /**
      * 打开红包
      *
-     * @param token
-     * @param bonusPackageId
-     * {
+     * @param token          登录凭证
+     * @param bonusPackageId 红包编号
+     *                       {
      *                       "success": false,
      *                       "errorCode": "",
      *                       "msg": "您不能领取自己的红包!",
@@ -1843,10 +1841,9 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/open")
     public Object bonusPackageOpen(String token, String bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            Long bonusId =Long.valueOf(bonusPackageId);
+            Long bonusId = Long.valueOf(bonusPackageId);
             userService.openBonusPackage(user, bonusId);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -1863,17 +1860,17 @@ public class UserController extends BaseController {
 
     /**
      * 红包退回（超时）
-     * @param token
-     * @param bonusPackageId
+     *
+     * @param token          登录凭证
+     * @param bonusPackageId 红包编号
      * @return
      */
     @RequestMapping("bonusPackage/sendBack")
     public Object bonusPackageSendBack(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            userService.sendBackBonusPackage(user,bonusPackageId);
+            userService.sendBackBonusPackage(user, bonusPackageId);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("红包退回异常: " + e.getMessage());
@@ -1889,19 +1886,22 @@ public class UserController extends BaseController {
 
     /**
      * 查看是否为我的红包
-     * @param token
-     * @param bonusPackageId
+     *
+     * @param token          登录凭证
+     * @param bonusPackageId 红包编号
      * @return
      */
     @RequestMapping("bonusPackage/isMine")
     public Object isMyBonusPackage(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            Map<String,Object> resultMap = userService.isMyBonusPackage(user,bonusPackageId);
+            Map<String, Object> resultMap = userService.isMyBonusPackage(user, bonusPackageId);
             result.setData(resultMap);
             result.setSuccess(true);
+            if(resultMap==null) {
+                result.setSuccess(false);
+            }
         } catch (MessageException e) {
             logger.error("查看是否为我的红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
@@ -1917,7 +1917,7 @@ public class UserController extends BaseController {
     /**
      * 用户认证信息更新(实名认证)
      *
-     * @param token
+     * @param token    登录凭证
      * @param cardId   身份证号
      * @param cardName 身份证名字
      *                 <p>
@@ -1929,12 +1929,11 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("auth")
+    @RequestMapping("cert")
     @Consume(TUserAuth.class)
-    public Object auth(String token, String cardId, String cardName) {
+    public Object cert(String token, String cardId, String cardName) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             userService.auth(token, user, cardId, cardName);
             result.setSuccess(true);
@@ -1953,7 +1952,7 @@ public class UserController extends BaseController {
     /**
      * 单位认证信息更新
      *
-     * @param token
+     * @param token    登录凭证
      * @param type     组织类型
      * @param name     组织名字
      * @param province 省份
@@ -1970,11 +1969,10 @@ public class UserController extends BaseController {
      * @return
      */
     @Consume(TCompany.class)
-    @RequestMapping("company/auth")
+    @RequestMapping("company/cert")
     public Object companyAuth(String token, Integer type, String name, String province, String city, String county, String depict, String url, String contactsName, String contactsTel, String contactsCardId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         TCompany company = (TCompany) ConsumeHelper.getObj();
         try {
             userService.companyAuth(user, company);
@@ -1994,8 +1992,8 @@ public class UserController extends BaseController {
     /**
      * 认证信息查询
      *
-     * @param token
-     * {
+     * @param token 登录凭证
+     *              {
      *              "success": true,
      *              "errorCode": "",
      *              "msg": "",
@@ -2029,15 +2027,13 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @PostMapping("company/info")
+    @PostMapping("company/infos")
     public Object companyInfo(String token) {
         AjaxResult result = new AjaxResult();
-//        TUser user = (TUser) redisUtil.get(token);
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            TCompany companyInfo = companyService.companyInfo(user.getId());
-            result.setData(companyInfo);
+            Map<String, Object> map = companyService.companyInfo(user);
+            result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("认证信息查询异常: " + e.getMessage());
@@ -2054,7 +2050,7 @@ public class UserController extends BaseController {
     /**
      * 每日签到信息查询
      *
-     * @param token
+     * @param token    登录凭证
      * @param ymString 年月字符串,eg.2019-03
      *
      *                 <p>
@@ -2093,15 +2089,12 @@ public class UserController extends BaseController {
      *                 }
      *                 ]
      *                 }
-     *
      * @return
      */
     @PostMapping("signUpInfo")
     public Object signUpInfo(String token, String ymString) {
         AjaxResult result = new AjaxResult();
-//        TUser user = (TUser) redisUtil.get(token);
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             SignUpInfoView signUpInfo = userService.signUpInfo(user, ymString);
             result.setSuccess(true);
@@ -2121,23 +2114,20 @@ public class UserController extends BaseController {
     /**
      * 每日签到
      *
-     * @param token
-     *
-     * {
+     * @param token 登录凭证
+     *              <p>
+     *              {
      *              "success": true,
      *              "errorCode": "",
      *              "msg": "",
      *              "data": 3    //本次获得奖励金额
      *              }
-     *
      * @return
      */
     @PostMapping("/signUp")
     public Object signUp(String token) {
         AjaxResult result = new AjaxResult();
-//        TUser user = (TUser) redisUtil.get(token);
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             long reward = userService.signUp(token, user);
             result.setSuccess(true);
@@ -2156,28 +2146,27 @@ public class UserController extends BaseController {
 
     /**
      * 用户反馈
-     * @param token
-     * @param labelsId key-value表中的对应id
-     * @param message  回馈内容
-     * @param voucherUrl    图片信息(多张使用逗号分隔)
      *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": ""
-     * }
-     *
+     * @param token      登录凭证
+     * @param labelsId   key-value表中的对应id
+     * @param message    回馈内容
+     * @param voucherUrl 图片信息(多张使用逗号分隔)
+     *                   <p>
+     *                   {
+     *                   "success": true,
+     *                   "errorCode": "",
+     *                   "msg": ""
+     *                   }
      * @return
      */
     @RequestMapping("feedBack")
     @Consume(TReport.class)
     public Object feedBack(String token, long labelsId, String message, String voucherUrl) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         TReport report = (TReport) ConsumeHelper.getObj();
         try {
-            userService.feedBack(user,report);
+            userService.feedBack(user, report);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("用户反馈异常: " + e.getMessage());
@@ -2193,27 +2182,27 @@ public class UserController extends BaseController {
 
     /**
      * 任务信息查询
-     * @param token
      *
-     * {
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "",
-     *     "data": [    //任务类型列表
-     *         3    //任务类型 0注册1实名2完善3签到4邀请好友5完成首次互助
-     *     ]
-     * }
-     *
+     * @param token 登录凭证
+     *              <p>
+     *              {
+     *              "success": true,
+     *              "errorCode": "",
+     *              "msg": "",
+     *              "data": [    //任务类型列表
+     *              3    //任务类型 0注册1实名2完善3签到4邀请好友5完成首次互助
+     *              ]
+     *              }
      * @return
      */
     @RequestMapping("taskList")
     public Object taskList(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            Set<Integer> taskIds = userService.taskList(user);
-            result.setData(taskIds);
+//            Set<Integer> taskIds = userService.taskList(user);
+            TaskHallView taskHallView = userService.taskHall(user);
+            result.setData(taskHallView);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("任务信息查询异常: " + e.getMessage());
@@ -2228,21 +2217,8 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 插入一条流水
-     * @param record
-     * @return
-     */
-    @RequestMapping("time")
-    public Long insertUserTimeRecords(TUserTimeRecord record) {
-        record.setType(1);
-        record.setTime(1l);
-        record.setCreateTime(13131313131313l);
-        record.setIsValid("1");
-        return userTimeRecordDao.insert(record);
-    }
-
-    /**
      * 获取key—value值 样本
+     *
      * @param key feedback
      * @return
      */
@@ -2265,10 +2241,9 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 功能描述: 发送短信验证码
-     * 作者: 许方毅
-     * 创建时间: 2018年10月30日 下午3:59:07
-     * @param telephone
+     * 发送短信验证码
+     *
+     * @param telephone 手机号
      * @return
      */
     @PostMapping("generateSMS")
@@ -2295,13 +2270,14 @@ public class UserController extends BaseController {
 
     /**
      * 获取成长值明细
-     * @param token
-     * @param ymString
-     * @param option
+     *
+     * @param token    登录凭证
+     * @param ymString 年月字符串
+     * @param option   操作
      * @return
      */
     @RequestMapping("scoreList")
-    public Object scoreList(String token,String ymString,String option) {
+    public Object scoreList(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
@@ -2321,8 +2297,9 @@ public class UserController extends BaseController {
 
     /**
      * 校验短信验证码
-     * @param telephone
-     * @param validCode
+     *
+     * @param telephone 手机号
+     * @param validCode 短信验证码
      * @return
      */
     @PostMapping("checkSMS")
@@ -2344,8 +2321,9 @@ public class UserController extends BaseController {
 
     /**
      * 回馈邀请人
-     * @param token
-     * @param inviterId
+     *
+     * @param token     登录凭证
+     * @param inviterId 邀请者编号
      * @return
      */
     @PostMapping("payInviter")
@@ -2369,7 +2347,8 @@ public class UserController extends BaseController {
 
     /**
      * 分享（查看二维码)
-     * @param token
+     *
+     * @param token  登录凭证
      * @param option 1个人分享、2服务分享、3求助分享 4加入组织
      * @return
      */
@@ -2393,14 +2372,19 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 功能描述: 微信授权基本信息更新
-     * 作者: 许方毅
-     * 创建时间: 2018年11月27日 下午1:28:25
+     * 微信授权基本信息更新
+     *
+     * @param token                登录凭证
+     * @param userHeadPortraitPath 头像
+     * @param name                 昵称
+     * @param sex                  性别 1男2女
      * @return
      */
     @RequestMapping("wechat/infosAuth")
-    public Object wechatInfosAuth(TUser user, String token) {
+    @Consume(TUser.class)
+    public Object wechatInfosAuth(String token, String userHeadPortraitPath, String name, Integer sex) {
         AjaxResult result = new AjaxResult();
+        TUser user = (TUser) ConsumeHelper.getObj();
         try {
             userService.wechatInfoAuth(user, token);
             result.setSuccess(true);
@@ -2417,7 +2401,8 @@ public class UserController extends BaseController {
 
     /**
      * 获取scene值
-     * @param scene
+     *
+     * @param scene 场景值
      * @return
      */
     @PostMapping("scene")
@@ -2440,8 +2425,9 @@ public class UserController extends BaseController {
 
     /**
      * 激活（生成邀请码）
-     * @param token
-     * @param inviteCode
+     *
+     * @param token      登录凭证
+     * @param inviteCode 邀请码(激活码)
      * @return
      */
     @PostMapping("invite/activate")
@@ -2463,8 +2449,9 @@ public class UserController extends BaseController {
 
     /**
      * 组织版登录（密码）
-     * @param telephone
-     * @param password
+     *
+     * @param telephone 手机号
+     * @param password  密码
      * @return
      */
     @PostMapping("loginGroupByPwd")
@@ -2488,9 +2475,10 @@ public class UserController extends BaseController {
 
     /**
      * 重置密码（组织）
-     * @param telephone
-     * @param validCode
-     * @param password
+     *
+     * @param telephone 手机号
+     * @param validCode 验证码
+     * @param password  密码
      * @return
      */
     @PostMapping("modifyPwd")
@@ -2512,8 +2500,9 @@ public class UserController extends BaseController {
 
     /**
      * 申请加入组织
-     * @param token
-     * @param companyId
+     *
+     * @param token     登录凭证
+     * @param companyId 组织编号
      * @return
      */
     @PostMapping("company/join")
@@ -2521,7 +2510,7 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         try {
             TUser user = (TUser) redisUtil.get(token);
-            userService.joinCompany(user,companyId);
+            userService.joinCompany(user, companyId);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("重置密码异常" + e.getMessage());
@@ -2536,10 +2525,11 @@ public class UserController extends BaseController {
 
     /**
      * 组织时间轨迹查询
-     * @param token
-     * @param year
-     * @param month
-     * @param type
+     *
+     * @param token 登录凭证
+     * @param year  年份
+     * @param month 月份
+     * @param type  类型 0全部1收入2支出
      * @return
      */
     @PostMapping("queryPayments")

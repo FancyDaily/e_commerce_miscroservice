@@ -38,7 +38,7 @@ public enum GrowthValueEnum {    //TODO 数值还没有确定
     GROWTH_TYPE_REP_SERV_DONE(33, 0, 23,"完成服务", 2, 1, 10, -1),    //完成服务
     GROWTH_TYPE_REP_COMMENT(34, 0, 24,"评价", 2, 1, 10, -1),        //评价
     GROWTH_TYPE_REP_SHARE_PRODUCT(35, 0, 25,"每日首次分享互助", 1, 1, 1, -1),    //分享互助
-    GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE(36, 0, 26,"每日首次参加公益活动", 5, 1, 5, -1);    //每日首次完成公益活动
+    GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE(36, 0, 36,"每日首次参加公益活动", 5, 1, 5, -1);    //每日首次完成公益活动
 
 
     // out

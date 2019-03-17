@@ -441,6 +441,8 @@ public interface AppConstant {
 
     public String LAST_SIGN_UP_DAY_OTHERS = "-1";
 
+    public String SIGN_UP_ALMOST_HALF_EDGE = "2";
+
     public String SIGN_UP_ALMOST_EDGE = "6";
 
     public String SIGN_UP_EDGE = "7";
@@ -448,7 +450,7 @@ public interface AppConstant {
     /**
      * 签到奖励 -> 普通
      */
-    public long SIGN_UP_BONUS = 3;
+    public long SIGN_UP_BONUS = 1;
 
     public long LEVEL_ONE_MIN = 0;
 
@@ -743,7 +745,7 @@ public interface AppConstant {
     /**
      * 可用的服务/求助状态(可报名)
      */
-    Integer[] AVAILABLE_STATUS_ARRAY = {0, 1, 2, 3};    //TODO 可用服务状态待确定
+    Integer[] AVAILABLE_STATUS_ARRAY = {1, 2};    //TODO 可用服务状态待确定
 
     /**
      * //收藏列表中的订单状态
@@ -758,5 +760,15 @@ public interface AppConstant {
     /**
      * 需要区分第一次的code数组
      */
-    Integer[] GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY = {32,33,34};
+    Integer[] GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY = {32,33,34,35};
+
+    /**
+     * 重复性任务
+     */
+    Integer[] DAILY_TASK_ARRAY = {20,21,22,23,24,25,26};
+
+    /**
+     * 一次性任务
+     */
+    Integer[] NOOB_TASK_ARRAY = {0,1,2,3,4,5,6,7,8,9};
 }

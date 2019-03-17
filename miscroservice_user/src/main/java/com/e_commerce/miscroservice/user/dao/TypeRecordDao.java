@@ -49,4 +49,18 @@ public interface TypeRecordDao {
      * @return
      */
     List<TTypeRecord> selectByTypeAndUserId(int code, int code1, Long id);
+
+    /**
+     * 查找今日成长值记录
+     * @param id
+     * @return
+     */
+    List<TTypeRecord> selectDailyGrowthRecords(Long id);
+
+    /**
+     * 查找所有成长记录
+     * @param id
+     * @return
+     */
+    List<TTypeRecord> selectGrowthRecords(Long id);
 }

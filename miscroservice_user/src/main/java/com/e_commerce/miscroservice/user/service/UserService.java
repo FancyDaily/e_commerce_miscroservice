@@ -92,9 +92,10 @@ public interface UserService {
      * @param pageNum
      * @param pageSize
      * @param isService
+     * @param me
      * @return
      */
-    QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService);
+    QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me);
 
     /**
      * 历史服务和求助
@@ -347,22 +348,27 @@ public interface UserService {
      */
     Map<String, Object> loginUserBySMS(String telephone, String validCode);
 
-    @Transactional(rollbackFor = Throwable.class)
     TUser rigester(TUser user);
 
     TUser getUserAccountByTelephone(String telephone);
 
     /**
-     * 为用户增加发布次数
-     * @param user 当前用户
-     * @param type 类型 1、求助 2、服务
+     * 用户登出
+     * @param token
      */
-	void addPublishTimes(TUser user, int type);
+    void logOut(String token);
+
     /**
-     * 是否关注了该用户
-     * @param userId 当前用户ID
-     * @param userFollowId 被关注用户ID
+     * 通过手机号获取用户
+     * @param telephone
      * @return
      */
-    boolean isCareUser(Long userId, Long userFollowId);
+    List<TUser> getUserByTelephone(String telephone);
+
+    /**
+     * 任务大厅
+     * @param user
+     * @return
+     */
+    TaskHallView taskHall(TUser user);
 }

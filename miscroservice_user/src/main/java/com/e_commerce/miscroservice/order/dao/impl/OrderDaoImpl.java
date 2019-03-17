@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
@@ -12,6 +13,8 @@ import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -86,6 +89,125 @@ public class OrderDaoImpl implements OrderDao {
 		}
 		return result;
 	}
+    /**
+     * 查询指定userId发布的订单： 服务/求助
+     *
+     * @param userId
+     * @param isService
+     * @return
+     */
+    @Override
+    public List<TOrder> selectPublishedByUserId(Long userId, boolean isService, TUser beenViewer) {
+        List<TOrder> result = null;
+        String[] split =new String[0];
+        String beenViewerCompanyIds = beenViewer.getCompanyIds();
+        if(beenViewerCompanyIds!=null) {
+            split = beenViewerCompanyIds.split(",");
+        }
+        List<Integer> companyIds = new ArrayList<>();
+        if(split.length>0) {
+            for(String str:split) {
+                companyIds.add(Integer.valueOf(str));
+            }
+        }
+        if (isService) {	//TODO 权限
+            if(!companyIds.isEmpty()) {
+				result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+						.groupBefore()
+						.groupBefore()
+						.eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+						.eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
+						.groupBefore()
+						.eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+						.in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+						.groupAfter()
+						.groupAfter()
+						.groupBefore()
+						.in(TOrder::getCompanyId, companyIds)
+						.or()
+						.eq(TOrder::getOpenAuth, ProductEnum.OPEN_AUTH_OPEN.getValue())
+						.or()
+						.isNull(TOrder::getCompanyId)
+						.groupAfter()
+						.eq(TOrder::getCreateUser, userId)
+						.eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
+						.eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+						.orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))  //TODO status ASC
+				);
+            } else {
+                result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                        .groupBefore()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+                        .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+                        .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+                        .groupAfter()
+                        .groupAfter()
+						.groupBefore()
+						.and()
+						.eq(TOrder::getOpenAuth, ProductEnum.OPEN_AUTH_OPEN.getValue())
+						.or()
+						.isNull(TOrder::getCompanyId)
+						.groupAfter()
+                        .eq(TOrder::getCreateUser, userId)
+                        .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))  //TODO status ASC
+                );
+            }
+        } else {
+            if(!companyIds.isEmpty()) {
+                result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                        .groupBefore()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+                        .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+                        .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+                        .groupAfter()
+                        .groupAfter()
+						.and()
+						.groupBefore()
+						.in(TOrder::getCompanyId,companyIds)
+						.or()
+						.eq(TOrder::getOpenAuth,ProductEnum.OPEN_AUTH_OPEN.getValue())
+						.or()
+						.isNull(TOrder::getCompanyId)
+						.groupAfter()
+                        .eq(TOrder::getCreateUser, userId)
+                        .eq(TOrder::getType, ProductEnum.TYPE_SEEK_HELP.getValue())
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))
+                );
+            } else {
+                result = MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                        .groupBefore()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
+                        .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()).groupAfter().or()
+                        .groupBefore()
+                        .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_NORMAL.getValue())
+                        .in(TOrder::getStatus, AppConstant.AVAILABLE_STATUS_ARRAY)
+                        .groupAfter()
+                        .groupAfter()
+						.and()
+						.groupBefore()
+						.eq(TOrder::getOpenAuth, ProductEnum.OPEN_AUTH_OPEN.getValue())
+						.or()
+						.isNull(TOrder::getCompanyId)
+						.groupAfter()
+                        .eq(TOrder::getCreateUser, userId)
+                        .eq(TOrder::getType, ProductEnum.TYPE_SEEK_HELP.getValue())
+                        .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))
+                );
+            }
+        }
+        return result;
+    }
 
 	@Override
 	public List<TOrder> pageOrder(PageOrderParamView param) {
@@ -99,6 +221,49 @@ public class OrderDaoImpl implements OrderDao {
 	}
 
 
+    /**
+     * 查询指定用户Id的过往服务/求助记录
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TOrder> selectPastByUserId(Long userId,TUser user) {
+        String[] split =new String[0];
+        String beenViewerCompanyIds = user.getCompanyIds();
+        if(beenViewerCompanyIds!=null) {
+            split = beenViewerCompanyIds.split(",");
+        }
+        List<Integer> companyIds = new ArrayList<>();
+        if(split.length>0) {
+            for(String str:split) {
+                companyIds.add(Integer.valueOf(str));
+            }
+        }
+        if(!companyIds.isEmpty()) {
+            return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+					.groupBefore()
+                    .in(TOrder::getCompanyId,companyIds)
+					.or()
+					.eq(TOrder::getOpenAuth,ProductEnum.OPEN_AUTH_OPEN.getValue())
+					.or()
+					.isNull(TOrder::getCompanyId)
+					.groupAfter()
+                    .eq(TOrder::getCreateUser, userId)
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
+                    .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+        } else {
+            return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+					.groupBefore()
+					.isNull(TOrder::getCompanyId)
+					.or()
+					.eq(TOrder::getOpenAuth,ProductEnum.OPEN_AUTH_OPEN.getValue())
+					.groupAfter()
+                    .eq(TOrder::getCreateUser, userId)
+                    .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
+                    .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+        }
+    }
 	/**
 	 * 查询指定用户Id的过往服务/求助记录
 	 *
@@ -164,24 +329,24 @@ public class OrderDaoImpl implements OrderDao {
 				.eq(TOrder::getStartTime, startTime).eq(TOrder::getEndTime, endTime).eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue()));
 	}
 
-	/**
-	 * 根据来源、用户id、状态、订单id集合查找
-	 *
-	 * @param source
-	 * @param userId
-	 * @param availableStatusArray
-	 * @param idList
-	 * @return
-	 */
-	@Override
-	public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList) {
-		return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
-				.eq(TOrder::getSource, source)
-				.eq(TOrder::getCreateUser, userId)
-				.in(TOrder::getStatus, availableStatusArray)
-				.in(TOrder::getId, idList)
-				.eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
-	}
+    /**
+     * 根据来源、用户id、状态、订单id集合查找
+     *
+     * @param source
+     * @param userId
+     * @param availableStatusArray
+     * @param idList
+     * @return
+     */
+    @Override
+    public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getSource, source)
+                .eq(TOrder::getCreateUser, userId)
+                .in(TOrder::getStatus, availableStatusArray)
+                .in(TOrder::getId, idList)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
 
 	@Override
 	public TOrder findOneLatestOrderByServiceId(Long serviceId) {
