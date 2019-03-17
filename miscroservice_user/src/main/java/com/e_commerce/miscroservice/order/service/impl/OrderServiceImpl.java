@@ -194,8 +194,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	public QueryResult<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user) {
 		QueryResult<PageEnrollAndChooseReturnView> result = new QueryResult<>();
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		List<PageEnrollAndChooseReturnView> listReturnView = new ArrayList<>();
 		Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
 		List<TOrderRelationship> pageEnrollAndChooseList = orderRelationshipDao.pageEnrollAndChooseList(pageNum, pageSize, user.getId());
@@ -244,8 +243,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public QueryResult<PageOrderReturnView> listMineOrder(Integer pageNum, Integer pageSize, TUser user) {
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		QueryResult<PageOrderReturnView> result = new QueryResult<>();
 		List<PageOrderReturnView> listReturnView = new ArrayList<>();
 		//列出当前用户的所有订单关系
@@ -359,8 +357,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	public DetailMineOrderReturnView detailMineOrder(TUser user, Long orderId) {
 		DetailMineOrderReturnView returnView = new DetailMineOrderReturnView();
-		//TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		TOrderRelationship relationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 		TOrder tOrder = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(tOrder);
@@ -590,7 +587,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			throw new MessageException("501", "用户授信不足");
 		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
-		order.setId(snowflakeIdWorker.nextId());
+//		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
 		order.setServiceId(service.getId());

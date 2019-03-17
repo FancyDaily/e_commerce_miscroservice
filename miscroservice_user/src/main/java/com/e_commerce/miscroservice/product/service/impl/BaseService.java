@@ -77,7 +77,7 @@ public class BaseService {
 	 * @param desc
 	 */
 	protected void setCommonServcieDescField(TUser user, TServiceDescribe desc) {
-		desc.setId(snowflakeIdWorker.nextId());
+//		desc.setId(snowflakeIdWorker.nextId());
 		long currentTime = System.currentTimeMillis();
 		desc.setCreateUser(user.getId());
 		desc.setCreateUserName(user.getName());
@@ -95,7 +95,7 @@ public class BaseService {
 	 * @param service 发布的服务求助
 	 */
 	protected void setServiceCommonField(TUser user, TService service) {
-		service.setId(snowflakeIdWorker.nextId());
+//		service.setId(snowflakeIdWorker.nextId());
 		// 待审核 TODO 暂时不做审核限制，直接是待开始
 //			service.setStatus(ProductEnum.STATUS_WAIT_EXAMINE.getValue());
 		service.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());

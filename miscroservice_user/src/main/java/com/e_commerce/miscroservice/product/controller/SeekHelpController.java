@@ -284,17 +284,17 @@ public class SeekHelpController extends BaseController {
 	 *
 	 * @param request
 	 * @param param
-	 * @param token
 	 * @return
 	 */
 	@PostMapping("/submit")
-	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param, String token) {
+	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
 /*		String paramString = (String) request.getAttribute("paramString");
 		request.removeAttribute("paramString");
 		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 		String token = param.getToken();*/
+		String token = param.getToken();
 		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			// 如果重复的，把前端传的固定毫秒值置位0
 			param.getService().setStartTime(0L);
