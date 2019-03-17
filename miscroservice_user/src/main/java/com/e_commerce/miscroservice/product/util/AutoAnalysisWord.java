@@ -71,7 +71,7 @@ public class AutoAnalysisWord {
 
     private Pattern pushTypePattern = Pattern.compile("(发布|.*)(求助|服务|需要)");
 
-    private String DATE_LINE = "";
+    private String DATE_LINE = "-";
     private Map<String, String> characterToNumberRelation = new HashMap<>();
     private Map<String, Integer> monthAndDayRelation = new HashMap<>();
     private Map<String, Integer> dateCharacterToNumberRelation = new HashMap<>();
@@ -79,7 +79,7 @@ public class AutoAnalysisWord {
     private DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("yyyy");
     private DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
     private DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy" + DATE_LINE + "MM" + DATE_LINE + "dd");
     private DateTimeFormatter weekDayFormatter = DateTimeFormatter.ofPattern("EEEE");
 

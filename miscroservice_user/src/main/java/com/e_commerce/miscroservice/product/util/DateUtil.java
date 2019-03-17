@@ -92,7 +92,25 @@ public class DateUtil {
 	 * @return
 	 */
 	public static Long parse(String dateTime) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+		return commonParse(dateTime, "yyyyMMddHHmm");
+	}
+	/**
+	 * 将字符串日期格式转换为毫秒值
+	 * @param dateTime 字符串时间日期
+	 * @return
+	 */
+	public static Long parseDate(String dateTime) {
+		return commonParse(dateTime, "yyyyMMdd");
+	}
+
+	/**
+	 * 公共解析 日期或时间 需要传递解析格式
+	 * @param dateTime 字符串时间日期
+	 * @param reg 时间日期的格式
+	 * @return
+	 */
+	public static Long commonParse(String dateTime, String reg) {
+		SimpleDateFormat sdf = new SimpleDateFormat(reg);
 		try {
 			Date date = sdf.parse(dateTime);
 			sdf = null;
@@ -109,7 +127,25 @@ public class DateUtil {
 	 * @return
 	 */
 	public static String format(Long timestamp) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+		return commonFormat(timestamp, "yyyyMMddHHmm");
+	}
+	/**
+	 * 将毫秒值转换为字符串日期
+	 * @param timestamp 时间戳
+	 * @return
+	 */
+	public static String formatDate(Long timestamp) {
+		return commonFormat(timestamp, "yyyyMMdd");
+	}
+
+	/**
+	 * 通用format 时间戳转字符串格式
+	 * @param timestamp  要格式的时间戳
+	 * @param reg 格式化的规则
+	 * @return
+	 */
+	public static String commonFormat(Long timestamp, String reg) {
+		SimpleDateFormat sdf = new SimpleDateFormat(reg);
 		try {
 			String format = sdf.format(timestamp);
 			sdf = null;

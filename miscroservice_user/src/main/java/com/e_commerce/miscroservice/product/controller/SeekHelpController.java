@@ -295,17 +295,25 @@ public class SeekHelpController extends BaseController {
 		request.removeAttribute("paramString");
 		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 		String token = param.getToken();*/
-
+		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+			// 如果重复的，把前端传的固定毫秒值置位0
+			param.getService().setStartTime(0L);
+			param.getService().setEndTime(0L);
+		}
 		TUser user = (TUser) redisUtil.get(token);
 		//这一层可判断出是求助，手动设置type参数
 //		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				productService.submitSeekHelp(user, param, token);
+				result.setSuccess(true);
 			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
 				productService.submitService(user, param, token);
+				result.setSuccess(true);
+			} else {
+				result.setSuccess(false);
+				result.setMsg("请选择发布类型");
 			}
-			result.setSuccess(true);
 			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
@@ -324,7 +332,7 @@ public class SeekHelpController extends BaseController {
 	}
 
 	/**
-	 * 发布求助
+	 * 发布求助文本解析
 	 *
 	 * @param text 解析后的文本内容
 	 * @param city 左上角的地址
@@ -352,6 +360,7 @@ public class SeekHelpController extends BaseController {
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
 		Map<String, Object> map = analysisWord.parse(text, city);
+		System.out.println(map);
 		// 地址名称
 		resultView.setAddressName((String) map.get("location"));
 		//标题
@@ -375,6 +384,11 @@ public class SeekHelpController extends BaseController {
 			resultView.setLatitude((Double) map.get("latitude"));
 		} catch (Exception e) {
 		}
+		if (resultView.getLongitude() == null || resultView.getLatitude() == null) {
+			resultView.setServicePlace(0);
+		} else {
+			resultView.setServicePlace(ProductEnum.PLACE_UNDERLINE.getValue());
+		}
 		// 收取时间
 		try {
 			resultView.setCollectTime((Integer) map.get("payCount"));
@@ -387,9 +401,19 @@ public class SeekHelpController extends BaseController {
 		}
 		// 需要的人数
 		try {
-			resultView.setServicePerson((Integer) map.get("personCount"));
+			resultView.setServicePersonnel((Integer) map.get("personCount"));
 		} catch (Exception e) {
-			resultView.setServicePerson(1);
+			resultView.setServicePersonnel(1);
+		}
+
+		if (StringUtil.isEmpty(resultView.getEndDateS())) { // 如果结束时间没有传，则往后加一天
+			Long startDateMill = DateUtil.commonParse(resultView.getStartDateS(), "yyyy-MM-dd");
+			Long nextDayStartMill = DateUtil.addDays(startDateMill, 1);
+			resultView.setEndDateS(DateUtil.commonFormat(nextDayStartMill, "yyyy-MM-dd"));
+		}
+
+		if (StringUtil.isEmpty(resultView.getEndTimeS())) {
+			resultView.setEndTimeS(resultView.getStartTimeS());
 		}
 
 		//如果weekDay为null 则是单次  若weekDay不为null，则是重复性
@@ -416,10 +440,10 @@ public class SeekHelpController extends BaseController {
 //		}
 		if (resultView.getTimeType().equals(ProductEnum.TIME_TYPE_FIXED.getValue())) { //单次的求助服务
 			if (StringUtil.isNotEmpty(resultView.getStartTimeS()) && StringUtil.isNotEmpty(resultView.getStartTimeS())) {
-				resultView.setStartTime(DateUtil.parse(resultView.getStartDateS() + resultView.getStartTimeS()));
+				resultView.setStartTime(DateUtil.commonParse(resultView.getStartDateS() + resultView.getStartTimeS(), "yyyy-MM-ddHH:mm"));
 			}
 			if (StringUtil.isNotEmpty(resultView.getEndDateS()) && StringUtil.isNotEmpty(resultView.getEndTimeS())) {
-				resultView.setEndTime(DateUtil.parse(resultView.getEndDateS() + resultView.getEndTimeS()));
+				resultView.setEndTime(DateUtil.commonParse(resultView.getEndDateS() + resultView.getEndTimeS(), "yyyy-MM-ddHH:mm"));
 			}
 		}
 		return resultView;

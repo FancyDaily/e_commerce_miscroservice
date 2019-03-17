@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.entity.application.AdminUser;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
@@ -11,6 +12,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
@@ -40,6 +42,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	private OrderCommonController orderService;
 	@Autowired
 	private UserCommonController userService;
+	@Autowired
+	private MessageCommonController messageService;
 
 	/**
 	 * 功能描述:发布求助
@@ -317,10 +321,17 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public void autoLowerFrameService(TService service) {
+		Long currentTime = System.currentTimeMillis();
+		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+		service.setUpdateTime(currentTime);
 		productDao.updateByPrimaryKeySelective(service);
 		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+		// TODO 发送系统消息
+		String title = "";
+		String content = "";
+		messageService.messageSave(service.getId(), new AdminUser(), title, content, service.getUserId(),currentTime);
 	}
 
 	@Override

@@ -2,12 +2,9 @@ package com.e_commerce.miscroservice.message.controller;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
-import com.e_commerce.miscroservice.commons.entity.application.TPublish;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.message.service.EventService;
-import com.e_commerce.miscroservice.message.service.PublishService;
-import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +14,9 @@ import java.util.List;
 
 
 /**
- * 键值模块
+ * 事件模块
  *
- * 键值controller
+ * 事件controller
  **/
 @RestController
 @RequestMapping("/api/v2/event")
