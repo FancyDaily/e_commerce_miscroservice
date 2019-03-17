@@ -77,7 +77,28 @@ public class UserDaoImpl implements UserDao {
     public List<TUser> selectByTelephone(String telephone) {
         return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
         .eq(TUser::getUserTel,telephone)
-        .eq(TUser::getIsValid,AppConstant.IS_ATTEN_YES));
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public Long insert(TUser user) {
+        MybatisOperaterUtil.getInstance().save(user);
+        return user.getId();
+    }
+
+    @Override
+    public List<TUser> selectByVxOpenId(String openId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getVxOpenId,openId)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUser> selectUserTelByJurisdiction(String telephone, Integer jurisdictionNormal) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserTel,telephone)
+        .eq(TUser::getJurisdiction,jurisdictionNormal)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     /**

@@ -9,6 +9,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class UserStartMain {
 
 	public static void main(String[] args) {
-		ApplicationContextUtil.run(UserStartMain.class, Boolean.TRUE, args);
+		ApplicationContextUtil.run(UserStartMain.class, Boolean.FALSE, args);
 	}
 }

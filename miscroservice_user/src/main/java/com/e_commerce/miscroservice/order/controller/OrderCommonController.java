@@ -73,16 +73,16 @@ public class OrderCommonController extends BaseController {
 		return orderRelationshipDao.insert(orderRelationship);
 	}
 
-	/**
-	 * @return int
-	 * @Author 姜修弘
-	 * 功能描述:更新订单
-	 * 创建时间:@Date 下午6:39 2019/3/6
-	 * @Param [orderRelationship]
-	 **/
-	public int updateOrderRelationship(TOrderRelationship orderRelationship) {
-		return orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-	}
+    /**
+     * @return int
+     * @Author 姜修弘
+     * 功能描述:更新订单
+     * 创建时间:@Date 下午6:39 2019/3/6
+     * @Param [orderRelationship]
+     **/
+    public int updateOrderRelationship(TOrderRelationship orderRelationship) {
+        return orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+    }
 
 	/**
 	 * @return com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship
@@ -115,7 +115,25 @@ public class OrderCommonController extends BaseController {
 	public List<TOrder> selectOdersByUserId(Long userId, boolean isService) {
 		return orderDao.selectPublishedByUserId(userId, isService);
 	}
+    /**
+     * 根据用户id获取订单列表
+     * @param userId
+     * @param beenViewer
+     * @return
+     */
+    public List<TOrder> selectOdersByUserId(Long userId, boolean isService, TUser beenViewer) {
+        return orderDao.selectPublishedByUserId(userId,isService,beenViewer);
+    }
 
+    /**
+     * 查询指定用户id过往订单记录
+     * @param userId
+     * @param user
+     * @return
+     */
+    public List<TOrder> selectEndOrdersByUserId(Long userId, TUser user) {
+        return  orderDao.selectPastByUserId(userId,user);
+    }
 	/**
 	 * 查询指定用户id过往订单记录
 	 *

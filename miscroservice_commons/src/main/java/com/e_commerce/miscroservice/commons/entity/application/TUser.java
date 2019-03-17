@@ -460,6 +460,14 @@ public class TUser implements Serializable {
         this.helpAttitudeEvaluate = helpAttitudeEvaluate;
     }
 
+    public String getCompanyIds() {
+        return companyIds;
+    }
+
+    public void setCompanyIds(String companyIds) {
+        this.companyIds = companyIds == null ? null : companyIds.trim();
+    }
+
     public String getCompanyNames() {
         return companyNames;
     }

@@ -23,4 +23,10 @@ public interface UserDao {
     List<TUser> selectUserTelByJurisdictionAndIsCompany(String telephone, Integer jurisdictionNormal, Integer isCompanyAccountYes);
 
     List<TUser> selectByTelephone(String telephone);
+
+    Long insert(TUser user);
+
+    List<TUser> selectByVxOpenId(String openId);
+
+    List<TUser> selectUserTelByJurisdiction(String telephone, Integer jurisdictionNormal);
 }

@@ -10,9 +10,11 @@ import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.user.dao.CompanyDao;
+import com.e_commerce.miscroservice.user.dao.UserAuthDao;
 import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.CompanyService;
+import com.e_commerce.miscroservice.user.vo.AuthView;
 import com.e_commerce.miscroservice.user.vo.StrServiceView;
 import com.e_commerce.miscroservice.user.vo.StrUserCompanyView;
 import com.github.pagehelper.Page;
@@ -42,6 +44,9 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Autowired
     private OrderCommonController orderService;
+
+    @Autowired
+    private UserAuthDao userAuthDao;
 
     /**
      * 获取加入的组织列表
@@ -234,15 +239,28 @@ public class CompanyServiceImpl implements CompanyService {
         return queryResult;
     }
 
-
     /**
      * 查询认证信息
-     * @param id
+     * @param user
      * @return
      */
     @Override
-    public TCompany companyInfo(Long id) {
-        return companyDao.selectLatestByUserId(id); //查找最新的一条认证记录
+    public Map<String, Object> companyInfo(TUser user) {
+        Long id = user.getId();
+        List<TUserAuth> auths = userAuthDao.selectByUserId(id);
+        TUserAuth auth = new TUserAuth();
+        if (!auths.isEmpty()) {
+            auth = auths.get(0);
+        }
+
+        AuthView authView = BeanUtil.copy(auth, AuthView.class);
+
+        authView.setUserTel(user.getUserTel());
+
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("authView",authView);
+        resultMap.put("companyView",companyDao.selectLatestByUserId(id));
+        return resultMap;
     }
 
 
