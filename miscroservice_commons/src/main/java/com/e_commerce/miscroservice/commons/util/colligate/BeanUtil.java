@@ -124,7 +124,8 @@ public final class BeanUtil extends org.springframework.beans.BeanUtils {
 	 * @param src 源对象
 	 * @param dist 需要赋值的对象
 	 */
-	public static void copy(Object src, Object dist) {
+	public static void
+	copy(Object src, Object dist) {
 		BeanCopier copier = BeanCopier
 				.create(src.getClass(), dist.getClass(), false);
 

@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageDao;
@@ -130,15 +131,18 @@ public class MessageServiceImpl implements MessageService {
         sendMessge.setIsValid("1");
 
         messageDao.insert(sendMessge);
-
+        sendMessge.setParent(sendMessge.getId());
         if (messageForParent == null){
             //如果是第一次发消息
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
                 @Override
-                public void afterCommit() {
-                    super.afterCommit();
-                    sendMessge.setParent(sendMessge.getId());
+                public void afterCompletion(int status) {
+
+                    if(status<0){
+                        return;
+                    }
                     messageDao.updateUpdate(sendMessge);
+                    super.afterCommit();
                 }
             });
         }
