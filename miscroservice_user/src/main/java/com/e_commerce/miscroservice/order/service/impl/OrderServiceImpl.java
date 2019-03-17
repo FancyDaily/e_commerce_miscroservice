@@ -662,7 +662,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 * @param order 订单
 	 */
 	private void lowerFrameServiceOrder(TOrder order) {
-		// TODO 拒绝求助者的报名 解冻求助者的时间币 并发送消息
+		List<TOrderRelationship> enrollList = orderRelationshipDao.selectListByStatusByEnroll(order.getId(), OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+		List<Long> enrollIdList = new ArrayList<>();
+		for (TOrderRelationship relationship : enrollList) {
+			enrollIdList.add(relationship.getReceiptUserId());
+		}
+		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
 	}
 
 	/**
@@ -689,7 +694,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		userFreeze.setUpdateUser(user.getId());
 		userFreeze.setUpdateUserName(user.getName());
 		userService.updateUserFreeze(userFreeze);
-		// TODO  调用方法拒绝所有服务者
+		List<TOrderRelationship> enrollList = orderRelationshipDao.selectListByStatusByEnroll(order.getId(), OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+		List<Long> enrollIdList = new ArrayList<>();
+		for (TOrderRelationship relationship : enrollList) {
+			enrollIdList.add(relationship.getReceiptUserId());
+		}
+		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+
 	}
 
 	/**

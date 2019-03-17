@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class AnalysisAudioView {
 	//标题
-	private String title;
+	private String serviceName;
 	//开始日期
 	private String startDateS;
 	// 结束日期
@@ -30,7 +30,7 @@ public class AnalysisAudioView {
 	// 发布类型 1、求助 2、服务
 	private Integer type;
 	//要求人数
-	private Integer personCount;
+	private Integer servicePerson;
 	//  0、一次性  1、重复性周期
 	private Integer timeType;
 	//星期  1,2,3 此类
