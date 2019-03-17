@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.commons.entity.application;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ public class TEvent implements Serializable {
 
     private Integer templateId;
 
-    private Long tiggerId;
+    private String tiggerId;
 
     private String parameter;
 

@@ -49,10 +49,6 @@ public class ProductCommonController extends BaseController {
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
 		Map<Long, String> coverPic = new HashMap<>();
 		List<TServiceDescribe> listProductDesc = productService.getListProductDesc(serviceIds);
-//		if (listProductDesc != null && listProductDesc.size() > 0) {
-//			listProductDesc.stream().filter(serviceDesc -> serviceDesc.getIsCover().equals(IS_COVER_YES))
-//					.forEach(serviceDesc -> coverPic.put(serviceDesc.getServiceId(), serviceDesc.getUrl()));
-//		}
 		for (TServiceDescribe tServiceDescribe : listProductDesc) {
 			if (tServiceDescribe.getIsCover().equals(IS_COVER_YES)) {
 				coverPic.put(tServiceDescribe.getServiceId(), tServiceDescribe.getUrl());
@@ -71,9 +67,21 @@ public class ProductCommonController extends BaseController {
 		return productService.getProductDesc(serviceId);
 	}
 
+	/**
+	 * 超时或者互助时不足自动下架
+	 * @param service 商品
+	 */
 	public void autoLowerFrameService(TService service) {
 		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
 		productService.autoLowerFrameService(service);
+	}
+
+	/**
+	 * 更新商品信息
+	 * @param service
+	 */
+	public void update(TService service) {
+		productService.updateServiceByKey(service);
 	}
 
 

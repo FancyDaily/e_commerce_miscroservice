@@ -22,4 +22,10 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
         return record.getId();
     }
 
+    @Override
+    public TUserTimeRecord selectById(Long id){
+        return MybatisOperaterUtil.getInstance().findOne(new TUserTimeRecord() ,
+                new MybatisSqlWhereBuild(TUserTimeRecord.class)
+                        .eq(TUserTimeRecord::getId,id));
+    }
 }

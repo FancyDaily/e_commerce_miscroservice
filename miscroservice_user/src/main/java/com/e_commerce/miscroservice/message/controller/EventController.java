@@ -37,10 +37,22 @@ public class EventController extends BaseController {
      * @param tiggerId 触发id
      *
      *
+     *             "id": 2, 编号
+     *             "userId": 68813259653775360, 用户编号
+     *             "templateId": 1, 模版id 1-赔付时间模版
+     *             "tiggerId": "orderId103548905098051584", 触发id
+     *             "parameter": "userTimeRecordId=104158218095165440", 参数
+     *             "priority": 2, 优先级
+     *             "text": "用户马晓晨已取消订单，并向你支付致歉礼：互助时10分钟", 模版填充文本
+     *             "createTime": 1552615648891, 创建时间
+     *             "createUser": 68813260748488704,
+     *             "createUserName": "马晓晨",
+     *             "isValid": "1"
+     *
      * @return
      */
     @PostMapping("/eventList")
-    public Object eventList(Long nowUserId , Long tiggerId) {
+    public Object eventList(Long nowUserId , String tiggerId) {
         AjaxResult result = new AjaxResult();
         try {
             List<TEvent> eventList = eventService.selectTeventListByUserIdAndTiggetId(nowUserId , tiggerId);

@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.user.util;
+package com.e_commerce.miscroservice.product.util;
 
 public class AnsjUtil {
     public final static String n = "名词";

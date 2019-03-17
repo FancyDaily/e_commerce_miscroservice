@@ -74,7 +74,7 @@ public class EventServicempl implements EventService {
      * @param tiggetId
      * @return
      */
-    public List<TEvent> selectTeventListByUserIdAndTiggetId(Long userId , Long tiggetId){
+    public List<TEvent> selectTeventListByUserIdAndTiggetId(Long userId , String tiggetId){
         return eventDao.selectByUserIdAndTiggetId(userId , tiggetId);
     }
 }

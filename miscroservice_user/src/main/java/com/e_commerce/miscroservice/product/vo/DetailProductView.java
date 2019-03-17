@@ -14,4 +14,5 @@ import java.util.List;
 public class DetailProductView {
 	private TService service;
 	private List<TServiceDescribe> desc;
+	private String imgUrl;
 }

@@ -52,6 +52,6 @@ public interface EventDao {
      * @param tiggerId
      * @return
      */
-    List<TEvent> selectByUserIdAndTiggetId(Long userId , Long tiggerId);
+    List<TEvent> selectByUserIdAndTiggetId(Long userId , String tiggerId);
 
 }

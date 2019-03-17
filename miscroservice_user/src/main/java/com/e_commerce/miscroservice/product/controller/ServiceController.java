@@ -10,10 +10,12 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 
 /**
@@ -167,7 +169,7 @@ public class ServiceController extends BaseController{
 	 * @return
 	 */
 	@PostMapping("/submit")
-	public Object submitService(HttpServletRequest request, String token, ServiceParamView param) {
+	public Object submitService(HttpServletRequest request, @RequestBody String token, ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
 //		String paramString = (String)request.getAttribute("paramString");
@@ -176,7 +178,11 @@ public class ServiceController extends BaseController{
 //		String token = param.getToken();
 		TUser user = (TUser) redisUtil.get(token);
 		try {
-			productService.submitService(user, param, token);
+			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
+				productService.submitSeekHelp(user, param, token);
+			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
+				productService.submitService(user, param, token);
+			}
 			result.setSuccess(true);
 			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_SUCCESS);
 			return result;

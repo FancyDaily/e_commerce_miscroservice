@@ -171,7 +171,6 @@ public class OrderController extends BaseController {
 	 *                      "id": 用户ID,
 	 *                      "name": "用户名称",
 	 *                      "userHeadPortraitPath": "用户头像",
-	 *                      "authStatus": 1、已实名 2、未实名，
 	 *                      authenticationStatus;1、未实名  2、已实名
 	 *                      "userType":用户类型 1、个人 2、公益组织 3、一般组织
 	 *                      "idString": "用户ID"

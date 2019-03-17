@@ -14,10 +14,12 @@ import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.order.vo.*;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.product.util.DateResult;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -70,8 +72,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			userService.freezeTimeCoin(order.getId(), order.getCollectTime() * order.getServicePersonnel(), order.getServiceId(), order.getServiceName());
+			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
+		// 为发布者增加一条订单关系
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -147,9 +150,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 			userView.setServeNum(tUser.getSeekHelpNum());
 		}
-		// TODO 获取发布者关注信息
-		// 关注状态 1、显示关注 2、显示已关注
-		userView.setCareStatus(1);
+		// 是否关注该用户
+		boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+		if (isCare) {
+			// 关注状态 1、显示关注 2、显示已关注
+			userView.setCareStatus(2);
+		} else {
+			userView.setCareStatus(1);
+		}
 		returnView.setUser(userView);
 		returnView.getUser().setCareStatus(1);
 		//详情页面展示举报状态 收藏状态 报名状态
@@ -210,7 +218,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		//商品封面图
 		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
-		//遍历组织view
+		//遍历组成view
 		for (TOrderRelationship orderRelationship : pageEnrollAndChooseList) {
 			PageEnrollAndChooseReturnView returnView = new PageEnrollAndChooseReturnView();
 			//显示的订单列表
@@ -418,8 +426,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				Long userId = listRelationship.get(0).getReceiptUserId();
 				TUser receiver = userService.getUserById(userId);
 				BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
-				// TODO 查询用户的关注状态
-				userView.setCareStatus(1);
+				// 是否关注该用户
+				boolean isCare = userService.isCareUser(user.getId(), userId);
+				if (isCare) {
+					// 关注状态 1、显示关注 2、显示已关注
+					userView.setCareStatus(2);
+				} else {
+					userView.setCareStatus(1);
+				}
 				// 求助 展示求助者评分
 				if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 					userView.setTotalEvaluate(receiver.getServTotalEvaluate());
@@ -437,9 +451,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				for (TOrderRelationship tOrderRelationship : listRelationship) {
 					TUser receiver = userService.getUserById(tOrderRelationship.getReceiptUserId());
 					BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
-					// TODO 查询用户的关注状态
-					userView.setCareStatus(1);
-//				userView.setPointStatus(1);
+					// 是否关注该用户
+					boolean isCare = userService.isCareUser(user.getId(), receiver.getId());
+					if (isCare) {
+						// 关注状态 1、显示关注 2、显示已关注
+						userView.setCareStatus(2);
+					} else {
+						userView.setCareStatus(1);
+					}
 				}
 				returnView.setListUserView(listUserView);
 			}
@@ -492,8 +511,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			Long fromUserId = relationship.getFromUserId();
 			TUser tUser = userService.getUserById(fromUserId);
 			BaseUserView userView = BeanUtil.copy(user, BaseUserView.class);
-			// TODO 查询用户的关注状态
-			userView.setCareStatus(1);
+			// 是否关注该用户
+			boolean isCare = userService.isCareUser(user.getId(), tUser.getId());
+			if (isCare) {
+				// 关注状态 1、显示关注 2、显示已关注
+				userView.setCareStatus(2);
+			} else {
+				userView.setCareStatus(1);
+			}
 			// 求助 展示求助者评分
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
@@ -555,7 +580,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
@@ -572,16 +597,21 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			// 生成订单的开始结束时间
 			Integer code = generateOrderTime(service, order, type, date);
+//			if (Objects.equals(type, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_UPPER.getValue())
+//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_AUTO.getValue())) {
+//				productService.update(service);
+//			}
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
 				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				return order;
-				// TODO 订单结束定时任务
+				// TODO 调用订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
-				return null;
+				return order;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
@@ -602,6 +632,78 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	/**
+	 * 到结束时间下架订单
+	 *
+	 * @param orderId 订单ID
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public void lowerFrameOrder(Long orderId) {
+		/*
+		 * 找到该订单，进行下架处理，
+		 * 进行是求助还是服务的判断，将时间币退还给发布人或者报名人
+		 * 调用其他方法派生下一张订单
+		 */
+		//下架订单  并将状态置为可见状态
+		TOrder order = orderDao.selectByPrimaryKey(orderId);
+		order.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
+		order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+		order.setUpdateTime(System.currentTimeMillis());
+		orderDao.updateByPrimaryKey(order);
+		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
+			lowerFrameSeekHelpOrder(order);
+		} else { // 是服务
+			lowerFrameServiceOrder(order);
+		}
+	}
+
+	/**
+	 * 下架服务订单
+	 *
+	 * @param order 订单
+	 */
+	private void lowerFrameServiceOrder(TOrder order) {
+		List<TOrderRelationship> enrollList = orderRelationshipDao.selectListByStatusByEnroll(order.getId(), OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+		List<Long> enrollIdList = new ArrayList<>();
+		for (TOrderRelationship relationship : enrollList) {
+			enrollIdList.add(relationship.getReceiptUserId());
+		}
+		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+	}
+
+	/**
+	 * 下架求助订单
+	 *
+	 * @param order 订单
+	 */
+	private void lowerFrameSeekHelpOrder(TOrder order) {
+		//找到用户关联的这张订单,把冻结的金额减去剩余没选的人数（解冻）
+		TUserFreeze userFreeze = userService.getUserFreeze(order.getCreateUser(), order.getId());
+		// 解冻金额  = 该订单冻结金额 - 单价 * 没被选择的人数
+		long thawTime = userFreeze.getFreezeTime() - order.getCollectTime() * (order.getServicePersonnel() - order.getConfirmNum());
+		//更新用户冻结表的冻结金额
+		userFreeze.setFreezeTime(userFreeze.getFreezeTime() - thawTime);
+		// 解冻用户表中的冻结信息
+		TUser user = userService.getUserById(order.getCreateUser());
+		user.setFreezeTime(user.getFreezeTime() - thawTime);
+		long currentTime = System.currentTimeMillis();
+		user.setUpdateTime(currentTime);
+		user.setUpdateUser(user.getId());
+		user.setUpdateUserName(user.getName());
+		userService.updateByPrimaryKey(user);
+		userFreeze.setUpdateTime(currentTime);
+		userFreeze.setUpdateUser(user.getId());
+		userFreeze.setUpdateUserName(user.getName());
+		userService.updateUserFreeze(userFreeze);
+		List<TOrderRelationship> enrollList = orderRelationshipDao.selectListByStatusByEnroll(order.getId(), OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+		List<Long> enrollIdList = new ArrayList<>();
+		for (TOrderRelationship relationship : enrollList) {
+			enrollIdList.add(relationship.getReceiptUserId());
+		}
+		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+
+	}
+
+	/**
 	 * 根据商品的抽象时间派生出订单具体的时间
 	 *
 	 * @param service 要派生的商品
@@ -619,14 +721,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//上架时候派生订单  感觉可以调用发布生成订单的逻辑
 			return produceOrderByUpper(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
-			//调用重新上架的逻辑
+			//调用发布派生的逻辑
+			return produceOrderByPublish(service, order, weekDayNumberArray);
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
-			return produceOrderByEnroll(service, date);
+			return produceOrderByEnroll(service, date, order);
 		} else {
 			//报名人满后派生
 			return produceOrderByEnough(weekDayNumberArray, service, date, order);
 		}
-		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
 
 	/**
@@ -634,9 +737,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
+	 * @param order      新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
 	 * @return
 	 */
-	private Integer produceOrderByEnroll(TService service, String enrollDate) {
+	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {
 		//报名派生  判断是否已经存在，已经存在，则停止派生
 		/*
 		 * 传递一个serviceId 和 一个订单的日期
@@ -649,13 +753,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String endDateTime = enrollDate + product.getEndTimeS();
 		Long startDateTimeMill = DateUtil.parse(startDateTime);
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
-		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-		if (count != 0) { //订单已存在
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (oldOrder != null) { //订单已存在
+			order = oldOrder;
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
 		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
@@ -690,13 +796,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		Long startDateTimeMill = DateUtil.addDays(DateUtil.parse(startDateTime), addDays);
 		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
-		Long count = orderDao.countProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
-		if (count != 0) { //有这张订单，不需要派生
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
+		if (oldOrder != null) { //有这张订单，不需要派生
+			order = oldOrder;
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
+			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		order.setStartTime(startDateTimeMill);
@@ -799,44 +907,77 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long productStartTime = DateUtil.parse(serviceStartTimeString);
 		//商品结束的时间
 		Long productEndTime = DateUtil.parse(serviceEndTimeString);
-//			//获取开始的时间是星期X
-		int startWeekDay = DateUtil.getWeekDay(productStartTime);
-//			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
-		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
-		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
-//			//订单开始的时间戳
-		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
-		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
-		//参数星期的下一个星期X(不包含这个参数星期)
-//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
-		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
-		int orderNextWeekDay;
-		while (true) {
-			if (endTimeMill >= System.currentTimeMillis()) {
-				break;
-			}
-			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+		DateResult dr = DateUtil.getNextOrderBeginAndEndTime(productStartTime, productEndTime, weekDayNumberArray, true);
+////			//获取开始的时间是星期X
+//		int startWeekDay = DateUtil.getWeekDay(productStartTime);
+////			//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
+//		int orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
+//		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+////			//订单开始的时间戳
+//		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
+//		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
+//		//参数星期的下一个星期X(不包含这个参数星期)
+////			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+//		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
+//		int orderNextWeekDay;
+//		while (true) {
+//			if (endTimeMill >= System.currentTimeMillis()) {
+//				break;
+//			}
+//			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+//
+//			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
+//			if (addDays == 0) {
+//				addDays = 7;
+//			}
+//			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
+//			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
+//			orderWeekDay = orderNextWeekDay;
+//		}
 
-			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
-			if (addDays == 0) {
-				addDays = 7;
-			}
-			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
-			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
-			orderWeekDay = orderNextWeekDay;
-		}
+		Long startTimeMill = dr.getStartTimeMill();
+		Long endTimeMill = dr.getEndTimeMill();
 		order.setStartTime(startTimeMill);
 		order.setEndTime(endTimeMill);
-		// 查看数据库防止有这一条
-		Long count = orderDao.countProductOrder(service.getId(), startTimeMill, endTimeMill);
-		if (count != 0) {
-			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
-		}
-		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
+		// 整个商品的结束时间
 		String endDateTime = service.getEndDateS() + service.getEndTimeS();
+		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		if (DateUtil.parse(endDateTime) < endTimeMill) {
 			return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
 		}
+		List<String> enrollDate = new ArrayList<>();
+//		enrollDate.add(DateUtil.getDate(startTimeMill));
+		dr.setDays(1);
+		long tempStart = startTimeMill;
+		long tempEnd = endTimeMill;
+		String startDate = DateUtil.getDate(startTimeMill);
+		//计算第一张订单后六天的可报名时间
+		DateResult tempResult;
+		while (dr.getDays() <= 6) {
+			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
+			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
+				break;
+			}
+			if (tempResult.getDays() == 0) {
+				break;
+			}
+			dr.setDays(dr.getDays() + tempResult.getDays());
+			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
+			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
+			if (temOrder == null) {
+				enrollDate.add(DateUtil.getDate(tempStart));
+			}
+			tempStart = tempResult.getStartTimeMill();
+			tempEnd = tempResult.getEndTimeMill();
+		}
+		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
+		// 查看数据库防止有这一条
+		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startTimeMill, endTimeMill);
+		if (oldOrder != null) {
+			order = oldOrder;
+			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+		}
+
 		//订单开始的日期
 //			String orderStartDate = DateUtil.format(cal.getTimeInMillis()).substring(0, 8);
 		//订单开始时间 = 订单开始的日期 + 商品的开始时间

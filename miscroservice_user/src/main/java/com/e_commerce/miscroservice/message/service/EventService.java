@@ -46,5 +46,5 @@ public interface EventService {
      * @param tiggetId
      * @return
      */
-    List<TEvent> selectTeventListByUserIdAndTiggetId(Long userId , Long tiggetId);
+    List<TEvent> selectTeventListByUserIdAndTiggetId(Long userId , String tiggetId);
 }

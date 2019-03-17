@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.user.util;
+package com.e_commerce.miscroservice.product.util;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class AutoAnalysisWord {
     private final String ADDRESS_NAME = "address.txt";
-    //        private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
+//            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
     private final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
     private Logger logger = LoggerFactory.getLogger(AutoAnalysisWord.class);
 
@@ -71,7 +71,7 @@ public class AutoAnalysisWord {
 
     private Pattern pushTypePattern = Pattern.compile("(发布|.*)(求助|服务|需要)");
 
-    private String DATE_LINE = "-";
+    private String DATE_LINE = "";
     private Map<String, String> characterToNumberRelation = new HashMap<>();
     private Map<String, Integer> monthAndDayRelation = new HashMap<>();
     private Map<String, Integer> dateCharacterToNumberRelation = new HashMap<>();
@@ -79,7 +79,7 @@ public class AutoAnalysisWord {
     private DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("yyyy");
     private DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
     private DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy" + DATE_LINE + "MM" + DATE_LINE + "dd");
     private DateTimeFormatter weekDayFormatter = DateTimeFormatter.ofPattern("EEEE");
 
@@ -248,8 +248,9 @@ public class AutoAnalysisWord {
     }
 
     public static void main(String[] args) {
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
+//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在城西银泰帮我带早餐,我可以支付十分钟", "杭州"));
 
 
 //        test();

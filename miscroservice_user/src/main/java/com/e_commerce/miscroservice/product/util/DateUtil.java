@@ -238,4 +238,51 @@ public class DateUtil {
 		}
 		return WeekDayNumberArray;
 	}
+
+	/**
+	 * 获取下一张订单的开始时间和结束时间
+	 * @param productStartTime 开始时间
+	 * @param productEndTime 结束时间
+	 * @param weekDayNumberArray 星期数组
+	 * @param contains 是否包含当前时间
+	 * @return
+	 */
+	public static DateResult getNextOrderBeginAndEndTime(Long productStartTime, Long productEndTime,int[] weekDayNumberArray, boolean contains) {
+		DateResult result = new DateResult();
+		//获取开始的时间是星期X
+		int startWeekDay = DateUtil.getWeekDay(productStartTime);
+		//获取订单开始的时间是星期X  离商品开始星期X最近的星期Y
+		int orderWeekDay = 0;
+		if (contains) {
+			orderWeekDay = DateUtil.getMostNearWeekDay(weekDayNumberArray, startWeekDay);
+		} else {
+			orderWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, startWeekDay);
+		}
+		int addDays = (orderWeekDay + 7 - startWeekDay) % 7;
+//			//订单开始的时间戳
+		Long startTimeMill = DateUtil.addDays(productStartTime, addDays);
+		Long endTimeMill = DateUtil.addDays(productEndTime, addDays);
+		//参数星期的下一个星期X(不包含这个参数星期)
+//			int orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+		//如果重复中包含当天的订单，查看结束时间是否小于当前时间，小于当前时间就是已经过了今天的，直接发下一个星期X的
+		int orderNextWeekDay;
+		while (true) {
+			if (endTimeMill > System.currentTimeMillis()) {
+				break;
+			}
+			orderNextWeekDay = DateUtil.getNextWeekDay(weekDayNumberArray, orderWeekDay);
+
+			addDays = (orderNextWeekDay + 7 - orderWeekDay) % 7;
+			if (addDays == 0) {
+				addDays = 7;
+			}
+			startTimeMill = DateUtil.addDays(startTimeMill, addDays);
+			endTimeMill = DateUtil.addDays(endTimeMill, addDays);
+			orderWeekDay = orderNextWeekDay;
+		}
+		result.setDays(addDays);
+		result.setStartTimeMill(startTimeMill);
+		result.setEndTimeMill(endTimeMill);
+		return result;
+	}
 }

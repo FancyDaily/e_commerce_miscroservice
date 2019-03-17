@@ -10,4 +10,6 @@ public interface UserTimeRecordDao {
     List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end);
 
     Long insert(TUserTimeRecord record);
+
+    TUserTimeRecord selectById(Long id);
 }
