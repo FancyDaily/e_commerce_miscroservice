@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.message.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
+import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.message.dao.EventDao;
+import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
 import com.e_commerce.miscroservice.message.service.EventService;
 import com.e_commerce.miscroservice.message.service.PublishService;
@@ -37,6 +39,8 @@ public class MessageCommonController extends BaseController {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    private FormidDao formidDao;
 
     /**
      * 插入系统消息
@@ -104,6 +108,7 @@ public class MessageCommonController extends BaseController {
 //		if (setTemplateIdEnum.getEnlarge() != 0) {
 //			wxMssVo.setEmphasis_keyword("keyword" + setTemplateIdEnum.getEnlarge()+".DATA");
 //		}
+
         logger.info("小程序推送结果={}", url);
         logger.info("小程序推送结果={}", wxMssVo.toString());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, wxMssVo, String.class);
@@ -147,4 +152,19 @@ public class MessageCommonController extends BaseController {
     public TEvent selectTeventById(Long id){
         return eventService.selectTeventById(id);
     }
+
+    /**
+     * 更新formId
+     * @param formid
+     * @return
+     */
+    public long updateFormId(TFormid formid){return formidDao.updateFormId(formid); }
+
+    /**
+     * 找到一条可用的formId
+     * @param findTime
+     * @param userId
+     * @return
+     */
+    public TFormid selectCanUseFormId(Long findTime , Long userId){return formidDao.selectAllFormIdCanUse(findTime , userId);}
 }

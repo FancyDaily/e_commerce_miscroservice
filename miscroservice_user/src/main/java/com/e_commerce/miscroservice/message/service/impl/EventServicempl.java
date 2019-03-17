@@ -46,6 +46,7 @@ public class EventServicempl implements EventService {
      * @param event
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public long insertTevent(TEvent event){
         return eventDao.insert(event);
     }
@@ -55,6 +56,7 @@ public class EventServicempl implements EventService {
      * @param event
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public long updateTevent(TEvent event){
         return eventDao.updateById(event);
     }

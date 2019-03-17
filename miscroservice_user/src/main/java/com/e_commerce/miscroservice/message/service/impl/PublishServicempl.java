@@ -53,7 +53,7 @@ public class PublishServicempl implements PublishService {
      * @param value
      * @param extend
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void pulishIn( Long id , String key , String value , String extend ) {
         TPublish publish = new TPublish();
         if (id == null) {

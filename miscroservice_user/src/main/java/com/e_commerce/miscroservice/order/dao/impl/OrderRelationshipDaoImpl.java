@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.mapper.OrderRelationshipMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import sun.jvm.hotspot.debugger.LongHashMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -406,6 +407,20 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
     }
 
+
+    /**
+     * 查询被选择
+     * @param orderId
+     * @return
+     */
+    public long selectJoinUser(Long orderId){
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .count(TOrderRelationship::getId)
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
+                .eq(TOrderRelationship::getIsValid , AppConstant.ACCREDIT_STATUS_YES));
+    }
     /**
      * 参与的订单的状态
      *
