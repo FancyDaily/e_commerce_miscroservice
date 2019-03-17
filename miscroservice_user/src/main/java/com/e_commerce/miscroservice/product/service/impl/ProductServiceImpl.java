@@ -131,7 +131,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param user  当前发布用户
 	 * @param param 发布服务所需要的参数
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void submitService(TUser user, ServiceParamView param, String token) {
 		//校验重复时间
@@ -405,6 +405,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -456,6 +463,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -523,8 +537,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 		//增加发布次数
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
-
 
 
 	/**
@@ -585,6 +605,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -616,6 +643,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
