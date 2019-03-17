@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.google.common.base.Joiner;
+import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -350,13 +351,40 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     //TODO 如果是互助时，发送短信
                     String msgContent = "【壹晓时】"+content;
                 }
-            } else {
+
+                TUser toUser = null;
                 for (int j = 0; j < userList.size(); j++) {
                     if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId().longValue()) {
-                        errorMsg.add("用户" + userList.get(j).getName() + "已被您操作");
+                        toUser = userList.get(i);
                         break;
                     }
                 }
+                /*TFormid formid = findFormId(nowTime, toUser);
+                if (formid != null) {
+                    try {
+                        if (order.getType())
+                        List<String> msg = new ArrayList<>();
+                        msg.add("您已被求助者选定");
+                        msg.add(serviceReceipts.get(0).getServiceName());
+                        msg.add(user.getName());
+                        msg.add(changeTime(nowTime));
+                        msg.add("如果您对该投诉有异议，请于2个工作日内联系平台在线客服。");
+                        String orderType = "1";
+                        if (toUser.getId() == serviceReceipts.get(0).getReceiptUserId().longValue()) {
+                            //如果是服务通知接收者是报名者
+                            orderType = "2";
+                        }
+                        String parameter = "?orderId="+serviceReceipts.get(0).getId()+"&returnHome=true&orderType="+orderType;
+                        wechatService.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.other_setTemplate_3,parameter);
+                        formid.setIsValid("0");
+                        formidDao.updateByPrimaryKey(formid);
+                        break;
+                    } catch (Exception e) {
+                        logger.error("发送服务通知失败");
+                    }*/
+                }
+            } else {
+                errorMsg.add("用户" + userList.get(j).getName() + "已被您操作");
             }
         }
         if ((canChooseUserSum - orderRelationshipIdList.size()) == 0) {
