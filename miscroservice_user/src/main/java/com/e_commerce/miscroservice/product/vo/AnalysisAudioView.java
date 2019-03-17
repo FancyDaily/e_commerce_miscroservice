@@ -30,7 +30,7 @@ public class AnalysisAudioView {
 	// 发布类型 1、求助 2、服务
 	private Integer type;
 	//要求人数
-	private Integer servicePerson;
+	private Integer servicePersonnel;
 	//  0、一次性  1、重复性周期
 	private Integer timeType;
 	//星期  1,2,3 此类
@@ -39,5 +39,7 @@ public class AnalysisAudioView {
 	private Long startTime;
 	//结束时间 timeType=0 单次使用此时间
 	private Long endTime;
+	// 服务场所 1、线上 2、线下  0 无法识别
+	private Integer servicePlace;
 
 }

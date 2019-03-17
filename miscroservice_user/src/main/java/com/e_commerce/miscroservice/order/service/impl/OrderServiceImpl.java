@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
@@ -44,6 +45,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	OrderRelationService orderRelationService;
 	@Autowired
 	OrderRecordDao orderRecordDao;
+	@Autowired
+	MessageCommonController messageService;
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
@@ -644,16 +647,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 调用其他方法派生下一张订单
 		 */
 		//下架订单  并将状态置为可见状态
+		Long currentTime = System.currentTimeMillis();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		order.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
 		order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
-		order.setUpdateTime(System.currentTimeMillis());
+		order.setUpdateTime(currentTime);
 		orderDao.updateByPrimaryKey(order);
 		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
 			lowerFrameSeekHelpOrder(order);
+			String title = "";
+			String content = "";
+			// TODO  发送消息
+			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 		} else { // 是服务
 			lowerFrameServiceOrder(order);
+			String title = "";
+			String content = "";
+			// TODO 发送消息
+			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 		}
+		// TODO 调用定时 派生一下账订单
 	}
 
 	/**

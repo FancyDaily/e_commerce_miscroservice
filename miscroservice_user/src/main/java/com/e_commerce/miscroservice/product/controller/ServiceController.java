@@ -168,7 +168,7 @@ public class ServiceController extends BaseController{
 	 * @param request
 	 * @return
 	 */
-	@PostMapping("/submit")
+//	@PostMapping("/submit")
 	public Object submitService(HttpServletRequest request, @RequestBody String token, ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
