@@ -571,7 +571,7 @@ public class OrderRelationController extends BaseController {
     /**
      * 举报订单详情
      *
-     * @param orderId 订单ID
+     * @param associationId 订单ID
      * @param token token
      * @param labelsId 标签ID
      * @param message 举报文本
@@ -585,11 +585,11 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/reportOrder")
-    public Object reportOrder(Long orderId , String token , long labelsId , String message , String voucherUrl) {
+    public Object reportOrder(Long associationId , String token , long labelsId , String message , String voucherUrl) {
         TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            orderRelationService.reoprtOrder(orderId , user , labelsId , message , voucherUrl);
+            orderRelationService.reoprtOrder(associationId , user , labelsId , message , voucherUrl);
             result.setSuccess(true);
             result.setMsg("举报成功");
         } catch (MessageException e) {
