@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.google.common.base.Joiner;
+import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1224,17 +1225,20 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     /**
      * 举报详情
      * @param orderId
-     * @param nowUserId
-     * @return
+     * @param nowUser
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
      */
     @Transactional(rollbackFor = Throwable.class)
-    public void reoprtOrder(Long orderId , Long nowUserId){
+    public void reoprtOrder(Long orderId , TUser nowUser , long labelsId , String message , String voucherUrl){
     TOrder order = orderDao.selectByPrimaryKey(orderId);
-    if(order.getCreateUser() == nowUserId.longValue()){
+    if(order.getCreateUser() == nowUser.getId().longValue()){
         throw new MessageException("499", "这是您自己的订单～");
     }
+    long nowTime = System.currentTimeMillis();
     TOrderRelationship orderRelationship = null;
-    orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUserId);
+    orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUser.getId());
     if (orderRelationship == null){
         //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
         orderRelationship = new TOrderRelationship();
@@ -1242,7 +1246,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setOrderId(order.getId());
         orderRelationship.setServiceType(order.getType());
         orderRelationship.setFromUserId(order.getCreateUser());
-        orderRelationship.setReceiptUserId(nowUserId);
+        orderRelationship.setReceiptUserId(nowUser.getId());
         orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
         orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
         orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
@@ -1254,12 +1258,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setTimeType(order.getTimeType());
         orderRelationship.setCollectTime(order.getCollectTime());
         orderRelationship.setCollectType(order.getCollectType());
-        orderRelationship.setCreateUser(order.getCreateUser());
-        orderRelationship.setCreateUserName(order.getCreateUserName());
-        orderRelationship.setCreateTime(order.getCreateTime());
-        orderRelationship.setUpdateUser(order.getCreateUser());
-        orderRelationship.setUpdateUserName(order.getCreateUserName());
-        orderRelationship.setUpdateTime(order.getCreateTime());
+        orderRelationship.setCreateUser(nowUser.getId());
+        orderRelationship.setCreateUserName(nowUser.getName());
+        orderRelationship.setCreateTime(nowTime);
+        orderRelationship.setUpdateUser(nowUser.getId());
+        orderRelationship.setUpdateUserName(nowUser.getName());
+        orderRelationship.setUpdateTime(nowTime);
         orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
         orderRelationshipDao.insert(orderRelationship);
     } else {
@@ -1269,6 +1273,25 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
         orderRelationshipDao.updateByPrimaryKey(orderRelationship);
     }
+
+        TReport report = new TReport();
+        report.setId(snowflakeIdWorker.nextId());
+        report.setReportUserId(0l);
+        report.setType(ReportEnum.TPYE_SERVICE.getType());
+        report.setAssociationId(orderId);
+        report.setLabelsId(labelsId);
+        report.setMessage(message);
+        report.setVoucherUrl(voucherUrl);
+        report.setStatus(ReportEnum.STATUS_PENDING_DISPOSAL.getType());
+        report.setCreateTime(nowTime);
+        report.setCreateUser(nowUser.getId());
+        report.setCreateUserName(nowUser.getName());
+        report.setUpdateTime(nowTime);
+        report.setUpdateUser(nowUser.getId());
+        report.setUpdateUserName(nowUser.getName());
+        report.setIsValid(AppConstant.IS_VALID_YES);
+        reportDao.saveOneOrder(report);
+
 
     }
     /**

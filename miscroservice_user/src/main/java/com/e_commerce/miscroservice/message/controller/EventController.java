@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.message.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.message.service.EventService;
@@ -32,7 +33,7 @@ public class EventController extends BaseController {
     /**
      * 根据触发id和用户查找触发事件
      *
-     * @param nowUserId 当前用户id
+     * @param token token
      * @param tiggerId 触发id
      *
      *             "id": 2, 编号
@@ -50,10 +51,11 @@ public class EventController extends BaseController {
      * @return
      */
     @PostMapping("/eventList")
-    public Object eventList(Long nowUserId , String tiggerId) {
+    public Object eventList(String token , String tiggerId) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            List<TEvent> eventList = eventService.selectTeventListByUserIdAndTiggetId(nowUserId , tiggerId);
+            List<TEvent> eventList = eventService.selectTeventListByUserIdAndTiggetId(user.getId() , tiggerId);
             result.setSuccess(true);
             result.setMsg("查询成功！");
             result.setData(eventList);

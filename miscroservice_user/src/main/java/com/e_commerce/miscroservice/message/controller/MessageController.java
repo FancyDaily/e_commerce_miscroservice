@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.message.controller;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
@@ -32,7 +33,7 @@ public class MessageController extends BaseController {
     /**
      * 收集formid
      * @param formId formid
-     * @param userId 用户id
+     * @param token   token
      *
      *     "success": true,
      *     "errorCode": "",
@@ -42,10 +43,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @RequestMapping("/collectFormId")
-    public Object collectFormId(String formId, Long userId) {
+    public Object collectFormId(String formId, String token) {
         AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
         try {
-            messageService.insertFormId(formId, userId);
+            messageService.insertFormId(formId, user.getId());
             result.setSuccess(true);
             result.setMsg("收集formId成功");
             return result;
@@ -62,7 +64,7 @@ public class MessageController extends BaseController {
      *
      * @param pageSize 分页大小
      * @param lastTime 上一条的时间
-     * @param nowUserId 当前用户ID
+     * @param token   token
      *
      *
      *                 "id": 81732352618790912, //系统消息编号
@@ -82,10 +84,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/notices")
-    public Object notices(int pageSize , long lastTime , Long nowUserId) {
+    public Object notices(int pageSize , long lastTime , String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            QueryResult<TMessageNotice> messageNotices = messageService.notices(lastTime, nowUserId, pageSize);
+            QueryResult<TMessageNotice> messageNotices = messageService.notices(lastTime, user.getId(), pageSize);
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(messageNotices);;
@@ -109,7 +112,7 @@ public class MessageController extends BaseController {
     /**
      * 发送消息
      *
-     * @param nowUserId 当前用户id
+     * @param token   token
      * @param messageUserId 发送给用户id
      * @param specialId 系统特殊操作id
      * @param type 类型 0-图片 1-文本
@@ -124,7 +127,8 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/sendMessage")
-    public Object sendMessage(Long nowUserId , Long messageUserId ,  Long specialId , int type , String message , String url) {
+    public Object sendMessage(String token , Long messageUserId ,  Long specialId , int type , String message , String url) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         if (type == MessageEnum.TYPE_TEXT.getType()) {
             //如果是文本，要看一下是否是空消息
@@ -135,7 +139,7 @@ public class MessageController extends BaseController {
             }
         }
         try {
-            messageService.send(nowUserId , messageUserId , specialId , type , message , url);
+            messageService.send(user.getId() , messageUserId , specialId , type , message , url);
             result.setSuccess(true);
             result.setMsg("发送成功");
             return result;
@@ -161,7 +165,7 @@ public class MessageController extends BaseController {
      * @param toUserId 对方用户编号
      * @param lastTime 上一条读取时间
      * @param pageSize 分页编号
-     * @param nowUserId 当前用户编号
+     * @param token   token
      *{
      *                 "id": 102098442918035456,  消息id
      *                 "userName": "马晓晨", //发送者名字
@@ -176,10 +180,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/detail")
-    public Object detail(Long toUserId , Long lastTime , int pageSize , Long nowUserId) {
+    public Object detail(Long toUserId , Long lastTime , int pageSize , String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId , lastTime , pageSize , nowUserId);
+            QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId , lastTime , pageSize , user.getId());
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(messageDetailViewQueryResult);
@@ -203,7 +208,7 @@ public class MessageController extends BaseController {
      * 消息展示list
      *
      * @param lastTime 上次读取时间
-     * @param nowUserId 当前用户ID
+     * @param token   token
      * @param pageSize 分页大小
      *
      *                 "parent": 72400059177631744, 分组id
@@ -218,10 +223,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/showList")
-    public Object showList(Long lastTime , Long nowUserId , Integer pageSize) {
+    public Object showList(Long lastTime , String token , Integer pageSize) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            QueryResult<MessageShowLIstView> list = messageService.list(nowUserId , lastTime , pageSize);
+            QueryResult<MessageShowLIstView> list = messageService.list(user.getId() , lastTime , pageSize);
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(list);
@@ -241,7 +247,7 @@ public class MessageController extends BaseController {
 
     /**
      * 查看第一条的系统消息时间和未读消息数量
-     * @param nowUserId 当前用户id
+     * @param token   token
      *
      *         "sysTime": 1547437340571,//最新一条的时间
      *         "sysUnReadSum": 8 未读消息数量
@@ -249,10 +255,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/noticesFirstInfo")
-    public Object noticesFirstInfo(Long nowUserId) {
+    public Object noticesFirstInfo(String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            NoticesFirstView noticesFirstView = messageService.noticesFirstInfo(nowUserId);
+            NoticesFirstView noticesFirstView = messageService.noticesFirstInfo(user.getId());
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(noticesFirstView);
@@ -272,7 +279,7 @@ public class MessageController extends BaseController {
 
     /**
      * 是否有未读消息
-     * @param nowUserId 当前用户id
+     * @param token   token
      *
      *     "success": true,
      *     "errorCode": "",
@@ -282,10 +289,11 @@ public class MessageController extends BaseController {
      * @return
      */
     @PostMapping("/unReadMsg")
-    public Object unReadMsg(Long nowUserId) {
+    public Object unReadMsg(String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            int unReadMsg = messageService.unReadMsg(nowUserId);
+            int unReadMsg = messageService.unReadMsg(user.getId());
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(unReadMsg);
