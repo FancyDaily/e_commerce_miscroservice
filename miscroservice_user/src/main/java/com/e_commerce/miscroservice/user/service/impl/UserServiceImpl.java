@@ -19,8 +19,6 @@ import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
-import javafx.concurrent.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -2474,27 +2472,36 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         //等级提升
         Integer level = user.getLevel();
+        //授信提升
+        Long creditLimit = user.getCreditLimit();
         if (growthValue >= LevelEnum.LEVEL_ONE.getMin() && growthValue < LevelEnum.LEVEL_ONE.getMax()) {
             level = LevelEnum.LEVEL_ONE.getLevel();
+            creditLimit= LevelEnum.LEVEL_ONE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
             level = LevelEnum.LEVEL_TWO.getLevel();
+            creditLimit = LevelEnum.LEVEL_TWO.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_THREE.getMin() && growthValue < LevelEnum.LEVEL_THREE.getMax()) {
             level = LevelEnum.LEVEL_THREE.getLevel();
+            creditLimit = LevelEnum.LEVEL_THREE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_FOUR.getMin() && growthValue < LevelEnum.LEVEL_FOUR.getMax()) {
             level = LevelEnum.LEVEL_FOUR.getLevel();
+            creditLimit = LevelEnum.LEVEL_FOUR.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_FIVE.getMin() && growthValue < LevelEnum.LEVEL_FIVE.getMax()) {
             level = LevelEnum.LEVEL_FIVE.getLevel();
+            creditLimit = LevelEnum.LEVEL_FIVE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_SIX.getMin() && growthValue < LevelEnum.LEVEL_SIX.getMax()) {
             level = LevelEnum.LEVEL_SIX.getLevel();
+            creditLimit = LevelEnum.LEVEL_SIX.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_SEVEN.getMin() && growthValue < LevelEnum.LEVEL_SEVEN.getMax()) {
             level = LevelEnum.LEVEL_SEVEN.getLevel();
+            creditLimit = LevelEnum.LEVEL_SEVEN.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_EIGHT.getMin()) {
             level = LevelEnum.LEVEL_EIGHT.getLevel();
+            creditLimit = LevelEnum.LEVEL_EIGHT.getCredit();
         }
 
         user.setLevel(level);
-
-        //TODO 授信总额提升 等待规则出来
+        user.setCreditLimit(creditLimit);
 
         //更新
         //updater

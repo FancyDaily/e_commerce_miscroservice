@@ -142,7 +142,7 @@ public class UserCommonController {
 	 * @param type 类型 1、求助 2、服务
 	 */
 	public void addPublishTimes(TUser user, int type) {
-		userService.addPublishTimes(user, type);
+//		userService.addPublishTimes(user, type);
 	}
 
 	/**
@@ -152,6 +152,7 @@ public class UserCommonController {
 	 * @return
 	 */
 	public boolean isCareUser(Long userId, Long userFollowId) {
-		return userService.isCareUser(userId, userFollowId);
+//		return userService.isCareUser(userId, userFollowId);
+		return false;
 	}
 }
