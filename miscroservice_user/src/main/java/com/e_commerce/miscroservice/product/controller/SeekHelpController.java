@@ -306,15 +306,16 @@ public class SeekHelpController extends BaseController {
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				productService.submitSeekHelp(user, param, token);
+				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
 				productService.submitService(user, param, token);
+				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else {
 				result.setSuccess(false);
 				result.setMsg("请选择发布类型");
 			}
-			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
 			logger.warn(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
