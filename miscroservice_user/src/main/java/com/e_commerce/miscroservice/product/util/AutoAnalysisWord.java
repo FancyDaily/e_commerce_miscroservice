@@ -9,6 +9,7 @@ import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -1494,7 +1495,7 @@ public class AutoAnalysisWord {
 
         try {
             List<String> allRegions = Files.readAllLines(Paths
-                    .get(AutoAnalysisWord.class.getResource("/properties/" + ADDRESS_NAME).toURI()));
+                    .get(new ClassPathResource("/properties/" + ADDRESS_NAME).getURI()));
 
             allRegionCache = HashBasedTable.create();
 
@@ -1516,7 +1517,7 @@ public class AutoAnalysisWord {
             }
 
 
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new RuntimeException("load address has error " + e.getMessage());
         }
     }

@@ -23,7 +23,6 @@ import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -49,7 +48,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	MessageCommonController messageService;
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public int saveOrder(TOrder order) {
 		/*
 		 * 已完成的订单是可以显示的 可见状态还是为1
@@ -78,6 +77,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
 		// 为发布者增加一条订单关系
+
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -142,6 +142,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(order);
+		TService product = productService.getProductById(order.getServiceId());
+		//报名日期
+		String enrollDate = product.getEnrollDate();
+		if (StringUtil.isNotEmpty(enrollDate)) {
+			String[] enrollDateArray = enrollDate.split(",");
+			returnView.setEnrollDate(enrollDateArray);
+		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
 		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
@@ -976,7 +983,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
 			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
 			if (temOrder == null) {
-				enrollDate.add(DateUtil.getDate(tempStart));
+				enrollDate.add(DateUtil.commonFormat(tempStart, "yyyy-MM-dd"));
 			}
 			tempStart = tempResult.getStartTimeMill();
 			tempEnd = tempResult.getEndTimeMill();
