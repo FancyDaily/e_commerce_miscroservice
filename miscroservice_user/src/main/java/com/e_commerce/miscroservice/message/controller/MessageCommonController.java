@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
+import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.dao.EventDao;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
@@ -166,4 +167,11 @@ public class MessageCommonController extends BaseController {
      * @return
      */
     public TFormid selectCanUseFormId(Long findTime , Long userId){return formidDao.selectAllFormIdCanUse(findTime , userId);}
+
+    /**
+     * 获取所有的评价标签
+     * @param key
+     * @return
+     */
+    public RemarkLablesView getAllRemarkLables(String key){return publishService.getAllRemarkLables(key);}
 }

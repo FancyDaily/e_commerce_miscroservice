@@ -71,6 +71,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		} else { //新插入的是可见的
 			order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 		}
+		order.setId(null);
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {

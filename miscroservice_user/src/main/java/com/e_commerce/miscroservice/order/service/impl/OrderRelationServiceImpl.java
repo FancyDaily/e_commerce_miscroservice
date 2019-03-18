@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.*;
@@ -86,16 +87,20 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     public long enroll(Long orderId, Long userId, String date, Long serviceId) throws ParseException {
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
-        TOrder order = new TOrder();
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
         TService service = productCommonController.getProductById(serviceId);
-        try {
-            order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
-        } catch (Exception e){
-            throw new MessageException("401", "对方余额不足");
+        if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
+            //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
+            try {
+                order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
+            } catch (Exception e){
+                throw new MessageException("401", "对方余额不足");
+            }
+            if(order == null){
+                throw new MessageException("401", "该日期已超出可报名日期");
+            }
         }
-        if(order == null){
-            throw new MessageException("401", "该日期已超出报名日期");
-        }
+
         String errorMsg = enrollCantByOrder(order , nowTime);
         if (errorMsg != null){
             //如果错误消息不为空，说明该订单有部分问题不允许报名，抛出错误信息，并在外面接到这个异常后将报名日历移除
@@ -1336,6 +1341,58 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         reportDao.saveOneOrder(report);
 
 
+    }
+
+
+    /**
+     * 获取评价标签
+     *
+     * @param type
+     * @param credit
+     * @param major
+     * @param attitude
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "报名成功",
+     *     "data": "与描述不符,态度差,不守时,不专业,服务差" 评价标签逗号分割
+     *
+     * @return
+     */
+    public String getRemarkLabels(int type , int credit, int major, int attitude){
+        RemarkLablesView remarkLablesView = null;
+        String lables = "";
+        if (type == 1){
+            //如果是求助标签
+            remarkLablesView = messageCommonController.getAllRemarkLables("seekHelpRemark");
+        } else {
+            remarkLablesView = messageCommonController.getAllRemarkLables("serviceRemark");
+        }
+        if (remarkLablesView == null){
+            return lables;
+        }
+        if (credit > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(remarkLablesView.getGoodCredit()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(remarkLablesView.getBadCredit()).toString();
+        }
+        if (major > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getGoodMajor()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getBadMajor()).toString();
+        }
+        if (attitude > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getGoodAttitude()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getBadAttitude()).toString();
+        }
+        return lables;
     }
     /**
      * 获取时间赠礼（接受或者拒绝）

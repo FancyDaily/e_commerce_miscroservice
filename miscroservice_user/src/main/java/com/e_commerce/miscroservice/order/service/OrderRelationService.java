@@ -165,4 +165,14 @@ public interface OrderRelationService {
      * @param serviceId
      */
     void removeCanEnrollDate(String date , Long serviceId);
+
+    /**
+     * 获取评价标签
+     * @param type
+     * @param credit
+     * @param major
+     * @param attitude
+     * @return
+     */
+    String getRemarkLabels(int type , int credit, int major, int attitude);
 }
