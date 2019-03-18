@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.message.service;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
@@ -57,4 +58,11 @@ public interface PublishService {
      * @return
      */
     List<BroadcastView> getBroadcast(String length , String width);
+
+    /**
+     * 解析remark的lables
+     * @param key
+     * @return
+     */
+    RemarkLablesView getAllRemarkLables(String key);
 }

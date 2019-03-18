@@ -65,6 +65,43 @@ public class OrderRelationController extends BaseController {
     }
 
     /**
+     * 根据评分返回评价标签
+     *
+     * @param type 类型 1-求助 2-服务
+     * @param credit 可信评分
+     * @param major 态度评分
+     * @param attitude 专业评分
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "报名成功",
+     *     "data": "与描述不符,态度差,不守时,不专业,服务差" 评价标签逗号分割
+     *
+     * @return
+     */
+    @RequestMapping("/getRemarkLabels")
+    public Object getRemarkLabels(int type , int credit, int major, int attitude) {
+        AjaxResult result = new AjaxResult();
+        try {
+            String msg = orderRelationService.getRemarkLabels(type, credit, major, attitude);
+            result.setSuccess(true);
+            result.setData(msg);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查看失败");
+        }
+        return result;
+    }
+
+    /**
      * 取消报名
      *
      * @param orderId   订单id
@@ -429,7 +466,7 @@ public class OrderRelationController extends BaseController {
      *     "success": true,
      *     "errorCode": "",
      *     "msg": "查看成功",
-     *     "data": 0 如果是0 就直接取消或者去选人页面，如果不是零 弹一个弹窗，告诉他每个人要赔付这个数值的前，问是否继续
+     *     "data": 0 状态判断
      *
      * @return
      */

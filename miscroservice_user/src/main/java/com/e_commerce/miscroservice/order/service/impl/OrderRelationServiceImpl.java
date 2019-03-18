@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.*;
@@ -86,16 +87,20 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     public long enroll(Long orderId, Long userId, String date, Long serviceId) throws ParseException {
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
-        TOrder order = new TOrder();
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
         TService service = productCommonController.getProductById(serviceId);
-        try {
-            order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
-        } catch (Exception e){
-            throw new MessageException("401", "对方余额不足");
+        if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
+            //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
+            try {
+                order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
+            } catch (Exception e){
+                throw new MessageException("401", "对方余额不足");
+            }
+            if(order == null){
+                throw new MessageException("401", "该日期已超出可报名日期");
+            }
         }
-        if(order == null){
-            throw new MessageException("401", "该日期已超出报名日期");
-        }
+
         String errorMsg = enrollCantByOrder(order , nowTime);
         if (errorMsg != null){
             //如果错误消息不为空，说明该订单有部分问题不允许报名，抛出错误信息，并在外面接到这个异常后将报名日历移除
@@ -125,15 +130,17 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         } else {
             //如果是求助
-            //TODO 如果未实名
+            if (nowUser.getAuthenticationStatus() != 2){
+                throw new MessageException("499", "对不起，您未实名，无法报名求助");
+            }
         }
 
         order.setEnrollNum(order.getEnrollNum() + 1);
         orderDao.updateByPrimaryKey(order);
 
-        //TODO 报名的通知（第一个报名的，或者第一个参与的（就看刘维怎么定，一个人报了取消又报了是不是还通知））
+        //报名的通知
 
-        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){//TODO 第一个报名的人
+        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
             //如果是求助
             if (orderRelationshipDao.selectJoinUser(orderId) == 0){
                 //如果是首次报名
@@ -435,7 +442,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     //如果是服务
                     title = "服务者已经接单";
                     content = new StringBuilder().append("您报名的“").append(order.getServiceName())
-                            .append("服务，小伙伴").append(nowUser.getName())
+                            .append("”服务，小伙伴").append(nowUser.getName())
                             .append("已确认接单咯。记得关注动态和保持与他的联系哦！").toString();
                 }
 
@@ -538,7 +545,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
-                //TODO 发送通知
+                //发送通知
                 String title = "";
                 String content = "";
                 if (type == 0){
@@ -599,7 +606,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                                 .append("”因求助者长时间未选定服务者，已默认下架处理啦~不过还有更多晓主等待您的帮助哦！").toString();
                     } else {
                         //如果是服务
-                        //TODO 文本没有
+                        title = "服务下架通知";
+                        content =new StringBuilder().append("您报名的服务“").append(order.getServiceName())
+                                .append("”，因超出结束时间已下架，您的互助时已解除冻结。错过是为了更好的相遇哦，不要灰心~").toString();
                     }
 
                 }
@@ -658,6 +667,57 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     orderRelationshipList.get(i).setUpdateUserName(nowUser.getName());
                     orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
                     //发送消息
+                    String title = "服务者已开始服务";
+                    String content = "";
+
+                    //发送通知
+                    TFormid formid = findFormId(nowTime, toUser);
+                    if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+                        //如果是求助
+                        content = new StringBuilder().append("在“").append(order.getServiceName())
+                                .append("”的求助中，服务者已经确认开始服务。如有异常，您可以发起投诉。").toString();
+                        if (formid != null) {
+                            try {
+                                List<String> msg = new ArrayList<>();
+                                String orderType = "2";//服务通知的接收者是报名者
+                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                msg.add("报告，服务者已就位");
+                                msg.add(order.getServiceName());
+                                msg.add(changeTime(order.getStartTime()));
+                                msg.add(changeAddress(order.getAddressName()));
+                                msg.add("服务者已点击「确认开始」。如有异常，您可以发起投诉。");
+                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_12 , parameter);
+                                formid.setIsValid("0");
+                                messageCommonController.updateFormId(formid);
+                            } catch (Exception e) {
+                                logger.error("发送服务通知失败");
+                            }
+                        }
+                    } else {
+                        //如果是服务
+                        content = new StringBuilder().append("您报名的“").append(order.getServiceName())
+                                .append("”的服务中，服务者已经确认开始服务。如有异常，您可以发起投诉。").toString();
+                        if (formid != null) {
+                            try {
+                                List<String> msg = new ArrayList<>();
+                                String orderType = "2";//服务通知的接收者是报名者
+                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                msg.add("报告，服务者已就位");
+                                msg.add(order.getServiceName());
+                                msg.add(nowUser.getName());
+                                msg.add(changeTime(order.getStartTime()));
+                                msg.add("服务者已点击「确认开始」。如有异常，您可以发起投诉。");
+                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.serv_setTemplate_13 , parameter);
+                                formid.setIsValid("0");
+                                messageCommonController.updateFormId(formid);
+                            } catch (Exception e) {
+                                logger.error("发送服务通知失败");
+                            }
+                        }
+                    }
+
+                    messageCommonController.messageSave(orderId , nowUser , title , content , toUser.getId() , nowTime);
+
                 }
             }
             orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList, orderRelationshipIdList);
@@ -803,7 +863,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             nowUser.setUpdateUser(nowUser.getId());
             nowUser.setUpdateUserName(nowUser.getName());
             userCommonController.updateByPrimaryKey(nowUser);
-            //TODO 插入互助时方面的成长值（查看今天支付多少次，然后再看加不加）有最高次数限制
         }
         //查看待支付人数，如果和支付人数相等，将发布用户状态置为待评价或已无效
         long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
@@ -825,11 +884,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
             if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
                 //如果是互助时，执行与公益时不同的操作
-                if (nowUser.getPayNum() == 0) {
-                    //如果是首次完成互助，增加成长值
-                    //TODO 如果是首次完成，那么要增加成长值
-                    logger.error("//TODO 如果是首次完成，那么要增加成长值");
-                }
+                //增加完成求助成长值
+                userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE , seekHelpDoneNum);
             }
         } else {
             //如果支付成功的人都是支付的0
@@ -1286,6 +1342,58 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
 
     }
+
+
+    /**
+     * 获取评价标签
+     *
+     * @param type
+     * @param credit
+     * @param major
+     * @param attitude
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "报名成功",
+     *     "data": "与描述不符,态度差,不守时,不专业,服务差" 评价标签逗号分割
+     *
+     * @return
+     */
+    public String getRemarkLabels(int type , int credit, int major, int attitude){
+        RemarkLablesView remarkLablesView = null;
+        String lables = "";
+        if (type == 1){
+            //如果是求助标签
+            remarkLablesView = messageCommonController.getAllRemarkLables("seekHelpRemark");
+        } else {
+            remarkLablesView = messageCommonController.getAllRemarkLables("serviceRemark");
+        }
+        if (remarkLablesView == null){
+            return lables;
+        }
+        if (credit > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(remarkLablesView.getGoodCredit()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(remarkLablesView.getBadCredit()).toString();
+        }
+        if (major > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getGoodMajor()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getBadMajor()).toString();
+        }
+        if (attitude > 3){
+            //如果是4星及以上
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getGoodAttitude()).toString();
+        } else {
+            //如果是3星及以下
+            lables = new StringBuilder().append(lables).append(",").append(remarkLablesView.getBadAttitude()).toString();
+        }
+        return lables;
+    }
     /**
      * 获取时间赠礼（接受或者拒绝）
      * @param getUser
@@ -1394,7 +1502,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         userTimeRecord.setUpdateUserName(nowUser.getName());
         userTimeRecord.setUpdateTime(nowTime);
         userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
-        //TODO 插入流水表
+        //插入流水表
 
         userCommonController.insertUserTimeRecords(userTimeRecord);
         long userTimeRecordId = userTimeRecord.getId();//插入方法返回流水表主键
@@ -1670,12 +1778,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
             if (orderRelationship.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
                 //如果收取的是互助时，完成互助时相关事情
-                if (toUser.getPayNum() == 0) {
-                    //如果是首次完成互助
-                    //TODO 奖励互助时 增加成长值
-                    logger.error("//TODO 奖励互助时 增加成长值");
-                }
-                //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）
+                //插入成长值
+                userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE , 1);
                 logger.error(" //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）");
                 //更新被支付用户的时间，并且将其完成求助数量+1
                 toUser.setSurplusTime(toUser.getSurplusTime() + payment);
@@ -1683,8 +1787,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //TODO 发送互助时系统通知
             } else {
                 //如果收取的是公益时，完成公益时相关事情
-                //TODO 看一下是不是第一次完成公益时 增加成长值
-                //TODO 看一下是不是今天第一次完成公益时 增加成长值
+                //完成公益时 增加成长值
+                userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE , 1);
                 //更新被支付用户的公益时间
                 toUser.setPublicWelfareTime(toUser.getSurplusTime() + payment);
                 //TODO 发送公益时系统通知
@@ -1708,7 +1812,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             userTimeRecord.setUpdateUserName(nowUser.getName());
             userTimeRecord.setUpdateTime(nowTime);
             userTimeRecord.setIsValid("1");
-            //TODO 插入 支付流水
+            userCommonController.insertUserTimeRecords(userTimeRecord);
         } else {
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
         }
@@ -1829,10 +1933,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             return msg;
         }
         if (order.getSource() == 2) {
-            if (false/*order.getOpenAuth() == 2*/) {//TODO 马晓晨的字段
+            if (order.getOpenAuth() == 2) {
                 // 如果是仅组织内成员可见
-                //TODO 调用许方毅 是否是组内成员
-                if (false) {
+                boolean isCompany = false;
+                String[] companIds = nowUser.getCompanyIds().split(",");
+                for (int i =0 ;i < companIds.length ; i++){
+                    if (order.getCompanyId().equals(companIds[i])) {
+                        // 属于组织成员
+                        isCompany = true;
+                        break;
+                    }
+                }
+                if (isCompany) {
                     // 不属于组织成员
                     msg = "对不起，该互助仅允许组织内成员报名，您非组织内成员，无法报名";
                     return msg;
