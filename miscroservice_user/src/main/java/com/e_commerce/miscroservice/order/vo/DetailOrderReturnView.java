@@ -40,6 +40,10 @@ public class DetailOrderReturnView {
 	 * 封面图地址
 	 */
 	private String coverImgUrl;
+	/**
+	 * 可报名日期
+	 */
+	private String[] enrollDate;
 
 	public String getServiceIdString() {
 		if (order != null) {

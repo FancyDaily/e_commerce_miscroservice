@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
+import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
@@ -22,7 +24,6 @@ import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -44,9 +45,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	OrderRelationService orderRelationService;
 	@Autowired
 	OrderRecordDao orderRecordDao;
+	@Autowired
+	MessageCommonController messageService;
+	@Autowired
+	EvaluateDao evaluateDao;
+
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public int saveOrder(TOrder order) {
 		/*
 		 * 已完成的订单是可以显示的 可见状态还是为1
@@ -69,12 +75,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		} else { //新插入的是可见的
 			order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 		}
+		order.setId(null);
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
 			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
 		// 为发布者增加一条订单关系
+
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -139,6 +147,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(order);
+		TService product = productService.getProductById(order.getServiceId());
+		//报名日期
+		String enrollDate = product.getEnrollDate();
+		if (StringUtil.isNotEmpty(enrollDate)) {
+			String[] enrollDateArray = enrollDate.split(",");
+			returnView.setEnrollDate(enrollDateArray);
+		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
 		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
@@ -164,6 +179,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 			if (tOrderRelationship == null) {
+				tOrderRelationship = new TOrderRelationship();
 				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
@@ -191,8 +207,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	public QueryResult<PageEnrollAndChooseReturnView> enrollList(Integer pageNum, Integer pageSize, TUser user) {
 		QueryResult<PageEnrollAndChooseReturnView> result = new QueryResult<>();
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		List<PageEnrollAndChooseReturnView> listReturnView = new ArrayList<>();
 		Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
 		List<TOrderRelationship> pageEnrollAndChooseList = orderRelationshipDao.pageEnrollAndChooseList(pageNum, pageSize, user.getId());
@@ -241,8 +256,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public QueryResult<PageOrderReturnView> listMineOrder(Integer pageNum, Integer pageSize, TUser user) {
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		QueryResult<PageOrderReturnView> result = new QueryResult<>();
 		List<PageOrderReturnView> listReturnView = new ArrayList<>();
 		//列出当前用户的所有订单关系
@@ -356,19 +370,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	public DetailMineOrderReturnView detailMineOrder(TUser user, Long orderId) {
 		DetailMineOrderReturnView returnView = new DetailMineOrderReturnView();
-		//TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		TOrderRelationship relationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 		TOrder tOrder = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(tOrder);
-		if (tOrder.getConfirmNum() == 0) {
-			//没有一个用户  只显示订单就可以
-			returnView.setStatus(0);
-			returnView.setRecord(new ArrayList<>());
-			returnView.setListUserView(new ArrayList<>());
-			returnView.setListDesc(new ArrayList<>());
-			return returnView;
-		}
 		// 待支付前为投诉 待支付后为举报 1、投诉 2、举报
 		if (Objects.equals(relationship.getStatus(), OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())) {
 			returnView.setReportAction(1);
@@ -381,6 +386,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		List<TServiceDescribe> productDesc = productService.getProductDesc(tOrder.getServiceId());
 		returnView.setListDesc(productDesc);
 		if (Objects.equals(user.getId(), tOrder.getCreateUser())) { //当前用户是发布者
+			if (tOrder.getConfirmNum() == 0) {
+				//没有一个用户  只显示订单就可以
+				returnView.setStatus(0);
+				returnView.setRecord(new ArrayList<>());
+				returnView.setListUserView(new ArrayList<>());
+				returnView.setListDesc(new ArrayList<>());
+				return returnView;
+			}
+			// 获取评价列表
+			List<Long> orderIds = new ArrayList<>();
+			orderIds.add(orderId);
+			List<TEvaluate> listEvaluates = evaluateDao.selectEvaluateInOrderIdsAndByUserId(orderIds, user.getId());
+			returnView.setListEvalute(listEvaluates);
 			//获取所有接单用户的订单关系
 			List<TOrderRelationship> listRelationship = orderRelationshipDao.getReceiver(orderId);
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {//当前用户是求助者
@@ -463,6 +481,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				returnView.setListUserView(listUserView);
 			}
 		} else { //当前用户是接单者
+			List<Long> orderIds = new ArrayList<>();
+			orderIds.add(orderId);
+			List<TEvaluate> listEvaluates = evaluateDao.selectEvaluateInOrderIdsAndByUserId(orderIds, user.getId());
+			returnView.setListEvalute(listEvaluates);
 			//对接单者来说 发布者发布的是求助  接单者就是服务者  就是一条服务记录 反之亦然
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				tOrder.setType(ProductEnum.TYPE_SERVICE.getValue());
@@ -587,7 +609,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			throw new MessageException("501", "用户授信不足");
 		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
-		order.setId(snowflakeIdWorker.nextId());
+//		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
 		order.setServiceId(service.getId());
@@ -605,13 +627,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
-				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				return order;
-				// TODO 调用订单结束定时任务
+				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
-				return order;
+				TOrder oldOrder = orderDao.findProductOrder(service.getId(), order.getStartTime(), order.getEndTime());
+				return oldOrder;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
@@ -644,16 +666,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 调用其他方法派生下一张订单
 		 */
 		//下架订单  并将状态置为可见状态
+		Long currentTime = System.currentTimeMillis();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		order.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
 		order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
-		order.setUpdateTime(System.currentTimeMillis());
+		order.setUpdateTime(currentTime);
 		orderDao.updateByPrimaryKey(order);
 		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
 			lowerFrameSeekHelpOrder(order);
+			String title = "";
+			String content = "";
+			// TODO  发送消息
+			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 		} else { // 是服务
 			lowerFrameServiceOrder(order);
+			String title = "";
+			String content = "";
+			// TODO 发送消息
+			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 		}
+		// TODO 调用定时 派生一下账订单
 	}
 
 	/**
@@ -737,7 +769,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
-	 * @param order      新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
+	 * @param order      新的订单
 	 * @return
 	 */
 	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {
@@ -753,15 +785,18 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String endDateTime = enrollDate + product.getEndTimeS();
 		Long startDateTimeMill = DateUtil.parse(startDateTime);
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
+		order.setStartTime(startDateTimeMill);
+		order.setEndTime(endDateTimeMill);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //订单已存在
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+
 		}
 		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
 		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
@@ -798,13 +833,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //有这张订单，不需要派生
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		order.setStartTime(startDateTimeMill);
@@ -965,16 +1000,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
 			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
 			if (temOrder == null) {
-				enrollDate.add(DateUtil.getDate(tempStart));
+				enrollDate.add(DateUtil.commonFormat(tempStart, "yyyy-MM-dd"));
 			}
 			tempStart = tempResult.getStartTimeMill();
 			tempEnd = tempResult.getEndTimeMill();
 		}
 		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条
+		order.setStartTime(startTimeMill);
+		order.setEndTime(endTimeMill);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startTimeMill, endTimeMill);
 		if (oldOrder != null) {
-			order = oldOrder;
+			order.setStartTime(startTimeMill);
+			order.setEndTime(endTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 

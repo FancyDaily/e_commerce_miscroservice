@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppMessageConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceSummary;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -168,7 +169,7 @@ public class ServiceController extends BaseController{
 	 * @param request
 	 * @return
 	 */
-	@PostMapping("/submit")
+//	@PostMapping("/submit")
 	public Object submitService(HttpServletRequest request, @RequestBody String token, ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
@@ -201,6 +202,56 @@ public class ServiceController extends BaseController{
 		}
 	}
 
+	/**
+	 * 发布精彩瞬间
+	 *
+	 * @param token tokne
+	 * @param serviceId serviceId
+	 * @param description 精彩瞬间描述
+	 * @param url 图片，逗号分割
+	 * @return
+	 */
+	@PostMapping("/sendServiceSummary")
+	public Object sendServiceSummary(String token, Long serviceId , String description , String url ) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			productService.sendServiceSummary(serviceId , description , url , user);
+			result.setSuccess(true);
+			result.setMsg("发布成功");
+			return result;
+		}  catch (Exception e) {
+			logger.error("发布失败"+ errInfo(e));
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("发布失败");
+			return result;
+		}
+	}
+
+
+	/**
+	 * 查看精彩瞬间
+	 * @param serviceId
+	 * @return
+	 */
+	@PostMapping("/findServiceSummary")
+	public Object findServiceSummary(Long serviceId) {
+		AjaxResult result = new AjaxResult();
+		try {
+			TServiceSummary serviceSummary = productService.findServiceSummary(serviceId);
+			result.setSuccess(true);
+			result.setMsg("查看成功");
+			result.setData(serviceSummary);
+			return result;
+		}  catch (Exception e) {
+			logger.error("查看失败"+ errInfo(e));
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查看失败");
+			return result;
+		}
+	}
 
 
 }

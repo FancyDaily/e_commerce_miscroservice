@@ -88,6 +88,5 @@ public interface MessageService {
      */
     int unReadMsg(Long nowUserId);
 
-    String test(Long orderId, List<Long> userIdList);
 
 }

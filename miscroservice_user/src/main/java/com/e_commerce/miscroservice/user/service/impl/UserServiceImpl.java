@@ -3041,19 +3041,19 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
     }
 
-    /**
-     * 技能校验
-     *
-     * @param user
-     * @param skill
-     * @param isModify
-     */
-    private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
-        Long userId = user.getId();
-        // 非空校验 必要元素：技能名称、封面图、id
-        if (skill == null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名称、封面图、技能编号都不能为空！");
-        }
+	/**
+	 * 技能校验
+	 *
+	 * @param user
+	 * @param skill
+	 * @param isModify
+	 */
+	private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
+		Long userId = user.getId();
+		// 非空校验 必要元素：技能名称、封面图、id
+		if (skill == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名称、封面图、技能编号都不能为空！");
+		}
 
         String name = skill.getName();
 
@@ -3101,5 +3101,20 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         return userCompanies.get(0).getCompanyId();
     }
+
+	@Override
+	public void addPublishTimes(TUser user, int type) {
+		if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
+			user.setSeekHelpPublishNum(user.getSeekHelpPublishNum() + 1);
+		} else {
+			user.setServePublishNum(user.getServePublishNum() + 1);
+		}
+		userDao.updateByPrimaryKey(user);
+	}
+
+	@Override
+	public boolean isCareUser(Long userId, Long userFollowId) {
+		return userFollowDao.countUserFollow(userId, userFollowId).equals(1) ? true : false;
+	}
 
 }

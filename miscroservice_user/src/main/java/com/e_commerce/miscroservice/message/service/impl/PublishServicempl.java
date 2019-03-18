@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 
+import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.dao.PublishDao;
 
 import com.e_commerce.miscroservice.message.service.PublishService;
@@ -53,14 +54,13 @@ public class PublishServicempl implements PublishService {
      * @param value
      * @param extend
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void pulishIn( Long id , String key , String value , String extend ) {
         TPublish publish = new TPublish();
         if (id == null) {
             id = snowflakeIdWorker.nextId();
         }
         long nowTime = System.currentTimeMillis();
-        publish.setId(id);
         publish.setMainKey(key);
         publish.setValue(value);
         publish.setExtend(extend);
@@ -120,6 +120,25 @@ public class PublishServicempl implements PublishService {
         return publishDao.selecePublish(key).getValue();
     }
 
+
+    /**
+     * 解析remark的lables
+     * @param key
+     * @return
+     */
+    public RemarkLablesView getAllRemarkLables(String key){
+        String value = publishDao.selecePublish(key).getValue();
+        RemarkLablesView remarkLablesView = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<RemarkLablesView> listType = objectMapper.readValue(value,new TypeReference<List<RemarkLablesView>>() { });
+            return  listType.get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表"+key+"关键字的json出错，" + e.getMessage());
+            return remarkLablesView;
+        }
+    }
 
     /**
      * 根据分辨率返回不同类型封面图

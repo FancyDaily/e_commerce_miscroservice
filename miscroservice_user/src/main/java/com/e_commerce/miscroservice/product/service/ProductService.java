@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.product.service;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceSummary;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
@@ -114,4 +115,20 @@ public interface ProductService {
 	 * @param service
 	 */
 	void updateServiceByKey(TService service);
+
+	/**
+	 * 发布精彩瞬间
+	 * @param serviceId
+	 * @param description
+	 * @param url
+	 * @param nowUser
+	 */
+	void sendServiceSummary(Long serviceId , String description , String url , TUser nowUser);
+
+	/**
+	 * 查找精彩瞬间
+	 * @param serviceId
+	 * @return
+	 */
+	TServiceSummary findServiceSummary(Long serviceId);
 }

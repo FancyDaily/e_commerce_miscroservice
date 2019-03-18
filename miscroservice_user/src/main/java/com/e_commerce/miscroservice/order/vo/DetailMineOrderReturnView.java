@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.order.vo;
 
+import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRecord;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
@@ -38,5 +39,9 @@ public class DetailMineOrderReturnView {
 	 * 详情
 	 */
 	private List<TServiceDescribe> listDesc;
+	/**
+	 * 评价信息
+	 */
+	private List<TEvaluate> listEvalute;
 
 }

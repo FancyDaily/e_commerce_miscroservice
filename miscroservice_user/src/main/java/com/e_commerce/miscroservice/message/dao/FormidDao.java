@@ -30,4 +30,19 @@ public interface FormidDao {
      */
     long insert(TFormid formid);
 
+    /**
+     * 查找可用的formId
+     * @param findTime
+     * @param userId
+     * @return
+     */
+    TFormid selectAllFormIdCanUse(Long findTime , Long userId);
+
+    /**
+     * 更新formId
+     * @param formid
+     * @return
+     */
+    long updateFormId(TFormid formid);
+
 }

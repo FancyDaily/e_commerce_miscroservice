@@ -44,7 +44,7 @@ public interface MessageDao {
      * @param message
      * @return
      */
-    long insert(TMessage message);
+    TMessage insert(TMessage message);
 
     /**
      * 根据两个用户查看全部消息，时间降序
@@ -67,4 +67,12 @@ public interface MessageDao {
      * @return
      */
     long selectCountByUnreade(Long parent , Long lastTime);
+
+    /**
+     * 更新消息
+     * @param message
+     * @return
+     */
+    long updateUpdate(TMessage message);
+
 }

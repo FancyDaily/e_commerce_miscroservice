@@ -7,18 +7,17 @@ import lombok.Data;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,26 +28,26 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AutoAnalysisWord {
-    private final String ADDRESS_NAME = "address.txt";
-//            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
-    private final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
+    private static final String ADDRESS_NAME = "address.txt";
+    //            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
+    private static final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
     private Logger logger = LoggerFactory.getLogger(AutoAnalysisWord.class);
 
     /****省:<市:区>**/
-    private Table<String, String, List<String>> allRegionCache;
+    private static Table<String, String, List<String>> allRegionCache;
 
 
-    private Pattern numberTimePattern = Pattern.compile("\\d{1,2}[:点](整|一刻|\\d{2})?");
-    private Pattern characterTimePattern = Pattern.compile("(一|两|二|三|四|五|六|七|八|九|十|\\d{2})点(整|一刻)?");
-    private Pattern periodWeekPattern = Pattern.compile("((每|每个)?(周|星期|礼拜)(一|二|三|四|五|六|七|天|日|[1-7]))|((每|每个)天)");
-    private Pattern baiduLngPattern = Pattern.compile("(?<=\"lng\":)[\\d.]+");
-    private Pattern baiduLatPattern = Pattern.compile("(?<=\"lat\":)[\\d.]+");
-    private Pattern gaodePattern = Pattern.compile("(?<=\"location\":\")[\\d.,]+");
-    private Pattern isNumPattern = Pattern.compile("[0-9]*");
-    private Pattern regionPattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,}");
-    private Pattern normalPattern = Pattern.compile("一|二|三|四|五|六|七|八|九|十");
-    private Pattern weekTimesPattern = Pattern.compile("(本|这|这个|下|下下|下下个)(周|星期|礼拜)");
-    private Pattern dayPattern = Pattern.compile("(?<=周|星期|礼拜).*");
+    private static Pattern numberTimePattern = Pattern.compile("\\d{1,2}[:点](整|一刻|\\d{2})?");
+    private static Pattern characterTimePattern = Pattern.compile("(一|两|二|三|四|五|六|七|八|九|十|\\d{2})点(整|一刻)?");
+    private static Pattern periodWeekPattern = Pattern.compile("((每|每个)?(周|星期|礼拜)(一|二|三|四|五|六|七|天|日|[1-7]))|((每|每个)天)");
+    private static Pattern baiduLngPattern = Pattern.compile("(?<=\"lng\":)[\\d.]+");
+    private static Pattern baiduLatPattern = Pattern.compile("(?<=\"lat\":)[\\d.]+");
+    private static Pattern gaodePattern = Pattern.compile("(?<=\"location\":\")[\\d.,]+");
+    private static Pattern isNumPattern = Pattern.compile("[0-9]*");
+    private static Pattern regionPattern = Pattern.compile("[\\u4e00-\\u9fa5]{2,}");
+    private static Pattern normalPattern = Pattern.compile("一|二|三|四|五|六|七|八|九|十");
+    private static Pattern weekTimesPattern = Pattern.compile("(本|这|这个|下|下下|下下个)(周|星期|礼拜)");
+    private static Pattern dayPattern = Pattern.compile("(?<=周|星期|礼拜).*");
     //      autoAnalysisWord.parse("哈的点点滴滴我需要20个人");
 //        autoAnalysisWord.parse("哈的点点滴滴我要20个人");
 //        autoAnalysisWord.parse("哈的点点滴滴我要20人");
@@ -71,27 +70,27 @@ public class AutoAnalysisWord {
 
     private Pattern pushTypePattern = Pattern.compile("(发布|.*)(求助|服务|需要)");
 
-    private String DATE_LINE = "";
-    private Map<String, String> characterToNumberRelation = new HashMap<>();
-    private Map<String, Integer> monthAndDayRelation = new HashMap<>();
-    private Map<String, Integer> dateCharacterToNumberRelation = new HashMap<>();
-    private Map<String, Pattern> characterPatternCache = new LinkedHashMap<>();
-    private DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("yyyy");
-    private DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
-    private DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy" + DATE_LINE + "MM" + DATE_LINE + "dd");
-    private DateTimeFormatter weekDayFormatter = DateTimeFormatter.ofPattern("EEEE");
+    private static String DATE_LINE = "-";
+    private static Map<String, String> characterToNumberRelation = new HashMap<>();
+    private static Map<String, Integer> monthAndDayRelation = new HashMap<>();
+    private static Map<String, Integer> dateCharacterToNumberRelation = new HashMap<>();
+    private static Map<String, Pattern> characterPatternCache = new LinkedHashMap<>();
+    private static DateTimeFormatter yearFormatter = DateTimeFormatter.ofPattern("yyyy");
+    private static DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MM");
+    private static DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("dd");
+    private static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy" + DATE_LINE + "MM" + DATE_LINE + "dd");
+    private static DateTimeFormatter weekDayFormatter = DateTimeFormatter.ofPattern("EEEE");
 
 
-    {
+    static {
         init();
     }
 
     /**
      * 初始化配置
      */
-    private void init() {
+    private static void init() {
 
         loadAddress();
         loadConfig();
@@ -1490,11 +1489,12 @@ public class AutoAnalysisWord {
     /**
      * 加载所有地址
      */
-    private void loadAddress() {
+    private static void loadAddress() {
 
         try {
-            List<String> allRegions = Files.readAllLines(Paths
-                    .get(AutoAnalysisWord.class.getResource("/properties/" + ADDRESS_NAME).toURI()));
+
+            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/prop/"
+                    + ADDRESS_NAME).getInputStream(), "utf-8");
 
             allRegionCache = HashBasedTable.create();
 
@@ -1516,7 +1516,8 @@ public class AutoAnalysisWord {
             }
 
 
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
+
             throw new RuntimeException("load address has error " + e.getMessage());
         }
     }
@@ -1524,7 +1525,7 @@ public class AutoAnalysisWord {
     /**
      * 加载转换的关系
      */
-    private void loadConfig() {
+    private static void loadConfig() {
         characterToNumberRelation.put("整", "00");
         characterToNumberRelation.put("一刻", "15");
         characterToNumberRelation.put("一", "01");

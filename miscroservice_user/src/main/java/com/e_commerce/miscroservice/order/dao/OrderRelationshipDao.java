@@ -209,4 +209,11 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long orderId);
+
+	/**
+	 * 查询被选择
+	 * @param orderId
+	 * @return
+	 */
+	long selectJoinUser(Long orderId);
 }

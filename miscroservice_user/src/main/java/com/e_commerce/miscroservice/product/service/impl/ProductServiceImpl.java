@@ -1,9 +1,7 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
@@ -11,7 +9,9 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.product.dao.serviceSummaryDao;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
@@ -40,6 +40,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	private OrderCommonController orderService;
 	@Autowired
 	private UserCommonController userService;
+	@Autowired
+	private MessageCommonController messageService;
+
+	@Autowired
+	private serviceSummaryDao serviceSummaryDao;
 
 	/**
 	 * 功能描述:发布求助
@@ -52,7 +57,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		//校验是否合规
 		checkProductLegal(user, param);
 		TService service = param.getService();
@@ -66,7 +71,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			// TODO 从用户模块调用
 			// 查询当前用户所在的组织，写入到service中
 //			Long companyId = getOwnCompanyId(user.getId());
-//			param.getService().setCompanyId(companyId);+
+//			param.getService().setCompanyId(companyId);
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
 			submitCompanySeekHelp(user, param);
 		} else {// 个人发布
@@ -127,7 +132,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param user  当前发布用户
 	 * @param param 发布服务所需要的参数
 	 */
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void submitService(TUser user, ServiceParamView param, String token) {
 		//校验重复时间
@@ -182,8 +187,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(rollbackFor = Throwable.class)
 	@Override
 	public void lowerFrame(TUser user, Long productId) {
-		// TODO 写死的用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		logger.info("id为{}的用户对商品id为{}进行了下架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
@@ -234,8 +238,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Override
 	@Transactional(rollbackFor = Throwable.class)
 	public void upperFrame(TUser user, Long productId) {
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		logger.info("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
 		try {
 			TService tService = productDao.selectByPrimaryKey(productId);
@@ -251,6 +254,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			tService.setUpdateUserName(user.getName());
 			tService.setUpdateTime(System.currentTimeMillis());
 			//将该商品派生出来的订单的service_status进行修改
+
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
@@ -268,8 +272,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Override
 	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type) {
-		// TODO 写死用户
-		user = userService.getUserById(68813260748488704L);
+		user = userService.getUserById(user.getId());
 		QueryResult<PageMineReturnView> result = new QueryResult<PageMineReturnView>();
 		List<PageMineReturnView> listPageMineReturnView = new ArrayList<>();
 		//分页插件
@@ -317,10 +320,17 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public void autoLowerFrameService(TService service) {
+		Long currentTime = System.currentTimeMillis();
+		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+		service.setUpdateTime(currentTime);
 		productDao.updateByPrimaryKeySelective(service);
 		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
+		// TODO 发送系统消息
+		String title = "";
+		String content = "";
+		messageService.messageSave(service.getId(), new AdminUser(), title, content, service.getUserId(),currentTime);
 	}
 
 	@Override
@@ -378,6 +388,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		service.setServeNum(user.getServeNum()); // 用户的服务数量
 		service.setIsValid(IS_VALID_YES);
+		productDao.insert(service);
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (TServiceDescribe desc : listServiceDescribe) {
@@ -390,15 +401,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
 		}
-		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
-		productDao.insert(service);
 		if (listServiceDescribe != null && listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -427,21 +442,22 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		service.setServeNum(user.getServeNum()); // 用户的服务数量
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-		for (TServiceDescribe desc : listServiceDescribe) {
-			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
-				throw new MessageException("服务描述中包含敏感词");
-			}
-			desc.setId(snowflakeIdWorker.nextId());
-			desc.setServiceId(service.getId()); // 服务id关联
-			desc.setType(service.getType());
-			setCommonServcieDescField(user, desc);
-		}
+
 		if (Objects.equals(user.getAuthenticationStatus(), AppConstant.AUTH_STATUS_NO)) {
 			throw new MessageException("请先实名后再发布服务");
 		}
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
 		productDao.insert(service);
+//		checkRepeat(user, service, listServiceDescribe);
+		for (TServiceDescribe desc : listServiceDescribe) {
+			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
+				throw new MessageException("服务描述中包含敏感词");
+			}
+//			desc.setId(snowflakeIdWorker.nextId());
+			desc.setServiceId(service.getId()); // 服务id关联
+			desc.setType(service.getType());
+			setCommonServcieDescField(user, desc);
+		}
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
@@ -449,6 +465,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -496,6 +519,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		TService service = param.getService();
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
 		setServiceCommonField(user, service);
+		productDao.insert(service);
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (TServiceDescribe desc : listServiceDescribe) {
@@ -506,18 +530,23 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
 		}
-		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
-		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
+		//派生出第一张订单
+		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		// 增加成长值
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 		//增加发布次数
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
-
 
 
 	/**
@@ -556,6 +585,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			throw new MessageException("您不是公益组织，没有权限发布公益时的项目");
 		}
 		setServiceCommonField(user, service);
+		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
+//		checkRepeat(user, service, listServiceDescribe);
+		productDao.insert(service);
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
@@ -569,15 +601,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
 		}
-		// 查询最新的一条是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
-		checkRepeat(user, service, listServiceDescribe);
-		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -591,6 +627,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	private void companySubmitEachHelp(TUser user, ServiceParamView param) {
 		TService service = param.getService();
 		setServiceCommonField(user, service);
+		productDao.insert(service);
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
@@ -602,13 +639,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
 		}
-		productDao.insert(service);
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
 		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				updateServiceByKey(service);
+			}
+		});
 	}
 
 	/**
@@ -720,4 +763,35 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return true;
 	}
 
+
+	/**
+	 * 发布精彩瞬间
+	 * @param serviceId
+	 * @param description
+	 * @param url
+	 * @param nowUser
+	 */
+	public void sendServiceSummary(Long serviceId , String description , String url , TUser nowUser){
+		long nowTime = System.currentTimeMillis();
+		TServiceSummary serviceSummary = new TServiceSummary();
+		serviceSummary.setServiceId(serviceId);
+		serviceSummary.setDescription(description);
+		serviceSummary.setUrl(url);
+		serviceSummary.setCreateTime(nowTime);
+		serviceSummary.setCreateUser(nowUser.getId());
+		serviceSummary.setCreateUserName(nowUser.getName());
+		serviceSummary.setUpdateTime(nowTime);
+		serviceSummary.setUpdateUser(nowUser.getId());
+		serviceSummary.setUpdateUserName(nowUser.getName());
+		serviceSummaryDao.saveServiceSummary(serviceSummary);
+	}
+
+	/**
+	 * 查找精彩瞬间
+	 * @param serviceId
+	 * @return
+	 */
+	public TServiceSummary findServiceSummary(Long serviceId){
+		return serviceSummaryDao.selectServiceSummaryByServiceId(serviceId);
+	}
 }

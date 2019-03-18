@@ -1,12 +1,10 @@
 package com.e_commerce.miscroservice.order.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
-import org.redisson.api.annotation.REntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,14 +25,11 @@ public class OrderRelationController extends BaseController {
     @Autowired
     private OrderRelationService orderRelationService;
 
-    @Autowired
-    private OrderRelationshipDao orderRelationshipDao;
-
     /**
      * 报名
      *
      * @param orderId   订单id
-     * @param userId    用户id
+     * @param token   token
      * @param date      日期
      * @param serviceId 商品id
      *
@@ -45,10 +40,11 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @RequestMapping("/enroll")
-    public Object enroll(Long orderId, long userId, String date, Long serviceId) {
+    public Object enroll(Long orderId, String token, String date, Long serviceId) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            orderRelationService.enroll(orderId, userId, date, serviceId);
+            orderRelationService.enroll(orderId, user.getId(), date, serviceId);
             result.setSuccess(true);
             result.setMsg("报名成功");
         } catch (MessageException e) {
@@ -69,10 +65,47 @@ public class OrderRelationController extends BaseController {
     }
 
     /**
+     * 根据评分返回评价标签
+     *
+     * @param type 类型 1-求助 2-服务
+     * @param credit 可信评分
+     * @param major 态度评分
+     * @param attitude 专业评分
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "报名成功",
+     *     "data": "与描述不符,态度差,不守时,不专业,服务差" 评价标签逗号分割
+     *
+     * @return
+     */
+    @RequestMapping("/getRemarkLabels")
+    public Object getRemarkLabels(int type , int credit, int major, int attitude) {
+        AjaxResult result = new AjaxResult();
+        try {
+            String msg = orderRelationService.getRemarkLabels(type, credit, major, attitude);
+            result.setSuccess(true);
+            result.setData(msg);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查看失败");
+        }
+        return result;
+    }
+
+    /**
      * 取消报名
      *
      * @param orderId   订单id
-     * @param nowUserId 当前用户id
+     * @param token   token
      *
      *                  "success": true,
      *                  "msg": "取消报名成功"
@@ -80,10 +113,11 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @RequestMapping("/removeEnroll")
-    public Object removeEnroll(Long orderId, Long nowUserId) {
+    public Object removeEnroll(Long orderId, String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            orderRelationService.removeEnroll(orderId, nowUserId);
+            orderRelationService.removeEnroll(orderId, user.getId());
             result.setSuccess(true);
             result.setMsg("取消报名成功");
         } catch (MessageException e) {
@@ -105,7 +139,7 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId   订单id
      * @param type      类型 1-选人 2-开始 7-支付 9-评价
-     * @param nowUserId 操作用户id
+     * @param token   token
      *
      *                  <p>
      *                  {
@@ -124,10 +158,11 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @RequestMapping("/userList")
-    public Object userList(Long orderId, int type, Long nowUserId) {
+    public Object userList(Long orderId, int type, String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            List<UserInfoView> userInfoViewList = orderRelationService.userListByPperation(orderId, type, nowUserId);
+            List<UserInfoView> userInfoViewList = orderRelationService.userListByPperation(orderId, type, user.getId());
             result.setSuccess(true);
             result.setData(userInfoViewList);
             result.setMsg("查看成功");
@@ -148,7 +183,7 @@ public class OrderRelationController extends BaseController {
     /**
      * 选择用户
      * @param orderId 订单id
-     * @param nowUserId 当前用户id
+     * @param token   token
      * @param userIds 被操作者id
      *
      * {
@@ -162,7 +197,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @RequestMapping("/chooseUser")
-    public Object chooseUser(Long orderId, Long nowUserId, String userIds) {
+    public Object chooseUser(Long orderId, String token, String userIds) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -171,7 +207,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.chooseUser(orderId , nowUserId , userIdList);
+            List<String> errorMsgList = orderRelationService.chooseUser(orderId , user.getId() , userIdList);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("选人成功");
@@ -192,7 +228,7 @@ public class OrderRelationController extends BaseController {
     /**
      * 拒绝用户
      * @param orderId 订单ID
-     * @param nowUserId 当前用户ID
+     * @param token   token
      * @param userIds 用户id（多人逗号分割）
      *
      *     "success": true,
@@ -202,7 +238,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @RequestMapping("/unChooseUser")
-    public Object unChooseUser(Long orderId, Long nowUserId, String userIds) {
+    public Object unChooseUser(Long orderId, String token, String userIds) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -211,7 +248,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.unChooseUser(orderId ,userIdList ,nowUserId , 0);
+            List<String> errorMsgList = orderRelationService.unChooseUser(orderId ,userIdList ,user.getId() , 0);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("拒绝成功");
@@ -233,7 +270,7 @@ public class OrderRelationController extends BaseController {
      * 支付
      *
      * @param orderId 订单编号
-     * @param nowUserId 当前用户id
+     * @param token   token
      * @param userIds 被支付用户id（多人逗号分割）
      * @param payments 支付钱数（多人逗号分割）
      *
@@ -246,7 +283,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/pay")
-    public Object pay(Long orderId, Long nowUserId, String userIds , String payments) {
+    public Object pay(Long orderId, String token, String userIds , String payments) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -261,7 +299,7 @@ public class OrderRelationController extends BaseController {
             paymentList.add(Long.parseLong(payment[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , nowUserId);
+            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , user.getId());
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("支付成功");
@@ -283,7 +321,7 @@ public class OrderRelationController extends BaseController {
      * 开始订单
      *
      * @param orderId 订单编号
-     * @param nowUserId 当前用户
+     * @param token   token
      * @param userIds 被开始用户，逗号分割
      *
      *     "success": true,
@@ -295,7 +333,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/startOrder")
-    public Object startOrder(Long orderId, Long nowUserId ,String userIds) {
+    public Object startOrder(Long orderId, String token ,String userIds) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -304,7 +343,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            orderRelationService.startOrder(orderId , nowUserId , userIdList);
+            orderRelationService.startOrder(orderId , user.getId() , userIdList);
             result.setSuccess(true);
             result.setMsg("开始成功");
         } catch (MessageException e) {
@@ -328,7 +367,7 @@ public class OrderRelationController extends BaseController {
      * @param labelsId 标签id
      * @param message 内容
      * @param voucherUrl 图片，多个逗号分割
-     * @param nowUserId 当前用户
+     * @param token   token
      * @param userIds 用户id 多个逗号分割
      *
      *     "success": true,
@@ -340,7 +379,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/reports")
-    public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , Long nowUserId , String userIds) {
+    public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , String token , String userIds) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -349,7 +389,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.repors(orderId , labelsId , message , voucherUrl , nowUserId , userIdList);
+            List<String> errorMsgList = orderRelationService.repors(orderId , labelsId , message , voucherUrl , user.getId() , userIdList);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("投诉成功");
@@ -370,7 +410,7 @@ public class OrderRelationController extends BaseController {
     /**
      * 批量评价
      *
-     * @param nowUserId 当前用户ID
+     * @param token   token
      * @param userIds 用户id 多个逗号分割
      * @param orderId 订单id
      * @param credit 信用评分
@@ -388,7 +428,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/remark")
-    public Object remark(Long nowUserId, String userIds, Long orderId , int credit, int major, int attitude, String message, String labels) {
+    public Object remark(String token, String userIds, Long orderId , int credit, int major, int attitude, String message, String labels) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -397,7 +438,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.remarkOrder(nowUserId , userIdList , orderId , credit , major , attitude , message , labels);
+            List<String> errorMsgList = orderRelationService.remarkOrder(user.getId() , userIdList , orderId , credit , major , attitude , message , labels);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("评价成功");
@@ -419,34 +460,35 @@ public class OrderRelationController extends BaseController {
     /**
      * 查看取消报名的应扣除时间币
      *
-     * @param nowUserId 当前用户id
+     * @param token   token
      * @param orderId 订单ID
      *
      *     "success": true,
      *     "errorCode": "",
      *     "msg": "查看成功",
-     *     "data": 0 如果是0 就直接取消或者去选人页面，如果不是零 弹一个弹窗，告诉他每个人要赔付这个数值的前，问是否继续
+     *     "data": 0 状态判断
      *
      * @return
      */
     @PostMapping("/removeOrderTips")
-    public Object removeOrderTips(Long nowUserId , Long orderId ) {
+    public Object removeOrderTips(String token , Long orderId ) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            long coin = orderRelationService.removeOrderTips(orderId , nowUserId);
+            long coin = orderRelationService.removeOrderTips(orderId , user.getId());
             result.setSuccess(true);
             result.setData(coin);
-            result.setMsg("查看成功");
+            result.setMsg("取消成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            logger.warn("取消失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
-            result.setMsg("查看失败," + e.getMessage());
+            result.setMsg("取消失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            logger.error("取消失败" + errInfo(e), e);
             result.setSuccess(false);
             result.setErrorCode("500");
-            result.setMsg("查看失败");
+            result.setMsg("取消失败");
         }
         return result;
     }
@@ -456,7 +498,7 @@ public class OrderRelationController extends BaseController {
      *
      * @param orderId 订单ID
      * @param userIds 被操作用户ID（多个逗号拼接）
-     * @param nowUserId 当前用户ID
+     * @param token token
      *
      *     "success": true,
      *     "errorCode": "",
@@ -466,7 +508,8 @@ public class OrderRelationController extends BaseController {
      * @return
      */
     @PostMapping("/removeOrder")
-    public Object removeOrder(Long orderId , String userIds , Long nowUserId) {
+    public Object removeOrder(Long orderId , String userIds , String token) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -475,7 +518,7 @@ public class OrderRelationController extends BaseController {
             userIdList.add(Long.parseLong(userId[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.removeOrder(orderId, userIdList , nowUserId);
+            List<String> errorMsgList = orderRelationService.removeOrder(orderId, userIdList , user.getId());
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("取消成功");
@@ -565,20 +608,25 @@ public class OrderRelationController extends BaseController {
     /**
      * 举报订单详情
      *
-     * @param orderId 订单ID
-     * @param nowUserId 当前用户ID
+     * @param associationId 订单ID
+     * @param token token
+     * @param labelsId 标签ID
+     * @param message 举报文本
+     * @param voucherUrl 图片链接
      *
-     *       "success": true,
-     *       "errorCode": "",
-     *       "msg": "拒绝赠礼成功",
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "举报成功",
+     *     "data": ""
      *
      * @return
      */
     @PostMapping("/reportOrder")
-    public Object reportOrder(Long orderId , Long nowUserId) {
+    public Object reportOrder(Long associationId , String token , long labelsId , String message , String voucherUrl) {
+        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
         try {
-            orderRelationService.reoprtOrder(orderId , nowUserId);
+            orderRelationService.reoprtOrder(associationId , user , labelsId , message , voucherUrl);
             result.setSuccess(true);
             result.setMsg("举报成功");
         } catch (MessageException e) {

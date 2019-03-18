@@ -16,6 +16,7 @@ services:
     #共享地址
     volumes:
     - /opt/logs:/opt/logs
+    - /logs:/logs
     - /tmp:/tmp
     - /root:/root
     #绑定端口

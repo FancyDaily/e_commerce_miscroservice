@@ -38,7 +38,6 @@ public interface OrderRelationService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     long enroll(Long orderId, Long userId , String date, Long serviceId ) throws ParseException;
 
-    String test(Long orderId , List<Long> userIdList);
     /**
      * @Author 姜修弘
      * 功能描述:取消报名
@@ -154,14 +153,26 @@ public interface OrderRelationService {
     /**
      * 举报详情
      * @param orderId
-     * @param nowUserId
-     * @return
+     * @param nowUser
+     * @param labelsId
+     * @param message
+     * @param voucherUrl
      */
-    void reoprtOrder(Long orderId , Long nowUserId);
+    void reoprtOrder(Long orderId , TUser nowUser , long labelsId , String message , String voucherUrl);
     /**
      * 移除可报名日期
      * @param date
      * @param serviceId
      */
     void removeCanEnrollDate(String date , Long serviceId);
+
+    /**
+     * 获取评价标签
+     * @param type
+     * @param credit
+     * @param major
+     * @param attitude
+     * @return
+     */
+    String getRemarkLabels(int type , int credit, int major, int attitude);
 }

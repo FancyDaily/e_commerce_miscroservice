@@ -11,6 +11,8 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageDao;
@@ -26,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 
 /**
@@ -55,6 +59,9 @@ public class MessageServiceImpl implements MessageService {
     private MessageDao messageDao;
 
     @Autowired
+    protected RedisUtil redisUtil;
+
+    @Autowired
     private FormidDao formidDao;
 
 
@@ -75,7 +82,7 @@ public class MessageServiceImpl implements MessageService {
         List<TMessageNotice> messageNotices = messageNoticeDao.selectMessageNoticeByLastTime(lastTime,nowUserId);
         result.setTotalCount(page.getTotal());
         result.setResultList(messageNotices);
-        //redisUtil.set("noticeUserId"+nowUserId, nowTime); TODO redis 上次读消息的时间
+        redisUtil.set("noticeUserId"+nowUserId, nowTime); //redis 上次读消息的时间
         return result;
     }
 
@@ -88,30 +95,30 @@ public class MessageServiceImpl implements MessageService {
      * @param message
      * @param url
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void send(Long nowUserId , Long messageUserId ,  Long specialId , int type , String message , String url) {
         TUser nowUser = userCommonController.getUserById(nowUserId);
         Integer statusForMsg = 1;//默认发送服务通知
         Long nowTime = System.currentTimeMillis();
         TMessage messageForParent = null;
         messageForParent = messageDao.selectNewMessageByTwoUserId(nowUserId , messageUserId);
-        long messageId = snowflakeIdWorker.nextId();
-        long parentId = messageId;
+        long parentId = 0l;
         if (messageForParent != null) {
-            //如果有消息。证明不是第一次发送消息，看一下是否是当天发的第一条消息。
+            //如果有消息。证明不是第一次发送消息，那么就有分组id。
             parentId = messageForParent.getParent();
-            TMessage firstMessage = messageDao.selectNewMessageByOneUserId(parentId ,nowUserId);
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-            String nowDay = simpleDateFormat.format(nowTime);
-            String firstDay = simpleDateFormat.format(firstMessage.getCreateTime());
-            if (nowDay.equals(firstDay)) {
-                //相等证明今天发过消息了（不可能发消息日期比当前时间早）就不发系统消息了
-                statusForMsg = 0 ;
+            TMessage firstMessage = null;
+            firstMessage = messageDao.selectNewMessageByOneUserId(parentId ,nowUserId);
+            if (firstMessage != null){
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+                String nowDay = simpleDateFormat.format(nowTime);
+                String firstDay = simpleDateFormat.format(firstMessage.getCreateTime());
+                if (nowDay.equals(firstDay)) {
+                    //相等证明今天发过消息了（不可能发消息日期比当前时间早）就不发系统消息了
+                    statusForMsg = 0 ;
+                }
             }
-
         }
         TMessage sendMessge = new TMessage();
-        sendMessge.setId(messageId);
         sendMessge.setParent(parentId);
         sendMessge.setMessageUserId(messageUserId);
         sendMessge.setUserId(nowUser.getId());
@@ -128,6 +135,21 @@ public class MessageServiceImpl implements MessageService {
         sendMessge.setIsValid("1");
 
         messageDao.insert(sendMessge);
+        sendMessge.setParent(sendMessge.getId());
+        if (messageForParent == null){
+            //如果是第一次发消息
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCompletion(int status) {
+
+                    if(status<0){
+                        return;
+                    }
+                    messageDao.updateUpdate(sendMessge);
+                    super.afterCommit();
+                }
+            });
+        }
         //TODO 发送通知
 
     }
@@ -196,7 +218,7 @@ public class MessageServiceImpl implements MessageService {
         }
         result.setTotalCount(page.getTotal());
         result.setResultList(messageDetailViews2);
-        //redisUtil.set("msgReadeLastTime"+parents.get(0)+nowUser.getId(), nowTime);TODO 插入上次阅读时间
+        redisUtil.set("msgReadeLastTime"+messageList.get(0).getParent()+","+nowUser.getId(), nowTime);//插入上次阅读时间
         return result;
     }
 
@@ -205,13 +227,13 @@ public class MessageServiceImpl implements MessageService {
      * @param formId
      * @param userId
      */
+    @Transactional(rollbackFor = Throwable.class)
     public void insertFormId(String formId, Long userId) {
         TUser user = userCommonController.getUserById(userId);
         //当前时间
         long currentTime = System.currentTimeMillis();
         //formid实体数据
         TFormid formid = new TFormid();
-        formid.setId(snowflakeIdWorker.nextId());
         formid.setIsValid("1");
         formid.setCreateUser(user.getId());
         formid.setCreateUserName(user.getName());
@@ -260,7 +282,7 @@ public class MessageServiceImpl implements MessageService {
             messageShowLIstView.setParent(messageList.get(i).getParent());
             messageShowLIstView.setTime(messageList.get(i).getUpdateTime());
             messageShowLIstView.setCreateTime(messageList.get(i).getCreateTime());
-            messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent()));
+            messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent() , nowUserId));
             if (messageList.get(i).getType() == MessageEnum.TYPE_PHOTO.getType()) {
                 //如果是图片
                 messageShowLIstView.setContent("[图片]");
@@ -323,7 +345,7 @@ public class MessageServiceImpl implements MessageService {
         List<TMessage> messageList = messageDao.messageShowList(nowUserId , 9999999999999l);
         //对每个分组进行查看，是否有未读消息
         for (int i = 0; i < messageList.size(); i++) {
-            if (unReadMsgSum(messageList.get(i).getParent()) > 0) {
+            if (unReadMsgSum(messageList.get(i).getParent() , nowUserId) > 0) {
                 return 1 ;
             }
         }
@@ -337,9 +359,8 @@ public class MessageServiceImpl implements MessageService {
      * @param parent
      * @return
      */
-    private long unReadMsgSum(Long parent) {
-        Long lastReadeTime = 0l;
-        //Long lastReadeTime = (Long)redisUtil.get("msgReadeLastTime"+messageParent+nowUser.getId()); TODO 通过redis获取上次该分组读消息的时间
+    private long unReadMsgSum(Long parent , Long nowUserId) {
+        Long lastReadeTime = (Long)redisUtil.get("msgReadeLastTime"+parent+","+nowUserId); //通过redis获取上次该分组读消息的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }
@@ -354,27 +375,11 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     private Long unReadNoticesSum(Long nowUserId) {
-        Long lastReadeTime = 0l;
-        //Long lastReadeTime = (Long)redisUtil.get("noticeUserId"+nowUser.getId());TODO 通过redis获取上次系统消息读取的时间
+        Long lastReadeTime = (Long)redisUtil.get("noticeUserId"+nowUserId);// 通过redis获取上次系统消息读取的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }
         long unReadNoticesSum = messageNoticeDao.selectMessageNoticeCountByLastTime(lastReadeTime , nowUserId);
         return unReadNoticesSum;
     }
-
-
-    /**
-     * @return java.lang.String
-     * @Author 姜修弘
-     * 功能描述:
-     * 创建时间:@Date 下午5:04 2019/3/6
-     * @Param [userId, orderRelationshipId]
-     **/
-    public String test(Long orderId ,List<Long> userIdList) {
-
-        return "ok";
-    }
-
-
 }
