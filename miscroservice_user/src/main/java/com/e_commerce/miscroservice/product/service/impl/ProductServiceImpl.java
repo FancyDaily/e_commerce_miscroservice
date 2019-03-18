@@ -253,6 +253,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			tService.setUpdateUserName(user.getName());
 			tService.setUpdateTime(System.currentTimeMillis());
 			//将该商品派生出来的订单的service_status进行修改
+
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
