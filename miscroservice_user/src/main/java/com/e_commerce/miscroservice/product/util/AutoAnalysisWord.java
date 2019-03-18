@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class AutoAnalysisWord {
     private final String ADDRESS_NAME = "address.txt";
-//            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
+    //            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
     private final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
     private Logger logger = LoggerFactory.getLogger(AutoAnalysisWord.class);
 
@@ -1495,7 +1494,7 @@ public class AutoAnalysisWord {
 
         try {
             List<String> allRegions = Files.readAllLines(Paths
-                    .get(new ClassPathResource("/properties/" + ADDRESS_NAME).getURI()));
+                    .get(new ClassPathResource("./properties/" + ADDRESS_NAME).getURI()));
 
             allRegionCache = HashBasedTable.create();
 
