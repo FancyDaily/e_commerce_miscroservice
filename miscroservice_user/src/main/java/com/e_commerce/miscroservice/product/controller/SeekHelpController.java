@@ -357,6 +357,7 @@ public class SeekHelpController extends BaseController {
 	 */
 	@PostMapping("/analysisWord")
 	public AnalysisAudioView analysisWord(String text, String city) {
+		logger.info("解析的文本为 {}, city 为 {} >>>>>>", text, city);
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
 		Map<String, Object> map = analysisWord.parse(text, city);

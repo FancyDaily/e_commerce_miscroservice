@@ -988,7 +988,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String startDate = DateUtil.getDate(startTimeMill);
 		//计算第一张订单后六天的可报名时间
 		DateResult tempResult;
-		while (dr.getDays() <= 6) {
+		while (dr.getDays() <= 7) {
 			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
 			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
 				break;
