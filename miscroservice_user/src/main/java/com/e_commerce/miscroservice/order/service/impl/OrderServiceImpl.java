@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
+import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
@@ -46,6 +47,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	OrderRecordDao orderRecordDao;
 	@Autowired
 	MessageCommonController messageService;
+	@Autowired
+	EvaluateDao evaluateDao;
+
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -370,14 +374,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		TOrderRelationship relationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 		TOrder tOrder = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(tOrder);
-		if (tOrder.getConfirmNum() == 0) {
-			//没有一个用户  只显示订单就可以
-			returnView.setStatus(0);
-			returnView.setRecord(new ArrayList<>());
-			returnView.setListUserView(new ArrayList<>());
-			returnView.setListDesc(new ArrayList<>());
-			return returnView;
-		}
 		// 待支付前为投诉 待支付后为举报 1、投诉 2、举报
 		if (Objects.equals(relationship.getStatus(), OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())) {
 			returnView.setReportAction(1);
@@ -390,6 +386,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		List<TServiceDescribe> productDesc = productService.getProductDesc(tOrder.getServiceId());
 		returnView.setListDesc(productDesc);
 		if (Objects.equals(user.getId(), tOrder.getCreateUser())) { //当前用户是发布者
+			if (tOrder.getConfirmNum() == 0) {
+				//没有一个用户  只显示订单就可以
+				returnView.setStatus(0);
+				returnView.setRecord(new ArrayList<>());
+				returnView.setListUserView(new ArrayList<>());
+				returnView.setListDesc(new ArrayList<>());
+				return returnView;
+			}
+			// 获取评价列表
+			List<Long> orderIds = new ArrayList<>();
+			orderIds.add(orderId);
+			List<TEvaluate> listEvaluates = evaluateDao.selectEvaluateInOrderIdsAndByUserId(orderIds, user.getId());
+			returnView.setListEvalute(listEvaluates);
 			//获取所有接单用户的订单关系
 			List<TOrderRelationship> listRelationship = orderRelationshipDao.getReceiver(orderId);
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {//当前用户是求助者
@@ -472,6 +481,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				returnView.setListUserView(listUserView);
 			}
 		} else { //当前用户是接单者
+			List<Long> orderIds = new ArrayList<>();
+			orderIds.add(orderId);
+			List<TEvaluate> listEvaluates = evaluateDao.selectEvaluateInOrderIdsAndByUserId(orderIds, user.getId());
+			returnView.setListEvalute(listEvaluates);
 			//对接单者来说 发布者发布的是求助  接单者就是服务者  就是一条服务记录 反之亦然
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				tOrder.setType(ProductEnum.TYPE_SERVICE.getValue());
@@ -615,7 +628,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//可以成功创建订单
 				saveOrder(order);
 				return order;
-				// TODO 调用订单结束定时任务
+				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
@@ -772,6 +785,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String endDateTime = enrollDate + product.getEndTimeS();
 		Long startDateTimeMill = DateUtil.parse(startDateTime);
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
+		order.setStartTime(startDateTimeMill);
+		order.setEndTime(endDateTimeMill);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //订单已存在
 			order.setStartTime(startDateTimeMill);
