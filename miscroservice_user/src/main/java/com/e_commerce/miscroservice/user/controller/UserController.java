@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 用户模块
@@ -46,6 +45,82 @@ public class UserController extends BaseController {
      *
      * @param telephone 手机号
      * @param validCode 短信验证码
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "user": {    //用户数据说明参考查看用户基本信息接口
+     *             "idString": "",
+     *             "age": "",
+     *             "isAtten": "",
+     *             "authStatus": 1,
+     *             "vxId": "",
+     *             "masterStatus": "",
+     *             "maxLevelMin": "",
+     *             "levelName": "",
+     *             "needGrowthNum": "",
+     *             "nextLevelName": "",
+     *             "timeStamp": "",
+     *             "id": 10,
+     *             "userAccount": "88705930",
+     *             "name": "张三",
+     *             "jurisdiction": 0,
+     *             "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
+     *             "userPicturePath": "https://",
+     *             "vxOpenId": "",
+     *             "occupation": "打杂",
+     *             "workPlace": "晓时",
+     *             "college": "大学生活好",
+     *             "birthday": 19980829,
+     *             "sex": 0,
+     *             "maxEducation": "未设置",
+     *             "followNum": 0,
+     *             "receiptNum": 0,
+     *             "remarks": "张三牛逼",
+     *             "level": 1,
+     *             "growthValue": 41,
+     *             "seekHelpNum": 0,
+     *             "serveNum": 0,
+     *             "seekHelpPublishNum": 0,
+     *             "servePublishNum": 0,
+     *             "surplusTime": 0,
+     *             "freezeTime": 0,
+     *             "creditLimit": 60,
+     *             "publicWelfareTime": 0,
+     *             "authenticationStatus": 2,
+     *             "authenticationType": 1,
+     *             "servTotalEvaluate": 0,
+     *             "servCreditEvaluate": 0,
+     *             "servMajorEvaluate": 0,
+     *             "servAttitudeEvaluate": 0,
+     *             "helpTotalEvaluate": 0,
+     *             "helpCreditEvaluate": 0,
+     *             "helpMajorEvaluate": 0,
+     *             "helpAttitudeEvaluate": 0,
+     *             "limitedCompanyNames": "",
+     *             "companyNames": "",
+     *             "skill": "",
+     *             "integrity": 100,
+     *             "isCompanyAccount": 2,
+     *             "userType": "1",
+     *             "extend": "",
+     *             "createUser": "",
+     *             "createUserName": "晓主88705930",
+     *             "createTime": 1552888705930,
+     *             "updateUser": 10,
+     *             "updateUserName": "张三",
+     *             "updateTime": 1552891742326,
+     *             "isValid": "1",
+     *             "inviteCode": "",
+     *             "idStr": "10",
+     *             "joinCompany": false
+     *         },
+     *         "token": "23524b708297e27fd2c1056bc3e50b5d"
+     *     }
+     * }
+     *
      * @return
      */
     @PostMapping("loginBySMS")
@@ -69,7 +144,11 @@ public class UserController extends BaseController {
 
     /**
      * 用户登出
-     * @param token
+     * @param token 登录凭证
+     *                    {
+     *                    "success": true, //成功
+     *                    "msg": ""
+     *                    }
      * @return
      */
     @PostMapping("logOut")
@@ -1813,6 +1892,9 @@ public class UserController extends BaseController {
             BonusPackageVIew bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
             result.setData(bonusPackage);
             result.setSuccess(true);
+            if(bonusPackage==null) {
+                result.setSuccess(false);
+            }
         } catch (MessageException e) {
             logger.error("查看红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
@@ -1863,6 +1945,14 @@ public class UserController extends BaseController {
      *
      * @param token          登录凭证
      * @param bonusPackageId 红包编号
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @RequestMapping("bonusPackage/sendBack")
@@ -1889,6 +1979,14 @@ public class UserController extends BaseController {
      *
      * @param token          登录凭证
      * @param bonusPackageId 红包编号
+     *
+     * {
+     *     "success": false,
+     *     "errorCode": "",
+     *     "msg": "该红包不存在！",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @RequestMapping("bonusPackage/isMine")
@@ -2244,6 +2342,14 @@ public class UserController extends BaseController {
      * 发送短信验证码
      *
      * @param telephone 手机号
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @PostMapping("generateSMS")
@@ -2274,6 +2380,106 @@ public class UserController extends BaseController {
      * @param token    登录凭证
      * @param ymString 年月字符串
      * @param option   操作
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": {
+     *         "monthTotalOut": 0,
+     *         "total": 41,
+     *         "month": "03",
+     *         "monthTotalIn": 41,
+     *         "monthList": [
+     *             {
+     *                 "idString": "43",
+     *                 "date": "2019-03-18",
+     *                 "id": 43,
+     *                 "userId": 10,
+     *                 "type": 31,
+     *                 "subType": 0,
+     *                 "title": "每日签到",
+     *                 "content": "每日签到",
+     *                 "num": 1,
+     *                 "createUser": 10,
+     *                 "createUserName": "张三",
+     *                 "createTime": 1552891742291,
+     *                 "updateUser": 10,
+     *                 "updateUserName": "张三",
+     *                 "updateTime": 1552891742291
+     *             },
+     *             {
+     *                 "idString": "33",
+     *                 "date": "2019-03-18",
+     *                 "id": 33,
+     *                 "userId": 10,
+     *                 "type": 13,
+     *                 "subType": 0,
+     *                 "title": "首次添加个人技能",
+     *                 "content": "首次添加个人技能",
+     *                 "num": 5,
+     *                 "createUser": 10,
+     *                 "createUserName": "张三",
+     *                 "createTime": 1552889331111,
+     *                 "updateUser": 10,
+     *                 "updateUserName": "张三",
+     *                 "updateTime": 1552889331111
+     *             },
+     *             {
+     *                 "idString": "32",
+     *                 "date": "2019-03-18",
+     *                 "id": 32,
+     *                 "userId": 10,
+     *                 "type": 12,
+     *                 "subType": 0,
+     *                 "title": "用户个人信息",
+     *                 "content": "用户个人信息",
+     *                 "num": 15,
+     *                 "createUser": 10,
+     *                 "createUserName": "张三",
+     *                 "createTime": 1552889231786,
+     *                 "updateUser": 10,
+     *                 "updateUserName": "张三",
+     *                 "updateTime": 1552889231786
+     *             },
+     *             {
+     *                 "idString": "31",
+     *                 "date": "2019-03-18",
+     *                 "id": 31,
+     *                 "userId": 10,
+     *                 "type": 11,
+     *                 "subType": 0,
+     *                 "title": "实名认证",
+     *                 "content": "实名认证",
+     *                 "num": 10,
+     *                 "createUser": 10,
+     *                 "createUserName": "晓主88705930",
+     *                 "createTime": 1552889181215,
+     *                 "updateUser": 10,
+     *                 "updateUserName": "晓主88705930",
+     *                 "updateTime": 1552889181215
+     *             },
+     *             {
+     *                 "idString": "23",
+     *                 "date": "2019-03-18",
+     *                 "id": 23,
+     *                 "userId": 10,
+     *                 "type": 10,
+     *                 "subType": 0,
+     *                 "title": "注册",
+     *                 "content": "注册",
+     *                 "num": 10,
+     *                 "createUser": 10,
+     *                 "createUserName": "晓主88705930",
+     *                 "createTime": 1552888719121,
+     *                 "updateUser": 10,
+     *                 "updateUserName": "晓主88705930",
+     *                 "updateTime": 1552888719121
+     *             }
+     *         ]
+     *     }
+     * }
+     *
      * @return
      */
     @RequestMapping("scoreList")
@@ -2300,6 +2506,14 @@ public class UserController extends BaseController {
      *
      * @param telephone 手机号
      * @param validCode 短信验证码
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @PostMapping("checkSMS")
@@ -2324,6 +2538,14 @@ public class UserController extends BaseController {
      *
      * @param token     登录凭证
      * @param inviterId 邀请者编号
+     *
+     * {
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "",
+     *     "data": ""
+     * }
+     *
      * @return
      */
     @PostMapping("payInviter")

@@ -164,4 +164,5 @@ public interface OrderDao {
 	 */
 	TOrder findProductOrderEnough(Long serviceId, long tempStart, long tempEnd);
 
+    TOrder selectById(Long orderId);
 }

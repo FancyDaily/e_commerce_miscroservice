@@ -387,7 +387,13 @@ public class OrderDaoImpl implements OrderDao {
 				.eq(TOrder::getServicePersonnel, TOrder::getConfirmNum));
 	}
 
-	/**
+    @Override
+    public TOrder selectById(Long orderId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TOrder(),new MybatisSqlWhereBuild((TOrder.class))
+		.eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
 	 * 查询发布的所有记录
 	 *
 	 * @param userId

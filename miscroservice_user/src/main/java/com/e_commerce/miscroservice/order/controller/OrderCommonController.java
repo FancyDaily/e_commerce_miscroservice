@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
+import com.e_commerce.miscroservice.order.dao.ReportDao;
 import com.e_commerce.miscroservice.order.vo.DetailOrderReturnView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,9 @@ public class OrderCommonController extends BaseController {
 
 	@Autowired
 	private EvaluateDao evaluateDao;
+
+	@Autowired
+	private ReportDao reportDao;
 
 	/**
 	 * 根据service派生订单 供其他模块调用
@@ -224,8 +228,12 @@ public class OrderCommonController extends BaseController {
 	 * @param orderRelationshipId
 	 * @return
 	 */
-	public TOrderRelationship selectOrderById(Long orderRelationshipId) {
+	public TOrderRelationship selectOrderRelationshipById(Long orderRelationshipId) {
 		return orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
+	}
+
+	public TOrder selectOrderById(Long orderId) {
+		return orderDao.selectById(orderId);
 	}
 
 	/**
@@ -259,4 +267,13 @@ public class OrderCommonController extends BaseController {
 	public void synOrderCreateUserName(Long userId, String userName) {
 		orderService.synOrderCreateUserName(userId, userName);
 	}
+
+	/**
+	 * 保存Treport实体
+	 * @param report
+	 */
+	public void saveTreport(TReport report) {
+		reportDao.saveOneOrder(report);
+	}
+
 }

@@ -155,4 +155,15 @@ public class UserCommonController {
 //		return userService.isCareUser(userId, userFollowId);
 		return false;
 	}
+
+
+	/**
+	 * 发送短信
+	 * @param telephone
+	 * @param content
+	 */
+	public boolean sendSMS(String telephone, String content) {
+		return userService.genrateSMSWithContent(telephone,content);
+	}
+
 }

@@ -17,4 +17,6 @@ public class LevelView {
 
     Long upToLevelUp;   //距下一次还差多少经验
 
+    String url; //等级对应的勋章url
+
 }
