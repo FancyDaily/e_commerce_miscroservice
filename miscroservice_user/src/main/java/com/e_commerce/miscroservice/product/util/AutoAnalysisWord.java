@@ -249,7 +249,7 @@ public class AutoAnalysisWord {
     public static void main(String[] args) {
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在城西银泰帮我带早餐,我可以支付十分钟", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("明天早上十点到西溪湿地看电影。", "杭州"));
 
 
 //        test();
@@ -1006,12 +1006,18 @@ public class AutoAnalysisWord {
             }
 
             //获取今天是本周周几
-            String dayOfWeekStr = weekDayFormatter.format(localDateTime).split("周|星期|礼拜")[1];
+            Integer dayOfWeekNum = dateCharacterToNumberRelation.get(weekDayFormatter.format(localDateTime).toLowerCase());
             Integer dayOfWeek;
-            if (isNumeric(dayOfWeekStr)) {
-                dayOfWeek = Integer.valueOf(dayOfWeekStr);
+            if (dayOfWeekNum != null) {
+                dayOfWeek = dayOfWeekNum;
             } else {
-                dayOfWeek = Integer.valueOf(dateCharacterToNumberRelation.get(dayOfWeekStr));
+                String dayOfWeekStr = weekDayFormatter.format(localDateTime).split("周|星期|礼拜")[1];
+
+                if (isNumeric(dayOfWeekStr)) {
+                    dayOfWeek = Integer.valueOf(dayOfWeekStr);
+                } else {
+                    dayOfWeek = Integer.valueOf(dateCharacterToNumberRelation.get(dayOfWeekStr));
+                }
             }
 
 
@@ -1578,6 +1584,13 @@ public class AutoAnalysisWord {
         dateCharacterToNumberRelation.put("求助", 1);
         dateCharacterToNumberRelation.put("服务", 2);
         dateCharacterToNumberRelation.put("需要", 1);
+        dateCharacterToNumberRelation.put("monday", 1);
+        dateCharacterToNumberRelation.put("tuesday", 2);
+        dateCharacterToNumberRelation.put("wednesday", 3);
+        dateCharacterToNumberRelation.put("thursday", 4);
+        dateCharacterToNumberRelation.put("friday", 5);
+        dateCharacterToNumberRelation.put("saturday", 6);
+        dateCharacterToNumberRelation.put("sunday", 7);
 
 
         monthAndDayRelation.put("1", 31);
