@@ -613,13 +613,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
-				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				return order;
 				// TODO 调用订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
-				return order;
+				TOrder oldOrder = orderDao.findProductOrder(service.getId(), order.getStartTime(), order.getEndTime());
+				return oldOrder;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
@@ -755,7 +755,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
-	 * @param order      新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
+	 * @param order      新的订单
 	 * @return
 	 */
 	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {
@@ -773,13 +773,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //订单已存在
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+
 		}
 		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
 		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
@@ -816,13 +817,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //有这张订单，不需要派生
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		order.setStartTime(startDateTimeMill);
@@ -990,9 +991,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条
+		order.setStartTime(startTimeMill);
+		order.setEndTime(endTimeMill);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startTimeMill, endTimeMill);
 		if (oldOrder != null) {
-			order = oldOrder;
+			order.setStartTime(startTimeMill);
+			order.setEndTime(endTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 
