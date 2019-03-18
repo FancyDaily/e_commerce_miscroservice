@@ -23,7 +23,6 @@ import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -49,7 +48,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	MessageCommonController messageService;
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public int saveOrder(TOrder order) {
 		/*
 		 * 已完成的订单是可以显示的 可见状态还是为1
@@ -78,6 +77,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
 		// 为发布者增加一条订单关系
+
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -142,6 +142,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(order);
+		TService product = productService.getProductById(order.getServiceId());
+		//报名日期
+		String enrollDate = product.getEnrollDate();
+		if (StringUtil.isNotEmpty(enrollDate)) {
+			String[] enrollDateArray = enrollDate.split(",");
+			returnView.setEnrollDate(enrollDateArray);
+		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
 		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
@@ -167,6 +174,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
 			if (tOrderRelationship == null) {
+				tOrderRelationship = new TOrderRelationship();
 				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
@@ -605,13 +613,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
-				System.out.println(order.getId() + "   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 				return order;
 				// TODO 调用订单结束定时任务
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
-				return order;
+				TOrder oldOrder = orderDao.findProductOrder(service.getId(), order.getStartTime(), order.getEndTime());
+				return oldOrder;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
@@ -747,7 +755,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service    商品
 	 * @param enrollDate 报名的日期
-	 * @param order      新的订单  如果已经存在该订单，就将新派生的订单引用到该订单上
+	 * @param order      新的订单
 	 * @return
 	 */
 	private Integer produceOrderByEnroll(TService service, String enrollDate, TOrder order) {
@@ -765,13 +773,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long endDateTimeMill = DateUtil.parse(endDateTime);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //订单已存在
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+
 		}
 		// 查看是否到结束时间，如果到结束时间，无法生成，但是不做下架处理
 		String productEndDateTime = product.getEndDateS() + product.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
@@ -808,13 +817,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long endDateTimeMill = DateUtil.addDays(DateUtil.parse(endDateTime), addDays);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startDateTimeMill, endDateTimeMill);
 		if (oldOrder != null) { //有这张订单，不需要派生
-			order = oldOrder;
+			order.setStartTime(startDateTimeMill);
+			order.setEndTime(endDateTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 		// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 		String productEndDateTime = service.getEndDateS() + service.getEndTimeS();
 		if (DateUtil.parse(productEndDateTime) < endDateTimeMill) {
-			order = null;
 			return OrderEnum.PRODUCE_RESULT_CODE_END.getValue();
 		}
 		order.setStartTime(startDateTimeMill);
@@ -975,16 +984,19 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
 			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
 			if (temOrder == null) {
-				enrollDate.add(DateUtil.getDate(tempStart));
+				enrollDate.add(DateUtil.commonFormat(tempStart, "yyyy-MM-dd"));
 			}
 			tempStart = tempResult.getStartTimeMill();
 			tempEnd = tempResult.getEndTimeMill();
 		}
 		service.setEnrollDate(StringUtils.join(enrollDate.toArray(), ","));
 		// 查看数据库防止有这一条
+		order.setStartTime(startTimeMill);
+		order.setEndTime(endTimeMill);
 		TOrder oldOrder = orderDao.findProductOrder(service.getId(), startTimeMill, endTimeMill);
 		if (oldOrder != null) {
-			order = oldOrder;
+			order.setStartTime(startTimeMill);
+			order.setEndTime(endTimeMill);
 			return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
 		}
 
