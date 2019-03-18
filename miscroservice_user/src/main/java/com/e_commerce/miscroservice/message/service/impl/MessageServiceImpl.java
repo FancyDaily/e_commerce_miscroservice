@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageDao;
@@ -58,6 +59,9 @@ public class MessageServiceImpl implements MessageService {
     private MessageDao messageDao;
 
     @Autowired
+    protected RedisUtil redisUtil;
+
+    @Autowired
     private FormidDao formidDao;
 
 
@@ -78,7 +82,7 @@ public class MessageServiceImpl implements MessageService {
         List<TMessageNotice> messageNotices = messageNoticeDao.selectMessageNoticeByLastTime(lastTime,nowUserId);
         result.setTotalCount(page.getTotal());
         result.setResultList(messageNotices);
-        //redisUtil.set("noticeUserId"+nowUserId, nowTime); TODO redis 上次读消息的时间
+        redisUtil.set("noticeUserId"+nowUserId, nowTime); //redis 上次读消息的时间
         return result;
     }
 
@@ -214,7 +218,7 @@ public class MessageServiceImpl implements MessageService {
         }
         result.setTotalCount(page.getTotal());
         result.setResultList(messageDetailViews2);
-        //redisUtil.set("msgReadeLastTime"+parents.get(0)+nowUser.getId(), nowTime);TODO 插入上次阅读时间
+        redisUtil.set("msgReadeLastTime"+messageList.get(0).getParent()+","+nowUser.getId(), nowTime);//插入上次阅读时间
         return result;
     }
 
@@ -278,7 +282,7 @@ public class MessageServiceImpl implements MessageService {
             messageShowLIstView.setParent(messageList.get(i).getParent());
             messageShowLIstView.setTime(messageList.get(i).getUpdateTime());
             messageShowLIstView.setCreateTime(messageList.get(i).getCreateTime());
-            messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent()));
+            messageShowLIstView.setUnReadSum(unReadMsgSum(messageList.get(i).getParent() , nowUserId));
             if (messageList.get(i).getType() == MessageEnum.TYPE_PHOTO.getType()) {
                 //如果是图片
                 messageShowLIstView.setContent("[图片]");
@@ -341,7 +345,7 @@ public class MessageServiceImpl implements MessageService {
         List<TMessage> messageList = messageDao.messageShowList(nowUserId , 9999999999999l);
         //对每个分组进行查看，是否有未读消息
         for (int i = 0; i < messageList.size(); i++) {
-            if (unReadMsgSum(messageList.get(i).getParent()) > 0) {
+            if (unReadMsgSum(messageList.get(i).getParent() , nowUserId) > 0) {
                 return 1 ;
             }
         }
@@ -355,9 +359,8 @@ public class MessageServiceImpl implements MessageService {
      * @param parent
      * @return
      */
-    private long unReadMsgSum(Long parent) {
-        Long lastReadeTime = 0l;
-        //Long lastReadeTime = (Long)redisUtil.get("msgReadeLastTime"+messageParent+nowUser.getId()); TODO 通过redis获取上次该分组读消息的时间
+    private long unReadMsgSum(Long parent , Long nowUserId) {
+        Long lastReadeTime = (Long)redisUtil.get("msgReadeLastTime"+parent+","+nowUserId); //通过redis获取上次该分组读消息的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }
@@ -372,8 +375,7 @@ public class MessageServiceImpl implements MessageService {
      * @return
      */
     private Long unReadNoticesSum(Long nowUserId) {
-        Long lastReadeTime = 0l;
-        //Long lastReadeTime = (Long)redisUtil.get("noticeUserId"+nowUser.getId());TODO 通过redis获取上次系统消息读取的时间
+        Long lastReadeTime = (Long)redisUtil.get("noticeUserId"+nowUserId);// 通过redis获取上次系统消息读取的时间
         if (lastReadeTime == null) {
             lastReadeTime = 0l;
         }

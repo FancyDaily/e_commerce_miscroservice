@@ -10,13 +10,9 @@ public class TServiceSummary implements Serializable {
 
     private Long serviceId;
 
-    private Long parent;
-
     private String description;
 
-    private String headUrl;
-
-    private String detailUrls;
+    private String url;
 
     private String extend;
 
@@ -52,14 +48,6 @@ public class TServiceSummary implements Serializable {
         this.serviceId = serviceId;
     }
 
-    public Long getParent() {
-        return parent;
-    }
-
-    public void setParent(Long parent) {
-        this.parent = parent;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -68,20 +56,12 @@ public class TServiceSummary implements Serializable {
         this.description = description == null ? null : description.trim();
     }
 
-    public String getHeadUrl() {
-        return headUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setHeadUrl(String headUrl) {
-        this.headUrl = headUrl == null ? null : headUrl.trim();
-    }
-
-    public String getDetailUrls() {
-        return detailUrls;
-    }
-
-    public void setDetailUrls(String detailUrls) {
-        this.detailUrls = detailUrls == null ? null : detailUrls.trim();
+    public void setUrl(String url) {
+        this.url = url == null ? null : url.trim();
     }
 
     public String getExtend() {

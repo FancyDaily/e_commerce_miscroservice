@@ -1,10 +1,7 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.entity.application.AdminUser;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
@@ -14,6 +11,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.product.dao.serviceSummaryDao;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
@@ -44,6 +42,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	private UserCommonController userService;
 	@Autowired
 	private MessageCommonController messageService;
+
+	@Autowired
+	private serviceSummaryDao serviceSummaryDao;
 
 	/**
 	 * 功能描述:发布求助
@@ -727,4 +728,35 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		return true;
 	}
 
+
+	/**
+	 * 发布精彩瞬间
+	 * @param serviceId
+	 * @param description
+	 * @param url
+	 * @param nowUser
+	 */
+	public void sendServiceSummary(Long serviceId , String description , String url , TUser nowUser){
+		long nowTime = System.currentTimeMillis();
+		TServiceSummary serviceSummary = new TServiceSummary();
+		serviceSummary.setServiceId(serviceId);
+		serviceSummary.setDescription(description);
+		serviceSummary.setUrl(url);
+		serviceSummary.setCreateTime(nowTime);
+		serviceSummary.setCreateUser(nowUser.getId());
+		serviceSummary.setCreateUserName(nowUser.getName());
+		serviceSummary.setUpdateTime(nowTime);
+		serviceSummary.setUpdateUser(nowUser.getId());
+		serviceSummary.setUpdateUserName(nowUser.getName());
+		serviceSummaryDao.saveServiceSummary(serviceSummary);
+	}
+
+	/**
+	 * 查找精彩瞬间
+	 * @param serviceId
+	 * @return
+	 */
+	public TServiceSummary findServiceSummary(Long serviceId){
+		return serviceSummaryDao.selectServiceSummaryByServiceId(serviceId);
+	}
 }
