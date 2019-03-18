@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.util;
 
+import com.e_commerce.miscroservice.product.util.AnsjUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.huaban.analysis.jieba.JiebaSegmenter;
@@ -17,7 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -26,6 +30,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+//import org.springframework.core.io.ClassPathResource;
 
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
@@ -249,7 +255,7 @@ public class AutoAnalysisWord {
     public static void main(String[] args) {
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("明天早上十点到西溪湿地看电影。", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse(" 明天早上10:20到杭州大厦给我带早点，我能付300分钟。", "杭州"));
 
 
 //        test();
@@ -610,11 +616,19 @@ public class AutoAnalysisWord {
         if (startTime.isEmpty()) {
             //三种情况，一种是全文字，一种是半文字半时间 一种是只有一个时间
             Matcher characterMatcher = characterTimePattern.matcher(text);
-
+            String _tmpTime = "";
             if (!characterMatcher.find()) {
-                return timeInfo;
+                //考虑另外一种情况为纯数字
+                if (tmpTime.isEmpty()) {
+                    return timeInfo;
+                } else {
+                    _tmpTime = tmpTime;
+                }
             }
-            String _tmpTime = characterMatcher.group();
+            if (_tmpTime.isEmpty()) {
+                _tmpTime = characterMatcher.group();
+            }
+
 
             if (tmpTime.isEmpty() && characterMatcher.find()) {
                 //全文字
@@ -1498,9 +1512,16 @@ public class AutoAnalysisWord {
     private static void loadAddress() {
 
         try {
-
-            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/prop/"
+//
+            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
                     + ADDRESS_NAME).getInputStream(), "utf-8");
+//            List<String> allRegions = null;
+//            try {
+//                allRegions = Files.readAllLines(Paths.get(AutoAnalysisWord.class.getResource("/properties/"
+//                        + ADDRESS_NAME).toURI()));
+//            } catch (URISyntaxException e) {
+//
+//            }
 
             allRegionCache = HashBasedTable.create();
 
