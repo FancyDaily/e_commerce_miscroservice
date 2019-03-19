@@ -24,6 +24,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -651,7 +652,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
         if(userId!=me.getId()) {    //查看别人的主页
-            TUser beenViewer = userDao.selectByPrimaryKey(userId);
+            TUser beenViewer = userDao.selectByPrimaryKey(me.getId());
             startPage = PageHelper.startPage(pageNum, pageSize);
             orders = orderService.selectOdersByUserId(userId, isService, beenViewer);
         }
@@ -2447,6 +2448,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private Integer checkMax(GrowthValueEnum growthValueEnum, TUser user, Integer counts) {
 
+    	//原始基数
+		Integer originalCounts = counts;
+
         //判空
         if (growthValueEnum == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型为空！");
@@ -2508,7 +2512,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         boolean flag = false;
         Integer dailyMaxIn = growthValueEnum.getDailyMaxIn();//TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
         Integer maxIn = growthValueEnum.getMaxIn();
-        if (countTotal > maxIn || countToday > dailyMaxIn) {   //总或者今日达到上限
+        if(maxIn==-1) {
+        	maxIn = 2147483647;
+		}
+        if (countTotal >= maxIn || countToday >= dailyMaxIn) {   //总或者今日达到上限
             counts = 0;
         } else {
             int inteval = dailyMaxIn - countToday;
@@ -2522,10 +2529,12 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         boolean superFlag = false;
         if (superGrowthValueEnum != null) { //特定类型
-            if (superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
+            if (counts > 0 && superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
                 //插入一条成长值流水
-                insertGrowthValueRecords(user, growthValueEnum);
-                counts--; //消耗掉一次插入机会
+                insertGrowthValueRecords(user, superGrowthValueEnum);
+                if(originalCounts <= growthValueEnum.getDailyMaxIn() / growthValueEnum.getPrice()) {
+					counts--; //消耗掉一次插入机会
+				}
                 superFlag = true;
                 //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
 
@@ -2901,8 +2910,60 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<NoobTask> noobTasks = (List<NoobTask>) taskMap.get("noobTasks");
         List<DailyTask> dailyTasks = (List<DailyTask>) taskMap.get("dailyTasks");
 
-        taskHallView.setNoobTasks(noobTasks);
-        taskHallView.setDailyTasks(dailyTasks);
+        Map<Long,DailyTask> doneTaskMap = new HashMap<>();
+        for(NoobTask noobTask:noobTasks) {
+        	DailyTask dailyTask = new DailyTask();
+        	dailyTask.setDone(noobTask.isDone());
+        	if(!noobTask.isDone()) {
+				dailyTask.setCurrentNum(0);
+			} else {
+        		dailyTask.setCurrentNum(1);
+			}
+        	doneTaskMap.put(noobTask.getTargetId(),dailyTask);
+		}
+
+        for(DailyTask dailyTask:dailyTasks) {
+        	doneTaskMap.put(dailyTask.getTargetId(),dailyTask);
+		}
+
+        //装载任务数据
+		String taskKey = "task";
+		String taskValue = messageService.getValue(taskKey);
+		List<DailyTask> resultList = new ArrayList<>();
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			List<DailyTask> dailyTaskList = objectMapper.readValue(taskValue,new TypeReference<List<DailyTask>>(){ });
+			for(DailyTask task:dailyTaskList) {
+				DailyTask dailyTask = doneTaskMap.get(task.getTargetId());
+				if(dailyTask!=null) {
+					task.setDone(dailyTask.isDone());
+					task.setCurrentNum(dailyTask.getCurrentNum());
+				}
+				resultList.add(task);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
+		}
+
+		noobTasks = new ArrayList<NoobTask>();
+		dailyTasks = new ArrayList<DailyTask>();
+		final List<Integer> noobTaskList = Arrays.asList(AppConstant.NOOB_TASK_ARRAY);
+		for(DailyTask task:resultList) {
+			if(noobTaskList.contains(task.getTargetId().intValue())) {
+				NoobTask noobTask = new NoobTask();
+				noobTask.setName(task.getName());
+				noobTask.setBonus(task.getBonus());
+				noobTask.setTargetId(task.getTargetId());
+				noobTask.setDone(task.isDone());
+				noobTasks.add(noobTask);
+			} else {
+				dailyTasks.add(task);
+			}
+		}
+
+		taskHallView.setNoobTasks(noobTasks);
+		taskHallView.setDailyTasks(dailyTasks);
 
         return taskHallView;
     }

@@ -61,8 +61,9 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
         return MybatisOperaterUtil.getInstance().finAll(new TTypeRecord(),new MybatisSqlWhereBuild(TTypeRecord.class)
                 .groupBefore()
         .eq(TTypeRecord::getType,code)
-        .or().eq(TTypeRecord::getType,code)
+        .or().eq(TTypeRecord::getType,code1)
                 .groupAfter()
+                .eq(TTypeRecord::getUserId,id)
                 .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
 
