@@ -35,6 +35,8 @@ public class AnalysisAudioView {
 	private Integer timeType;
 	//星期  1,2,3 此类
 	private String dateWeekNumber;
+	// 星期 字符串类型
+	private String dateWeek;
 	//开始时间 timeType=0 单次使用此时间
 	private Long startTime;
 	//结束时间 timeType=0 单次使用此时间

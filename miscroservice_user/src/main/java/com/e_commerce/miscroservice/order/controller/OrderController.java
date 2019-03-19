@@ -201,7 +201,7 @@ public class OrderController extends BaseController {
 	 */
 	@PostMapping("/list")
 	@Consume(PageOrderParamView.class)
-	public Object list(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
+	public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
 					   Integer pageSize, String condition, String token) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
@@ -273,7 +273,7 @@ public class OrderController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/detail")
-	public Object detail(Long orderId, String token) {
+	public Object detailIndexOrder(Long orderId, String token) {
 		TUser user = (TUser) redisUtil.get(token);
 		AjaxResult result = new AjaxResult();
 		try {
