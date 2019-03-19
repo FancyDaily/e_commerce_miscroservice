@@ -1,4 +1,4 @@
-package com.other;
+package com.e_commerce.miscroservice.product.util;
 
 import com.e_commerce.miscroservice.product.util.AnsjUtil;
 import com.google.common.collect.HashBasedTable;
@@ -8,6 +8,7 @@ import lombok.Data;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-//import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ClassPathResource;
 
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
@@ -270,6 +271,7 @@ public class AutoAnalysisWord {
 //        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点开游泳party,滨江大厦我能支付400分钟", "杭州"));
 //        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点半开游泳party,滨江大厦我能支付400分钟", "杭州"));
         System.out.println(new AutoAnalysisWord().parse("这个月20号到下个月25号，每周三周五，周六周天早上10点到12点帮我带早餐。", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse(" 这个月20号到下个月25号，每周三周五，周六周天早上十点到12点给我带早餐。,", "杭州"));
 
 
         test();
@@ -690,6 +692,9 @@ public class AutoAnalysisWord {
 
 
             if (startTime.contains("点")) {
+                if (startTime.endsWith("点")) {
+                    startTime += "整";
+                }
                 String[] _startTimeArr = startTime.split("点");
                 startTime = characterToNumberRelation.get(_startTimeArr[0]) + ":" + characterToNumberRelation.get(_startTimeArr[1]);
 
@@ -1557,15 +1562,15 @@ public class AutoAnalysisWord {
 
         try {
 //
-//            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
-//                    + ADDRESS_NAME).getInputStream(), "utf-8");
-            List<String> allRegions = null;
-            try {
-                allRegions = Files.readAllLines(Paths.get(AutoAnalysisWord.class.getResource("/properties/"
-                        + ADDRESS_NAME).toURI()));
-            } catch (URISyntaxException e) {
-
-            }
+            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
+                    + ADDRESS_NAME).getInputStream(), "utf-8");
+//            List<String> allRegions = null;
+//            try {
+//                allRegions = Files.readAllLines(Paths.get(AutoAnalysisWord.class.getResource("/properties/"
+//                        + ADDRESS_NAME).toURI()));
+//            } catch (URISyntaxException e) {
+//
+//            }
 
             allRegionCache = HashBasedTable.create();
 
