@@ -1688,8 +1688,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             msg = "对不起，您已发表过评价";
         }
 
-        if (msg != null) {
-            //更行订单关系表
+        if (msg == null) {
+            //更新订单关系表
             orderRelationship.setUpdateTime(nowTime);
             orderRelationship.setUpdateUser(nowUser.getId());
             orderRelationship.setUpdateUserName(nowUser.getName());
