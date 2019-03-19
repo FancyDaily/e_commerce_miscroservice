@@ -302,6 +302,9 @@ public class SeekHelpController extends BaseController {
 			// 如果重复的，把前端传的固定毫秒值置位0
 			param.getService().setStartTime(0L);
 			param.getService().setEndTime(0L);
+		} else {
+			param.getService().setStartDateS("");
+			param.getService().setEndDateS("");
 		}
 		TUser user = (TUser) redisUtil.get(token);
 		//这一层可判断出是求助，手动设置type参数
