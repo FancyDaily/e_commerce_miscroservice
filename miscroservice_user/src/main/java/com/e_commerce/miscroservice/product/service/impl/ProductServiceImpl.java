@@ -135,6 +135,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public void submitService(TUser user, ServiceParamView param, String token) {
+		user = userService.getUserById(user.getId());
 		//校验重复时间
 		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			checkRepeatProductLegal(param.getService());

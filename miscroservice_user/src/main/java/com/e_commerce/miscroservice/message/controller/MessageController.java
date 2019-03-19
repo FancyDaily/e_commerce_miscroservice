@@ -290,8 +290,20 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/unReadMsg")
     public Object unReadMsg(String token) {
-        TUser user = (TUser) redisUtil.get(token);
         AjaxResult result = new AjaxResult();
+        if (token == null){
+            result.setSuccess(true);
+            result.setMsg("查看成功");
+            result.setData(0);
+            return result;
+        }
+        TUser user = (TUser) redisUtil.get(token);
+        if (user == null){
+            result.setSuccess(true);
+            result.setMsg("查看成功");
+            result.setData(0);
+            return result;
+        }
         try {
             int unReadMsg = messageService.unReadMsg(user.getId());
             result.setSuccess(true);
