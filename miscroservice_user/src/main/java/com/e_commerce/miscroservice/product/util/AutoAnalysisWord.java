@@ -11,14 +11,16 @@ import org.ansj.splitWord.analysis.ToAnalysis;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-
+import org.springframework.core.io.ClassPathResource;
 
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
@@ -38,6 +40,9 @@ public class AutoAnalysisWord {
 
     /****省:<市:区>**/
     private static Table<String, String, List<String>> allRegionCache;
+
+    private static final String AFTERNOON_TIME = "下午|晚上|傍晚|中午|夜里|晚间|夜晚|黄昏|下晌|下昼|黑夜|夜间|暮夜|星夜|半夜";
+    private static final String MORNING_TIME = "上午|早上|凌晨|清晨|清早|朝晨|破晓|黎明|拂晓";
 
 
     private static Pattern numberTimePattern = Pattern.compile("\\d{1,2}[:点](整|一刻|\\d{2})?");
@@ -252,9 +257,9 @@ public class AutoAnalysisWord {
 
     public static void main(String[] args) {
 
-//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
-//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午03:40开游泳party。", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
+        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午04:20到晚上八点开游泳party,滨江大厦我能支付400分钟", "杭州"));
 
 
         test();
@@ -368,7 +373,9 @@ public class AutoAnalysisWord {
             }
 
 
-            if (location.getTailInfo() != null) {
+            if (location.getTailInfo() != null&&(location.getHeadInfo()==null||
+                    (location.getHeadInfo()!=null&&location.getTailInfo().size()>location.getHeadInfo().size()))) {
+
                 workBuild.delete(0, workBuild.length());
                 for (WordInfo wordInfo : location.getTailInfo()) {
                     workBuild.append(wordInfo.getWordName());
@@ -591,7 +598,7 @@ public class AutoAnalysisWord {
                 endTime = matcher.group();
                 originalEndime = endTime;
                 //进行字符串的替换,去除时间
-                replaceAllStr = "(上午|早上|凌晨)?" + startTime + ".*" + "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
+                replaceAllStr = "("+MORNING_TIME+")?" + startTime + ".*" + "("+MORNING_TIME+"|"+AFTERNOON_TIME+")?" + endTime;
 
 
                 //转换成24小时制
@@ -641,7 +648,7 @@ public class AutoAnalysisWord {
                 matchOringalEndTime = originalEndime;
 
                 //进行字符串的替换,去除时间
-                replaceAllStr = "(上午|早上|凌晨)?" + startTime + ".*" + "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
+                replaceAllStr = "("+MORNING_TIME+")?" + startTime + ".*" + "("+MORNING_TIME+"|"+AFTERNOON_TIME+")?" + endTime;
 
 
             } else if (tmpTime.equals(_tmpTime) || tmpTime.isEmpty()) {
@@ -651,7 +658,7 @@ public class AutoAnalysisWord {
                 startTime = timeFormatter.format(LocalDateTime.now());
                 endTime = _tmpTime;
                 //进行字符串的替换,去除时间
-                replaceAllStr = "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
+                replaceAllStr = "("+MORNING_TIME+"|"+AFTERNOON_TIME+")?" + endTime;
                 originalStartTime = endTime;
                 originalEndime = "";
                 matchOringalEndTime = endTime;
@@ -683,7 +690,7 @@ public class AutoAnalysisWord {
                 }
 
                 //进行字符串的替换,去除时间
-                replaceAllStr = "(上午|早上|凌晨)?" + startTime + ".*" + "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
+                replaceAllStr = "("+MORNING_TIME+")?" + startTime + ".*" + "("+MORNING_TIME+"|"+AFTERNOON_TIME+")?" + endTime;
 
 
             }
@@ -705,7 +712,7 @@ public class AutoAnalysisWord {
             }
 
             //判断是否需要转换成24小时制
-            if (Pattern.compile("(下午|傍晚|中午|夜里|晚间|夜晚)" + matchOringalEndTime).matcher(text).find()) {
+            if (Pattern.compile("("+AFTERNOON_TIME+")" + matchOringalEndTime).matcher(text).find()) {
                 //转换成24小时制
                 String[] arrs = endTime.split(":");
                 Integer sumTime = Integer.parseInt(arrs[0]) + 12;
@@ -885,10 +892,10 @@ public class AutoAnalysisWord {
         String result = "";
         DateInfo dateInfo;
 
-        Matcher matcher = Pattern.compile(".*(?=(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + originalStartTime + ")").matcher(text);
+        Matcher matcher = Pattern.compile(".*(?=("+MORNING_TIME+"|"+AFTERNOON_TIME+")?" + originalStartTime + ")").matcher(text);
         String dataStr = "";
         if (matcher.find()) {
-            String prefixDate = matcher.group().replaceAll("(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)", "");
+            String prefixDate = matcher.group().replaceAll("("+MORNING_TIME+"|"+AFTERNOON_TIME+")", "");
 
             //先检查周期性任务
             dateInfo = getPeriodDate(prefixDate);
