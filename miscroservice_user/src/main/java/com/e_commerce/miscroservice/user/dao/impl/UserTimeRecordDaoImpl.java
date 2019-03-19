@@ -14,7 +14,14 @@ import java.util.List;
 public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     @Override
     public List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord(), new MybatisSqlWhereBuild(TUserTimeRecord.class).eq(TUserTimeRecord::getUserId, userId).between(TUserTimeRecord::getCreateTime, begin, end).eq(TUserTimeRecord::getIsValid, AppConstant.IS_VALID_YES));
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord(), new MybatisSqlWhereBuild(TUserTimeRecord.class)
+                .groupBefore()
+                .eq(TUserTimeRecord::getUserId, userId)
+                .or()
+                .eq(TUserTimeRecord::getFromUserId,userId)
+                .groupAfter()
+                .between(TUserTimeRecord::getCreateTime, begin, end)
+                .eq(TUserTimeRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override

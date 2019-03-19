@@ -201,7 +201,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 			resultList = inList;
 		}
 
-		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 收入
+		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 支出
 			resultList = outList;
 		}
 
@@ -398,9 +398,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         for (TUserSkill userSkill : userSkills) {
             UserSkillView theView = BeanUtil.copy(userSkill, UserSkillView.class);
             theView.setIdString(String.valueOf(theView.getId()));
-            if (theView.getDetailUrls() != null && theView.getDetailUrls().contains(",")) {
-                theView.setDetailUrlArray(theView.getDetailUrls().split(","));
-            }
+            if (theView.getDetailUrls() != null && theView.getDetailUrls().contains(",")) {	//多张图
+				theView.setDetailUrlArray(theView.getDetailUrls().split(","));
+			} else if(theView.getDetailUrls() != null && !theView.getDetailUrls().contains(",")) {	//单张图
+				String[] array = {theView.getDetailUrls()};
+				theView.setDetailUrlArray(array);
+			}
             userSkillList.add(theView);
         }
         skillView.setSkillCnt(userSkills.size());
@@ -551,6 +554,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true,user);
 
         //技能列表
+		user = new TUser();
+		user.setId(userId);
         UserSkillListView skills = skills(user);
 
         result.setHelps(helps);
