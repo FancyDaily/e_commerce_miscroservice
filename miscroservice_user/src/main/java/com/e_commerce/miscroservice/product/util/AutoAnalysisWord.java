@@ -18,10 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-//import org.springframework.core.io.ClassPathResource;
+
 
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
@@ -44,6 +41,7 @@ public class AutoAnalysisWord {
 
 
     private static Pattern numberTimePattern = Pattern.compile("\\d{1,2}[:点](整|一刻|\\d{2})?");
+    private static Pattern timerPattern = Pattern.compile("\\d{1,2}:\\d{1,2}");
     private static Pattern characterTimePattern = Pattern.compile("(一|两|二|三|四|五|六|七|八|九|十|\\d{2})点(整|一刻)?");
     private static Pattern periodWeekPattern = Pattern.compile("((每|每个)?(周|星期|礼拜)(一|二|三|四|五|六|七|天|日|[1-7]))|((每|每个)天)");
     private static Pattern baiduLngPattern = Pattern.compile("(?<=\"lng\":)[\\d.]+");
@@ -253,12 +251,13 @@ public class AutoAnalysisWord {
     }
 
     public static void main(String[] args) {
+
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
 //        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse(" 明天早上10:20到杭州大厦给我带早点，我能付300分钟。", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午03:40开游泳party。", "杭州"));
 
 
-//        test();
+        test();
     }
 
     /**
@@ -596,7 +595,7 @@ public class AutoAnalysisWord {
 
 
                 //转换成24小时制
-                if (isNumeric(endTime)) {
+                if (timerPattern.matcher(endTime).matches()) {
                     String[] arrs = endTime.split(":");
                     Integer sumTime = Integer.parseInt(arrs[0]) + 12;
                     endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + arrs[1];
@@ -612,6 +611,8 @@ public class AutoAnalysisWord {
         }
 
         Boolean isSingleDateFlag = Boolean.FALSE;
+
+        String matchOringalEndTime = "";
 
         if (startTime.isEmpty()) {
             //三种情况，一种是全文字，一种是半文字半时间 一种是只有一个时间
@@ -637,6 +638,7 @@ public class AutoAnalysisWord {
                 originalStartTime = _tmpTime;
                 endTime = characterMatcher.group();
                 originalEndime = endTime;
+                matchOringalEndTime = originalEndime;
 
                 //进行字符串的替换,去除时间
                 replaceAllStr = "(上午|早上|凌晨)?" + startTime + ".*" + "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
@@ -652,6 +654,7 @@ public class AutoAnalysisWord {
                 replaceAllStr = "(上午|早上|凌晨|下午|傍晚|中午|夜里|晚间|夜晚)?" + endTime;
                 originalStartTime = endTime;
                 originalEndime = "";
+                matchOringalEndTime = endTime;
 
             } else {
                 //半文字半时间
@@ -669,11 +672,13 @@ public class AutoAnalysisWord {
                     originalStartTime = _tmpTime;
                     endTime = tmpTime;
                     originalEndime = endTime;
+                    matchOringalEndTime = endTime;
                 } else {
                     startTime = tmpTime;
                     originalStartTime = tmpTime;
                     endTime = _tmpTime;
                     originalEndime = endTime;
+                    matchOringalEndTime = endTime;
 
                 }
 
@@ -700,7 +705,7 @@ public class AutoAnalysisWord {
             }
 
             //判断是否需要转换成24小时制
-            if (Pattern.compile("(下午|傍晚|中午|夜里|晚间|夜晚)" + endTime).matcher(text).matches()) {
+            if (Pattern.compile("(下午|傍晚|中午|夜里|晚间|夜晚)" + matchOringalEndTime).matcher(text).find()) {
                 //转换成24小时制
                 String[] arrs = endTime.split(":");
                 Integer sumTime = Integer.parseInt(arrs[0]) + 12;
@@ -716,8 +721,17 @@ public class AutoAnalysisWord {
         DateInfo dateInfo = getDate(text, originalStartTime, originalEndime);
         timeInfo.setWeekDay(dateInfo.getPeriodWeekDay());
         if (isSingleDateFlag) {
-            timeInfo.setStartDate(dateFormatter.format(LocalDateTime.now()));
-            timeInfo.setEndDate(dateInfo.getStartDate());
+            //增加一个判断条件如果是周期性的每天下午03:00
+            if (dateInfo.getStartDate() != null && dateInfo.getEndDate() != null && dateInfo.getPeriodWeekDay() != null) {
+                timeInfo.setStartTime("00:00");
+                timeInfo.setStartDate(dateInfo.getStartDate());
+                timeInfo.setEndDate(dateInfo.getEndDate());
+            } else {
+                timeInfo.setStartDate(dateFormatter.format(LocalDateTime.now()));
+                timeInfo.setEndDate(dateInfo.getStartDate());
+            }
+
+
         } else {
 
             timeInfo.setStartDate(dateInfo.getStartDate());
@@ -880,7 +894,7 @@ public class AutoAnalysisWord {
             dateInfo = getPeriodDate(prefixDate);
 
             if (!dateInfo.getPeriodWeekDay().isEmpty()) {
-                Matcher suffixMatcher = Pattern.compile("(?<=" + originalEndTime + ").*").matcher(text);
+                Matcher suffixMatcher = Pattern.compile("(?<=" + (originalEndTime.isEmpty() ? originalStartTime : originalEndTime) + ").*").matcher(text);
                 if (suffixMatcher.find()) {
                     dateInfo.setText(dateInfo.getText() + suffixMatcher.group());
                 }
@@ -1512,7 +1526,7 @@ public class AutoAnalysisWord {
     private static void loadAddress() {
 
         try {
-//
+
             List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
                     + ADDRESS_NAME).getInputStream(), "utf-8");
 //            List<String> allRegions = null;
