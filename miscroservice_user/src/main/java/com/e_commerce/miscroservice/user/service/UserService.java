@@ -216,13 +216,6 @@ public interface UserService {
     void feedBack(TUser user,TReport report);
 
     /**
-     * 任务信息查询
-     * @param user
-     * @return
-     */
-    Set<Integer> taskList(TUser user);
-
-    /**
      * 红包退回
      * @param user
      * @param bonusPackageId
@@ -242,6 +235,14 @@ public interface UserService {
      * @return
      */
     AjaxResult genrateSMSCode(String telephone);
+
+    /**
+     * 发送指定内容的短信
+     * @param telephone
+     * @param content
+     * @return
+     */
+    boolean genrateSMSWithContent(String telephone, String content);
 
     /**
      * 校验短信验证码

@@ -110,6 +110,16 @@ public class PublishServicempl implements PublishService {
         }
     }
 
+    /**
+     * 根据key获取value
+     * @param key
+     * @return
+     */
+    @Override
+    public String getValue(String key){
+        return publishDao.selecePublish(key).getValue();
+    }
+
 
     /**
      * 解析remark的lables

@@ -148,7 +148,27 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                                 .isNull(TOrderRelationship::getReceiptUserId)
                             .groupAfter()
                         .groupAfter()
-                        .eq(TOrderRelationship::getIsValid, AppConstant.ACCREDIT_STATUS_YES));
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+        return orderRelationshipList;
+    }
+
+    /**
+     * 根据用户id (发布者和参与者) 来查询订单关系List
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TOrderRelationship> selectEndByUserId(Long userId) {
+        List<TOrderRelationship> orderRelationshipList = MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).or()
+                        .groupBefore()
+                        .eq(TOrderRelationship::getFromUserId, userId)
+                        .isNull(TOrderRelationship::getReceiptUserId)
+                        .groupAfter()
+                        .groupAfter()
+                        .eq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_IS_COMPLETED.getType())
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
         return orderRelationshipList;
     }
 

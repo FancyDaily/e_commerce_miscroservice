@@ -42,7 +42,7 @@
         t_order_relationship
         WHERE
         (
-        from_user_id = #{userId}
+        (from_user_id = #{userId} AND receipt_user_id is NULL)
         OR (receipt_user_id = #{userId}
         AND `status` IN (1, 2, 3, 9, 10, 11, 12))
         )

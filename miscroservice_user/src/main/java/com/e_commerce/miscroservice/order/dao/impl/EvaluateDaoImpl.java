@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TEvaluate;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
-import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import org.springframework.stereotype.Repository;
 

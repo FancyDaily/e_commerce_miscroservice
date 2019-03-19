@@ -9,7 +9,8 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
-import com.e_commerce.miscroservice.commons.wechat.service.WechatService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.dao.*;
@@ -17,14 +18,20 @@ import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -35,6 +42,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 	@Autowired
 	private OrderCommonController orderService;
+
+	@Autowired
+	private MessageCommonController messageService;
 
 	@Autowired
 	private GrowthValueService growthValueService;
@@ -87,15 +97,13 @@ public class UserServiceImpl extends BaseService implements UserService {
 	@Autowired
 	private RedisUtil redisUtil;
 
-	private SnowflakeIdWorker idGenerator = new SnowflakeIdWorker();
-
 	@Value("${debug}")
 	private String debug;
 
 	@Value("${page.invite}")
 	private String pageValueInvite;
 
-	@Value("${page.person}") // TODO
+	@Value("${page.person}")
 	private String pageValuePerson;
 
 	@Value("${page.service}")
@@ -305,6 +313,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 	 */
 	@Override
 	public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
+		user = userDao.selectByPrimaryKey(user.getId());
+
 		// 判空
 		if (lastTime == null) {
 			lastTime = System.currentTimeMillis();
@@ -405,8 +415,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param user
      * @param skill
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void skillAdd(TUser user, TUserSkill skill) {
         //校验
         skillPass(user, skill, false);
@@ -426,7 +436,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userSkillDao.insert(skill);
 
         //成长值
-        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+		taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
     }
 
     /**
@@ -470,13 +480,46 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public void collect(TUser user, Long orderId) {
         if (orderId == null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单关系Id不能为空!");
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单Id不能为空!");
         }
 
         TOrderRelationship orderRelationship = orderService.selectOrdertionshipByuserIdAndOrderId(user.getId(), orderId);
-        if (orderRelationship == null) {
+        //如果订单关系不存在，创建一条
+		if(orderRelationship==null) {
+			TOrder order = orderService.selectOrderById(orderId);
+			if(order==null) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单不存在！");
+			}
+			orderRelationship = new TOrderRelationship();
+			orderRelationship.setServiceId(order.getServiceId());
+			orderRelationship.setOrderId(order.getId());
+			orderRelationship.setServiceType(order.getType());
+			orderRelationship.setFromUserId(order.getCreateUser());
+			orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
+			orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+			orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
+			orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
+			orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+			orderRelationship.setServiceName(order.getServiceName());
+			orderRelationship.setStartTime(order.getStartTime());
+			orderRelationship.setEndTime(order.getEndTime());
+			orderRelationship.setTimeType(order.getTimeType());
+			orderRelationship.setCollectTime(order.getCollectTime());
+			orderRelationship.setCollectType(order.getCollectType());
+			orderRelationship.setCreateUser(order.getCreateUser());
+			orderRelationship.setCreateUserName(order.getCreateUserName());
+			orderRelationship.setCreateTime(order.getCreateTime());
+			orderRelationship.setUpdateUser(order.getCreateUser());
+			orderRelationship.setUpdateUserName(order.getCreateUserName());
+			orderRelationship.setUpdateTime(order.getCreateTime());
+			orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+
+			orderService.insertOrderRelationship(orderRelationship);
+			return;
+		}
+        /*if (orderRelationship == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
-        }
+        }*/
         if (OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType() != orderRelationship.getServiceCollectionType()) {    //当前业务为收藏
             orderService.updateCollectStatus(orderRelationship.getId(), OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
         } else { //当前业务为取消收藏
@@ -495,7 +538,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public UserPageView page(TUser user, Long userId) {
         UserPageView result = new UserPageView();
         //基本信息
-        user = userDao.selectByPrimaryKey(userId);
+        user = userDao.selectByPrimaryKey(user.getId());
         DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
@@ -551,15 +594,22 @@ public class UserServiceImpl extends BaseService implements UserService {
             pageSize = 0;
         }
 
+        List<TOrderRelationship> orderRelationships = orderService.selectEndOrdertionshipListByuserId(userId);
+        List<Long> orderIds = new ArrayList<>();
+        for(TOrderRelationship orderRelationship:orderRelationships) {
+        	orderIds.add(orderRelationship.getOrderId());
+		}
+
+        //判空
+		if(orderIds.isEmpty()) {
+			return new QueryResult();
+		}
+
         //分页
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         //查找符合条件的订单记录
-        List<TOrder> orders = orderService.selectEndOrdersByUserId(userId,user);
-        List<Long> orderIds = new ArrayList<>();
-        for (TOrder order : orders) {
-            orderIds.add(order.getId());
-        }
+        List<TOrder> orders = orderService.selectOrdersInIdsByViewer(orderIds,user);
 
         Map<Long, Object> evaluateMap = new HashMap<>();
         List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds, userId);
@@ -602,7 +652,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
         if(userId!=me.getId()) {    //查看别人的主页
-            TUser beenViewer = userDao.selectByPrimaryKey(userId);
+            TUser beenViewer = userDao.selectByPrimaryKey(me.getId());
             startPage = PageHelper.startPage(pageNum, pageSize);
             orders = orderService.selectOdersByUserId(userId, isService, beenViewer);
         }
@@ -735,36 +785,45 @@ public class UserServiceImpl extends BaseService implements UserService {
         String name = user.getName();
         if (name != null) {
             //TODO 调用订单模块的方法 同步修改订单相关昵称
+			orderService.synOrderCreateUserName(user.getId(),user.getName());
         }
 
-        user = userDao.selectByPrimaryKey(idHolder.getId());
-        completeReward(user); //TODO 用户信息完整度任务奖励
+		final TUser[] finalUser = new TUser[1];
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				finalUser[0] = completeReward(user);	//个人信息完整度奖励
 
-        // 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
-        if (updateData != null && updateData.getUserTel() != null) {
-            TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
-            if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
-                    && !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
-                companyAccount.setUserTel(telephone);
-                // updater
-                companyAccount.setUpdateTime(currentTimeMillis);
-                companyAccount.setUpdateUser(user.getId());
-                companyAccount.setUpdateUserName(user.getName());
-                userDao.updateByPrimaryKey(companyAccount);
-                // 删除组织账号的缓存
-                String redisKey = "str" + companyAccount.getId();
-                String companyToken = (String) redisUtil.get(redisKey);
-                if (companyToken != null) {
-                    redisUtil.del(companyToken);// 删除访问凭证
-                }
-                redisUtil.del(redisKey);// 删除登录凭证
-            }
-        }
+				final TUser tUser = finalUser[0];
+				// 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
+				if (updateData != null && updateData.getUserTel() != null) {
+					TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
+					if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
+							&& !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
+						companyAccount.setUserTel(telephone);
+						// updater
+						companyAccount.setUpdateTime(currentTimeMillis);
+						companyAccount.setUpdateUser(tUser.getId());
+						companyAccount.setUpdateUserName(tUser.getName());
+						userDao.updateByPrimaryKey(companyAccount);
+						// 删除组织账号的缓存
+						String redisKey = "str" + companyAccount.getId();
+						String companyToken = (String) redisUtil.get(redisKey);
+						if (companyToken != null) {
+							redisUtil.del(companyToken);// 删除访问凭证
+						}
+						redisUtil.del(redisKey);// 删除登录凭证
+					}
+				}
 
-        // 刷新缓存
-        flushRedisUser(token, user);
-        return token;
+				// 刷新缓存
+				flushRedisUser(token, tUser);
 
+				super.afterCompletion(status);
+			}
+		});
+
+		return token;
     }
 
 
@@ -775,19 +834,17 @@ public class UserServiceImpl extends BaseService implements UserService {
      *
      * @param user
      */
-    private void completeReward(TUser user) {
+    private TUser completeReward(TUser user) {
         Long userId = user.getId();
 
-        // TODO 与数据库同步
+        // 与数据库同步
         user = userDao.selectByPrimaryKey(userId);
 
-/*
         // 查询是否有任务完成记录
         List<TUserTask> pageTask = userTaskDao.findTasksByTypeAndUserId(TaskEnum.TASK_PAGE.getType(), user.getId());
         if (!pageTask.isEmpty()) {
-            return;
+            return user;
         }
-*/
 
         // 完整度累计
         Integer completeNum = 0;
@@ -801,22 +858,42 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         if (userPicturePath != null) {
             int num = PersonalIntegrity.USER_PICTURE_PATH.getNum();
-            completeNum = completeNum + num;
+            completeNum += num;
         }
-        //
+        //公司
         String workPlace = user.getWorkPlace();
         if (workPlace != null && !workPlace.isEmpty()) {
             int num = PersonalIntegrity.COMPANY.getNum();
-            completeNum = completeNum + num;
+            completeNum += num;
         }
 
-        String college = user.getCollege();
+        //昵称
+		String name = user.getName();
+        if (name != null && !name.isEmpty()) {
+        	int num = PersonalIntegrity.NAME.getNum();
+        	completeNum += num;
+		}
+
+		//职位
+		String occupation = user.getOccupation();
+        if(occupation != null && !occupation.isEmpty()) {
+        	int num = PersonalIntegrity.POST.getNum();
+        	completeNum += num;
+		}
+
+		String college = user.getCollege();
         if (college != null && !college.isEmpty()) {
             int num = PersonalIntegrity.EDUCATION.getNum();
-            completeNum = completeNum + num;
+            completeNum += num;
         }
 
-        if (completeNum >= completeTaskNum) {
+		String remarks = user.getRemarks();
+        if(remarks !=null && !remarks.isEmpty()) {
+        	int num = PersonalIntegrity.REMARKS.getNum();
+        	completeNum += num;
+		}
+
+		if (completeNum >= completeTaskNum) {
             // 获取任务奖励
             Long reward = TaskEnum.TASK_PAGE.getReward();
             taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_PAGE);  //TODO 成长值相关
@@ -824,6 +901,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         user.setIntegrity(completeNum);
         userDao.updateByPrimaryKey(user);
+        return user;
     }
 
     /**
@@ -836,10 +914,12 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public TBonusPackage preGenerateBonusPackage(TUser user, TBonusPackage bonusPackage) {
-        //TODO 判穷
+        //判穷
+		if(bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+		}
 
         long currentTimeMillis = System.currentTimeMillis();
-//        bonusPackage.setId(idGenerator.nextId());
         bonusPackage.setUserId(user.getId());
         bonusPackage.setCreateTime(currentTimeMillis);
         bonusPackage.setUpdateTime(currentTimeMillis);
@@ -870,9 +950,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (AppConstant.IS_VALID_YES.equals(bonusPackage.getIsValid())) {
             return;
         }
+
         Long time = bonusPackage.getTime();
         Long currentMills = System.currentTimeMillis();
-        //TODO 判穷
+        //判穷
+		if(bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+		}
 
         //余额变动
         user = userDao.selectByPrimaryKey(user.getId());    //最新数据
@@ -933,6 +1017,9 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public BonusPackageVIew bonusPackageInfo(TUser user, Long bonusId) {
+    	if(bonusId==null) {
+			return null;
+		}
         TBonusPackage info = bonusPackageDao.info(bonusId);
         if (info == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在！");
@@ -970,7 +1057,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         //判权
-        if (bonusRecord.getCreateUser().equals(user.getId())) { //TODO
+        if (bonusRecord.getCreateUser().equals(user.getId())) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您不能领取自己的红包!");
         }
 
@@ -1005,11 +1092,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTimeRecordDao.insert(userTimeRecord);
 
         // 写一条通知(通知红包发起人)
-        String content = String.format(SysMsgEnum.BONUS_PACKAGE_DONE.getContent(), bonusRecord.getDescription(),
+       /* String content = String.format(SysMsgEnum.BONUS_PACKAGE_DONE.getContent(), bonusRecord.getDescription(),
                 user.getId());
-        Long targetUserId = bonusRecord.getUserId();
+        Long targetUserId = bonusRecord.getUserId();*/
 
-        //TODO 插入一条系统消息 调用order模块的接口
+        //插入一条系统消息 调用order模块的接口
         //insertSysMsg(targetUserId, SysMsgEnum.BONUS_PACKAGE_DONE.getTitle(), content);
     }
 
@@ -1059,6 +1146,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param cardId
      * @param cardName
      */
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public void auth(String token, TUser user, String cardId, String cardName) {
         // TODO 与数据库同步
@@ -1115,7 +1203,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setUpdateUserName(user.getName());
 
         // 插入系统消息
-//        insertSysMsg(user.getId(), SysMsgEnum.AUTH.getTitle(), SysMsgEnum.AUTH.getContent()); //TODO 插入系统消息
+//      insertSysMsg(user.getId(), SysMsgEnum.AUTH.getTitle(), SysMsgEnum.AUTH.getContent()); //插入系统消息
 
         // 实名认证奖励(插入账单流水记录)
 //        insertReward(user, PaymentEnum.PAYMENT_TYPE_CERT_BONUS);  //TODO 插入实名认证奖励(插入账单流水记录)
@@ -1258,6 +1346,146 @@ public class UserServiceImpl extends BaseService implements UserService {
         return String.valueOf(AppConstant.DEFAULT_AUTH_STATUS);
     }
 
+	/**
+	 * 每日签到
+	 *
+	 * @param token
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@Transactional(rollbackFor = Throwable.class)
+	public long signUp(String token, TUser user) {
+		// 判空
+		if (user == null) {
+			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
+		}
+
+		// id
+		Long id = user.getId();
+
+		// 判空
+		if (id == null) {
+			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
+		}
+
+		// TODO 从数据库获得即时的用户
+		user = userDao.selectByPrimaryKey(id);
+
+		// 从未签到标记
+		boolean flag = false;
+
+		// 查询签到相关记录
+		List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
+
+		TUserTask userTask = null;
+		if (tasks.isEmpty()) {
+			flag = true;
+		} else {
+			userTask = tasks.get(0); // 最后签到实体类
+		}
+
+		long reward = AppConstant.SIGN_UP_BONUS;
+		Integer targetNum = 1;
+		long special = 3;
+		if (!flag) {
+			// 查询连续签到天数与最后签到日
+			String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
+
+			// 计数器
+			int count = 0;
+
+			for (int i = 0; i < tasks.size(); i++) {
+				count++;
+				TUserTask thisDic = tasks.get(i);
+				Long thisTimeStamp = thisDic.getCreateTime();
+				TUserTask nextDic;
+				Long nextTimeStamp = 0l;
+				if (i != tasks.size() - 1) {
+					nextDic = tasks.get(i + 1);
+					nextTimeStamp = nextDic.getCreateTime();
+				}
+				if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
+					break;
+				}
+			}
+
+			if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
+				count--;
+			}
+
+			targetNum = count % 7;
+			// 最后签到日信息
+			String dayCountStr = String.valueOf(targetNum);
+
+			// 最后签到日为今天，提示 -> 请勿重复签到
+			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
+				throw new MessageException("请勿重复签到");
+			}
+
+			// 最后签到日为昨天
+			// -> 计数等于6，计数为7，给出特殊奖励
+			// -> 计数等于7，计数为0,给出普通奖励
+			// -> else，计数++，给出普通奖励
+			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
+				// 处理计数
+				if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
+					targetNum = 0;
+				} else {
+					targetNum = targetNum + 1;
+				}
+
+				// 处理奖励
+				if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 2 -> 特殊
+					// 特殊奖励
+					special = 3; // 特殊奖励
+					reward = special;
+				}
+
+				// 处理奖励
+				if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
+					// 特殊奖励
+					special = 5; // 特殊奖励
+					reward = special;
+				}
+			}
+
+			// else,计数=1,给出普通奖励
+			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
+				targetNum = 1;
+			}
+
+			userTask.setTargetNum(targetNum);
+//            userTask.setId(idGenerator.nextId());
+			if (targetNum == 7) {
+				userTask.setValue(String.valueOf(special));
+			}
+			long currentTimeMillis = System.currentTimeMillis();
+			userTask.setCreateTime(currentTimeMillis);
+			userTask.setCreateUser(id);
+			userTask.setCreateUserName(user.getName());
+			userTask.setUpdateTime(currentTimeMillis);
+			userTask.setUpdateUser(id);
+			userTask.setUpdateUserName(user.getName());
+			userTask.setIsValid(AppConstant.IS_VALID_YES);
+			userTaskDao.insert(userTask);
+		}
+
+		// 从未签到
+		if (flag) {
+			// 插入一条新的记录
+			insertSignUpInfo(user);
+		}
+
+		//插入一条成长值流水
+		insertGrowthValueRecords(user, GrowthValueEnum.GROWTH_TYPE_REP_SIGN_UP, reward);
+
+		//成长值 & 等级提升 & 授信额度提升
+		levelUp(user, (int) reward);
+
+		return reward;
+	}
+
     /**
      * 签到信息查询
      *
@@ -1355,146 +1583,6 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
-     * 每日签到
-     *
-     * @param token
-     * @param user
-     * @return
-     */
-    @Override
-    public long signUp(String token, TUser user) {
-        // 判空
-        if (user == null) {
-            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
-        }
-
-        // id
-        Long id = user.getId();
-
-        // 判空
-        if (id == null) {
-            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
-        }
-
-        // TODO 从数据库获得即时的用户
-        user = userDao.selectByPrimaryKey(id);
-
-        // 从未签到标记
-        boolean flag = false;
-
-        // 查询签到相关记录
-        List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
-
-        TUserTask userTask = null;
-        if (tasks.isEmpty()) {
-            flag = true;
-        } else {
-            userTask = tasks.get(0); // 最后签到实体类
-        }
-
-        long reward = AppConstant.SIGN_UP_BONUS;
-        Integer targetNum = 1;
-        long special = 3;
-        if (!flag) {
-            // 查询连续签到天数与最后签到日
-            String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
-
-            // 计数器
-            int count = 0;
-
-            for (int i = 0; i < tasks.size(); i++) {
-                count++;
-                TUserTask thisDic = tasks.get(i);
-                Long thisTimeStamp = thisDic.getCreateTime();
-                TUserTask nextDic;
-                Long nextTimeStamp = 0l;
-                if (i != tasks.size() - 1) {
-                    nextDic = tasks.get(i + 1);
-                    nextTimeStamp = nextDic.getCreateTime();
-                }
-                if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
-                    break;
-                }
-            }
-
-            if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
-                count--;
-            }
-
-            targetNum = count % 7; // TODO 计算连续签到天数
-            // 最后签到日信息
-            String dayCountStr = String.valueOf(targetNum);
-
-            // 最后签到日为今天，提示 -> 请勿重复签到
-            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
-                throw new MessageException("请勿重复签到");
-            }
-
-            // 最后签到日为昨天
-            // -> 计数等于6，计数为7，给出特殊奖励
-            // -> 计数等于7，计数为0,给出普通奖励
-            // -> else，计数++，给出普通奖励
-            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
-                // 处理计数
-                if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
-                    targetNum = 0;
-                } else {
-                    targetNum = targetNum + 1;
-                }
-
-                // 处理奖励
-                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 2 -> 特殊
-                    // 特殊奖励
-                    special = 3; // 特殊奖励 //TODO
-                    reward = special;
-                }
-
-                // 处理奖励
-                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
-                    // 特殊奖励
-                    special = 5; // 特殊奖励 //TODO
-                    reward = special;
-                }
-            }
-
-            // else,计数=1,给出普通奖励
-            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
-                targetNum = 1;
-            }
-
-            userTask.setTargetNum(targetNum);
-//            userTask.setId(idGenerator.nextId());
-            if (targetNum == 7) {
-                userTask.setValue(String.valueOf(special));
-            }
-            long currentTimeMillis = System.currentTimeMillis();
-            userTask.setCreateTime(currentTimeMillis);
-            userTask.setCreateUser(id);
-            userTask.setCreateUserName(user.getName());
-            userTask.setUpdateTime(currentTimeMillis);
-            userTask.setUpdateUser(id);
-            userTask.setUpdateUserName(user.getName());
-            userTask.setIsValid(AppConstant.IS_VALID_YES);
-            userTaskDao.insert(userTask);
-        }
-
-        // 从未签到
-        if (flag) {
-            // 插入一条新的记录
-            insertSignUpInfo(user);
-        }
-
-        //TODO 完成奖励待添加 JK
-        //插入一条成长值流水
-        insertGrowthValueRecords(user, GrowthValueEnum.GROWTH_TYPE_REP_SIGN_UP, reward);
-
-        //成长值 & 等级提升 & 授信额度提升
-        levelUp(user, (int) reward);
-
-        return reward;
-    }
-
-    /**
      * 插入一条任务记录
      *
      * @param user
@@ -1508,6 +1596,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTask.setUserId(user.getId());
         userTask.setType(taskEnum.getType());
         //creater & updater
+		userTask.setTargetId(String.valueOf(taskEnum.getType()));
         userTask.setCreateTime(currentTimeMillis);
         userTask.setCreateUser(user.getId());
         userTask.setCreateUserName(user.getName());
@@ -1532,6 +1621,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         typeRecord.setUserId(user.getId());
         typeRecord.setType(growthValueEnum.getCode());
         typeRecord.setSubType(growthValueEnum.getSubCode());
+        typeRecord.setTitle(growthValueEnum.getMessage());
+        typeRecord.setContent(growthValueEnum.getMessage());
         if (reward == null) {
             reward = Long.valueOf(growthValueEnum.getPrice());
         }
@@ -1554,35 +1645,18 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void feedBack(TUser user, TReport report) {
-//        orderService.feedBack();  //TODO 调用订单模块的用户反馈接口
-    }
+		final long currentTimeMillis = System.currentTimeMillis();
+		//creater & updater
+		report.setCreateUser(user.getId());
+		report.setCreateUserName(user.getName());
+		report.setCreateTime(currentTimeMillis);
+		report.setUpdateUser(user.getId());
+		report.setUpdateUserName(user.getName());
+		report.setUpdateTime(currentTimeMillis);
+		report.setIsValid(AppConstant.IS_VALID_YES);
+		orderService.saveTreport(report);
 
-    @Override
-    public Set<Integer> taskList(TUser user) {
-        return null;
     }
-
-    /**
-     * 任务信息查询
-     *
-     * @param user
-     * @return
-     */
-   /* @Override
-    public Set<Integer> taskList(TUser user) {
-        Set<Integer> resultSet = new TreeSet<>();
-        List<TUserTask> userTasks = userTaskDao.findOnesTasks(user.getId());
-        //每日的类型集合
-        Integer[] dailyTaskArray = AppConstant.DAILY_TASK_ARRAY;
-        List<Integer> includeList = Arrays.asList(dailyTaskArray);
-        for (TUserTask userTask : userTasks) {
-            if (includeList.contains(userTask.getType()) && !DateUtil.isToday(userTask.getCreateTime())) {  //如果是日常任务，判断是否为今天
-                continue;
-            }
-            resultSet.add(userTask.getType());
-        }
-        return resultSet;
-    }*/
 
     /**
      * 红包退回
@@ -1594,13 +1668,16 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
         //修改红包记录
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
+		//红包不存在
+        if(bonusPackage==null) {
+        	return;
+		}
         bonusPackage.setId(bonusPackageId);
         bonusPackage.setIsValid(AppConstant.IS_VALID_NO);
         bonusPackageDao.updateByPrimaryKey(bonusPackage);
         long currentTimeMillis = System.currentTimeMillis();
         //插入退款流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-//        userTimeRecord.setId(idGenerator.nextId());
         userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PAC_SEND_BACK.getCode());
         userTimeRecord.setTime(bonusPackage.getTime());
         userTimeRecord.setUserId(user.getId());
@@ -1634,9 +1711,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TPublish getPublishValue(String key) {
-//        return orderService.getPublishValue(keœy);
+		String value = messageService.getValue(key);
         TPublish publish = new TPublish();
-        publish.setValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
+//        publish.setValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
+		publish.setValue(value);
         return publish;
     }
 
@@ -1648,9 +1726,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public AjaxResult genrateSMSCode(String telephone) {
-        AjaxResult result = new AjaxResult();
+		AjaxResult result = new AjaxResult();
+		Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
+/*
         // 如果存在
-        Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
         if (redisUtil.hasKey("time" + telephone)) {
             if (redisUtil.hasKey("count" + telephone)) {
                 long time = redisUtil.getExpire("time" + telephone);// 获取剩余时间
@@ -1678,6 +1757,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                         AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码!");
             }
         }
+*/
 
 //        String debug = "debug"; //TODO 后续根据配置文件读取
 
@@ -1715,6 +1795,34 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         return result;
     }
+
+	/**
+	 * 发送短信(指定内容)
+	 *
+	 * @param telephone
+	 * @return
+	 */
+	@Override
+	public boolean genrateSMSWithContent(String telephone, String content) {
+		boolean result = false;
+		// 生成6位随机数
+		Map<String, Object> params = new HashMap<>();
+		params.put("mobile", telephone);
+		params.put("content", content);
+
+		String resMsg;
+		if (StringUtil.equals(AppConstant.DEBUG_STATUS_TRUE, debug)) { // 表示当前运行环境为调试
+			resMsg = "true";
+		} else {
+			resMsg = smsService.sendServMsg(params);
+		}
+
+		if (StringUtil.equals("true", resMsg)) {
+			result = true;
+		}
+
+		return result;
+	}
 
     /**
      * 校验短信验证码
@@ -1860,10 +1968,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "option有误！错误的option:" + option);
         }
 
-//        Long id = idGenerator.nextId();
-
         TTypeDictionaries dictionaries = new TTypeDictionaries();
-//        dictionaries.setId(id);
         dictionaries.setEntityId(inviterId);
         dictionaries.setValue(scene);
         dictionaries.setType(DictionaryEnum.SHARE.getType());
@@ -2107,7 +2212,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum) {
         //根据类型校验最大值、当日最大值
-        growthValueEnum = checkMax(growthValueEnum, user);
+		try {
+        	growthValueEnum = checkMax(growthValueEnum, user);
+		} catch (MessageException e) {
+			return user;
+		}
 
         //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
         Integer price = growthValueEnum.getPrice(); //数额
@@ -2142,9 +2251,15 @@ public class UserServiceImpl extends BaseService implements UserService {
         return levelUp(user, price);
     }
 
+	/**
+	 * 确认是否为我的红包
+	 * @param user
+	 * @param bonusPackageId
+	 * @return
+	 */
     @Override
     public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
-        if(bonusPackageId==null) {
+        if(bonusPackageId==null || user==null) {
             return null;
         }
         Map<String, Object> resultMap = new HashMap<>();
@@ -2152,6 +2267,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         return resultMap;
     }
 
+	/**
+	 * 组织版登录
+	 * @param telephone
+	 * @param password
+	 * @return
+	 */
     @Override
     public Map<String, Object> loginGroupByPwd(String telephone, String password) {
         return null;
@@ -2267,7 +2388,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 冻结金额
         user.setFreezeTime(0L);
         // 总余额
-        user.setSurplusTime(PaymentEnum.PAYMENT_TYPE_RIGESTER_BONUS.getBonus());
+        user.setSurplusTime(0l);
 
         // 实名相关
         user.setAuthenticationStatus(AppConstant.DEFAULT_AUTH_STATUS);
@@ -2281,34 +2402,22 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setMasterStatus(AppConstant.MASTER_STATUS_DEFAULT); // 达人标记
 
         // creater & updater
-        user.setCreateTime(System.currentTimeMillis());
+		long currentTimeMillis = System.currentTimeMillis();
+		user.setCreateTime(System.currentTimeMillis());
         user.setCreateUser(user.getId());
         user.setCreateUserName(user.getName());
-        user.setUpdateTime(System.currentTimeMillis());
+        user.setUpdateTime(currentTimeMillis);
         user.setUpdateUser(user.getId());
         user.setUpdateUserName(user.getName());
 
         // 有效性
         user.setIsValid(AppConstant.IS_VALID_YES);
 
-        // 插入注册的系统消息
-//        insertRigesterSysMsg(user);   //TODO 调用订单模块的接口
+		// 插入一条用户记录
+		userDao.insert(user);
 
-
-      /*
-        // 插入一条注册完成奖励
-        insertRigesterReward(user);
-
-        // 插入“注册完成”的任务信息
-        rigesterTaskComplete(user);
-
-        // 插入一条通用权益（获取互助时）
-        addMedal(user, DictionaryEnum.INTEREST_EARN.getType(), DictionaryEnum.INTEREST_EARN.getSubType(),
-                DictionaryEnum.INTEREST_EARN.getReward());// TODO可能会将target_id分离出去
-        */
-
-        // 插入一条用户记录
-        userDao.insert(user);
+		// 插入注册的系统消息
+		messageService.messageSave(null,user,AppConstant.NOTICE_TITLE_RIGESTER,AppConstant.NOTICE_CONTENT_RIGESTER,user.getId(),currentTimeMillis);
 
         // 注册完成任务
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
@@ -2338,6 +2447,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     private Integer checkMax(GrowthValueEnum growthValueEnum, TUser user, Integer counts) {
+
+    	//原始基数
+		Integer originalCounts = counts;
 
         //判空
         if (growthValueEnum == null) {
@@ -2400,7 +2512,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         boolean flag = false;
         Integer dailyMaxIn = growthValueEnum.getDailyMaxIn();//TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
         Integer maxIn = growthValueEnum.getMaxIn();
-        if (countTotal > maxIn || countToday > dailyMaxIn) {   //总或者今日达到上限
+        if(maxIn==-1) {
+        	maxIn = 2147483647;
+		}
+        if (countTotal >= maxIn || countToday >= dailyMaxIn) {   //总或者今日达到上限
             counts = 0;
         } else {
             int inteval = dailyMaxIn - countToday;
@@ -2414,10 +2529,12 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         boolean superFlag = false;
         if (superGrowthValueEnum != null) { //特定类型
-            if (superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
+            if (counts > 0 && superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
                 //插入一条成长值流水
-                insertGrowthValueRecords(user, growthValueEnum);
-                counts--; //消耗掉一次插入机会
+                insertGrowthValueRecords(user, superGrowthValueEnum);
+                if(originalCounts <= growthValueEnum.getDailyMaxIn() / growthValueEnum.getPrice()) {
+					counts--; //消耗掉一次插入机会
+				}
                 superFlag = true;
                 //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
 
@@ -2448,8 +2565,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 遍历枚举
         Integer value = null;
         for(GrowthValueEnum growthValueEnum:GrowthValueEnum.values()) {
-            if(growthValueEnum.getCode() == taskCode) {
+            if(growthValueEnum.getTaskCode() == taskCode) {
                 value = growthValueEnum.getPrice();
+                break;
             }
         }
         userTask.setValue(String.valueOf(value));
@@ -2465,6 +2583,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     private TUser levelUp(TUser user, Integer price) {
+    	//增加成长值之前同步数据
+//		user = userDao.selectByPrimaryKey(user.getId());	//TODO
+
         Long growthValue = user.getGrowthValue();
 
         //成长值增加
@@ -2472,27 +2593,36 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         //等级提升
         Integer level = user.getLevel();
+        //授信提升
+        Long creditLimit = user.getCreditLimit();
         if (growthValue >= LevelEnum.LEVEL_ONE.getMin() && growthValue < LevelEnum.LEVEL_ONE.getMax()) {
             level = LevelEnum.LEVEL_ONE.getLevel();
+            creditLimit= LevelEnum.LEVEL_ONE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
             level = LevelEnum.LEVEL_TWO.getLevel();
+            creditLimit = LevelEnum.LEVEL_TWO.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_THREE.getMin() && growthValue < LevelEnum.LEVEL_THREE.getMax()) {
             level = LevelEnum.LEVEL_THREE.getLevel();
+            creditLimit = LevelEnum.LEVEL_THREE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_FOUR.getMin() && growthValue < LevelEnum.LEVEL_FOUR.getMax()) {
             level = LevelEnum.LEVEL_FOUR.getLevel();
+            creditLimit = LevelEnum.LEVEL_FOUR.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_FIVE.getMin() && growthValue < LevelEnum.LEVEL_FIVE.getMax()) {
             level = LevelEnum.LEVEL_FIVE.getLevel();
+            creditLimit = LevelEnum.LEVEL_FIVE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_SIX.getMin() && growthValue < LevelEnum.LEVEL_SIX.getMax()) {
             level = LevelEnum.LEVEL_SIX.getLevel();
+            creditLimit = LevelEnum.LEVEL_SIX.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_SEVEN.getMin() && growthValue < LevelEnum.LEVEL_SEVEN.getMax()) {
             level = LevelEnum.LEVEL_SEVEN.getLevel();
+            creditLimit = LevelEnum.LEVEL_SEVEN.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_EIGHT.getMin()) {
             level = LevelEnum.LEVEL_EIGHT.getLevel();
+            creditLimit = LevelEnum.LEVEL_EIGHT.getCredit();
         }
 
         user.setLevel(level);
-
-        //TODO 授信总额提升 等待规则出来
+        user.setCreditLimit(creditLimit);
 
         //更新
         //updater
@@ -2593,7 +2723,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         if (dayMaxIn != -1) {
-            if (dayMaxIn - dayTotal < growthValueEnum.getPrice()) { //本次将要完成任务
+            if (dayTotal < dayMaxIn && dayTotal + growthValueEnum.getPrice() >= dayMaxIn) { //本次将要完成任务
                 //TODO 插入一条任务完成的记录
                 insertTaskRecords(user, growthValueEnum.getTaskCode());
             }
@@ -2690,9 +2820,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTaskDao.insert(userTask);
     }
 
-
     /**
-     * 刷勋缓存
+     * 刷新缓存
      *
      * @param token
      * @param user
@@ -2730,7 +2859,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TaskHallView taskHall(TUser user) {
-        //TODO 等级信息
+    	//获取等级、成长值信息
         user = userDao.selectByPrimaryKey(user.getId());
         LevelView levelView = new LevelView();
         levelView.setGrowthValue(user.getGrowthValue());
@@ -2743,6 +2872,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if(levelEnum.getLevel().equals(level)) {
                 currentLevel = levelEnum;
                 flag = true;
+                continue;
             }
             if(flag) {
                 nextLevel = levelEnum;
@@ -2753,6 +2883,25 @@ public class UserServiceImpl extends BaseService implements UserService {
         if(nextLevel!=null) {
             levelView.setUpToLevelUp(nextLevel.getMin() - user.getGrowthValue());
         }
+
+        //获取url
+		String url = "";
+		String key = "levelMedal";
+		String value = messageService.getValue(key);
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			List<LevelMedalView> levelMedalViews = objectMapper.readValue(value,new TypeReference<List<LevelMedalView>>(){ });
+			for(LevelMedalView levelMedal:levelMedalViews) {
+				if(levelMedal.getLevelNum().equals(currentLevel.getLevel())) {
+					url = levelMedal.getUrl();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
+		}
+
+		levelView.setUrl(url);	//等级对应勋章地址
         TaskHallView taskHallView = new TaskHallView();
         taskHallView.setLevelView(levelView);
 
@@ -2761,8 +2910,60 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<NoobTask> noobTasks = (List<NoobTask>) taskMap.get("noobTasks");
         List<DailyTask> dailyTasks = (List<DailyTask>) taskMap.get("dailyTasks");
 
-        taskHallView.setNoobTasks(noobTasks);
-        taskHallView.setDailyTasks(dailyTasks);
+        Map<Long,DailyTask> doneTaskMap = new HashMap<>();
+        for(NoobTask noobTask:noobTasks) {
+        	DailyTask dailyTask = new DailyTask();
+        	dailyTask.setDone(noobTask.isDone());
+        	if(!noobTask.isDone()) {
+				dailyTask.setCurrentNum(0);
+			} else {
+        		dailyTask.setCurrentNum(1);
+			}
+        	doneTaskMap.put(noobTask.getTargetId(),dailyTask);
+		}
+
+        for(DailyTask dailyTask:dailyTasks) {
+        	doneTaskMap.put(dailyTask.getTargetId(),dailyTask);
+		}
+
+        //装载任务数据
+		String taskKey = "task";
+		String taskValue = messageService.getValue(taskKey);
+		List<DailyTask> resultList = new ArrayList<>();
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			List<DailyTask> dailyTaskList = objectMapper.readValue(taskValue,new TypeReference<List<DailyTask>>(){ });
+			for(DailyTask task:dailyTaskList) {
+				DailyTask dailyTask = doneTaskMap.get(task.getTargetId());
+				if(dailyTask!=null) {
+					task.setDone(dailyTask.isDone());
+					task.setCurrentNum(dailyTask.getCurrentNum());
+				}
+				resultList.add(task);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
+		}
+
+		noobTasks = new ArrayList<NoobTask>();
+		dailyTasks = new ArrayList<DailyTask>();
+		final List<Integer> noobTaskList = Arrays.asList(AppConstant.NOOB_TASK_ARRAY);
+		for(DailyTask task:resultList) {
+			if(noobTaskList.contains(task.getTargetId().intValue())) {
+				NoobTask noobTask = new NoobTask();
+				noobTask.setName(task.getName());
+				noobTask.setBonus(task.getBonus());
+				noobTask.setTargetId(task.getTargetId());
+				noobTask.setDone(task.isDone());
+				noobTasks.add(noobTask);
+			} else {
+				dailyTasks.add(task);
+			}
+		}
+
+		taskHallView.setNoobTasks(noobTasks);
+		taskHallView.setDailyTasks(dailyTasks);
 
         return taskHallView;
     }
@@ -2829,6 +3030,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             dailyTask.setBonus(taskEnum.getReward().intValue());
             dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
             dailyTask.setCurrentNum(taskEnum.getDailyMaxNum());
+            if(dailyTask.getTotalNum().equals(dailyTask.getCurrentNum())) {
+            	dailyTask.setDone(true);
+			}
             dailyTaskMap.put(type,dailyTask);
         }
 

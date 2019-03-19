@@ -4,7 +4,6 @@ package com.e_commerce.miscroservice.message.dao.impl;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
-import com.e_commerce.miscroservice.message.dao.MessageDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
 import org.springframework.stereotype.Repository;
 

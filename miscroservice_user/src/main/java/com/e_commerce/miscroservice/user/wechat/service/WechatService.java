@@ -1,6 +1,6 @@
-package com.e_commerce.miscroservice.commons.wechat.service;
+package com.e_commerce.miscroservice.user.wechat.service;
 
-import com.e_commerce.miscroservice.commons.wechat.entity.WechatSession;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 
 /**
  * 功能描述:

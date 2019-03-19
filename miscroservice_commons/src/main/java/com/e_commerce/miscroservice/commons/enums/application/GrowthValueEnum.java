@@ -30,7 +30,7 @@ public enum GrowthValueEnum {    //TODO 数值还没有确定
     GROWTH_TYPE_UNREP_FIRST_SERV_SEND(16, 0, 6,"首次发布服务", 10, 1, 10, 10),    //首次发布服务
     GROWTH_TYPE_UNREP_FIRST_COMMENT(17, 0, 7,"首次对互助进行评价", 5, 1, 5, 5),        //首次对互助进行评价
     GROWTH_TYPE_UNREP_FIRST_JOIN_COMPANY(18, 0, 8,"首次加入组织", 5, 1, 5, 5),    //首次加入组织
-    GROWTH_TYPE_UNREP_FIRST_PUBLIC_WELFARE_ACTY_DONE(19, 9,0, "首次完成公益活动", 20, 1, 20, 20),    //首次完成公益活动
+    GROWTH_TYPE_UNREP_FIRST_PUBLIC_WELFARE_ACTY_DONE(19, 9,9, "首次完成公益活动", 20, 1, 20, 20),    //首次完成公益活动
     //重复 -> TODO 总上限还未设置
     GROWTH_TYPE_REP_INVITE(30, 0, 20,"邀请好友注册成功", 10, 1, -1, -1),    //邀请好友注册成功
     GROWTH_TYPE_REP_SIGN_UP(31, 0, 21,"每日签到", 1, 1, 1, -1),    //每日签到

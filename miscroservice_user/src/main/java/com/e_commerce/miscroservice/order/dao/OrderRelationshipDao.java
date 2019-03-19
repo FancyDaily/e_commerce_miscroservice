@@ -124,7 +124,10 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> selectByUserId(Long userId);
-	/**
+
+    List<TOrderRelationship> selectEndByUserId(Long userId);
+
+    /**
 	 * 分页报名和选人列表
 	 *
 	 * @param pageNum  分页页数

@@ -281,13 +281,13 @@ public interface AppConstant {
     public String IS_VALID_DEFAULT = IS_VALID_YES;
 
     /**
-     * 消息类型相关常量 TODO
+     * 消息类型相关常量
      */
     /*
      * 注册
      */
     public Integer NOTICE_TYPE_RIGESTER = 1;
-    public String NOTICE_CONTENT_RIGESTER = "恭喜您成功注册，感恩与您同行，壹晓时在此赠送您30分钟互助时，您可以在您的时间账户中查看。"; //内容 TODO
+    public String NOTICE_CONTENT_RIGESTER = "欢迎加入晓时时间银行，您的到来，让时间变得更有温度。修改昵称、完善个人主页后，会遇到更多温暖的小伙伴哦！"; //内容
 
     /**
      * 用户履历类型 -> 教育、工作
@@ -548,7 +548,7 @@ public interface AppConstant {
 
     public long TARGET_ID_FIRST_HELP = 105l;
 
-    public String NOTICE_TITLE_RIGESTER = "注册成功";
+    public String NOTICE_TITLE_RIGESTER = "欢迎加入壹晓时";
 
     /**
      * 系统级别的用户 -> id

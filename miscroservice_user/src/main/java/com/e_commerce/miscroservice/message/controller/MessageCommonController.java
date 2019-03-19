@@ -131,6 +131,8 @@ public class MessageCommonController extends BaseController {
         return publishService.getValue(labelsId , key);
     }
 
+    public String getValue(String key) {return publishService.getValue(key);}
+
     /**
      * 插入事件
      * @param event

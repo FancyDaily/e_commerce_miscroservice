@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
+import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
@@ -23,6 +24,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +51,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	MessageCommonController messageService;
 	@Autowired
 	EvaluateDao evaluateDao;
+	@Autowired
+	@Lazy
+	MqTemplate mqTemplate;
 
 
 	@Override
@@ -183,6 +188,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 				tOrderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+			}
+			if (order.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
+				tOrderRelationship.setServiceReportType(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 			}
 			returnView.setOrderRelationship(tOrderRelationship);
 		} else {
@@ -532,7 +540,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			tOrder.setServicePersonnel(1);
 			Long fromUserId = relationship.getFromUserId();
 			TUser tUser = userService.getUserById(fromUserId);
-			BaseUserView userView = BeanUtil.copy(user, BaseUserView.class);
+			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
 			// 是否关注该用户
 			boolean isCare = userService.isCareUser(user.getId(), tUser.getId());
 			if (isCare) {
@@ -602,6 +610,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
+	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) {
+		return orderDao.selectOrdersInOrderIdsByViewer(orderIds,viewer);
+	}
+
+    @Override
 	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());
@@ -627,8 +640,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//可以成功创建订单
 				saveOrder(order);
-				return order;
 				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
+//				mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);
+				return order;
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());

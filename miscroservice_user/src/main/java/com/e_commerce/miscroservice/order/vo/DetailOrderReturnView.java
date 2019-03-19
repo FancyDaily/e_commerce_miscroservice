@@ -45,7 +45,7 @@ public class DetailOrderReturnView {
 	 */
 	private String[] enrollDate;
 
-	public String getServiceIdString() {
+	public String getOrderIdString() {
 		if (order != null) {
 			return order.getId() + "";
 		}

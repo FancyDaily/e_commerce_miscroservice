@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
+import com.e_commerce.miscroservice.order.dao.ReportDao;
 import com.e_commerce.miscroservice.order.vo.DetailOrderReturnView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,9 @@ public class OrderCommonController extends BaseController {
 
 	@Autowired
 	private EvaluateDao evaluateDao;
+
+	@Autowired
+	private ReportDao reportDao;
 
 	/**
 	 * 根据service派生订单 供其他模块调用
@@ -104,6 +108,15 @@ public class OrderCommonController extends BaseController {
 	 **/
 	public List<TOrderRelationship> selectOrdertionshipListByuserId(Long userId) {
 		return orderRelationshipDao.selectByUserId(userId);
+	}
+
+	/**
+	 * 查询结束的订单关系
+	 * @param userId
+	 * @return
+	 */
+	public List<TOrderRelationship> selectEndOrdertionshipListByuserId(Long userId) {
+		return orderRelationshipDao.selectEndByUserId(userId);
 	}
 
 	/**
@@ -224,8 +237,12 @@ public class OrderCommonController extends BaseController {
 	 * @param orderRelationshipId
 	 * @return
 	 */
-	public TOrderRelationship selectOrderById(Long orderRelationshipId) {
+	public TOrderRelationship selectOrderRelationshipById(Long orderRelationshipId) {
 		return orderRelationshipDao.selectByPrimaryKey(orderRelationshipId);
+	}
+
+	public TOrder selectOrderById(Long orderId) {
+		return orderDao.selectById(orderId);
 	}
 
 	/**
@@ -259,4 +276,20 @@ public class OrderCommonController extends BaseController {
 	public void synOrderCreateUserName(Long userId, String userName) {
 		orderService.synOrderCreateUserName(userId, userName);
 	}
+
+	/**
+	 * 保存Treport实体
+	 * @param report
+	 */
+	public void saveTreport(TReport report) {
+		reportDao.saveOneOrder(report);
+	}
+
+	/**
+	 * 根据用户id、观察者查询所有订单记录
+	 * @param orderIds
+	 * @param viewer
+	 * @return
+	 */
+	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) { return orderService.selectOrdersInIdsByViewer(orderIds,viewer);}
 }

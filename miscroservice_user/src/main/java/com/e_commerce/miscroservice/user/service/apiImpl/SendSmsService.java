@@ -63,6 +63,7 @@ public class SendSmsService implements APIService {
 		return sendSms(params);
 		
 	}
+
 	public String sendServMsg(Map<String, Object> params) {
 		String tkey = TextFormater.format(Calendar.getInstance().getTime(), "yyyyMMddHHmmss");
 		String password = MD5.crypt(MD5.crypt(passwd) + tkey );

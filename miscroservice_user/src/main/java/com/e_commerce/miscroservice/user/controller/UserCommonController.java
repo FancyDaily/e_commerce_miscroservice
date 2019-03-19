@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,9 @@ public class UserCommonController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private WechatService wechatService;
 
 	@Autowired
 	private UserDao userDao;
@@ -142,7 +146,7 @@ public class UserCommonController {
 	 * @param type 类型 1、求助 2、服务
 	 */
 	public void addPublishTimes(TUser user, int type) {
-		userService.addPublishTimes(user, type);
+//		userService.addPublishTimes(user, type);
 	}
 
 	/**
@@ -152,7 +156,18 @@ public class UserCommonController {
 	 * @return
 	 */
 	public boolean isCareUser(Long userId, Long userFollowId) {
-		return userService.isCareUser(userId, userFollowId);
+//		return userService.isCareUser(userId, userFollowId);
+		return false;
+	}
+
+
+	/**
+	 * 发送短信
+	 * @param telephone
+	 * @param content
+	 */
+	public boolean sendSMS(String telephone, String content) {
+		return userService.genrateSMSWithContent(telephone,content);
 	}
 
 	/**
@@ -161,4 +176,12 @@ public class UserCommonController {
 	 * @return
 	 */
 	public List<TUserTimeRecord> selectGetTimeByOrder(Long orderId){return userTimeRecordDao.selectGetTimeByOrder(orderId);}
+
+	/**
+	 * 获取微信token
+	 */
+	public String getWechatToken() {
+		return wechatService.getToken();
+	}
+
 }

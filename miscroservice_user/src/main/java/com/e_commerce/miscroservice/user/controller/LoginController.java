@@ -9,7 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
-import com.e_commerce.miscroservice.commons.wechat.service.WechatService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;

@@ -51,6 +51,9 @@ public interface PublishService {
      * @return
      */
     String getValue(long labelsId , String key);
+
+    String getValue(String key);
+
     /**
      * 根据分辨率返回不同类型封面图
      * @param length
