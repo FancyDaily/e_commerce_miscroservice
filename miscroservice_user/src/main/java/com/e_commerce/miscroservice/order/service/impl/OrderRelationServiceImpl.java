@@ -2029,6 +2029,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             userTimeRecord.setType(1);
             userTimeRecord.setTargetId(orderRelationship.getOrderId());
             userTimeRecord.setTime(payment);
+            userTimeRecord.setCreateTime(nowTime);
             userTimeRecord.setCreateUser(nowUser.getId());
             userTimeRecord.setCreateUserName(nowUser.getName());
             userTimeRecord.setUpdateTime(nowTime);
