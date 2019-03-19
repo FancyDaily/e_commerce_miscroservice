@@ -415,6 +415,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param skill
      */
     @Override
+    @Transactional(rollbackFor = Throwable.class)
     public void skillAdd(TUser user, TUserSkill skill) {
         //校验
         skillPass(user, skill, false);
@@ -536,7 +537,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public UserPageView page(TUser user, Long userId) {
         UserPageView result = new UserPageView();
         //基本信息
-        user = userDao.selectByPrimaryKey(userId);
+        user = userDao.selectByPrimaryKey(user.getId());
         DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
