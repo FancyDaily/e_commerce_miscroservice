@@ -1149,7 +1149,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是报名者，要修改自己的订单状态
             TUser toUser = userCommonController.getUserById(userIdList.get(0));
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
-            String msg = remark(orderRelationship, nowUser, toUser, nowTime, false);
+            String msg = remark(orderRelationship, nowUser, toUser, nowTime, true);
             if (msg != null) {
                 throw new MessageException("499", msg);
             }
