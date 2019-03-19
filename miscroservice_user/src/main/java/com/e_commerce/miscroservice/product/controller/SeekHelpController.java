@@ -306,15 +306,16 @@ public class SeekHelpController extends BaseController {
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				productService.submitSeekHelp(user, param, token);
+				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
 				productService.submitService(user, param, token);
+				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else {
 				result.setSuccess(false);
 				result.setMsg("请选择发布类型");
 			}
-			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
 			logger.warn(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
@@ -357,6 +358,7 @@ public class SeekHelpController extends BaseController {
 	 */
 	@PostMapping("/analysisWord")
 	public AnalysisAudioView analysisWord(String text, String city) {
+		logger.info("解析的文本为 {}, city 为 {} >>>>>>", text, city);
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
 		Map<String, Object> map = analysisWord.parse(text, city);

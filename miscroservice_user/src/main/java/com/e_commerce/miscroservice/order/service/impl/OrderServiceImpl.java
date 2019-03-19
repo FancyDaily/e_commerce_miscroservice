@@ -423,7 +423,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 			if (Objects.equals(11, relationship.getStatus())) { //已评价 待对方评价
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_WAIT_OTHER_REMARK.getValue());
-			} else if (Objects.equals(12, relationship.getStatus())) { // 待评价
+			} else if (Objects.equals(12, relationship.getStatus()) || Objects.equals(9, relationship.getStatus())) { // 待评价
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_WAIT_REMARK.getValue());
 			} else if (Objects.equals(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType(), relationship.getStatus())
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
@@ -509,7 +509,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 			if (Objects.equals(11, relationship.getStatus())) { //已评价 待对方评价
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_WAIT_OTHER_REMARK.getValue());
-			} else if (Objects.equals(12, relationship.getStatus())) { // 待评价
+			} else if (Objects.equals(12, relationship.getStatus()) || Objects.equals(9, relationship.getStatus())) { // 待评价
 				returnView.setStatus(OrderEnum.DETAIL_SHOW_STATUS_WAIT_REMARK.getValue());
 			} else if (Objects.equals(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType(), relationship.getStatus())
 					|| Objects.equals(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType(), relationship.getStatus())) {
@@ -993,7 +993,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		String startDate = DateUtil.getDate(startTimeMill);
 		//计算第一张订单后六天的可报名时间
 		DateResult tempResult;
-		while (dr.getDays() <= 6) {
+		while (dr.getDays() <= 7) {
 			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
 			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
 				break;

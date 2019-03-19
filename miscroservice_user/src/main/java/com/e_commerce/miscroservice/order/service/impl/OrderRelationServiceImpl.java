@@ -795,7 +795,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 } else if (orderRelationship == null) {
                     msgList.add("找不到用户" + toUser.getName() + "的订单信息");
                 } else {
-                    String msg = payOrderPri(orderRelationship, paymentList.get(i), nowUser, nowTime, toUser);
+                    String msg = payOrderPri(orderRelationship, paymentList.get(i), nowUser, nowTime, toUser , order);
                     if (msg != null) {
                         //支付失败，添加错误信息
                         msgList.add(msg);
@@ -804,6 +804,32 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
                             //如果收取的是互助时
                             paymentSum += paymentList.get(i);
+
+                            //发送互助时系统通知
+                            //发布者支付，只可能是求助
+                            String title = "互助时已到账";
+                            String msgContent = new StringBuilder().append("您已完成“").append(orderRelationship.getServiceName())
+                                    .append("”的求助事项，获得的").append(paymentList.get(i))
+                                    .append("分钟互助时已存入您的时间账户。真是棒棒哒！").toString();
+
+                            TFormid formid = findFormId(nowTime, toUser);
+                            if (formid != null) {
+                                try {
+                                    List<String> wxMsg = new ArrayList<>();
+                                    String orderType = "2";//服务通知的接收者是报名者
+                                    String parameter = "";
+                                    wxMsg.add("叮！收到了一份时间谢礼");
+                                    wxMsg.add(orderRelationship.getServiceName());
+                                    wxMsg.add(nowUser.getName());
+                                    wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                                    formid.setIsValid("0");
+                                    messageCommonController.updateFormId(formid);
+                                } catch (Exception e) {
+                                    logger.error("发送服务通知失败");
+                                }
+                            }
+                            messageCommonController.messageSave(orderRelationship.getId() , nowUser , title , msgContent , toUser.getId() , nowTime);
                         } else {
                             //如果是公益时，那么公益时数量要加
                             //paymentByWelfareSum += paymentList.get(i);
@@ -831,7 +857,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是报名者支付，要修改自己的订单状态
             publishUserId = userIdList.get(0);
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
-            String msg = payOrderPri(orderRelationship, paymentList.get(0), nowUser, nowTime, toUserList.get(0));
+            String msg = payOrderPri(orderRelationship, paymentList.get(0), nowUser, nowTime, toUserList.get(0) , order);
             if (msg != null) {
                 throw new MessageException("499", msg);
             }
@@ -844,7 +870,77 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 seekHelpDoneNum++;
                 //服务记录内容
                 content = nowUser.getName() + " 支付了" + toUserList.get(0).getName() + collectType + timeChange(paymentSum);
+
+                //如果是报名者支付，只可能是服务
+                if (order.getServicePersonnel() == 1){
+                    //如果是一对一服务
+                    String title = "互助时到账提醒";
+                    String msgContent = new StringBuilder().append("您完成“").append(orderRelationship.getServiceName())
+                            .append("”服务获得小伙伴").append(nowUser.getName()).append("的").append(paymentList.get(0))
+                            .append("分钟互助时已经存入您的时间账户。快去查看吧~").toString();
+
+                    TFormid formid = findFormId(nowTime, toUserList.get(0));
+                    if (formid != null) {
+                        try {
+                            List<String> wxMsg = new ArrayList<>();
+                            String orderType = "2";//服务通知的接收者是报名者
+                            String parameter = "";
+                            wxMsg.add("叮！收到时间谢礼");
+                            wxMsg.add(orderRelationship.getServiceName());
+                            wxMsg.add(new StringBuilder().append(nowUser.getName()).append("等")
+                                    .append(order.getServicePersonnel()).append("人").toString());
+                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                            formid.setIsValid("0");
+                            messageCommonController.updateFormId(formid);
+                        } catch (Exception e) {
+                            logger.error("发送服务通知失败");
+                        }
+                    }
+                    messageCommonController.messageSave(orderRelationship.getId() , nowUser , title , msgContent , toUserList.get(0).getId() , nowTime);
+
+                }
             }
+
+            if (order.getServicePersonnel() > 0){
+                //如果是多人服务
+                //看一下是不是最后一个人支付
+                long complete = orderRelationshipDao.selectCompleteUserSum(orderId);
+                if (complete == order.getServicePersonnel() - 1){
+                    //如果是支付的最后一个人，如果是
+                    List<TUserTimeRecord> userTimeRecordList = userCommonController.selectGetTimeByOrder(orderId);
+                    long paySum = 0l;
+                    for (int i = 0 ; i < userTimeRecordList.size() ; i++){
+                        paySum = paySum + userTimeRecordList.get(i).getTime();
+                    }
+                    String title = "互助时到账提醒";
+                    String msgContent = new StringBuilder().append("您完成“").append(orderRelationship.getServiceName())
+                            .append("”服务获得的").append(paySum)
+                            .append("分钟互助时已存入您的时间账户。").toString();
+
+                    TFormid formid = findFormId(nowTime, toUserList.get(0));
+                    if (formid != null) {
+                        try {
+                            List<String> wxMsg = new ArrayList<>();
+                            String orderType = "2";//服务通知的接收者是报名者
+                            String parameter = "";
+                            wxMsg.add("叮！收到了一份时间谢礼");
+                            wxMsg.add(orderRelationship.getServiceName());
+                            wxMsg.add(nowUser.getName());
+                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                            formid.setIsValid("0");
+                            messageCommonController.updateFormId(formid);
+                        } catch (Exception e) {
+                            logger.error("发送服务通知失败");
+                        }
+                    }
+                    messageCommonController.messageSave(orderRelationship.getId() , nowUser , title , msgContent , toUserList.get(0).getId() , nowTime);
+
+                }
+            }
+
+
 
         }
 
@@ -1053,7 +1149,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是报名者，要修改自己的订单状态
             TUser toUser = userCommonController.getUserById(userIdList.get(0));
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUserId);
-            String msg = remark(orderRelationship, nowUser, toUser, nowTime, false);
+            String msg = remark(orderRelationship, nowUser, toUser, nowTime, true);
             if (msg != null) {
                 throw new MessageException("499", msg);
             }
@@ -1592,8 +1688,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             msg = "对不起，您已发表过评价";
         }
 
-        if (msg != null) {
-            //更行订单关系表
+        if (msg == null) {
+            //更新订单关系表
             orderRelationship.setUpdateTime(nowTime);
             orderRelationship.setUpdateUser(nowUser.getId());
             orderRelationship.setUpdateUserName(nowUser.getName());
@@ -1735,7 +1831,25 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         report.setIsValid(AppConstant.IS_VALID_YES);
         reportDao.saveOneOrder(report);
 
-        //TODO 服务通知
+        //服务通知
+        TFormid formid = findFormId(nowTime, toUser);
+        String parameter = "";
+        if (formid != null) {
+            try {
+                List<String> msgList = new ArrayList<>();
+                String orderType = "2";//服务通知的接收者是报名者
+                msgList.add(messageCommonController.getValue(labelsId, "complaint"));
+                msgList.add(nowUser.getName());
+                msgList.add(changeTime(nowTime));
+                msgList.add("如果您对该投诉有异议，请于2个工作日内联系平台在线客服。");
+                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msgList , SetTemplateIdEnum.help_setTemplate_18 , parameter);
+                formid.setIsValid("0");
+                messageCommonController.updateFormId(formid);
+            } catch (Exception e) {
+                logger.error("发送服务通知失败");
+            }
+        }
+
         //系统通知
         String title = "收到投诉提醒";
         String content = new StringBuilder().append("在“").append(orderRelationship.getServiceName())
@@ -1757,7 +1871,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param toUser
      * @return
      */
-    private String payOrderPri(TOrderRelationship orderRelationship, Long payment, TUser nowUser, long nowTime, TUser toUser) {
+    private String payOrderPri(TOrderRelationship orderRelationship, Long payment, TUser nowUser, long nowTime, TUser toUser , TOrder order) {
         String msg = null;
         if (orderRelationship.getStatus() != OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()) {
             msg = "支付失败：用户" + toUser.getName() + "状态无法支付";
@@ -1784,7 +1898,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //更新被支付用户的时间，并且将其完成求助数量+1
                 toUser.setSurplusTime(toUser.getSurplusTime() + payment);
                 toUser.setPayNum(toUser.getPayNum() + 1);
-                //TODO 发送互助时系统通知
             } else {
                 //如果收取的是公益时，完成公益时相关事情
                 //完成公益时 增加成长值
@@ -2147,16 +2260,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      */
     public void removeCanEnrollDate(String date , Long serviceId){
         TService service = productCommonController.getProductById(serviceId);
-        String enrollDate = service.getEnrollDate();
-        List<String> canEnrollDateList = new ArrayList<>();
-        String[] enrollDates = enrollDate.split(",");
-        for (int i = 0; i < enrollDates.length; i++) {
-            if (! enrollDates[i].equals(date)){
-                canEnrollDateList.add(enrollDates[i]);
+        if (service.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
+            String enrollDate = service.getEnrollDate();
+            List<String> canEnrollDateList = new ArrayList<>();
+            String[] enrollDates = enrollDate.split(",");
+            for (int i = 0; i < enrollDates.length; i++) {
+                if (! enrollDates[i].equals(date)){
+                    canEnrollDateList.add(enrollDates[i]);
+                }
             }
+            enrollDate = Joiner.on(",").join(canEnrollDateList);
+            service.setEnrollDate(enrollDate);
+            productCommonController.update(service);
         }
-        enrollDate = Joiner.on(",").join(canEnrollDateList);
-        service.setEnrollDate(enrollDate);
-        productCommonController.update(service);
     }
 }

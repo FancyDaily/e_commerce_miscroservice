@@ -12,4 +12,10 @@ public interface UserTimeRecordDao {
     Long insert(TUserTimeRecord record);
 
     TUserTimeRecord selectById(Long id);
+    /**
+     * 查找一个订单的所有流水
+     * @param orderId
+     * @return
+     */
+    List<TUserTimeRecord> selectGetTimeByOrder(Long orderId);
 }

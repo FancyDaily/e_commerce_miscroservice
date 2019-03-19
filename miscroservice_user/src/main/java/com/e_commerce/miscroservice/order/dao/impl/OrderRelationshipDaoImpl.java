@@ -360,6 +360,30 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
         return count;
     }
 
+
+    /**
+     * 查看完成的（支付的）用户的数量
+     *
+     * @param orderId
+     * @return
+     */
+    public long selectCompleteUserSum(Long orderId){
+        long count = MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .count(TOrderRelationship::getId)
+                .eq(TOrderRelationship::getOrderId, orderId)
+                .isNotNull(TOrderRelationship::getReceiptUserId)
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_UNDER_WAY.getType())
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_WAIT_PAY.getType())
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+        return  count;
+    }
     /**
      * 查询用户发布或报名的成立的订单关系
      * @param userId

@@ -448,7 +448,7 @@ public class OrderRelationController extends BaseController {
             result.setErrorCode("499");
             result.setMsg("评价失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("投诉失败" + errInfo(e), e);
+            logger.error("评价失败" + errInfo(e), e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("评价失败");

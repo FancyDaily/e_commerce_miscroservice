@@ -1,12 +1,15 @@
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
-
 jar {
     baseName "miscroservice_user"
     mainClassName = 'com.e_commerce.miscroservice.UserStartMain'
 }
 
+
+ext {
+    springBootVersion = "1.5.8.RELEASE"
+}
 
 dependencies {
     compile "org.apache.shiro:shiro-spring:1.3.2"
@@ -14,4 +17,7 @@ dependencies {
     compile group: 'org.powermock', name: 'powermock-api-mockito', version: '1.7.4'
     compile 'org.ansj:ansj_seg:5.1.1'
     compile project(":miscroservice_commons")
+
+
 }
+

@@ -171,6 +171,13 @@ public class UserCommonController {
 	}
 
 	/**
+	 * 查找一个订单的所有流水
+	 * @param orderId
+	 * @return
+	 */
+	public List<TUserTimeRecord> selectGetTimeByOrder(Long orderId){return userTimeRecordDao.selectGetTimeByOrder(orderId);}
+
+	/**
 	 * 获取微信token
 	 */
 	public String getWechatToken() {
