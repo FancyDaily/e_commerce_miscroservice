@@ -15,7 +15,7 @@ public class DailyTask {
 
     private Integer bonus;  //价格
 
-    private boolean isDone; //是否完成
+    private boolean done; //是否完成
 
     private Integer currentNum; //当前次数
 
