@@ -88,10 +88,10 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        TService service = productCommonController.getProductById(serviceId);
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
             try {
+                TService service = productCommonController.getProductById(serviceId);
                 order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
             } catch (Exception e){
                 throw new MessageException("401", "对方余额不足");
@@ -219,7 +219,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 }
             }
         }
-        return serviceId;
+        return 1l;
     }
 
     public List<String> orgEnroll(List<Long> userIdList , List<Long> orderIdList){
