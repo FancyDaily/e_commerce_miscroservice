@@ -9,7 +9,7 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
-import com.e_commerce.miscroservice.commons.wechat.service.WechatService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
@@ -312,6 +312,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 	 */
 	@Override
 	public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
+		user = userDao.selectByPrimaryKey(user.getId());
+
 		// 判空
 		if (lastTime == null) {
 			lastTime = System.currentTimeMillis();
@@ -412,7 +414,6 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param user
      * @param skill
      */
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillAdd(TUser user, TUserSkill skill) {
         //校验
@@ -433,7 +434,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userSkillDao.insert(skill);
 
         //成长值
-        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+		taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
     }
 
     /**
@@ -591,15 +592,22 @@ public class UserServiceImpl extends BaseService implements UserService {
             pageSize = 0;
         }
 
+        List<TOrderRelationship> orderRelationships = orderService.selectEndOrdertionshipListByuserId(userId);
+        List<Long> orderIds = new ArrayList<>();
+        for(TOrderRelationship orderRelationship:orderRelationships) {
+        	orderIds.add(orderRelationship.getOrderId());
+		}
+
+        //判空
+		if(orderIds.isEmpty()) {
+			return new QueryResult();
+		}
+
         //分页
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         //查找符合条件的订单记录
-        List<TOrder> orders = orderService.selectEndOrdersByUserId(userId,user);
-        List<Long> orderIds = new ArrayList<>();
-        for (TOrder order : orders) {
-            orderIds.add(order.getId());
-        }
+        List<TOrder> orders = orderService.selectOrdersInIdsByViewer(orderIds,user);
 
         Map<Long, Object> evaluateMap = new HashMap<>();
         List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds, userId);
@@ -775,6 +783,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         String name = user.getName();
         if (name != null) {
             //TODO 调用订单模块的方法 同步修改订单相关昵称
+			orderService.synOrderCreateUserName(user.getId(),user.getName());
         }
 
 		final TUser[] finalUser = new TUser[1];
@@ -1715,9 +1724,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public AjaxResult genrateSMSCode(String telephone) {
-        AjaxResult result = new AjaxResult();
+		AjaxResult result = new AjaxResult();
+		Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
+/*
         // 如果存在
-        Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
         if (redisUtil.hasKey("time" + telephone)) {
             if (redisUtil.hasKey("count" + telephone)) {
                 long time = redisUtil.getExpire("time" + telephone);// 获取剩余时间
@@ -1745,6 +1755,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                         AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码!");
             }
         }
+*/
 
 //        String debug = "debug"; //TODO 后续根据配置文件读取
 
@@ -2199,7 +2210,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum) {
         //根据类型校验最大值、当日最大值
-        growthValueEnum = checkMax(growthValueEnum, user);
+		try {
+        	growthValueEnum = checkMax(growthValueEnum, user);
+		} catch (MessageException e) {
+			return user;
+		}
 
         //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
         Integer price = growthValueEnum.getPrice(); //数额
@@ -2242,7 +2257,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 	 */
     @Override
     public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
-        if(bonusPackageId==null) {
+        if(bonusPackageId==null || user==null) {
             return null;
         }
         Map<String, Object> resultMap = new HashMap<>();
@@ -2396,11 +2411,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 有效性
         user.setIsValid(AppConstant.IS_VALID_YES);
 
-        // 插入注册的系统消息
-		messageService.messageSave(null,user,AppConstant.NOTICE_TITLE_RIGESTER,AppConstant.NOTICE_CONTENT_RIGESTER,user.getId(),currentTimeMillis);
+		// 插入一条用户记录
+		userDao.insert(user);
 
-        // 插入一条用户记录
-        userDao.insert(user);
+		// 插入注册的系统消息
+		messageService.messageSave(null,user,AppConstant.NOTICE_TITLE_RIGESTER,AppConstant.NOTICE_CONTENT_RIGESTER,user.getId(),currentTimeMillis);
 
         // 注册完成任务
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);

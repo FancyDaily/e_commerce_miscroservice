@@ -602,6 +602,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	}
 
 	@Override
+	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) {
+		return orderDao.selectOrdersInOrderIdsByViewer(orderIds,viewer);
+	}
+
+    @Override
 	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());

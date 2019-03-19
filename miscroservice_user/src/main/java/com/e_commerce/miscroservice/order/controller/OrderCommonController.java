@@ -111,6 +111,15 @@ public class OrderCommonController extends BaseController {
 	}
 
 	/**
+	 * 查询结束的订单关系
+	 * @param userId
+	 * @return
+	 */
+	public List<TOrderRelationship> selectEndOrdertionshipListByuserId(Long userId) {
+		return orderRelationshipDao.selectEndByUserId(userId);
+	}
+
+	/**
 	 * 根据用户id获取订单列表
 	 *
 	 * @param userId
@@ -276,4 +285,11 @@ public class OrderCommonController extends BaseController {
 		reportDao.saveOneOrder(report);
 	}
 
+	/**
+	 * 根据用户id、观察者查询所有订单记录
+	 * @param orderIds
+	 * @param viewer
+	 * @return
+	 */
+	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) { return orderService.selectOrdersInIdsByViewer(orderIds,viewer);}
 }

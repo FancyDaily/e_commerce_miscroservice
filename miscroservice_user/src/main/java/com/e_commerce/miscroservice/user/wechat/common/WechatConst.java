@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.wechat.common;
+package com.e_commerce.miscroservice.user.wechat.common;
 /**
  * 功能描述:小程序所用接口常量描述
  * 模块:

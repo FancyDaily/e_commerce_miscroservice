@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.wechat.entity;
+package com.e_commerce.miscroservice.user.wechat.entity;
 /**
  * 功能描述:微信用户数据水印
  * 模块:

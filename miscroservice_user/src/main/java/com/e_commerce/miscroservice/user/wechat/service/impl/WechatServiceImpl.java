@@ -1,21 +1,20 @@
-package com.e_commerce.miscroservice.commons.wechat.service.impl;
+package com.e_commerce.miscroservice.user.wechat.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
-import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
-import com.e_commerce.miscroservice.commons.wechat.common.MyX509TrustManager;
-import com.e_commerce.miscroservice.commons.wechat.common.WechatConst;
-import com.e_commerce.miscroservice.commons.wechat.common.WechatErrorConst;
-import com.e_commerce.miscroservice.commons.wechat.entity.*;
-import com.e_commerce.miscroservice.commons.wechat.service.WechatService;
+import com.e_commerce.miscroservice.user.wechat.common.MyX509TrustManager;
+import com.e_commerce.miscroservice.user.wechat.common.WechatConst;
+import com.e_commerce.miscroservice.user.wechat.common.WechatErrorConst;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatToken;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatPhone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -24,7 +23,6 @@ import javax.net.ssl.TrustManager;
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 

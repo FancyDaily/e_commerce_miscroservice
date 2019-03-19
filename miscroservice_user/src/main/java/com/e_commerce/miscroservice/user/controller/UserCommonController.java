@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,9 @@ public class UserCommonController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private WechatService wechatService;
 
 	@Autowired
 	private UserDao userDao;
@@ -164,6 +168,13 @@ public class UserCommonController {
 	 */
 	public boolean sendSMS(String telephone, String content) {
 		return userService.genrateSMSWithContent(telephone,content);
+	}
+
+	/**
+	 * 获取微信token
+	 */
+	public String getWechatToken() {
+		return wechatService.getToken();
 	}
 
 }

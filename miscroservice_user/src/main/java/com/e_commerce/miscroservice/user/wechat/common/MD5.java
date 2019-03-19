@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.wechat.common;
+package com.e_commerce.miscroservice.user.wechat.common;
 
 import java.security.MessageDigest;
 

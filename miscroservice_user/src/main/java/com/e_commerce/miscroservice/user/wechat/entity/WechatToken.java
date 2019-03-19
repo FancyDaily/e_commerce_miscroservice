@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.wechat.entity;
+package com.e_commerce.miscroservice.user.wechat.entity;
 /**
  * 功能描述:定义微信token实体
  * 模块:

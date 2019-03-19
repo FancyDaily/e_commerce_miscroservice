@@ -12,24 +12,6 @@ public enum OrderEnum {
 	STATUS_NORMAL(1, "正常产出的订单状态"),
 	STATUS_CANCEL(3, "已取消"),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	PRODUCE_TYPE_SUBMIT(1, "在发布时派生订单"),
 	PRODUCE_TYPE_UPPER(2, "在重新上架的时候派生订单"),
 	PRODUCE_TYPE_AUTO(3, "在上一张订单结束时下架"),

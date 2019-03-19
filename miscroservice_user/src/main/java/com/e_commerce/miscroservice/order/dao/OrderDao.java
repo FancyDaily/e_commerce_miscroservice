@@ -165,4 +165,13 @@ public interface OrderDao {
 	TOrder findProductOrderEnough(Long serviceId, long tempStart, long tempEnd);
 
     TOrder selectById(Long orderId);
+
+	/**
+	 * 根据订单id集合、观察者查找订单记录
+	 * @param orderIds
+	 * @param viewer
+	 * @return
+	 */
+	List<TOrder> selectOrdersInOrderIdsByViewer(List<Long> orderIds, TUser viewer);
+
 }

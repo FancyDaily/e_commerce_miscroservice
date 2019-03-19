@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.order.vo.*;
 
+import java.util.List;
+
 /**
  * 功能描述:
  * 模块:
@@ -102,4 +104,13 @@ public interface OrderService {
 	 * @param userName 修改后的名称
 	 */
 	void synOrderCreateUserName(Long userId, String userName);
+
+	/**
+	 * 根据订单id集合、观察者查找订单记录
+	 * @param orderIds
+	 * @param viewer
+	 * @return
+	 */
+	List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer);
+
 }

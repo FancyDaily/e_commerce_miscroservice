@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -2776,4 +2777,14 @@ public class UserController extends BaseController {
         return result;
     }
 
+    @PostMapping("test")
+    public void test(String token) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) redisUtil.get(token);
+        try {
+            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE, 6);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.wechat.common;
+package com.e_commerce.miscroservice.user.wechat.entity;
 /**
  * 功能描述:
  * 模块:
@@ -8,7 +8,7 @@ package com.e_commerce.miscroservice.commons.wechat.common;
  * 公司:浙江晓时信息技术有限公司
  * 作者:丁卫江
  * 邮箱:1664315156@qq.com
- * 创建时间:Aug 20, 2018 5:17:50 PM
+ * 创建时间:Aug 20, 2018 3:20:51 PM
  *************************************
  *************************************
  * 修改人:
@@ -17,9 +17,6 @@ package com.e_commerce.miscroservice.commons.wechat.common;
  * 1.
  * 2.
  */
-public interface WechatErrorConst {
+public class WechatQRCode {
 
-	String GET_TOKE_FAILURE = "90001";
-	
-	String GET_PHONE_FAILURE = "90002";
 }
