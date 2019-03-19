@@ -158,6 +158,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (StringUtil.isNotEmpty(enrollDate)) {
 			String[] enrollDateArray = enrollDate.split(",");
 			returnView.setEnrollDate(enrollDateArray);
+		} else {
+			returnView.setEnrollDate(new String[0]);
 		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
@@ -171,10 +173,14 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userView.setServeNum(tUser.getSeekHelpNum());
 		}
 		// 是否关注该用户
-		boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
-		if (isCare) {
-			// 关注状态 1、显示关注 2、显示已关注
-			userView.setCareStatus(2);
+		if (user != null) {
+			boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+			if (isCare) {
+				// 关注状态 1、显示关注 2、显示已关注
+				userView.setCareStatus(2);
+			} else {
+				userView.setCareStatus(1);
+			}
 		} else {
 			userView.setCareStatus(1);
 		}
@@ -641,7 +647,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//可以成功创建订单
 				saveOrder(order);
 				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
-//				mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);
+//				TimerScheduler scheduler = new TimerScheduler();
+//				scheduler.setParams();
+//				MqListenerConvert
+//				mqTemplate.sendMs g(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);
 				return order;
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
 				// 订单已存在或者已经，不需要再派生
