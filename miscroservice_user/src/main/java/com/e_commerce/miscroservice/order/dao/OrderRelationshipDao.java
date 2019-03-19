@@ -216,4 +216,12 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	long selectJoinUser(Long orderId);
+
+	/**
+	 * 查看完成的（支付的）用户的数量
+	 *
+	 * @param orderId
+	 * @return
+	 */
+	long selectCompleteUserSum(Long orderId);
 }

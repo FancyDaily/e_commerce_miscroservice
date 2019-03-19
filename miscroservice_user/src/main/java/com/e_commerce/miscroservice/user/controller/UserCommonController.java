@@ -154,4 +154,11 @@ public class UserCommonController {
 	public boolean isCareUser(Long userId, Long userFollowId) {
 		return userService.isCareUser(userId, userFollowId);
 	}
+
+	/**
+	 * 查找一个订单的所有流水
+	 * @param orderId
+	 * @return
+	 */
+	public List<TUserTimeRecord> selectGetTimeByOrder(Long orderId){return userTimeRecordDao.selectGetTimeByOrder(orderId);}
 }

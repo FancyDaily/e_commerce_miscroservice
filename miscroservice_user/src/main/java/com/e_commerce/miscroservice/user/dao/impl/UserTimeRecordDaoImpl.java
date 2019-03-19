@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
@@ -27,5 +28,18 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
         return MybatisOperaterUtil.getInstance().findOne(new TUserTimeRecord() ,
                 new MybatisSqlWhereBuild(TUserTimeRecord.class)
                         .eq(TUserTimeRecord::getId,id));
+    }
+
+    /**
+     * 查找一个订单的所有流水
+     * @param orderId
+     * @return
+     */
+    public List<TUserTimeRecord> selectGetTimeByOrder(Long orderId){
+       return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord() ,
+                new MybatisSqlWhereBuild(TUserTimeRecord.class)
+                        .eq(TUserTimeRecord::getTargetId , orderId)
+                        .eq(TUserTimeRecord::getType , PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())
+                        .eq(TUserTimeRecord::getIsValid , AppConstant.IS_ATTEN_YES));
     }
 }

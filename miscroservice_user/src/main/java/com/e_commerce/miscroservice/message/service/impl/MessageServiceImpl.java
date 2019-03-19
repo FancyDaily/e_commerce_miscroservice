@@ -291,9 +291,14 @@ public class MessageServiceImpl implements MessageService {
             }
             if (messageList.get(i).getUserId() == nowUser.getId().longValue()) {
                 //如果消息的发布者是当前用户
-                messageShowLIstView.setUserName(nowUser.getName());
-                messageShowLIstView.setUserUrl(nowUser.getUserHeadPortraitPath());
-                messageShowLIstView.setToUserId(nowUser.getId());
+                for (int j = 0; j < toUsersInfoList.size(); j++) {
+                    if (messageList.get(i).getMessageUserId() == toUsersInfoList.get(j).getId().longValue()) {
+                        messageShowLIstView.setUserName(toUsersInfoList.get(j).getName());
+                        messageShowLIstView.setUserUrl(toUsersInfoList.get(j).getUserHeadPortraitPath());
+                        messageShowLIstView.setToUserId(toUsersInfoList.get(j).getId());
+                        break;
+                    }
+                }
             } else {
                 for (int j = 0; j < toUsersInfoList.size(); j++) {
                     if (messageList.get(i).getUserId() == toUsersInfoList.get(j).getId().longValue()) {
