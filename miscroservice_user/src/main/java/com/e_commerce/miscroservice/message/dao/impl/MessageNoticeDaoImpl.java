@@ -41,7 +41,7 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
         List<TMessageNotice> messageNoticeList = MybatisOperaterUtil.getInstance().finAll(new TMessageNotice(),
                 new MybatisSqlWhereBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
-                        .gt(TMessageNotice::getCreateTime , lastTIme)
+                        .lt(TMessageNotice::getCreateTime , lastTIme)
                         .eq(TMessageNotice::getIsValid , "1")
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return messageNoticeList;
