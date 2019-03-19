@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -358,6 +361,7 @@ public class SeekHelpController extends BaseController {
 	 */
 	@PostMapping("/analysisWord")
 	public AnalysisAudioView analysisWord(String text, String city) {
+		String[] dateWeekArray = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
 		logger.info("解析的文本为 {}, city 为 {} >>>>>>", text, city);
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
@@ -422,6 +426,12 @@ public class SeekHelpController extends BaseController {
 		if (resultView.getDateWeekNumber() == null || Objects.equals(resultView.getDateWeekNumber(), "null")) {
 			resultView.setTimeType(ProductEnum.TIME_TYPE_FIXED.getValue());
 		} else {
+			List<String> dateWeekList = new ArrayList<>();
+			int[] weekDayArray = DateUtil.getWeekDayArray(resultView.getDateWeekNumber());
+			for (int i = 0; i < weekDayArray.length; i++) {
+				dateWeekList.add(dateWeekArray[i]);
+			}
+			resultView.setDateWeek(StringUtils.join(dateWeekList, ","));
 			resultView.setTimeType(ProductEnum.TIME_TYPE_REPEAT.getValue());
 		}
 
@@ -446,6 +456,12 @@ public class SeekHelpController extends BaseController {
 			}
 			if (StringUtil.isNotEmpty(resultView.getEndDateS()) && StringUtil.isNotEmpty(resultView.getEndTimeS())) {
 				resultView.setEndTime(DateUtil.commonParse(resultView.getEndDateS() + resultView.getEndTimeS(), "yyyy-MM-ddHH:mm"));
+			}
+			if (resultView.getStartTime() == 0) {
+				resultView.setStartTime(null);
+			}
+			if (resultView.getEndTime() == 0) {
+				resultView.setEndTime(null);
 			}
 		}
 		return resultView;
