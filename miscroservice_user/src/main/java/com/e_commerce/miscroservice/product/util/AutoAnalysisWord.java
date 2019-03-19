@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.product.util;
+package com.other;
 
 import com.e_commerce.miscroservice.product.util.AnsjUtil;
 import com.google.common.collect.HashBasedTable;
@@ -8,7 +8,6 @@ import lombok.Data;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.springframework.core.io.ClassPathResource;
+//import org.springframework.core.io.ClassPathResource;
 
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
@@ -257,19 +256,20 @@ public class AutoAnalysisWord {
 
     public static void main(String[] args) {
 
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
-        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
-        //凌晨4点半
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午04:20到晚上八点开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天上午04:20到上午八点整开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天上午04:20到下午八点整开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天凌晨02:20到凌晨04:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天凌晨03:20到凌晨05:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午03:20到晚上05:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午四点整到晚上六点一刻开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午四点整到晚上8:20开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点开游泳party,滨江大厦我能支付400分钟", "杭州"));
-        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点半开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午十点在上城赞成中心帮我带早餐,我可以支付十分钟", ""));
+//        System.out.println(new AutoAnalysisWord().parse("我需要有人明天上午11点在赞成中心帮我带早餐,我可以支付十分钟", "杭州"));
+//        //凌晨4点半
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午04:20到晚上八点开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天上午04:20到上午八点整开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天上午04:20到下午八点整开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天凌晨02:20到凌晨04:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天凌晨03:20到凌晨05:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午03:20到晚上05:12开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午四点整到晚上六点一刻开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午四点整到晚上8:20开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点开游泳party,滨江大厦我能支付400分钟", "杭州"));
+//        System.out.println(new AutoAnalysisWord().parse("下个月15号到下个月24号, 每天下午3:20到晚上七点半开游泳party,滨江大厦我能支付400分钟", "杭州"));
+        System.out.println(new AutoAnalysisWord().parse("这个月20号到下个月25号，每周三周五，周六周天早上10点到12点帮我带早餐。", "杭州"));
 
 
         test();
@@ -611,18 +611,6 @@ public class AutoAnalysisWord {
                 replaceAllStr = "(" + MORNING_TIME + ")?" + startTime + ".*" + "(" + MORNING_TIME + "|" + AFTERNOON_TIME + ")?" + endTime;
 
 
-//                //转换成24小时制
-//                if (timerPattern.matcher(endTime).matches()) {
-//                    String[] arrs = endTime.split(":");
-//                    Integer sumTime = Integer.parseInt(arrs[0]) + 12;
-//                    endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + arrs[1];
-//                    //4点整
-//                } else if (endTime.contains("点")) {
-//                    String[] arrs = endTime.split("点");
-//                    Integer sumTime = Integer.parseInt(arrs[0]) + 12;
-//                    endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + characterToNumberRelation.get(arrs[1]);
-//                }
-
             }
 
         }
@@ -706,24 +694,6 @@ public class AutoAnalysisWord {
                 startTime = characterToNumberRelation.get(_startTimeArr[0]) + ":" + characterToNumberRelation.get(_startTimeArr[1]);
 
             }
-            if (endTime.contains("点")) {
-                if (endTime.endsWith("点")) {
-                    endTime += "整";
-                }
-                String[] _endTimeArr = endTime.split("点");
-
-                endTime = (isNumeric(_endTimeArr[0]) ? _endTimeArr[0] : characterToNumberRelation.get(_endTimeArr[0])) + ":" + characterToNumberRelation.get(_endTimeArr[1]);
-
-            }
-
-            //判断是否需要转换成24小时制
-//            if (Pattern.compile("(" + AFTERNOON_TIME + ")" + matchOringalEndTime).matcher(text).find()) {
-//                //转换成24小时制
-//                String[] arrs = endTime.split(":");
-//                Integer sumTime = Integer.parseInt(arrs[0]) + 12;
-//                endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + arrs[1];
-//
-//            }
 
 
         }
@@ -737,12 +707,6 @@ public class AutoAnalysisWord {
                 startTime = sumTime > 24 ? arrs[0] : sumTime + ":" + arrs[1];
 
             }
-            //4点整
-//            else if (endTime.contains("点")) {
-//                String[] arrs = endTime.split("点");
-//                Integer sumTime = Integer.parseInt(arrs[0]) + 12;
-//                endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + characterToNumberRelation.get(arrs[1]);
-//            }
 
         }
 
@@ -755,12 +719,29 @@ public class AutoAnalysisWord {
                 endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + arrs[1];
 
             }
-            //4点整
-//            else if (endTime.contains("点")) {
-//                String[] arrs = endTime.split("点");
-//                Integer sumTime = Integer.parseInt(arrs[0]) + 12;
-//                endTime = sumTime > 24 ? arrs[0] : sumTime + ":" + characterToNumberRelation.get(arrs[1]);
-//            }
+
+
+        }
+
+        if (endTime.contains("点")) {
+            if (endTime.endsWith("点")) {
+                endTime += "整";
+            }
+            String[] _endTimeArr = endTime.split("点");
+
+            endTime = (isNumeric(_endTimeArr[0]) ? _endTimeArr[0] : characterToNumberRelation.get(_endTimeArr[0])) + ":" + characterToNumberRelation.get(_endTimeArr[1]);
+
+        }
+
+
+        if (startTime.contains("点")) {
+            if (startTime.endsWith("点")) {
+                startTime += "整";
+            }
+
+            String[] _startTimeArr = startTime.split("点");
+
+            startTime = (isNumeric(_startTimeArr[0]) ? _startTimeArr[0] : characterToNumberRelation.get(_startTimeArr[0])) + ":" + characterToNumberRelation.get(_startTimeArr[1]);
 
         }
 
@@ -1575,16 +1556,16 @@ public class AutoAnalysisWord {
     private static void loadAddress() {
 
         try {
-
-            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
-                    + ADDRESS_NAME).getInputStream(), "utf-8");
-//            List<String> allRegions = null;
-//            try {
-//                allRegions = Files.readAllLines(Paths.get(AutoAnalysisWord.class.getResource("/properties/"
-//                        + ADDRESS_NAME).toURI()));
-//            } catch (URISyntaxException e) {
 //
-//            }
+//            List<String> allRegions = IOUtils.readLines(new ClassPathResource("/properties/"
+//                    + ADDRESS_NAME).getInputStream(), "utf-8");
+            List<String> allRegions = null;
+            try {
+                allRegions = Files.readAllLines(Paths.get(AutoAnalysisWord.class.getResource("/properties/"
+                        + ADDRESS_NAME).toURI()));
+            } catch (URISyntaxException e) {
+
+            }
 
             allRegionCache = HashBasedTable.create();
 
