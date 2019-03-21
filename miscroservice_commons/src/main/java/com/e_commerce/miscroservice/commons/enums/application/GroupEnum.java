@@ -1,4 +1,4 @@
-package com.xiaoshitimebank.app.constant;
+package com.e_commerce.miscroservice.commons.enums.application;
 /**
  * 功能描述:组织枚举
  * 模块:

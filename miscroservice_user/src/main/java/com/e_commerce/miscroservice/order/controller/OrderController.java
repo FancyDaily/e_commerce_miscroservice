@@ -202,7 +202,7 @@ public class OrderController extends BaseController {
 	@PostMapping("/list")
 	@Consume(PageOrderParamView.class)
 	public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
-					   Integer pageSize, String condition, String token) {
+							Integer pageSize, String condition, String token) {
 		AjaxResult result = new AjaxResult();
 		TUser user = (TUser) redisUtil.get(token);
 		PageOrderParamView param = (PageOrderParamView) ConsumeHelper.getObj();
@@ -255,7 +255,7 @@ public class OrderController extends BaseController {
 	 *                },,
 	 *                "orderRelationship": {
 	 *                "serviceReportType": "0、未投诉  1、已投诉  2、被投诉 3、已解决",
-	 *                 "status": 0、3、 4、 5、 6、可报名,  其他：已报名
+	 *                "status": 0、3、 4、 5、 6、可报名,  其他：已报名
 	 *                "serviceCollectionType": 0、2 未收藏  1、已收藏,
 	 *                },
 	 *                "listServiceDescribe": [
@@ -348,6 +348,70 @@ public class OrderController extends BaseController {
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取报名选人列表失败");
+		}
+		return result;
+	}
+
+	/**
+	 * 我的选人列表（组织专属）
+	 *
+	 * @param token    用户token
+	 * @param pageNum  页数
+	 * @param pageSize 每页数量
+	 *                 {
+	 *                 "success": true,
+	 *                 "errorCode": "",
+	 *                 "msg": "获取报名列表成功",
+	 *                 "data": {
+	 *                 "resultList": [
+	 *                 {
+	 *                 "order": {
+	 *                 "id": 订单ID,
+	 *                 "nameAudioUrl": "音频地址",
+	 *                 "serviceName": "求助服务名称",
+	 *                 "servicePersonnel": 要求人数,
+	 *                 "servicePlace": 1、线上 2、线下,
+	 *                 "labels": "标签",
+	 *                 "type": 类型 1、求助 2、服务,
+	 *                 "source": 来源 1、个人 2、组织,
+	 *                 "addressName": 地址名称,
+	 *                 "longitude": 经度,
+	 *                 "latitude": 纬度,
+	 *                 "enrollNum": 报名人数,
+	 *                 "confirmNum": 确认人数,
+	 *                 "startTime": 开始时间,
+	 *                 "endTime": 结束时间,
+	 *                 "timeType": 0 一次性 1、可重复,
+	 *                 "collectTime": 收取时间,
+	 *                 "collectType": 收取分类 1、互助时 2、公益时,
+	 *                 "createUser": 创建人ID,
+	 *                 },
+	 *                 "porductCoverPic": 封面图地址，"https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour%28v3.0%29/otherImg/155072256231016.png",
+	 *                 "status": 状态： 1、已结束 2、已取消 3、待选人
+	 *                 }
+	 *                 ],
+	 *                 "totalCount": 总条数
+	 *                 }
+	 *                 }
+	 * @return
+	 */
+	@PostMapping("/mineChooseList")
+	public Object mineChooseList(String token, Integer pageNum, Integer pageSize) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			QueryResult<PageEnrollAndChooseReturnView> data = orderService.mineChooseList(pageNum, pageSize, user);
+			result.setSuccess(true);
+			result.setData(data);
+			result.setMsg("获取报名列表成功");
+		} catch (MessageException e) {
+			logger.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setMsg("查询失败," + e.getMessage());
+		} catch (Exception e) {
+			logger.error("获取报名列表成功" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setMsg("获取报名列表失败");
 		}
 		return result;
 	}

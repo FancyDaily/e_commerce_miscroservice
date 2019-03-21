@@ -1,4 +1,4 @@
-package com.xiaoshitimebank.app.exception;
+package com.e_commerce.miscroservice.commons.exception.colligate;
 /**
  * 功能描述:没有权限修改异常  暂时用在组织的分组中
  * 模块:

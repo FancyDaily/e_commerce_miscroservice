@@ -100,7 +100,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (user != null) { // 如果当前用户是登录状态，则查看当前用户加入了哪些组织
 			//TODO 调用用户模块
 //			companyIds = userCompanyDao.selectCompanyIdByUser(user.getId());
-//			param.setCurrentUserId(user.getId());
+			param.setCurrentUserId(user.getId());
 		}
 		param.setUserCompanyIds(companyIds);
 		//搜索条件
@@ -620,7 +620,52 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		return orderDao.selectOrdersInOrderIdsByViewer(orderIds,viewer);
 	}
 
-    @Override
+	@Override
+	public QueryResult<PageEnrollAndChooseReturnView> mineChooseList(Integer pageNum, Integer pageSize, TUser user) {
+		QueryResult<PageEnrollAndChooseReturnView> result = new QueryResult<>();
+		user = userService.getUserById(user.getId());
+		List<PageEnrollAndChooseReturnView> listReturnView = new ArrayList<>();
+		Page<TOrderRelationship> page = PageHelper.startPage(pageNum, pageSize);
+		List<TOrderRelationship> pageEnrollAndChooseList = orderRelationshipDao.pageChooseList(user.getId());
+		if (pageEnrollAndChooseList.size() == 0) {
+			result.setResultList(new ArrayList<>());
+			result.setTotalCount(0L);
+			return result;
+		}
+		//所有的orderid
+		List<Long> orderIds = new ArrayList<>();
+		//所有的商品ID
+		List<Long> serviceIds = new ArrayList<>();
+		for (TOrderRelationship orderRelationship : pageEnrollAndChooseList) {
+			orderIds.add(orderRelationship.getOrderId());
+			serviceIds.add(orderRelationship.getServiceId());
+		}
+		//订单列表的map  key：orderid  value: order
+		Map<Long, TOrder> orderMap = new HashMap<>();
+		//订单列表
+		List<TOrder> listOrder = orderDao.selectOrderByOrderIds(orderIds);
+		for (TOrder tOrder : listOrder) {
+			orderMap.put(tOrder.getId(), tOrder);
+		}
+		//商品封面图
+		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
+		//遍历组成view
+		for (TOrderRelationship orderRelationship : pageEnrollAndChooseList) {
+			PageEnrollAndChooseReturnView returnView = new PageEnrollAndChooseReturnView();
+			//显示的订单列表
+			returnView.setOrder(orderMap.get(orderRelationship.getOrderId()));
+			//显示的封面url
+			returnView.setPorductCoverPic(productCoverPic.get(orderRelationship.getServiceId()));
+			//根据当前用户是发布者及接单者判断显示状态
+			getEnrollChooseShowStatus(user, orderRelationship, returnView);
+			listReturnView.add(returnView);
+		}
+		result.setResultList(listReturnView);
+		result.setTotalCount(page.getTotal());
+		return result;
+	}
+
+	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) {
 		TUser tUser = userService.getUserById(service.getUserId());

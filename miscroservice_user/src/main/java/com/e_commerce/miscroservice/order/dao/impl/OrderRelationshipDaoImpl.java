@@ -384,6 +384,14 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
         return  count;
     }
+
+    @Override
+    public List<TOrderRelationship> pageChooseList(Long userId) {
+        return relationshipMapper.getChooseList(userId);
+//        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+//                .eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId));
+    }
+
     /**
      * 查询用户发布或报名的成立的订单关系
      * @param userId
