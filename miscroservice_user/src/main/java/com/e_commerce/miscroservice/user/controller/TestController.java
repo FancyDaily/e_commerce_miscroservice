@@ -1,63 +1,51 @@
 package com.e_commerce.miscroservice.user.controller;
 
-import org.springframework.stereotype.Component;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.annotation.service.InnerRestController;
+import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
+import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
+import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-//@Component
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+@InnerRestController
 public class TestController {
 
-//	@PostConstruct
-	public void init(){
-//		 查询 根据条件查询 代表 userName和userPass两个字段
-//		SELECT * FROM `test_tmp_d_t_o` WHERE (age =18 AND user_name="1") or (age >33) ;
-//		 List<TestTmpDTO> id = MybatisOperaterUtil.getInstance().finAll(new TestTmpDTO(),
-//				 new MybatisSqlWhereBuild(TestTmpDTO.class).
-//						 groupBefore().eq(TestTmpDTO::getAge,18).or().eq(TestTmpDTO::getUserName,"1").groupAfter().
-//						 or(). groupBefore().gte(TestTmpDTO::getAge,32).eq(TestTmpDTO::getUserName,"10").groupAfter());
-//
-//		 System.out.println(id);
+
+    @Autowired
+    @Lazy
+    private MqTemplate mqTemplate;
 
 
-//		 long count = MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TestTmpDTO.class).
-//				 count(TestTmpDTO::getUserName).eq(TestTmpDTO::getAge,23));
-//		 System.out.println(count);
-//
-//
-//		 TestTmpDTO testTmpDTO = new TestTmpDTO();
-//		 testTmpDTO.setAge(23);
-//		 testTmpDTO.setUserName("admin5");
-//		 testTmpDTO.setUserPass("admin123");
-//
-//		 int save = MybatisOperaterUtil.getInstance().save(testTmpDTO);
-//		 System.out.println(save);
-//		System.out.println(testTmpDTO.getId());
-////		 testTmpDTO = new TestTmpDTO();
-////		 testTmpDTO.setUserName("admin");
-//
-////		 int delete = MybatisOperaterUtil.getInstance().delete(new MybatisSqlWhereBuild(TestTmpDTO.class)
-////				 .eq(TestTmpDTO::getUserName,"admin"));
-////		 System.out.println(delete);
-////		testTmpDTO = new TestTmpDTO();
-////		 testTmpDTO.setUserName("admin4");
-////		 int userName = MybatisOperaterUtil.getInstance().update(testTmpDTO,
-////		 new MybatisSqlWhereBuild(TestTmpDTO.class).like(TestTmpDTO::getUserName, "admin2%"));
-////		 System.out.println(userName);
-////
-////		 查询 根据条件查询 代表 userName和userPass两个字段
-//		 testTmpDTO = new TestTmpDTO();
-//		 testTmpDTO.setUserName(MybatisSqlDefaultUtil.STRING_DEFAULT_VALUE);
-//		 TestTmpDTO id = MybatisOperaterUtil.getInstance().findOne(new TestTmpDTO(),
-//				 new MybatisSqlWhereBuild(TestTmpDTO.class).like(TestTmpDTO::getUserName, "admin%"));
-//
-//		 System.out.println(id);
-////
-//////		查询所有
-//         List<TestTmpDTO> testTmpDTOS =
-//         MybatisOperaterUtil.getInstance().finAll(new TestTmpDTO(),
-//         new MybatisSqlWhereBuild(TestTmpDTO.class).page(2, 10));
-//		System.out.println(testTmpDTOS);
+    @GetMapping("index")
 
-	}
+    public String init() {
 
+
+        TimerScheduler timerScheduler = new TimerScheduler();
+        timerScheduler.setName("111" + UUID.randomUUID().toString());
+        timerScheduler.setCron("*/20 * * * * *  ?");
+        timerScheduler.setType(TimerSchedulerTypeEnum.RED_PACKET_ENDED.toNum());
+
+        Map<String, String> map = new HashMap<>();
+        map.put("aaa", "11");
+        map.put("bbb", "22");
+
+        timerScheduler.setParams(JSON.toJSONString(map));
+
+
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(timerScheduler));
+        return "OK";
+
+    }
 
 
 }
