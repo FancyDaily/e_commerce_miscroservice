@@ -408,7 +408,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType()).groupAfter()
-                .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId).groupAfter()
+                .or().groupBefore().eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId)
+                        .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType()).groupAfter()
                         .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrderRelationship::getCreateTime))
                 );

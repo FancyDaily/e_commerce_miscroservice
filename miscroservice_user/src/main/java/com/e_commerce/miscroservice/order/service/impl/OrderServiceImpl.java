@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.order.service.impl;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -692,7 +693,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//可以成功创建订单
 				saveOrder(order);
 				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
-//				TimerScheduler scheduler = new TimerScheduler();
+				TimerScheduler scheduler = new TimerScheduler();
+//				scheduler.set
 //				scheduler.setParams();
 //				MqListenerConvert
 //				mqTemplate.sendMs g(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);

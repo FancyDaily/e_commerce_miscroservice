@@ -17,7 +17,6 @@ import java.util.List;
 
 /**
  * 组织模块
- * 功能描述:用户Controller
  */
 @RestController
 @RequestMapping("api/v2/group")
@@ -30,10 +29,9 @@ public class GroupController {
 	Log logger = Log.getInstance(GroupController.class);
 
 	/**
+	 * 查询所有分组列表
 	 *
-	 * 功能描述:查询所有分组列表
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月14日 下午2:09:18
+	 * @param token
 	 * @return
 	 */
 	@PostMapping("/list")
@@ -59,10 +57,10 @@ public class GroupController {
 	}
 
 	/**
+	 * 插入分组
 	 *
-	 * 功能描述：新建一个分组
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月14日 下午3:34:15
+	 * @param group
+	 * @param token
 	 * @return
 	 */
 	@PostMapping("/insert")
@@ -86,11 +84,9 @@ public class GroupController {
 	}
 
 	/**
+	 * 修改分组名称
 	 *
-	 * 功能描述:修改分组的名称
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月14日 下午6:43:34
-	 * @param group  获取组织ID和组织名称
+	 * @param group
 	 * @param token
 	 * @return
 	 */
@@ -119,11 +115,9 @@ public class GroupController {
 	}
 
 	/**
+	 * 删除分组
 	 *
-	 * 功能描述:删除分组
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月15日 下午2:35:55
-	 * @param groupId 分组ID
+	 * @param groupId
 	 * @param token
 	 * @return
 	 */

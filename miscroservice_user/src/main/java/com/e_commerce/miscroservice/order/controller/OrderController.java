@@ -353,7 +353,7 @@ public class OrderController extends BaseController {
 	}
 
 	/**
-	 * 我的选人列表（组织专属）
+	 * 我的选人列表 --> 组织专属
 	 *
 	 * @param token    用户token
 	 * @param pageNum  页数
@@ -386,7 +386,7 @@ public class OrderController extends BaseController {
 	 *                 "collectType": 收取分类 1、互助时 2、公益时,
 	 *                 "createUser": 创建人ID,
 	 *                 },
-	 *                 "porductCoverPic": 封面图地址，"https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour%28v3.0%29/otherImg/155072256231016.png",
+	 *                 "porductCoverPic": 封面图地址,
 	 *                 "status": 状态： 1、已结束 2、已取消 3、待选人
 	 *                 }
 	 *                 ],
