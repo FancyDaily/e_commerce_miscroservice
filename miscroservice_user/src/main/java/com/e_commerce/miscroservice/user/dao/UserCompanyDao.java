@@ -60,4 +60,25 @@ public interface UserCompanyDao {
      * @param userCompany
      */
     int insert(TUserCompany userCompany);
+
+    /**
+     * 通过用户ID获取组织ID
+     * @param userId
+     * @return
+     */
+	TUserCompany getOwnCompanyIdByUser(Long userId);
+
+    /**
+     * 列出该组织下的所有用户
+     * @param companyId
+     * @return
+     */
+    List<TUserCompany> listCompanyUser(Long companyId);
+
+    /**
+     * 统计该分组下的用户数
+     * @param groupId 分组ID
+     * @return
+     */
+    long countGroupUser(Long groupId);
 }
