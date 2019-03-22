@@ -2987,9 +2987,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             user = userList.get(0);
-            if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            /*if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
                 throw new MessageException("当前用户被封禁!禁止登录！");
-            }
+            }*/
         }
         return user;
     }

@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.e_commerce.miscroservice.commons.entity.application.TGroup;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
+import com.e_commerce.miscroservice.user.vo.BaseGroupView;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +27,6 @@ import java.util.List;
 
 /**
  * 组织模块
- * 功能描述:用户Controller
  */
 @RestController
 @RequestMapping("api/v2/group")
@@ -242,11 +244,9 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * 功能描述: 批量插入成员(Excel文件)
-     * 作者: 许方毅
-     * 创建时间: 2019年1月23日 下午6:07:49
-     * @param token
+     * 批量插入成员(Excel文件)
      * @param file
+     * @param token
      * @return
      */
     @PostMapping("/multiUserInsert")
@@ -273,5 +273,173 @@ public class GroupController extends BaseController {
         return result;
     }
 
+	/**
+	 * 查询所有分组列表
+	 *
+	 * @param token
+	 * @return
+	 */
+	@PostMapping("/list")
+	public Object listGroup(String token) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		try {
+			List<BaseGroupView> listGroup = groupService.listGroup(user);
+			result.setData(listGroup);
+			result.setSuccess(true);
+			result.setMsg("查询分组列表成功");
+		} catch (IllegalArgumentException e) {
+			result.setSuccess(false);
+			result.setMsg("查询分组列表失败");
+			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.setSuccess(false);
+			result.setMsg("查询分组列表失败");
+//			logger.error(errInfo(e), e);
+		}
+		return result;
+	}
+
+	/**
+	 * 插入分组
+	 *
+	 * @param group
+	 * @param token
+	 * @return
+	 */
+	@PostMapping("/insert")
+	public Object insertGroup(TGroup group, String token) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			groupService.insert(group, user);
+			result.setSuccess(true);
+			result.setMsg("新建分组成功");
+		} catch (IllegalArgumentException e) {
+			result.setSuccess(false);
+			result.setMsg("新建分组失败");
+			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			result.setSuccess(false);
+			result.setMsg("新建分组失败");
+//			logger.error(errInfo(e), e);
+		}
+		return result;
+	}
+
+	/**
+	 * 修改分组名称
+	 *
+	 * @param group
+	 * @param token
+	 * @return
+	 */
+	@PostMapping("/modify")
+	public Object updateGroup(TGroup group, String token) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			groupService.updateGroup(group, user);
+			result.setSuccess(true);
+			result.setMsg("修改分组名称成功");
+		} catch (NoAuthChangeException e) {
+			result.setSuccess(false);
+			result.setMsg(e.getMessage());
+			logger.info(e.getMessage(), e);
+		} catch (IllegalArgumentException e) {
+			result.setSuccess(false);
+			result.setMsg("修改分组名称失败");
+			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			result.setSuccess(false);
+			result.setMsg("修改分组名称失败");
+//			logger.error(errInfo(e), e);
+		}
+		return result;
+	}
+
+	/**
+	 * 删除分组
+	 *
+	 * @param groupId
+	 * @param token
+	 * @return
+	 */
+	@PostMapping("/delete")
+	public Object deleteGroup(Long groupId, String token) {
+		TUser user = (TUser) redisUtil.get(token);
+		AjaxResult result = new AjaxResult();
+		try {
+			groupService.deleteGroup(groupId, user);
+			result.setSuccess(true);
+			result.setMsg("删除分组成功");
+		} catch (NoAuthChangeException e) {
+			result.setSuccess(false);
+			result.setMsg(e.getMessage());
+			logger.info(e.getMessage(), e);
+		} catch (IllegalArgumentException e) {
+			result.setSuccess(false);
+			result.setMsg("删除分组失败");
+			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			result.setSuccess(false);
+			result.setMsg("删除分组失败");
+//			logger.error(errInfo(e), e);
+		}
+		return result;
+	}
+
+    /**
+     * 新成员列表(待处理申请名单)
+     * @param token
+     * @param pageNum
+     * @param pageSize
+     * @param param
+     * @param skill
+     * @return
+     */
+    @PostMapping("user/waitToJoin")
+    public Object userWaitToJoin(String token, Integer pageNum, Integer pageSize, String param, String skill) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            QueryResult<SmartUserView> userViews = groupService.userWaitToJoin(user, pageNum, pageSize, param, skill);
+            result.setData(userViews);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("新成员列表(待处理申请名单)异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("新成员列表(待处理申请名单)异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 组织年度流水折线图数据
+     * @param token
+     * @return
+     */
+    @PostMapping("companyPaymentDiagram")
+    public Object companyPaymentDiagram(String token) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            CompanyRecentView view = groupService.companyPaymentDiagram(user);
+            result.setData(view);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error("组织年度流水折线图数据异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("组织年度流水折线图数据异常" + errInfo(e));
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
 }

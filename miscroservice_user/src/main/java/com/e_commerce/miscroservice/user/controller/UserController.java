@@ -2746,8 +2746,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     *
-     *
+     * 组织时间轨迹
      * @param token 登录凭证
      * @param year  年份
      * @param month 月份

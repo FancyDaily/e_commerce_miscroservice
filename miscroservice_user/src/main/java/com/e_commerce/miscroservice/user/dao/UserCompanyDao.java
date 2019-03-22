@@ -107,6 +107,12 @@ public interface UserCompanyDao {
      */
     List<TUserCompany> selectByCompanyIdAndStateAndTeamNameAndGroupId(Long companyId, Integer joinStateCompanyPass, String param, Long groupId);
 
+    /**
+     * 查找userCompany记录
+     * @param companyId 组织id
+     * @param valueOf 用户id
+     * @return
+     */
     List<TUserCompany> selectByCompanyIdAndUserId(Long companyId, Long valueOf);
 
     /**
@@ -128,4 +134,33 @@ public interface UserCompanyDao {
      * @param userCompany
      */
     int updateByUserIdAndCompanyJobAndCompanyIdAndStateSetUserCompany(Long valueOf, Integer jobCompanyMember, Long companyId, Integer joinStateCompanyNotYet, TUserCompany userCompany);
+
+    /**
+     * 通过用户ID获取组织ID
+     * @param userId
+     * @return
+     */
+	TUserCompany getOwnCompanyIdByUser(Long userId);
+
+    /**
+     * 列出该组织下的所有用户
+     * @param companyId
+     * @return
+     */
+    List<TUserCompany> listCompanyUser(Long companyId);
+
+    /**
+     * 统计该分组下的用户数
+     * @param groupId 分组ID
+     * @return
+     */
+    long countGroupUser(Long groupId);
+
+    /**
+     * 查找记录
+     * @param companyId 组织id
+     * @param joinStateCompanyNotYet 加入状态
+     * @return
+     */
+    List<TUserCompany> selectByCompanyIdAndState(Long companyId, Integer joinStateCompanyNotYet);
 }

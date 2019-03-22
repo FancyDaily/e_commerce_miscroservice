@@ -130,6 +130,27 @@ public class UserDaoImpl implements UserDao {
         return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
     }
 
+    @Override
+    public List<TUser> selectByNameAndTelephoneLikeSkillInIds(String name, String telephone, String skill, List<Long> idList) {
+        MybatisSqlWhereBuild build = new MybatisSqlWhereBuild(TUser.class)
+                .in(TUser::getId,idList)
+                .eq(TUser::getIsValid, AppConstant.IS_VALID_YES);
+
+        if(name!=null) {
+            build.eq(TUser::getName, name);
+        }
+
+        if(telephone!=null) {
+            build.eq(TUser::getUserTel, telephone);
+        }
+
+        if(skill!=null && skill!="") {
+            build.like(TUser::getSkill, "%" + skill + "%");
+        }
+
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
+    }
+
     /**
      * 获取该账号的分身
      *

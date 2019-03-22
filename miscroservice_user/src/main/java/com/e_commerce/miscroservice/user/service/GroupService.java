@@ -10,6 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import com.e_commerce.miscroservice.commons.entity.application.TGroup;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
+import com.e_commerce.miscroservice.user.vo.BaseGroupView;
+
 public interface GroupService {
 
     /**
@@ -74,4 +78,35 @@ public interface GroupService {
     void userReject(TUser user, String userIds);
 
     List<String> multiUserInsert(TUser user, MultipartFile file) throws IOException;
+	/**
+	 * 分组的组织列表
+	 * @param user 当前用户
+	 * @return
+	 */
+	List<BaseGroupView> listGroup(TUser user);
+
+	/**
+	 * 新建分组
+	 * @param group
+	 * @param user
+	 */
+	void insert(TGroup group, TUser user);
+
+	/**
+	 * 更新分组
+	 * @param group
+	 * @param user 当前用户
+	 */
+	void updateGroup(TGroup group, TUser user) throws NoAuthChangeException;
+
+	/**
+	 * 删除分组
+	 * @param groupId
+	 * @param user
+	 */
+	void deleteGroup(Long groupId, TUser user) throws NoAuthChangeException;
+
+	QueryResult<SmartUserView> userWaitToJoin(TUser user, Integer pageNum, Integer pageSize, String param, String skill);
+
+	CompanyRecentView companyPaymentDiagram(TUser user);
 }

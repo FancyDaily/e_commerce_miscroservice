@@ -233,5 +233,35 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
         .eq(TUserCompany::getState,joinStateCompanyNotYet)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public TUserCompany getOwnCompanyIdByUser(Long userId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUserCompany(), new MybatisSqlWhereBuild(TUserCompany.class)
+                .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES).eq(TUserCompany::getUserId, userId)
+                .eq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_CREATER));
+    }
+
+    @Override
+    public List<TUserCompany> listCompanyUser(Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(), new MybatisSqlWhereBuild(TUserCompany.class)
+                .eq(TUserCompany::getState, 2).eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
+                .eq(TUserCompany::getCompanyId, companyId).isNotNull(TUserCompany::getGroupId));
+    }
+
+    @Override
+    public long countGroupUser(Long groupId) {
+        return  MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TUserCompany.class)
+                .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES).eq(TUserCompany::getState, 2)
+                .eq(TUserCompany::getGroupId, groupId));
+    }
+
+    @Override
+    public List<TUserCompany> selectByCompanyIdAndState(Long companyId, Integer joinStateCompanyNotYet) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+        .eq(TUserCompany::getCompanyId,companyId)
+        .eq(TUserCompany::getState,joinStateCompanyNotYet)
+        .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }
 

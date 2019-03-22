@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,4 +36,6 @@ public interface UserTimeRecordDao {
     List<TUserTimeRecord> selectByUserIdInOrderIds(Long userId, List<Long> orderIds);
 
     List<TUserTimeRecord> selectByUserId(Long id);
+
+    List<TUserTimeRecord> selectByUserIdOrFromUserIdAndTypeBetween(Long userId, PaymentEnum paymentTypeAceptServ, long betLeft, long betRight);
 }

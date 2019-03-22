@@ -113,4 +113,12 @@ public interface OrderService {
 	 */
 	List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer);
 
+	/**
+	 * 我的选人列表
+	 * @param pageNum 页数
+	 * @param pageSize 每页数量
+	 * @param user 当前用户
+	 * @return
+	 */
+	QueryResult<PageEnrollAndChooseReturnView> mineChooseList(Integer pageNum, Integer pageSize, TUser user);
 }

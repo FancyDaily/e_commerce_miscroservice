@@ -93,4 +93,17 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
         .eq(TUserTimeRecord::getUserId,id)
         .eq(TUserTimeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TUserTimeRecord> selectByUserIdOrFromUserIdAndTypeBetween(Long userId, PaymentEnum paymentTypeAceptServ, long betLeft, long betRight) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord(),new MybatisSqlWhereBuild(TUserTimeRecord.class)
+                .groupBefore()
+                .eq(TUserTimeRecord::getUserId,userId)
+                .or()
+                .eq(TUserTimeRecord::getFromUserId,userId)
+                .groupAfter()
+                .eq(TUserTimeRecord::getType,paymentTypeAceptServ)
+                .between(TUserTimeRecord::getCreateTime,betLeft,betRight)
+                .eq(TUserTimeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

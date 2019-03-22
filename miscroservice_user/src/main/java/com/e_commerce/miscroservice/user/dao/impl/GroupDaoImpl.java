@@ -20,16 +20,33 @@ public class GroupDaoImpl implements GroupDao {
     }
 
     @Override
-    public TGroup selectByPrimaryKey(Long groupId) {
-        return MybatisOperaterUtil.getInstance().findOne(new TGroup(),new MybatisSqlWhereBuild(TGroup.class)
-        .eq(TGroup::getId,groupId)
-        .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
-    }
-
-    @Override
     public List<TGroup> selectByCompanyId(Long companyId) {
         return MybatisOperaterUtil.getInstance().finAll(new TGroup(),new MybatisSqlWhereBuild(TGroup.class)
         .eq(TGroup::getCompanyId,companyId)
         .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TGroup> listGroup(Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGroup(), new MybatisSqlWhereBuild(TGroup.class)
+                .eq(TGroup::getCompanyId, companyId).eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public int insert(TGroup group) {
+        return MybatisOperaterUtil.getInstance().save(group);
+    }
+
+    @Override
+    public TGroup selectByPrimaryKey(Long id) {
+        return MybatisOperaterUtil.getInstance().findOne(new TGroup(), new MybatisSqlWhereBuild(TGroup.class)
+                .eq(TGroup::getId, id)
+                .eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public int updateByPrimaryKeySelective(TGroup updateGroup) {
+        return MybatisOperaterUtil.getInstance().update(updateGroup, new MybatisSqlWhereBuild(TGroup.class)
+                .eq(TGroup::getId, updateGroup.getId()));
     }
 }
