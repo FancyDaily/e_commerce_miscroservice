@@ -5,7 +5,21 @@ import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import java.util.List;
 
 public interface GroupDao {
+
+    /**
+     * 根据组织id、权限查询
+     * @param companyId
+     * @param groupAuthDefault
+     * @return
+     */
     List<TGroup> selectByCompanyIdAndAuth(Long companyId, Integer groupAuthDefault);
+
+    /**
+     * 根据组织id查询
+     * @param companyId
+     * @return
+     */
+    List<TGroup> selectByCompanyId(Long companyId);
 
 	/**
 	 * 查询分组列表
@@ -21,7 +35,7 @@ public interface GroupDao {
 	int insert(TGroup group);
 
 	/**
-	 * 根据主键查询济洛路
+	 * 根据主键查询
 	 * @param id
 	 * @return
 	 */

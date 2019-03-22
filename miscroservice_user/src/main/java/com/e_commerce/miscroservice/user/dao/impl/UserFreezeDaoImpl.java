@@ -69,4 +69,12 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
                 .eq(TUserFreeze::getUserId, createUser).eq(TUserFreeze::getOrderId, orderId));
     }
 
+    @Override
+    public List<TUserFreeze> selectByUserIdBetween(Long userId, Long beginStamp, Long endStamp) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class)
+        .eq(TUserFreeze::getUserId,userId)
+                .between(TUserFreeze::getCreateTime,beginStamp,endStamp)
+                .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }

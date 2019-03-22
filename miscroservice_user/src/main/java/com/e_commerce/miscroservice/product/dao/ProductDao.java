@@ -13,6 +13,7 @@ import java.util.List;
 public interface ProductDao {
 	/**
 	 * 插入一条记录
+	 *
 	 * @param service
 	 * @return
 	 */
@@ -20,6 +21,7 @@ public interface ProductDao {
 
 	/**
 	 * 根据主键id查询service
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -27,6 +29,7 @@ public interface ProductDao {
 
 	/**
 	 * 根据主键进行更新
+	 *
 	 * @param lowerFrameService
 	 * @return
 	 */
@@ -34,14 +37,16 @@ public interface ProductDao {
 
 	/**
 	 * 获取用户最新一条求助或服务的ID
+	 *
 	 * @param userId 用户ID
-	 * @param type 类型 1、求助 2、服务
+	 * @param type   类型 1、求助 2、服务
 	 * @return 可能为null
 	 */
 	TService selectUserNewOneRecord(Long userId, Integer type);
 
 	/**
 	 * 获取商品信息根据商品的idList
+	 *
 	 * @param productIds 商品的ID
 	 * @return 商品的list
 	 */
@@ -49,6 +54,7 @@ public interface ProductDao {
 
 	/**
 	 * 根据商品ID的list获取商品详情list
+	 *
 	 * @param productIds 商品ID的list
 	 * @return 商品详情的list
 	 */
@@ -56,6 +62,7 @@ public interface ProductDao {
 
 	/**
 	 * 获取商品详情
+	 *
 	 * @param serviceId 商品ID
 	 * @return 详情list（多张图片多个desc）
 	 */
@@ -63,12 +70,30 @@ public interface ProductDao {
 
 	/**
 	 * 根据用户查询所有的求助服务
-	 * @param userId 当前用户ID
-	 * @param pageNum 页数
-	 * @param pageSize 每页数量
-	 * @param type 类型 1、求助 2、服务
+	 *
+	 * @param userId   当前用户ID
+	 * @param type     类型 1、求助 2、服务
 	 * @return
 	 */
+	List<TService> getListProductByUserId(Long userId, Integer type);
+
+	/**
+	 * 组织账号发布的、状态下、时间区间下
+	 * @param userId
+	 * @param companyPublishedStatusArray
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+    List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin,Long end);
+
+	/**
+	 * 组织账号发布的、状态下
+	 * @param userId
+	 * @param companyPublishedStatusArray
+	 * @return
+	 */
+	List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray);
 	List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type);
 
 	/**

@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
@@ -432,6 +433,25 @@ public class OrderDaoImpl implements OrderDao {
                     .in(TOrder::getId, orderIds)
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         }
+    }
+
+    /**
+     * 查询今日创建订单，指定创建者
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TOrder> selectDailyOrders(Long userId) {
+        // 获取今日起止时间戳
+        long currentTimeMillis = System.currentTimeMillis();
+        long startStamp = DateUtil.getStartStamp(currentTimeMillis);
+        long endStamp = DateUtil.getEndStamp(currentTimeMillis);
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+        .eq(TOrder::getCreateUser,userId)
+                .lte(TOrder::getStartTime,endStamp)
+                .gte(TOrder::getEndTime,startStamp)
+                .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL)
+                .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     /**

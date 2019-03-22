@@ -189,4 +189,5 @@ public interface OrderDao {
 	 */
 	long updateOrderByList(List<TOrder> orderList, List<Long> orderIdList);
 
+	List<TOrder> selectDailyOrders(Long userId);
 }

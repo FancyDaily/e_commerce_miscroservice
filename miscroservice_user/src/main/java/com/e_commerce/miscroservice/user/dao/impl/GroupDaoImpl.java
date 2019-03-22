@@ -20,6 +20,13 @@ public class GroupDaoImpl implements GroupDao {
     }
 
     @Override
+    public List<TGroup> selectByCompanyId(Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGroup(),new MybatisSqlWhereBuild(TGroup.class)
+        .eq(TGroup::getCompanyId,companyId)
+        .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
     public List<TGroup> listGroup(Long companyId) {
         return MybatisOperaterUtil.getInstance().finAll(new TGroup(), new MybatisSqlWhereBuild(TGroup.class)
                 .eq(TGroup::getCompanyId, companyId).eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
@@ -33,7 +40,8 @@ public class GroupDaoImpl implements GroupDao {
     @Override
     public TGroup selectByPrimaryKey(Long id) {
         return MybatisOperaterUtil.getInstance().findOne(new TGroup(), new MybatisSqlWhereBuild(TGroup.class)
-                .eq(TGroup::getId, id).eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
+                .eq(TGroup::getId, id)
+                .eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override

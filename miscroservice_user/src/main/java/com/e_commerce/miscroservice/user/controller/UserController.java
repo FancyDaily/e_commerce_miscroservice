@@ -2299,7 +2299,6 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-//            Set<Integer> taskIds = userService.taskList(user);
             TaskHallView taskHallView = userService.taskHall(user);
             result.setData(taskHallView);
             result.setSuccess(true);
@@ -2747,8 +2746,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 组织时间轨迹查询
-     *
+     * 组织时间轨迹
      * @param token 登录凭证
      * @param year  年份
      * @param month 月份
@@ -2764,15 +2762,36 @@ public class UserController extends BaseController {
             result.setData(view);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.error("组织时间轨迹查询" + e.getMessage());
             result.setSuccess(false);
-            result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error(errInfo(e));
+            logger.error("组织时间轨迹查询" + errInfo(e));
             result.setSuccess(false);
-            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
-            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 每日时间流水查询
+     * @param token
+     * @return
+     */
+    @PostMapping("queryPaymentToDay")
+    public Object queryPaymentToDay(String token) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            CompanyDailyPaymentView dailyPaymentView = userService.queryPaymentToDay(user);
+            result.setSuccess(true);
+            result.setData(dailyPaymentView);
+        } catch (MessageException e) {
+            logger.error("每日时间流水查询" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("每日时间流水查询" + errInfo(e));
+            result.setSuccess(false);
         }
         return result;
     }

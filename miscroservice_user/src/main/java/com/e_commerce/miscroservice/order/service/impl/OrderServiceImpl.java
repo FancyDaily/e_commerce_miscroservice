@@ -573,21 +573,41 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public DetailChooseReturnView chooseDetail(Long orderId, TUser user) {
-		TOrder order = orderDao.selectByPrimaryKey(orderId);
-		//所有的报名者
-		List<TOrderRelationship> tOrderRelationships = orderRelationshipDao.selectListByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
-		List<BaseUserView> listUser = new ArrayList<>();
-		for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
-			TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
-			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
-			userView.setCareStatus(1);
-			listUser.add(userView);
-		}
 		DetailChooseReturnView result = new DetailChooseReturnView();
+		TOrder order = orderDao.selectByPrimaryKey(orderId);
+		if (Objects.equals(order.getCreateUser(), user.getId())) { // 当前用户是发布者
+			//所有的报名者
+			List<TOrderRelationship> tOrderRelationships = orderRelationshipDao.selectListByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+			List<BaseUserView> listUser = new ArrayList<>();
+			for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
+				TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
+				BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+				boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+				if (isCare) {
+					// 关注状态 1、显示关注 2、显示已关注
+					userView.setCareStatus(2);
+				} else {
+					userView.setCareStatus(1);
+				}
+				listUser.add(userView);
+			}
+			result.setListUser(listUser);
+		} else {
+			TUser tUser = userService.getUserById(order.getCreateUser());
+			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+			boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+			if (isCare) {
+				// 关注状态 1、显示关注 2、显示已关注
+				userView.setCareStatus(2);
+			} else {
+				userView.setCareStatus(1);
+			}
+			List<BaseUserView> listUser = new ArrayList<>();
+			listUser.add(userView);
+			result.setListUser(listUser);
+		}
 		result.setOrder(order);
-		result.setListUser(listUser);
 		return result;
-
 	}
 
 	@Override
