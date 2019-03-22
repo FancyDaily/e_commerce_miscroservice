@@ -106,7 +106,7 @@
                 ,end_time DESC
             </when>
             <when test="type != null and type == 2">
-                ,total_evaluate DESC
+                ,total_evaluate DESC,end_time DESC
             </when>
             <otherwise>
             </otherwise>
