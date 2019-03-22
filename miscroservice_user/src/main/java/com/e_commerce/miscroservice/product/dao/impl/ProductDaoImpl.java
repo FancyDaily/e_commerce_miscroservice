@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -71,5 +72,24 @@ public class ProductDaoImpl implements ProductDao {
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
 				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;
+	}
+
+    @Override
+    public List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin, Long end) {
+        return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+		.eq(TService::getUserId,userId)
+		.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
+				.in(TService::getStatus,companyPublishedStatusArray)
+				.between(TService::getCreateTime,begin,end)
+				.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+	@Override
+	public List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray) {
+		return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getUserId,userId)
+				.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
+				.in(TService::getStatus,companyPublishedStatusArray)
+				.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
 	}
 }

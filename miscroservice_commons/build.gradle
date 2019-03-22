@@ -64,4 +64,8 @@ dependencies {
     compile group: 'com.aliyun.oss',name:'aliyun-sdk-oss',version:'2.8.3'
     compile group: 'com.aliyun',name:'aliyun-java-sdk-sts',version:'3.0.0'
     compile group: 'com.aliyun',name:'aliyun-java-sdk-core',version:'3.5.0'
+    //poi插件(excel文件读取)
+    compile group: 'org.apache.poi',name:'poi',version:'3.14'
+    compile group: 'org.apache.poi',name:'poi-ooxml',version:'3.14'
+
 }

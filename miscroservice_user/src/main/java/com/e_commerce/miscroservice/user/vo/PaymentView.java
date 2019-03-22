@@ -1,5 +1,8 @@
 package com.e_commerce.miscroservice.user.vo;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
 /**
@@ -20,7 +23,8 @@ import java.io.Serializable;
  * 1.
  * 2.
  */
-
+@Setter
+@Getter
 public class PaymentView implements Serializable{
 	
 	/**
@@ -31,71 +35,16 @@ public class PaymentView implements Serializable{
 	private String idString;
 
 	private String serviceName;	//服务标题
+
+	private Integer serviceType;	//求助还是服务
+
+	private String serviceTypeName;	//服务类型名（大类）
 	
-	private String tag;	//服务类型（大类）
-	
-	private Integer collectType;	//区分互助时和公益时
-	
-	private Integer servicePersonnel;	//预计参与人数
-	
-	private Long totalTime;	//总计
-	
+	private Integer confirmNum;	//参与人数
+
 	private Long collectTime;	//单价
 
-	public String getIdString() {
-		return idString;
-	}
+	private Long totalTime;	//总计
 
-	public void setIdString(String idString) {
-		this.idString = idString;
-	}
-
-	public String getServiceName() {
-		return serviceName;
-	}
-
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
-
-	public String getTag() {
-		return tag;
-	}
-
-	public void setTag(String tag) {
-		this.tag = tag;
-	}
-
-	public Integer getCollectType() {
-		return collectType;
-	}
-
-	public void setCollectType(Integer collectType) {
-		this.collectType = collectType;
-	}
-
-	public Integer getServicePersonnel() {
-		return servicePersonnel;
-	}
-
-	public void setServicePersonnel(Integer servicePersonnel) {
-		this.servicePersonnel = servicePersonnel;
-	}
-	
-	public Long getTotalTime() {
-		return totalTime;
-	}
-
-	public void setTotalTime(Long totalTime) {
-		this.totalTime = totalTime;
-	}
-
-	public Long getCollectTime() {
-		return collectTime;
-	}
-
-	public void setCollectTime(Long collectTime) {
-		this.collectTime = collectTime;
-	}
 
 }

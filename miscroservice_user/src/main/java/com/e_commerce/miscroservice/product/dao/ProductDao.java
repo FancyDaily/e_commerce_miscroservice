@@ -76,4 +76,22 @@ public interface ProductDao {
 	 * @return
 	 */
 	List<TService> getListProductByUserId(Long userId, Integer type);
+
+	/**
+	 * 组织账号发布的、状态下、时间区间下
+	 * @param userId
+	 * @param companyPublishedStatusArray
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+    List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin,Long end);
+
+	/**
+	 * 组织账号发布的、状态下
+	 * @param userId
+	 * @param companyPublishedStatusArray
+	 * @return
+	 */
+	List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray);
 }

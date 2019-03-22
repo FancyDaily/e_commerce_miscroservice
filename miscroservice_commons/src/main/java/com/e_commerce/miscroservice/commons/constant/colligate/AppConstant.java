@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.commons.constant.colligate;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import org.bouncycastle.asn1.crmf.PKIPublicationInfo;
 
 import java.util.List;
@@ -771,4 +772,11 @@ public interface AppConstant {
      * 一次性任务
      */
     Integer[] NOOB_TASK_ARRAY = {0,1,2,3,4,5,6,7,8,9};
+
+    /**
+     * 组织发布状态
+     */
+    Integer[] COMPANY_PUBLISHED_STATUS_ARRAY = {ProductEnum.STATUS_UPPER_FRAME.getValue()
+            ,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue(),ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()
+    ,ProductEnum.STATUS_DELETE.getValue()}; //TODO 组织版组织概况中发布的商品
 }
