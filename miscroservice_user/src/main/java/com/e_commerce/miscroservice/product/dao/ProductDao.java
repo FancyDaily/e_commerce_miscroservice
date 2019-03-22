@@ -94,7 +94,6 @@ public interface ProductDao {
 	 * @return
 	 */
 	List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray);
-	List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type);
 
 	/**
 	 * 查看一个人的所有服务订单
