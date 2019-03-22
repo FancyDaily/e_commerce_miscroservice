@@ -174,5 +174,20 @@ public interface OrderDao {
 	 */
 	List<TOrder> selectOrdersInOrderIdsByViewer(List<Long> orderIds, TUser viewer);
 
+	/**
+	 * 查看一个人的所有服务订单
+	 * @param userId
+	 * @return
+	 */
+	List<TOrder> selectUserServ(Long userId);
+
+	/**
+	 * 批量更新订单
+	 * @param orderList
+	 * @param orderIdList
+	 * @return
+	 */
+	long updateOrderByList(List<TOrder> orderList, List<Long> orderIdList);
+
 	List<TOrder> selectDailyOrders(Long userId);
 }

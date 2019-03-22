@@ -68,7 +68,7 @@ public class UserCommonController {
 	 * @param userIds
 	 * @return
 	 */
-	public List selectUserByIds(List userIds) {
+	public List<TUser> selectUserByIds(List userIds) {
 		return userDao.queryByIds(userIds);
 	}
 

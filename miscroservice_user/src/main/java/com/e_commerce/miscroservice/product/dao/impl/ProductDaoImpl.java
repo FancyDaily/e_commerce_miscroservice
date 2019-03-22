@@ -66,14 +66,6 @@ public class ProductDaoImpl implements ProductDao {
 				.eq(TServiceDescribe::getServiceId, serviceId));
 	}
 
-	@Override
-	public List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
-		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
-				.eq(TService::getUserId, userId).eq(TService::getType, type)
-				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
-		return listServie;
-	}
-
     @Override
     public List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin, Long end) {
         return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
@@ -91,5 +83,37 @@ public class ProductDaoImpl implements ProductDao {
 				.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
 				.in(TService::getStatus,companyPublishedStatusArray)
 				.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TService> getListProductByUserId(Long userId, Integer type) {
+		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getUserId, userId).eq(TService::getType, type)
+				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
+		return listServie;
+	}
+	/**
+	 * 查看一个人的所有服务订单
+	 * @param userId
+	 * @return
+	 */
+	public List<TService> selectUserServ(Long userId){
+		return MybatisOperaterUtil.getInstance().finAll(new TService() , new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getCreateUser , userId)
+				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
+				.eq(TService::getType , ProductEnum.TYPE_SERVICE));
+	}
+
+	/**
+	 * 批量更新订单
+	 * @param serviceList
+	 * @param serviceIdList
+	 * @return
+	 */
+	public long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList) {
+		long count = MybatisOperaterUtil.getInstance().update(serviceList,
+				new MybatisSqlWhereBuild(TService.class)
+						.in(TService::getId, serviceIdList));
+		return count;
 	}
 }

@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -131,4 +132,11 @@ public interface ProductService {
 	 * @return
 	 */
 	TServiceSummary findServiceSummary(Long serviceId);
+
+	/**
+	 * 获取用户的可用金额（发布时候获取用户金额）
+	 * @param user
+	 * @return
+	 */
+	Map<String, Long> getUserAvaliableMoney(TUser user);
 }
