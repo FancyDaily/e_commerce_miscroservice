@@ -29,4 +29,8 @@ public interface UserDao {
     List<TUser> selectByVxOpenId(String openId);
 
     List<TUser> selectUserTelByJurisdiction(String telephone, Integer jurisdictionNormal);
+
+    List<TUser> selectByUserTelByPasswordByIsCompanyAccYes(String telephone, String password, Integer isCompanyAccountYes);
+
+    List<TUser> selectByTelephoneInInIds(String param, List<Long> userIds);
 }

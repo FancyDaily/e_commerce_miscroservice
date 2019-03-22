@@ -18,4 +18,21 @@ public interface UserTimeRecordDao {
      * @return
      */
     List<TUserTimeRecord> selectGetTimeByOrder(Long orderId);
+
+    /**
+     * 根据用户id查找流水记录
+     * @param userId
+     * @return
+     */
+    List<TUserTimeRecord> selectTimeRecordByUserIdBetweenASC(Long userId,Long begin,Long end);
+
+    /**
+     * 根据用户id、订单ids查找所有流水记录
+     * @param userId
+     * @param orderIds
+     * @return
+     */
+    List<TUserTimeRecord> selectByUserIdInOrderIds(Long userId, List<Long> orderIds);
+
+    List<TUserTimeRecord> selectByUserId(Long id);
 }

@@ -174,4 +174,5 @@ public interface OrderDao {
 	 */
 	List<TOrder> selectOrdersInOrderIdsByViewer(List<Long> orderIds, TUser viewer);
 
+	List<TOrder> selectDailyOrders(Long userId);
 }

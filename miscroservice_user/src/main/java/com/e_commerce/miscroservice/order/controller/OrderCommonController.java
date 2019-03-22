@@ -292,4 +292,13 @@ public class OrderCommonController extends BaseController {
 	 * @return
 	 */
 	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) { return orderService.selectOrdersInIdsByViewer(orderIds,viewer);}
+
+	/**
+	 * 查询今日指定用户创建的订单
+	 * @param userId
+	 * @return
+	 */
+	public List<TOrder> selectDailyOrders(Long userId) {
+		return orderDao.selectDailyOrders(userId);
+	}
 }

@@ -18,4 +18,18 @@ public class GroupDaoImpl implements GroupDao {
         .eq(TGroup::getAuth,groupAuthDefault)
         .eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public TGroup selectByPrimaryKey(Long groupId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TGroup(),new MybatisSqlWhereBuild(TGroup.class)
+        .eq(TGroup::getId,groupId)
+        .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TGroup> selectByCompanyId(Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGroup(),new MybatisSqlWhereBuild(TGroup.class)
+        .eq(TGroup::getCompanyId,companyId)
+        .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

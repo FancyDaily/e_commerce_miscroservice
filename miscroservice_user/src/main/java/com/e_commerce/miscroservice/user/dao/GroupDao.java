@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface GroupDao {
     List<TGroup> selectByCompanyIdAndAuth(Long companyId, Integer groupAuthDefault);
+
+    TGroup selectByPrimaryKey(Long groupId);
+
+    List<TGroup> selectByCompanyId(Long companyId);
 }

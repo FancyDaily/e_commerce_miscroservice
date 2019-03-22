@@ -386,4 +386,11 @@ public interface UserService {
      * @return
      */
     boolean isCareUser(Long userId, Long userFollowId);
+
+    /**
+     * 组织每日时间流水查询
+     * @param user
+     * @return
+     */
+    CompanyDailyPaymentView queryPaymentToDay(TUser user);
 }
