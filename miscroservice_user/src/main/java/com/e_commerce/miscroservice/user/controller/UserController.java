@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -646,11 +647,12 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("skill/delete")
+    @Transactional(rollbackFor = Throwable.class)
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-            userService.skillDelete(id);
+            userService.skillDelete(user,id);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("删除技能异常: " + e.getMessage());
