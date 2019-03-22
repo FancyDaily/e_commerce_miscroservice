@@ -114,7 +114,8 @@ public interface UserService {
      * 删除技能
      * @param id
      */
-    void skillDelete(Long id);
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    void skillDelete(TUser user, Long id);
 
     /**
      * 查看用户基本信息
