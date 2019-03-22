@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.product.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
+import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,9 @@ import java.util.Map;
 public class ProductCommonController extends BaseController {
 	@Autowired
 	ProductService productService;
+
+	@Autowired
+	ProductDao productDao;
 
 	/**
 	 * 根据ID批量查询所有商品
@@ -82,5 +86,10 @@ public class ProductCommonController extends BaseController {
 		productService.updateServiceByKey(service);
 	}
 
+	public List<TService> selectServProByUser(Long userId){return productDao.selectUserServ(userId); }
+
+	public long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList){
+		return  productDao.updateServiceByList(serviceList ,serviceIdList);
+	}
 
 }

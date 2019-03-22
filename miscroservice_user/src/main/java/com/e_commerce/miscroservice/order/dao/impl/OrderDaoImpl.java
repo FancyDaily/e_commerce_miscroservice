@@ -448,4 +448,29 @@ public class OrderDaoImpl implements OrderDao {
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc((TOrder::getStatus))));
     }
+
+    /**
+     * 查看一个人的所有服务订单
+     * @param userId
+     * @return
+     */
+    public List<TOrder> selectUserServ(Long userId){
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder() , new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getCreateUser , userId)
+                .eq(TOrder::getIsValid , AppConstant.IS_VALID_YES)
+                .eq(TOrder::getType , ProductEnum.TYPE_SERVICE));
+    }
+
+    /**
+     * 批量更新订单
+     * @param orderList
+     * @param orderIdList
+     * @return
+     */
+    public long updateOrderByList(List<TOrder> orderList, List<Long> orderIdList) {
+        long count = MybatisOperaterUtil.getInstance().update(orderList,
+                new MybatisSqlWhereBuild(TOrder.class)
+                        .in(TOrder::getId, orderIdList));
+        return count;
+    }
 }

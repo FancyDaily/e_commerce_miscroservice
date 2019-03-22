@@ -1702,6 +1702,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是报名者，订单改为报名者取消
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType());
         }
+        orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
         orderRelationship.setUpdateUserName(nowUser.getName());
         orderRelationship.setUpdateUser(nowUser.getId());
         orderRelationship.setUpdateTime(nowTiem);
@@ -1742,7 +1743,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         event.setTiggerId("orderId"+orderId);
         event.setParameter(""+userTimeRecordId);
         event.setPriority(2);
-        event.setText("用户"+toUser.getName()+"已取消订单，并向你支付致歉礼：互助时"+timeChange(payment));
+        event.setText("用户"+nowUser.getName()+"已取消订单，并向你支付致歉礼：互助时"+timeChange(payment));
         event.setCreateTime(nowTime);
         event.setCreateUser(nowUser.getId());
         event.setCreateUserName(nowUser.getName());
@@ -1891,6 +1892,34 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             toUser.setUpdateUser(toUser.getId());
 
             userCommonController.updateByPrimaryKey(toUser);
+
+            //给被评价用户服务表里的数据进行更新
+            List<TOrder> changeOrder = orderDao.selectUserServ(toUser.getId());
+            List<Long> changeOrderId = new ArrayList<>();
+            if (changeOrder != null && changeOrder.size() > 0) {
+                double average = (double)(attitude + major + credit)/toUser.getServeNum();
+                average = average * 10000;
+                int round = (int) Math.round(average);
+                for (int i = 0; i < changeOrder.size(); i++) {
+                    changeOrder.get(i).setTotalEvaluate(round);
+                    changeOrderId.add(changeOrder.get(i).getId());
+                }
+                orderDao.updateOrderByList(changeOrder , changeOrderId);
+            }
+
+            //给被评价用户批量更新商品
+            List<TService> changeServiceList = productCommonController.selectServProByUser(toUser.getId());
+            List<Long> changeServiceIdList = new ArrayList<>();
+            if (changeServiceList != null && changeServiceList.size() > 0){
+                double average = (double)(attitude + major + credit)/toUser.getServeNum();
+                average = average * 10000;
+                int round = (int) Math.round(average);
+                for (int i = 0 ; i < changeServiceList.size() ; i++){
+                    changeServiceList.get(i).setTotalEvaluate(round);
+                    changeServiceIdList.add(changeServiceList.get(i).getId());
+                }
+                productCommonController.updateServiceByList(changeServiceList , changeServiceIdList);
+            }
         }
     }
 

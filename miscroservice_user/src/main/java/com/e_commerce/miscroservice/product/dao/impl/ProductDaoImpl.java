@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -71,5 +72,30 @@ public class ProductDaoImpl implements ProductDao {
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
 				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
 		return listServie;
+	}
+
+	/**
+	 * 查看一个人的所有服务订单
+	 * @param userId
+	 * @return
+	 */
+	public List<TService> selectUserServ(Long userId){
+		return MybatisOperaterUtil.getInstance().finAll(new TService() , new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getCreateUser , userId)
+				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
+				.eq(TService::getType , ProductEnum.TYPE_SERVICE));
+	}
+
+	/**
+	 * 批量更新订单
+	 * @param serviceList
+	 * @param serviceIdList
+	 * @return
+	 */
+	public long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList) {
+		long count = MybatisOperaterUtil.getInstance().update(serviceList,
+				new MybatisSqlWhereBuild(TService.class)
+						.in(TService::getId, serviceIdList));
+		return count;
 	}
 }
