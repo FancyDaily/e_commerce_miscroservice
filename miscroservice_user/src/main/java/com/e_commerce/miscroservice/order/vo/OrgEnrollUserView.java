@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.order.vo;
 
+import lombok.Data;
+
 import java.util.List;
 
 /**
@@ -13,11 +15,12 @@ import java.util.List;
  * 邮箱: 747052172@qq.com
  * 创建时间:2018年11月3日 下午6:18:50
  */
+@Data
 public class OrgEnrollUserView {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private String serviceIdToString; //string 型的serviceId
+	private Long orderId; //string 型的serviceId
 	private String title; //标题
 	private Integer status; //状态
 	private String startTime; //开始时间
@@ -27,58 +30,4 @@ public class OrgEnrollUserView {
 	private Long chooseUserSum; //已选人数
 	private Long canChooseSum; //可选人数
 	
-	public String getServiceIdToString() {
-		return serviceIdToString;
-	}
-	public void setServiceIdToString(Long serviceIdToString) {
-		this.serviceIdToString = serviceIdToString+"";
-	}
-	public String getTitle() {
-		return title;
-	}
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	public Integer getStatus() {
-		return status;
-	}
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-	public String getStartTime() {
-		return startTime;
-	}
-	public void setStartTime(String startTime) {
-		this.startTime = startTime;
-	}
-	public String getEndTime() {
-		return endTime;
-	}
-	public void setEndTime(String endTime) {
-		this.endTime = endTime;
-	}
-	public Boolean getIsRepeat() {
-		return isRepeat;
-	}
-	public void setIsRepeat(Boolean isRepeat) {
-		this.isRepeat = isRepeat;
-	}
-	public Long getEnrollSum() {
-		return enrollSum;
-	}
-	public void setEnrollSum(Long enrollSum) {
-		this.enrollSum = enrollSum;
-	}
-	public Long getChooseUserSum() {
-		return chooseUserSum;
-	}
-	public void setChooseUserSum(Long chooseUserSum) {
-		this.chooseUserSum = chooseUserSum;
-	}
-	public Long getCanChooseSum() {
-		return canChooseSum;
-	}
-	public void setCanChooseSum(Long canChooseSum) {
-		this.canChooseSum = canChooseSum;
-	}
 }

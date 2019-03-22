@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.*;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
+import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
@@ -2481,7 +2482,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
     }
 
-    public void orgOrderInfo(Long orderId){
-
+    public void orgOrderInfo(Long orderId , TUser nowUser){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
+        OrgEnrollUserView orgEnrollUserView = new OrgEnrollUserView();
+        orgEnrollUserView.setOrderId(orderId);
+        orgEnrollUserView.setTitle(order.getServiceName());
+        orgEnrollUserView.setStatus(orderRelationship.getStatus());
+        orgEnrollUserView.setStartTime(changeTime(order.getStartTime()));
+        orgEnrollUserView.setEndTime(changeTime(order.getEndTime()));
+        orgEnrollUserView.setIsRepeat(false);
+        if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
+            orgEnrollUserView.setIsRepeat(true);
+        }
     }
 }

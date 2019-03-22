@@ -492,6 +492,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					} else {
 						userView.setCareStatus(1);
 					}
+					listUserView.add(userView);
 				}
 				returnView.setListUserView(listUserView);
 			}
