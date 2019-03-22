@@ -66,10 +66,10 @@ public class ProductDaoImpl implements ProductDao {
 	}
 
 	@Override
-	public List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
+	public List<TService> getListProductByUserId(Long userId, Integer type) {
 		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
-				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
+				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;
 	}
 }

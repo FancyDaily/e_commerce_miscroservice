@@ -23,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 求助模块
@@ -279,6 +276,56 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
 			return result;
 		}
+	}
+
+	/**
+	 * 获取当前用户可用余额
+	 *
+	 * @param token 当前用户token
+	 * @return
+	 */
+	@PostMapping("/getUserAvaliableMoney")
+	public Object getUserAvaliableMoney(String token) {
+		AjaxResult result = new AjaxResult();
+		TUser user = (TUser) redisUtil.get(token);
+		Map<String, Long> data = productService.getUserAvaliableMoney(user);
+		result.setData(data);
+		result.setSuccess(true);
+		return result;
+	}
+
+	/**
+	 * 获取当前时间段包含的周X
+	 *
+	 * @param startTimeMill 开始时间毫秒值
+	 * @param endTimeMill   结束时间毫秒值
+	 * @return
+	 */
+	@PostMapping("/getAvaliableWeek")
+	public Object getAvaliableWeek(Long startTimeMill, Long endTimeMill) {
+		AjaxResult result = new AjaxResult();
+		if (startTimeMill < endTimeMill) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(startTimeMill);
+			int count = 0;
+			List<Integer> weekArray = new ArrayList<>();
+			while (cal.getTimeInMillis() < endTimeMill) {
+				count ++;
+				weekArray.add(DateUtil.getWeekDay(cal.getTimeInMillis()));
+				if (count == 7) {
+					break;
+				}
+				cal.add(Calendar.DAY_OF_YEAR, 1);
+			}
+			// 排序一下
+			Object[] weekArr =  weekArray.toArray();
+			Arrays.sort(weekArr);
+			result.setSuccess(true);
+			result.setData(weekArr);
+			return result;
+		}
+		result.setSuccess(false);
+		return result;
 	}
 
 

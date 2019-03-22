@@ -279,7 +279,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//分页插件
 		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
 		//我发布的列表
-		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(), pageNum, pageSize, type);
+		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(),type);
 		if (listProductByUserId.size() == 0) {
 			result.setResultList(new ArrayList<>());
 			result.setTotalCount(0L);
@@ -300,12 +300,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		for (TService tService : listProductByUserId) {
 			PageMineReturnView returnView = new PageMineReturnView();
 			returnView.setService(tService);
-			tService.setNameAudioUrl("");
-//			returnView.setImgUrl(coverPic.get(tService.getId()));
-			returnView.setImgUrl("");
+			returnView.setImgUrl(coverPic.get(tService.getId()));
+//			returnView.setImgUrl("");
 			if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_UPPER_FRAME.getValue())) {
 				returnView.setStatus("上架中");
-			} else if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+			} else if (Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+					|| Objects.equals(tService.getStatus(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
 				returnView.setStatus("已下架");
 			}
 			listPageMineReturnView.add(returnView);
@@ -794,5 +794,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 */
 	public TServiceSummary findServiceSummary(Long serviceId){
 		return serviceSummaryDao.selectServiceSummaryByServiceId(serviceId);
+	}
+
+	@Override
+	public Map<String, Long> getUserAvaliableMoney(TUser user) {
+		user = userService.getUserById(user.getId());
+		Map<String, Long> data = new HashMap<>();
+		data.put("avaliableMoney", user.getSurplusTime() + user.getCreditLimit());
+		return data;
 	}
 }

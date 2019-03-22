@@ -18,4 +18,8 @@ public class PageEnrollAndChooseReturnView {
 	 * 显示状态: 1、已结束  2、已取消 3、待选人 4、被拒绝  5、已报名 6、已入选
 	 */
 	private Integer status;
+	/**
+	 * 发布者
+	 */
+	private BaseUserView userView;
 }
