@@ -439,9 +439,28 @@ public class UserServiceImpl extends BaseService implements UserService {
         skill.setIsValid(AppConstant.IS_VALID_YES);
         userSkillDao.insert(skill);
 
-        //成长值
-		taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
-    }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				TUser finalUser = new TUser();
+				//成长值
+				finalUser = taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+
+				//维护t_user表 skill字段
+				String formerSkills = finalUser.getSkill();
+				String latestSkills = new StringBuilder(formerSkills).append(",").append(skill).toString();
+				finalUser.setSkill(latestSkills);
+				//updater
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
+				//TODO 刷新缓存
+
+				super.afterCompletion(status);
+			}
+		});
+	}
 
     /**
      * 修改技能
@@ -461,6 +480,31 @@ public class UserServiceImpl extends BaseService implements UserService {
         skill.setUpdateUser(user.getId());
         skill.setUpdateUserName(user.getName());
         userSkillDao.update(skill);
+
+        //维护t_user表 skill字段
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+				StringBuilder builder = new StringBuilder();
+				for(TUserSkill skill:latestSkills) {
+					builder = builder.append(skill).append(",");
+				}
+				String skills = builder.toString();
+				if(skills.endsWith(",")) {
+					skills = skills.substring(0,skills.length()-1);
+				}
+				user.setSkill(skills);
+				//updater
+				user.setUpdateTime(System.currentTimeMillis());
+				user.setUpdateUser(user.getId());
+				user.setUpdateUserName(user.getName());
+				userDao.updateByPrimaryKey(user);
+				//TODO 刷新缓存
+
+				super.afterCompletion(status);
+			}
+		});
     }
 
     /**
@@ -542,12 +586,13 @@ public class UserServiceImpl extends BaseService implements UserService {
     public UserPageView page(TUser user, Long userId) {
         UserPageView result = new UserPageView();
         //基本信息
-        user = userDao.selectByPrimaryKey(user.getId());
-        DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
+        TUser theUser = userDao.selectByPrimaryKey(userId);
+        DesensitizedUserView view = BeanUtil.copy(theUser, DesensitizedUserView.class);
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
+        user = userDao.selectByPrimaryKey(user.getId());
         //求助列表
         QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false,user);
 
@@ -577,6 +622,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
+		me = userDao.selectByPrimaryKey(me.getId());
         return getOnesAvailableItems(userId, pageNum, pageSize, isService,me);
     }
 
@@ -658,9 +704,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
         if(userId!=me.getId()) {    //查看别人的主页
-            TUser beenViewer = userDao.selectByPrimaryKey(me.getId());
             startPage = PageHelper.startPage(pageNum, pageSize);
-            orders = orderService.selectOdersByUserId(userId, isService, beenViewer);
+            orders = orderService.selectOdersByUserId(userId, isService, me);
         }
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
@@ -695,22 +740,53 @@ public class UserServiceImpl extends BaseService implements UserService {
         userFreezeDao.insert(userFreeze);
     }
 
-    /**
-     * 删除技能
-     *
-     * @param id
-     */
+	/**
+	 * 删除技能
+	 * @param user
+	 * @param id
+	 */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
-    public void skillDelete(Long id) {
+    public void skillDelete(TUser user, Long id) {
         if (id == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能id不能为空");
         }
         userSkillDao.delete(id);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+				StringBuilder builder = new StringBuilder();
+				for(TUserSkill skill:latestSkills) {
+					builder = builder.append(skill).append(",");
+				}
+				String skills = builder.toString();
+				if(skills.endsWith(",")) {
+					skills = skills.substring(0,skills.length()-1);
+				}
+
+				//同步用户表中的技能
+				TUser finalUser = null;
+				finalUser = userDao.selectByPrimaryKey(user.getId());	//DELMARK
+				user.setSkill(skills);
+				//updater
+				user.setUpdateTime(System.currentTimeMillis());
+				user.setUpdateUser(user.getId());
+				user.setUpdateUserName(user.getName());
+
+				userDao.updateByPrimaryKey(user);
+				//TODO 刷新缓存
+				super.afterCompletion(status);
+			}
+		});
     }
 
     @Override
     public DesensitizedUserView info(TUser user, Long userId) {
+		if(userId==null) {
+			userId = user.getId();
+		}
         TUser findUser = userDao.info(userId);
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
@@ -1672,6 +1748,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param bonusPackageId
      */
     @Override
+	@Transactional(rollbackFor = Throwable.class)
     public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
         //修改红包记录
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
@@ -1698,16 +1775,26 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
         userTimeRecordDao.insert(userTimeRecord);
 
-        //返还红包金额
-        user = userDao.selectByPrimaryKey(user.getId());
-        user.setSurplusTime(user.getSurplusTime() + bonusPackage.getTime());
-        user.setCreateTime(currentTimeMillis);
-        user.setCreateUser(user.getId());
-        user.setCreateUserName(user.getName());
-        user.setUpdateTime(currentTimeMillis);
-        user.setUpdateUser(user.getId());
-        user.setUpdateUserName(user.getName());
-        userDao.updateByPrimaryKey(user);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				//返还红包金额
+				TUser finalUser = null;
+				finalUser = userDao.selectByPrimaryKey(user.getId());
+				finalUser.setSurplusTime(finalUser.getSurplusTime() + bonusPackage.getTime());
+				finalUser.setCreateTime(currentTimeMillis);
+				finalUser.setCreateUser(finalUser.getId());
+				finalUser.setCreateUserName(finalUser.getName());
+				finalUser.setUpdateTime(currentTimeMillis);
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
+
+				super.afterCompletion(status);
+			}
+		});
+
+
     }
 
     /**
@@ -2133,6 +2220,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param companyId
      */
     @Override
+	@Transactional(rollbackFor = Throwable.class)
     public void joinCompany(TUser user, Long companyId) {
         // 查询组织是否存在
         TCompany company = companyDao.selectByPrimaryKey(companyId);
@@ -2477,7 +2565,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 		// 登录
 		Long userId = user.getId();
 
-		// 使得之前的token失效 //TODO
+		// 使得之前的token失效
 		String redisKey = "str" + userId;
 		if (redisUtil.hasKey(redisKey)) {
 			String lastToken = (String) redisUtil.get(redisKey);
@@ -2497,7 +2585,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 		resultMap.put(AppConstant.USER, userView);
 
 		return resultMap;
-    }   //TODO 后续补充
+    }
 
     /**
      * 手机号验证码登录(个人账号)
@@ -2575,7 +2663,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 头像、性别、昵称等从微信获取的字段
         if (StringUtil.isEmpty(user.getUserHeadPortraitPath())) {
-            user.setUserHeadPortraitPath(AppConstant.DEFAULT_HEADURL); // TODO
+            user.setUserHeadPortraitPath(AppConstant.DEFAULT_HEADURL);
         }
 
         if (!(user.getSex() != null && user.getSex() > -1)) {
