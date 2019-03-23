@@ -2799,11 +2799,11 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("test")
-    public void test(String token) {
+    public void test(String token,Integer counts) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE, 6);
+            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, counts);
         } catch (Exception e) {
             e.printStackTrace();
         }

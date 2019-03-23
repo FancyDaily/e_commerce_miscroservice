@@ -199,6 +199,10 @@ public class IDCardUtil {
 				flag = Character.isDigit(number[x]);
 			}
 		} else if (number.length == 18) {
+			for (int x = 0; xn new HashMap<String, Object>();
+				flag = Character.isDigit(number[x]);
+			}
+		} else if (number.length == 18) {
 			for (int x = 0; x < number.length - 1; x++) {
 				if (!flag) return new HashMap<String, Object>();
 				flag = Character.isDigit(number[x]);
