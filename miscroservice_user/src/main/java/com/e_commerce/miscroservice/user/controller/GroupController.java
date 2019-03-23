@@ -172,7 +172,7 @@ public class GroupController extends BaseController {
     }
 
     /**
-     * 删除组织成员
+     * 删除组织成员(成员删除)
      * @param token
      * @param userIds
      * @return

@@ -163,4 +163,14 @@ public interface UserCompanyDao {
      * @return
      */
     List<TUserCompany> selectByCompanyIdAndState(Long companyId, Integer joinStateCompanyNotYet);
+
+    /**
+     * 查找记录
+     * @param idList id集合
+     * @param jobCompanyMember 组内身份
+     * @return
+     */
+    List<TUserCompany> selectInUserIdAndCompanyJob(ArrayList<Long> idList, Integer jobCompanyMember);
+
+    TUserCompany selectByPrimaryKey(Long companyId);
 }

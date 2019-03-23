@@ -715,7 +715,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				saveOrder(order);
 				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
 				TimerScheduler scheduler = new TimerScheduler();
-				scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
+//				scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
 				scheduler.setName("lowerOrder");
 //				scheduler
 				scheduler.setCron("");
