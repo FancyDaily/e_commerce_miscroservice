@@ -95,7 +95,6 @@ public interface ProductDao {
 	 */
 	List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray);
 
-
 	/**
 	 * 查看一个人的所有服务订单
 	 * @param userId

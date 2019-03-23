@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -186,7 +187,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userView.setCareStatus(1);
 		}
 		returnView.setUser(userView);
-		returnView.getUser().setCareStatus(1);
 		//详情页面展示举报状态 收藏状态 报名状态
 		if (user != null) { // 当前用户是登录状态
 			TOrderRelationship tOrderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, user.getId());
@@ -492,6 +492,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					} else {
 						userView.setCareStatus(1);
 					}
+					listUserView.add(userView);
 				}
 				returnView.setListUserView(listUserView);
 			}
@@ -714,7 +715,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				saveOrder(order);
 				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
 				TimerScheduler scheduler = new TimerScheduler();
-//				scheduler.set
+				scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
+				scheduler.setName("lowerOrder");
+//				scheduler
+				scheduler.setCron("");
+//				scheduler.setParams();
 //				scheduler.setParams();
 //				MqListenerConvert
 //				mqTemplate.sendMs g(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);
