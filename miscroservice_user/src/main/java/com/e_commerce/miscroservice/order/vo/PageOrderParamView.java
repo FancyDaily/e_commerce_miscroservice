@@ -55,5 +55,9 @@ public class PageOrderParamView implements Serializable {
 	 * 当前用户ID，用于查询时的排序
 	 */
 	private Long currentUserId;
+	/**
+	 * 组织用户ID --> 用来查询我发布的订单列表  “选人”
+	 */
+	private Long companyUserId;
 
 }

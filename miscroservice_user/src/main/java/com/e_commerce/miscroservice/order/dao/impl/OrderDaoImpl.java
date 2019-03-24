@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
@@ -435,6 +436,25 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     /**
+     * 查询今日创建订单，指定创建者
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TOrder> selectDailyOrders(Long userId) {
+        // 获取今日起止时间戳
+        long currentTimeMillis = System.currentTimeMillis();
+        long startStamp = DateUtil.getStartStamp(currentTimeMillis);
+        long endStamp = DateUtil.getEndStamp(currentTimeMillis);
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+        .eq(TOrder::getCreateUser,userId)
+                .lte(TOrder::getStartTime,endStamp)
+                .gte(TOrder::getEndTime,startStamp)
+                .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL)
+                .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 查询发布的所有记录
      *
      * @param userId
@@ -447,5 +467,30 @@ public class OrderDaoImpl implements OrderDao {
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
                 .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc((TOrder::getStatus))));
+    }
+
+    /**
+     * 查看一个人的所有服务订单
+     * @param userId
+     * @return
+     */
+    public List<TOrder> selectUserServ(Long userId){
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder() , new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getCreateUser , userId)
+                .eq(TOrder::getIsValid , AppConstant.IS_VALID_YES)
+                .eq(TOrder::getType , ProductEnum.TYPE_SERVICE));
+    }
+
+    /**
+     * 批量更新订单
+     * @param orderList
+     * @param orderIdList
+     * @return
+     */
+    public long updateOrderByList(List<TOrder> orderList, List<Long> orderIdList) {
+        long count = MybatisOperaterUtil.getInstance().update(orderList,
+                new MybatisSqlWhereBuild(TOrder.class)
+                        .in(TOrder::getId, orderIdList));
+        return count;
     }
 }

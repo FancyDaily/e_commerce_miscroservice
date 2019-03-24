@@ -227,4 +227,11 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	long selectCompleteUserSum(Long orderId);
+
+	/**
+	 * 获取选人列表
+	 * @param userId 当前用户ID
+	 * @return
+	 */
+	List<TOrderRelationship> pageChooseList(Long userId);
 }

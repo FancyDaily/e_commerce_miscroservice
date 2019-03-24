@@ -1,4 +1,3 @@
-/*
 package com.e_commerce.miscroservice.commons.util.colligate;
 
 import java.io.File;
@@ -15,9 +14,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;  
 import org.apache.poi.ss.usermodel.Sheet;  
 import org.apache.poi.ss.usermodel.Workbook;  
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.multipart.MultipartFile;
-*/
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;  
+import org.springframework.web.multipart.MultipartFile;  
 /**
  * 功能描述:excel读写工具类
  * 模块:
@@ -35,26 +33,20 @@ import org.springframework.web.multipart.MultipartFile;
  * 修改内容:
  * 1.
  * 2.
- *//*
-
+ */
 public class POIUtil {  
     private static Logger logger  = Logger.getLogger(POIUtil.class);  
     private final static String xls = "xls";  
     private final static String xlsx = "xlsx";  
       
     
-    */
-/**
+    /**
      * 根据路径读取excel文件
-     *//*
-
+     */
     public static List<String[]> readFromPath(String path) throws IOException {
     	InputStream inputStream = new FileInputStream(new File(path));
-    	*/
-/*//*
-/检查文件
-        checkFile(file);  *//*
-
+    	/*//检查文件  
+        checkFile(file);  */
         //获得Workbook工作薄对象  
         Workbook workbook = new XSSFWorkbook(inputStream);  
         //创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回  
@@ -96,13 +88,11 @@ public class POIUtil {
     }
     
     
-    */
-/**
+    /** 
      * 读入excel文件，解析后返回 
      * @param file 
      * @throws IOException  
-     *//*
-
+     */  
     public static List<String[]> readExcel(MultipartFile file) throws IOException{  
         //检查文件  
         checkFile(file);  
@@ -177,7 +167,7 @@ public class POIUtil {
                 workbook = new XSSFWorkbook(is);  
             }  
         } catch (IOException e) {  
-            logger.error(e.getMessage());
+            logger.info(e.getMessage());  
         }  
         return workbook;  
     }  
@@ -216,4 +206,4 @@ public class POIUtil {
         }  
         return cellValue;  
     }  
-}*/
+}

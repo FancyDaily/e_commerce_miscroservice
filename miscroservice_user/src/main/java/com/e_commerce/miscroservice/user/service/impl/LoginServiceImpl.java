@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -71,7 +72,6 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 	 * @param encryptedData
 	 * @param iv
 	 */
-	@SuppressWarnings("unchecked")
 	public String phoneAutho(String openid, String encryptedData, String iv) {
 
 		LOG.info("/n-------------------------开始获取用户手机号码----------------------------");
@@ -88,13 +88,13 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 		params.put(MOBILE, telephone);
 		// 区分测试和生产环境
 		String validCode = "666666";
-		if (StringUtil.equals(AppConstant.DEBUG_STATUS_FALSE, DEBUG)) { // 表示当前运行环境为生产 TODO
+		if (ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为生产
 			validCode = UUIDGenerator.messageCode();
 		}
 		params.put(AppConstant.VALID_CODE, validCode);
 
 		String bVal = "true";
-		if (StringUtil.equals(AppConstant.DEBUG_STATUS_FALSE, DEBUG)) { // 表示当前运行环境为生产
+		if (ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为生产
 			bVal = sendSmsService.execute(params);
 		}
 

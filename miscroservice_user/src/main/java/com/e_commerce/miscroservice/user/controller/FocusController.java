@@ -44,8 +44,7 @@ public class FocusController extends BaseController {
     @RequestMapping("submit")
     public Object submit(String token, Long userFollowId) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             focusService.submit(user, userFollowId);
             result.setSuccess(true);
@@ -144,8 +143,7 @@ public class FocusController extends BaseController {
     @RequestMapping("focusList")
     public Object focusList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, true);
             result.setData(queryResult);
@@ -245,8 +243,7 @@ public class FocusController extends BaseController {
     @RequestMapping("fanList")
     public Object fanList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = new TUser();
-        user.setId(68813260748488704l);
+        TUser user = (TUser) redisUtil.get(token);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, false);
             result.setData(queryResult);

@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -66,10 +68,55 @@ public class ProductDaoImpl implements ProductDao {
 	}
 
 	@Override
-	public List<TService> getListProductByUserId(Long userId, Integer pageNum, Integer pageSize, Integer type) {
+	public List<TService> getListProductByUserId(Long userId, Integer type) {
 		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
-				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()));
+				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;
+	}
+
+    @Override
+    public List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin, Long end) {
+        return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+		.eq(TService::getUserId,userId)
+		.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
+				.in(TService::getStatus,companyPublishedStatusArray)
+				.between(TService::getCreateTime,begin,end)
+				.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+	@Override
+	public List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray) {
+		return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getUserId,userId)
+				.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
+				.in(TService::getStatus,companyPublishedStatusArray)
+				.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
+	}
+
+
+    /**
+	 * 查看一个人的所有服务订单
+	 * @param userId
+	 * @return
+	 */
+	public List<TService> selectUserServ(Long userId){
+		return MybatisOperaterUtil.getInstance().finAll(new TService() , new MybatisSqlWhereBuild(TService.class)
+				.eq(TService::getCreateUser , userId)
+				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
+				.eq(TService::getType , ProductEnum.TYPE_SERVICE));
+	}
+
+	/**
+	 * 批量更新订单
+	 * @param serviceList
+	 * @param serviceIdList
+	 * @return
+	 */
+	public long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList) {
+		long count = MybatisOperaterUtil.getInstance().update(serviceList,
+				new MybatisSqlWhereBuild(TService.class)
+						.in(TService::getId, serviceIdList));
+		return count;
 	}
 }

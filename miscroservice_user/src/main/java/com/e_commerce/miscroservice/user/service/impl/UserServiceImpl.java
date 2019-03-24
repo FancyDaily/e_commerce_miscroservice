@@ -4,10 +4,12 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.AllTypeJsonEntity;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
@@ -24,7 +26,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -438,9 +439,36 @@ public class UserServiceImpl extends BaseService implements UserService {
         skill.setIsValid(AppConstant.IS_VALID_YES);
         userSkillDao.insert(skill);
 
-        //成长值
-		taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
-    }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				TUser finalUser = userDao.selectByPrimaryKey(user.getId());
+				//成长值
+				finalUser = taskComplete(finalUser, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+
+				//维护t_user表 skill字段
+				String formerSkills = finalUser.getSkill();
+				if(formerSkills==null) {	//一个技能都没有
+					formerSkills = "";
+				}
+
+				if(!formerSkills.equals("")) {
+					formerSkills += ",";
+				}
+
+				String latestSkills = new StringBuilder(formerSkills).append(skill.getName()).toString();
+				finalUser.setSkill(latestSkills);
+				//updater
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
+				//TODO 刷新缓存
+
+				super.afterCompletion(status);
+			}
+		});
+	}
 
     /**
      * 修改技能
@@ -460,6 +488,33 @@ public class UserServiceImpl extends BaseService implements UserService {
         skill.setUpdateUser(user.getId());
         skill.setUpdateUserName(user.getName());
         userSkillDao.update(skill);
+
+        //维护t_user表 skill字段
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+				StringBuilder builder = new StringBuilder();
+				for(TUserSkill skill:latestSkills) {
+					builder = builder.append(skill.getName()).append(",");
+				}
+				String skills = builder.toString();
+				if(skills.endsWith(",")) {
+					skills = skills.substring(0,skills.length()-1);
+				}
+				TUser finalUser = new TUser();
+				finalUser = userDao.selectByPrimaryKey(user.getId());
+				finalUser.setSkill(skills);
+				//updater
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
+				//TODO 刷新缓存
+
+				super.afterCompletion(status);
+			}
+		});
     }
 
     /**
@@ -539,14 +594,19 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public UserPageView page(TUser user, Long userId) {
+    	if(userId==null) {
+    		userId = user.getId();
+		}
+
         UserPageView result = new UserPageView();
         //基本信息
-        user = userDao.selectByPrimaryKey(user.getId());
-        DesensitizedUserView view = BeanUtil.copy(user, DesensitizedUserView.class);
+        TUser theUser = userDao.selectByPrimaryKey(userId);
+        DesensitizedUserView view = BeanUtil.copy(theUser, DesensitizedUserView.class);
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
+        user = userDao.selectByPrimaryKey(user.getId());
         //求助列表
         QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false,user);
 
@@ -576,6 +636,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
+		me = userDao.selectByPrimaryKey(me.getId());
         return getOnesAvailableItems(userId, pageNum, pageSize, isService,me);
     }
 
@@ -657,9 +718,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
         if(userId!=me.getId()) {    //查看别人的主页
-            TUser beenViewer = userDao.selectByPrimaryKey(me.getId());
             startPage = PageHelper.startPage(pageNum, pageSize);
-            orders = orderService.selectOdersByUserId(userId, isService, beenViewer);
+            orders = orderService.selectOdersByUserId(userId, isService, me);
         }
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
@@ -694,22 +754,53 @@ public class UserServiceImpl extends BaseService implements UserService {
         userFreezeDao.insert(userFreeze);
     }
 
-    /**
-     * 删除技能
-     *
-     * @param id
-     */
+	/**
+	 * 删除技能
+	 * @param user
+	 * @param id
+	 */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
-    public void skillDelete(Long id) {
+    public void skillDelete(TUser user, Long id) {
         if (id == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能id不能为空");
         }
         userSkillDao.delete(id);
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+				StringBuilder builder = new StringBuilder();
+				for(TUserSkill skill:latestSkills) {
+					builder = builder.append(skill.getName()).append(",");
+				}
+				String skills = builder.toString();
+				if(skills.endsWith(",")) {
+					skills = skills.substring(0,skills.length()-1);
+				}
+
+				//同步用户表中的技能
+				TUser finalUser = null;
+				finalUser = userDao.selectByPrimaryKey(user.getId());	//DELMARK
+				finalUser.setSkill(skills);
+				//updater
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+
+				userDao.updateByPrimaryKey(finalUser);
+				//TODO 刷新缓存
+				super.afterCompletion(status);
+			}
+		});
     }
 
     @Override
     public DesensitizedUserView info(TUser user, Long userId) {
+		if(userId==null) {
+			userId = user.getId();
+		}
         TUser findUser = userDao.info(userId);
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
@@ -767,7 +858,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (telephone != null) {
             // 若对手机号进行修改
             if (!idHolder.getUserTel().equals(telephone)) {
-                if (getUserByTelephone(telephone).isEmpty()) {
+                if (!getUserByTelephone(telephone).isEmpty()) {
                     throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已存在！");
                 }
 //				return flushRedisUserNewToken(token, user);
@@ -786,10 +877,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 更新数据库
         userDao.updateByPrimaryKey(user);
 
-        // TODO 如果为修改昵称 -> 同步修改服务表里的创建者昵称
+        // 如果为修改昵称 -> 同步修改服务表里的创建者昵称
         String name = user.getName();
-        if (name != null) {
-            //TODO 调用订单模块的方法 同步修改订单相关昵称
+        if (name != null && !name.equals(idHolder.getName())) {	//进行了修改昵称
+            // 调用订单模块的方法 同步修改订单相关昵称
 			orderService.synOrderCreateUserName(user.getId(),user.getName());
         }
 
@@ -1473,6 +1564,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 			userTask.setUpdateUser(id);
 			userTask.setUpdateUserName(user.getName());
 			userTask.setIsValid(AppConstant.IS_VALID_YES);
+			userTask.setId(null);
 			userTaskDao.insert(userTask);
 		}
 
@@ -1670,6 +1762,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param bonusPackageId
      */
     @Override
+	@Transactional(rollbackFor = Throwable.class)
     public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
         //修改红包记录
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
@@ -1696,16 +1789,26 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
         userTimeRecordDao.insert(userTimeRecord);
 
-        //返还红包金额
-        user = userDao.selectByPrimaryKey(user.getId());
-        user.setSurplusTime(user.getSurplusTime() + bonusPackage.getTime());
-        user.setCreateTime(currentTimeMillis);
-        user.setCreateUser(user.getId());
-        user.setCreateUserName(user.getName());
-        user.setUpdateTime(currentTimeMillis);
-        user.setUpdateUser(user.getId());
-        user.setUpdateUserName(user.getName());
-        userDao.updateByPrimaryKey(user);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				//返还红包金额
+				TUser finalUser = null;
+				finalUser = userDao.selectByPrimaryKey(user.getId());
+				finalUser.setSurplusTime(finalUser.getSurplusTime() + bonusPackage.getTime());
+				finalUser.setCreateTime(currentTimeMillis);
+				finalUser.setCreateUser(finalUser.getId());
+				finalUser.setCreateUserName(finalUser.getName());
+				finalUser.setUpdateTime(currentTimeMillis);
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
+
+				super.afterCompletion(status);
+			}
+		});
+
+
     }
 
     /**
@@ -1764,11 +1867,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 */
 
-//        String debug = "debug"; //TODO 后续根据配置文件读取
+//        String debug = "debug"; //根据配置文件读取
 
         // 生成6位随机数
         String validCode = "666666";
-        if (StringUtil.equals(AppConstant.DEBUG_STATUS_FALSE, debug)) { // 表示当前运行环境为生产
+        if (ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为生产
             validCode = UUIDGenerator.messageCode();
         }
 
@@ -1777,7 +1880,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         params.put(AppConstant.VALID_CODE, validCode);
 
         String resMsg;
-        if (StringUtil.equals(AppConstant.DEBUG_STATUS_TRUE, debug)) { // 表示当前运行环境为调试
+        if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
             resMsg = "true";
         } else {
             resMsg = smsService.execute(params);
@@ -1816,7 +1919,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 		params.put("content", content);
 
 		String resMsg;
-		if (StringUtil.equals(AppConstant.DEBUG_STATUS_TRUE, debug)) { // 表示当前运行环境为调试
+		if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
 			resMsg = "true";
 		} else {
 			resMsg = smsService.sendServMsg(params);
@@ -2131,6 +2234,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param companyId
      */
     @Override
+	@Transactional(rollbackFor = Throwable.class)
     public void joinCompany(TUser user, Long companyId) {
         // 查询组织是否存在
         TCompany company = companyDao.selectByPrimaryKey(companyId);
@@ -2205,7 +2309,188 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public CompanyPaymentView queryPayment(TUser user, String year, String month, String type) {
-        return null;    //TODO 后续补充
+		// 与数据库同步
+		user = userDao.selectByPrimaryKey(user.getId());
+
+		Long userId = user.getId();
+		Long companyId = getOwnCompanyId(userId);
+		// 判空
+		Map<String, Object> monthBetween = new HashMap<>();
+		Long monthStartStamp = System.currentTimeMillis();
+		// 处理年月信息
+		if (year != null && month != null) {
+			monthStartStamp = Long.valueOf(DateUtil.dateToStamp(year + "-" + month + "-" + "1"));
+		}
+		monthBetween = DateUtil.getMonthBetween(monthStartStamp);
+		Long beginStamp = Long.valueOf((String) monthBetween.get("begin"));
+		Long endStamp = Long.valueOf((String) monthBetween.get("end"));
+
+		List<SinglePaymentView> freezeView = new ArrayList<>();
+		if ("3".equals(type)) { // 冻结
+			List<TUserFreeze> userFreezes = userFreezeDao.selectByUserIdBetween(userId,beginStamp,endStamp);
+			if (!userFreezes.isEmpty()) {
+				for (TUserFreeze userFreeze : userFreezes) {
+					SinglePaymentView view = BeanUtil.copy(userFreeze, SinglePaymentView.class);
+					view.setIdString(String.valueOf(userFreeze.getId()));
+					view.setServIdString(String.valueOf(userFreeze.getOrderId())); // 订单id
+					view.setServiceName(userFreeze.getServiceName()); // 名称
+					view.setType("求助");// TODO 冻结都是求助类型
+					view.setTime(DateUtil.timeStamp2Seconds(userFreeze.getCreateTime())); // 发生日期
+					view.setTotalTime(Integer.valueOf(String.valueOf(userFreeze.getFreezeTime()))); // 冻结时间
+					view.setPayOrGainString(timeChange(userFreeze.getFreezeTime())); // TODO 格式化的冻结时间(不带正负号)
+					freezeView.add(view);
+				}
+			}
+		}
+
+		// 查询详细
+		List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectTimeRecordByUserIdBetweenASC(userId,beginStamp,endStamp);
+		// 收入列表
+		List<TUserTimeRecord> inList = new ArrayList<>();
+		// 支出列表
+		List<TUserTimeRecord> outList = new ArrayList<>();
+		// 最终结果
+		CompanyPaymentView view = new CompanyPaymentView();
+		// target_id为键
+//		Map<Long, Map<String,Object>> joinerMap = new HashMap<Long, Map<String,Object>>();
+//		Map<String, Object> map = new HashMap<String,Object>();
+		// 键值为target_id
+		Map<Long, List<Long>> joinerMap = new HashMap<>();
+		Map<Long, List<String>> joinerNameMap = new HashMap<>();
+		Map<Long, TOrder> receiptMap = new HashMap<>();
+		Map<Long, Integer> totalMap = new HashMap<>();
+
+		List<Long> targetIdList = new ArrayList<>(); // 包含已经添加进最终结果的id
+
+		int monthly_in = 0;
+		int monthly_out = 0;
+		// 遍历赋值
+		for (TUserTimeRecord userTimeRecord : userTimeRecords) {
+			Long targetId = userTimeRecord.getTargetId();
+			int count = 0; // 对同一分组统计金额
+			if (totalMap.containsKey(targetId)) {
+				count = totalMap.get(targetId);
+			}
+			Long joinerId = null;
+			// 收入
+			if (userId.equals(userTimeRecord.getUserId())) {
+				joinerId = userTimeRecord.getFromUserId();
+			}
+			// 支出
+			if (userId.equals(userTimeRecord.getFromUserId())) {
+				joinerId = userTimeRecord.getUserId();
+			}
+			List<Long> joinerIds = new ArrayList<>();
+			List<String> joinerNameList = new ArrayList<>();
+			// 判断map
+			if (joinerMap.containsKey(targetId)) { // 获取原集合(添加元素)
+				joinerIds = joinerMap.get(targetId);
+				joinerNameList = joinerNameMap.get(targetId);
+			}
+			joinerIds.add(joinerId);
+			String name = userDao.selectByPrimaryKey(joinerId).getName();
+			joinerNameList.add(name);
+			// 根据targetId找到订单信息
+			TOrder order = orderService.selectOrderById(targetId);
+			// 加入或刷新map
+			joinerNameMap.put(targetId, joinerNameList);
+			joinerMap.put(targetId, joinerIds);
+			receiptMap.put(targetId, order);
+
+			// 收入
+			if (userId.equals(userTimeRecord.getUserId())) {
+				monthly_in += userTimeRecord.getTime();
+				inList.add(userTimeRecord);
+			}
+			// 支出
+			if (userId.equals(userTimeRecord.getFromUserId())) {
+				monthly_out += userTimeRecord.getTime();
+				outList.add(userTimeRecord);
+			}
+			count += userTimeRecord.getTime();
+			totalMap.put(targetId, count);
+
+		}
+		// 处理与合并
+		List<SinglePaymentView> finalInlist = new ArrayList<>();
+		List<SinglePaymentView> finalOutList = new ArrayList<>();
+		for (int i = inList.size() - 1; i >= 0; i--) {
+			TUserTimeRecord in = inList.get(i);
+			Long targetId = in.getTargetId();
+			// 判断targetId是否在列
+			if (!targetIdList.contains(targetId)) {
+				TOrder order = receiptMap.get(targetId);
+				SinglePaymentView thView = BeanUtil.copy(in, SinglePaymentView.class);
+				thView.setIdString(String.valueOf(in.getId())); // 没什么用的流水id
+				thView.setServiceName(order.getServiceName());// 服务名字
+				thView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
+				thView.setTime(DateUtil.timeStamp2Seconds(in.getCreateTime())); // 最后产生金额的时间（同一服务当月）
+				thView.setJoinMembers(joinerNameMap.get(targetId));
+				thView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
+				thView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
+				thView.setPayOrGainString("+" + timeChange(Long.valueOf(totalMap.get(targetId))));
+				finalInlist.add(thView);
+				targetIdList.add(targetId);
+			}
+		}
+		for (int i = outList.size() - 1; i >= 0; i--) {
+			TUserTimeRecord out = outList.get(i);
+			Long targetId = out.getTargetId();
+			// 判断targetId是否在列
+			if (!targetIdList.contains(targetId)) {
+				TOrder order = receiptMap.get(targetId);
+				SinglePaymentView thisView = BeanUtil.copy(out, SinglePaymentView.class);
+				thisView.setIdString(String.valueOf(out.getId())); // 没什么用的流水id
+				thisView.setServiceName(order.getServiceName());// 服务名字
+				thisView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
+				thisView.setTime(DateUtil.timeStamp2Seconds(out.getCreateTime())); // 最后产生金额的时间（同一服务当月）
+				thisView.setJoinMembers(joinerNameMap.get(targetId));
+				thisView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
+				thisView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
+				thisView.setPayOrGainString("-" + timeChange(Long.valueOf(totalMap.get(targetId))));
+				finalOutList.add(thisView);
+				targetIdList.add(targetId);
+			}
+		}
+		// 合并
+		List<SinglePaymentView> totalList = new ArrayList<>();
+		for (SinglePaymentView in : finalInlist) {
+			totalList.add(in);
+		}
+		for (SinglePaymentView out : finalOutList) {
+			totalList.add(out);
+		}
+
+		// 装载最终结果
+		view.setAvailable_time((int) (user.getSurplusTime() - user.getFreezeTime()));
+		view.setMonthly_in(monthly_in);
+		view.setMonthly_out(monthly_out);
+		view.setFreeze_time(Integer.valueOf(String.valueOf(user.getFreezeTime())));
+
+		List<SinglePaymentView> finalList = new ArrayList<>();
+
+		// 判断是全部、in还是out
+		if ("0".equals(type)) {
+			finalList = totalList;
+		} else if ("1".equals(type)) {
+			finalList = finalInlist;
+		} else if ("2".equals(type)) {
+			finalList = finalOutList;
+		} else if ("3".equals(type)) {
+			finalList = freezeView;
+		}
+		// 排序
+		Collections.sort(finalList, new Comparator<SinglePaymentView>() {
+
+			@Override
+			public int compare(SinglePaymentView o1, SinglePaymentView o2) {
+				return (int) (o2.getCreateTime() - o1.getCreateTime());
+			}
+		});
+
+		view.setSinglePaymentViews(finalList);
+
+		return view;
     }
 
     /**
@@ -2280,8 +2565,41 @@ public class UserServiceImpl extends BaseService implements UserService {
 	 */
     @Override
     public Map<String, Object> loginGroupByPwd(String telephone, String password) {
-        return null;
-    }   //TODO 后续补充
+		// 对前端给的password作处理(AES)
+		password = AESCommonUtil.encript(password);
+		TUser user = null;
+
+		List<TUser> users = userDao.selectByUserTelByPasswordByIsCompanyAccYes(telephone,password,AppConstant.IS_COMPANY_ACCOUNT_YES);
+		if (!users.isEmpty()) {
+			user = users.get(0);
+		}
+		if (user == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户名或密码错误,或非组织账号");
+		}
+		// 登录
+		Long userId = user.getId();
+
+		// 使得之前的token失效
+		String redisKey = "str" + userId;
+		if (redisUtil.hasKey(redisKey)) {
+			String lastToken = (String) redisUtil.get(redisKey);
+			redisUtil.del(lastToken);
+		}
+
+		String token = genToken(user);
+		redisUtil.set(token, user, getUserTokenInterval());
+		redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
+
+		redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put(AppConstant.USER_TOKEN, token);
+		// String化
+		DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
+		userView.setIdStr(String.valueOf(userView.getId()));
+		resultMap.put(AppConstant.USER, userView);
+
+		return resultMap;
+    }
 
     /**
      * 手机号验证码登录(个人账号)
@@ -2359,7 +2677,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 头像、性别、昵称等从微信获取的字段
         if (StringUtil.isEmpty(user.getUserHeadPortraitPath())) {
-            user.setUserHeadPortraitPath(AppConstant.DEFAULT_HEADURL); // TODO
+            user.setUserHeadPortraitPath(AppConstant.DEFAULT_HEADURL);
         }
 
         if (!(user.getSex() != null && user.getSex() > -1)) {
@@ -2526,7 +2844,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             int inteval = dailyMaxIn - countToday;
             int countsNum = counts * growthValueEnum.getPrice();
             int resultCounts = inteval / growthValueEnum.getPrice();
-            if (inteval > 0 && countsNum - inteval > 0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
+            if (inteval > 0 && countsNum - inteval >= 0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
                 flag = true;
             }
             counts = countsNum < inteval ? counts : resultCounts;
@@ -2576,6 +2894,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
         userTask.setValue(String.valueOf(value));
+        userTask.setTargetId(String.valueOf(taskCode));
         //creater & updater
         userTask.setCreateTime(currentTimeMillis);
         userTask.setCreateUser(user.getId());
@@ -2770,9 +3089,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             user = userList.get(0);
-            if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            /*if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
                 throw new MessageException("当前用户被封禁!禁止登录！");
-            }
+            }*/
         }
         return user;
     }
@@ -3154,7 +3473,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         // 判长 技能名
-        if (name.length() > 8) {
+        if (name.length() > 18) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名过长！"); // TODO
         }
 
@@ -3196,7 +3515,132 @@ public class UserServiceImpl extends BaseService implements UserService {
 
 	@Override
 	public boolean isCareUser(Long userId, Long userFollowId) {
-		return userFollowDao.countUserFollow(userId, userFollowId).equals(1) ? true : false;
+		return userFollowDao.countUserFollow(userId, userFollowId).equals(1L) ? true : false;
+	}
+
+	/**
+	 * 组织每日时间流水查询(今日需求、服务情况)
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public CompanyDailyPaymentView queryPaymentToDay(TUser user) {
+		user = userDao.selectByPrimaryKey(user.getId());
+
+		Long userId = user.getId();
+		Long companyId = getOwnCompanyId(userId);
+		// 获取今日起止时间戳
+		long currentTimeMillis = System.currentTimeMillis();
+		long startStamp = DateUtil.getStartStamp(currentTimeMillis);
+		long endStamp = DateUtil.getEndStamp(currentTimeMillis);
+
+		List<TOrder> orders = orderService.selectDailyOrders(userId);
+
+		//构建订单ids
+		List<Long> orderIds = new ArrayList<>();
+
+		//初始化 orderId-order map && serviceId-paymentView map
+		Map<Long,TOrder> orderMap = new HashMap<>();
+		Map<Long,PaymentView> paymentViewMap = new HashMap<>();
+
+		//装载orderId-order map
+		for(TOrder order:orders) {
+			//装载订单ids
+			orderIds.add(order.getId());
+
+			//装载订单
+			orderMap.put(order.getId(),order);
+			Long serviceId = order.getServiceId();
+			PaymentView paymentView = paymentViewMap.get(serviceId);
+			if(paymentView==null) {
+				paymentView = new PaymentView();
+			}
+
+			//装载数据
+			if(paymentView.getIdString()!=null) {
+				paymentView.setIdString(String.valueOf(order.getServiceId()));
+				paymentView.setServiceType(order.getType());
+				paymentView.setServiceName(order.getServiceName());
+				paymentView.setCollectTime(order.getCollectTime());
+				paymentView.setServiceTypeName(getServiceValue(order.getServiceTypeId()));
+			}
+
+			//装载参与人数（确认人选）
+			Integer confirmNum = paymentView.getConfirmNum();
+			if(confirmNum==null) {
+				confirmNum = 0;
+			}
+			confirmNum += order.getConfirmNum();
+			paymentView.setConfirmNum(confirmNum);
+			paymentViewMap.put(serviceId,paymentView);
+		}
+
+		List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);
+
+		//初始化 serviceId-payOrGainNum map
+		Map<Long,Long> payOrGainNumMap = new HashMap<>();
+		for(TUserTimeRecord userTimeRecord:userTimeRecords) {
+			String orderId = userTimeRecord.getOrderId();	//订单id
+			TOrder order = orderMap.get(orderId);
+			Long serviceId = order.getServiceId();
+			Long payOrGainNum = payOrGainNumMap.get(serviceId);
+			if(payOrGainNum==null) {
+				payOrGainNum = 0l;
+			}
+			payOrGainNum += userTimeRecord.getTime();
+			payOrGainNumMap.put(serviceId,payOrGainNum);
+		}
+
+		//初始化结果集
+		List<PaymentView> serviceViews = new ArrayList<>();
+		List<PaymentView> helpViews = new ArrayList<>();
+
+		//装载每项商品赚取或支出总时间 并 划分服务求助
+		for(Long serviceId:paymentViewMap.keySet()) {
+			//装载每项商品赚取或支出总时间
+			Long payOrGainNum = payOrGainNumMap.get(serviceId);
+			PaymentView paymentView = paymentViewMap.get(serviceId);
+			paymentView.setTotalTime(payOrGainNum);	//总收入或者支出时间
+			//区分服务还是求助
+			if(ProductEnum.TYPE_SEEK_HELP.getValue() == paymentView.getServiceType().intValue()) {	//求助
+				helpViews.add(paymentView);
+				continue;
+			}
+			serviceViews.add(paymentView);
+		}
+
+		//装载结果
+		CompanyDailyPaymentView resultView = new CompanyDailyPaymentView();
+		resultView.setHelpPaymentViews(helpViews);
+		resultView.setServPaymentViews(serviceViews);
+
+		return resultView;
+	}
+
+	/**
+	 * 获取服务类型名
+	 * @param serviceTypeId 服务类型id
+	 * @return
+	 */
+	private String getServiceValue(Long serviceTypeId) {
+		String url = "";
+		ObjectMapper objectMapper = new ObjectMapper();
+		String value = messageService.getValue(String.valueOf(serviceTypeId));
+		//解析json
+		try {
+			List<AllTypeJsonEntity> listType = objectMapper.readValue(value,new TypeReference<List<AllTypeJsonEntity>>() { });
+			for (int i = 0; i < listType.size(); i++) {
+				AllTypeJsonEntity jsonEntity = listType.get(i);
+				if (Long.parseLong(jsonEntity.getId()) == serviceTypeId.longValue()) {
+					return jsonEntity.getTitle();
+				}
+			}
+			return "";
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("解析字典表allType关键字的json出错，" + e.getMessage());
+			return "";
+		}
 	}
 
 }

@@ -55,7 +55,26 @@
         ELSE
         0
         END ASC
+    </select>
 
+    <select id="getChooseList" parameterType="Long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        t_order_relationship
+        WHERE
+        from_user_id = #{userId}
+        AND
+        receipt_user_id is NULL
+        ORDER BY
+        CASE
+        WHEN `STATUS` = 3 THEN
+        1
+        WHEN end_time &lt; (select unix_timestamp() * 1000)  THEN
+        1
+        ELSE
+        0
+        END ASC
     </select>
 </mapper>
 

@@ -102,6 +102,68 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
+     * 根据手机号、密码、账号性质查找用户记录
+     * @param telephone
+     * @param password
+     * @param isCompanyAccount
+     * @return
+     */
+    @Override
+    public List<TUser> selectByUserTelByPasswordByIsCompanyAccYes(String telephone, String password, Integer isCompanyAccount) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserTel,telephone)
+        .eq(TUser::getPassword,password)
+        .eq(TUser::getIsCompanyAccount,isCompanyAccount)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUser> selectByTelephoneInInIds(String param, List<Long> userIds) {
+        MybatisSqlWhereBuild build = new MybatisSqlWhereBuild(TUser.class)
+                .in(TUser::getId, userIds)
+                .eq(TUser::getIsValid, AppConstant.IS_VALID_YES)
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime));
+        if(param!=null) {
+            build.eq(TUser::getUserTel,param);
+        }
+
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
+    }
+
+    @Override
+    public List<TUser> selectByNameAndTelephoneLikeSkillInIds(String name, String telephone, String skill, List<Long> idList) {
+        MybatisSqlWhereBuild build = new MybatisSqlWhereBuild(TUser.class)
+                .in(TUser::getId,idList)
+                .eq(TUser::getIsValid, AppConstant.IS_VALID_YES);
+
+        if(name!=null) {
+            build.eq(TUser::getName, name);
+        }
+
+        if(telephone!=null) {
+            build.eq(TUser::getUserTel, telephone);
+        }
+
+        if(skill!=null && skill!="") {
+            build.like(TUser::getSkill, "%" + skill + "%");
+        }
+
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
+    }
+
+    /**
+     * 根据ids查找用户
+     * @param split 用户ids
+     * @return
+     */
+    @Override
+    public List<TUser> selectInUserIds(String[] split) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .in(TUser::getId,split)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 获取该账号的分身
      *
      * @param user

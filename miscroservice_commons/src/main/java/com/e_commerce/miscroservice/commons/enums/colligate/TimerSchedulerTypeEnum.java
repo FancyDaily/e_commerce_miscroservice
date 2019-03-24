@@ -18,6 +18,7 @@ public enum TimerSchedulerTypeEnum {
     WITHDRAW_DEPOSIT_BANK_DELAY_TASK(-30000, "withdraw_deposit_bank_delay_task"),
     ORDER_DELAY_TASK(-20000, "orders6_delay_task"),
     //    WITHDRAW_DEPOSIT_BANK_DELAY_TASK(-5000, "withdraw_deposit_bank_delay_task"),
+    ORDER_OVERTIME_END(6, "order_overtime_end"),
     WITHDRAW_DEPOSIT_BANK(5, "withdraw_deposit_bank");
     //    ORDER_DELAY_TASK(-20000, "orders6_delay_task");
     private int key;

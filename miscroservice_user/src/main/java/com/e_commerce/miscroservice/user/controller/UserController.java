@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -646,11 +647,12 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("skill/delete")
+    @Transactional(rollbackFor = Throwable.class)
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-            userService.skillDelete(id);
+            userService.skillDelete(user,id);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("删除技能异常: " + e.getMessage());
@@ -2299,7 +2301,6 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-//            Set<Integer> taskIds = userService.taskList(user);
             TaskHallView taskHallView = userService.taskHall(user);
             result.setData(taskHallView);
             result.setSuccess(true);
@@ -2747,8 +2748,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 组织时间轨迹查询
-     *
+     * 组织时间轨迹
      * @param token 登录凭证
      * @param year  年份
      * @param month 月份
@@ -2764,25 +2764,46 @@ public class UserController extends BaseController {
             result.setData(view);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.error("组织时间轨迹查询" + e.getMessage());
             result.setSuccess(false);
-            result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error(errInfo(e));
+            logger.error("组织时间轨迹查询" + errInfo(e));
             result.setSuccess(false);
-            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
-            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 每日时间流水查询
+     * @param token
+     * @return
+     */
+    @PostMapping("queryPaymentToDay")
+    public Object queryPaymentToDay(String token) {
+        AjaxResult result = new AjaxResult();
+        try {
+            TUser user = (TUser) redisUtil.get(token);
+            CompanyDailyPaymentView dailyPaymentView = userService.queryPaymentToDay(user);
+            result.setSuccess(true);
+            result.setData(dailyPaymentView);
+        } catch (MessageException e) {
+            logger.error("每日时间流水查询" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error("每日时间流水查询" + errInfo(e));
+            result.setSuccess(false);
         }
         return result;
     }
 
     @PostMapping("test")
-    public void test(String token) {
+    public void test(String token,Integer counts) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
         try {
-            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE, 6);
+            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, counts);
         } catch (Exception e) {
             e.printStackTrace();
         }
