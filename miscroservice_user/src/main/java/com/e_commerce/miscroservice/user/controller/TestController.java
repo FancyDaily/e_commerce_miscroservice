@@ -9,7 +9,6 @@ import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.HashMap;
@@ -32,8 +31,8 @@ public class TestController {
 
         TimerScheduler timerScheduler = new TimerScheduler();
         timerScheduler.setName("111" + UUID.randomUUID().toString());
-        timerScheduler.setCron("*/20 * * * * *  ?");
-        timerScheduler.setType(TimerSchedulerTypeEnum.RED_PACKET_ENDED.toNum());
+        timerScheduler.setCron("*/20 * * * * ? *");
+        timerScheduler.setType(TimerSchedulerTypeEnum.TEST.toNum());
 
         Map<String, String> map = new HashMap<>();
         map.put("aaa", "11");
