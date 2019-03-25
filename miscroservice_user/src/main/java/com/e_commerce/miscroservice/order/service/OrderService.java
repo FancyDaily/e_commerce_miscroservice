@@ -121,4 +121,17 @@ public interface OrderService {
 	 * @return
 	 */
 	QueryResult<PageEnrollAndChooseReturnView> mineChooseList(Integer pageNum, Integer pageSize, TUser user);
+
+	/**
+	 * 下架订单
+	 * @param orderId 订单ID
+	 */
+	void lowerFrameOrder(Long orderId);
+
+	/**
+	 * 获取订单通过订单ID
+	 * @param orderId 订单ID
+	 * @return
+	 */
+	TOrder getOrderById(Long orderId);
 }

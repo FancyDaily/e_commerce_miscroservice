@@ -429,6 +429,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType())
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())
                 .eq(TOrderRelationship::getOrderId , orderId)
                 .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
     }

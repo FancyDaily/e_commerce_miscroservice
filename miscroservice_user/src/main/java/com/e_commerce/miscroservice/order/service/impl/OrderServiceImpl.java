@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -7,6 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
@@ -70,6 +73,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 			 	—— 新插入的时间在前，数据库那条就不可见，新插入的就可见
 		 *		—— 如果没有的话，新插入的就是可见的
 		 */
+
 		TOrder visiableOrder = orderDao.selectVisiableOrder(order.getServiceId());
 		if (visiableOrder != null) { //之前有可见的订单
 			if (visiableOrder.getEndTime() < order.getEndTime()) {// 数据库那条在前,当前插入的为不可见
@@ -711,21 +715,18 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 //				productService.update(service);
 //			}
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
+				//判断商品的状态是否正确
+				if (!Objects.equals(service.getStatus(), ProductEnum.STATUS_UPPER_FRAME.getValue())) {
+					logger.error("商品存在错误的状态，无法继续派生订单");
+					throw new MessageException("商品状态错误");
+				}
 				//可以成功创建订单
 				saveOrder(order);
-				// TODO 调用订单结束定时任务  订单下架后把可报名日期移除掉
-				TimerScheduler scheduler = new TimerScheduler();
-//				scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
-				scheduler.setName("lowerOrder");
-//				scheduler
-				scheduler.setCron("");
-//				scheduler.setParams();
-//				scheduler.setParams();
-//				MqListenerConvert
-//				mqTemplate.sendMs g(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), TimerSchedulerTypeEnum.);
+				//发送MQ消息，将定时下架订单任务发送到调度中心
+				sendMqBySaveOrder(service, order);
 				return order;
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue())) {
-				// 订单已存在或者已经，不需要再派生
+				// 订单已存在，不需要再派生
 				logger.info("商品ID为{}，时间为 {} - {} 的订单已经存在，无法继续派生", service.getId(), order.getStartTime(), order.getEndTime());
 				TOrder oldOrder = orderDao.findProductOrder(service.getId(), order.getStartTime(), order.getEndTime());
 				return oldOrder;
@@ -745,7 +746,24 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			saveOrder(order);
 			return order;
 		}
-		return order;
+		return null;
+	}
+
+	/**
+	 * 向MQ发送订单结束的消息
+	 * @param service 商品
+	 * @param order 订单
+	 */
+	private void sendMqBySaveOrder(TService service, TOrder order) {
+		TimerScheduler scheduler = new TimerScheduler();
+		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
+		scheduler.setName("lower_order");
+		scheduler.setCron(DateUtil.genCron(order.getEndTime()));
+		Map<String, String> map = new HashMap<>();
+		map.put("serviceId", String.valueOf(service.getId()));
+		map.put("orderId", String.valueOf(order.getId()));
+		scheduler.setParams(JSON.toJSONString(map));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
 	}
 
 	/**
@@ -753,6 +771,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param orderId 订单ID
 	 */
+	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void lowerFrameOrder(Long orderId) {
 		/*
@@ -780,7 +799,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			// TODO 发送消息
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 		}
-		// TODO 调用定时 派生一下账订单
+	}
+
+	@Override
+	public TOrder getOrderById(Long orderId) {
+		return orderDao.selectByPrimaryKey(orderId);
 	}
 
 	/**
@@ -840,21 +863,20 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 * @return
 	 */
 	private Integer generateOrderTime(TService service, TOrder order, int type, String date) {
-		int[] weekDayNumberArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
 		if (OrderEnum.PRODUCE_TYPE_SUBMIT.getValue() == type) {
 			//发布时候生成的订单
-			return produceOrderByPublish(service, order, weekDayNumberArray);
+			return produceOrderByPublish(service, order);
 		} else if (OrderEnum.PRODUCE_TYPE_UPPER.getValue() == type) {
 			//上架时候派生订单  感觉可以调用发布生成订单的逻辑
-			return produceOrderByUpper(service, order, weekDayNumberArray);
+			return produceOrderByUpper(service, order);
 		} else if (OrderEnum.PRODUCE_TYPE_AUTO.getValue() == type) {
 			//调用发布派生的逻辑
-			return produceOrderByPublish(service, order, weekDayNumberArray);
+			return produceOrderByPublish(service, order);
 		} else if (OrderEnum.PRODUCE_TYPE_ENROLL.getValue() == type) {
 			return produceOrderByEnroll(service, date, order);
 		} else {
 			//报名人满后派生
-			return produceOrderByEnough(weekDayNumberArray, service, date, order);
+			return produceOrderByEnough(service, date, order);
 		}
 //		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
 	}
@@ -900,13 +922,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	/**
 	 * 人选满了之后派生订单
 	 *
-	 * @param weekDayNumberArray 商品周期的星期数组
 	 * @param service            要派生订单的商品
 	 * @param date               选满人的订单日期
 	 * @param order              要派生的订单
 	 * @return code码
 	 */
-	private Integer produceOrderByEnough(int[] weekDayNumberArray, TService service, String date, TOrder order) {
+	private Integer produceOrderByEnough(TService service, String date, TOrder order) {
 		/*
 		 * 传递一个serviceId 和 一个结束的日期
 		 * 根据这个商品的周  获取下一张订单的周
@@ -915,6 +936,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 数据库不存在的话，就进行派生。如果超过商品结束时间，不做下架操作，不提示无法生成，不创建下一张订单
 		 */
 //		date = "20190312";
+		int[] weekDayNumberArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
 		String startDateTime = date + service.getStartTimeS();
 		String endDateTime = date + service.getEndTimeS();
 		//报名人满的订单所在的周
@@ -948,10 +970,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service
 	 * @param order
-	 * @param weekDayNumberArray
 	 * @return
 	 */
-	private Integer produceOrderByUpper(TService service, TOrder order, int[] weekDayNumberArray) {
+	private Integer produceOrderByUpper(TService service, TOrder order) {
 		/*
 		 * 重新上架，先找上一条已完成的订单，
 		 * {
@@ -971,7 +992,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * }
 		 *
 		 */
-		return produceOrderByPublish(service, order, weekDayNumberArray);
+		return produceOrderByPublish(service, order);
 		// 重新上架，找最后一条结束的，如果没有，停止派生
 //		TOrder latestOrder = orderDao.findOneLatestOrderByServiceId(service.getId());
 //		if (latestOrder == null) { // 如果为空，则不需要派生，说明有一张订单还在执行
@@ -1019,10 +1040,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 *
 	 * @param service            要派生订单的商品
 	 * @param order              派生的订单
-	 * @param weekDayNumberArray 商品重复周期的星期数组
 	 * @return
 	 */
-	private Integer produceOrderByPublish(TService service, TOrder order, int[] weekDayNumberArray) {
+	private Integer produceOrderByPublish(TService service, TOrder order) {
 		/*
 		 * 获取商品的开始的时间  然后获取商品的开始时间是周几
 		 * 然后获取离这个周最近的一个可以发布的周，可能会是当天
@@ -1031,6 +1051,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		 * 如果超过商品的结束时间，则对商品进行下架处理
 		 */
 		//获取商品开始时间的字符串形式 201803051434
+		int[] weekDayNumberArray = DateUtil.getWeekDayArray(service.getDateWeekNumber());
 		String serviceStartTimeString = service.getStartDateS() + service.getStartTimeS();
 		String serviceEndTimeString = service.getStartDateS() + service.getEndTimeS();
 		// 商品开始的时间
