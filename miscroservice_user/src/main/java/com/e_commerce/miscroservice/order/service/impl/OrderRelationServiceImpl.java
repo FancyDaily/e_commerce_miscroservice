@@ -793,7 +793,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @Param [orderId, userIdList, paymentList, nowUser]
      **/
     @Transactional(rollbackFor = Throwable.class)
-    public List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId) {
+    public List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId , int type) {
         TUser nowUser = userCommonController.getUserById(nowUserId);
         List<String> msgList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
@@ -918,10 +918,22 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 }
             }
             //服务记录内容
-            if (seekHelpDoneNum > 3) {
-                content = nowUser.getName() + " 支付了" + payUserName + seekHelpDoneNum + "人" + collectType + timeChange(paymentSum);
-            } else {
-                content = nowUser.getName() + " 支付了" + payUserName + collectType + timeChange(paymentSum);
+            if (type == 1){
+                //如果类型为个人手动支付
+                if (seekHelpDoneNum > 3) {
+                    content = nowUser.getName() + " 支付了" + payUserName + seekHelpDoneNum + "人" + collectType + timeChange(paymentSum);
+                } else {
+                    content = nowUser.getName() + " 支付了" + payUserName + collectType + timeChange(paymentSum);
+                }
+
+            } else if (type == 2){
+                //如果是自动
+                if (seekHelpDoneNum > 3) {
+                    content = "系统自动 支付了" + payUserName + seekHelpDoneNum + "人" + collectType + timeChange(paymentSum);
+                } else {
+                    content = "系统自动 支付了" + payUserName + collectType + timeChange(paymentSum);
+                }
+
             }
 
         } else {
@@ -939,8 +951,17 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     paymentSum += paymentList.get(0);
                 }
                 seekHelpDoneNum++;
+
                 //服务记录内容
-                content = nowUser.getName() + " 支付了" + toUserList.get(0).getName() + collectType + timeChange(paymentSum);
+                if (type == 1){
+                    //如果类型为个人手动支付
+                    content = nowUser.getName() + " 支付了" + toUserList.get(0).getName() + collectType + timeChange(paymentSum);
+
+                } else if (type == 2){
+                    //如果是自动
+                    content = "系统自动 支付了" + toUserList.get(0).getName() + collectType + timeChange(paymentSum);
+
+                }
 
                 //如果是报名者支付，只可能是服务
                 if (order.getServicePersonnel() == 1){
@@ -2725,5 +2746,16 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         return result;
 
+    }
+
+    public void timePayOrder(Long orderId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+            //如果是求助，给一堆人付钱
+            List<Long> userIdList = new ArrayList<>();
+            List<Long> paymentList = new ArrayList<>();
+
+
+        }
     }
 }

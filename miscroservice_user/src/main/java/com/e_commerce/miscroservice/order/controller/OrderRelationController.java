@@ -302,7 +302,7 @@ public class OrderRelationController extends BaseController {
             paymentList.add(Long.parseLong(payment[i]));
         }
         try {
-            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , user.getId());
+            List<String> errorMsgList = orderRelationService.payOrder(orderId , userIdList , paymentList , user.getId() , 1);
             result.setSuccess(true);
             result.setData(errorMsgList);
             result.setMsg("支付成功");

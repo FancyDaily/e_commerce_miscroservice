@@ -91,9 +91,10 @@ public interface OrderRelationService {
      * @param userIdList
      * @param paymentList
      * @param nowUserId
+     * @param type
      * @return
      */
-    List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
+    List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId , int type);
     /**
      * 新增发布者订单关系
      * @param order
