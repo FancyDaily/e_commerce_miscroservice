@@ -177,7 +177,6 @@ public class LoginServiceImpl extends BaseService implements LoginService {
     @Autowired
     private AuthorizeRpcService authorizeRpcService;
 
-
     /**
      * 登陆校验 step1
      *
@@ -226,23 +225,22 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         String key = MD5.crypt(session.getOpenid());
 
         // 存储用户
-//        String userId = StringUtil.numberToString(user.getId());
-//        String token = TokenUtil.genToken(userId);
-//        // redis
-//        redisUtil.set(token, user, getUserTokenInterval());
-//        redisUtil.set("" + userId, user, getUserTokenInterval());
-//        redisUtil.set("str" + userId, token, getUserTokenInterval());
-//
-//        redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
-//        resultMap.put("userId", userId);
-//        resultMap.put(AppConstant.USER_TOKEN, token);
+        String userId = StringUtil.numberToString(user.getId());
+        String token = TokenUtil.genToken(userId);
+        // redis
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set("" + userId, user, getUserTokenInterval());
+        redisUtil.set("str" + userId, token, getUserTokenInterval());
+
+        redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
+        resultMap.put("userId", userId);
+        resultMap.put(AppConstant.USER_TOKEN, token);
 
         Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
 
-        if (load != null) {
-            redisMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
+        if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
+            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
         }
-
 
         // 返回map，包含自定义状态
         return resultMap;
@@ -334,6 +332,11 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         if (user == null) {
             return new HashMap<String, Object>();
         }
+
+        if(!AppConstant.AVALIABLE_STATUS_AVALIABLE.equals(user.getAvaliableStatus())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该用户被封禁，禁止登录!");
+        }
+
         String userId = StringUtil.numberToString(user.getId());
         String token = TokenUtil.genToken(userId);
 
@@ -356,6 +359,14 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put("token", token);
         resultMap.put("userId", userId);
+
+/*
+        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
+
+        if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
+            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
+        }
+*/
 
         return resultMap;
     }

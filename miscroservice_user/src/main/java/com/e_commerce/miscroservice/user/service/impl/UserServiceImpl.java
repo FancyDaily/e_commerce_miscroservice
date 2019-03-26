@@ -44,6 +44,9 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
 public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
+    private AuthorizeRpcService authorizeRpcService;
+
+    @Autowired
     private SendSmsService smsService;
 
     @Autowired
@@ -2269,10 +2272,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         long currentTimeMillis = System.currentTimeMillis();
         TUserCompany userCompany = new TUserCompany();
-       /* if (formerId == null) {
-            formerId = idGenerator.nextId();
-        }
-        userCompany.setId(formerId);*/
+        userCompany.setId(formerId);
         userCompany.setUserId(user.getId());
         userCompany.setTeamName(user.getName());
         userCompany.setCompanyId(companyId);
@@ -2648,6 +2648,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 登录
         Long userId = user.getId();
 
+
         // 使得之前的token失效 //TODO
         String redisKey = "str" + userId;
         if (redisUtil.hasKey(redisKey)) {
@@ -2655,13 +2656,12 @@ public class UserServiceImpl extends BaseService implements UserService {
             redisUtil.del(lastToken);
         }
 
-//        String token = genToken(user);
-//        redisUtil.set(token, user, getUserTokenInterval());
-//        redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
-//
-//        redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
+        String token = genToken(user);
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
+        redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
         Map<String, Object> resultMap = new HashMap<>();
-//        resultMap.put(AppConstant.USER_TOKEN, token);
+        resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
         DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
         userView.setIdStr(String.valueOf(userView.getId()));
@@ -2670,14 +2670,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         //设置token
         if (user.getToken() == null) {
             Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
-            if (tokenDto != null) {
+            if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
                 user.setToken(tokenDto.getToken());
             }
         }
 
         //设置token
         resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
-
 
         return resultMap;
     }
@@ -2780,12 +2779,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             user.setToken(token.getToken());
         }
 
-
         return user;
     }
-
-    @Autowired
-    private AuthorizeRpcService authorizeRpcService;
 
     private String genToken(TUser user) {
         String val = String.valueOf(user.getId());
@@ -3618,6 +3613,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             paymentViewMap.put(serviceId, paymentView);
         }
 
+        if(orderIds.isEmpty()) {
+            return new CompanyDailyPaymentView();
+        }
+
         List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);
 
         //初始化 serviceId-payOrGainNum map
@@ -3658,6 +3657,54 @@ public class UserServiceImpl extends BaseService implements UserService {
         resultView.setServPaymentViews(serviceViews);
 
         return resultView;
+    }
+
+    @Override
+    public TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage) {
+        Long time = bonusPackage.getTime();
+        Long currentMills = System.currentTimeMillis();
+        //判穷
+        if (time > (user.getSurplusTime() - user.getFreezeTime())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+        bonusPackage.setUserId(user.getId());
+        bonusPackage.setCreateTime(currentTimeMillis);
+        bonusPackage.setUpdateTime(currentTimeMillis);
+        bonusPackage.setCreateUser(user.getId());
+        bonusPackage.setUpdateUser(user.getId());
+        bonusPackage.setCreateUserName(user.getName());
+        bonusPackage.setUpdateUserName(user.getName());
+        bonusPackage.setIsValid(AppConstant.IS_VALID_YES);
+        bonusPackageDao.insert(bonusPackage);
+
+        //余额变动
+        user = userDao.selectByPrimaryKey(user.getId());    //最新数据
+        user.setSurplusTime(user.getSurplusTime() - time);
+        //updater
+        user.setUpdateTime(currentMills);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(user);
+
+        //流水
+        TUserTimeRecord record = new TUserTimeRecord();
+        record.setFromUserId(user.getId());
+        record.setTime(time);
+        record.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_OUT.getCode());
+        record.setTargetId(bonusPackage.getId());
+        //creater & updater
+        record.setCreateTime(currentMills);
+        record.setCreateUser(user.getId());
+        record.setCreateUserName(user.getName());
+        record.setUpdateTime(currentMills);
+        record.setUpdateUser(user.getId());
+        record.setUpdateUserName(user.getName());
+        record.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(record);
+
+        return bonusPackage;
     }
 
     /**

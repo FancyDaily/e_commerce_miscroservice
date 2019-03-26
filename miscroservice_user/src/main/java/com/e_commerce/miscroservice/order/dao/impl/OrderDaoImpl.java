@@ -450,7 +450,7 @@ public class OrderDaoImpl implements OrderDao {
         .eq(TOrder::getCreateUser,userId)
                 .lte(TOrder::getStartTime,endStamp)
                 .gte(TOrder::getEndTime,startStamp)
-                .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL)
+                .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL.getValue())
                 .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 

@@ -395,4 +395,12 @@ public interface UserService {
      * @return
      */
     CompanyDailyPaymentView queryPaymentToDay(TUser user);
+
+    /**
+     * 创建一个红包
+     * @param user
+     * @param bonusPackage
+     * @return
+     */
+    TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage);
 }

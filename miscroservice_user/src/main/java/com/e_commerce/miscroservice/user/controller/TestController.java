@@ -31,21 +31,22 @@ public class TestController {
 
     public String init() {
 
-
-        TimerScheduler timerScheduler = new TimerScheduler();
-        timerScheduler.setName("111" + UUID.randomUUID().toString());
-        timerScheduler.setCron("*/20 * * * * ? *");
-        timerScheduler.setType(TimerSchedulerTypeEnum.TEST.toNum());
-
-        Map<String, String> map = new HashMap<>();
-        map.put("aaa", "11");
-        map.put("bbb", "22");
-
-        timerScheduler.setParams(JSON.toJSONString(map));
-
-
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(timerScheduler));
-        return "OK";
+//
+//        TimerScheduler timerScheduler = new TimerScheduler();
+//        timerScheduler.setName("111" + UUID.randomUUID().toString());
+//        timerScheduler.setCron("*/20 * * * * ? *");
+//        timerScheduler.setType(TimerSchedulerTypeEnum.TEST.toNum());
+//
+//        Map<String, String> map = new HashMap<>();
+//        map.put("aaa", "11");
+//        map.put("bbb", "22");
+//
+//        timerScheduler.setParams(JSON.toJSONString(map));
+//
+//
+//        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(timerScheduler));
+//        return "OK";
+        return "init";
 
     }
 

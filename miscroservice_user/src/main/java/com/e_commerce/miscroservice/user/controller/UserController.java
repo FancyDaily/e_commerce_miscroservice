@@ -1850,11 +1850,14 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("bonusPackage/generate")
-    public Object bonusPackageGenerate(String token, Long bonusPackageId) {
+    @Consume(TBonusPackage.class)
+    public Object bonusPackageGenerate(String token, Long bonusPackageId, String description, Long time) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) redisUtil.get(token);
+        TBonusPackage bonuspackage = (TBonusPackage) ConsumeHelper.getObj();
         try {
-            userService.generateBonusPackage(user, bonusPackageId);
+            TBonusPackage bonusPackage = userService.generateBonusPackage(user, bonuspackage);
+            result.setData(bonusPackage);
             result.setSuccess(true);
         } catch (MessageException e) {
             logger.error("创建红包异常: " + e.getMessage());
@@ -2732,11 +2735,11 @@ public class UserController extends BaseController {
             userService.joinCompany(user, companyId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("重置密码异常" + e.getMessage());
+            logger.error("申请加入组织异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("重置密码异常" + errInfo(e));
+            logger.error("申请加入组织异常" + errInfo(e));
             result.setSuccess(false);
         }
         return result;

@@ -171,7 +171,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
      */
     private List<TUserCompany> getUserCompanies(Long companyId, int year) {
         Map<String, Object> yearBetween = DateUtil.y2BetweenStamp(year);
-        return userCompanyDao.selectBycompanyIdAndCompanyJobAndStateBetween(companyId,AppConstant.JOB_COMPANY_CREATER,AppConstant.JOIN_STATE_COMPANY_PASS,(long) yearBetween.get("betLeft"),(long) yearBetween.get("betRight"));
+        return userCompanyDao.selectBycompanyIdAndCompanyJobAndStateBetween(companyId,AppConstant.JOB_COMPANY_MEMBER,AppConstant.JOIN_STATE_COMPANY_PASS,(long) yearBetween.get("betLeft"),(long) yearBetween.get("betRight"));
     }
 
     /**
@@ -364,8 +364,11 @@ public class GroupServiceImpl extends BaseService implements GroupService {
      */
     @Override
     public void userAdd(TUser user, Long groupId, String userIds) {
+        if(userIds==null || userIds.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"添加的对象不能为空！");
+        }
+
         long currentTimeMillis = System.currentTimeMillis();
-        boolean done = false;
         Long userId = user.getId();
         Long companyId = getOwnCompanyId(userId);
         TCompany company = companyDao.selectByPrimaryKey(companyId);
@@ -383,6 +386,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
         for (String thisId : split) {
+            boolean done = false;
             TUser thisUser = userDao.selectByPrimaryKey(Long.valueOf(thisId));
             // 判重
             List<TUserCompany> userCompanies = userCompanyDao.selectByCompanyIdAndUserId(companyId,Long.valueOf(thisId));
@@ -390,6 +394,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
                 for (TUserCompany userCompany : userCompanies) {
                     if (AppConstant.JOB_COMPANY_MEMBER.equals(userCompany.getCompanyJob())
                             && !AppConstant.JOIN_STATE_COMPANY_PASS.equals(userCompany.getState())) { // 存在非审核通过组织成员的记录
+                        userCompany.setGroupId(groupId);
                         userCompany.setState(AppConstant.JOIN_STATE_COMPANY_PASS);
                         userCompany.setUpdateTime(currentTimeMillis);
                         userCompany.setUpdateUser(userId);
@@ -427,20 +432,26 @@ public class GroupServiceImpl extends BaseService implements GroupService {
                 //查找t_usercompany
                 List<TUserCompany> tUserCompanies = userCompanyDao.selectByUserIdAndCompanyJob(thisUser.getId(), AppConstant.JOB_COMPANY_MEMBER);
                 String companyIds = "";
-                String compamnyNames = "";
+                String companyNames = "";
                 for(TUserCompany tUserCompany:tUserCompanies) {
+                    companyIds += tUserCompany.getCompanyId();
                     companyIds += ",";
-                    companyIds += tUserCompany.getId();
-                    companyName += ",";
-                    companyName += tUserCompany.getCompanyName();
+                    companyNames += tUserCompany.getCompanyName();
+                    companyNames += ",";
                 }
-                user.setCompanyIds(companyIds);
-                user.setCompanyNames(compamnyNames);
+                if(companyIds.endsWith(",")) {
+                    companyIds = companyIds.substring(0,companyIds.length()-1);
+                }
+                if(companyNames.endsWith(",")) {
+                    companyNames = companyNames.substring(0,companyNames.length()-1);
+                }
+                thisUser.setCompanyIds(companyIds);
+                thisUser.setCompanyNames(companyNames);
                 //updater
-                user.setUpdateTime(System.currentTimeMillis());
-                user.setUpdateUser(user.getId());
-                user.setUpdateUserName(user.getName());
-                userDao.updateByPrimaryKey(user);
+                thisUser.setUpdateTime(System.currentTimeMillis());
+                thisUser.setUpdateUser(user.getId());
+                thisUser.setUpdateUserName(user.getName());
+                userDao.updateByPrimaryKey(thisUser);
             }
         }
     }
@@ -527,19 +538,19 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         }
 
         //维护t_user companyIds、companyNames字段
-        TUser theUser = userDao.selectByPrimaryKey(user.getId());
+        TUser theUser = userByTelephone;
         String companyIds = theUser.getCompanyIds();
         String companyNames = theUser.getCompanyNames();
         if(companyIds==null) {
             companyIds = "";
         }
-        if(companyIds!="") {
+        if(!"".equals(companyIds)) {
             companyIds += ",";
         }
         if(companyNames==null) {
             companyNames = "";
         }
-        if(companyNames!="") {
+        if(!"".equals(companyNames)) {
             companyNames += ",";
         }
 
@@ -548,10 +559,10 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         companyNames += company.getCompanyName();
 
         if(companyIds.endsWith(",")) {
-            companyIds.substring(0,companyIds.length()-1);
+            companyIds = companyIds.substring(0,companyIds.length()-1);
         }
         if(companyNames.endsWith(",")) {
-            companyNames.substring(0,companyNames.length()-1);
+            companyNames = companyNames.substring(0,companyNames.length()-1);
         }
 
         theUser.setCompanyIds(companyIds);
@@ -616,25 +627,30 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             TUser tUser = userMap.get(id);
             //统计查询该用户所有的组织
             List<Long> companyIdList = idMap.get(id);
-            List<String> companyNaemList = nameMap.get(id);
+            List<String> companyNameList = nameMap.get(id);
             String companyIds = "";
             String companyNames = "";
-            for(Long corpId:companyIdList) {
-                companyIds += ",";
-                companyIds += corpId;
+            if(companyIdList!=null) {
+                for(Long corpId:companyIdList) {
+                    companyIds += ",";
+                    companyIds += corpId;
+                }
             }
             if(companyIds.endsWith(",")) {
                 companyIds = companyIds.substring(0,companyIds.length()-1);
             }
+
+            if(companyNameList!=null) {
+                for(String name:companyNameList) {
+                    companyNames += ",";
+                    companyNames += name;
+                }
+            }
             if(companyNames.endsWith(",")) {
                 companyNames = companyNames.substring(0,companyNames.length()-1);
             }
-
-            for(String name:companyNaemList) {
-                companyNames += ",";
-                companyNames += name;
-            }
-
+            tUser.setCompanyIds(companyIds);
+            tUser.setCompanyNames(companyNames);
             //updater
             tUser.setUpdateTime(System.currentTimeMillis());
             tUser.setUpdateUser(id);
@@ -667,7 +683,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         Map<Long,TUser> userMap = new HashMap<>();
         //构建map
         for(TUser tUser:users) {
-            userMap.put(user.getId(),user);
+            userMap.put(tUser.getId(),tUser);
         }
 
         for(String userId:split) {
@@ -677,7 +693,10 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             userCompanyDao.updateByUserIdAndCompanyJobAndCompanyIdAndStateSetUserCompany(Long.valueOf(userId),AppConstant.JOB_COMPANY_MEMBER,companyId,AppConstant.JOIN_STATE_COMPANY_NOT_YET,userCompany);
 
             //维护t_user表 company_id、company_name字段
-            TUser tUser = userMap.get(userId);      //从map获取
+            TUser tUser = userMap.get(Long.valueOf(userId));      //从map获取
+            if(tUser == null) {
+                continue;
+            }
             String companyIds = tUser.getCompanyIds();
 
             if(companyIds.contains(String.valueOf(companyId))) {    //如果已经存在
@@ -707,13 +726,13 @@ public class GroupServiceImpl extends BaseService implements GroupService {
 
             companyNames = new StringBuilder(companyNames).append(companyName).toString();
 
-            user.setCompanyIds(companyIds);
-            user.setCompanyNames(companyNames);
+            tUser.setCompanyIds(companyIds);
+            tUser.setCompanyNames(companyNames);
             //updater
-            user.setUpdateTime(System.currentTimeMillis());
-            user.setUpdateUser(user.getId());
-            user.setUpdateUserName(user.getName());
-            userDao.updateByPrimaryKey(user);
+            tUser.setUpdateTime(System.currentTimeMillis());
+            tUser.setUpdateUser(user.getId());
+            tUser.setUpdateUserName(user.getName());
+            userDao.updateByPrimaryKey(tUser);
         }
     }
 
@@ -724,6 +743,10 @@ public class GroupServiceImpl extends BaseService implements GroupService {
      */
     @Override
     public void userReject(TUser user, String userIds) {
+        if(userIds==null || userIds.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"选定对象不能为空!");
+        }
+
         Long ownerId = user.getId();
         Long companyId = getOwnCompanyId(ownerId);
         String[] split = new String[1];
@@ -1075,7 +1098,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
      */
     private List<TUserTimeRecord> getUserTimeRecords(Long userId, Integer year) {
         Map<String, Object> yearBetween = DateUtil.y2BetweenStamp(year);
-        return userTimeRecordDao.selectByUserIdOrFromUserIdAndTypeBetween(userId,PaymentEnum.PAYMENT_TYPE_ACEPT_SERV,(long) yearBetween.get("betLeft"), (long) yearBetween.get("betRight"));
+        return userTimeRecordDao.selectByUserIdOrFromUserIdAndTypeBetween(userId,PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode(),(long) yearBetween.get("betLeft"), (long) yearBetween.get("betRight"));
     }
 
 }
