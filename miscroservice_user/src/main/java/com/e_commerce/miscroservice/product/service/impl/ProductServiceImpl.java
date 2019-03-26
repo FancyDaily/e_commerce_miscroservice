@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
@@ -197,13 +198,18 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (!upperStatus) {
 				throw new MessageException("当前状态无法进行下架");
 			}
+			Long currentTime = System.currentTimeMillis();
 			tService.setStatus(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
 			tService.setUpdateUser(user.getId());
 			tService.setUpdateUserName(user.getName());
-			tService.setUpdateTime(System.currentTimeMillis());
+			tService.setUpdateTime(currentTime);
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
 			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
+			String title = "	";
+			String content = "";
+			messageService.messageSave(tService.getId(), new AdminUser(), title, content, tService.getUserId(), currentTime);
+			// TODO 服务通知
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("下架失败");
@@ -237,7 +243,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	}
 
 	@Override
-	@Transactional(rollbackFor = Throwable.class)
+	@Transactional(rollbackFor = Exception.class)
 	public void upperFrame(TUser user, Long productId) {
 		user = userService.getUserById(user.getId());
 		logger.info("id为{}的用户对商品id为{}进行了上架操作", user.getId(), productId);
@@ -265,6 +271,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			});
 			orderService.produceOrder(tService, OrderEnum.PRODUCE_TYPE_UPPER.getValue(), "");
 			productDao.updateByPrimaryKeySelective(tService);
+		} catch (NoEnoughCreditException e) {
+			logger.info("没有足够的授信，无法上架 >>>>>>");
+			throw new MessageException("没有足够的授信");
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("重新上架失败");
@@ -406,7 +415,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		try {
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		} catch (NoEnoughCreditException e) {
+			throw new MessageException("没有足够的授信");
+		}
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
@@ -463,7 +476,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+
+		try {
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		} catch (NoEnoughCreditException e) {
+			throw new MessageException("没有足够的授信");
+		}
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -535,7 +553,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		try {
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		} catch (NoEnoughCreditException e) {
+			throw new MessageException("没有足够的授信");
+		}
 		// 增加成长值
 		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 		//增加发布次数
@@ -606,7 +628,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		try {
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		} catch (NoEnoughCreditException e) {
+			throw new MessageException("没有足够的授信");
+		}
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
@@ -644,7 +670,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-		orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		try {
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+		} catch (NoEnoughCreditException e) {
+			throw new MessageException("没有足够的授信");
+		}
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override

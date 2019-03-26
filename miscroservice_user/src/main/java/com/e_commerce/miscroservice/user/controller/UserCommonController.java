@@ -1,13 +1,16 @@
 package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
+import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class UserCommonController {
 	private UserService userService;
 
 	@Autowired
+	private GroupService groupService;
+
+	@Autowired
 	private WechatService wechatService;
 
 	@Autowired
@@ -39,6 +45,9 @@ public class UserCommonController {
 
 	@Autowired
 	private UserTimeRecordDao userTimeRecordDao;
+
+	@Autowired
+	private UserCompanyDao userCompanyDao;
 
 	/**
 	 * 根据id获取用户
@@ -183,4 +192,51 @@ public class UserCommonController {
 		return wechatService.getToken();
 	}
 
+
+	/**
+	 * 根据名字查找用户
+	 * @param name
+	 * @return
+	 */
+	public List<TUser> selectUserByName(String name){
+		return userDao.selectUserByName(name);
+	}
+
+	/**
+	 * 根据电话查找用户
+	 * @param telephone
+	 * @return
+	 */
+	public List<TUser> selectUserByTelephone(String telephone){
+		return userDao.selectUserByName(telephone);
+	}
+
+	/**
+	 * 根据组内名字查找用户
+	 *
+	 * @param name
+	 * @return
+	 */
+	public List<TUserCompany> selectUserCompanyByName(String name){
+		return userCompanyDao.selectUserCompanyByName(name);
+	}
+
+	/**
+	 * 获取一个用户的组织编号
+	 * @param userId
+	 * @return
+	 */
+	public Long getOwnCompanyId(Long userId){
+		return groupService.getOwnCompanyId(userId);
+	}
+
+	/**
+	 * 根据组织编号和用户列表查找用户组织信息
+	 * @param userIdList
+	 * @param companyId
+	 * @return
+	 */
+	public List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
+		return userCompanyDao.selectUserCompanyByIdAndUserIdList(userIdList , companyId);
+	}
 }

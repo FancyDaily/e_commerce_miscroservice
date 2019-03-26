@@ -265,6 +265,29 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
 
+    /**
+     * 根据组织用户名字查找组织用户
+     * @param name
+     * @return
+     */
+    public List<TUserCompany> selectUserCompanyByName(String name){
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany() ,
+                new MybatisSqlWhereBuild(TUserCompany.class).eq(TUserCompany::getTeamName , name)
+                        .eq(TUserCompany::getIsValid , AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据组织编号和用户列表 查看用户组织信息
+     * @param userIdList
+     * @param companyId
+     * @return
+     */
+    public List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany() ,
+                new MybatisSqlWhereBuild(TUserCompany.class).eq(TUserCompany::getCompanyId , companyId)
+                        .in(TUserCompany::getUserId , userIdList)
+                        .eq(TUserCompany::getIsValid , AppConstant.IS_VALID_YES));
+    }
     @Override
     public List<TUserCompany> selectInUserIdAndCompanyJob(ArrayList<Long> idList, Integer jobCompanyMember) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)

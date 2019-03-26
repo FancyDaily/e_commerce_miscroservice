@@ -14,6 +14,7 @@ import com.e_commerce.miscroservice.message.service.EventService;
 import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.message.vo.WxMssVo;
+import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class MessageCommonController extends BaseController {
 
     @Autowired
     private MessageNoticeDao messageNoticeDao;
+
+    @Autowired
+    private UserCommonController userCommonController;
 
     @Autowired
     private PublishService publishService;
@@ -87,7 +91,7 @@ public class MessageCommonController extends BaseController {
         /*
         RestTemplate restTemplate = new RestTemplate();
 
-        //String token = getToken();
+        String token = userCommonController.getWechatToken();
         //String url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send" + "?access_token=" + token; TODO 等待获取token
         String url = "";
         // 拼接推送的模版

@@ -36,5 +36,9 @@ public interface UserDao {
 
     List<TUser> selectByNameAndTelephoneLikeSkillInIds(String name, String telephone, String skill, List<Long> idList);
 
+    List<TUser> selectUserByName(String name);
+
+    List<TUser> selectUserByTelephone(String telephone);
+
     List<TUser> selectInUserIds(String[] split);
 }

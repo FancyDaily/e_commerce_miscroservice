@@ -392,6 +392,20 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 //                .eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId));
     }
 
+    @Override
+    public Long countWaitPay(Long orderId) {
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                .eq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()));
+    }
+
+    @Override
+    public List<TOrderRelationship> selectWaitPay(Long orderId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                .eq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()));
+    }
+
     /**
      * 查询用户发布或报名的成立的订单关系
      * @param userId
@@ -429,6 +443,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType())
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())
                 .eq(TOrderRelationship::getOrderId , orderId)
                 .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -475,6 +491,28 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .eq(TOrderRelationship::getIsValid , AppConstant.ACCREDIT_STATUS_YES));
     }
+
+
+    /**
+     * 根据orderId和statusList来升序查询在userIdList里的报名者订单List
+     *
+     * @param orderId
+     * @param statusList
+     * @return
+     */
+    public List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long orderId, List<Integer> statusList , List<Long> userIdList) {
+        List<TOrderRelationship> orderRelationshipList = MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .eq(TOrderRelationship::getOrderId, orderId)
+                        .in(TOrderRelationship::getStatus, statusList)
+                        .in(TOrderRelationship::getReceiptUserId , userIdList)
+                        .isNotNull(TOrderRelationship::getReceiptUserId)
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
+        );
+        return orderRelationshipList;
+    }
+
     /**
      * 参与的订单的状态
      *

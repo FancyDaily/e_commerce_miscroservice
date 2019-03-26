@@ -193,6 +193,26 @@ public class UserDaoImpl implements UserDao {
         return result;
     }
 
+
+    /**
+     * 根据名字查找user
+     * @param name
+     * @return
+     */
+    public List<TUser> selectUserByName(String name ){
+        return MybatisOperaterUtil.getInstance().finAll(new TUser() , new MybatisSqlWhereBuild(TUser.class).eq(TUser::getName , name));
+    }
+
+    /**
+     * 根据电话查找user
+     * @param telephone
+     * @return
+     */
+    public List<TUser> selectUserByTelephone(String telephone){
+        return MybatisOperaterUtil.getInstance().finAll(new TUser() , new MybatisSqlWhereBuild(TUser.class).eq(TUser::getUserTel , telephone));
+    }
+
+
 }
 
 

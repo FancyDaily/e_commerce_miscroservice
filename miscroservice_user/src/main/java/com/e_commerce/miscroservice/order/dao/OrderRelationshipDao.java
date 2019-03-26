@@ -234,4 +234,27 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> pageChooseList(Long userId);
+
+	/**
+	 * 根据orderId和statusList来升序查询在userIdList里的报名者订单List
+	 *
+	 * @param orderId
+	 * @param statusList
+	 * @return
+	 */
+	List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long orderId, List<Integer> statusList , List<Long> userIdList);
+
+	/**
+	 * 统计待支付的订单关系
+	 * @param orderId 订单ID
+	 * @return
+	 */
+	Long countWaitPay(Long orderId);
+
+	/**
+	 * 查询该订单下未支付的订单关系
+	 * @param orderId 订单ID
+	 * @return
+	 */
+	List<TOrderRelationship> selectWaitPay(Long orderId);
 }

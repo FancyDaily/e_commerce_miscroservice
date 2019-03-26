@@ -321,4 +321,37 @@ public class DateUtil {
 		result.setEndTimeMill(endTimeMill);
 		return result;
 	}
+
+	/**
+	 * 根据时间格式"yyyyMMddHHmmss"字符串生成cron
+	 * @param date
+	 * @return
+	 */
+	public static String genCron(String date) {
+		String year = date.substring(0, 4);
+		//月
+		String month = date.substring(4, 6);
+		//日
+		String day = date.substring(6,8);
+		//时
+		String hour = date.substring(8, 10);
+		//分
+		String minute = date.substring(10, 12);
+		//秒
+		String second = date.substring(12, 14);
+
+		String corn = second+" "+minute+" "+hour+" "+day+" "+month+" "+"? "+year;
+		System.out.println(corn);
+		return corn;
+	}
+
+	/**
+	 * 根据毫秒值获取cron语法
+	 * @param timestamp 时间戳
+	 * @return
+	 */
+	public static String genCron(Long timestamp) {
+		String stringDateTime = format(timestamp);
+		return genCron(stringDateTime);
+	}
 }

@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.order.vo;
 
+import lombok.Data;
+
 /**
  * 功能描述:
  * 模块:
@@ -18,6 +20,7 @@ package com.e_commerce.miscroservice.order.vo;
  * 1.
  * 2.
  */
+@Data
 public class UserInfoView {
 
     private String name;//名字
@@ -26,37 +29,8 @@ public class UserInfoView {
 
     private int status;//状态
 
-    private String toStringId;//string型的用户id
+    private long toStringId;//string型的用户id
 
-    public String getName() {
-        return name;
-    }
+    private Integer authStatus; // 实名认证状态
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUserHeadPortraitPath() {
-        return userHeadPortraitPath;
-    }
-
-    public void setUserHeadPortraitPath(String userHeadPortraitPath) {
-        this.userHeadPortraitPath = userHeadPortraitPath;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public String getToStringId() {
-        return toStringId;
-    }
-
-    public void setToStringId(Long toStringId) {
-        this.toStringId = toStringId+"";
-    }
 }
