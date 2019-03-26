@@ -286,5 +286,20 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
                         .in(TUserCompany::getUserId , userIdList)
                         .eq(TUserCompany::getIsValid , AppConstant.IS_VALID_YES));
     }
+    @Override
+    public List<TUserCompany> selectInUserIdAndCompanyJob(ArrayList<Long> idList, Integer jobCompanyMember) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+                .in(TUserCompany::getUserId,idList)
+                .eq(TUserCompany::getCompanyJob,jobCompanyMember)
+                .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public TUserCompany selectByPrimaryKey(Long companyId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
+        .eq(TUserCompany::getId,companyId)
+        .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }
 

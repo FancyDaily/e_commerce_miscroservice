@@ -152,6 +152,18 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
+     * 根据ids查找用户
+     * @param split 用户ids
+     * @return
+     */
+    @Override
+    public List<TUser> selectInUserIds(String[] split) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .in(TUser::getId,split)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 获取该账号的分身
      *
      * @param user

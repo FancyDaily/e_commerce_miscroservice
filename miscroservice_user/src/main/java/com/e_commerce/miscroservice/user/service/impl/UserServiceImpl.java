@@ -442,13 +442,21 @@ public class UserServiceImpl extends BaseService implements UserService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
-				TUser finalUser = new TUser();
+				TUser finalUser = userDao.selectByPrimaryKey(user.getId());
 				//成长值
-				finalUser = taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+				finalUser = taskComplete(finalUser, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
 
 				//维护t_user表 skill字段
 				String formerSkills = finalUser.getSkill();
-				String latestSkills = new StringBuilder(formerSkills).append(",").append(skill).toString();
+				if(formerSkills==null) {	//一个技能都没有
+					formerSkills = "";
+				}
+
+				if(!formerSkills.equals("")) {
+					formerSkills += ",";
+				}
+
+				String latestSkills = new StringBuilder(formerSkills).append(skill.getName()).toString();
 				finalUser.setSkill(latestSkills);
 				//updater
 				finalUser.setUpdateTime(System.currentTimeMillis());
@@ -488,18 +496,20 @@ public class UserServiceImpl extends BaseService implements UserService {
 				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
 				StringBuilder builder = new StringBuilder();
 				for(TUserSkill skill:latestSkills) {
-					builder = builder.append(skill).append(",");
+					builder = builder.append(skill.getName()).append(",");
 				}
 				String skills = builder.toString();
 				if(skills.endsWith(",")) {
 					skills = skills.substring(0,skills.length()-1);
 				}
-				user.setSkill(skills);
+				TUser finalUser = new TUser();
+				finalUser = userDao.selectByPrimaryKey(user.getId());
+				finalUser.setSkill(skills);
 				//updater
-				user.setUpdateTime(System.currentTimeMillis());
-				user.setUpdateUser(user.getId());
-				user.setUpdateUserName(user.getName());
-				userDao.updateByPrimaryKey(user);
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
+				userDao.updateByPrimaryKey(finalUser);
 				//TODO 刷新缓存
 
 				super.afterCompletion(status);
@@ -584,6 +594,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public UserPageView page(TUser user, Long userId) {
+    	if(userId==null) {
+    		userId = user.getId();
+		}
+
         UserPageView result = new UserPageView();
         //基本信息
         TUser theUser = userDao.selectByPrimaryKey(userId);
@@ -759,7 +773,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
 				StringBuilder builder = new StringBuilder();
 				for(TUserSkill skill:latestSkills) {
-					builder = builder.append(skill).append(",");
+					builder = builder.append(skill.getName()).append(",");
 				}
 				String skills = builder.toString();
 				if(skills.endsWith(",")) {
@@ -769,13 +783,13 @@ public class UserServiceImpl extends BaseService implements UserService {
 				//同步用户表中的技能
 				TUser finalUser = null;
 				finalUser = userDao.selectByPrimaryKey(user.getId());	//DELMARK
-				user.setSkill(skills);
+				finalUser.setSkill(skills);
 				//updater
-				user.setUpdateTime(System.currentTimeMillis());
-				user.setUpdateUser(user.getId());
-				user.setUpdateUserName(user.getName());
+				finalUser.setUpdateTime(System.currentTimeMillis());
+				finalUser.setUpdateUser(finalUser.getId());
+				finalUser.setUpdateUserName(finalUser.getName());
 
-				userDao.updateByPrimaryKey(user);
+				userDao.updateByPrimaryKey(finalUser);
 				//TODO 刷新缓存
 				super.afterCompletion(status);
 			}
@@ -2830,7 +2844,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             int inteval = dailyMaxIn - countToday;
             int countsNum = counts * growthValueEnum.getPrice();
             int resultCounts = inteval / growthValueEnum.getPrice();
-            if (inteval > 0 && countsNum - inteval > 0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
+            if (inteval > 0 && countsNum - inteval >= 0) { //任务当前未完成，且次数在不被消耗的前提下能够完成任务
                 flag = true;
             }
             counts = countsNum < inteval ? counts : resultCounts;
@@ -3459,7 +3473,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         // 判长 技能名
-        if (name.length() > 8) {
+        if (name.length() > 18) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名过长！"); // TODO
         }
 

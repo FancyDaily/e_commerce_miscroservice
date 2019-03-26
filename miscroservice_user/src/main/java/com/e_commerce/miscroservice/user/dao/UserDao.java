@@ -39,4 +39,6 @@ public interface UserDao {
     List<TUser> selectUserByName(String name);
 
     List<TUser> selectUserByTelephone(String telephone);
+
+    List<TUser> selectInUserIds(String[] split);
 }

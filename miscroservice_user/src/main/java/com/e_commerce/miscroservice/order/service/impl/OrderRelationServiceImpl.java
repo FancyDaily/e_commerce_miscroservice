@@ -4,8 +4,10 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
@@ -28,7 +30,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.xml.crypto.Data;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -530,7 +531,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //将该订单设置为可见，并调用方法修改订单可见状态
                 orderCommonController.changeOrderVisiableStatus(orderId, 1);
                 //派生下一张订单
-                orderCommonController.produceOrder( service ,OrderEnum.PRODUCE_TYPE_ENOUGH.getValue(),date);
+                try {
+                    orderCommonController.produceOrder( service ,OrderEnum.PRODUCE_TYPE_ENOUGH.getValue(),date);
+                } catch (NoEnoughCreditException e) {
+                    logger.info("用户授信不足，无法派生订单");
+                    errorMsg.add("因余额不足，您无法派生下一张订单");
+                }
                 //移除可报名日期
                 removeCanEnrollDate(date , service.getId());
             }

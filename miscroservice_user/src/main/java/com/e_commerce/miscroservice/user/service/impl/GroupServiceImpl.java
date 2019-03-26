@@ -419,6 +419,28 @@ public class GroupServiceImpl extends BaseService implements GroupService {
                 userCompany.setUpdateUserName(user.getName());
                 userCompany.setIsValid(AppConstant.IS_VALID_YES); // 有效
                 userCompanyDao.insert(userCompany);
+                done = true;
+            }
+
+            //维护t_user表中的company_id、company_name字段
+            if(done) {
+                //查找t_usercompany
+                List<TUserCompany> tUserCompanies = userCompanyDao.selectByUserIdAndCompanyJob(thisUser.getId(), AppConstant.JOB_COMPANY_MEMBER);
+                String companyIds = "";
+                String compamnyNames = "";
+                for(TUserCompany tUserCompany:tUserCompanies) {
+                    companyIds += ",";
+                    companyIds += tUserCompany.getId();
+                    companyName += ",";
+                    companyName += tUserCompany.getCompanyName();
+                }
+                user.setCompanyIds(companyIds);
+                user.setCompanyNames(compamnyNames);
+                //updater
+                user.setUpdateTime(System.currentTimeMillis());
+                user.setUpdateUser(user.getId());
+                user.setUpdateUserName(user.getName());
+                userDao.updateByPrimaryKey(user);
             }
         }
     }
@@ -461,32 +483,84 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
         // 判重
+        boolean done = false;
+        long currentTimeMillis = System.currentTimeMillis();
         List<TUserCompany> userCompanies = userCompanyDao.selectByCompanyIdAndUserId(companyId,userByTelephone.getId());
-        if (!userCompanies.isEmpty()) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已加入本组织!");
+        for(TUserCompany userCompany:userCompanies) {
+            Integer state = userCompany.getState();
+            if(AppConstant.JOIN_STATE_COMPANY_PASS.equals(state)) {
+                throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已加入本组织!");
+            }
+            if(AppConstant.JOIN_STATE_COMPANY_NOT_YET.equals(state) || AppConstant.JOIN_STATE_COMPANY_REFUSE.equals(state)) {
+                //更新该条记录 并记录 done为true
+                userCompany.setState(AppConstant.JOIN_STATE_COMPANY_PASS);
+                //updater
+                userCompany.setUpdateTime(currentTimeMillis);
+                userCompany.setUpdateUser(user.getId());
+                userCompany.setUpdateUserName(user.getName());
+                userCompanyDao.updateByPrimaryKey(userCompany);
+                done = true;
+            }
         }
 
-        long currentTimeMillis = System.currentTimeMillis();
-        // 加入组织
-        TUserCompany userCompany = new TUserCompany();
-        userCompany.setCompanyId(companyId); // 组织id
-        TCompany company = companyDao.selectByPrimaryKey(companyId);
-        if(company!=null) {
-            userCompany.setCompanyName(company.getName());	//TODO组织名字
+        if(!done) {
+            // 加入组织
+            TUserCompany userCompany = new TUserCompany();
+            userCompany.setCompanyId(companyId); // 组织id
+            TCompany company = companyDao.selectByPrimaryKey(companyId);
+            if(company!=null) {
+                userCompany.setCompanyName(company.getName());	//TODO组织名字
+            }
+            userCompany.setUserId(userByTelephone.getId()); // 成员id
+            userCompany.setGroupId(groupId);
+            userCompany.setCompanyJob(AppConstant.JOB_COMPANY_MEMBER); // 角色为普通成员
+            userCompany.setTeamName(userName); // 组内昵称
+            userCompany.setState(AppConstant.JOIN_STATE_COMPANY_PASS); // TODO STATE REMARK
+            userCompany.setCreateTime(currentTimeMillis);
+            userCompany.setCreateUser(userId);
+            userCompany.setCreateUserName(user.getName());
+            userCompany.setUpdateTime(currentTimeMillis);
+            userCompany.setUpdateUser(userId);
+            userCompany.setUpdateUserName(user.getName());
+            userCompany.setIsValid(AppConstant.IS_VALID_YES); // 有效
+            userCompanyDao.insert(userCompany);
         }
-        userCompany.setUserId(userByTelephone.getId()); // 成员id
-        userCompany.setGroupId(groupId);
-        userCompany.setCompanyJob(AppConstant.JOB_COMPANY_MEMBER); // 角色为普通成员
-        userCompany.setTeamName(userName); // 组内昵称
-        userCompany.setState(AppConstant.JOIN_STATE_COMPANY_PASS); // TODO STATE REMARK
-        userCompany.setCreateTime(currentTimeMillis);
-        userCompany.setCreateUser(userId);
-        userCompany.setCreateUserName(user.getName());
-        userCompany.setUpdateTime(currentTimeMillis);
-        userCompany.setUpdateUser(userId);
-        userCompany.setUpdateUserName(user.getName());
-        userCompany.setIsValid(AppConstant.IS_VALID_YES); // 有效
-        userCompanyDao.insert(userCompany);
+
+        //维护t_user companyIds、companyNames字段
+        TUser theUser = userDao.selectByPrimaryKey(user.getId());
+        String companyIds = theUser.getCompanyIds();
+        String companyNames = theUser.getCompanyNames();
+        if(companyIds==null) {
+            companyIds = "";
+        }
+        if(companyIds!="") {
+            companyIds += ",";
+        }
+        if(companyNames==null) {
+            companyNames = "";
+        }
+        if(companyNames!="") {
+            companyNames += ",";
+        }
+
+        companyIds += companyId;
+        TUserCompany company = userCompanyDao.selectByPrimaryKey(companyId);
+        companyNames += company.getCompanyName();
+
+        if(companyIds.endsWith(",")) {
+            companyIds.substring(0,companyIds.length()-1);
+        }
+        if(companyNames.endsWith(",")) {
+            companyNames.substring(0,companyNames.length()-1);
+        }
+
+        theUser.setCompanyIds(companyIds);
+        theUser.setCompanyNames(companyNames);
+        //updater
+        theUser.setUpdateTime(currentTimeMillis);
+        theUser.setUpdateUser(user.getId());
+        theUser.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(theUser);
     }
 
     /**
@@ -512,6 +586,62 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         userCompany.setIsValid(AppConstant.IS_VALID_NO); // 删除
 
         userCompanyDao.updateByUserIdsAndCompanyJobAndCompanyIdSetUserCompany(idList,AppConstant.JOB_COMPANY_MEMBER,companyId,userCompany);
+
+        //维护t_user的company_id、company_name字段
+        List<TUser> tUsers = userDao.selectInUserIds(split);
+        //构建maps
+        Map<Long,TUser> userMap = new HashMap<>();
+        for(TUser tUser:tUsers) {
+            userMap.put(tUser.getId(),tUser);
+        }
+
+        List<TUserCompany> userCompanies = userCompanyDao.selectInUserIdAndCompanyJob(idList, AppConstant.JOB_COMPANY_MEMBER);
+        Map<Long,List<Long>> idMap = new HashMap<>();
+        Map<Long,List<String>> nameMap = new HashMap<>();
+        for(TUserCompany usercompany:userCompanies) {
+            Long usercompanyUserId = usercompany.getUserId();
+            Long id = usercompany.getCompanyId();
+            String name = usercompany.getCompanyName();
+            List<Long> companyIdList = idMap.get(usercompanyUserId);
+            List<String> companyNameList = nameMap.get(usercompanyUserId);
+            companyIdList = new ArrayList();
+            companyNameList = new ArrayList();
+            companyIdList.add(id);
+            companyNameList.add(name);
+            idMap.put(usercompanyUserId,companyIdList);
+            nameMap.put(usercompanyUserId,companyNameList);
+        }
+
+        for(Long id:idList) {
+            TUser tUser = userMap.get(id);
+            //统计查询该用户所有的组织
+            List<Long> companyIdList = idMap.get(id);
+            List<String> companyNaemList = nameMap.get(id);
+            String companyIds = "";
+            String companyNames = "";
+            for(Long corpId:companyIdList) {
+                companyIds += ",";
+                companyIds += corpId;
+            }
+            if(companyIds.endsWith(",")) {
+                companyIds = companyIds.substring(0,companyIds.length()-1);
+            }
+            if(companyNames.endsWith(",")) {
+                companyNames = companyNames.substring(0,companyNames.length()-1);
+            }
+
+            for(String name:companyNaemList) {
+                companyNames += ",";
+                companyNames += name;
+            }
+
+            //updater
+            tUser.setUpdateTime(System.currentTimeMillis());
+            tUser.setUpdateUser(id);
+            tUser.setUpdateUserName(tUser.getName());
+            userDao.updateByPrimaryKey(tUser);
+        }
+
     }
 
     /**
@@ -523,6 +653,8 @@ public class GroupServiceImpl extends BaseService implements GroupService {
     public void userPass(TUser user, String userIds) {
         Long ownerId = user.getId();
         Long companyId = getOwnCompanyId(ownerId);
+        TCompany tCompany = companyDao.selectByPrimaryKey(companyId);
+        String companyName = tCompany.getName();
         String[] split = new String[1];
         //处理userIds
         if(userIds.contains(",")) {	//批量
@@ -530,10 +662,58 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         } else {	//单个
             split[0] = userIds;
         }
+
+        List<TUser> users = userDao.selectInUserIds(split);
+        Map<Long,TUser> userMap = new HashMap<>();
+        //构建map
+        for(TUser tUser:users) {
+            userMap.put(user.getId(),user);
+        }
+
         for(String userId:split) {
+            //加入组织
             TUserCompany userCompany = new TUserCompany();
             userCompany.setState(AppConstant.JOIN_STATE_COMPANY_PASS);
             userCompanyDao.updateByUserIdAndCompanyJobAndCompanyIdAndStateSetUserCompany(Long.valueOf(userId),AppConstant.JOB_COMPANY_MEMBER,companyId,AppConstant.JOIN_STATE_COMPANY_NOT_YET,userCompany);
+
+            //维护t_user表 company_id、company_name字段
+            TUser tUser = userMap.get(userId);      //从map获取
+            String companyIds = tUser.getCompanyIds();
+
+            if(companyIds.contains(String.valueOf(companyId))) {    //如果已经存在
+                continue;
+            }
+
+            //拼接组织id
+            if(companyIds==null) {
+                companyIds = "";
+            }
+
+            if(!companyIds.equals("")) {
+                companyIds += ",";
+            }
+
+            companyIds = new StringBuilder(companyIds).append(companyId).toString();
+
+            String companyNames = tUser.getCompanyNames();
+            //拼接组织名
+            if(companyNames==null) {
+                companyNames = "";
+            }
+
+            if(!companyNames.equals("")) {
+                companyNames += ",";
+            }
+
+            companyNames = new StringBuilder(companyNames).append(companyName).toString();
+
+            user.setCompanyIds(companyIds);
+            user.setCompanyNames(companyNames);
+            //updater
+            user.setUpdateTime(System.currentTimeMillis());
+            user.setUpdateUser(user.getId());
+            user.setUpdateUserName(user.getName());
+            userDao.updateByPrimaryKey(user);
         }
     }
 
