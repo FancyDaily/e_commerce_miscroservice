@@ -236,11 +236,11 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         resultMap.put("userId", userId);
         resultMap.put(AppConstant.USER_TOKEN, token);
 
-        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
-
-        if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
-            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
-        }
+//        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
+//
+//        if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
+//            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
+//        }
 
         // 返回map，包含自定义状态
         return resultMap;

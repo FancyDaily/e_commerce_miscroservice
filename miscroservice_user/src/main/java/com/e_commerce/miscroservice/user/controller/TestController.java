@@ -7,10 +7,13 @@ import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -46,6 +49,8 @@ public class TestController {
 
 
     }
+
+
 
 
 }
