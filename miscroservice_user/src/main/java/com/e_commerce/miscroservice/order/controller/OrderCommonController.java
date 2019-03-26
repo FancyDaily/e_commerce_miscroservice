@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -40,7 +41,7 @@ public class OrderCommonController extends BaseController {
 	 * @param date    派生的日期
 	 * @return
 	 */
-	public TOrder produceOrder(TService service, Integer type, String date) {
+	public TOrder produceOrder(TService service, Integer type, String date) throws NoEnoughCreditException {
 //		logger.error("开始为serviceId为{}的商品派生订单>>>>>>", service.getId());
 		return orderService.produceOrder(service, type, date);
 	}

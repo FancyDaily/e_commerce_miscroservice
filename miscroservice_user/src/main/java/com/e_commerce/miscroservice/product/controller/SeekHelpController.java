@@ -272,7 +272,6 @@ public class SeekHelpController extends BaseController {
 		} catch (Exception e) {
 			logger.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + errInfo(e));
 			result.setSuccess(false);
-			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
 			return result;
 		}

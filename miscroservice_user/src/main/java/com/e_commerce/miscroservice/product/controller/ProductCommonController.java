@@ -73,8 +73,9 @@ public class ProductCommonController extends BaseController {
 	/**
 	 * 超时或者互助时不足自动下架
 	 * @param service 商品
+	 * @param type 1、超过结束时间下架 2、互助时不足下架
 	 */
-	public void autoLowerFrameService(TService service) {
+	public void autoLowerFrameService(TService service, Integer type) {
 		productService.autoLowerFrameService(service);
 	}
 

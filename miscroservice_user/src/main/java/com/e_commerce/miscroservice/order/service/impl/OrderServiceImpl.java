@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
@@ -86,14 +87,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		} else { //新插入的是可见的
 			order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 		}
-		order.setId(null);
+		order.setId(null); // BeanUtil中copy了service的ID  所以这里要置为null
 		orderDao.saveOneOrder(order);
 		// 只有求助并且是互助时才冻结订单
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue()) && order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
 			userService.freezeTimeCoin(order.getCreateUser(), order.getCollectTime() * order.getServicePersonnel(), order.getId(), order.getServiceName());
 		}
 		// 为发布者增加一条订单关系
-
 		return orderRelationService.addTorderRelationship(order);
 	}
 
@@ -693,10 +693,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public TOrder produceOrder(TService service, Integer type, String date) {
+	public TOrder produceOrder(TService service, Integer type, String date) throws NoEnoughCreditException {
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
-			throw new MessageException("501", "用户授信不足");
+			//TODO  进行下架操作
+			throw new NoEnoughCreditException("用户授信不足");
 		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
 //		order.setId(snowflakeIdWorker.nextId());
@@ -734,7 +735,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue())) {
 				logger.info("商品ID为{}的商品已经超时，无法继续派生， 已做下架处理", service.getId(), order.getStartTime(), order.getEndTime());
 				// 下架商品  同步所有订单状态
-				productService.autoLowerFrameService(service);
+				productService.autoLowerFrameService(service, 1);
 				return null;
 
 			} else if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_END.getValue())) {
@@ -777,7 +778,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		/*
 		 * 找到该订单，进行下架处理，
 		 * 进行是求助还是服务的判断，将时间币退还给发布人或者报名人
-		 * 调用其他方法派生下一张订单
 		 */
 		//下架订单  并将状态置为可见状态
 		Long currentTime = System.currentTimeMillis();
@@ -787,17 +787,53 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		order.setUpdateTime(currentTime);
 		orderDao.updateByPrimaryKey(order);
 		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
+			String title = "求助订单结束通知";
+			String content = null;
 			lowerFrameSeekHelpOrder(order);
-			String title = "";
-			String content = "";
-			// TODO  发送消息
+			if (Objects.equals(order.getCollectType(), ProductEnum.COLLECT_TYPE_EACHHELP.getValue())
+					&& !Objects.equals(order.getServicePersonnel(), order.getConfirmNum())) { // 互助时的消息
+				content = "您于 %s 到 %s 的互助“%s”到结束时间已结束，系统已解冻您剩余的互助时，请注意查收";
+				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
+						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+			} else { // 公益时的消息
+				content = "您于 %s - %s 的互助“%s”到结束时间已结束。";
+				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
+						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+			}
+			//订单结束给发布者发送的消息
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
+			//如果有未支付的订单，发送消息并调用 24小时后自动支付的定时
+			Long waitPayPerson = orderRelationshipDao.countWaitPay(orderId);
+			// 如果已经结束了， 还有人待支付
+			if (!Objects.equals(waitPayPerson, 0L)) {
+				title = "请确认互助结束";
+				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
+				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
+						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
+				// TODO 发送MQ 激活姜修弘的定时任务
+				// TODO 发送模板消息
+			}
+
 		} else { // 是服务
 			lowerFrameServiceOrder(order);
-			String title = "";
-			String content = "";
-			// TODO 发送消息
+			String title = "服务订单结束通知";
+			String content = "您于 %s - %s 的互助“%s”到结束时间已结束。";
+			content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
+					, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
+			List<TOrderRelationship> listWaitPay = orderRelationshipDao.selectWaitPay(orderId);
+			for (TOrderRelationship relationship : listWaitPay) {
+				// 这是一个服务  接单用户就是求助者  给求助者发消息
+				Long userId = relationship.getReceiptUserId();
+				title = "请确认互助结束";
+				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
+				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
+						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				messageService.messageSave(order.getId(), new AdminUser(), title, content, userId, currentTime);
+				// TODO 发送MQ 激活姜修弘的定时任务
+				// TODO  发送模板消息
+			}
 		}
 	}
 
