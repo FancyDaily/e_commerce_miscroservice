@@ -346,9 +346,10 @@ public interface UserService {
      * 手机号验证码登录
      * @param telephone
      * @param validCode
+     * @param uuid 设备号
      * @return
      */
-    Map<String, Object> loginUserBySMS(String telephone, String validCode);
+    Map<String, Object> loginUserBySMS(String telephone, String validCode,String uuid);
 
     TUser rigester(TUser user);
 
@@ -394,4 +395,12 @@ public interface UserService {
      * @return
      */
     CompanyDailyPaymentView queryPaymentToDay(TUser user);
+
+    /**
+     * 创建一个红包
+     * @param user
+     * @param bonusPackage
+     * @return
+     */
+    TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage);
 }

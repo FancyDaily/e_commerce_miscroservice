@@ -1,13 +1,19 @@
 package com.e_commerce.miscroservice.user.dao;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
-import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public interface UserTimeRecordDao {
+    /**
+     * 查找月度流水记录
+     * @param userId
+     * @param begin
+     * @param end
+     * @return
+     */
     List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end);
 
     Long insert(TUserTimeRecord record);
@@ -37,5 +43,13 @@ public interface UserTimeRecordDao {
 
     List<TUserTimeRecord> selectByUserId(Long id);
 
-    List<TUserTimeRecord> selectByUserIdOrFromUserIdAndTypeBetween(Long userId, PaymentEnum paymentTypeAceptServ, long betLeft, long betRight);
+    /**
+     * 查找
+     * @param userId 用户id
+     * @param paymentType 支付枚举类型
+     * @param betLeft 区间-起
+     * @param betRight 区间-止
+     * @return
+     */
+    List<TUserTimeRecord> selectByUserIdOrFromUserIdAndTypeBetween(Long userId, int paymentType, long betLeft, long betRight);
 }

@@ -6,11 +6,13 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.AllTypeJsonEntity;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
+import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
@@ -35,310 +37,316 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.io.IOException;
 import java.util.*;
 
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX;
+
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
-	@Autowired
-	private SendSmsService smsService;
+    @Autowired
+    private AuthorizeRpcService authorizeRpcService;
 
-	@Autowired
-	private OrderCommonController orderService;
+    @Autowired
+    private SendSmsService smsService;
 
-	@Autowired
-	private MessageCommonController messageService;
+    @Autowired
+    private OrderCommonController orderService;
 
-	@Autowired
-	private GrowthValueService growthValueService;
+    @Autowired
+    private MessageCommonController messageService;
 
-	@Autowired
-	private WechatService wechatService;
+    @Autowired
+    private GrowthValueService growthValueService;
 
-	@Autowired
-	private UserDao userDao;
+    @Autowired
+    private WechatService wechatService;
 
-	@Autowired
-	private UserTimeRecordDao userTimeRecordDao;
+    @Autowired
+    private UserDao userDao;
 
-	@Autowired
-	private UserFreezeDao userFreezeDao;
+    @Autowired
+    private UserTimeRecordDao userTimeRecordDao;
 
-	@Autowired
-	private PublicWelfareDao publicWelfareDao;
+    @Autowired
+    private UserFreezeDao userFreezeDao;
 
-	@Autowired
-	private UserSkillDao userSkillDao;
+    @Autowired
+    private PublicWelfareDao publicWelfareDao;
 
-	@Autowired
-	private UserFollowDao userFollowDao;
+    @Autowired
+    private UserSkillDao userSkillDao;
 
-	@Autowired
-	private BonusPackageDao bonusPackageDao;
+    @Autowired
+    private UserFollowDao userFollowDao;
 
-	@Autowired
-	private UserAuthDao userAuthDao;
+    @Autowired
+    private BonusPackageDao bonusPackageDao;
 
-	@Autowired
-	private CompanyDao companyDao;
+    @Autowired
+    private UserAuthDao userAuthDao;
 
-	@Autowired
-	private UserTaskDao userTaskDao;
+    @Autowired
+    private CompanyDao companyDao;
 
-	@Autowired
-	private TypeDictionariesDao typeDictionariesDao;
+    @Autowired
+    private UserTaskDao userTaskDao;
 
-	@Autowired
-	private UserCompanyDao userCompanyDao;
+    @Autowired
+    private TypeDictionariesDao typeDictionariesDao;
 
-	@Autowired
-	private GroupDao groupDao;
+    @Autowired
+    private UserCompanyDao userCompanyDao;
 
-	@Autowired
-	private TypeRecordDao typeRecordDao;
+    @Autowired
+    private GroupDao groupDao;
 
-	@Autowired
-	private RedisUtil redisUtil;
+    @Autowired
+    private TypeRecordDao typeRecordDao;
 
-	@Value("${debug}")
-	private String debug;
+    @Autowired
+    private RedisUtil redisUtil;
 
-	@Value("${page.invite}")
-	private String pageValueInvite;
+    @Value("${debug}")
+    private String debug;
 
-	@Value("${page.person}")
-	private String pageValuePerson;
+    @Value("${page.invite}")
+    private String pageValueInvite;
 
-	@Value("${page.service}")
-	private String pageValueService;
+    @Value("${page.person}")
+    private String pageValuePerson;
 
-	@Value("${page.help}")
-	private String pageValueHelp;
+    @Value("${page.service}")
+    private String pageValueService;
 
-	@Value("${page.company}")
-	private String pageValueCompany;
+    @Value("${page.help}")
+    private String pageValueHelp;
 
-	/**
-	 * 时间轨迹
-	 *
-	 * @param user
-	 * @param ymString
-	 * @param option
-	 * @return
-	 */
-	@Override
-	public Map<String, Object> payments(TUser user, String ymString, String option) {
-		// id
-		Long id = user.getId();
+    @Value("${page.company}")
+    private String pageValueCompany;
 
-		// 同步
-		user = userDao.selectByPrimaryKey(id);  //TODO
+    /**
+     * 时间轨迹
+     *
+     * @param user
+     * @param ymString
+     * @param option
+     * @return
+     */
+    @Override
+    public Map<String, Object> payments(TUser user, String ymString, String option) {
+        // id
+        Long id = user.getId();
 
-		// 结果
-		List<SingleUserTimeRecordView> resultList = new ArrayList<SingleUserTimeRecordView>();
+        // 同步
+        user = userDao.selectByPrimaryKey(id);  //TODO
 
-		// 判空
-		if (StringUtil.isEmpty(ymString)) {
-			ymString = DateUtil.timeStamp2Date(System.currentTimeMillis());
-		}
+        // 结果
+        List<SingleUserTimeRecordView> resultList = new ArrayList<SingleUserTimeRecordView>();
 
-		if (!StringUtil.isEmpty(ymString) && !ymString.contains("-")) {
-			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "日期参数格式不正确!");
-		}
+        // 判空
+        if (StringUtil.isEmpty(ymString)) {
+            ymString = DateUtil.timeStamp2Date(System.currentTimeMillis());
+        }
 
-		// 当前月份
-		String[] split = ymString.split("-");
-		String month = split[1].toString();
+        if (!StringUtil.isEmpty(ymString) && !ymString.contains("-")) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "日期参数格式不正确!");
+        }
 
-		// 处理请求参数 ymString
-		Map<String, Object> map = DateUtil.ym2BetweenStamp(ymString);
-		String beginStr = (String) map.get("begin");
-		String endStr = (String) map.get("end");
-		Long begin = Long.valueOf(beginStr);
-		Long end = Long.valueOf(endStr);
+        // 当前月份
+        String[] split = ymString.split("-");
+        String month = split[1].toString();
 
-		// 返回结果
-		List<TUserTimeRecord> totalList = userTimeRecordDao.selectMonthlyTimeRecord(id, begin, end);   //TODO
+        // 处理请求参数 ymString
+        Map<String, Object> map = DateUtil.ym2BetweenStamp(ymString);
+        String beginStr = (String) map.get("begin");
+        String endStr = (String) map.get("end");
+        Long begin = Long.valueOf(beginStr);
+        Long end = Long.valueOf(endStr);
 
-		// 计算月度总计，并分组：收入、支出
-		List<SingleUserTimeRecordView> inList = new ArrayList<SingleUserTimeRecordView>();
-		List<SingleUserTimeRecordView> outList = new ArrayList<SingleUserTimeRecordView>();
-		Long totalIn = 0L;
-		Long totalOut = 0L;
+        // 返回结果
+        List<TUserTimeRecord> totalList = userTimeRecordDao.selectMonthlyTimeRecord(id, begin, end);   //TODO
 
-		// 筛选数据、统计总和
-		for (TUserTimeRecord record : totalList) {
-			SingleUserTimeRecordView view = BeanUtil.copy(record, SingleUserTimeRecordView.class);
-			view.setIdString(String.valueOf(view.getId()));
-			view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
-			Integer type = record.getType();
-			for (PaymentEnum payType : PaymentEnum.values()) {
-				if (type.equals(payType.getCode())) {
-					view.setTitle(payType.getMessage());
-					break;
-				}
-			}
+        // 计算月度总计，并分组：收入、支出
+        List<SingleUserTimeRecordView> inList = new ArrayList<SingleUserTimeRecordView>();
+        List<SingleUserTimeRecordView> outList = new ArrayList<SingleUserTimeRecordView>();
+        Long totalIn = 0L;
+        Long totalOut = 0L;
 
-			// 流水名目
-			if (id.equals(record.getUserId())) { // 收入
-				if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getCode())) {
-					view.setTitle(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getMessage());
-				}
-				resultList.add(view);
-				totalIn += record.getTime();
-				inList.add(view);
-			}
+        // 筛选数据、统计总和
+        for (TUserTimeRecord record : totalList) {
+            SingleUserTimeRecordView view = BeanUtil.copy(record, SingleUserTimeRecordView.class);
+            view.setIdString(String.valueOf(view.getId()));
+            view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
+            Integer type = record.getType();
+            for (PaymentEnum payType : PaymentEnum.values()) {
+                if (type.equals(payType.getCode())) {
+                    view.setTitle(payType.getMessage());
+                    break;
+                }
+            }
 
-			if (id.equals(record.getFromUserId())) { // 支出
-				if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())) {
-					view.setTitle(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getMessage());
-				}
-				view.setTime(-view.getTime());
-				resultList.add(view);
-				totalOut += record.getTime();
-				outList.add(view);
-			}
-		}
+            // 流水名目
+            if (id.equals(record.getUserId())) { // 收入
+                if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getCode())) {
+                    view.setTitle(PaymentEnum.PAYMENT_TYPE_PROVIDE_SERV.getMessage());
+                }
+                resultList.add(view);
+                totalIn += record.getTime();
+                inList.add(view);
+            }
 
-		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_IN, option)) { // 收入
-			resultList = inList;
-		}
+            if (id.equals(record.getFromUserId())) { // 支出
+                if (record.getType().equals(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())) {
+                    view.setTitle(PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getMessage());
+                }
+                view.setTime(-view.getTime());
+                resultList.add(view);
+                totalOut += record.getTime();
+                outList.add(view);
+            }
+        }
 
-		if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 支出
-			resultList = outList;
-		}
+        if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_IN, option)) { // 收入
+            resultList = inList;
+        }
 
-		Collections.sort(resultList, new Comparator<SingleUserTimeRecordView>() {
+        if (StringUtil.equals(AppConstant.PAYMENTS_OPTION_OUT, option)) { // 支出
+            resultList = outList;
+        }
 
-			@Override
-			public int compare(SingleUserTimeRecordView o1, SingleUserTimeRecordView o2) {
-				return (int) (o2.getCreateTime() - o1.getCreateTime());
-			}
-		});
+        Collections.sort(resultList, new Comparator<SingleUserTimeRecordView>() {
 
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		Long surplusTime = user.getSurplusTime(); // 总额
-		Long freezeTime = user.getFreezeTime(); // 冻结
-		Long vacantTime = surplusTime - freezeTime; // 可用
-		resultMap.put("total", surplusTime); // 总额
-		resultMap.put("vacant", vacantTime);
-		resultMap.put("frozen", freezeTime);
-		resultMap.put("month", month);
-		resultMap.put("monthTotalIn", totalIn);
-		resultMap.put("monthTotalOut", totalOut);
-		resultMap.put("monthList", resultList);
+            @Override
+            public int compare(SingleUserTimeRecordView o1, SingleUserTimeRecordView o2) {
+                return (int) (o2.getCreateTime() - o1.getCreateTime());
+            }
+        });
 
-		return resultMap;
-	}
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        Long surplusTime = user.getSurplusTime(); // 总额
+        Long freezeTime = user.getFreezeTime(); // 冻结
+        Long vacantTime = surplusTime - freezeTime; // 可用
+        resultMap.put("total", surplusTime); // 总额
+        resultMap.put("vacant", vacantTime);
+        resultMap.put("frozen", freezeTime);
+        resultMap.put("month", month);
+        resultMap.put("monthTotalIn", totalIn);
+        resultMap.put("monthTotalOut", totalOut);
+        resultMap.put("monthList", resultList);
 
-	/**
-	 * 冻结明细
-	 *
-	 * @param id
-	 * @param lastTime
-	 * @param pageSize
-	 * @return
-	 */
-	@Override
-	public QueryResult<UserFreezeView> frozenList(Long id, Long lastTime, Integer pageSize) {
-		// 判空
-		if (lastTime == null) {
-			lastTime = System.currentTimeMillis();
-		}
+        return resultMap;
+    }
 
-		if (pageSize == null) {
-			pageSize = 0;
-		}
+    /**
+     * 冻结明细
+     *
+     * @param id
+     * @param lastTime
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public QueryResult<UserFreezeView> frozenList(Long id, Long lastTime, Integer pageSize) {
+        // 判空
+        if (lastTime == null) {
+            lastTime = System.currentTimeMillis();
+        }
 
-		List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id, lastTime);
+        if (pageSize == null) {
+            pageSize = 0;
+        }
 
-		// 如果列表为空
-		if (userFreezes.isEmpty()) {
-			return new QueryResult<UserFreezeView>();
-		}
+        List<TUserFreeze> userFreezes = userFreezeDao.queryUserFreezeDESC(id, lastTime);
 
-		// idList
-		List<Long> idList = new ArrayList<Long>();
-		// 结果集list
-		List<UserFreezeView> resultList = new ArrayList<UserFreezeView>();
-		// 结果集list
-		List<UserFreezeView> finalResultList = new ArrayList<UserFreezeView>();
-		// 遍历装载 -> 冻结金额、分页时间、服务id
-		for (TUserFreeze userFreeze : userFreezes) {
-			idList.add(userFreeze.getOrderId());
-			UserFreezeView result = BeanUtil.copy(userFreeze, UserFreezeView.class); //TODO 装载分页时间戳、冻结时间、订单id
-			resultList.add(result);
-		}
+        // 如果列表为空
+        if (userFreezes.isEmpty()) {
+            return new QueryResult<UserFreezeView>();
+        }
 
-		// PageHelper
-		Page<Object> startPage = PageHelper.startPage(0, pageSize);
+        // idList
+        List<Long> idList = new ArrayList<Long>();
+        // 结果集list
+        List<UserFreezeView> resultList = new ArrayList<UserFreezeView>();
+        // 结果集list
+        List<UserFreezeView> finalResultList = new ArrayList<UserFreezeView>();
+        // 遍历装载 -> 冻结金额、分页时间、服务id
+        for (TUserFreeze userFreeze : userFreezes) {
+            idList.add(userFreeze.getOrderId());
+            UserFreezeView result = BeanUtil.copy(userFreeze, UserFreezeView.class); //TODO 装载分页时间戳、冻结时间、订单id
+            resultList.add(result);
+        }
 
-		// 服务集
-		// 查找订单表
-		List<TOrder> orders = orderService.selectOrdersInOrderIds(idList);//TODO 调用订单模块的controller() 入餐 -> orderId
-		//建立订单id-订单实体映射
-		Map<Long, TOrder> orderMap = new HashMap<Long, TOrder>();
-		for (TOrder order : orders) {
-			orderMap.put(order.getId(), order);
-		}
+        // PageHelper
+        Page<Object> startPage = PageHelper.startPage(0, pageSize);
 
-		// 遍历装载
-		for (UserFreezeView result : resultList) {
-			TOrder order = orderMap.get(result.getOrderId());
-			if (order != null) {
-				result.setAddressName(order.getAddressName());
-				result.setServiceName(order.getServiceName());
-				result.setStartTime(order.getStartTime());
-				result.setEndTime(order.getEndTime());
-				result.setServicePersonnel(order.getServicePersonnel());
-				result.setType(order.getType());
-				result.setServiceIdString(String.valueOf(order.getServiceId()));
-				result.setOrderIdString(String.valueOf(order.getId()));
-				finalResultList.add(result);
-			}
-		}
+        // 服务集
+        // 查找订单表
+        List<TOrder> orders = orderService.selectOrdersInOrderIds(idList);//TODO 调用订单模块的controller() 入餐 -> orderId
+        //建立订单id-订单实体映射
+        Map<Long, TOrder> orderMap = new HashMap<Long, TOrder>();
+        for (TOrder order : orders) {
+            orderMap.put(order.getId(), order);
+        }
 
-		QueryResult<UserFreezeView> queryResult = new QueryResult<UserFreezeView>();
-		queryResult.setResultList(finalResultList);
-		queryResult.setTotalCount(startPage.getTotal());
+        // 遍历装载
+        for (UserFreezeView result : resultList) {
+            TOrder order = orderMap.get(result.getOrderId());
+            if (order != null) {
+                result.setAddressName(order.getAddressName());
+                result.setServiceName(order.getServiceName());
+                result.setStartTime(order.getStartTime());
+                result.setEndTime(order.getEndTime());
+                result.setServicePersonnel(order.getServicePersonnel());
+                result.setType(order.getType());
+                result.setServiceIdString(String.valueOf(order.getServiceId()));
+                result.setOrderIdString(String.valueOf(order.getId()));
+                finalResultList.add(result);
+            }
+        }
 
-		return queryResult;
-	}
+        QueryResult<UserFreezeView> queryResult = new QueryResult<UserFreezeView>();
+        queryResult.setResultList(finalResultList);
+        queryResult.setTotalCount(startPage.getTotal());
 
-	/**
-	 * 公益历程列表
-	 *
-	 * @param user
-	 * @param lastTime
-	 * @param pageSize
-	 * @param year
-	 * @return
-	 */
-	@Override
-	public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
-		user = userDao.selectByPrimaryKey(user.getId());
+        return queryResult;
+    }
 
-		// 判空
-		if (lastTime == null) {
-			lastTime = System.currentTimeMillis();
-		}
+    /**
+     * 公益历程列表
+     *
+     * @param user
+     * @param lastTime
+     * @param pageSize
+     * @param year
+     * @return
+     */
+    @Override
+    public Map<String, Object> publicWelfareList(TUser user, Long lastTime, Integer pageSize, Integer year) {
+        user = userDao.selectByPrimaryKey(user.getId());
 
-		if (pageSize == null) {
-			pageSize = 0;
-		}
+        // 判空
+        if (lastTime == null) {
+            lastTime = System.currentTimeMillis();
+        }
 
-		if (year == null) {
-			long timeStamp = System.currentTimeMillis();
-			String timeStamp2Date = DateUtil.timeStamp2Date(timeStamp);
-			String[] split = timeStamp2Date.split("-");
-			year = Integer.valueOf(split[0]);
-		}
+        if (pageSize == null) {
+            pageSize = 0;
+        }
 
-		// between
-		Map<String, Object> betMap = DateUtil.y2BetweenStamp(year);
-		Long betLeft = (Long) betMap.get("betLeft");
-		Long betRight = (Long) betMap.get("betRight");
+        if (year == null) {
+            long timeStamp = System.currentTimeMillis();
+            String timeStamp2Date = DateUtil.timeStamp2Date(timeStamp);
+            String[] split = timeStamp2Date.split("-");
+            year = Integer.valueOf(split[0]);
+        }
 
-		// id
-		Long id = user.getId();
+        // between
+        Map<String, Object> betMap = DateUtil.y2BetweenStamp(year);
+        Long betLeft = (Long) betMap.get("betLeft");
+        Long betRight = (Long) betMap.get("betRight");
+
+        // id
+        Long id = user.getId();
 
         WelfareParamView param = new WelfareParamView();
         param.setId(id);
@@ -399,12 +407,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         for (TUserSkill userSkill : userSkills) {
             UserSkillView theView = BeanUtil.copy(userSkill, UserSkillView.class);
             theView.setIdString(String.valueOf(theView.getId()));
-            if (theView.getDetailUrls() != null && theView.getDetailUrls().contains(",")) {	//多张图
-				theView.setDetailUrlArray(theView.getDetailUrls().split(","));
-			} else if(theView.getDetailUrls() != null && !theView.getDetailUrls().contains(",")) {	//单张图
-				String[] array = {theView.getDetailUrls()};
-				theView.setDetailUrlArray(array);
-			}
+            if (theView.getDetailUrls() != null && theView.getDetailUrls().contains(",")) {    //多张图
+                theView.setDetailUrlArray(theView.getDetailUrls().split(","));
+            } else if (theView.getDetailUrls() != null && !theView.getDetailUrls().contains(",")) {    //单张图
+                String[] array = {theView.getDetailUrls()};
+                theView.setDetailUrlArray(array);
+            }
             userSkillList.add(theView);
         }
         skillView.setSkillCnt(userSkills.size());
@@ -440,35 +448,35 @@ public class UserServiceImpl extends BaseService implements UserService {
         userSkillDao.insert(skill);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCompletion(int status) {
-				TUser finalUser = userDao.selectByPrimaryKey(user.getId());
-				//成长值
-				finalUser = taskComplete(finalUser, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
+            @Override
+            public void afterCompletion(int status) {
+                TUser finalUser = userDao.selectByPrimaryKey(user.getId());
+                //成长值
+                finalUser = taskComplete(finalUser, GrowthValueEnum.GROWTH_TYPE_UNREP_SKILL);
 
-				//维护t_user表 skill字段
-				String formerSkills = finalUser.getSkill();
-				if(formerSkills==null) {	//一个技能都没有
-					formerSkills = "";
-				}
+                //维护t_user表 skill字段
+                String formerSkills = finalUser.getSkill();
+                if (formerSkills == null) {    //一个技能都没有
+                    formerSkills = "";
+                }
 
-				if(!formerSkills.equals("")) {
-					formerSkills += ",";
-				}
+                if (!formerSkills.equals("")) {
+                    formerSkills += ",";
+                }
 
-				String latestSkills = new StringBuilder(formerSkills).append(skill.getName()).toString();
-				finalUser.setSkill(latestSkills);
-				//updater
-				finalUser.setUpdateTime(System.currentTimeMillis());
-				finalUser.setUpdateUser(finalUser.getId());
-				finalUser.setUpdateUserName(finalUser.getName());
-				userDao.updateByPrimaryKey(finalUser);
-				//TODO 刷新缓存
+                String latestSkills = new StringBuilder(formerSkills).append(skill.getName()).toString();
+                finalUser.setSkill(latestSkills);
+                //updater
+                finalUser.setUpdateTime(System.currentTimeMillis());
+                finalUser.setUpdateUser(finalUser.getId());
+                finalUser.setUpdateUserName(finalUser.getName());
+                userDao.updateByPrimaryKey(finalUser);
+                //TODO 刷新缓存
 
-				super.afterCompletion(status);
-			}
-		});
-	}
+                super.afterCompletion(status);
+            }
+        });
+    }
 
     /**
      * 修改技能
@@ -490,31 +498,31 @@ public class UserServiceImpl extends BaseService implements UserService {
         userSkillDao.update(skill);
 
         //维护t_user表 skill字段
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCompletion(int status) {
-				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
-				StringBuilder builder = new StringBuilder();
-				for(TUserSkill skill:latestSkills) {
-					builder = builder.append(skill.getName()).append(",");
-				}
-				String skills = builder.toString();
-				if(skills.endsWith(",")) {
-					skills = skills.substring(0,skills.length()-1);
-				}
-				TUser finalUser = new TUser();
-				finalUser = userDao.selectByPrimaryKey(user.getId());
-				finalUser.setSkill(skills);
-				//updater
-				finalUser.setUpdateTime(System.currentTimeMillis());
-				finalUser.setUpdateUser(finalUser.getId());
-				finalUser.setUpdateUserName(finalUser.getName());
-				userDao.updateByPrimaryKey(finalUser);
-				//TODO 刷新缓存
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+                List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+                StringBuilder builder = new StringBuilder();
+                for (TUserSkill skill : latestSkills) {
+                    builder = builder.append(skill.getName()).append(",");
+                }
+                String skills = builder.toString();
+                if (skills.endsWith(",")) {
+                    skills = skills.substring(0, skills.length() - 1);
+                }
+                TUser finalUser = new TUser();
+                finalUser = userDao.selectByPrimaryKey(user.getId());
+                finalUser.setSkill(skills);
+                //updater
+                finalUser.setUpdateTime(System.currentTimeMillis());
+                finalUser.setUpdateUser(finalUser.getId());
+                finalUser.setUpdateUserName(finalUser.getName());
+                userDao.updateByPrimaryKey(finalUser);
+                //TODO 刷新缓存
 
-				super.afterCompletion(status);
-			}
-		});
+                super.afterCompletion(status);
+            }
+        });
     }
 
     /**
@@ -543,38 +551,38 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         TOrderRelationship orderRelationship = orderService.selectOrdertionshipByuserIdAndOrderId(user.getId(), orderId);
         //如果订单关系不存在，创建一条
-		if(orderRelationship==null) {
-			TOrder order = orderService.selectOrderById(orderId);
-			if(order==null) {
-				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"订单不存在！");
-			}
-			orderRelationship = new TOrderRelationship();
-			orderRelationship.setServiceId(order.getServiceId());
-			orderRelationship.setOrderId(order.getId());
-			orderRelationship.setServiceType(order.getType());
-			orderRelationship.setFromUserId(order.getCreateUser());
-			orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
-			orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
-			orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
-			orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
-			orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
-			orderRelationship.setServiceName(order.getServiceName());
-			orderRelationship.setStartTime(order.getStartTime());
-			orderRelationship.setEndTime(order.getEndTime());
-			orderRelationship.setTimeType(order.getTimeType());
-			orderRelationship.setCollectTime(order.getCollectTime());
-			orderRelationship.setCollectType(order.getCollectType());
-			orderRelationship.setCreateUser(order.getCreateUser());
-			orderRelationship.setCreateUserName(order.getCreateUserName());
-			orderRelationship.setCreateTime(order.getCreateTime());
-			orderRelationship.setUpdateUser(order.getCreateUser());
-			orderRelationship.setUpdateUserName(order.getCreateUserName());
-			orderRelationship.setUpdateTime(order.getCreateTime());
-			orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+        if (orderRelationship == null) {
+            TOrder order = orderService.selectOrderById(orderId);
+            if (order == null) {
+                throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在！");
+            }
+            orderRelationship = new TOrderRelationship();
+            orderRelationship.setServiceId(order.getServiceId());
+            orderRelationship.setOrderId(order.getId());
+            orderRelationship.setServiceType(order.getType());
+            orderRelationship.setFromUserId(order.getCreateUser());
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
+            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
+            orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+            orderRelationship.setServiceName(order.getServiceName());
+            orderRelationship.setStartTime(order.getStartTime());
+            orderRelationship.setEndTime(order.getEndTime());
+            orderRelationship.setTimeType(order.getTimeType());
+            orderRelationship.setCollectTime(order.getCollectTime());
+            orderRelationship.setCollectType(order.getCollectType());
+            orderRelationship.setCreateUser(order.getCreateUser());
+            orderRelationship.setCreateUserName(order.getCreateUserName());
+            orderRelationship.setCreateTime(order.getCreateTime());
+            orderRelationship.setUpdateUser(order.getCreateUser());
+            orderRelationship.setUpdateUserName(order.getCreateUserName());
+            orderRelationship.setUpdateTime(order.getCreateTime());
+            orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
 
-			orderService.insertOrderRelationship(orderRelationship);
-			return;
-		}
+            orderService.insertOrderRelationship(orderRelationship);
+            return;
+        }
         /*if (orderRelationship == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
         }*/
@@ -594,9 +602,9 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public UserPageView page(TUser user, Long userId) {
-    	if(userId==null) {
-    		userId = user.getId();
-		}
+        if (userId == null) {
+            userId = user.getId();
+        }
 
         UserPageView result = new UserPageView();
         //基本信息
@@ -608,14 +616,14 @@ public class UserServiceImpl extends BaseService implements UserService {
         result.setDesensitizedUserView(view);
         user = userDao.selectByPrimaryKey(user.getId());
         //求助列表
-        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false,user);
+        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false, user);
 
         //服务列表
-        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true,user);
+        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true, user);
 
         //技能列表
-		user = new TUser();
-		user.setId(userId);
+        user = new TUser();
+        user.setId(userId);
         UserSkillListView skills = skills(user);
 
         result.setHelps(helps);
@@ -636,8 +644,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public QueryResult pageService(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
-		me = userDao.selectByPrimaryKey(me.getId());
-        return getOnesAvailableItems(userId, pageNum, pageSize, isService,me);
+        me = userDao.selectByPrimaryKey(me.getId());
+        return getOnesAvailableItems(userId, pageNum, pageSize, isService, me);
     }
 
     /**
@@ -662,20 +670,20 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         List<TOrderRelationship> orderRelationships = orderService.selectEndOrdertionshipListByuserId(userId);
         List<Long> orderIds = new ArrayList<>();
-        for(TOrderRelationship orderRelationship:orderRelationships) {
-        	orderIds.add(orderRelationship.getOrderId());
-		}
+        for (TOrderRelationship orderRelationship : orderRelationships) {
+            orderIds.add(orderRelationship.getOrderId());
+        }
 
         //判空
-		if(orderIds.isEmpty()) {
-			return new QueryResult();
-		}
+        if (orderIds.isEmpty()) {
+            return new QueryResult();
+        }
 
         //分页
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         //查找符合条件的订单记录
-        List<TOrder> orders = orderService.selectOrdersInIdsByViewer(orderIds,user);
+        List<TOrder> orders = orderService.selectOrdersInIdsByViewer(orderIds, user);
 
         Map<Long, Object> evaluateMap = new HashMap<>();
         List<TEvaluate> evaluates = orderService.selectEvaluateInOrderIdsAndByUserId(orderIds, userId);
@@ -714,10 +722,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         return result;
     }
 
-    private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService,TUser me) {
+    private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
-        if(userId!=me.getId()) {    //查看别人的主页
+        if (userId != me.getId()) {    //查看别人的主页
             startPage = PageHelper.startPage(pageNum, pageSize);
             orders = orderService.selectOdersByUserId(userId, isService, me);
         }
@@ -754,11 +762,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         userFreezeDao.insert(userFreeze);
     }
 
-	/**
-	 * 删除技能
-	 * @param user
-	 * @param id
-	 */
+    /**
+     * 删除技能
+     *
+     * @param user
+     * @param id
+     */
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void skillDelete(TUser user, Long id) {
@@ -768,46 +777,46 @@ public class UserServiceImpl extends BaseService implements UserService {
         userSkillDao.delete(id);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCompletion(int status) {
-				List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
-				StringBuilder builder = new StringBuilder();
-				for(TUserSkill skill:latestSkills) {
-					builder = builder.append(skill.getName()).append(",");
-				}
-				String skills = builder.toString();
-				if(skills.endsWith(",")) {
-					skills = skills.substring(0,skills.length()-1);
-				}
+            @Override
+            public void afterCompletion(int status) {
+                List<TUserSkill> latestSkills = userSkillDao.queryOnesSkills(user.getId());
+                StringBuilder builder = new StringBuilder();
+                for (TUserSkill skill : latestSkills) {
+                    builder = builder.append(skill.getName()).append(",");
+                }
+                String skills = builder.toString();
+                if (skills.endsWith(",")) {
+                    skills = skills.substring(0, skills.length() - 1);
+                }
 
-				//同步用户表中的技能
-				TUser finalUser = null;
-				finalUser = userDao.selectByPrimaryKey(user.getId());	//DELMARK
-				finalUser.setSkill(skills);
-				//updater
-				finalUser.setUpdateTime(System.currentTimeMillis());
-				finalUser.setUpdateUser(finalUser.getId());
-				finalUser.setUpdateUserName(finalUser.getName());
+                //同步用户表中的技能
+                TUser finalUser = null;
+                finalUser = userDao.selectByPrimaryKey(user.getId());    //DELMARK
+                finalUser.setSkill(skills);
+                //updater
+                finalUser.setUpdateTime(System.currentTimeMillis());
+                finalUser.setUpdateUser(finalUser.getId());
+                finalUser.setUpdateUserName(finalUser.getName());
 
-				userDao.updateByPrimaryKey(finalUser);
-				//TODO 刷新缓存
-				super.afterCompletion(status);
-			}
-		});
+                userDao.updateByPrimaryKey(finalUser);
+                //TODO 刷新缓存
+                super.afterCompletion(status);
+            }
+        });
     }
 
     @Override
     public DesensitizedUserView info(TUser user, Long userId) {
-		if(userId==null) {
-			userId = user.getId();
-		}
+        if (userId == null) {
+            userId = user.getId();
+        }
         TUser findUser = userDao.info(userId);
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
         DesensitizedUserView view = BeanUtil.copy(findUser, DesensitizedUserView.class);
         String companyNames = view.getCompanyNames();
-        if(companyNames!=null) {
+        if (companyNames != null) {
             StringBuilder stringBuilder = new StringBuilder();
             int count = 0;
             for (String companyName : companyNames.split(",")) {
@@ -879,47 +888,47 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 如果为修改昵称 -> 同步修改服务表里的创建者昵称
         String name = user.getName();
-        if (name != null && !name.equals(idHolder.getName())) {	//进行了修改昵称
+        if (name != null && !name.equals(idHolder.getName())) {    //进行了修改昵称
             // 调用订单模块的方法 同步修改订单相关昵称
-			orderService.synOrderCreateUserName(user.getId(),user.getName());
+            orderService.synOrderCreateUserName(user.getId(), user.getName());
         }
 
-		final TUser[] finalUser = new TUser[1];
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCompletion(int status) {
-				finalUser[0] = completeReward(user);	//个人信息完整度奖励
+        final TUser[] finalUser = new TUser[1];
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+                finalUser[0] = completeReward(user);    //个人信息完整度奖励
 
-				final TUser tUser = finalUser[0];
-				// 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
-				if (updateData != null && updateData.getUserTel() != null) {
-					TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
-					if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
-							&& !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
-						companyAccount.setUserTel(telephone);
-						// updater
-						companyAccount.setUpdateTime(currentTimeMillis);
-						companyAccount.setUpdateUser(tUser.getId());
-						companyAccount.setUpdateUserName(tUser.getName());
-						userDao.updateByPrimaryKey(companyAccount);
-						// 删除组织账号的缓存
-						String redisKey = "str" + companyAccount.getId();
-						String companyToken = (String) redisUtil.get(redisKey);
-						if (companyToken != null) {
-							redisUtil.del(companyToken);// 删除访问凭证
-						}
-						redisUtil.del(redisKey);// 删除登录凭证
-					}
-				}
+                final TUser tUser = finalUser[0];
+                // 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
+                if (updateData != null && updateData.getUserTel() != null) {
+                    TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
+                    if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
+                            && !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
+                        companyAccount.setUserTel(telephone);
+                        // updater
+                        companyAccount.setUpdateTime(currentTimeMillis);
+                        companyAccount.setUpdateUser(tUser.getId());
+                        companyAccount.setUpdateUserName(tUser.getName());
+                        userDao.updateByPrimaryKey(companyAccount);
+                        // 删除组织账号的缓存
+                        String redisKey = "str" + companyAccount.getId();
+                        String companyToken = (String) redisUtil.get(redisKey);
+                        if (companyToken != null) {
+                            redisUtil.del(companyToken);// 删除访问凭证
+                        }
+                        redisUtil.del(redisKey);// 删除登录凭证
+                    }
+                }
 
-				// 刷新缓存
-				flushRedisUser(token, tUser);
+                // 刷新缓存
+                flushRedisUser(token, tUser);
 
-				super.afterCompletion(status);
-			}
-		});
+                super.afterCompletion(status);
+            }
+        });
 
-		return token;
+        return token;
     }
 
 
@@ -964,32 +973,32 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
 
         //昵称
-		String name = user.getName();
+        String name = user.getName();
         if (name != null && !name.isEmpty()) {
-        	int num = PersonalIntegrity.NAME.getNum();
-        	completeNum += num;
-		}
+            int num = PersonalIntegrity.NAME.getNum();
+            completeNum += num;
+        }
 
-		//职位
-		String occupation = user.getOccupation();
-        if(occupation != null && !occupation.isEmpty()) {
-        	int num = PersonalIntegrity.POST.getNum();
-        	completeNum += num;
-		}
+        //职位
+        String occupation = user.getOccupation();
+        if (occupation != null && !occupation.isEmpty()) {
+            int num = PersonalIntegrity.POST.getNum();
+            completeNum += num;
+        }
 
-		String college = user.getCollege();
+        String college = user.getCollege();
         if (college != null && !college.isEmpty()) {
             int num = PersonalIntegrity.EDUCATION.getNum();
             completeNum += num;
         }
 
-		String remarks = user.getRemarks();
-        if(remarks !=null && !remarks.isEmpty()) {
-        	int num = PersonalIntegrity.REMARKS.getNum();
-        	completeNum += num;
-		}
+        String remarks = user.getRemarks();
+        if (remarks != null && !remarks.isEmpty()) {
+            int num = PersonalIntegrity.REMARKS.getNum();
+            completeNum += num;
+        }
 
-		if (completeNum >= completeTaskNum) {
+        if (completeNum >= completeTaskNum) {
             // 获取任务奖励
             Long reward = TaskEnum.TASK_PAGE.getReward();
             taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_PAGE);  //TODO 成长值相关
@@ -1011,9 +1020,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public TBonusPackage preGenerateBonusPackage(TUser user, TBonusPackage bonusPackage) {
         //判穷
-		if(bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
-		}
+        if (bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+        }
 
         long currentTimeMillis = System.currentTimeMillis();
         bonusPackage.setUserId(user.getId());
@@ -1050,9 +1059,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         Long time = bonusPackage.getTime();
         Long currentMills = System.currentTimeMillis();
         //判穷
-		if(bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
-		}
+        if (bonusPackage.getTime() > (user.getSurplusTime() - user.getFreezeTime())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+        }
 
         //余额变动
         user = userDao.selectByPrimaryKey(user.getId());    //最新数据
@@ -1113,9 +1122,9 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public BonusPackageVIew bonusPackageInfo(TUser user, Long bonusId) {
-    	if(bonusId==null) {
-			return null;
-		}
+        if (bonusId == null) {
+            return null;
+        }
         TBonusPackage info = bonusPackageDao.info(bonusId);
         if (info == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在！");
@@ -1442,146 +1451,146 @@ public class UserServiceImpl extends BaseService implements UserService {
         return String.valueOf(AppConstant.DEFAULT_AUTH_STATUS);
     }
 
-	/**
-	 * 每日签到
-	 *
-	 * @param token
-	 * @param user
-	 * @return
-	 */
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public long signUp(String token, TUser user) {
-		// 判空
-		if (user == null) {
-			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
-		}
+    /**
+     * 每日签到
+     *
+     * @param token
+     * @param user
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public long signUp(String token, TUser user) {
+        // 判空
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "用户为空！");
+        }
 
-		// id
-		Long id = user.getId();
+        // id
+        Long id = user.getId();
 
-		// 判空
-		if (id == null) {
-			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
-		}
+        // 判空
+        if (id == null) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "id为空！");
+        }
 
-		// TODO 从数据库获得即时的用户
-		user = userDao.selectByPrimaryKey(id);
+        // TODO 从数据库获得即时的用户
+        user = userDao.selectByPrimaryKey(id);
 
-		// 从未签到标记
-		boolean flag = false;
+        // 从未签到标记
+        boolean flag = false;
 
-		// 查询签到相关记录
-		List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
+        // 查询签到相关记录
+        List<TUserTask> tasks = userTaskDao.findlatestSignUps(id);
 
-		TUserTask userTask = null;
-		if (tasks.isEmpty()) {
-			flag = true;
-		} else {
-			userTask = tasks.get(0); // 最后签到实体类
-		}
+        TUserTask userTask = null;
+        if (tasks.isEmpty()) {
+            flag = true;
+        } else {
+            userTask = tasks.get(0); // 最后签到实体类
+        }
 
-		long reward = AppConstant.SIGN_UP_BONUS;
-		Integer targetNum = 1;
-		long special = 3;
-		if (!flag) {
-			// 查询连续签到天数与最后签到日
-			String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
+        long reward = AppConstant.SIGN_UP_BONUS;
+        Integer targetNum = 1;
+        long special = 3;
+        if (!flag) {
+            // 查询连续签到天数与最后签到日
+            String status = DateUtil.curtMillesVsYesMilles(userTask.getCreateTime()); // 最后签到日类型(昨天、今天、其他)
 
-			// 计数器
-			int count = 0;
+            // 计数器
+            int count = 0;
 
-			for (int i = 0; i < tasks.size(); i++) {
-				count++;
-				TUserTask thisDic = tasks.get(i);
-				Long thisTimeStamp = thisDic.getCreateTime();
-				TUserTask nextDic;
-				Long nextTimeStamp = 0l;
-				if (i != tasks.size() - 1) {
-					nextDic = tasks.get(i + 1);
-					nextTimeStamp = nextDic.getCreateTime();
-				}
-				if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
-					break;
-				}
-			}
+            for (int i = 0; i < tasks.size(); i++) {
+                count++;
+                TUserTask thisDic = tasks.get(i);
+                Long thisTimeStamp = thisDic.getCreateTime();
+                TUserTask nextDic;
+                Long nextTimeStamp = 0l;
+                if (i != tasks.size() - 1) {
+                    nextDic = tasks.get(i + 1);
+                    nextTimeStamp = nextDic.getCreateTime();
+                }
+                if (!DateUtil.oneMillesVsAnother(thisTimeStamp, nextTimeStamp)) {
+                    break;
+                }
+            }
 
-			if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
-				count--;
-			}
+            if (!status.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY)) {
+                count--;
+            }
 
-			targetNum = count % 7;
-			// 最后签到日信息
-			String dayCountStr = String.valueOf(targetNum);
+            targetNum = count % 7;
+            // 最后签到日信息
+            String dayCountStr = String.valueOf(targetNum);
 
-			// 最后签到日为今天，提示 -> 请勿重复签到
-			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
-				throw new MessageException("请勿重复签到");
-			}
+            // 最后签到日为今天，提示 -> 请勿重复签到
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_TODAY, status)) {
+                throw new MessageException("请勿重复签到");
+            }
 
-			// 最后签到日为昨天
-			// -> 计数等于6，计数为7，给出特殊奖励
-			// -> 计数等于7，计数为0,给出普通奖励
-			// -> else，计数++，给出普通奖励
-			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
-				// 处理计数
-				if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
-					targetNum = 0;
-				} else {
-					targetNum = targetNum + 1;
-				}
+            // 最后签到日为昨天
+            // -> 计数等于6，计数为7，给出特殊奖励
+            // -> 计数等于7，计数为0,给出普通奖励
+            // -> else，计数++，给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_YESTERDAY, status)) {
+                // 处理计数
+                if (StringUtil.equals(AppConstant.SIGN_UP_EDGE, dayCountStr)) { // 7 -> 归零
+                    targetNum = 0;
+                } else {
+                    targetNum = targetNum + 1;
+                }
 
-				// 处理奖励
-				if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 2 -> 特殊
-					// 特殊奖励
-					special = 3; // 特殊奖励
-					reward = special;
-				}
+                // 处理奖励
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_HALF_EDGE, dayCountStr)) { // 2 -> 特殊
+                    // 特殊奖励
+                    special = 3; // 特殊奖励
+                    reward = special;
+                }
 
-				// 处理奖励
-				if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
-					// 特殊奖励
-					special = 5; // 特殊奖励
-					reward = special;
-				}
-			}
+                // 处理奖励
+                if (StringUtil.equals(AppConstant.SIGN_UP_ALMOST_EDGE, dayCountStr)) { // 6 -> 特殊
+                    // 特殊奖励
+                    special = 5; // 特殊奖励
+                    reward = special;
+                }
+            }
 
-			// else,计数=1,给出普通奖励
-			if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
-				targetNum = 1;
-			}
+            // else,计数=1,给出普通奖励
+            if (StringUtil.equals(AppConstant.LAST_SIGN_UP_DAY_OTHERS, status)) {
+                targetNum = 1;
+            }
 
-			userTask.setTargetNum(targetNum);
+            userTask.setTargetNum(targetNum);
 //            userTask.setId(idGenerator.nextId());
-			if (targetNum == 7) {
-				userTask.setValue(String.valueOf(special));
-			}
-			long currentTimeMillis = System.currentTimeMillis();
-			userTask.setCreateTime(currentTimeMillis);
-			userTask.setCreateUser(id);
-			userTask.setCreateUserName(user.getName());
-			userTask.setUpdateTime(currentTimeMillis);
-			userTask.setUpdateUser(id);
-			userTask.setUpdateUserName(user.getName());
-			userTask.setIsValid(AppConstant.IS_VALID_YES);
-			userTask.setId(null);
-			userTaskDao.insert(userTask);
-		}
+            if (targetNum == 7) {
+                userTask.setValue(String.valueOf(special));
+            }
+            long currentTimeMillis = System.currentTimeMillis();
+            userTask.setCreateTime(currentTimeMillis);
+            userTask.setCreateUser(id);
+            userTask.setCreateUserName(user.getName());
+            userTask.setUpdateTime(currentTimeMillis);
+            userTask.setUpdateUser(id);
+            userTask.setUpdateUserName(user.getName());
+            userTask.setIsValid(AppConstant.IS_VALID_YES);
+            userTask.setId(null);
+            userTaskDao.insert(userTask);
+        }
 
-		// 从未签到
-		if (flag) {
-			// 插入一条新的记录
-			insertSignUpInfo(user);
-		}
+        // 从未签到
+        if (flag) {
+            // 插入一条新的记录
+            insertSignUpInfo(user);
+        }
 
-		//插入一条成长值流水
-		insertGrowthValueRecords(user, GrowthValueEnum.GROWTH_TYPE_REP_SIGN_UP, reward);
+        //插入一条成长值流水
+        insertGrowthValueRecords(user, GrowthValueEnum.GROWTH_TYPE_REP_SIGN_UP, reward);
 
-		//成长值 & 等级提升 & 授信额度提升
-		levelUp(user, (int) reward);
+        //成长值 & 等级提升 & 授信额度提升
+        levelUp(user, (int) reward);
 
-		return reward;
-	}
+        return reward;
+    }
 
     /**
      * 签到信息查询
@@ -1693,7 +1702,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTask.setUserId(user.getId());
         userTask.setType(taskEnum.getType());
         //creater & updater
-		userTask.setTargetId(String.valueOf(taskEnum.getType()));
+        userTask.setTargetId(String.valueOf(taskEnum.getType()));
         userTask.setCreateTime(currentTimeMillis);
         userTask.setCreateUser(user.getId());
         userTask.setCreateUserName(user.getName());
@@ -1742,16 +1751,16 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void feedBack(TUser user, TReport report) {
-		final long currentTimeMillis = System.currentTimeMillis();
-		//creater & updater
-		report.setCreateUser(user.getId());
-		report.setCreateUserName(user.getName());
-		report.setCreateTime(currentTimeMillis);
-		report.setUpdateUser(user.getId());
-		report.setUpdateUserName(user.getName());
-		report.setUpdateTime(currentTimeMillis);
-		report.setIsValid(AppConstant.IS_VALID_YES);
-		orderService.saveTreport(report);
+        final long currentTimeMillis = System.currentTimeMillis();
+        //creater & updater
+        report.setCreateUser(user.getId());
+        report.setCreateUserName(user.getName());
+        report.setCreateTime(currentTimeMillis);
+        report.setUpdateUser(user.getId());
+        report.setUpdateUserName(user.getName());
+        report.setUpdateTime(currentTimeMillis);
+        report.setIsValid(AppConstant.IS_VALID_YES);
+        orderService.saveTreport(report);
 
     }
 
@@ -1762,14 +1771,14 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param bonusPackageId
      */
     @Override
-	@Transactional(rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void sendBackBonusPackage(TUser user, Long bonusPackageId) {
         //修改红包记录
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
-		//红包不存在
-        if(bonusPackage==null) {
-        	return;
-		}
+        //红包不存在
+        if (bonusPackage == null) {
+            return;
+        }
         bonusPackage.setId(bonusPackageId);
         bonusPackage.setIsValid(AppConstant.IS_VALID_NO);
         bonusPackageDao.updateByPrimaryKey(bonusPackage);
@@ -1790,23 +1799,23 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTimeRecordDao.insert(userTimeRecord);
 
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void afterCompletion(int status) {
-				//返还红包金额
-				TUser finalUser = null;
-				finalUser = userDao.selectByPrimaryKey(user.getId());
-				finalUser.setSurplusTime(finalUser.getSurplusTime() + bonusPackage.getTime());
-				finalUser.setCreateTime(currentTimeMillis);
-				finalUser.setCreateUser(finalUser.getId());
-				finalUser.setCreateUserName(finalUser.getName());
-				finalUser.setUpdateTime(currentTimeMillis);
-				finalUser.setUpdateUser(finalUser.getId());
-				finalUser.setUpdateUserName(finalUser.getName());
-				userDao.updateByPrimaryKey(finalUser);
+            @Override
+            public void afterCompletion(int status) {
+                //返还红包金额
+                TUser finalUser = null;
+                finalUser = userDao.selectByPrimaryKey(user.getId());
+                finalUser.setSurplusTime(finalUser.getSurplusTime() + bonusPackage.getTime());
+                finalUser.setCreateTime(currentTimeMillis);
+                finalUser.setCreateUser(finalUser.getId());
+                finalUser.setCreateUserName(finalUser.getName());
+                finalUser.setUpdateTime(currentTimeMillis);
+                finalUser.setUpdateUser(finalUser.getId());
+                finalUser.setUpdateUserName(finalUser.getName());
+                userDao.updateByPrimaryKey(finalUser);
 
-				super.afterCompletion(status);
-			}
-		});
+                super.afterCompletion(status);
+            }
+        });
 
 
     }
@@ -1819,10 +1828,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TPublish getPublishValue(String key) {
-		String value = messageService.getValue(key);
+        String value = messageService.getValue(key);
         TPublish publish = new TPublish();
 //        publish.setValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
-		publish.setValue(value);
+        publish.setValue(value);
         return publish;
     }
 
@@ -1834,8 +1843,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public AjaxResult genrateSMSCode(String telephone) {
-		AjaxResult result = new AjaxResult();
-		Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
+        AjaxResult result = new AjaxResult();
+        Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
 /*
         // 如果存在
         if (redisUtil.hasKey("time" + telephone)) {
@@ -1904,33 +1913,33 @@ public class UserServiceImpl extends BaseService implements UserService {
         return result;
     }
 
-	/**
-	 * 发送短信(指定内容)
-	 *
-	 * @param telephone
-	 * @return
-	 */
-	@Override
-	public boolean genrateSMSWithContent(String telephone, String content) {
-		boolean result = false;
-		// 生成6位随机数
-		Map<String, Object> params = new HashMap<>();
-		params.put("mobile", telephone);
-		params.put("content", content);
+    /**
+     * 发送短信(指定内容)
+     *
+     * @param telephone
+     * @return
+     */
+    @Override
+    public boolean genrateSMSWithContent(String telephone, String content) {
+        boolean result = false;
+        // 生成6位随机数
+        Map<String, Object> params = new HashMap<>();
+        params.put("mobile", telephone);
+        params.put("content", content);
 
-		String resMsg;
-		if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
-			resMsg = "true";
-		} else {
-			resMsg = smsService.sendServMsg(params);
-		}
+        String resMsg;
+        if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
+            resMsg = "true";
+        } else {
+            resMsg = smsService.sendServMsg(params);
+        }
 
-		if (StringUtil.equals("true", resMsg)) {
-			result = true;
-		}
+        if (StringUtil.equals("true", resMsg)) {
+            result = true;
+        }
 
-		return result;
-	}
+        return result;
+    }
 
     /**
      * 校验短信验证码
@@ -2234,7 +2243,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param companyId
      */
     @Override
-	@Transactional(rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Throwable.class)
     public void joinCompany(TUser user, Long companyId) {
         // 查询组织是否存在
         TCompany company = companyDao.selectByPrimaryKey(companyId);
@@ -2263,10 +2272,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         long currentTimeMillis = System.currentTimeMillis();
         TUserCompany userCompany = new TUserCompany();
-       /* if (formerId == null) {
-            formerId = idGenerator.nextId();
-        }
-        userCompany.setId(formerId);*/
+        userCompany.setId(formerId);
         userCompany.setUserId(user.getId());
         userCompany.setTeamName(user.getName());
         userCompany.setCompanyId(companyId);
@@ -2309,188 +2315,188 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public CompanyPaymentView queryPayment(TUser user, String year, String month, String type) {
-		// 与数据库同步
-		user = userDao.selectByPrimaryKey(user.getId());
+        // 与数据库同步
+        user = userDao.selectByPrimaryKey(user.getId());
 
-		Long userId = user.getId();
-		Long companyId = getOwnCompanyId(userId);
-		// 判空
-		Map<String, Object> monthBetween = new HashMap<>();
-		Long monthStartStamp = System.currentTimeMillis();
-		// 处理年月信息
-		if (year != null && month != null) {
-			monthStartStamp = Long.valueOf(DateUtil.dateToStamp(year + "-" + month + "-" + "1"));
-		}
-		monthBetween = DateUtil.getMonthBetween(monthStartStamp);
-		Long beginStamp = Long.valueOf((String) monthBetween.get("begin"));
-		Long endStamp = Long.valueOf((String) monthBetween.get("end"));
+        Long userId = user.getId();
+        Long companyId = getOwnCompanyId(userId);
+        // 判空
+        Map<String, Object> monthBetween = new HashMap<>();
+        Long monthStartStamp = System.currentTimeMillis();
+        // 处理年月信息
+        if (year != null && month != null) {
+            monthStartStamp = Long.valueOf(DateUtil.dateToStamp(year + "-" + month + "-" + "1"));
+        }
+        monthBetween = DateUtil.getMonthBetween(monthStartStamp);
+        Long beginStamp = Long.valueOf((String) monthBetween.get("begin"));
+        Long endStamp = Long.valueOf((String) monthBetween.get("end"));
 
-		List<SinglePaymentView> freezeView = new ArrayList<>();
-		if ("3".equals(type)) { // 冻结
-			List<TUserFreeze> userFreezes = userFreezeDao.selectByUserIdBetween(userId,beginStamp,endStamp);
-			if (!userFreezes.isEmpty()) {
-				for (TUserFreeze userFreeze : userFreezes) {
-					SinglePaymentView view = BeanUtil.copy(userFreeze, SinglePaymentView.class);
-					view.setIdString(String.valueOf(userFreeze.getId()));
-					view.setServIdString(String.valueOf(userFreeze.getOrderId())); // 订单id
-					view.setServiceName(userFreeze.getServiceName()); // 名称
-					view.setType("求助");// TODO 冻结都是求助类型
-					view.setTime(DateUtil.timeStamp2Seconds(userFreeze.getCreateTime())); // 发生日期
-					view.setTotalTime(Integer.valueOf(String.valueOf(userFreeze.getFreezeTime()))); // 冻结时间
-					view.setPayOrGainString(timeChange(userFreeze.getFreezeTime())); // TODO 格式化的冻结时间(不带正负号)
-					freezeView.add(view);
-				}
-			}
-		}
+        List<SinglePaymentView> freezeView = new ArrayList<>();
+        if ("3".equals(type)) { // 冻结
+            List<TUserFreeze> userFreezes = userFreezeDao.selectByUserIdBetween(userId, beginStamp, endStamp);
+            if (!userFreezes.isEmpty()) {
+                for (TUserFreeze userFreeze : userFreezes) {
+                    SinglePaymentView view = BeanUtil.copy(userFreeze, SinglePaymentView.class);
+                    view.setIdString(String.valueOf(userFreeze.getId()));
+                    view.setServIdString(String.valueOf(userFreeze.getOrderId())); // 订单id
+                    view.setServiceName(userFreeze.getServiceName()); // 名称
+                    view.setType("求助");// TODO 冻结都是求助类型
+                    view.setTime(DateUtil.timeStamp2Seconds(userFreeze.getCreateTime())); // 发生日期
+                    view.setTotalTime(Integer.valueOf(String.valueOf(userFreeze.getFreezeTime()))); // 冻结时间
+                    view.setPayOrGainString(timeChange(userFreeze.getFreezeTime())); // TODO 格式化的冻结时间(不带正负号)
+                    freezeView.add(view);
+                }
+            }
+        }
 
-		// 查询详细
-		List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectTimeRecordByUserIdBetweenASC(userId,beginStamp,endStamp);
-		// 收入列表
-		List<TUserTimeRecord> inList = new ArrayList<>();
-		// 支出列表
-		List<TUserTimeRecord> outList = new ArrayList<>();
-		// 最终结果
-		CompanyPaymentView view = new CompanyPaymentView();
-		// target_id为键
+        // 查询详细
+        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectTimeRecordByUserIdBetweenASC(userId, beginStamp, endStamp);
+        // 收入列表
+        List<TUserTimeRecord> inList = new ArrayList<>();
+        // 支出列表
+        List<TUserTimeRecord> outList = new ArrayList<>();
+        // 最终结果
+        CompanyPaymentView view = new CompanyPaymentView();
+        // target_id为键
 //		Map<Long, Map<String,Object>> joinerMap = new HashMap<Long, Map<String,Object>>();
 //		Map<String, Object> map = new HashMap<String,Object>();
-		// 键值为target_id
-		Map<Long, List<Long>> joinerMap = new HashMap<>();
-		Map<Long, List<String>> joinerNameMap = new HashMap<>();
-		Map<Long, TOrder> receiptMap = new HashMap<>();
-		Map<Long, Integer> totalMap = new HashMap<>();
+        // 键值为target_id
+        Map<Long, List<Long>> joinerMap = new HashMap<>();
+        Map<Long, List<String>> joinerNameMap = new HashMap<>();
+        Map<Long, TOrder> receiptMap = new HashMap<>();
+        Map<Long, Integer> totalMap = new HashMap<>();
 
-		List<Long> targetIdList = new ArrayList<>(); // 包含已经添加进最终结果的id
+        List<Long> targetIdList = new ArrayList<>(); // 包含已经添加进最终结果的id
 
-		int monthly_in = 0;
-		int monthly_out = 0;
-		// 遍历赋值
-		for (TUserTimeRecord userTimeRecord : userTimeRecords) {
-			Long targetId = userTimeRecord.getTargetId();
-			int count = 0; // 对同一分组统计金额
-			if (totalMap.containsKey(targetId)) {
-				count = totalMap.get(targetId);
-			}
-			Long joinerId = null;
-			// 收入
-			if (userId.equals(userTimeRecord.getUserId())) {
-				joinerId = userTimeRecord.getFromUserId();
-			}
-			// 支出
-			if (userId.equals(userTimeRecord.getFromUserId())) {
-				joinerId = userTimeRecord.getUserId();
-			}
-			List<Long> joinerIds = new ArrayList<>();
-			List<String> joinerNameList = new ArrayList<>();
-			// 判断map
-			if (joinerMap.containsKey(targetId)) { // 获取原集合(添加元素)
-				joinerIds = joinerMap.get(targetId);
-				joinerNameList = joinerNameMap.get(targetId);
-			}
-			joinerIds.add(joinerId);
-			String name = userDao.selectByPrimaryKey(joinerId).getName();
-			joinerNameList.add(name);
-			// 根据targetId找到订单信息
-			TOrder order = orderService.selectOrderById(targetId);
-			// 加入或刷新map
-			joinerNameMap.put(targetId, joinerNameList);
-			joinerMap.put(targetId, joinerIds);
-			receiptMap.put(targetId, order);
+        int monthly_in = 0;
+        int monthly_out = 0;
+        // 遍历赋值
+        for (TUserTimeRecord userTimeRecord : userTimeRecords) {
+            Long targetId = userTimeRecord.getTargetId();
+            int count = 0; // 对同一分组统计金额
+            if (totalMap.containsKey(targetId)) {
+                count = totalMap.get(targetId);
+            }
+            Long joinerId = null;
+            // 收入
+            if (userId.equals(userTimeRecord.getUserId())) {
+                joinerId = userTimeRecord.getFromUserId();
+            }
+            // 支出
+            if (userId.equals(userTimeRecord.getFromUserId())) {
+                joinerId = userTimeRecord.getUserId();
+            }
+            List<Long> joinerIds = new ArrayList<>();
+            List<String> joinerNameList = new ArrayList<>();
+            // 判断map
+            if (joinerMap.containsKey(targetId)) { // 获取原集合(添加元素)
+                joinerIds = joinerMap.get(targetId);
+                joinerNameList = joinerNameMap.get(targetId);
+            }
+            joinerIds.add(joinerId);
+            String name = userDao.selectByPrimaryKey(joinerId).getName();
+            joinerNameList.add(name);
+            // 根据targetId找到订单信息
+            TOrder order = orderService.selectOrderById(targetId);
+            // 加入或刷新map
+            joinerNameMap.put(targetId, joinerNameList);
+            joinerMap.put(targetId, joinerIds);
+            receiptMap.put(targetId, order);
 
-			// 收入
-			if (userId.equals(userTimeRecord.getUserId())) {
-				monthly_in += userTimeRecord.getTime();
-				inList.add(userTimeRecord);
-			}
-			// 支出
-			if (userId.equals(userTimeRecord.getFromUserId())) {
-				monthly_out += userTimeRecord.getTime();
-				outList.add(userTimeRecord);
-			}
-			count += userTimeRecord.getTime();
-			totalMap.put(targetId, count);
+            // 收入
+            if (userId.equals(userTimeRecord.getUserId())) {
+                monthly_in += userTimeRecord.getTime();
+                inList.add(userTimeRecord);
+            }
+            // 支出
+            if (userId.equals(userTimeRecord.getFromUserId())) {
+                monthly_out += userTimeRecord.getTime();
+                outList.add(userTimeRecord);
+            }
+            count += userTimeRecord.getTime();
+            totalMap.put(targetId, count);
 
-		}
-		// 处理与合并
-		List<SinglePaymentView> finalInlist = new ArrayList<>();
-		List<SinglePaymentView> finalOutList = new ArrayList<>();
-		for (int i = inList.size() - 1; i >= 0; i--) {
-			TUserTimeRecord in = inList.get(i);
-			Long targetId = in.getTargetId();
-			// 判断targetId是否在列
-			if (!targetIdList.contains(targetId)) {
-				TOrder order = receiptMap.get(targetId);
-				SinglePaymentView thView = BeanUtil.copy(in, SinglePaymentView.class);
-				thView.setIdString(String.valueOf(in.getId())); // 没什么用的流水id
-				thView.setServiceName(order.getServiceName());// 服务名字
-				thView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
-				thView.setTime(DateUtil.timeStamp2Seconds(in.getCreateTime())); // 最后产生金额的时间（同一服务当月）
-				thView.setJoinMembers(joinerNameMap.get(targetId));
-				thView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
-				thView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
-				thView.setPayOrGainString("+" + timeChange(Long.valueOf(totalMap.get(targetId))));
-				finalInlist.add(thView);
-				targetIdList.add(targetId);
-			}
-		}
-		for (int i = outList.size() - 1; i >= 0; i--) {
-			TUserTimeRecord out = outList.get(i);
-			Long targetId = out.getTargetId();
-			// 判断targetId是否在列
-			if (!targetIdList.contains(targetId)) {
-				TOrder order = receiptMap.get(targetId);
-				SinglePaymentView thisView = BeanUtil.copy(out, SinglePaymentView.class);
-				thisView.setIdString(String.valueOf(out.getId())); // 没什么用的流水id
-				thisView.setServiceName(order.getServiceName());// 服务名字
-				thisView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
-				thisView.setTime(DateUtil.timeStamp2Seconds(out.getCreateTime())); // 最后产生金额的时间（同一服务当月）
-				thisView.setJoinMembers(joinerNameMap.get(targetId));
-				thisView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
-				thisView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
-				thisView.setPayOrGainString("-" + timeChange(Long.valueOf(totalMap.get(targetId))));
-				finalOutList.add(thisView);
-				targetIdList.add(targetId);
-			}
-		}
-		// 合并
-		List<SinglePaymentView> totalList = new ArrayList<>();
-		for (SinglePaymentView in : finalInlist) {
-			totalList.add(in);
-		}
-		for (SinglePaymentView out : finalOutList) {
-			totalList.add(out);
-		}
+        }
+        // 处理与合并
+        List<SinglePaymentView> finalInlist = new ArrayList<>();
+        List<SinglePaymentView> finalOutList = new ArrayList<>();
+        for (int i = inList.size() - 1; i >= 0; i--) {
+            TUserTimeRecord in = inList.get(i);
+            Long targetId = in.getTargetId();
+            // 判断targetId是否在列
+            if (!targetIdList.contains(targetId)) {
+                TOrder order = receiptMap.get(targetId);
+                SinglePaymentView thView = BeanUtil.copy(in, SinglePaymentView.class);
+                thView.setIdString(String.valueOf(in.getId())); // 没什么用的流水id
+                thView.setServiceName(order.getServiceName());// 服务名字
+                thView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
+                thView.setTime(DateUtil.timeStamp2Seconds(in.getCreateTime())); // 最后产生金额的时间（同一服务当月）
+                thView.setJoinMembers(joinerNameMap.get(targetId));
+                thView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
+                thView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
+                thView.setPayOrGainString("+" + timeChange(Long.valueOf(totalMap.get(targetId))));
+                finalInlist.add(thView);
+                targetIdList.add(targetId);
+            }
+        }
+        for (int i = outList.size() - 1; i >= 0; i--) {
+            TUserTimeRecord out = outList.get(i);
+            Long targetId = out.getTargetId();
+            // 判断targetId是否在列
+            if (!targetIdList.contains(targetId)) {
+                TOrder order = receiptMap.get(targetId);
+                SinglePaymentView thisView = BeanUtil.copy(out, SinglePaymentView.class);
+                thisView.setIdString(String.valueOf(out.getId())); // 没什么用的流水id
+                thisView.setServiceName(order.getServiceName());// 服务名字
+                thisView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
+                thisView.setTime(DateUtil.timeStamp2Seconds(out.getCreateTime())); // 最后产生金额的时间（同一服务当月）
+                thisView.setJoinMembers(joinerNameMap.get(targetId));
+                thisView.setServIdString(String.valueOf(order.getId())); // TODO 订单id（或应当为服务id）
+                thisView.setType(AppConstant.SERV_TYPE_HELP.equals(order.getType()) ? "求助" : "服务");
+                thisView.setPayOrGainString("-" + timeChange(Long.valueOf(totalMap.get(targetId))));
+                finalOutList.add(thisView);
+                targetIdList.add(targetId);
+            }
+        }
+        // 合并
+        List<SinglePaymentView> totalList = new ArrayList<>();
+        for (SinglePaymentView in : finalInlist) {
+            totalList.add(in);
+        }
+        for (SinglePaymentView out : finalOutList) {
+            totalList.add(out);
+        }
 
-		// 装载最终结果
-		view.setAvailable_time((int) (user.getSurplusTime() - user.getFreezeTime()));
-		view.setMonthly_in(monthly_in);
-		view.setMonthly_out(monthly_out);
-		view.setFreeze_time(Integer.valueOf(String.valueOf(user.getFreezeTime())));
+        // 装载最终结果
+        view.setAvailable_time((int) (user.getSurplusTime() - user.getFreezeTime()));
+        view.setMonthly_in(monthly_in);
+        view.setMonthly_out(monthly_out);
+        view.setFreeze_time(Integer.valueOf(String.valueOf(user.getFreezeTime())));
 
-		List<SinglePaymentView> finalList = new ArrayList<>();
+        List<SinglePaymentView> finalList = new ArrayList<>();
 
-		// 判断是全部、in还是out
-		if ("0".equals(type)) {
-			finalList = totalList;
-		} else if ("1".equals(type)) {
-			finalList = finalInlist;
-		} else if ("2".equals(type)) {
-			finalList = finalOutList;
-		} else if ("3".equals(type)) {
-			finalList = freezeView;
-		}
-		// 排序
-		Collections.sort(finalList, new Comparator<SinglePaymentView>() {
+        // 判断是全部、in还是out
+        if ("0".equals(type)) {
+            finalList = totalList;
+        } else if ("1".equals(type)) {
+            finalList = finalInlist;
+        } else if ("2".equals(type)) {
+            finalList = finalOutList;
+        } else if ("3".equals(type)) {
+            finalList = freezeView;
+        }
+        // 排序
+        Collections.sort(finalList, new Comparator<SinglePaymentView>() {
 
-			@Override
-			public int compare(SinglePaymentView o1, SinglePaymentView o2) {
-				return (int) (o2.getCreateTime() - o1.getCreateTime());
-			}
-		});
+            @Override
+            public int compare(SinglePaymentView o1, SinglePaymentView o2) {
+                return (int) (o2.getCreateTime() - o1.getCreateTime());
+            }
+        });
 
-		view.setSinglePaymentViews(finalList);
+        view.setSinglePaymentViews(finalList);
 
-		return view;
+        return view;
     }
 
     /**
@@ -2502,11 +2508,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum) {
         //根据类型校验最大值、当日最大值
-		try {
-        	growthValueEnum = checkMax(growthValueEnum, user);
-		} catch (MessageException e) {
-			return user;
-		}
+        try {
+            growthValueEnum = checkMax(growthValueEnum, user);
+        } catch (MessageException e) {
+            return user;
+        }
 
         //成长值奖励（成长值流水、成长值提升、等级提升、授信额度提升）
         Integer price = growthValueEnum.getPrice(); //数额
@@ -2541,15 +2547,16 @@ public class UserServiceImpl extends BaseService implements UserService {
         return levelUp(user, price);
     }
 
-	/**
-	 * 确认是否为我的红包
-	 * @param user
-	 * @param bonusPackageId
-	 * @return
-	 */
+    /**
+     * 确认是否为我的红包
+     *
+     * @param user
+     * @param bonusPackageId
+     * @return
+     */
     @Override
     public Map<String, Object> isMyBonusPackage(TUser user, Long bonusPackageId) {
-        if(bonusPackageId==null || user==null) {
+        if (bonusPackageId == null || user == null) {
             return null;
         }
         Map<String, Object> resultMap = new HashMap<>();
@@ -2557,83 +2564,30 @@ public class UserServiceImpl extends BaseService implements UserService {
         return resultMap;
     }
 
-	/**
-	 * 组织版登录
-	 * @param telephone
-	 * @param password
-	 * @return
-	 */
-    @Override
-    public Map<String, Object> loginGroupByPwd(String telephone, String password) {
-		// 对前端给的password作处理(AES)
-		password = AESCommonUtil.encript(password);
-		TUser user = null;
-
-		List<TUser> users = userDao.selectByUserTelByPasswordByIsCompanyAccYes(telephone,password,AppConstant.IS_COMPANY_ACCOUNT_YES);
-		if (!users.isEmpty()) {
-			user = users.get(0);
-		}
-		if (user == null) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户名或密码错误,或非组织账号");
-		}
-		// 登录
-		Long userId = user.getId();
-
-		// 使得之前的token失效
-		String redisKey = "str" + userId;
-		if (redisUtil.hasKey(redisKey)) {
-			String lastToken = (String) redisUtil.get(redisKey);
-			redisUtil.del(lastToken);
-		}
-
-		String token = genToken(user);
-		redisUtil.set(token, user, getUserTokenInterval());
-		redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
-
-		redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
-		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put(AppConstant.USER_TOKEN, token);
-		// String化
-		DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
-		userView.setIdStr(String.valueOf(userView.getId()));
-		resultMap.put(AppConstant.USER, userView);
-
-		return resultMap;
-    }
-
     /**
-     * 手机号验证码登录(个人账号)
+     * 组织版登录
      *
      * @param telephone
-     * @param validCode
+     * @param password
      * @return
      */
     @Override
-    public Map<String, Object> loginUserBySMS(String telephone, String validCode) {
-        checkSMS(telephone, validCode);
-        TUser user = new TUser();
-        if (!isUser(telephone)) { // 注册并登录
-            user.setUserTel(telephone);
-            // 注册
-            rigester(user);
-        }
-        user = getUserAccountByTelephone(telephone);
+    public Map<String, Object> loginGroupByPwd(String telephone, String password) {
+        // 对前端给的password作处理(AES)
+        password = AESCommonUtil.encript(password);
+        TUser user = null;
 
-        //处理封禁
-        if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
-            throw new MessageException("当前用户被封禁!禁止登录！");
+        List<TUser> users = userDao.selectByUserTelByPasswordByIsCompanyAccYes(telephone, password, AppConstant.IS_COMPANY_ACCOUNT_YES);
+        if (!users.isEmpty()) {
+            user = users.get(0);
         }
-
-        //激活假用户
-        if (AppConstant.IS_FAKE_YES.equals(user.getIsFake())) { // 如果为假用户
-            user.setIsFake(AppConstant.IS_FAKE_NO); // TODO 真实用户
-            userDao.updateByPrimaryKey(user);
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户名或密码错误,或非组织账号");
         }
-
         // 登录
         Long userId = user.getId();
 
-        // 使得之前的token失效 //TODO
+        // 使得之前的token失效
         String redisKey = "str" + userId;
         if (redisUtil.hasKey(redisKey)) {
             String lastToken = (String) redisUtil.get(redisKey);
@@ -2651,6 +2605,79 @@ public class UserServiceImpl extends BaseService implements UserService {
         DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
+
+        return resultMap;
+    }
+
+    /**
+     * 手机号验证码登录(个人账号)
+     *
+     * @param telephone
+     * @param validCode
+     * @param uuid      设备号
+     * @return
+     */
+    @Override
+    public Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid) {
+        checkSMS(telephone, validCode);
+        TUser user = new TUser();
+        TUser tmpUser = null;
+        if (!isUser(telephone)) { // 注册并登录
+            user.setUserTel(telephone);
+            // 注册
+            user.setDeviceId(uuid);
+            tmpUser = rigester(user);
+        }
+        user = getUserAccountByTelephone(telephone);
+
+        if (tmpUser != null) {
+            user.setToken(tmpUser.getToken());
+        }
+
+        //处理封禁
+        if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            throw new MessageException("当前用户被封禁!禁止登录！");
+        }
+
+        //激活假用户
+        if (AppConstant.IS_FAKE_YES.equals(user.getIsFake())) { // 如果为假用户
+            user.setIsFake(AppConstant.IS_FAKE_NO); // TODO 真实用户
+            userDao.updateByPrimaryKey(user);
+        }
+
+        // 登录
+        Long userId = user.getId();
+
+
+        // 使得之前的token失效 //TODO
+        String redisKey = "str" + userId;
+        if (redisUtil.hasKey(redisKey)) {
+            String lastToken = (String) redisUtil.get(redisKey);
+            redisUtil.del(lastToken);
+        }
+
+        String token = genToken(user);
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
+        redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put(AppConstant.USER_TOKEN, token);
+        // String化
+        DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
+        userView.setIdStr(String.valueOf(userView.getId()));
+        resultMap.put(AppConstant.USER, userView);
+
+        //设置token
+        if (user.getToken() == null) {
+            Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
+            if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
+                user.setToken(tokenDto.getToken());
+            }
+        }
+
+        //设置token
+        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
+
         return resultMap;
     }
 
@@ -2725,8 +2752,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setMasterStatus(AppConstant.MASTER_STATUS_DEFAULT); // 达人标记
 
         // creater & updater
-		long currentTimeMillis = System.currentTimeMillis();
-		user.setCreateTime(System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        user.setCreateTime(System.currentTimeMillis());
         user.setCreateUser(user.getId());
         user.setCreateUserName(user.getName());
         user.setUpdateTime(currentTimeMillis);
@@ -2736,14 +2763,21 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 有效性
         user.setIsValid(AppConstant.IS_VALID_YES);
 
-		// 插入一条用户记录
-		userDao.insert(user);
+        // 插入一条用户记录
+        userDao.insert(user);
 
-		// 插入注册的系统消息
-		messageService.messageSave(null,user,AppConstant.NOTICE_TITLE_RIGESTER,AppConstant.NOTICE_CONTENT_RIGESTER,user.getId(),currentTimeMillis);
+        // 插入注册的系统消息
+        messageService.messageSave(null, user, AppConstant.NOTICE_TITLE_RIGESTER, AppConstant.NOTICE_CONTENT_RIGESTER, user.getId(), currentTimeMillis);
 
         // 注册完成任务
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
+
+        //注册用户中心数据
+        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
+
+        if (token != null&&token.getToken()!=null) {
+            user.setToken(token.getToken());
+        }
 
         return user;
     }
@@ -2771,8 +2805,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private Integer checkMax(GrowthValueEnum growthValueEnum, TUser user, Integer counts) {
 
-    	//原始基数
-		Integer originalCounts = counts;
+        //原始基数
+        Integer originalCounts = counts;
 
         //判空
         if (growthValueEnum == null) {
@@ -2835,9 +2869,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         boolean flag = false;
         Integer dailyMaxIn = growthValueEnum.getDailyMaxIn();//TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
         Integer maxIn = growthValueEnum.getMaxIn();
-        if(maxIn==-1) {
-        	maxIn = 2147483647;
-		}
+        if (maxIn == -1) {
+            maxIn = 2147483647;
+        }
         if (countTotal >= maxIn || countToday >= dailyMaxIn) {   //总或者今日达到上限
             counts = 0;
         } else {
@@ -2855,9 +2889,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (counts > 0 && superCountTotal < superGrowthValueEnum.getMaxIn() && superCountToday < superGrowthValueEnum.getDailyMaxIn()) {   //如果一次型没有记录存在
                 //插入一条成长值流水
                 insertGrowthValueRecords(user, superGrowthValueEnum);
-                if(originalCounts <= growthValueEnum.getDailyMaxIn() / growthValueEnum.getPrice()) {
-					counts--; //消耗掉一次插入机会
-				}
+                if (originalCounts <= growthValueEnum.getDailyMaxIn() / growthValueEnum.getPrice()) {
+                    counts--; //消耗掉一次插入机会
+                }
                 superFlag = true;
                 //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
 
@@ -2887,8 +2921,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 遍历枚举
         Integer value = null;
-        for(GrowthValueEnum growthValueEnum:GrowthValueEnum.values()) {
-            if(growthValueEnum.getTaskCode() == taskCode) {
+        for (GrowthValueEnum growthValueEnum : GrowthValueEnum.values()) {
+            if (growthValueEnum.getTaskCode() == taskCode) {
                 value = growthValueEnum.getPrice();
                 break;
             }
@@ -2907,7 +2941,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     private TUser levelUp(TUser user, Integer price) {
-    	//增加成长值之前同步数据
+        //增加成长值之前同步数据
 //		user = userDao.selectByPrimaryKey(user.getId());	//TODO
 
         Long growthValue = user.getGrowthValue();
@@ -2921,7 +2955,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         Long creditLimit = user.getCreditLimit();
         if (growthValue >= LevelEnum.LEVEL_ONE.getMin() && growthValue < LevelEnum.LEVEL_ONE.getMax()) {
             level = LevelEnum.LEVEL_ONE.getLevel();
-            creditLimit= LevelEnum.LEVEL_ONE.getCredit();
+            creditLimit = LevelEnum.LEVEL_ONE.getCredit();
         } else if (growthValue >= LevelEnum.LEVEL_TWO.getMin() && growthValue < LevelEnum.LEVEL_TWO.getMax()) {
             level = LevelEnum.LEVEL_TWO.getLevel();
             creditLimit = LevelEnum.LEVEL_TWO.getCredit();
@@ -3178,12 +3212,13 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     /**
      * 任务大厅
+     *
      * @param user
      * @return
      */
     @Override
     public TaskHallView taskHall(TUser user) {
-    	//获取等级、成长值信息
+        //获取等级、成长值信息
         user = userDao.selectByPrimaryKey(user.getId());
         LevelView levelView = new LevelView();
         levelView.setGrowthValue(user.getGrowthValue());
@@ -3192,40 +3227,41 @@ public class UserServiceImpl extends BaseService implements UserService {
         LevelEnum currentLevel = null;
         LevelEnum nextLevel = null;
         boolean flag = false;
-        for(LevelEnum levelEnum:LevelEnum.values()) {
-            if(levelEnum.getLevel().equals(level)) {
+        for (LevelEnum levelEnum : LevelEnum.values()) {
+            if (levelEnum.getLevel().equals(level)) {
                 currentLevel = levelEnum;
                 flag = true;
                 continue;
             }
-            if(flag) {
+            if (flag) {
                 nextLevel = levelEnum;
                 break;
             }
         }
         levelView.setLevelName(currentLevel.getName());
-        if(nextLevel!=null) {
+        if (nextLevel != null) {
             levelView.setUpToLevelUp(nextLevel.getMin() - user.getGrowthValue());
         }
 
         //获取url
-		String url = "";
-		String key = "levelMedal";
-		String value = messageService.getValue(key);
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			List<LevelMedalView> levelMedalViews = objectMapper.readValue(value,new TypeReference<List<LevelMedalView>>(){ });
-			for(LevelMedalView levelMedal:levelMedalViews) {
-				if(levelMedal.getLevelNum().equals(currentLevel.getLevel())) {
-					url = levelMedal.getUrl();
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
-		}
+        String url = "";
+        String key = "levelMedal";
+        String value = messageService.getValue(key);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<LevelMedalView> levelMedalViews = objectMapper.readValue(value, new TypeReference<List<LevelMedalView>>() {
+            });
+            for (LevelMedalView levelMedal : levelMedalViews) {
+                if (levelMedal.getLevelNum().equals(currentLevel.getLevel())) {
+                    url = levelMedal.getUrl();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
+        }
 
-		levelView.setUrl(url);	//等级对应勋章地址
+        levelView.setUrl(url);    //等级对应勋章地址
         TaskHallView taskHallView = new TaskHallView();
         taskHallView.setLevelView(levelView);
 
@@ -3234,72 +3270,73 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<NoobTask> noobTasks = (List<NoobTask>) taskMap.get("noobTasks");
         List<DailyTask> dailyTasks = (List<DailyTask>) taskMap.get("dailyTasks");
 
-        Map<Long,DailyTask> doneTaskMap = new HashMap<>();
-        for(NoobTask noobTask:noobTasks) {
-        	DailyTask dailyTask = new DailyTask();
-        	dailyTask.setDone(noobTask.isDone());
-        	if(!noobTask.isDone()) {
-				dailyTask.setCurrentNum(0);
-			} else {
-        		dailyTask.setCurrentNum(1);
-			}
-        	doneTaskMap.put(noobTask.getTargetId(),dailyTask);
-		}
+        Map<Long, DailyTask> doneTaskMap = new HashMap<>();
+        for (NoobTask noobTask : noobTasks) {
+            DailyTask dailyTask = new DailyTask();
+            dailyTask.setDone(noobTask.isDone());
+            if (!noobTask.isDone()) {
+                dailyTask.setCurrentNum(0);
+            } else {
+                dailyTask.setCurrentNum(1);
+            }
+            doneTaskMap.put(noobTask.getTargetId(), dailyTask);
+        }
 
-        for(DailyTask dailyTask:dailyTasks) {
-        	doneTaskMap.put(dailyTask.getTargetId(),dailyTask);
-		}
+        for (DailyTask dailyTask : dailyTasks) {
+            doneTaskMap.put(dailyTask.getTargetId(), dailyTask);
+        }
 
         //装载任务数据
-		String taskKey = "task";
-		String taskValue = messageService.getValue(taskKey);
-		List<DailyTask> resultList = new ArrayList<>();
-		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			List<DailyTask> dailyTaskList = objectMapper.readValue(taskValue,new TypeReference<List<DailyTask>>(){ });
-			for(DailyTask task:dailyTaskList) {
-				DailyTask dailyTask = doneTaskMap.get(task.getTargetId());
-				if(dailyTask!=null) {
-					task.setDone(dailyTask.isDone());
-					task.setCurrentNum(dailyTask.getCurrentNum());
-				}
-				resultList.add(task);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
-		}
+        String taskKey = "task";
+        String taskValue = messageService.getValue(taskKey);
+        List<DailyTask> resultList = new ArrayList<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<DailyTask> dailyTaskList = objectMapper.readValue(taskValue, new TypeReference<List<DailyTask>>() {
+            });
+            for (DailyTask task : dailyTaskList) {
+                DailyTask dailyTask = doneTaskMap.get(task.getTargetId());
+                if (dailyTask != null) {
+                    task.setDone(dailyTask.isDone());
+                    task.setCurrentNum(dailyTask.getCurrentNum());
+                }
+                resultList.add(task);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表" + key + "关键字的json出错，" + e.getMessage());
+        }
 
-		noobTasks = new ArrayList<NoobTask>();
-		dailyTasks = new ArrayList<DailyTask>();
-		final List<Integer> noobTaskList = Arrays.asList(AppConstant.NOOB_TASK_ARRAY);
-		for(DailyTask task:resultList) {
-			if(noobTaskList.contains(task.getTargetId().intValue())) {
-				NoobTask noobTask = new NoobTask();
-				noobTask.setName(task.getName());
-				noobTask.setBonus(task.getBonus());
-				noobTask.setTargetId(task.getTargetId());
-				noobTask.setDone(task.isDone());
-				noobTasks.add(noobTask);
-			} else {
-				dailyTasks.add(task);
-			}
-		}
+        noobTasks = new ArrayList<NoobTask>();
+        dailyTasks = new ArrayList<DailyTask>();
+        final List<Integer> noobTaskList = Arrays.asList(AppConstant.NOOB_TASK_ARRAY);
+        for (DailyTask task : resultList) {
+            if (noobTaskList.contains(task.getTargetId().intValue())) {
+                NoobTask noobTask = new NoobTask();
+                noobTask.setName(task.getName());
+                noobTask.setBonus(task.getBonus());
+                noobTask.setTargetId(task.getTargetId());
+                noobTask.setDone(task.isDone());
+                noobTasks.add(noobTask);
+            } else {
+                dailyTasks.add(task);
+            }
+        }
 
-		taskHallView.setNoobTasks(noobTasks);
-		taskHallView.setDailyTasks(dailyTasks);
+        taskHallView.setNoobTasks(noobTasks);
+        taskHallView.setDailyTasks(dailyTasks);
 
         return taskHallView;
     }
 
-    private Map<String,Object> queryTasks(TUser user) {
-        Map<Integer,TaskEnum> taskEnumMap = new HashMap<>();
-        for(TaskEnum taskEnum: TaskEnum.values()) {
-            taskEnumMap.put(taskEnum.getType(),taskEnum);
+    private Map<String, Object> queryTasks(TUser user) {
+        Map<Integer, TaskEnum> taskEnumMap = new HashMap<>();
+        for (TaskEnum taskEnum : TaskEnum.values()) {
+            taskEnumMap.put(taskEnum.getType(), taskEnum);
         }
 
         //结果
-        Map<String,Object> resultMap = new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         List<NoobTask> noobTasks = new ArrayList<>();
         List<DailyTask> dailyTasks = new ArrayList<>();
         Integer[] noobTaskArray = AppConstant.NOOB_TASK_ARRAY;
@@ -3314,18 +3351,18 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         List<TTypeRecord> dailyGrowthRecords = growthValueService.findOnesGrowthRecords(user.getId());
         //map
-        Map<Integer,Integer> map = new HashMap<>();
-        Map<Integer,NoobTask> noobTaskMap = new HashMap<>();
-        Map<Integer,DailyTask> dailyTaskMap = new HashMap<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        Map<Integer, NoobTask> noobTaskMap = new HashMap<>();
+        Map<Integer, DailyTask> dailyTaskMap = new HashMap<>();
         //遍历装载map
-        for(TTypeRecord dailyGrowthRecord:dailyGrowthRecords) {
-            if(!noobTaskList.contains(dailyGrowthRecord.getType())) {   //如果为非菜鸟类型
-                if(!(dailyGrowthRecord.getCreateTime()>beginStamp && dailyGrowthRecord.getCreateTime()<endStamp)) { //如果不是今天
+        for (TTypeRecord dailyGrowthRecord : dailyGrowthRecords) {
+            if (!noobTaskList.contains(dailyGrowthRecord.getType())) {   //如果为非菜鸟类型
+                if (!(dailyGrowthRecord.getCreateTime() > beginStamp && dailyGrowthRecord.getCreateTime() < endStamp)) { //如果不是今天
                     continue;
                 }
             }
             Integer counts = map.get(dailyGrowthRecord.getType());
-            if(counts==null) {
+            if (counts == null) {
                 counts = 0;
             }
             map.put(dailyGrowthRecord.getType(), ++counts);
@@ -3333,49 +3370,49 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         List<TUserTask> tasks = userTaskDao.findOnesTasks(user.getId());
         //遍历筛选出新手任务、日常任务
-        for(TUserTask task:tasks) {
+        for (TUserTask task : tasks) {
             Integer type = task.getType();
             TaskEnum taskEnum = taskEnumMap.get(type);
             String targetId = task.getTargetId();
-            if(noobTaskList.contains(type)) {
+            if (noobTaskList.contains(type)) {
                 NoobTask noobTask = new NoobTask();
                 noobTask.setTargetId(Long.valueOf(targetId));
                 noobTask.setName(taskEnum.getDesc());
                 noobTask.setBonus(taskEnum.getReward().intValue());
                 noobTask.setDone(true);
-                noobTaskMap.put(type,noobTask);
+                noobTaskMap.put(type, noobTask);
                 continue;
             }
             DailyTask dailyTask = new DailyTask();
-            if(targetId!=null) {
+            if (targetId != null) {
                 dailyTask.setTargetId(Long.valueOf(targetId));
             }
             dailyTask.setName(taskEnum.getDesc());
             dailyTask.setBonus(taskEnum.getReward().intValue());
             dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
             dailyTask.setCurrentNum(taskEnum.getDailyMaxNum());
-            if(dailyTask.getTotalNum().equals(dailyTask.getCurrentNum())) {
-            	dailyTask.setDone(true);
-			}
-            dailyTaskMap.put(type,dailyTask);
+            if (dailyTask.getTotalNum().equals(dailyTask.getCurrentNum())) {
+                dailyTask.setDone(true);
+            }
+            dailyTaskMap.put(type, dailyTask);
         }
 
-        for(TaskEnum taskEnum:TaskEnum.values()) {
+        for (TaskEnum taskEnum : TaskEnum.values()) {
             Integer type = taskEnum.getType();
             NoobTask noobTask = noobTaskMap.get(type);  //菜鸟任务
             DailyTask dailyTask = dailyTaskMap.get(type);
-            if(noobTask!=null) {
+            if (noobTask != null) {
                 noobTasks.add(noobTask);
             }
-            if(dailyTask!=null) {
+            if (dailyTask != null) {
                 dailyTasks.add(dailyTask);
             }
             //如果两者都不存在
             Integer counts = map.get(type); //成长值记录
-            if(noobTask==null && dailyTask==null) {
-                if(noobTaskList.contains(type)) { //菜鸟任务
+            if (noobTask == null && dailyTask == null) {
+                if (noobTaskList.contains(type)) { //菜鸟任务
                     noobTask = new NoobTask();
-                    if(counts!=null && counts!=0) {
+                    if (counts != null && counts != 0) {
                         noobTask.setTargetId(taskEnum.getTargetId());
                         noobTask.setName(taskEnum.getDesc());
                         noobTask.setBonus(taskEnum.getReward().intValue());
@@ -3383,7 +3420,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                         noobTasks.add(noobTask);
                     }
                 } else {    //日常任务
-                    if(counts!=null && counts!=0) {
+                    if (counts != null && counts != 0) {
                         Integer dailyMaxNum = taskEnum.getDailyMaxNum();
                         dailyTask = new DailyTask();
                         dailyTask.setTargetId(taskEnum.getTargetId());
@@ -3391,7 +3428,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                         dailyTask.setBonus(taskEnum.getReward().intValue());
                         dailyTask.setCurrentNum(counts);
                         dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
-                        if(counts>=dailyMaxNum) {
+                        if (counts >= dailyMaxNum) {
                             dailyTask.setDone(true);
                         }
                         dailyTasks.add(dailyTask);
@@ -3399,8 +3436,8 @@ public class UserServiceImpl extends BaseService implements UserService {
                 }
             }
         }
-        resultMap.put("noobTasks",noobTasks);
-        resultMap.put("dailyTasks",dailyTasks);
+        resultMap.put("noobTasks", noobTasks);
+        resultMap.put("dailyTasks", dailyTasks);
         return resultMap;
     }
 
@@ -3442,19 +3479,19 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
     }
 
-	/**
-	 * 技能校验
-	 *
-	 * @param user
-	 * @param skill
-	 * @param isModify
-	 */
-	private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
-		Long userId = user.getId();
-		// 非空校验 必要元素：技能名称、封面图、id
-		if (skill == null) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名称、封面图、技能编号都不能为空！");
-		}
+    /**
+     * 技能校验
+     *
+     * @param user
+     * @param skill
+     * @param isModify
+     */
+    private void skillPass(TUser user, TUserSkill skill, boolean isModify) {
+        Long userId = user.getId();
+        // 非空校验 必要元素：技能名称、封面图、id
+        if (skill == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "技能名称、封面图、技能编号都不能为空！");
+        }
 
         String name = skill.getName();
 
@@ -3503,144 +3540,199 @@ public class UserServiceImpl extends BaseService implements UserService {
         return userCompanies.get(0).getCompanyId();
     }
 
-	@Override
-	public void addPublishTimes(TUser user, int type) {
-		if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
-			user.setSeekHelpPublishNum(user.getSeekHelpPublishNum() + 1);
-		} else {
-			user.setServePublishNum(user.getServePublishNum() + 1);
-		}
-		userDao.updateByPrimaryKey(user);
-	}
+    @Override
+    public void addPublishTimes(TUser user, int type) {
+        if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
+            user.setSeekHelpPublishNum(user.getSeekHelpPublishNum() + 1);
+        } else {
+            user.setServePublishNum(user.getServePublishNum() + 1);
+        }
+        userDao.updateByPrimaryKey(user);
+    }
 
-	@Override
-	public boolean isCareUser(Long userId, Long userFollowId) {
-		return userFollowDao.countUserFollow(userId, userFollowId).equals(1L) ? true : false;
-	}
+    @Override
+    public boolean isCareUser(Long userId, Long userFollowId) {
+        return userFollowDao.countUserFollow(userId, userFollowId).equals(1L) ? true : false;
+    }
 
-	/**
-	 * 组织每日时间流水查询(今日需求、服务情况)
-	 * @param user
-	 * @return
-	 */
-	@Override
-	public CompanyDailyPaymentView queryPaymentToDay(TUser user) {
-		user = userDao.selectByPrimaryKey(user.getId());
+    /**
+     * 组织每日时间流水查询(今日需求、服务情况)
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public CompanyDailyPaymentView queryPaymentToDay(TUser user) {
+        user = userDao.selectByPrimaryKey(user.getId());
 
-		Long userId = user.getId();
-		Long companyId = getOwnCompanyId(userId);
-		// 获取今日起止时间戳
-		long currentTimeMillis = System.currentTimeMillis();
-		long startStamp = DateUtil.getStartStamp(currentTimeMillis);
-		long endStamp = DateUtil.getEndStamp(currentTimeMillis);
+        Long userId = user.getId();
+        Long companyId = getOwnCompanyId(userId);
+        // 获取今日起止时间戳
+        long currentTimeMillis = System.currentTimeMillis();
+        long startStamp = DateUtil.getStartStamp(currentTimeMillis);
+        long endStamp = DateUtil.getEndStamp(currentTimeMillis);
 
-		List<TOrder> orders = orderService.selectDailyOrders(userId);
+        List<TOrder> orders = orderService.selectDailyOrders(userId);
 
-		//构建订单ids
-		List<Long> orderIds = new ArrayList<>();
+        //构建订单ids
+        List<Long> orderIds = new ArrayList<>();
 
-		//初始化 orderId-order map && serviceId-paymentView map
-		Map<Long,TOrder> orderMap = new HashMap<>();
-		Map<Long,PaymentView> paymentViewMap = new HashMap<>();
+        //初始化 orderId-order map && serviceId-paymentView map
+        Map<Long, TOrder> orderMap = new HashMap<>();
+        Map<Long, PaymentView> paymentViewMap = new HashMap<>();
 
-		//装载orderId-order map
-		for(TOrder order:orders) {
-			//装载订单ids
-			orderIds.add(order.getId());
+        //装载orderId-order map
+        for (TOrder order : orders) {
+            //装载订单ids
+            orderIds.add(order.getId());
 
-			//装载订单
-			orderMap.put(order.getId(),order);
-			Long serviceId = order.getServiceId();
-			PaymentView paymentView = paymentViewMap.get(serviceId);
-			if(paymentView==null) {
-				paymentView = new PaymentView();
-			}
+            //装载订单
+            orderMap.put(order.getId(), order);
+            Long serviceId = order.getServiceId();
+            PaymentView paymentView = paymentViewMap.get(serviceId);
+            if (paymentView == null) {
+                paymentView = new PaymentView();
+            }
 
-			//装载数据
-			if(paymentView.getIdString()!=null) {
-				paymentView.setIdString(String.valueOf(order.getServiceId()));
-				paymentView.setServiceType(order.getType());
-				paymentView.setServiceName(order.getServiceName());
-				paymentView.setCollectTime(order.getCollectTime());
-				paymentView.setServiceTypeName(getServiceValue(order.getServiceTypeId()));
-			}
+            //装载数据
+            if (paymentView.getIdString() != null) {
+                paymentView.setIdString(String.valueOf(order.getServiceId()));
+                paymentView.setServiceType(order.getType());
+                paymentView.setServiceName(order.getServiceName());
+                paymentView.setCollectTime(order.getCollectTime());
+                paymentView.setServiceTypeName(getServiceValue(order.getServiceTypeId()));
+            }
 
-			//装载参与人数（确认人选）
-			Integer confirmNum = paymentView.getConfirmNum();
-			if(confirmNum==null) {
-				confirmNum = 0;
-			}
-			confirmNum += order.getConfirmNum();
-			paymentView.setConfirmNum(confirmNum);
-			paymentViewMap.put(serviceId,paymentView);
-		}
+            //装载参与人数（确认人选）
+            Integer confirmNum = paymentView.getConfirmNum();
+            if (confirmNum == null) {
+                confirmNum = 0;
+            }
+            confirmNum += order.getConfirmNum();
+            paymentView.setConfirmNum(confirmNum);
+            paymentViewMap.put(serviceId, paymentView);
+        }
 
-		List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);
+        if(orderIds.isEmpty()) {
+            return new CompanyDailyPaymentView();
+        }
 
-		//初始化 serviceId-payOrGainNum map
-		Map<Long,Long> payOrGainNumMap = new HashMap<>();
-		for(TUserTimeRecord userTimeRecord:userTimeRecords) {
-			String orderId = userTimeRecord.getOrderId();	//订单id
-			TOrder order = orderMap.get(orderId);
-			Long serviceId = order.getServiceId();
-			Long payOrGainNum = payOrGainNumMap.get(serviceId);
-			if(payOrGainNum==null) {
-				payOrGainNum = 0l;
-			}
-			payOrGainNum += userTimeRecord.getTime();
-			payOrGainNumMap.put(serviceId,payOrGainNum);
-		}
+        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);
 
-		//初始化结果集
-		List<PaymentView> serviceViews = new ArrayList<>();
-		List<PaymentView> helpViews = new ArrayList<>();
+        //初始化 serviceId-payOrGainNum map
+        Map<Long, Long> payOrGainNumMap = new HashMap<>();
+        for (TUserTimeRecord userTimeRecord : userTimeRecords) {
+            String orderId = userTimeRecord.getOrderId();    //订单id
+            TOrder order = orderMap.get(orderId);
+            Long serviceId = order.getServiceId();
+            Long payOrGainNum = payOrGainNumMap.get(serviceId);
+            if (payOrGainNum == null) {
+                payOrGainNum = 0l;
+            }
+            payOrGainNum += userTimeRecord.getTime();
+            payOrGainNumMap.put(serviceId, payOrGainNum);
+        }
 
-		//装载每项商品赚取或支出总时间 并 划分服务求助
-		for(Long serviceId:paymentViewMap.keySet()) {
-			//装载每项商品赚取或支出总时间
-			Long payOrGainNum = payOrGainNumMap.get(serviceId);
-			PaymentView paymentView = paymentViewMap.get(serviceId);
-			paymentView.setTotalTime(payOrGainNum);	//总收入或者支出时间
-			//区分服务还是求助
-			if(ProductEnum.TYPE_SEEK_HELP.getValue() == paymentView.getServiceType().intValue()) {	//求助
-				helpViews.add(paymentView);
-				continue;
-			}
-			serviceViews.add(paymentView);
-		}
+        //初始化结果集
+        List<PaymentView> serviceViews = new ArrayList<>();
+        List<PaymentView> helpViews = new ArrayList<>();
 
-		//装载结果
-		CompanyDailyPaymentView resultView = new CompanyDailyPaymentView();
-		resultView.setHelpPaymentViews(helpViews);
-		resultView.setServPaymentViews(serviceViews);
+        //装载每项商品赚取或支出总时间 并 划分服务求助
+        for (Long serviceId : paymentViewMap.keySet()) {
+            //装载每项商品赚取或支出总时间
+            Long payOrGainNum = payOrGainNumMap.get(serviceId);
+            PaymentView paymentView = paymentViewMap.get(serviceId);
+            paymentView.setTotalTime(payOrGainNum);    //总收入或者支出时间
+            //区分服务还是求助
+            if (ProductEnum.TYPE_SEEK_HELP.getValue() == paymentView.getServiceType().intValue()) {    //求助
+                helpViews.add(paymentView);
+                continue;
+            }
+            serviceViews.add(paymentView);
+        }
 
-		return resultView;
-	}
+        //装载结果
+        CompanyDailyPaymentView resultView = new CompanyDailyPaymentView();
+        resultView.setHelpPaymentViews(helpViews);
+        resultView.setServPaymentViews(serviceViews);
 
-	/**
-	 * 获取服务类型名
-	 * @param serviceTypeId 服务类型id
-	 * @return
-	 */
-	private String getServiceValue(Long serviceTypeId) {
-		String url = "";
-		ObjectMapper objectMapper = new ObjectMapper();
-		String value = messageService.getValue(String.valueOf(serviceTypeId));
-		//解析json
-		try {
-			List<AllTypeJsonEntity> listType = objectMapper.readValue(value,new TypeReference<List<AllTypeJsonEntity>>() { });
-			for (int i = 0; i < listType.size(); i++) {
-				AllTypeJsonEntity jsonEntity = listType.get(i);
-				if (Long.parseLong(jsonEntity.getId()) == serviceTypeId.longValue()) {
-					return jsonEntity.getTitle();
-				}
-			}
-			return "";
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("解析字典表allType关键字的json出错，" + e.getMessage());
-			return "";
-		}
-	}
+        return resultView;
+    }
+
+    @Override
+    public TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage) {
+        Long time = bonusPackage.getTime();
+        Long currentMills = System.currentTimeMillis();
+        //判穷
+        if (time > (user.getSurplusTime() - user.getFreezeTime())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的余额不足!");
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+        bonusPackage.setUserId(user.getId());
+        bonusPackage.setCreateTime(currentTimeMillis);
+        bonusPackage.setUpdateTime(currentTimeMillis);
+        bonusPackage.setCreateUser(user.getId());
+        bonusPackage.setUpdateUser(user.getId());
+        bonusPackage.setCreateUserName(user.getName());
+        bonusPackage.setUpdateUserName(user.getName());
+        bonusPackage.setIsValid(AppConstant.IS_VALID_YES);
+        bonusPackageDao.insert(bonusPackage);
+
+        //余额变动
+        user = userDao.selectByPrimaryKey(user.getId());    //最新数据
+        user.setSurplusTime(user.getSurplusTime() - time);
+        //updater
+        user.setUpdateTime(currentMills);
+        user.setUpdateUser(user.getId());
+        user.setUpdateUserName(user.getName());
+        userDao.updateByPrimaryKey(user);
+
+        //流水
+        TUserTimeRecord record = new TUserTimeRecord();
+        record.setFromUserId(user.getId());
+        record.setTime(time);
+        record.setType(PaymentEnum.PAYMENT_TYPE_BONUS_PACKAGE_OUT.getCode());
+        record.setTargetId(bonusPackage.getId());
+        //creater & updater
+        record.setCreateTime(currentMills);
+        record.setCreateUser(user.getId());
+        record.setCreateUserName(user.getName());
+        record.setUpdateTime(currentMills);
+        record.setUpdateUser(user.getId());
+        record.setUpdateUserName(user.getName());
+        record.setIsValid(AppConstant.IS_VALID_YES);
+        userTimeRecordDao.insert(record);
+
+        return bonusPackage;
+    }
+
+    /**
+     * 获取服务类型名
+     *
+     * @param serviceTypeId 服务类型id
+     * @return
+     */
+    private String getServiceValue(Long serviceTypeId) {
+        String url = "";
+        ObjectMapper objectMapper = new ObjectMapper();
+        String value = messageService.getValue(String.valueOf(serviceTypeId));
+        //解析json
+        try {
+            List<AllTypeJsonEntity> listType = objectMapper.readValue(value, new TypeReference<List<AllTypeJsonEntity>>() {
+            });
+            for (int i = 0; i < listType.size(); i++) {
+                AllTypeJsonEntity jsonEntity = listType.get(i);
+                if (Long.parseLong(jsonEntity.getId()) == serviceTypeId.longValue()) {
+                    return jsonEntity.getTitle();
+                }
+            }
+            return "";
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("解析字典表allType关键字的json出错，" + e.getMessage());
+            return "";
+        }
+    }
 
 }
