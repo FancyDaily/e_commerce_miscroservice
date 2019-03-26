@@ -2,8 +2,11 @@ package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
+import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
+import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +51,7 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("报名成功");
         } catch (MessageException e) {
-            if (e.getErrorCode().equals("401")){
+            if (e.getErrorCode().equals("401") && serviceId != null){
                 orderRelationService.removeCanEnrollDate(date ,serviceId);
             }
             logger.warn("报名失败," + e.getMessage());
@@ -643,4 +646,70 @@ public class OrderRelationController extends BaseController {
         return result;
     }
 
+
+    /**
+     * 组织版的订单头部信息
+     *
+     * @param orderId
+     * @param token
+     * @return
+     */
+    @PostMapping("/orgOrderInfo")
+    public Object orgOrderInfo(Long orderId , String token) {
+        TUser user = (TUser) redisUtil.get(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            OrgEnrollUserView orgEnrollUserView = orderRelationService.orgOrderInfo(orderId , user.getId());
+            result.setSuccess(true);
+            result.setData(orgEnrollUserView);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查看失败");
+        }
+        return result;
+    }
+
+    /**
+     * 组织选人列表
+     *
+     * @param orderId 订单id
+     * @param status 1-可选择 2-已选择 3-被拒绝 4-已取消
+     * @param type 1-查找姓名 2-查找电话 3-查找组内姓名，搜索栏前面的选项
+     * @param value 对应值，搜索栏里面的内容
+     * @param pageSize 分页大小
+     * @param pageNum 分页页码
+     * @param token token
+     * @return
+     */
+    @PostMapping("/enrollUserInfoList")
+    public Object enrollUserInfoList(Long orderId, int status, int type, String value,
+                                     int pageSize, int pageNum, String token) {
+        TUser user = (TUser) redisUtil.get(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            QueryResult<EnrollUserInfoView> enrollUserInfoViewList = orderRelationService.enrollUserInfoList(orderId , status , type , value ,pageSize ,pageNum ,user);
+            result.setSuccess(true);
+            result.setData(enrollUserInfoViewList);
+            result.setMsg("查看成功");
+        } catch (MessageException e) {
+            logger.warn("查看失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("查看失败," + e.getMessage());
+        } catch (Exception e) {
+            logger.error("查看失败" + errInfo(e), e);
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("查看失败");
+        }
+        return result;
+    }
 }

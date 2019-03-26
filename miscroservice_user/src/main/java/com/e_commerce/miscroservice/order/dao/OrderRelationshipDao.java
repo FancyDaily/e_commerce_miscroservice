@@ -234,4 +234,13 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> pageChooseList(Long userId);
+
+	/**
+	 * 根据orderId和statusList来升序查询在userIdList里的报名者订单List
+	 *
+	 * @param orderId
+	 * @param statusList
+	 * @return
+	 */
+	List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long orderId, List<Integer> statusList , List<Long> userIdList);
 }

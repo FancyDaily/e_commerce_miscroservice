@@ -26,8 +26,8 @@ public class OrgEnrollUserView {
 	private String startTime; //开始时间
 	private String endTime; //结束时间
 	private Boolean isRepeat; //是否为重复周期
-	private Long enrollSum; //报名人数
-	private Long chooseUserSum; //已选人数
-	private Long canChooseSum; //可选人数
+	private Integer enrollSum; //报名人数
+	private Integer chooseUserSum; //已选人数
+	private Integer canChooseSum; //可选人数
 	
 }

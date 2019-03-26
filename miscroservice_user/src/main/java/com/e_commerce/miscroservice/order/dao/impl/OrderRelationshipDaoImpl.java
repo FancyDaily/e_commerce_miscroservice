@@ -475,6 +475,28 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                 .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .eq(TOrderRelationship::getIsValid , AppConstant.ACCREDIT_STATUS_YES));
     }
+
+
+    /**
+     * 根据orderId和statusList来升序查询在userIdList里的报名者订单List
+     *
+     * @param orderId
+     * @param statusList
+     * @return
+     */
+    public List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long orderId, List<Integer> statusList , List<Long> userIdList) {
+        List<TOrderRelationship> orderRelationshipList = MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),
+                new MybatisSqlWhereBuild(TOrderRelationship.class)
+                        .eq(TOrderRelationship::getOrderId, orderId)
+                        .in(TOrderRelationship::getStatus, statusList)
+                        .in(TOrderRelationship::getReceiptUserId , userIdList)
+                        .isNotNull(TOrderRelationship::getReceiptUserId)
+                        .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
+        );
+        return orderRelationshipList;
+    }
+
     /**
      * 参与的订单的状态
      *

@@ -5,6 +5,9 @@ import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
+import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -175,4 +178,27 @@ public interface OrderRelationService {
      * @return
      */
     String getRemarkLabels(int type , int credit, int major, int attitude);
+
+    /**
+     * 组织版的订单详情头部信息
+     *
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+    OrgEnrollUserView orgOrderInfo(Long orderId , Long nowUserId);
+    /**
+     * 组织报名选人列表
+     *
+     * @param orderId
+     * @param status
+     * @param type
+     * @param value
+     * @param pageSize
+     * @param pageNum
+     * @param nowUser
+     * @return
+     */
+    QueryResult<EnrollUserInfoView> enrollUserInfoList(Long orderId, int status, int type, String value,
+                                                              int pageSize, int pageNum, TUser nowUser);
 }

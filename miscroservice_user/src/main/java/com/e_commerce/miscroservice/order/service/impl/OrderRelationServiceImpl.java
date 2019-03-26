@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -11,11 +12,14 @@ import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.*;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
+import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
 import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -369,6 +373,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     userInfoView.setName(userlist.get(j).getName());
                     userInfoView.setUserHeadPortraitPath(userlist.get(j).getUserHeadPortraitPath());
                     userInfoView.setStatus(1);//默认为已到
+                    userInfoView.setAuthStatus(userlist.get(i).getAuthenticationStatus());
                     if (type == 7 || type == 5) {
                         //如果是是支付，还要看一下未到人员
                         if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()) {
@@ -2450,7 +2455,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         } else {
             //如果是求助
             if (nowUser.getAuthenticationStatus() != 2){
-                throw new MessageException("499", "对不起，您未实名，无法报名求助");
+                throw new MessageException("9527", "对不起，您未实名，无法报名求助");
             }
         }
 
@@ -2482,9 +2487,16 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
     }
 
-    public void orgOrderInfo(Long orderId , TUser nowUser){
+    /**
+     * 组织版的订单详情头部信息
+     *
+     * @param orderId
+     * @param nowUserId
+     * @return
+     */
+    public OrgEnrollUserView orgOrderInfo(Long orderId , Long nowUserId){
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUser.getId());
+        TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId , nowUserId);
         OrgEnrollUserView orgEnrollUserView = new OrgEnrollUserView();
         orgEnrollUserView.setOrderId(orderId);
         orgEnrollUserView.setTitle(order.getServiceName());
@@ -2495,5 +2507,217 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             orgEnrollUserView.setIsRepeat(true);
         }
+        orgEnrollUserView.setEnrollSum(order.getEnrollNum());
+
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        statusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+        statusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+        statusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+        statusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
+        List<TOrderRelationship> orderChooseRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+
+        orgEnrollUserView.setChooseUserSum(orderChooseRelationshipList.size());
+
+        orgEnrollUserView.setCanChooseSum(
+                orderRelationshipDao.selectListByStatusForNotSignByEnroll(orderId ,
+                        OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()).size());
+
+        return orgEnrollUserView;
+
+    }
+
+    /**
+     * 组织报名选人列表
+     *
+     * @param orderId
+     * @param status
+     * @param type
+     * @param value
+     * @param pageSize
+     * @param pageNum
+     * @param nowUser
+     * @return
+     */
+    public QueryResult<EnrollUserInfoView> enrollUserInfoList(Long orderId, int status, int type, String value,
+                                                       int pageSize, int pageNum, TUser nowUser){
+
+        QueryResult<EnrollUserInfoView> result = new QueryResult<>();
+        List<EnrollUserInfoView> enrollUserInfoViewList = new ArrayList<>();
+        List<Long> userIdFindList = new ArrayList<>();
+
+        if (type == 1) {
+            // 1是输入姓名
+            List<TUser> userFindList = userCommonController.selectUserByName(value);
+            for (int i = 0; i < userFindList.size(); i++) {
+                userIdFindList.add(userFindList.get(i).getId());
+            }
+            if (userIdFindList.size() <= 0) {
+                // 没数据
+                result.setResultList(enrollUserInfoViewList);
+                result.setTotalCount(0l);
+                return result;
+            }
+        } else if (type == 2) {
+            // 2 是输入手机号
+            List<TUser> userFindList = userCommonController.selectUserByTelephone(value);
+            for (int i = 0; i < userFindList.size(); i++) {
+                userIdFindList.add(userFindList.get(i).getId());
+            }
+            if (userIdFindList.size() <= 0) {
+                // 没数据
+                result.setResultList(enrollUserInfoViewList);
+                result.setTotalCount(0l);
+                return result;
+            }
+        } else if (type == 3) {
+            // 如果是组内姓名
+            List<TUserCompany> userCompanies = userCommonController.selectUserCompanyByName(value);
+
+            for (int i = 0; i < userCompanies.size(); i++) {
+                userIdFindList.add(userCompanies.get(i).getUserId());
+            }
+            if (userIdFindList.size() <= 0) {
+                // 没数据
+                result.setResultList(enrollUserInfoViewList);
+                result.setTotalCount(0l);
+                return result;
+            }
+        }
+
+        List<TOrderRelationship> orderRelationshipList = null;
+        //分页插件
+        Page<TService> page = PageHelper.startPage(pageNum, pageSize);
+        if (status == 1) {
+            // 1是可选择
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+            if (userIdFindList.size() > 0){
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnrollInUserList(orderId , statusList , userIdFindList);
+            } else {
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            }
+
+        } else if (status == 2) {
+            // 2是被选择
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
+            if (userIdFindList.size() > 0){
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnrollInUserList(orderId , statusList , userIdFindList);
+            } else {
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            }
+
+        } else if (status == 3) {
+            // 3是被拒绝
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType());
+            if (userIdFindList.size() > 0){
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnrollInUserList(orderId , statusList , userIdFindList);
+            } else {
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            }
+
+        } else if (status == 4) {
+            // 3是取消
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType());
+            if (userIdFindList.size() > 0){
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnrollInUserList(orderId , statusList , userIdFindList);
+            } else {
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            }
+
+        }
+
+        if (orderRelationshipList == null || orderRelationshipList.size() <= 0) {
+            // 没数据
+            result.setResultList(enrollUserInfoViewList);
+            result.setTotalCount(0l);
+            return result;
+        }
+
+        List<Long> userIds = new ArrayList<>();
+
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
+            userIds.add(orderRelationshipList.get(i).getUpdateUser());
+        }
+
+        List<TUser> userList = userCommonController.selectUserByIds(userIds);
+        if (userList == null || userList.size() <= 0) {
+            // 没数据
+            result.setResultList(enrollUserInfoViewList);
+            result.setTotalCount(0l);
+            return result;
+        }
+
+        Long companyId = userCommonController.getOwnCompanyId(nowUser.getId());
+        List<TUserCompany> userCompanieList = userCommonController.selectUserCompanyByIdAndUserIdList(userIdFindList , companyId);
+
+        for (int i = 0; i < orderRelationshipList.size(); i++) {
+            TUser thisUser = null;
+            for (int j = 0; j < userList.size(); j++) {
+                if (orderRelationshipList.get(i).getReceiptUserId() == userList.get(j).getId().longValue()) {
+                    thisUser = userList.get(j);
+                    break;
+                }
+            }
+            if (thisUser != null) {
+                TUserCompany userCompany = null;
+                for (int j = 0; j < userCompanieList.size(); j++) {
+                    if (orderRelationshipList.get(i).getReceiptUserId() == userCompanieList.get(j).getUserId().longValue()) {
+                        userCompany = userCompanieList.get(j);
+                        break;
+                    }
+                }
+                EnrollUserInfoView enrollUserInfoView = new EnrollUserInfoView();
+
+                if (userCompany != null) {
+                    enrollUserInfoView.setIsGroup(true);
+                    enrollUserInfoView.setUserNameForTeam(userCompany.getTeamName());
+                } else {
+                    enrollUserInfoView.setIsGroup(false);
+                }
+
+                enrollUserInfoView.setUserIdToString(thisUser.getId());
+                enrollUserInfoView.setUserName(thisUser.getName());
+                enrollUserInfoView.setUserUrl(thisUser.getUserHeadPortraitPath());
+                if (thisUser.getAge() == null) {
+                    enrollUserInfoView.setAge("未知");
+                } else {
+                    enrollUserInfoView.setAge(thisUser.getAge() + "");
+                }
+                if (thisUser.getOccupation() == null) {
+                    enrollUserInfoView.setOccupation("无业游民");
+                } else {
+                    enrollUserInfoView.setOccupation(thisUser.getOccupation());
+                }
+                if (thisUser.getSkill() == null) {
+                    enrollUserInfoView.setSkill("未设定");
+                } else {
+                    enrollUserInfoView.setSkill(thisUser.getSkill());
+                }
+                enrollUserInfoView.setServe_num(thisUser.getServeNum());
+                enrollUserInfoView.setTotal_eva(thisUser.getServTotalEvaluate());
+                enrollUserInfoView.setCreatTime(changeTime(orderRelationshipList.get(i).getCreateTime()));
+                enrollUserInfoView.setStatus(orderRelationshipList.get(i).getStatus());
+                enrollUserInfoView.setSex(thisUser.getSex());
+                enrollUserInfoViewList.add(enrollUserInfoView);
+            }
+
+        }
+        result.setResultList(enrollUserInfoViewList);
+        result.setTotalCount(page.getTotal());
+
+
+
+        return result;
+
     }
 }

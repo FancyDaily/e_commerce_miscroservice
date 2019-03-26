@@ -163,4 +163,19 @@ public interface UserCompanyDao {
      * @return
      */
     List<TUserCompany> selectByCompanyIdAndState(Long companyId, Integer joinStateCompanyNotYet);
+
+    /**
+     * 根据组织用户名字查找组织用户
+     * @param name
+     * @return
+     */
+    List<TUserCompany> selectUserCompanyByName(String name);
+
+    /**
+     * 根据组织编号和用户列表 查看用户组织信息
+     * @param userIdList
+     * @param companyId
+     * @return
+     */
+    List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId);
 }
