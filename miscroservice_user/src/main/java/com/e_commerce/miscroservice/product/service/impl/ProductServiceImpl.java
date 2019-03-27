@@ -69,10 +69,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		// 组织发布
 		if (isCompany) {
-			// TODO 从用户模块调用
 			// 查询当前用户所在的组织，写入到service中
-//			Long companyId = getOwnCompanyId(user.getId());
-//			param.getService().setCompanyId(companyId);
+			Long companyId = userService.getOwnCompanyId(user.getId());
+			param.getService().setCompanyId(companyId);
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
 			submitCompanySeekHelp(user, param);
 		} else {// 个人发布
@@ -83,6 +82,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	/**
 	 * 当前发布的产品是否合规
+	 *
 	 * @param user
 	 * @param param
 	 */
@@ -106,11 +106,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	/**
 	 * 功能描述: 查看用户时间币是否足够
-	 * @author 马晓晨
-	 * @date 2019/3/9 21:43
+	 *
 	 * @param user
 	 * @param service
 	 * @return
+	 * @author 马晓晨
+	 * @date 2019/3/9 21:43
 	 */
 	private void checkEnoughTimeCoin(TUser user, TService service) {
 		// 求助发布的单价
@@ -159,9 +160,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		// 组织发布
 		boolean isCompany = user.getIsCompanyAccount().equals(IS_COMPANY_ACCOUNT_YES);
 		if (isCompany) {
-			//  TODO 从用户模块那里调用
-//			Long companyId = getOwnCompanyId(user.getId());
-//			param.getService().setCompanyId(companyId);
+			Long companyId = userService.getOwnCompanyId(user.getId());
+			param.getService().setCompanyId(companyId);
 			//这一层可以判断出是组织，将source字段值写为组织
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
 			submitCompanyService(user, param);
@@ -206,9 +206,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
 			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
-			String title = "	";
-			String content = "";
-			messageService.messageSave(tService.getId(), new AdminUser(), title, content, tService.getUserId(), currentTime);
+			// 手动下架不需要发送通知
+//			String title = "";
+//			String content = "";
+//			messageService.messageSave(tService.getId(), new AdminUser(), title, content, tService.getUserId(), currentTime);
 			// TODO 服务通知
 		} catch (Exception e) {
 			logger.error(errInfo(e));
@@ -288,7 +289,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//分页插件
 		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
 		//我发布的列表
-		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(),type);
+		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(), type);
 		if (listProductByUserId.size() == 0) {
 			result.setResultList(new ArrayList<>());
 			result.setTotalCount(0L);
@@ -331,16 +332,28 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void autoLowerFrameService(TService service) {
+	public void autoLowerFrameService(TService service, Integer type) {
 		Long currentTime = System.currentTimeMillis();
 		service.setStatus(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
 		service.setUpdateTime(currentTime);
 		productDao.updateByPrimaryKeySelective(service);
 		orderService.synOrderServiceStatus(service.getId(), ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue());
-		// TODO 发送系统消息
-		String title = "";
-		String content = "";
-		messageService.messageSave(service.getId(), new AdminUser(), title, content, service.getUserId(),currentTime);
+		String title = "%s下架通知";
+		String content = null;
+		if (Objects.equals(type, 1)) {//超过结束时间下架
+			content = "您发布的%s“%s”，由于已超过原定结束时间，已自动下架。您可以修改时间后重新上架。";
+		} else {  // 互助时不足下架
+			content = "您发布的%s“%s”，由于互助时不足，无法继续生成订单，已自动下架。您可以赚取足够的互助时重新上架。";
+		}
+		if (Objects.equals(type, ProductEnum.TYPE_SEEK_HELP.getValue())) {
+			title = String.format(title, "求助");
+			content = String.format(content, "求助", service.getServiceName());
+		} else {
+			title = String.format(title, "服务");
+			content = String.format(content, "服务", service.getServiceName());
+		}
+		messageService.messageSave(service.getId(), new AdminUser(), title, content, service.getUserId(), currentTime);
+		// TODO 发送服务通知
 	}
 
 	@Override
@@ -416,7 +429,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -478,7 +491,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		//派生出第一张订单
 
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -534,7 +547,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * @param param
 	 * @param token
 	 */
-	private void  submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
+	private void submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
 		TService service = param.getService();
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
 		setServiceCommonField(user, service);
@@ -554,7 +567,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -629,7 +642,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -671,7 +684,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(),"");
+			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -797,12 +810,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	/**
 	 * 发布精彩瞬间
+	 *
 	 * @param serviceId
 	 * @param description
 	 * @param url
 	 * @param nowUser
 	 */
-	public void sendServiceSummary(Long serviceId , String description , String url , TUser nowUser){
+	public void sendServiceSummary(Long serviceId, String description, String url, TUser nowUser) {
 		long nowTime = System.currentTimeMillis();
 		TServiceSummary serviceSummary = new TServiceSummary();
 		serviceSummary.setServiceId(serviceId);
@@ -819,10 +833,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	/**
 	 * 查找精彩瞬间
+	 *
 	 * @param serviceId
 	 * @return
 	 */
-	public TServiceSummary findServiceSummary(Long serviceId){
+	public TServiceSummary findServiceSummary(Long serviceId) {
 		return serviceSummaryDao.selectServiceSummaryByServiceId(serviceId);
 	}
 
