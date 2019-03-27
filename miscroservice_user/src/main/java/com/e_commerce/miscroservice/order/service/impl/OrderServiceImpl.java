@@ -877,7 +877,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Map map = new HashMap();
 		map.put("userIds", userIds);
 		map.put("orderId", order.getId());
-		map.put("type", 2);
 		//支付用户ID
 		map.put("payUserIds", payUserIds);
 		map.put("paymentList", paymentList);
