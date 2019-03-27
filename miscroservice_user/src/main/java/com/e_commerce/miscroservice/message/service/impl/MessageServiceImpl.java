@@ -10,10 +10,12 @@ import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
+import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
@@ -21,6 +23,7 @@ import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
+import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -45,7 +48,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * 创建时间:2019年3月2日 下午4:55:46
  */
 @Service
-public class MessageServiceImpl implements MessageService {
+public class MessageServiceImpl extends BaseService implements MessageService {
 
 
     Log logger = Log.getInstance(com.e_commerce.miscroservice.order.service.impl.OrderRelationServiceImpl.class);
@@ -63,6 +66,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private FormidDao formidDao;
+
+    @Autowired
+    private MessageCommonController messageCommonController;
 
 
     @Autowired
@@ -150,7 +156,29 @@ public class MessageServiceImpl implements MessageService {
                 }
             });
         }
-        //TODO 发送通知
+        //发送通知
+
+        TUser toUser = userCommonController.getUserById(messageUserId);
+        TFormid formid = findFormId(nowTime, toUser);
+        if (formid != null) {
+            try {
+                List<String> msg = new ArrayList<>();
+                String parameter = "?toUserId="+messageUserId+"&lastTime=9999999999999&pageSize=5&returnHome=true";
+                msg.add(nowUser.getName());
+                if (!url.isEmpty()) {
+                    //如果url不为空 证明发送的是图片
+                    msg.add("[图片]");
+                } else {
+                    msg.add(message);
+                }
+                msg.add(changeTime(nowTime));
+                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+                formid.setIsValid("0");
+                messageCommonController.updateFormId(formid);
+            } catch (Exception e) {
+                logger.error("发送服务通知失败");
+            }
+        }
 
     }
 
