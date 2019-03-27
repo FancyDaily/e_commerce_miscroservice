@@ -51,6 +51,13 @@ public interface OrderDao {
      */
     List<TOrder> pageOrder(PageOrderParamView param);
 
+	/**
+	 * 查询今日派生出的订单
+	 * @param userId
+	 * @return
+	 */
+	List<TOrder> selectDailyCreatedOrders(Long userId);
+
     /**
      * 根据userId查找订单列表
      * @param userId

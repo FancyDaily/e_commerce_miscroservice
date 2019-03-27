@@ -307,7 +307,7 @@ public class BaseService {
 		long formIdTime = nowTime - 7 * 24 * 60 * 60 * 1000;
 		if (toTUser.getVxOpenId() != null) {
 			//查出所以七天内有效的fomid
-			messageCommonController.selectCanUseFormId(formIdTime , toTUser.getId());
+			formid = messageCommonController.selectCanUseFormId(formIdTime , toTUser.getId());
 		}
 		return formid;
 	}

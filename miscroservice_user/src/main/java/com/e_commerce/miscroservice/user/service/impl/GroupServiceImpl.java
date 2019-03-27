@@ -132,8 +132,9 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         List<TUserCompany> resultList = new ArrayList<>();
         if (isThisMonth) {
             resultList = userCompanyDao.selectJoinMembersByCompanyIdBetween(companyId,begin,end);
+        } else {
+            resultList = userCompanyDao.selectJoinMembersByCompanyId(companyId);
         }
-        resultList = userCompanyDao.selectJoinMembersByCompanyId(companyId);
 
         return resultList.size();
     }

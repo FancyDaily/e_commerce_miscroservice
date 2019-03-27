@@ -202,7 +202,8 @@ public class LoginController extends BaseController {
      * @return
      */
     @PostMapping("reLogin")
-    public Object reLogin(String openid) {  //TODO uid
+    public Object reLogin(String openid) {
+        //TODO uid
         AjaxResult result = new AjaxResult();
         try {
             Map<String, Object> resultMap = loginService.loginByOpenid(openid);

@@ -1,13 +1,20 @@
 package com.e_commerce.miscroservice.user.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.AllTypeJsonEntity;
+import com.e_commerce.miscroservice.commons.entity.colligate.Category;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
+import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
@@ -28,6 +35,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +50,10 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
 
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
+
+    @Autowired
+    @Lazy
+    private MqTemplate mqTemplate;
 
     @Autowired
     private AuthorizeRpcService authorizeRpcService;
@@ -609,6 +621,18 @@ public class UserServiceImpl extends BaseService implements UserService {
         UserPageView result = new UserPageView();
         //基本信息
         TUser theUser = userDao.selectByPrimaryKey(userId);
+        Integer isCompanyAccount = theUser.getIsCompanyAccount();
+        if(AppConstant.IS_COMPANY_ACCOUNT_YES.equals(isCompanyAccount)) {   //如果是组织账号
+            result.setCompanyAccount(true);
+            TCompany ownCompany = getOwnCompany(theUser.getId());
+            for(CompanyTypeEnum theEnum:CompanyTypeEnum.values()) {
+                if(theEnum.getCode().equals(ownCompany.getType())) {
+                    //获取组织性质
+                    result.setCompanyType(theEnum.getName());
+                    break;
+                }
+            }
+        }
         DesensitizedUserView view = BeanUtil.copy(theUser, DesensitizedUserView.class);
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
@@ -2315,7 +2339,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public CompanyPaymentView queryPayment(TUser user, String year, String month, String type) {
-        // 与数据库同步
+        // 与数据库同步   //TODO 测试 年月起止时间戳有点问题
         user = userDao.selectByPrimaryKey(user.getId());
 
         Long userId = user.getId();
@@ -2648,7 +2672,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 登录
         Long userId = user.getId();
 
-
         // 使得之前的token失效 //TODO
         String redisKey = "str" + userId;
         if (redisUtil.hasKey(redisKey)) {
@@ -2672,11 +2695,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
             if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
                 user.setToken(tokenDto.getToken());
+                //设置token
+                resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
             }
         }
-
-        //设置token
-        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
 
         return resultMap;
     }
@@ -2754,10 +2776,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         // creater & updater
         long currentTimeMillis = System.currentTimeMillis();
         user.setCreateTime(System.currentTimeMillis());
-        user.setCreateUser(user.getId());
         user.setCreateUserName(user.getName());
         user.setUpdateTime(currentTimeMillis);
-        user.setUpdateUser(user.getId());
         user.setUpdateUserName(user.getName());
 
         // 有效性
@@ -2765,6 +2785,8 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 插入一条用户记录
         userDao.insert(user);
+        user.setCreateUser(user.getId());
+        user.setUpdateUser(user.getId());
 
         // 插入注册的系统消息
         messageService.messageSave(null, user, AppConstant.NOTICE_TITLE_RIGESTER, AppConstant.NOTICE_CONTENT_RIGESTER, user.getId(), currentTimeMillis);
@@ -3525,10 +3547,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
-     * 功能描述: 获取组织账号对应组织编号
-     * 作者: 许方毅
-     * 创建时间: 2019年1月14日 下午1:45:04
-     *
+     * 获取组织账号对应组织编号
      * @param id
      * @return
      */
@@ -3539,6 +3558,21 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         return userCompanies.get(0).getCompanyId();
     }
+
+    /**
+     * 获取组织账号对应组织实体
+     * @param id
+     * @return
+     */
+    private TCompany getOwnCompany(Long id) {
+        List<TUserCompany> userCompanies = userCompanyDao.selectByUserIdAndCompanyjob(id, AppConstant.JOB_COMPANY_CREATER);
+        if (userCompanies.isEmpty()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有对应组织！");
+        }
+        Long companyId = userCompanies.get(0).getCompanyId();
+        return companyDao.selectByPrimaryKey(companyId);
+    }
+
 
     @Override
     public void addPublishTimes(TUser user, int type) {
@@ -3572,7 +3606,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         long startStamp = DateUtil.getStartStamp(currentTimeMillis);
         long endStamp = DateUtil.getEndStamp(currentTimeMillis);
 
-        List<TOrder> orders = orderService.selectDailyOrders(userId);
+        List<TOrder> orders = orderService.selectDailyCreatedOrders(userId);    //查找当天派生出的订单
 
         //构建订单ids
         List<Long> orderIds = new ArrayList<>();
@@ -3595,7 +3629,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
 
             //装载数据
-            if (paymentView.getIdString() != null) {
+            if (paymentView.getIdString() == null) {
                 paymentView.setIdString(String.valueOf(order.getServiceId()));
                 paymentView.setServiceType(order.getType());
                 paymentView.setServiceName(order.getServiceName());
@@ -3617,13 +3651,13 @@ public class UserServiceImpl extends BaseService implements UserService {
             return new CompanyDailyPaymentView();
         }
 
-        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);
+        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectDailyByUserIdInOrderIds(userId, orderIds);  //查找当日生成的流水
 
         //初始化 serviceId-payOrGainNum map
         Map<Long, Long> payOrGainNumMap = new HashMap<>();
         for (TUserTimeRecord userTimeRecord : userTimeRecords) {
-            String orderId = userTimeRecord.getOrderId();    //订单id
-            TOrder order = orderMap.get(orderId);
+            Long targetId = userTimeRecord.getTargetId();    //订单id
+            TOrder order = orderMap.get(targetId);
             Long serviceId = order.getServiceId();
             Long payOrGainNum = payOrGainNumMap.get(serviceId);
             if (payOrGainNum == null) {
@@ -3641,6 +3675,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         for (Long serviceId : paymentViewMap.keySet()) {
             //装载每项商品赚取或支出总时间
             Long payOrGainNum = payOrGainNumMap.get(serviceId);
+            if(payOrGainNum==null) {
+                payOrGainNum = 0l;
+            }
             PaymentView paymentView = paymentViewMap.get(serviceId);
             paymentView.setTotalTime(payOrGainNum);    //总收入或者支出时间
             //区分服务还是求助
@@ -3659,6 +3696,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         return resultView;
     }
 
+    /**
+     * 直接创建一个红包
+     * @param user
+     * @param bonusPackage
+     * @return
+     */
     @Override
     public TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage) {
         Long time = bonusPackage.getTime();
@@ -3704,6 +3747,25 @@ public class UserServiceImpl extends BaseService implements UserService {
         record.setIsValid(AppConstant.IS_VALID_YES);
         userTimeRecordDao.insert(record);
 
+        //TODO 定时任务-红包退回
+        TimerScheduler timerScheduler = new TimerScheduler();
+        timerScheduler.setType(TimerSchedulerTypeEnum.BONUS_PACKAGE_SEND_BACK_TASK.toNum());
+        timerScheduler.setName("红包" + UUID.randomUUID().toString());
+        String ymdStr = DateUtil.timeStamp2Seconds(currentTimeMillis);
+        String[] split = ymdStr.split(" ");
+        String[] times = split[1].split(":");
+        StringBuilder appender = new StringBuilder().append(times[2]).append(" ").append(times[1]).append(" ").append(times[0]).append(" ");
+        String cron = appender.append("*/1 * ? *").toString();
+
+        cron = "*/20 * * * * ? *";
+        timerScheduler.setCron(cron);
+
+        Map<String,Object> param = new HashMap<>();
+        param.put("bonusPackage",bonusPackage);
+        timerScheduler.setParams(JSON.toJSONString(param));
+
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName() ,JSONObject.toJSONString(timerScheduler));
+
         return bonusPackage;
     }
 
@@ -3715,16 +3777,17 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     private String getServiceValue(Long serviceTypeId) {
         String url = "";
+        String key = "category";
         ObjectMapper objectMapper = new ObjectMapper();
-        String value = messageService.getValue(String.valueOf(serviceTypeId));
+        String value = messageService.getValue(String.valueOf(key));
         //解析json
         try {
-            List<AllTypeJsonEntity> listType = objectMapper.readValue(value, new TypeReference<List<AllTypeJsonEntity>>() {
+            List<Category> listType = objectMapper.readValue(value, new TypeReference<List<Category>>() {
             });
             for (int i = 0; i < listType.size(); i++) {
-                AllTypeJsonEntity jsonEntity = listType.get(i);
+                Category jsonEntity = listType.get(i);
                 if (Long.parseLong(jsonEntity.getId()) == serviceTypeId.longValue()) {
-                    return jsonEntity.getTitle();
+                    return jsonEntity.getSortName();
                 }
             }
             return "";

@@ -34,4 +34,9 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
         resultMap.put("publicWelfares",publicWelfares);
         return resultMap;
     }
+
+    @Override
+    public int insert(TPublicWelfare publicWelfare) {
+        return MybatisOperaterUtil.getInstance().save(publicWelfare);
+    }
 }

@@ -13,6 +13,7 @@ public enum TimerSchedulerTypeEnum {
     CALLBACK_REQUEST(1, "callback_request"),
     TEST(2, "test"),
     WITHDRAW_DEPOSIT_BANK_DELAY_TASK(-30000, "withdraw_deposit_bank_delay_task"),
+    BONUS_PACKAGE_SEND_BACK_TASK(4,"bonus_package_send_back_task"),
     ORDER_OVERTIME_END(3, "order_overtime_end"),
     ORDER_DELAY_TASK(-20000, "orders6_delay_task");
     private int key;
