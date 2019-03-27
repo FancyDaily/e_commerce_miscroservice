@@ -257,4 +257,11 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	List<TOrderRelationship> selectWaitPay(Long orderId);
+
+	/**
+	 * 查询报名者数量
+	 * @param orderId
+	 * @return
+	 */
+	long selectEnrollUserCount(Long orderId);
 }

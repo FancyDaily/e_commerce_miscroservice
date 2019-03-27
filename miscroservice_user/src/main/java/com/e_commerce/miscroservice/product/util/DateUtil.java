@@ -130,6 +130,14 @@ public class DateUtil {
 		return commonFormat(timestamp, "yyyyMMddHHmm");
 	}
 	/**
+	 * 将毫秒值转换为字符串时间日期
+	 * @param timestamp 时间戳
+	 * @return
+	 */
+	public static String formatShow(Long timestamp) {
+		return commonFormat(timestamp, "yyyy-MM-dd HH:mm");
+	}
+	/**
 	 * 将毫秒值转换为字符串日期
 	 * @param timestamp 时间戳
 	 * @return
@@ -250,6 +258,18 @@ public class DateUtil {
 		cal.add(Calendar.DAY_OF_YEAR, addDays);
 		return cal.getTimeInMillis();
 	}
+	/**
+	 * 给指定毫秒值加指定的小时
+	 * @param timestamp 指定的毫秒值
+	 * @param addHours 指定的小时
+	 * @return 增加后的毫秒值
+	 */
+	public static Long addHours(Long timestamp, int addHours) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		cal.add(Calendar.HOUR, addHours);
+		return cal.getTimeInMillis();
+	}
 
 	public static int[] getWeekDayArray(String dateWeekNumber) {
 		String[] weekDayArray = dateWeekNumber.split(",");
@@ -338,7 +358,13 @@ public class DateUtil {
 		//分
 		String minute = date.substring(10, 12);
 		//秒
-		String second = date.substring(12, 14);
+
+		String second = null;
+		try {
+			second = date.substring(12, 14);
+		} catch (Exception e) {
+			second = "00";
+		}
 
 		String corn = second+" "+minute+" "+hour+" "+day+" "+month+" "+"? "+year;
 		System.out.println(corn);

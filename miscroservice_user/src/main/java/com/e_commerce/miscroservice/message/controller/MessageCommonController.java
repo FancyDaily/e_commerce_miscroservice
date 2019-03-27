@@ -4,10 +4,8 @@ import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
-import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
-import com.e_commerce.miscroservice.message.dao.EventDao;
 import com.e_commerce.miscroservice.message.dao.FormidDao;
 import com.e_commerce.miscroservice.message.dao.MessageNoticeDao;
 import com.e_commerce.miscroservice.message.service.EventService;
@@ -88,12 +86,11 @@ public class MessageCommonController extends BaseController {
      * @return
      */
     public String pushOneUserMsg(String openid, String formid, List<String> msg, SetTemplateIdEnum setTemplateIdEnum , String parameter) {
-        /*
+
         RestTemplate restTemplate = new RestTemplate();
 
         String token = userCommonController.getWechatToken();
-        //String url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send" + "?access_token=" + token; TODO 等待获取token
-        String url = "";
+        String url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send" + "?access_token=" + token;
         // 拼接推送的模版
         WxMssVo wxMssVo = new WxMssVo();
 
@@ -121,8 +118,7 @@ public class MessageCommonController extends BaseController {
         logger.info("小程序推送结果={}", wxMssVo.toString());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, wxMssVo, String.class);
         logger.info("小程序推送结果={}", responseEntity.getBody());
-        return responseEntity.getBody();*/
-        throw new MessageException("499", "对不起，还没弄好");
+        return responseEntity.getBody();
     }
 
     /**

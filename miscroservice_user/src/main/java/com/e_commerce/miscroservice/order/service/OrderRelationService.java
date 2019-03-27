@@ -91,9 +91,10 @@ public interface OrderRelationService {
      * @param userIdList
      * @param paymentList
      * @param nowUserId
+     * @param type
      * @return
      */
-    List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId);
+    List<String> payOrder(Long orderId, List<Long> userIdList, List<Long> paymentList, Long nowUserId , int type);
     /**
      * 新增发布者订单关系
      * @param order
@@ -201,4 +202,28 @@ public interface OrderRelationService {
      */
     QueryResult<EnrollUserInfoView> enrollUserInfoList(Long orderId, int status, int type, String value,
                                                               int pageSize, int pageNum, TUser nowUser);
+
+    /**
+     * 两个小时还未选人的通知方法
+     * @param orderId
+     */
+    void noChooseByTwoHour(Long orderId);
+
+    /**
+     * 无人报名的通知
+     * @param orderId
+     */
+    void noUserEnrollByStart(Long orderId);
+
+    /**
+     * 到开始时间未确认开始
+     * @param orderId
+     */
+    void noSignWhenStart(Long orderId);
+
+    /**
+     * 开始前一个小时
+     * @param orderId
+     */
+    void oneHourByStart(Long orderId);
 }

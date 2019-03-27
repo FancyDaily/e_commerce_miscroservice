@@ -99,9 +99,10 @@ public interface ProductService {
 	/**
 	 * 根据主键修改信息
 	 * @param service 要修改的实体类，需要带主键ID
+	 * @param type 1、超过结束时间下架 2、互助时不足下架
 	 * @return
 	 */
-	void autoLowerFrameService(TService service);
+	void autoLowerFrameService(TService service, Integer type);
 
 	/**
 	 * 查看商品详情
