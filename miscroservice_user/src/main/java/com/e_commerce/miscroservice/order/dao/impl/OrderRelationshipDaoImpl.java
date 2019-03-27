@@ -438,23 +438,6 @@ public List<TOrderRelationship> listRelationshipByUserId(Long userId){
 		);
 		}
 
-/**
- * 查询成立的订单关系
- * @param orderId 订单ID
- * @return
- */
-@Override
-public List<TOrderRelationship> getReceiver(Long orderId){
-		return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(),new MybatisSqlWhereBuild(TOrderRelationship.class)
-		.isNotNull(TOrderRelationship::getReceiptUserId).neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NO_STATE.getType())
-		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
-		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
-		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
-		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType())
-		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())
-		.eq(TOrderRelationship::getOrderId,orderId)
-		.eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
-		}
     /**
      * 查询成立的订单关系
      * @param orderId 订单ID
@@ -538,22 +521,6 @@ public List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long or
 		return orderRelationshipList;
 		}
 
-/**
- * 参与的订单的状态
- *
- * @return
- */
-private List<Integer> participationStatusList(){
-		List<Integer> orderRelationshipStatusList=new ArrayList<>();
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
-		orderRelationshipStatusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
-		return orderRelationshipStatusList;
-		}
     /**
      * 查询报名者数量
      * @param orderId
