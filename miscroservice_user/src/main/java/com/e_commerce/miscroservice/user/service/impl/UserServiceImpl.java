@@ -2667,16 +2667,16 @@ public class UserServiceImpl extends BaseService implements UserService {
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
-        //设置token
-        if (user.getToken() == null) {
-            Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
-            if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
-                user.setToken(tokenDto.getToken());
-            }
-        }
-
-        //设置token
-        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
+//        //设置token
+//        if (user.getToken() == null) {
+//            Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
+//            if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
+//                user.setToken(tokenDto.getToken());
+//            }
+//        }
+//
+//        //设置token
+//        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
 
         return resultMap;
     }
@@ -2772,12 +2772,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 注册完成任务
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
-        //注册用户中心数据
-        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
-
-        if (token != null&&token.getToken()!=null) {
-            user.setToken(token.getToken());
-        }
+//        //注册用户中心数据
+//        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
+//
+//        if (token != null&&token.getToken()!=null) {
+//            user.setToken(token.getToken());
+//        }
 
         return user;
     }
