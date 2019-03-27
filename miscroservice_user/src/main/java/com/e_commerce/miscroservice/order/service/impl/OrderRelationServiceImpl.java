@@ -2743,4 +2743,64 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         }
     }
+
+    /**
+     * 两个小时还未选人的通知方法
+     * @param orderId
+     */
+    public void noChooseByTwoHour(Long orderId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        long nowTime = System.currentTimeMillis();
+        TUser publishUser = userCommonController.getUserById(order.getCreateUser());
+        TOrderRelationship orderRelationshipByPublish = orderRelationshipDao.selectByOrderIdAndUserId(orderId , order.getCreateUser());
+        if (orderRelationshipByPublish.getStatus() != OrderRelationshipEnum.STATUS_NO_STATE.getType()){
+            //如果发布者状态不为为选人，说明选过人了，不用发送消息
+            return;
+        } else {
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectListByStatusByEnroll(orderId , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+            if (orderRelationshipList.size() == 0){
+                //如果没有待选的人 不用发送消息
+                return;
+            } else {
+
+                //发送消息
+                String title = "请及时选定服务者";
+                String msgContent = new StringBuilder().append("距离您的求助“").append(orderRelationshipByPublish.getServiceName())
+                        .append("”开始时间只剩下2小时啦！已经有").append(orderRelationshipList.size())
+                        .append("位小天使报名，快去选定您需要的人吧~“").toString();
+
+                TFormid formid = findFormId(nowTime, publishUser);
+                if (formid != null) {
+                    try {
+                        List<String> wxMsg = new ArrayList<>();
+                        String parameter = "?orderId="+order.getId()+"&returnHome=true";
+                        wxMsg.add("您还未选定ta哦");
+                        wxMsg.add(orderRelationshipByPublish.getServiceName());
+                        TUser toUser = userCommonController.getUserById(orderRelationshipList.get(0).getReceiptUserId());
+                        if (orderRelationshipList.size() == 1){
+                            wxMsg.add(toUser.getName());
+                        } else {
+                            wxMsg.add(new StringBuilder().append(toUser.getName()).append("等")
+                                    .append(orderRelationshipList.size()).append("人").toString());
+                        }
+                        wxMsg.add("别拖啦，再不选定，ta就来不及上车啦！");
+                        messageCommonController.pushOneUserMsg(publishUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_4 , parameter);
+                        formid.setIsValid("0");
+                        messageCommonController.updateFormId(formid);
+                    } catch (Exception e) {
+                        logger.error("发送服务通知失败");
+                    }
+                }
+                TUser adminUser = new TUser();
+                adminUser.setId(0l);
+                adminUser.setName("系统管理员");
+                messageCommonController.messageSave(order.getId() , adminUser , title , msgContent , publishUser.getId() , nowTime);
+
+            }
+        }
+    }
+
+   /* public noUserEnrollByStart(Long orderId){
+
+    }*/
 }
