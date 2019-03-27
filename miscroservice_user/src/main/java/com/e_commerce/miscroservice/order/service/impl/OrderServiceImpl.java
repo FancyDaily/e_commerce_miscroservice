@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -104,8 +105,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		// 根据当前用户的组织查看当前用户是否有权限查看
 		List<Long> companyIds = new ArrayList<>();
 		if (user != null) { // 如果当前用户是登录状态，则查看当前用户加入了哪些组织
-			//TODO 调用用户模块
-//			companyIds = userCompanyDao.selectCompanyIdByUser(user.getId());
+			TUser tUser = userService.getUserById(user.getId());
+			String companyIdsString = tUser.getCompanyIds();
+			if (StringUtil.isNotEmpty(companyIdsString)) {
+				String[] companyIdStringArray = companyIdsString.split(",");
+				companyIds = Stream.of(companyIdStringArray).map(Long::parseLong).collect(Collectors.toList());
+			}
 			param.setCurrentUserId(user.getId());
 		}
 		param.setUserCompanyIds(companyIds);
@@ -696,7 +701,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	public TOrder produceOrder(TService service, Integer type, String date) throws NoEnoughCreditException {
 		TUser tUser = userService.getUserById(service.getUserId());
 		if (!checkEnoughTimeCoin(tUser, service)) {
-			//TODO  进行下架操作
 			throw new NoEnoughCreditException("用户授信不足");
 		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
@@ -745,6 +749,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 		} else {
 			saveOrder(order);
+			//发送MQ消息，将定时下架订单任务发送到调度中心
+			sendMqBySaveOrder(service, order);
 			return order;
 		}
 		return null;
@@ -782,59 +788,101 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		//下架订单  并将状态置为可见状态
 		Long currentTime = System.currentTimeMillis();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
-		order.setStatus(OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue());
+		order.setStatus(OrderEnum.STATUS_END.getValue());
 		order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 		order.setUpdateTime(currentTime);
 		orderDao.updateByPrimaryKey(order);
+		// 付钱的用户ID
+		List<Long> payUserIds = new ArrayList<>();
+		// 收钱的用户ID
+		List<Long> userIds = new ArrayList<>();
+		// 支付金额
+		List<Long> paymentList = new ArrayList<>();
+		// 该订单待支付的人
+		List<TOrderRelationship> listWaitPay = orderRelationshipDao.selectWaitPay(orderId);
 		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
+			// 求助 发布者为付钱者
+			payUserIds.add(order.getCreateUser());
+			listWaitPay.stream().forEach(waitPayUser -> {
+				paymentList.add(waitPayUser.getCollectTime());
+				userIds.add(waitPayUser.getReceiptUserId());
+			});
 			String title = "求助订单结束通知";
 			String content = null;
 			lowerFrameSeekHelpOrder(order);
 			if (Objects.equals(order.getCollectType(), ProductEnum.COLLECT_TYPE_EACHHELP.getValue())
 					&& !Objects.equals(order.getServicePersonnel(), order.getConfirmNum())) { // 互助时的消息
 				content = "您于 %s 到 %s 的互助“%s”到结束时间已结束，系统已解冻您剩余的互助时，请注意查收";
-				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
-						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				content = String.format(content, DateUtil.formatShow(order.getStartTime())
+						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 			} else { // 公益时的消息
 				content = "您于 %s - %s 的互助“%s”到结束时间已结束。";
-				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
-						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				content = String.format(content, DateUtil.formatShow(order.getStartTime())
+						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 			}
 			//订单结束给发布者发送的消息
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
 			//如果有未支付的订单，发送消息并调用 24小时后自动支付的定时
-			Long waitPayPerson = orderRelationshipDao.countWaitPay(orderId);
+//			Long waitPayPerson = orderRelationshipDao.countWaitPay(orderId);
 			// 如果已经结束了， 还有人待支付
-			if (!Objects.equals(waitPayPerson, 0L)) {
+			if (!Objects.equals(listWaitPay.size(), 0)) {
 				title = "请确认互助结束";
 				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
-				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
-						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				content = String.format(content, DateUtil.formatShow(order.getStartTime())
+						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 				messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
-				// TODO 发送MQ 激活姜修弘的定时任务
 				// TODO 发送模板消息
 			}
-
 		} else { // 是服务
 			lowerFrameServiceOrder(order);
+			// 发布者为收钱用户  接单者为付钱用户
+			userIds.add(order.getCreateUser());
+			// 付钱用户
+			listWaitPay.stream().forEach(waitPayUser -> {
+				payUserIds.add(waitPayUser.getReceiptUserId());
+				paymentList.add(waitPayUser.getCollectTime());
+			});
 			String title = "服务订单结束通知";
 			String content = "您于 %s - %s 的互助“%s”到结束时间已结束。";
-			content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
-					, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+			content = String.format(content, DateUtil.formatShow(order.getStartTime())
+					, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
-			List<TOrderRelationship> listWaitPay = orderRelationshipDao.selectWaitPay(orderId);
 			for (TOrderRelationship relationship : listWaitPay) {
 				// 这是一个服务  接单用户就是求助者  给求助者发消息
 				Long userId = relationship.getReceiptUserId();
 				title = "请确认互助结束";
 				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
-				content = String.format(content, DateUtil.commonFormat(order.getStartTime(), "yyyy-MM-dd")
-						, DateUtil.commonFormat(order.getEndTime(), "yyyy-MM-dd"), order.getServiceName());
+				content = String.format(content, DateUtil.formatShow(order.getStartTime())
+						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 				messageService.messageSave(order.getId(), new AdminUser(), title, content, userId, currentTime);
-				// TODO 发送MQ 激活姜修弘的定时任务
 				// TODO  发送模板消息
 			}
 		}
+		// 24小时后自动支付
+		sendMqByEndOrder(order, userIds, paymentList, payUserIds);
+	}
+
+	/**
+	 * 订单结束24小时自动支付的MQ消息到定时调度中心
+	 * @param order 订单
+	 * @param userIds 提醒的用户
+	 * @param paymentList 支付的金额
+	 */
+	private void sendMqByEndOrder(TOrder order, List<Long> userIds, List<Long> paymentList, List<Long> payUserIds) {
+		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+		TimerScheduler scheduler = new TimerScheduler();
+		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_PAY.toNum());
+		scheduler.setName("pay_order");
+		scheduler.setCron(cron);
+		Map map = new HashMap();
+		map.put("userIds", userIds);
+		map.put("orderId", order.getId());
+		//支付用户ID
+		map.put("payUserIds", payUserIds);
+		map.put("paymentList", paymentList);
+		// 自动支付所需要的参数
+		scheduler.setParams(JSON.toJSONString(map));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
 	}
 
 	@Override
@@ -885,7 +933,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		for (TOrderRelationship relationship : enrollList) {
 			enrollIdList.add(relationship.getReceiptUserId());
 		}
-		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		if (enrollIdList.size() != 0) {
+			orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		}
 
 	}
 

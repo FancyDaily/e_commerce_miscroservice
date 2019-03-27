@@ -2,45 +2,48 @@ package com.e_commerce.miscroservice.order.listener.mqListener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
-import com.e_commerce.miscroservice.commons.entity.application.TService;
-import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
-import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.order.service.OrderService;
-import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
+
 
 /**
- * @author 姜修弘
- * @date 2019/3/26
+ * @author 马晓晨
+ * @date 2019/3/27
  */
 @Component
 public class OrderPayListener extends MqListenerConvert {
 
-	Log logger = Log.getInstance(OrderPayListener.class);
+	Log logger = Log.getInstance(OrderEndListener.class);
+	@Autowired
+	private OrderRelationService relationService;
 
-	@Autowired
-	private OrderService orderService;
-	@Autowired
-	private ProductCommonController productService;
+	@RequestMapping("/testPay")
+	public String test(String transferData) {
+		transferTo(transferData);
+		return "ok";
+	}
 
 	@Override
 	protected void transferTo(String transferData) {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
-		Long serviceId = Long.parseLong((String) paramMap.get("serviceId"));
-		Long orderId = Long.parseLong((String) paramMap.get("orderId"));
-		//获取商品信息
-		TService service = productService.getProductById(serviceId);
-		//下架订单
-		orderService.lowerFrameOrder(orderId);
-		// 从service中取消掉可报名日期（暂时不用，派生订单会重新计算可报名日期）
-		//派生订单
-		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_AUTO.getValue(), null);
-		} catch (NoEnoughCreditException e) {
-			logger.info("没有足够的授信，已做下架处理");
-			productService.autoLowerFrameService(service, 2);
+		System.out.println(paramMap);
+		// 获取参数
+		List<Long> userIds = (List)paramMap.get("userIds");
+		List<Long> paymentList = (List)paramMap.get("paymentList");
+		Long orderId = (Long)paramMap.get("orderId");
+		List<Long> payUserIds = (List)paramMap.get("payUserIds");
+		//支付
+		for (Long payUserId : payUserIds) {
+			try {
+				relationService.payOrder(orderId, userIds, paymentList,payUserId, 2);
+			} catch (Exception e) {
+				logger.error("id为{}的用户为id{}的用户在订单ID为{}的互助中支付失败");
+			}
 		}
 	}
 }

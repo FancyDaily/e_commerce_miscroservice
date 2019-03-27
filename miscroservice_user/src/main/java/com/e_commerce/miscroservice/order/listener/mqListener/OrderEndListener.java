@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author 马晓晨
@@ -25,9 +26,16 @@ public class OrderEndListener extends MqListenerConvert {
 	@Autowired
 	private ProductCommonController productService;
 
+	@RequestMapping("/testEnd")
+	public String test(String transferData) {
+		transferTo(transferData);
+		return "ok";
+	}
+
 	@Override
-	protected void transferTo(String transferData) {
+	public void transferTo(String transferData) {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
+		System.out.println(paramMap);
 		Long serviceId = Long.parseLong((String) paramMap.get("serviceId"));
 		Long orderId = Long.parseLong((String) paramMap.get("orderId"));
 		//获取商品信息

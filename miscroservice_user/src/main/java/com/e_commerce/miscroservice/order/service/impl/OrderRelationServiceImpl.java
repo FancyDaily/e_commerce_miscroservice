@@ -1,10 +1,18 @@
 package com.e_commerce.miscroservice.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
+import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
@@ -23,6 +31,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -31,7 +40,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -78,6 +89,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
     @Autowired
     private EvaluateDao evaluateDao;
+    @Autowired
+    @Lazy
+    MqTemplate mqTemplate;
 
     /**
      * 报名
@@ -2739,9 +2753,28 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果是求助，给一堆人付钱
             List<Long> userIdList = new ArrayList<>();
             List<Long> paymentList = new ArrayList<>();
-
-
         }
+    }
+
+    /**
+     * 结束支付调用的自动评价
+     * @param order 订单
+     * @param userIds 被评价者
+     * @param appraiser 评价者
+     */
+    private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId) {
+        String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+        TimerScheduler scheduler = new TimerScheduler();
+        scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
+        scheduler.setName("remark_order");
+        scheduler.setCron(cron);
+        Map map = new HashMap();
+        map.put("userIds", userIds);
+        map.put("orderId", order.getId());
+        map.put("appraiserId", appraiserId);
+        // 自动支付所需要的参数
+        scheduler.setParams(JSON.toJSONString(map));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**

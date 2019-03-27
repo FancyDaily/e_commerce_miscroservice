@@ -76,7 +76,7 @@ public class ProductCommonController extends BaseController {
 	 * @param type 1、超过结束时间下架 2、互助时不足下架
 	 */
 	public void autoLowerFrameService(TService service, Integer type) {
-		productService.autoLowerFrameService(service);
+		productService.autoLowerFrameService(service, type);
 	}
 
 	/**

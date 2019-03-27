@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -331,12 +330,11 @@ public class SeekHelpController extends BaseController {
 	/**
 	 * 发布
 	 *
-	 * @param request
 	 * @param param
 	 * @return
 	 */
 	@PostMapping("/submit")
-	public Object submitSeekHelp(HttpServletRequest request, @RequestBody ServiceParamView param) {
+	public Object submitSeekHelp(@RequestBody ServiceParamView param) {
 		AjaxResult result = new AjaxResult();
 		//从拦截器中获取参数的String
 /*		String paramString = (String) request.getAttribute("paramString");

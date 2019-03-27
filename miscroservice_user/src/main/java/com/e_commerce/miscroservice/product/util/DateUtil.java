@@ -130,6 +130,14 @@ public class DateUtil {
 		return commonFormat(timestamp, "yyyyMMddHHmm");
 	}
 	/**
+	 * 将毫秒值转换为字符串时间日期
+	 * @param timestamp 时间戳
+	 * @return
+	 */
+	public static String formatShow(Long timestamp) {
+		return commonFormat(timestamp, "yyyy-MM-dd HH:mm");
+	}
+	/**
 	 * 将毫秒值转换为字符串日期
 	 * @param timestamp 时间戳
 	 * @return
@@ -338,7 +346,13 @@ public class DateUtil {
 		//分
 		String minute = date.substring(10, 12);
 		//秒
-		String second = date.substring(12, 14);
+
+		String second = null;
+		try {
+			second = date.substring(12, 14);
+		} catch (Exception e) {
+			second = "00";
+		}
 
 		String corn = second+" "+minute+" "+hour+" "+day+" "+month+" "+"? "+year;
 		System.out.println(corn);
