@@ -36,8 +36,9 @@ public interface LoginService {
 	/**
 	 * 校验短信验证码
 	 * @param validCode
+	 * @param uuid 设备号
 	 */
-	Map<String, Object> validSmsCode(String openid, String validCode);
+	Map<String, Object> validSmsCode(String openid, String validCode,String uuid);
 
 	/**
 	 * 登陆校验

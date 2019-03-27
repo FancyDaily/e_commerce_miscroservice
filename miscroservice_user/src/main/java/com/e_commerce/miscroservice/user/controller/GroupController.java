@@ -185,11 +185,12 @@ public class GroupController extends BaseController {
             groupService.delete(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" + e.getMessage());
+            logger.error("删除组织成员(成员删除)" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" + errInfo(e));
+            e.printStackTrace();
+            logger.error("删除组织成员(成员删除)" + errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -233,11 +234,11 @@ public class GroupController extends BaseController {
             groupService.userReject(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("成员审核通过异常" + e.getMessage());
+            logger.error("成员审核拒绝异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("成员审核通过异常" + errInfo(e));
+            logger.error("成员审核拒绝异常" + errInfo(e));
             result.setSuccess(false);
         }
         return result;
@@ -258,7 +259,7 @@ public class GroupController extends BaseController {
             result.setData(errorInfoList);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("成员审核通过异常" + e.getMessage());
+            logger.error("批量插入成员(Excel文件)异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (IOException e) {
@@ -267,7 +268,7 @@ public class GroupController extends BaseController {
             result.setErrorCode(AppErrorConstant.AppError.IOError.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("成员审核通过异常" + errInfo(e));
+            logger.error("批量插入成员(Excel文件)异常" + errInfo(e));
             result.setSuccess(false);
         }
         return result;

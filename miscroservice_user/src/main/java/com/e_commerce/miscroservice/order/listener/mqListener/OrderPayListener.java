@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
+
 /**
  * @author 马晓晨
  * @date 2019/3/27
@@ -36,15 +37,13 @@ public class OrderPayListener extends MqListenerConvert {
 		List<Long> paymentList = (List)paramMap.get("paymentList");
 		Long orderId = (Long)paramMap.get("orderId");
 		List<Long> payUserIds = (List)paramMap.get("payUserIds");
-		Integer type = (Integer)paramMap.get("type");
 		//支付
 		for (Long payUserId : payUserIds) {
 			try {
-				relationService.payOrder(orderId, userIds, paymentList,payUserId);
+				relationService.payOrder(orderId, userIds, paymentList,payUserId, 2);
 			} catch (Exception e) {
 				logger.error("id为{}的用户为id{}的用户在订单ID为{}的互助中支付失败");
 			}
 		}
-
 	}
 }
