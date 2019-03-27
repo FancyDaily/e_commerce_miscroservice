@@ -3,4 +3,4 @@ VOLUME /tmp
 ADD ./build/libs/miscroservice*.jar /miscroservice.jar
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ENTRYPOINT [ "sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dremote.log.level=INFO  -Xms126m -Xmx216m -jar /miscroservice.jar" ]
+ENTRYPOINT [ "sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -Dremote.log.level=INFO  -Xms512m -Xmx1024m -jar /miscroservice.jar" ]

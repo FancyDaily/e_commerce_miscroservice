@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.enums.application.*;
+import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -142,8 +144,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 if (formid != null) {
                     try {
                         List<String> msg = new ArrayList<>();
-                        String orderType = "2";//服务通知的接收者是报名者
-                        String parameter = "?orderId="+order.getId()+"&returnHome=true&orderType="+orderType;
+                        String parameter = "?orderId="+order.getId()+"&returnHome=true";
                         msg.add("已有一位小天使报名帮助你哦");
                         msg.add(order.getServiceName());
                         msg.add(nowUser.getName());
@@ -170,8 +171,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 if (formid != null) {
                     try {
                         List<String> msg = new ArrayList<>();
-                        String orderType = "2";//服务通知的接收者是报名者
-                        String parameter = "?orderId="+order.getId()+"&returnHome=true&orderType="+orderType;
+                        String parameter = "?orderId="+order.getId()+"&returnHome=true";
                         msg.add(order.getServiceName());
                         msg.add(nowUser.getName());
                         msg.add(changeTime(nowTime));
@@ -197,8 +197,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     if (formid != null) {
                         try {
                             List<String> msg = new ArrayList<>();
-                            String orderType = "2";//服务通知的接收者是报名者
-                            String parameter = "?orderId="+order.getId()+"&returnHome=true&orderType="+orderType;
+                            String parameter = "?orderId="+order.getId()+"&returnHome=true";
                             msg.add(order.getServiceName());
                             msg.add(nowUser.getName());
                             msg.add(changeTime(nowTime));
@@ -504,8 +503,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 if (formid != null) {
                     try {
                         List<String> msg = new ArrayList<>();
-                        String orderType = "2";//服务通知的接收者是报名者
-                        String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                        String parameter = "?orderId="+order.getId()+"&returnHome=true";
                         if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
                             //如果是求助
                             msg.add("您已被求助者选定");
@@ -513,7 +511,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             msg.add(changeTime(order.getStartTime()));
                             msg.add(changeAddress(order.getAddressName()));
                             msg.add("万物遇见了阳光，而我遇见了热心的你，真好");
-                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg ,  SetTemplateIdEnum.help_setTemplate_7 , parameter);
                         } else {
                             //如果是服务
                             msg.add("服务者确认接单啦！");
@@ -612,9 +610,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         //如果是求助
                         if (formid != null) {
                             try {
+                                String parameter = "";
                                 List<String> msg = new ArrayList<>();
-                                String orderType = "2";//服务通知的接收者是报名者
-                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
                                 msg.add("很遗憾，您未被求助者选中");
                                 msg.add(order.getServiceName());
                                 msg.add(toUser.getName());
@@ -634,9 +631,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         //如果是服务
                         if (formid != null) {
                             try {
+                                String parameter = "";
                                 List<String> msg = new ArrayList<>();
-                                String orderType = "2";//服务通知的接收者是报名者
-                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
                                 msg.add("啊喔…TA似乎不太方便");
                                 msg.add(order.getServiceName());
                                 msg.add(nowUser.getName());
@@ -736,14 +732,13 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         if (formid != null) {
                             try {
                                 List<String> msg = new ArrayList<>();
-                                String orderType = "2";//服务通知的接收者是报名者
-                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                String parameter = "?orderId="+order.getId()+"&returnHome=true";
                                 msg.add("报告，服务者已就位");
                                 msg.add(order.getServiceName());
                                 msg.add(changeTime(order.getStartTime()));
                                 msg.add(changeAddress(order.getAddressName()));
                                 msg.add("服务者已点击「确认开始」。如有异常，您可以发起投诉。");
-                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_12 , parameter);
+                                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_14 , parameter);
                                 formid.setIsValid("0");
                                 messageCommonController.updateFormId(formid);
                             } catch (Exception e) {
@@ -757,8 +752,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         if (formid != null) {
                             try {
                                 List<String> msg = new ArrayList<>();
-                                String orderType = "2";//服务通知的接收者是报名者
-                                String parameter = "?orderId="+orderId+"&returnHome=true&orderType="+orderType;
+                                String parameter = "?orderId="+order.getId()+"&returnHome=true";
                                 msg.add("报告，服务者已就位");
                                 msg.add(order.getServiceName());
                                 msg.add(nowUser.getName());
@@ -873,13 +867,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             if (formid != null) {
                                 try {
                                     List<String> wxMsg = new ArrayList<>();
-                                    String orderType = "2";//服务通知的接收者是报名者
-                                    String parameter = "";
+                                    String parameter = "?returnHome=true";
                                     wxMsg.add("叮！收到了一份时间谢礼");
                                     wxMsg.add(orderRelationship.getServiceName());
                                     wxMsg.add(nowUser.getName());
                                     wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
-                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_17 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
                                 } catch (Exception e) {
@@ -901,12 +894,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             if (formid != null) {
                                 try {
                                     List<String> wxMsg = new ArrayList<>();
-                                    String orderType = "2";//服务通知的接收者是报名者
-                                    String parameter = "";
+                                    String parameter = "?returnHome=true";
                                     wxMsg.add("叮！你的公益时长有了新变化");
                                     wxMsg.add(paymentList.get(i)+"分钟");
                                     wxMsg.add("你做过最有意义的事情，已成功被时间记录，您可移步「壹晓时」查看。");
-                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_18 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
                                 } catch (Exception e) {
@@ -986,14 +978,13 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     if (formid != null) {
                         try {
                             List<String> wxMsg = new ArrayList<>();
-                            String orderType = "2";//服务通知的接收者是报名者
-                            String parameter = "";
+                            String parameter = "?returnHome=true";
                             wxMsg.add("叮！收到时间谢礼");
                             wxMsg.add(orderRelationship.getServiceName());
                             wxMsg.add(new StringBuilder().append(nowUser.getName()).append("等")
                                     .append(order.getServicePersonnel()).append("人").toString());
                             wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
-                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.serv_setTemplate_15 , parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
                         } catch (Exception e) {
@@ -1025,13 +1016,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     if (formid != null) {
                         try {
                             List<String> wxMsg = new ArrayList<>();
-                            String orderType = "2";//服务通知的接收者是报名者
-                            String parameter = "";
+                            String parameter = "?returnHome=true";
                             wxMsg.add("叮！收到了一份时间谢礼");
                             wxMsg.add(orderRelationship.getServiceName());
                             wxMsg.add(nowUser.getName());
                             wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
-                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                            messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.serv_setTemplate_16 , parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
                         } catch (Exception e) {
@@ -1283,7 +1273,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (userIdList.size() == errorMsgList.size()){
             throw new MessageException("499", "所选用户中没有可评价用户");
         }
-        //TODO 增加成长值，增加数量是userlist数量减去错误数量
+        userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_COMMENT , (userIdList.size() - errorMsgList.size()));
         return errorMsgList;
     }
 
@@ -1383,14 +1373,13 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             if (formid != null) {
                                 try {
                                     List<String> wxMsg = new ArrayList<>();
-                                    String orderType = "2";//服务通知的接收者是报名者
-                                    String parameter = "";
+                                    String parameter = "?orderId="+order.getId()+"&returnHome=true";
                                     wxMsg.add("：很遗憾，TA因故取消了互助");
                                     wxMsg.add(orderRelationship.getServiceName());
                                     wxMsg.add(nowUser.getName());
                                     wxMsg.add("这一次的错过，是为了彼此更好的相遇");
                                     wxMsg.add("临时取消实在抱歉，TA为您准备了一份致歉礼，请点击查收～");
-                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_22 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
                                 } catch (Exception e) {
@@ -1416,7 +1405,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                                     wxMsg.add(nowUser.getName());
                                     wxMsg.add("这一次的错过，是为了彼此更好的相遇");
                                     wxMsg.add("您可以去报名其他互助，或者继续选定其他已报名的小伙伴");
-                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_7 , parameter);
+                                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_21 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
                                 } catch (Exception e) {
@@ -2039,16 +2028,15 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         //服务通知
         TFormid formid = findFormId(nowTime, toUser);
-        String parameter = "";
         if (formid != null) {
             try {
                 List<String> msgList = new ArrayList<>();
-                String orderType = "2";//服务通知的接收者是报名者
+                String parameter = "?orderId="+orderRelationship.getOrderId()+"&returnHome=true";
                 msgList.add(messageCommonController.getValue(labelsId, "complaint"));
                 msgList.add(nowUser.getName());
                 msgList.add(changeTime(nowTime));
                 msgList.add("如果您对该投诉有异议，请于2个工作日内联系平台在线客服。");
-                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msgList , SetTemplateIdEnum.help_setTemplate_18 , parameter);
+                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msgList , SetTemplateIdEnum.help_setTemplate_20 , parameter);
                 formid.setIsValid("0");
                 messageCommonController.updateFormId(formid);
             } catch (Exception e) {
@@ -2788,4 +2776,64 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         scheduler.setParams(JSON.toJSONString(map));
         mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
     }
+
+    /**
+     * 两个小时还未选人的通知方法
+     * @param orderId
+     */
+    public void noChooseByTwoHour(Long orderId){
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        long nowTime = System.currentTimeMillis();
+        TUser publishUser = userCommonController.getUserById(order.getCreateUser());
+        TOrderRelationship orderRelationshipByPublish = orderRelationshipDao.selectByOrderIdAndUserId(orderId , order.getCreateUser());
+        if (orderRelationshipByPublish.getStatus() != OrderRelationshipEnum.STATUS_NO_STATE.getType()){
+            //如果发布者状态不为为选人，说明选过人了，不用发送消息
+            return;
+        } else {
+            List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectListByStatusByEnroll(orderId , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+            if (orderRelationshipList.size() == 0){
+                //如果没有待选的人 不用发送消息
+                return;
+            } else {
+
+                //发送消息
+                String title = "请及时选定服务者";
+                String msgContent = new StringBuilder().append("距离您的求助“").append(orderRelationshipByPublish.getServiceName())
+                        .append("”开始时间只剩下2小时啦！已经有").append(orderRelationshipList.size())
+                        .append("位小天使报名，快去选定您需要的人吧~“").toString();
+
+                TFormid formid = findFormId(nowTime, publishUser);
+                if (formid != null) {
+                    try {
+                        List<String> wxMsg = new ArrayList<>();
+                        String parameter = "?orderId="+order.getId()+"&returnHome=true";
+                        wxMsg.add("您还未选定ta哦");
+                        wxMsg.add(orderRelationshipByPublish.getServiceName());
+                        TUser toUser = userCommonController.getUserById(orderRelationshipList.get(0).getReceiptUserId());
+                        if (orderRelationshipList.size() == 1){
+                            wxMsg.add(toUser.getName());
+                        } else {
+                            wxMsg.add(new StringBuilder().append(toUser.getName()).append("等")
+                                    .append(orderRelationshipList.size()).append("人").toString());
+                        }
+                        wxMsg.add("别拖啦，再不选定，ta就来不及上车啦！");
+                        messageCommonController.pushOneUserMsg(publishUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_4 , parameter);
+                        formid.setIsValid("0");
+                        messageCommonController.updateFormId(formid);
+                    } catch (Exception e) {
+                        logger.error("发送服务通知失败");
+                    }
+                }
+                TUser adminUser = new TUser();
+                adminUser.setId(0l);
+                adminUser.setName("系统管理员");
+                messageCommonController.messageSave(order.getId() , adminUser , title , msgContent , publishUser.getId() , nowTime);
+
+            }
+        }
+    }
+
+   /* public noUserEnrollByStart(Long orderId){
+
+    }*/
 }
