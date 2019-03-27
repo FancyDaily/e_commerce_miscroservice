@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -831,7 +832,30 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				content = String.format(content, DateUtil.formatShow(order.getStartTime())
 						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 				messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
-				// TODO 发送模板消息
+				if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
+					//发送模板消息
+					TUser toUser = userService.getUserById(order.getCreateUser());
+					TFormid formid = findFormId(currentTime, toUser);
+					if (formid != null) {
+						try {
+							List<String> wxMsg = new ArrayList<>();
+							String parameter = "?orderId=" + order.getId() + "&returnHome=true";
+							wxMsg.add("朋友，该结束了");
+							wxMsg.add(order.getServiceName());
+							wxMsg.add(changeTime(order.getStartTime()));
+							wxMsg.add(changeTime(order.getEndTime()));
+							wxMsg.add("是时候为这一段时光画上一个句号了，请及时点击「确认支付」哦");
+							wxMsg.add("若长时间没有操作，我们将于24小时后自动确认并结算时间哦");
+
+							messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_13, parameter);
+							formid.setIsValid("0");
+							messageCommonController.updateFormId(formid);
+						} catch (Exception e) {
+							logger.error("发送服务通知失败");
+						}
+					}
+				}
+
 			}
 		} else { // 是服务
 			lowerFrameServiceOrder(order);

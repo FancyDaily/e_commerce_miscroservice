@@ -236,6 +236,21 @@ public class BaseService {
 		String startTime = simpleDateFormat.format(time);
 		return startTime;
 	}
+
+	/**
+	 *
+	 * 功能描述:修改时间为yyyy-MM-dd HH:mm
+	 * 作者:姜修弘
+	 * 创建时间:2019年1月15日 下午1:59:21
+	 * @param time
+	 * @return
+	 */
+	public String changeTimeToYMD(Long time) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String startTime = simpleDateFormat.format(time);
+		return startTime;
+	}
+
 	/**
 	 *
 	 * 功能描述:修改时间为汉字的日期 yyyy年MM月dd日 HH:mm

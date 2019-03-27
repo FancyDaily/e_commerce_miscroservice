@@ -439,7 +439,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
     @Override
     public List<TOrderRelationship> getReceiver(Long orderId) {
         return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
-                .isNotNull(TOrderRelationship::getReceiptUserId).neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
+                .isNotNull(TOrderRelationship::getReceiptUserId)
+                .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
                 .neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
@@ -511,6 +512,18 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrderRelationship::getCreateTime))
         );
         return orderRelationshipList;
+    }
+
+    /**
+     * 查询报名者数量
+     * @param orderId
+     * @return
+     */
+    public long selectEnrollUserCount(Long orderId) {
+        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
+                .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE)
+                .isNotNull(TOrderRelationship::getReceiptUserId));
     }
 
     /**
