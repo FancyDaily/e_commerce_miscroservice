@@ -258,6 +258,18 @@ public class DateUtil {
 		cal.add(Calendar.DAY_OF_YEAR, addDays);
 		return cal.getTimeInMillis();
 	}
+	/**
+	 * 给指定毫秒值加指定的小时
+	 * @param timestamp 指定的毫秒值
+	 * @param addHours 指定的小时
+	 * @return 增加后的毫秒值
+	 */
+	public static Long addHours(Long timestamp, int addHours) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		cal.add(Calendar.HOUR, addHours);
+		return cal.getTimeInMillis();
+	}
 
 	public static int[] getWeekDayArray(String dateWeekNumber) {
 		String[] weekDayArray = dateWeekNumber.split(",");

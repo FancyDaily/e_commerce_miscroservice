@@ -762,6 +762,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 * @param order 订单
 	 */
 	private void sendMqBySaveOrder(TService service, TOrder order) {
+		//定时结束订单
 		TimerScheduler scheduler = new TimerScheduler();
 		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
 		scheduler.setName("lower_order");
@@ -771,6 +772,25 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		map.put("orderId", String.valueOf(order.getId()));
 		scheduler.setParams(JSON.toJSONString(map));
 		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+		//定时开始前俩小时发送消息
+		TimerScheduler orderBeforeSendMessageScheduler = new TimerScheduler();
+		orderBeforeSendMessageScheduler.setType(TimerSchedulerTypeEnum.ORDER_SEND_MESSAGE.toNum());
+		orderBeforeSendMessageScheduler.setName("order_send_message");
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
+		Map<String, String> paramMap = new HashMap<>();
+		paramMap.put("orderId", String.valueOf(order.getId()));
+		paramMap.put("type", "1");
+		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(map));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
+		Map<String, String> paramMap2 = new HashMap<>();
+		paramMap2.put("orderId", String.valueOf(order.getId()));
+		paramMap2.put("type", "2");
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime()));
+		Map<String, String> paramMap3 = new HashMap<>();
+		paramMap3.put("orderId", String.valueOf(order.getId()));
+		paramMap3.put("type", "3");
 	}
 
 	/**

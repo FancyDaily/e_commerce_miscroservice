@@ -2772,7 +2772,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * 结束支付调用的自动评价
      * @param order 订单
      * @param userIds 被评价者
-     * @param appraiser 评价者
+     * @param appraiserId 评价者
      */
     private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId) {
         String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));

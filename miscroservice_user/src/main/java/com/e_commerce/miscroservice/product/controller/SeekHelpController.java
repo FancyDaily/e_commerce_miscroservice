@@ -235,7 +235,6 @@ public class SeekHelpController extends BaseController {
 		} catch (Exception e) {
 			logger.error(AppMessageConstant.PRODUCT_DEL_ERROR + errInfo(e));
 			result.setSuccess(false);
-			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR);
 			return result;
 		}
