@@ -13,8 +13,21 @@ public enum TimerSchedulerTypeEnum {
     CALLBACK_REQUEST(1, "callback_request"),
     TEST(2, "test"),
     WITHDRAW_DEPOSIT_BANK_DELAY_TASK(-30000, "withdraw_deposit_bank_delay_task"),
+    /**
+     * 订单超时自动结束
+     */
     ORDER_OVERTIME_END(3, "order_overtime_end"),
+    /**
+     * 订单发送消息
+     */
+    ORDER_SEND_MESSAGE(6, "order_send_message"),
+    /**
+     * 订单结束自动支付
+     */
     ORDER_OVERTIME_PAY(4, "order_overtime_pay"),
+    /**
+     * 订单支付自动评价
+     */
     ORDER_OVERTIME_REMARK(5, "order_overtime_remark"),
     ORDER_DELAY_TASK(-20000, "orders6_delay_task");
     private int key;

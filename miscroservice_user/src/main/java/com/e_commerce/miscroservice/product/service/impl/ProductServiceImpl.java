@@ -220,16 +220,15 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void del(TUser user, Long productId) {
-		user = userService.getUserById(68813260748488704L);
-		logger.error("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
+		logger.info("id为{}的用户对商品id为{}进行了删除操作", user.getId(), productId);
+		TService tService = productDao.selectByPrimaryKey(productId);
+		boolean lowerStatus = tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
+				|| tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+				|| tService.getStatus().equals(ProductEnum.STATUS_EXAMINE_NOPASS.getValue());
+		if (!lowerStatus) {
+			throw new MessageException("当前状态无法删除");
+		}
 		try {
-			TService tService = productDao.selectByPrimaryKey(productId);
-			boolean lowerStatus = tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
-					|| tService.getStatus().equals(ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
-					|| tService.getStatus().equals(ProductEnum.STATUS_EXAMINE_NOPASS.getValue());
-			if (!lowerStatus) {
-				throw new MessageException("当前状态无法删除");
-			}
 			tService.setStatus(ProductEnum.STATUS_DELETE.getValue());
 			tService.setUpdateUser(user.getId());
 			tService.setUpdateUserName(user.getName());
@@ -255,6 +254,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 					|| tService.getStatus().equals(ProductEnum.STATUS_EXAMINE_NOPASS.getValue());
 			if (!lowerStatus) {
 				throw new MessageException("当前状态无法上架");
+			}
+			if (Objects.equals(tService.getTimeType(), ProductEnum.TIME_TYPE_FIXED.getValue())) {
+				throw new MessageException("一次性的互助无法重新上架");
 			}
 			checkRepeatProductLegal(tService);
 			tService.setStatus(ProductEnum.STATUS_UPPER_FRAME.getValue());
