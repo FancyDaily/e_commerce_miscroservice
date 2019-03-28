@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
+import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
@@ -7,6 +8,7 @@ import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.service.impl.OrderServiceImpl;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.dao.ProductDescDao;
@@ -55,6 +57,9 @@ public class BaseService {
 
 	@Autowired
 	protected OrderServiceImpl orderServiceImpl;
+
+	@Autowired
+	protected MessageCommonController messageCommonController;
 
 	protected SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker();
 
@@ -300,5 +305,26 @@ public class BaseService {
 		String startTime = simpleDateFormat.format(time);
 		return startTime;
 	}
+
+
+	/**
+	 *
+	 * 功能描述:判断一个人是否微信授权，是否有可用的formid
+	 * 作者:姜修弘
+	 * 创建时间:2018年12月5日 下午6:30:21
+	 * @param nowTime
+	 * @param toTUser
+	 * @return
+	 */
+	protected TFormid findFormId(long nowTime, TUser toTUser) {
+		TFormid formid = null;
+		long formIdTime = nowTime - 7 * 24 * 60 * 60 * 1000;
+		if (toTUser.getVxOpenId() != null) {
+			//查出所以七天内有效的fomid
+			messageCommonController.selectCanUseFormId(formIdTime , toTUser.getId());
+		}
+		return formid;
+	}
+
 
 }
