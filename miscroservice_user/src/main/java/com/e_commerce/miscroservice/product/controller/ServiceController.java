@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,7 +74,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SERVICE.getValue());
 			result.setData(list);

@@ -472,7 +472,8 @@ public class SeekHelpController extends BaseController {
 		}
 
 		//如果weekDay为null 则是单次  若weekDay不为null，则是重复性
-		if (resultView.getDateWeekNumber() == null || Objects.equals(resultView.getDateWeekNumber(), "null")) {
+		if (StringUtils.isEmpty(resultView.getDateWeekNumber())) {
+//		if (resultView.getDateWeekNumber() == null || Objects.equals(resultView.getDateWeekNumber(), "null")) {
 			resultView.setTimeType(ProductEnum.TIME_TYPE_FIXED.getValue());
 		} else {
 			List<String> dateWeekList = new ArrayList<>();
@@ -506,10 +507,10 @@ public class SeekHelpController extends BaseController {
 			if (StringUtil.isNotEmpty(resultView.getEndDateS()) && StringUtil.isNotEmpty(resultView.getEndTimeS())) {
 				resultView.setEndTime(DateUtil.commonParse(resultView.getEndDateS() + resultView.getEndTimeS(), "yyyy-MM-ddHH:mm"));
 			}
-			if (resultView.getStartTime() == 0) {
+			if (resultView.getStartTime()!=null&&resultView.getStartTime() == 0) {
 				resultView.setStartTime(null);
 			}
-			if (resultView.getEndTime() == 0) {
+			if (resultView.getEndTime()!=null&&resultView.getEndTime() == 0) {
 				resultView.setEndTime(null);
 			}
 		}
