@@ -1,15 +1,11 @@
 package com.e_commerce.miscroservice.user.controller;
 
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
-import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
-import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
-import com.e_commerce.miscroservice.user.dao.UserDao;
-import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
-import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
+import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -48,6 +44,9 @@ public class UserCommonController {
 
 	@Autowired
 	private UserCompanyDao userCompanyDao;
+
+	@Autowired
+	private PublicWelfareDao publicWelfareDao;
 
 	/**
 	 * 根据id获取用户
@@ -118,8 +117,8 @@ public class UserCommonController {
 	 * @param user
 	 * @param growthValueEnum
 	 */
-	public void taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
-		userService.taskComplete(user, growthValueEnum, counts);
+	public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
+		return userService.taskComplete(user, growthValueEnum, counts);
 	}
 
 	/**
@@ -239,4 +238,14 @@ public class UserCommonController {
 	public List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
 		return userCompanyDao.selectUserCompanyByIdAndUserIdList(userIdList , companyId);
 	}
+
+	/**
+	 * 插入公益时流水
+	 * @param publicWelfare
+	 * @return
+	 */
+	public int insertPublicWelfare(TPublicWelfare publicWelfare) {
+		return publicWelfareDao.insert(publicWelfare);
+	}
+
 }

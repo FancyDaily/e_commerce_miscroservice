@@ -494,6 +494,7 @@ public List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long ord
 public long selectJoinUser(Long orderId){
 		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
 		.count(TOrderRelationship::getId)
+		.isNotNull(TOrderRelationship::getReceiptUserId)
 		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NO_STATE.getType())
 		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
 		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())

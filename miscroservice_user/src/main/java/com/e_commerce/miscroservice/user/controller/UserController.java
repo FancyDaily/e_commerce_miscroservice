@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
@@ -377,7 +378,7 @@ public class UserController extends BaseController {
     @RequestMapping("payments")
     public Object payments(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Map<String, Object> payments = userService.payments(user, ymString, option);
             result.setData(payments);
@@ -426,7 +427,7 @@ public class UserController extends BaseController {
     @RequestMapping("freezeList")
     public Object freezeList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<UserFreezeView> queryResult = userService.frozenList(user.getId(), lastTime, pageSize);
             result.setSuccess(true);
@@ -482,7 +483,7 @@ public class UserController extends BaseController {
     @RequestMapping("publicWelfareList")
     public Object publicWelfareList(String token, Long lastTime, Integer pageSize, Integer year) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Map<String, Object> map = userService.publicWelfareList(user, lastTime, pageSize, year);
             result.setData(map);
@@ -548,7 +549,7 @@ public class UserController extends BaseController {
     @RequestMapping("skill/list")
     public Object skillList(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             UserSkillListView skillView = userService.skills(user);
             result.setData(skillView);
@@ -583,7 +584,7 @@ public class UserController extends BaseController {
     public Object skillAdd(String token, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.skillAdd(user, skill);
             result.setSuccess(true);
@@ -619,7 +620,7 @@ public class UserController extends BaseController {
     public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrl) {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.skillModify(user, skill);
             result.setSuccess(true);
@@ -651,7 +652,7 @@ public class UserController extends BaseController {
     @Transactional(rollbackFor = Throwable.class)
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.skillDelete(user, id);
             result.setSuccess(true);
@@ -724,7 +725,7 @@ public class UserController extends BaseController {
     @RequestMapping("collect/list")
     public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<List<TOrder>> queryResult = userService.collectList(user, pageNum, pageSize);
             result.setData(queryResult);
@@ -758,7 +759,7 @@ public class UserController extends BaseController {
     @RequestMapping("collect")
     public Object collect(String token, Long orderId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.collect(user, orderId);
             result.setSuccess(true);
@@ -851,7 +852,7 @@ public class UserController extends BaseController {
     @RequestMapping("infos")
     public Object info(String token, Long userId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             DesensitizedUserView userView = userService.info(user, userId);
             result.setData(userView);
@@ -1219,7 +1220,7 @@ public class UserController extends BaseController {
     @RequestMapping("page")
     public Object page(String token, Long userId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             UserPageView page = userService.page(user, userId);
             result.setData(page);
@@ -1362,7 +1363,7 @@ public class UserController extends BaseController {
     @RequestMapping("page/service")
     public Object pageService(String token, Long userId, Integer pageNum, Integer pageSize, boolean isService) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult queryResult = userService.pageService(userId, pageNum, pageSize, isService, user);
             result.setData(queryResult);
@@ -1512,7 +1513,7 @@ public class UserController extends BaseController {
     @RequestMapping("historyService")
     public Object historyService(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult queryResult = userService.historyService(user, userId, pageNum, pageSize);
             result.setData(queryResult);
@@ -1572,7 +1573,7 @@ public class UserController extends BaseController {
     @RequestMapping("company/list")
     public Object companyList(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<StrUserCompanyView> companies = companyService.getCompanyList(user, userId, pageNum, pageSize);
             result.setData(companies);
@@ -1649,7 +1650,7 @@ public class UserController extends BaseController {
     @RequestMapping("company/social/list")
     public Object companySocialList(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<StrServiceView> activityList = companyService.getActivityList(companyId, pageNum, pageSize);
             result.setData(activityList);
@@ -1726,7 +1727,7 @@ public class UserController extends BaseController {
     @RequestMapping("company/social/list/mine")
     public Object companySocialListMine(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<StrServiceView> myActivityList = companyService.getMyActivityList(user.getId(), companyId, pageNum, pageSize);
             result.setData(myActivityList);
@@ -1818,7 +1819,7 @@ public class UserController extends BaseController {
     @Consume(TBonusPackage.class)
     public Object bonusPackagePreGenerate(String token, String description, Long time) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             TBonusPackage bonusPackage = (TBonusPackage) ConsumeHelper.getObj();
             TBonusPackage bonus = userService.preGenerateBonusPackage(user, bonusPackage);
@@ -1853,7 +1854,7 @@ public class UserController extends BaseController {
     @Consume(TBonusPackage.class)
     public Object bonusPackageGenerate(String token, Long bonusPackageId, String description, Long time) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         TBonusPackage bonuspackage = (TBonusPackage) ConsumeHelper.getObj();
         try {
             TBonusPackage bonusPackage = userService.generateBonusPackage(user, bonuspackage);
@@ -1894,7 +1895,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/infos")
     public Object bonusPackageInfo(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             BonusPackageVIew bonusPackage = userService.bonusPackageInfo(user, bonusPackageId);
             result.setData(bonusPackage);
@@ -1930,7 +1931,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/open")
     public Object bonusPackageOpen(String token, String bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Long bonusId = Long.valueOf(bonusPackageId);
             userService.openBonusPackage(user, bonusId);
@@ -1964,7 +1965,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/sendBack")
     public Object bonusPackageSendBack(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.sendBackBonusPackage(user, bonusPackageId);
             result.setSuccess(true);
@@ -1997,7 +1998,7 @@ public class UserController extends BaseController {
     @RequestMapping("bonusPackage/isMine")
     public Object isMyBonusPackage(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Map<String, Object> resultMap = userService.isMyBonusPackage(user, bonusPackageId);
             result.setData(resultMap);
@@ -2036,7 +2037,7 @@ public class UserController extends BaseController {
     @Consume(TUserAuth.class)
     public Object cert(String token, String cardId, String cardName) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.auth(token, user, cardId, cardName);
             result.setSuccess(true);
@@ -2075,7 +2076,7 @@ public class UserController extends BaseController {
     @RequestMapping("company/cert")
     public Object companyAuth(String token, Integer type, String name, String province, String city, String county, String depict, String url, String contactsName, String contactsTel, String contactsCardId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         TCompany company = (TCompany) ConsumeHelper.getObj();
         try {
             userService.companyAuth(user, company);
@@ -2133,7 +2134,7 @@ public class UserController extends BaseController {
     @PostMapping("company/infos")
     public Object companyInfo(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Map<String, Object> map = companyService.companyInfo(user);
             result.setData(map);
@@ -2197,7 +2198,7 @@ public class UserController extends BaseController {
     @PostMapping("signUpInfo")
     public Object signUpInfo(String token, String ymString) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             SignUpInfoView signUpInfo = userService.signUpInfo(user, ymString);
             result.setSuccess(true);
@@ -2230,7 +2231,7 @@ public class UserController extends BaseController {
     @PostMapping("/signUp")
     public Object signUp(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             long reward = userService.signUp(token, user);
             result.setSuccess(true);
@@ -2266,7 +2267,7 @@ public class UserController extends BaseController {
     @Consume(TReport.class)
     public Object feedBack(String token, long labelsId, String message, String voucherUrl) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         TReport report = (TReport) ConsumeHelper.getObj();
         try {
             userService.feedBack(user, report);
@@ -2301,7 +2302,7 @@ public class UserController extends BaseController {
     @RequestMapping("taskList")
     public Object taskList(String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             TaskHallView taskHallView = userService.taskHall(user);
             result.setData(taskHallView);
@@ -2487,7 +2488,7 @@ public class UserController extends BaseController {
     @RequestMapping("scoreList")
     public Object scoreList(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             Map<String, Object> queryResult = growthValueService.scoreList(user, ymString, option);
             result.setSuccess(true);
@@ -2551,7 +2552,7 @@ public class UserController extends BaseController {
     @PostMapping("payInviter")
     public Object payInviter(String token, Long inviterId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         Long mineId = user.getId();
         try {
             userService.payInviter(inviterId, mineId);
@@ -2577,7 +2578,7 @@ public class UserController extends BaseController {
     @PostMapping("share")
     public Object share(String token, String serviceId, String option, String userId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             ShareServiceView shareServiceView = userService.share(user, serviceId, option, token, userId);
             result.setSuccess(true);
@@ -2731,7 +2732,7 @@ public class UserController extends BaseController {
     public Object joinCompany(String token, Long companyId) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             userService.joinCompany(user, companyId);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -2758,7 +2759,7 @@ public class UserController extends BaseController {
     public Object queryPayments(String token, String year, String month, String type) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             CompanyPaymentView view = userService.queryPayment(user, year, month, type);
             result.setData(view);
             result.setSuccess(true);
@@ -2783,7 +2784,8 @@ public class UserController extends BaseController {
     public Object queryPaymentToDay(String token) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = (TUser) redisUtil.get(token);
+
+            TUser user = UserUtil.getUser(token);
             CompanyDailyPaymentView dailyPaymentView = userService.queryPaymentToDay(user);
             result.setSuccess(true);
             result.setData(dailyPaymentView);
@@ -2801,7 +2803,7 @@ public class UserController extends BaseController {
     @PostMapping("test")
     public void test(String token, Integer counts) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, counts);
         } catch (Exception e) {

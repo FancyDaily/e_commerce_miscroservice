@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,7 +53,7 @@ public class EventController extends BaseController {
      */
     @PostMapping("/eventList")
     public Object eventList(String token , String tiggerId) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             List<TEvent> eventList = eventService.selectTeventListByUserIdAndTiggetId(user.getId() , tiggerId);

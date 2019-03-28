@@ -34,7 +34,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 
 public class DateUtil {
 
-	private static Long interval = (long) (24 * 60 * 60 * 1000);
+	public static Long interval = (long) (24 * 60 * 60 * 1000);
 
 /*
 	 * 时间戳转换成日期格式字符串 

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -264,7 +265,7 @@ public class OrderCommonController extends BaseController {
 	 * @return
 	 */
 	public DetailOrderReturnView detailIndexOrder(Long orderId, String token) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		return orderService.orderDetail(orderId, user);
 	}
 
@@ -295,11 +296,20 @@ public class OrderCommonController extends BaseController {
 	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) { return orderService.selectOrdersInIdsByViewer(orderIds,viewer);}
 
 	/**
-	 * 查询今日指定用户创建的订单
+	 * 查询今日相关的订单,指定发布者
 	 * @param userId
 	 * @return
 	 */
 	public List<TOrder> selectDailyOrders(Long userId) {
 		return orderDao.selectDailyOrders(userId);
+	}
+
+	/**
+	 * 查询今日派生出的订单,指定发布者
+	 * @param userId
+	 * @return
+	 */
+	public List<TOrder> selectDailyCreatedOrders(Long userId) {
+		return orderDao.selectDailyCreatedOrders(userId);
 	}
 }

@@ -1,16 +1,20 @@
 package com.e_commerce.miscroservice.user.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
-import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 微信授权登录模块
@@ -114,7 +115,7 @@ public class LoginController extends BaseController {
             Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid);
             String loginStatus = (String) resultMap.get(LOGIN_STATUS);
             String token = (String) resultMap.get(AppConstant.USER_TOKEN);
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             String certStatus = userService.getCertStatus(user.getId()); // 获取实名信息
             Map<String, String> map = new HashMap<>();
             map.put(CERT_STATUS, certStatus);
@@ -203,6 +204,7 @@ public class LoginController extends BaseController {
      */
     @PostMapping("reLogin")
     public Object reLogin(String openid) {
+        //TODO uid
         AjaxResult result = new AjaxResult();
         try {
             Map<String, Object> resultMap = loginService.loginByOpenid(openid);

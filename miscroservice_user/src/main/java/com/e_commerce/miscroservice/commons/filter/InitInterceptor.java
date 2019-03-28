@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.commons.config.filter;
+package com.e_commerce.miscroservice.commons.filter;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.log.Log;

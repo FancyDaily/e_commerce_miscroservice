@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.user.dao.UserTimeRecordDao;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +85,26 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
                 .eq(TUserTimeRecord::getFromUserId,userId)
                 .groupAfter()
                 .in(TUserTimeRecord::getOrderId,orderIds)
+                .eq(TUserTimeRecord::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据用户id、订单ids查找当天流水记录
+     * @param userId
+     * @param orderIds
+     * @return
+     */
+    @Override
+    public List<TUserTimeRecord> selectDailyByUserIdInOrderIds(Long userId,List<Long> orderIds) {
+        long currentTimeMillis = System.currentTimeMillis();
+        return MybatisOperaterUtil.getInstance().finAll(new TUserTimeRecord(),new MybatisSqlWhereBuild(TUserTimeRecord.class)
+                .groupBefore()
+                .eq(TUserTimeRecord::getUserId,userId)
+                .or()
+                .eq(TUserTimeRecord::getFromUserId,userId)
+                .groupAfter()
+                .in(TUserTimeRecord::getTargetId,orderIds)
+                .between(TUserTimeRecord::getCreateTime, DateUtil.getStartStamp(currentTimeMillis),DateUtil.getEndStamp(currentTimeMillis))
                 .eq(TUserTimeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
 
