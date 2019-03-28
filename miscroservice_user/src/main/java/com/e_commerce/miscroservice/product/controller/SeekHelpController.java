@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.util.AutoAnalysisWord;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
@@ -81,7 +82,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SEEK_HELP.getValue());
 			result.setData(list);
@@ -147,7 +148,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/productDetail")
 	public Object detail(String token, Long serviceId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			DetailProductView detailProductView = productService.detail(user, serviceId);
 			result.setData(detailProductView);
@@ -183,7 +184,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/upperFrame")
 	public Object upperFrame(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.upperFrame(user, productId);
 			result.setSuccess(true);
@@ -220,7 +221,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/delSeekHelp")
 	public Object delSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
@@ -255,7 +256,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/lowerFrameSeekHelp")
 	public Object lowerFrameSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
@@ -284,7 +285,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/getUserAvaliableMoney")
 	public Object getUserAvaliableMoney(String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		Map<String, Long> data = productService.getUserAvaliableMoney(user);
 		result.setData(data);
 		result.setSuccess(true);
@@ -349,7 +350,7 @@ public class SeekHelpController extends BaseController {
 			param.getService().setStartDateS("");
 			param.getService().setEndDateS("");
 		}
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		//这一层可判断出是求助，手动设置type参数
 //		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {

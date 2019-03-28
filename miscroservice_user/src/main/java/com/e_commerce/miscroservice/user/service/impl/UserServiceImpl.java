@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
@@ -2226,7 +2227,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void generateInviteCode(String token, String inviteCode) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         Long userId = user.getId();
         if (checkInviteCode(inviteCode)) {
             user = userDao.selectByPrimaryKey(userId);
@@ -3493,7 +3494,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void logOut(String token) {
         if (StringUtil.isNotEmpty(token) && redisUtil.hasKey(token)) {
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             String redisKey = "str" + user.getId();
             redisUtil.del(redisKey);// 删除登录凭证
             redisUtil.del(token);// 删除访问凭证

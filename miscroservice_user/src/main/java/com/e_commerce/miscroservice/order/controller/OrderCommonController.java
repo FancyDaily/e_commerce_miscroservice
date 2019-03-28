@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.dao.EvaluateDao;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.dao.OrderRelationshipDao;
@@ -264,7 +265,7 @@ public class OrderCommonController extends BaseController {
 	 * @return
 	 */
 	public DetailOrderReturnView detailIndexOrder(Long orderId, String token) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		return orderService.orderDetail(orderId, user);
 	}
 

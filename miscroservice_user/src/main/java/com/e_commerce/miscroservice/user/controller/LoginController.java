@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
@@ -114,7 +115,7 @@ public class LoginController extends BaseController {
             Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid);
             String loginStatus = (String) resultMap.get(LOGIN_STATUS);
             String token = (String) resultMap.get(AppConstant.USER_TOKEN);
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             String certStatus = userService.getCertStatus(user.getId()); // 获取实名信息
             Map<String, String> map = new HashMap<>();
             map.put(CERT_STATUS, certStatus);

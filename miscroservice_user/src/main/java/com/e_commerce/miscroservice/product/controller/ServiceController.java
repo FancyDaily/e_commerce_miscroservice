@@ -109,7 +109,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/delService")
 	public Object delService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
@@ -145,7 +145,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/lowerFrameService")
 	public Object lowerFrameService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
@@ -179,7 +179,7 @@ public class ServiceController extends BaseController{
 //		request.removeAttribute("paramString");
 //		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 //		String token = param.getToken();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				productService.submitSeekHelp(user, param, token);
@@ -216,7 +216,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/sendServiceSummary")
 	public Object sendServiceSummary(String token, Long serviceId , String description , String url ) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.sendServiceSummary(serviceId , description , url , user);
 			result.setSuccess(true);
