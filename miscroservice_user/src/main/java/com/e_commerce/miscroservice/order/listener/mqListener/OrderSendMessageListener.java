@@ -8,42 +8,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.List;
-
+import java.util.Objects;
 
 /**
  * @author 马晓晨
  * @date 2019/3/27
  */
 @Component
-public class OrderPayListener extends MqListenerConvert {
-
+public class OrderSendMessageListener extends MqListenerConvert {
 	Log logger = Log.getInstance(OrderEndListener.class);
+
 	@Autowired
 	private OrderRelationService relationService;
 
-	@RequestMapping("/testPay")
+	@RequestMapping("/testSendMessage")
 	public String test(String transferData) {
 		transferTo(transferData);
 		return "ok";
 	}
-
 	@Override
 	protected void transferTo(String transferData) {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
 		System.out.println(paramMap);
 		// 获取参数
-		List<Long> userIds = (List)paramMap.get("userIds");
-		List<Long> paymentList = (List)paramMap.get("paymentList");
-		Long orderId = (Long)paramMap.get("orderId");
-		List<Long> payUserIds = (List)paramMap.get("payUserIds");
-		//支付
-		for (Long payUserId : payUserIds) {
-			try {
-				relationService.payOrder(orderId, userIds, paymentList,payUserId, 2);
-			} catch (Exception e) {
-				logger.error("id为{}的用户为id{}的用户在订单ID为{}的互助中支付失败", payUserId, userIds.get(0), orderId);
-			}
+		Long orderId = Long.parseLong((String)paramMap.get("orderId"));
+		// 类型 1、提前俩小时发送消息  2、提前 一小时发送消息  3、在开始时间发送消息
+		Integer type = Integer.parseInt((String)paramMap.get("type"));
+		if (Objects.equals(type, 1)) {
+			// 提前俩小时发送消息
+		} else if (Objects.equals(type, 2)) {
+			// //提前一小时发送消息
+		} else if (Objects.equals(type, 3)) {
+			// 在开始时间发送消息
 		}
 	}
 }

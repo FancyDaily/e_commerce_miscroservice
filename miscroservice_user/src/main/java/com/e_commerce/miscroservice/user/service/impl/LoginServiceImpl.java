@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LoginServiceImpl extends BaseService implements LoginService {
@@ -125,6 +126,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      * @param validCode
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public Map<String, Object> validSmsCode(String openid, String validCode, String uuid) {
         if (!StringUtil.isNotEmpty(validCode)) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "验证码不能为空！");
@@ -155,22 +157,19 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         user.setUserTel(telephone);
         userDao.updateByPrimaryKey(user);
         // token
-//		String key = MD5.crypt(session.getOpenid());
-//		redisUtil.hset(REDIS_USER, key, user);
+        String userId = String.valueOf(user.getId());
+        String token = TokenUtil.genToken(userId);
+		// redis
+		redisUtil.set(token, user, getUserTokenInterval());
+		redisUtil.set("" + userId, user, getUserTokenInterval());
+		redisUtil.set("str" + userId, token, getUserTokenInterval());
 
-//        String userId = String.valueOf(user.getId());
-//        String token = TokenUtil.genToken(userId);
-//		// redis
-//		redisUtil.set(token, user, getUserTokenInterval());
-//		redisUtil.set("" + userId, user, getUserTokenInterval());
-//		redisUtil.set("str" + userId, token, getUserTokenInterval());
-//
-//		Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
-//		resultMap.put(AppConstant.USER_TOKEN, token);
+		Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
+		resultMap.put(AppConstant.USER_TOKEN, token);
 
-
-        Map<String, Object> resultMap = new HashMap<>();
-        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
+        if(user.getToken()!=null &&  !"".equals(user.getToken())) {
+            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
+        }
         return resultMap; // 返回登录状态
     }
 

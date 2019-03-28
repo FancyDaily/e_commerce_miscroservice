@@ -34,7 +34,7 @@ mq:
   #是否打开发送开关 true是 false不是
   openSend: true
   # 发送消息的集合管理  格式  消息名称:消息的类型(fanout,direct):接受的监听类的名称(首字母小写) eg msg:fanout:demoListener
-  channels: timer_scheduler_timer_send_test:fanout:listeners,timer_scheduler_timer_send_order_overtime_end:fanout:orderEndListener
+  channels: timer_scheduler_timer_send_test:fanout:listeners,timer_scheduler_timer_send_order_overtime_end:fanout:orderEndListener,timer_scheduler_timer_send_order_overtime_pay:fanout:orderPayListener,timer_scheduler_timer_send_order_send_message:fanout:orderSendMessageListener,timer_scheduler_timer_send_bonus_package_send_back_task:fanout:bonusPackageListener
 
 
 ---
