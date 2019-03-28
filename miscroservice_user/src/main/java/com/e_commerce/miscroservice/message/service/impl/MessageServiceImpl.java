@@ -158,25 +158,28 @@ public class MessageServiceImpl extends BaseService implements MessageService {
         }
         //发送通知
 
-        TUser toUser = userCommonController.getUserById(messageUserId);
-        TFormid formid = findFormId(nowTime, toUser);
-        if (formid != null) {
-            try {
-                List<String> msg = new ArrayList<>();
-                String parameter = "?toUserId="+messageUserId+"&lastTime=9999999999999&pageSize=5&returnHome=true";
-                msg.add(nowUser.getName());
-                if (!url.isEmpty()) {
-                    //如果url不为空 证明发送的是图片
-                    msg.add("[图片]");
-                } else {
-                    msg.add(message);
+        if (statusForMsg == 1){
+            //如果需要发送服务消息
+            TUser toUser = userCommonController.getUserById(messageUserId);
+            TFormid formid = findFormId(nowTime, toUser);
+            if (formid != null) {
+                try {
+                    List<String> msg = new ArrayList<>();
+                    String parameter = "?toUserId="+messageUserId+"&lastTime=9999999999999&pageSize=5&returnHome=true";
+                    msg.add(nowUser.getName());
+                    if (!url.isEmpty()) {
+                        //如果url不为空 证明发送的是图片
+                        msg.add("[图片]");
+                    } else {
+                        msg.add(message);
+                    }
+                    msg.add(changeTime(nowTime));
+                    messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+                    formid.setIsValid("0");
+                    messageCommonController.updateFormId(formid);
+                } catch (Exception e) {
+                    logger.error("发送服务通知失败");
                 }
-                msg.add(changeTime(nowTime));
-                messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
-                formid.setIsValid("0");
-                messageCommonController.updateFormId(formid);
-            } catch (Exception e) {
-                logger.error("发送服务通知失败");
             }
         }
 

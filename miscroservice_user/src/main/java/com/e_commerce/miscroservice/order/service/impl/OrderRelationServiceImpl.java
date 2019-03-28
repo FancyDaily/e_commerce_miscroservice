@@ -486,7 +486,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 String title ="恭喜您已被求助者选定";
 
                 String content = new StringBuilder().append("在“").append(order.getServiceName())
-                        .append("的求助中，您已被求助者").append(nowUser.getName())
+                        .append("”的求助中，您已被求助者").append(nowUser.getName())
                         .append("选定为服务者啦！感谢您的热心，请与求助者保持联系并准时提供服务哦～").toString();
                 if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
                     //如果是服务
@@ -1124,7 +1124,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (order.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
                 //如果是互助时，执行与公益时不同的操作
                 //增加完成求助成长值
-                userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE , seekHelpDoneNum);
+                nowUser =  userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE , seekHelpDoneNum);
             }
         } else {
             //如果支付成功的人都是支付的0
@@ -1323,7 +1323,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (userIdList.size() == errorMsgList.size()){
             throw new MessageException("499", "所选用户中没有可评价用户");
         }
-        userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_COMMENT , (userIdList.size() - errorMsgList.size()));
+        nowUser =  userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_COMMENT , (userIdList.size() - errorMsgList.size()));
         return errorMsgList;
     }
 
@@ -2147,7 +2147,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (orderRelationship.getCollectType() == OrderEnum.COLLECT_TYPE_TIME.getValue()) {
                 //如果收取的是互助时，完成互助时相关事情
                 //插入成长值
-                userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE , 1);
+                toUser = userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE , 1);
                 //更新被支付用户的时间，并且将其完成求助数量+1
                 toUser.setSurplusTime(toUser.getSurplusTime() + payment);
                 toUser.setPayNum(toUser.getPayNum() + 1);
@@ -2169,7 +2169,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             } else {
                 //如果收取的是公益时，完成公益时相关事情
                 //完成公益时 增加成长值
-                userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE , 1);
+                toUser = userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE , 1);
                 //更新被支付用户的公益时间
                 toUser.setPublicWelfareTime(toUser.getSurplusTime() + payment);
                 //插入公益流水
@@ -3056,7 +3056,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             wxMsg.add(changeTime(order.getStartTime()));
                             wxMsg.add("服务开始了吗？是不是还漏了一步——点击「确认开始」呢？");
 
-                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_13 , parameter);
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_12 , parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
                         } catch (Exception e) {
