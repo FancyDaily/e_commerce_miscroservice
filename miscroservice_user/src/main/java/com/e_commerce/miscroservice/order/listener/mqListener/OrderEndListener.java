@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author 马晓晨
  * @date 2019/3/25
  */
-@Component
+//@Component
 public class OrderEndListener extends MqListenerConvert {
 
 	Log logger = Log.getInstance(OrderEndListener.class);

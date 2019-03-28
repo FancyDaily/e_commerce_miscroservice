@@ -15,7 +15,7 @@ import java.util.List;
  * @author 马晓晨
  * @date 2019/3/27
  */
-@Component
+//@Component
 public class OrderPayListener extends MqListenerConvert {
 
 	Log logger = Log.getInstance(OrderEndListener.class);

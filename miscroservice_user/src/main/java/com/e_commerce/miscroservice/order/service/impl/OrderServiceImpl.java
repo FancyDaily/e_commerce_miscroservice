@@ -728,6 +728,32 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				}
 				//可以成功创建订单
 				saveOrder(order);
+				//发送服务通知
+				long nowTime = System.currentTimeMillis();
+				TUser toUser = userService.getUserById(order.getCreateUser());
+				TFormid formid = findFormId(nowTime , toUser);
+				if (formid != null) {
+					try {
+						List<String> msg = new ArrayList<>();
+						String parameter = "";
+						if (service.getType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
+							msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
+									.append(service.getCollectTime() * service.getServicePersonnel())
+									.append("分钟").toString());
+						} else {
+							msg.add("您的最新求助信息自动发布成功");
+						}
+						msg.add(order.getServiceName());
+						msg.add(changeTime(order.getStartTime()));
+						msg.add(changeAddress(order.getAddressName()));
+						msg.add("如果您暂时不再需要，可以在「我的-我发布的」下架本条求助。");
+						messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+						formid.setIsValid("0");
+						messageCommonController.updateFormId(formid);
+					} catch (Exception e) {
+						logger.error("发送服务通知失败");
+					}
+				}
 				//发送MQ消息，将定时下架订单任务发送到调度中心
 				sendMqBySaveOrder(service, order);
 				return order;
@@ -894,12 +920,31 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			for (TOrderRelationship relationship : listWaitPay) {
 				// 这是一个服务  接单用户就是求助者  给求助者发消息
 				Long userId = relationship.getReceiptUserId();
-				title = "请确认互助结束";
-				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
-				content = String.format(content, DateUtil.formatShow(order.getStartTime())
-						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
+				title = "请确认服务结束";
+				content = new StringBuilder().append("在“").append(order.getServiceName())
+						.append("”的服务中，服务如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。").toString();
 				messageService.messageSave(order.getId(), new AdminUser(), title, content, userId, currentTime);
-				// TODO  发送模板消息
+				// 发送模板消息
+				TUser toUser = userService.getUserById(userId);
+				TFormid formid = findFormId(currentTime, toUser);
+				if (formid != null) {
+					try {
+						List<String> wxMsg = new ArrayList<>();
+						String parameter = "?orderId=" + order.getId() + "&returnHome=true";
+						wxMsg.add("到结束的时候啦");
+						wxMsg.add(order.getServiceName());
+						wxMsg.add(changeTime(order.getStartTime()));
+						wxMsg.add(changeTime(order.getEndTime()));
+						wxMsg.add("是时候为这一段时光画上一个句号了，请及时点击「确认支付」哦");
+						wxMsg.add("若长时间没有操作，我们将于24小时后自动确认并结算互助时哦");
+
+						messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.serv_setTemplate_14, parameter);
+						formid.setIsValid("0");
+						messageCommonController.updateFormId(formid);
+					} catch (Exception e) {
+						logger.error("发送服务通知失败");
+					}
+				}
 			}
 		}
 		// 24小时后自动支付

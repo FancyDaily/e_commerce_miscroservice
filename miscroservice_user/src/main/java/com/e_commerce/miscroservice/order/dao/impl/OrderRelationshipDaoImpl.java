@@ -486,19 +486,21 @@ public List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long ord
 		}
 
 
-    /**
-     * 查询被选择
-     * @param orderId
-     * @return
-     */
-    public long selectJoinUser(Long orderId){
-        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
-                .count(TOrderRelationship::getId)
-                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE.getType())
-                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
-                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
-                .eq(TOrderRelationship::getIsValid , AppConstant.IS_VALID_YES));
-    }
+/**
+ * 查询被选择
+ * @param orderId
+ * @return
+ */
+public long selectJoinUser(Long orderId){
+		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
+		.count(TOrderRelationship::getId)
+		.isNotNull(TOrderRelationship::getReceiptUserId)
+		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NO_STATE.getType())
+		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
+		.neq(TOrderRelationship::getStatus,OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
+		.eq(TOrderRelationship::getIsValid,AppConstant.ACCREDIT_STATUS_YES));
+		}
+
 
 /**
  * 根据orderId和statusList来升序查询在userIdList里的报名者订单List
