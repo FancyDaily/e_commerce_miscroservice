@@ -312,4 +312,8 @@ public class OrderCommonController extends BaseController {
 	public List<TOrder> selectDailyCreatedOrders(Long userId) {
 		return orderDao.selectDailyCreatedOrders(userId);
 	}
+
+	public TOrderRelationship selectCollectByOrderIdAndUserId(Long userId, Long orderId) {
+		return orderRelationshipDao.selectCollectByOrderIdAndUserId(orderId, userId);
+	}
 }
