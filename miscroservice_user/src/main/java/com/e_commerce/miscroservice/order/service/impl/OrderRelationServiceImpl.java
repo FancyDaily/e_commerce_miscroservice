@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
@@ -35,10 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -2589,7 +2587,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @return
      */
     public QueryResult<EnrollUserInfoView> enrollUserInfoList(Long orderId, int status, int type, String value,
-                                                       int pageSize, int pageNum, TUser nowUser){
+                                                              int pageSize, int pageNum, TUser nowUser){
 
         QueryResult<EnrollUserInfoView> result = new QueryResult<>();
         List<EnrollUserInfoView> enrollUserInfoViewList = new ArrayList<>();
@@ -2777,10 +2775,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param appraiserId 评价者
      */
     private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId) {
-        String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+        // TODO
+//        String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
         TimerScheduler scheduler = new TimerScheduler();
         scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
-        scheduler.setName("remark_order");
+        scheduler.setName("remark_order" + UUID.randomUUID().toString());
+        String cron = DateUtil.genCron(order.getEndTime() + 180000L);
         scheduler.setCron(cron);
         Map map = new HashMap();
         map.put("userIds", userIds);
@@ -2788,7 +2788,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         map.put("appraiserId", appraiserId);
         // 自动支付所需要的参数
         scheduler.setParams(JSON.toJSONString(map));
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**

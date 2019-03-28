@@ -649,7 +649,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	@Override
 	public List<TOrder> selectOrdersInIdsByViewer(List<Long> orderIds, TUser viewer) {
-		return orderDao.selectOrdersInOrderIdsByViewer(orderIds,viewer);
+		return orderDao.selectOrdersInOrderIdsByViewer(orderIds, viewer);
 	}
 
 	@Override
@@ -700,12 +700,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public TOrder produceOrder(TService service, Integer type, String date) throws NoEnoughCreditException {
-		TUser tUser = userService.getUserById(service.getUserId());
-		if (!checkEnoughTimeCoin(tUser, service)) {
-			throw new NoEnoughCreditException("用户授信不足");
-		}
 		TOrder order = BeanUtil.copy(service, TOrder.class);
-//		order.setId(snowflakeIdWorker.nextId());
 		order.setConfirmNum(0);
 		order.setEnrollNum(0);
 		order.setServiceId(service.getId());
@@ -715,16 +710,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (service.getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
 			// 生成订单的开始结束时间
 			Integer code = generateOrderTime(service, order, type, date);
-//			if (Objects.equals(type, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue())
-//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_UPPER.getValue())
-//					|| Objects.equals(type, OrderEnum.PRODUCE_TYPE_AUTO.getValue())) {
-//				productService.update(service);
-//			}
 			if (code.equals(OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue())) {
 				//判断商品的状态是否正确
 				if (!Objects.equals(service.getStatus(), ProductEnum.STATUS_UPPER_FRAME.getValue())) {
 					logger.error("商品存在错误的状态，无法继续派生订单");
 					throw new MessageException("商品状态错误");
+				}
+				TUser tUser = userService.getUserById(service.getUserId());
+				if (!checkEnoughTimeCoin(tUser, service)) {
+					throw new NoEnoughCreditException("用户授信不足");
 				}
 				//可以成功创建订单
 				saveOrder(order);
@@ -759,39 +753,49 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	/**
 	 * 向MQ发送订单结束的消息
+	 *
 	 * @param service 商品
-	 * @param order 订单
+	 * @param order   订单
 	 */
 	private void sendMqBySaveOrder(TService service, TOrder order) {
 		//定时结束订单
 		TimerScheduler scheduler = new TimerScheduler();
 		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_END.toNum());
-		scheduler.setName("lower_order");
+		scheduler.setName("lower_order" + UUID.randomUUID().toString());
 		scheduler.setCron(DateUtil.genCron(order.getEndTime()));
 		Map<String, String> map = new HashMap<>();
 		map.put("serviceId", String.valueOf(service.getId()));
 		map.put("orderId", String.valueOf(order.getId()));
 		scheduler.setParams(JSON.toJSONString(map));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
-		//定时开始前俩小时发送消息
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+		/*    定时开始前俩小时发送消息 */
 		TimerScheduler orderBeforeSendMessageScheduler = new TimerScheduler();
 		orderBeforeSendMessageScheduler.setType(TimerSchedulerTypeEnum.ORDER_SEND_MESSAGE.toNum());
-		orderBeforeSendMessageScheduler.setName("order_send_message");
+		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
 		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
 		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("orderId", String.valueOf(order.getId()));
 		paramMap.put("type", "1");
-		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(map));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
-		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
+		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
+		// 订单开始一小时有人成单 提醒用户的消息
+		// TODO
+//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 2000L));
 		Map<String, String> paramMap2 = new HashMap<>();
+		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
 		paramMap2.put("orderId", String.valueOf(order.getId()));
 		paramMap2.put("type", "2");
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap2));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
+		// 到开始时间无人报名提醒发布者  到开始时间未签到 提醒服务者
 		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime()));
 		Map<String, String> paramMap3 = new HashMap<>();
+		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
 		paramMap3.put("orderId", String.valueOf(order.getId()));
 		paramMap3.put("type", "3");
+		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap3));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
 	}
 
 	/**
@@ -846,7 +850,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//如果有未支付的订单，发送消息并调用 24小时后自动支付的定时
 //			Long waitPayPerson = orderRelationshipDao.countWaitPay(orderId);
 			// 如果已经结束了， 还有人待支付
-			if (!Objects.equals(listWaitPay.size(), 0)) {
+			if (!Objects.equals(listWaitPay.size(), 0) && Objects.equals(order.getCollectType(), ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
 				title = "请确认互助结束";
 				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
 				content = String.format(content, DateUtil.formatShow(order.getStartTime())
@@ -875,7 +879,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						}
 					}
 				}
-
 			}
 		} else { // 是服务
 			lowerFrameServiceOrder(order);
@@ -891,15 +894,17 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			content = String.format(content, DateUtil.formatShow(order.getStartTime())
 					, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
 			messageService.messageSave(order.getId(), new AdminUser(), title, content, order.getCreateUser(), currentTime);
-			for (TOrderRelationship relationship : listWaitPay) {
-				// 这是一个服务  接单用户就是求助者  给求助者发消息
-				Long userId = relationship.getReceiptUserId();
-				title = "请确认互助结束";
-				content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
-				content = String.format(content, DateUtil.formatShow(order.getStartTime())
-						, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
-				messageService.messageSave(order.getId(), new AdminUser(), title, content, userId, currentTime);
-				// TODO  发送模板消息
+			if (order.getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
+				for (TOrderRelationship relationship : listWaitPay) {
+					// 这是一个服务  接单用户就是求助者  给求助者发消息
+					Long userId = relationship.getReceiptUserId();
+					title = "请确认互助结束";
+					content = "在 %s 到 %s 的互助“%s”中，互助如已完成，记得确认结束并支付给小伙伴互助时喔~如果长时间未确认，我们将于24小时后自动确认并结算互助时。";
+					content = String.format(content, DateUtil.formatShow(order.getStartTime())
+							, DateUtil.formatShow(order.getEndTime()), order.getServiceName());
+					messageService.messageSave(order.getId(), new AdminUser(), title, content, userId, currentTime);
+					// TODO  发送模板消息
+				}
 			}
 		}
 		// 24小时后自动支付
@@ -908,15 +913,18 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 
 	/**
 	 * 订单结束24小时自动支付的MQ消息到定时调度中心
-	 * @param order 订单
-	 * @param userIds 提醒的用户
+	 *
+	 * @param order       订单
+	 * @param userIds     提醒的用户
 	 * @param paymentList 支付的金额
 	 */
 	private void sendMqByEndOrder(TOrder order, List<Long> userIds, List<Long> paymentList, List<Long> payUserIds) {
-		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+		// TODO
+//		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+		String cron = DateUtil.genCron(order.getEndTime() + 180000L);
 		TimerScheduler scheduler = new TimerScheduler();
 		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_PAY.toNum());
-		scheduler.setName("pay_order");
+		scheduler.setName("pay_order" + UUID.randomUUID().toString());
 		scheduler.setCron(cron);
 		Map map = new HashMap();
 		map.put("userIds", userIds);
@@ -926,7 +934,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		map.put("paymentList", paymentList);
 		// 自动支付所需要的参数
 		scheduler.setParams(JSON.toJSONString(map));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND_.toName(), JSONObject.toJSONString(scheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
 	}
 
 	@Override
@@ -954,24 +962,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 * @param order 订单
 	 */
 	private void lowerFrameSeekHelpOrder(TOrder order) {
-		//找到用户关联的这张订单,把冻结的金额减去剩余没选的人数（解冻）
+		//找到用户关联的这张订单,把冻结的金额减去剩余没选的人数（解冻） 公益时不会产生冻结订单
 		TUserFreeze userFreeze = userService.getUserFreeze(order.getCreateUser(), order.getId());
 		// 解冻金额  = 该订单冻结金额 - 单价 * 没被选择的人数
-		long thawTime = userFreeze.getFreezeTime() - order.getCollectTime() * (order.getServicePersonnel() - order.getConfirmNum());
-		//更新用户冻结表的冻结金额
-		userFreeze.setFreezeTime(userFreeze.getFreezeTime() - thawTime);
-		// 解冻用户表中的冻结信息
-		TUser user = userService.getUserById(order.getCreateUser());
-		user.setFreezeTime(user.getFreezeTime() - thawTime);
-		long currentTime = System.currentTimeMillis();
-		user.setUpdateTime(currentTime);
-		user.setUpdateUser(user.getId());
-		user.setUpdateUserName(user.getName());
-		userService.updateByPrimaryKey(user);
-		userFreeze.setUpdateTime(currentTime);
-		userFreeze.setUpdateUser(user.getId());
-		userFreeze.setUpdateUserName(user.getName());
-		userService.updateUserFreeze(userFreeze);
+		if (userFreeze != null) {
+			long thawTime = userFreeze.getFreezeTime() - order.getCollectTime() * (order.getServicePersonnel() - order.getConfirmNum());
+			//更新用户冻结表的冻结金额
+			userFreeze.setFreezeTime(userFreeze.getFreezeTime() - thawTime);
+			// 解冻用户表中的冻结信息
+			TUser user = userService.getUserById(order.getCreateUser());
+			user.setFreezeTime(user.getFreezeTime() - thawTime);
+			long currentTime = System.currentTimeMillis();
+			user.setUpdateTime(currentTime);
+			user.setUpdateUser(user.getId());
+			user.setUpdateUserName(user.getName());
+			userService.updateByPrimaryKey(user);
+			userFreeze.setUpdateTime(currentTime);
+			userFreeze.setUpdateUser(user.getId());
+			userFreeze.setUpdateUserName(user.getName());
+			userService.updateUserFreeze(userFreeze);
+		}
 		List<TOrderRelationship> enrollList = orderRelationshipDao.selectListByStatusByEnroll(order.getId(), OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
 		List<Long> enrollIdList = new ArrayList<>();
 		for (TOrderRelationship relationship : enrollList) {
@@ -1052,9 +1062,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	/**
 	 * 人选满了之后派生订单
 	 *
-	 * @param service            要派生订单的商品
-	 * @param date               选满人的订单日期
-	 * @param order              要派生的订单
+	 * @param service 要派生订单的商品
+	 * @param date    选满人的订单日期
+	 * @param order   要派生的订单
 	 * @return code码
 	 */
 	private Integer produceOrderByEnough(TService service, String date, TOrder order) {
@@ -1168,8 +1178,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	/**
 	 * 发布派生订单
 	 *
-	 * @param service            要派生订单的商品
-	 * @param order              派生的订单
+	 * @param service 要派生订单的商品
+	 * @param order   派生的订单
 	 * @return
 	 */
 	private Integer produceOrderByPublish(TService service, TOrder order) {
@@ -1235,6 +1245,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		//计算第一张订单后六天的可报名时间
 		DateResult tempResult;
 		while (dr.getDays() <= 7) {
+			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
+			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
+			if (temOrder == null) {
+				enrollDate.add(DateUtil.commonFormat(tempStart, "yyyy-MM-dd"));
+			}
 			tempResult = DateUtil.getNextOrderBeginAndEndTime(tempStart, tempEnd, weekDayNumberArray, false);
 			if (DateUtil.parse(endDateTime) < tempResult.getEndTimeMill()) {
 				break;
@@ -1243,11 +1258,6 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				break;
 			}
 			dr.setDays(dr.getDays() + tempResult.getDays());
-			// 查找这个时间段是否有报满人的订单，如果有报满人的订单，则不需要将这天的日期加进去  否则就将这天加入到可报名日期
-			TOrder temOrder = orderDao.findProductOrderEnough(service.getId(), tempStart, tempEnd);
-			if (temOrder == null) {
-				enrollDate.add(DateUtil.commonFormat(tempStart, "yyyy-MM-dd"));
-			}
 			tempStart = tempResult.getStartTimeMill();
 			tempEnd = tempResult.getEndTimeMill();
 		}

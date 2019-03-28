@@ -529,7 +529,7 @@ public List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long or
     public long selectEnrollUserCount(Long orderId) {
         return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
                 .eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
-                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE)
+                .neq(TOrderRelationship::getStatus , OrderRelationshipEnum.STATUS_NO_STATE.getType())
                 .isNotNull(TOrderRelationship::getReceiptUserId));
     }
 

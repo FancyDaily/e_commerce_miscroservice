@@ -471,7 +471,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		service.setServeNum(user.getServeNum()); // 用户的服务数量
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-
 		if (Objects.equals(user.getAuthenticationStatus(), AppConstant.AUTH_STATUS_NO)) {
 			throw new MessageException("请先实名后再发布服务");
 		}
@@ -482,7 +481,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("服务描述中包含敏感词");
 			}
-//			desc.setId(snowflakeIdWorker.nextId());
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
@@ -491,18 +489,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-
 		try {
 			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
-		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
+				//增加成长值
+				TUser tUser = userService.getUserById(user.getId());
+				userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 				updateServiceByKey(service);
 			}
 		});
@@ -530,7 +529,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 		for (int i = 0; i < weekDayArray.length; i++) {
 			int weekDay = Integer.parseInt(weekDayArray[i]);
-			long countWeek = DateUtil.countWeek(service.getStartDateS(), service.getEndDateS(), weekDay);
+			long countWeek = DateUtil.countWeek(startBeginDate, service.getEndDateS(), weekDay);
 			if (countWeek > 0) {
 				isContainWeek = true;
 			}
@@ -573,14 +572,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
-		// 增加成长值
-		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
+
 		//增加发布次数
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
+				// 增加成长值
+				TUser tUser = userService.getUserById(user.getId());
+				userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 				updateServiceByKey(service);
 			}
 		});
