@@ -24,6 +24,7 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
@@ -95,7 +96,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      *
      * @param orderId
      * @param userId
-     * @param date
+     * @param date 20190327
      * @param serviceId
      * @throws ParseException
      * @return¶
@@ -708,6 +709,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 if (order.getType() == 2) {
                     //如果是服务,解冻时间币
                     unFreezeTime(order.getCollectTime(), nowTime, toUser, orderId);
+                    toUser.setFreezeTime(toUser.getFreezeTime() - order.getCollectTime());
+                    //updater
+                    toUser.setUpdateTime(System.currentTimeMillis());
+                    toUser.setUpdateUserName(nowUser.getName());
+                    toUser.setUpdateUser(nowUser.getId());
+                    userCommonController.updateByPrimaryKey(toUser);
                 }
             } else {
                 errorMsg.add("用户" + toUser.getName() + "已被您操作");
@@ -1871,9 +1878,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_WAIT_REMARK.getType()) {
             //如果是双方未评价
             if (isOwn) {
-                //如果是改的是自己的订单关系
-                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
-            } else {
+                //如果是改的是自己的订单关系（参与者评价发布者）
+                orderRelationship.setStatus(OrderRelationshipEnum.STATUS_IS_REMARK.getType());//IS_REMARK 、 BE_REMARK行为的主体为参与者
+            } else {//发布者评价参与者
                 orderRelationship.setStatus(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
             }
         } else if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_IS_REMARK.getType()) {
@@ -2031,7 +2038,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             } else {
                 orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
             }
-            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType());
         } else if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()) {
             if (isOwn) {
                 //如果订单关系是自己的
@@ -2130,6 +2136,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             msg = "支付失败：该订单已被投诉";
             return msg;
         }
+        if (orderRelationship.getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_EACH_OTHER.getType()) {
+            //如果用户发起投诉
+            msg = "支付失败：该订单已被投诉";
+            return msg;
+        }
         if (payment > 0) {
             //如果是有时间支付完成的
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
@@ -2137,11 +2148,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //如果收取的是互助时，完成互助时相关事情
                 //插入成长值
                 userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE , 1);
-                logger.error(" //TODO 插入成长值（查看今天被支付多少次，然后再看加不加）");
                 //更新被支付用户的时间，并且将其完成求助数量+1
                 toUser.setSurplusTime(toUser.getSurplusTime() + payment);
                 toUser.setPayNum(toUser.getPayNum() + 1);
-
                 //插入支付流水
                 TUserTimeRecord userTimeRecord = new TUserTimeRecord();
                 userTimeRecord.setUserId(toUser.getId());
@@ -2157,14 +2166,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 userTimeRecord.setUpdateTime(nowTime);
                 userTimeRecord.setIsValid("1");
                 userCommonController.insertUserTimeRecords(userTimeRecord);
-
             } else {
                 //如果收取的是公益时，完成公益时相关事情
                 //完成公益时 增加成长值
                 userCommonController.taskComplete(toUser , GrowthValueEnum.GROWTH_TYPE_REP_PUBLIC_WELFARE_ACTY_DONE , 1);
                 //更新被支付用户的公益时间
                 toUser.setPublicWelfareTime(toUser.getSurplusTime() + payment);
-
                 //插入公益流水
                 TPublicWelfare publicWelfare = new TPublicWelfare();
                 publicWelfare.setUserId(toUser.getId());
@@ -2183,9 +2190,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             toUser.setUpdateUserName(nowUser.getName());
             toUser.setUpdateUser(nowUser.getId());
             toUser.setUpdateTime(nowTime);
-            toUser.setServeNum(toUser.getServeNum() + 1);
             userCommonController.updateByPrimaryKey(toUser);
-
             //调用发送定时任务，被支付者向支付者发表评价
             List<Long> remarkUserIdList = new ArrayList<>();
             remarkUserIdList.add(nowUser.getId());
@@ -2198,7 +2203,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         orderRelationship.setUpdateUser(nowUser.getId());
         orderRelationship.setUpdateUserName(nowUser.getName());
         orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-
 
         return msg;
     }
@@ -2377,6 +2381,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果订单ID非空，说明以前有取消被取消等等状态，将原订单复用
             orderRelationship.setUpdateTime(nowTime);
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
             orderRelationship.setUpdateUser(nowUser.getId());
             orderRelationship.setUpdateUserName(nowUser.getName());
 
@@ -2538,7 +2543,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
             long canUseTime = nowUser.getSurplusTime() + nowUser.getCreditLimit() - nowUser.getFreezeTime();
             if (canUseTime < order.getCollectTime()) {
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 throw new MessageException("499", "对不起，余额不足 不可以报名");
             }
             userCommonController.freezeTimeCoin(nowUser.getId(), order.getCollectTime(), order.getId(), order.getServiceName());

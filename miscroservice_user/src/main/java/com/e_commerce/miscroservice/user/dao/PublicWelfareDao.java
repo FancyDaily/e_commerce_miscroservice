@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
+import com.e_commerce.miscroservice.commons.entity.application.TPublicWelfare;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.vo.WelfareParamView;
 
@@ -19,5 +20,12 @@ public interface PublicWelfareDao {
      * @return
      */
     Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisSqlWhereBuild.ORDER desc);
+
+    /**
+     * 插入公益时流水
+     * @param publicWelfare
+     * @return
+     */
+    int insert(TPublicWelfare publicWelfare);
 
 }

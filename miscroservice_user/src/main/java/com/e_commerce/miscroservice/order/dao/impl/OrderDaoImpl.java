@@ -436,7 +436,7 @@ public class OrderDaoImpl implements OrderDao {
     }
 
     /**
-     * 查询今日创建订单，指定创建者
+     * 查询今日相关订单，指定创建者
      * @param userId
      * @return
      */
@@ -450,6 +450,24 @@ public class OrderDaoImpl implements OrderDao {
         .eq(TOrder::getCreateUser,userId)
                 .lte(TOrder::getStartTime,endStamp)
                 .gte(TOrder::getEndTime,startStamp)
+                .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL.getValue())
+                .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 查询所有今日创建的订单，指定创建者
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<TOrder> selectDailyCreatedOrders(Long userId) {
+        // 获取今日起止时间戳
+        long currentTimeMillis = System.currentTimeMillis();
+        long startStamp = DateUtil.getStartStamp(currentTimeMillis);
+        long endStamp = DateUtil.getEndStamp(currentTimeMillis);
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getCreateUser,userId)
+                .between(TOrder::getCreateTime,startStamp,endStamp)
                 .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL.getValue())
                 .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }

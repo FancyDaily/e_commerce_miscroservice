@@ -38,8 +38,8 @@ public class TestController {
         timerScheduler.setType(TimerSchedulerTypeEnum.TEST.toNum());
 
         Map<String, String> map = new HashMap<>();
-        map.put("aaa", "11");
-        map.put("bbb", "22");
+        map.put("aaa", "99");
+        map.put("bbb", "99");
 
         timerScheduler.setParams(JSON.toJSONString(map));
 

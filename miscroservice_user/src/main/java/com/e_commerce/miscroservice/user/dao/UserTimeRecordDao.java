@@ -41,6 +41,8 @@ public interface UserTimeRecordDao {
      */
     List<TUserTimeRecord> selectByUserIdInOrderIds(Long userId, List<Long> orderIds);
 
+    List<TUserTimeRecord> selectDailyByUserIdInOrderIds(Long userId, List<Long> orderIds);
+
     List<TUserTimeRecord> selectByUserId(Long id);
 
     /**
