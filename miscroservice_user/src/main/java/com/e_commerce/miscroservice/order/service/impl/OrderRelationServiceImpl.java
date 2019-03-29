@@ -38,6 +38,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -87,6 +88,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     @Autowired
     @Lazy
     MqTemplate mqTemplate;
+
+    private static Map<String, String> map = new ConcurrentHashMap<String, String>();
+
 
     /**
      * 报名
@@ -739,11 +743,17 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TUser nowUser = userCommonController.getUserById(nowUserId);
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
+        int startUserSum = 0;
+        //被支付人名字默认为空
+        String startUserName = "";
+        //服务通知内容
+        String noticeContent = "";
         if (order.getCreateUser() == nowUser.getId().longValue()) {
             //如果是服务的发布者，改报名者状态
             List<Long> orderRelationshipIdList = new ArrayList<>();
             List<TUser> toUserList = userCommonController.selectUserByIds(userIdList);
             List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectByOrderIdAndEnrollUserIdList(orderId, userIdList);
+
             for (int i = 0; i < orderRelationshipList.size(); i++) {
                 TUser toUser = new TUser();
                 for (int j = 0; j < toUserList.size(); j++) {
@@ -765,6 +775,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     //发送消息
                     String title = "服务者已开始服务";
                     String content = "";
+
+                    //开始人数+1
+                    startUserSum++;
+
+                    //对服务记录的人的名字进行合并处理
+                    if (startUserSum == 1) {
+                        startUserName = startUserName + toUser.getName();
+                    } else if (startUserSum == 2 || startUserSum == 3) {
+                        startUserName = startUserName + "、" + toUser.getName();
+                    } else if (startUserSum == 4) {
+                        startUserName = startUserName + "等";
+                    }
 
                     //发送通知
                     TFormid formid = findFormId(nowTime, toUser);
@@ -815,6 +837,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 }
             }
             orderRelationshipDao.updateOrderRelationshipByList(orderRelationshipList, orderRelationshipIdList);
+
+            //修改服务通知内容
+            if (startUserSum > 3) {
+                noticeContent = new StringBuilder().append(nowUser.getName()).append(" 确认了为")
+                        .append(startUserName).append(startUserSum).append("人开始服务").toString();
+            } else {
+                noticeContent = new StringBuilder().append(nowUser.getName()).append(" 确认了为")
+                        .append(startUserName).append("开始服务").toString();
+            }
+
+
+
         } else {
             //如果是报名者，改自己的开始状态，并且该状态的订单只有一个
             TOrderRelationship orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId, nowUser.getId());
@@ -828,7 +862,14 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             orderRelationship.setUpdateUser(nowUser.getId());
             orderRelationship.setUpdateUserName(nowUser.getName());
             orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+
+            noticeContent = new StringBuilder().append(nowUser.getName()).append(" 确认开始服务").toString();
+
         }
+
+        //插入服务记录
+        recoreSave(orderId, noticeContent, nowUser, nowTime);
+
         return errorMsg;
     }
 
@@ -1293,6 +1334,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             String msg = remark(orderRelationship, nowUser, toUser, nowTime, true);
             if (msg != null) {
                 throw new MessageException("499", msg);
+            } else {
+                //插入评价，并且更新用户评分数据
+                insertRemarkAndUpdateUser(nowUser , toUser , order , credit , major , attitude , message , labels , nowTime );
             }
         }
         //修改发布者订单关系状态
@@ -2173,7 +2217,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 publicWelfare.setUpdateUser(nowUser.getId());
                 publicWelfare.setUpdateUserName(nowUser.getName());
                 publicWelfare.setIsValid(AppConstant.IS_VALID_YES);
-                //TODO 调用user的插入公益历程方法
+                //调用user的插入公益历程方法
+
+                userCommonController.insertPublicWelfare(publicWelfare);
             }
             toUser.setUpdateUserName(nowUser.getName());
             toUser.setUpdateUser(nowUser.getId());
@@ -2400,7 +2446,18 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             orderRelationship.setUpdateUserName(nowUser.getName());
             orderRelationship.setUpdateTime(nowTime);
             orderRelationship.setIsValid("1");
-            orderRelationshipDao.insert(orderRelationship);
+            map.containsKey(order.getId()+","+nowUser.getId());
+            if (!map.containsKey(order.getId()+","+nowUser.getId())){
+                map.put(order.getId()+","+nowUser.getId(),order.getId()+","+nowUser.getId());
+                try {
+                    orderRelationshipDao.insert(orderRelationship);
+                } catch (Exception e){
+                    map.remove(order.getId()+","+nowUser.getId());
+                }
+                map.remove(order.getId()+","+nowUser.getId());
+            } else {
+                throw new MessageException("499", "对不起，您已报名，请勿重复报名");
+            }
         }
         return orderRelationship.getId();
     }
