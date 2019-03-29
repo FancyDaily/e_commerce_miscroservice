@@ -2793,12 +2793,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 注册完成任务
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
-//        //注册用户中心数据
-//        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
-//
-//        if (token != null&&token.getToken()!=null) {
-//            user.setToken(token.getToken());
-//        }
+        //注册用户中心数据
+        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
+
+        if (token != null&&token.getToken()!=null) {
+            user.setToken(token.getToken());
+        }
 
         return user;
     }
