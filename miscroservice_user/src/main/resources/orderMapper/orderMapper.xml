@@ -102,7 +102,7 @@
         END
         DESC,
         service_place
-        DESC,
+        DESC
         <choose>
             <when test="type != null and type == 1">
                 ,end_time DESC
