@@ -109,7 +109,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 TService service = productCommonController.getProductById(serviceId);
                 order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
             } catch (Exception e){
-                throw new MessageException("401", "对方余额不足");
+                throw new MessageException("499", "对方余额不足");
             }
             if(order == null){
                 throw new MessageException("401", "该日期已超出可报名日期");
@@ -223,9 +223,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param serviceId
      * @return
      */
-    public List<String> orgEnroll(List<Long> userIdList  , String date , Long serviceId){
+    public List<String> orgEnroll(Long orderId , List<Long> userIdList  , String date , Long serviceId){
         List<String> msgList = new ArrayList<>();
-        TOrder order = null;
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
         long nowTime = System.currentTimeMillis();
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
@@ -233,7 +233,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 TService service = productCommonController.getProductById(serviceId);
                 order = orderCommonController.produceOrder(service , OrderEnum.PRODUCE_TYPE_ENROLL.getValue() , date);
             } catch (Exception e){
-                throw new MessageException("401", "您账户余额不足");
+                throw new MessageException("499", "您账户余额不足");
             }
             if(order == null){
                 throw new MessageException("401", "该日期已超出可报名日期");

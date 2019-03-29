@@ -38,7 +38,7 @@ public class PublishController extends BaseController {
 
     /**
      *
-     * 功能描述:存入key—value值
+     * 存入key—value值
      *
      * @param id 编号
      * @param key key
@@ -76,9 +76,10 @@ public class PublishController extends BaseController {
     }
     /**
      *
-     * 功能描述:存入key—value值
+     * 获取key—value值
      *
      * @param key key值
+     *
      *         "id": 63645917454908320, //自增编号
      *         "mainKey": "feedback", //key
      *         "extend": "",
