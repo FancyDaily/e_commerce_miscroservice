@@ -395,6 +395,7 @@ public class OrderDaoImpl implements OrderDao {
     @Override
     public TOrder selectById(Long orderId) {
         return MybatisOperaterUtil.getInstance().findOne(new TOrder(), new MybatisSqlWhereBuild((TOrder.class))
+                .eq(TOrder::getId,orderId)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
