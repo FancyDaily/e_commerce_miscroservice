@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
@@ -22,16 +21,11 @@ public class OrderRemarkListener extends MqListenerConvert {
 	@Autowired
 	private OrderRelationService relationService;
 
-	@RequestMapping("/testRemark")
-	public String test(String transferData) {
-		transferTo(transferData);
-		return "ok";
-	}
-
 	@Override
 	protected void transferTo(String transferData) {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
 		System.out.println(paramMap);
+		logger.info("OrderRemarkListener MQ监听器开始执行了 >>>>>>");
 		// 获取参数
 		List<Long> userIds = (List) paramMap.get("userIds");
 		Long appraiserId = (Long) paramMap.get("appraiserId");

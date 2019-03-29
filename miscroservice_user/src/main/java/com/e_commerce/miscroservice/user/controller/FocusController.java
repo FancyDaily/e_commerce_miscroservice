@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
 import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
@@ -44,7 +45,7 @@ public class FocusController extends BaseController {
     @RequestMapping("submit")
     public Object submit(String token, Long userFollowId) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             focusService.submit(user, userFollowId);
             result.setSuccess(true);
@@ -143,7 +144,7 @@ public class FocusController extends BaseController {
     @RequestMapping("focusList")
     public Object focusList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, true);
             result.setData(queryResult);
@@ -243,7 +244,7 @@ public class FocusController extends BaseController {
     @RequestMapping("fanList")
     public Object fanList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, false);
             result.setData(queryResult);

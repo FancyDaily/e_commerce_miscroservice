@@ -264,4 +264,6 @@ public interface OrderRelationshipDao {
 	 * @return
 	 */
 	long selectEnrollUserCount(Long orderId);
+
+	TOrderRelationship selectCollectByOrderIdAndUserId(Long orderId, Long id);
 }

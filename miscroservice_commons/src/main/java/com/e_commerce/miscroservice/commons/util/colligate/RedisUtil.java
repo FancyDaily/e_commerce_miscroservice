@@ -40,7 +40,7 @@ public class RedisUtil {
 	
 	@Resource(name="redisTemplate")
 	private RedisTemplate<String, Object> redisTemplate;
-	
+
 	public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}

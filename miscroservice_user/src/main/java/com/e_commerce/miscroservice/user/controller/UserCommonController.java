@@ -117,8 +117,8 @@ public class UserCommonController {
 	 * @param user
 	 * @param growthValueEnum
 	 */
-	public void taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
-		userService.taskComplete(user, growthValueEnum, counts);
+	public TUser taskComplete(TUser user, GrowthValueEnum growthValueEnum, Integer counts) {
+		return userService.taskComplete(user, growthValueEnum, counts);
 	}
 
 	/**

@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -72,7 +74,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SERVICE.getValue());
 			result.setData(list);
@@ -107,7 +109,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/delService")
 	public Object delService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
@@ -143,7 +145,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/lowerFrameService")
 	public Object lowerFrameService(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
@@ -177,7 +179,7 @@ public class ServiceController extends BaseController{
 //		request.removeAttribute("paramString");
 //		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 //		String token = param.getToken();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 				productService.submitSeekHelp(user, param, token);
@@ -214,7 +216,7 @@ public class ServiceController extends BaseController{
 	@PostMapping("/sendServiceSummary")
 	public Object sendServiceSummary(String token, Long serviceId , String description , String url ) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			productService.sendServiceSummary(serviceId , description , url , user);
 			result.setSuccess(true);

@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.vo.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,7 +75,7 @@ public class OrderController extends BaseController {
 	@PostMapping("/detailMineOrder")
 	public Object detailMineOrder(Long orderId, String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			DetailMineOrderReturnView detailMineOrder = orderService.detailMineOrder(user, orderId);
 			result.setData(detailMineOrder);
@@ -134,7 +135,7 @@ public class OrderController extends BaseController {
 	@RequestMapping("/listMineOrder")
 	public Object listMineOrder(Integer pageNum, Integer pageSize, String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<PageOrderReturnView> list = orderService.listMineOrder(pageNum, pageSize, user);
 			result.setData(list);
@@ -205,7 +206,7 @@ public class OrderController extends BaseController {
 	public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
 							Integer pageSize, String condition, String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		PageOrderParamView param = (PageOrderParamView) ConsumeHelper.getObj();
 		try {
 			QueryResult<PageOrderReturnView> list = orderService.list(param, user);
@@ -275,7 +276,7 @@ public class OrderController extends BaseController {
 	 */
 	@RequestMapping("/detail")
 	public Object detailIndexOrder(Long orderId, String token) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			DetailOrderReturnView data = orderService.orderDetail(orderId, user);
@@ -332,7 +333,7 @@ public class OrderController extends BaseController {
 	 */
 	@PostMapping("/enrollList")
 	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			QueryResult<PageEnrollAndChooseReturnView> data = orderService.enrollList(pageNum, pageSize, user);
@@ -398,7 +399,7 @@ public class OrderController extends BaseController {
 	 */
 	@PostMapping("/mineChooseList")
 	public Object mineChooseList(String token, Integer pageNum, Integer pageSize) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			QueryResult<PageEnrollAndChooseReturnView> data = orderService.mineChooseList(pageNum, pageSize, user);
@@ -459,7 +460,7 @@ public class OrderController extends BaseController {
 	 */
 	@PostMapping("/chooseDetail")
 	public Object chooseDetail(String token, Long orderId) {
-		TUser user = (TUser) redisUtil.get(token);
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			DetailChooseReturnView data = orderService.chooseDetail(orderId, user);

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -510,5 +509,20 @@ public class OrderDaoImpl implements OrderDao {
                 new MybatisSqlWhereBuild(TOrder.class)
                         .in(TOrder::getId, orderIdList));
         return count;
+    }
+
+    /**
+     * 根据订单id、订单状态查找所有订单记录
+     *
+     * @param idList
+     * @param collectionAvailableStatusArray
+     * @return
+     */
+    @Override
+    public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .in(TOrder::getId, idList)
+                .in(TOrder::getStatus, collectionAvailableStatusArray)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 }

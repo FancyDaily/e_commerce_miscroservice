@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.application.SetTemplateIdEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.util.colligate.BadWordUtil;
@@ -210,7 +211,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //			String title = "";
 //			String content = "";
 //			messageService.messageSave(tService.getId(), new AdminUser(), title, content, tService.getUserId(), currentTime);
-			// TODO 服务通知
 		} catch (Exception e) {
 			logger.error(errInfo(e));
 			throw new MessageException("下架失败");
@@ -343,7 +343,48 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		String title = "%s下架通知";
 		String content = null;
 		if (Objects.equals(type, 1)) {//超过结束时间下架
-			content = "您发布的%s“%s”，由于已超过原定结束时间，已自动下架。您可以修改时间后重新上架。";
+			content = "您发布的%s“%s”，由于已超过原定结束时间，已自动下架。您可以修改时间后重新上架。当然，如有报名，切记及时选定哦～";
+			// 发送模板消息
+			TUser toUser = userService.getUserById(service.getUserId());
+			TFormid formid = findFormId(currentTime, toUser);
+			if (formid != null) {
+				if (service.getType() == ProductEnum.TYPE_SERVICE.getValue()) {
+					try {
+						String parameter = "";
+						List<String> wxMsg = new ArrayList<>();
+						wxMsg.add("服务已经超时下架");
+						wxMsg.add(service.getServiceName());
+						wxMsg.add(changeTime(service.getStartTime()));
+						wxMsg.add(changeTime(service.getEndTime()));
+						wxMsg.add("由于已超过原定结束时间，您的服务已自动下架。");
+						wxMsg.add("您可以修改时间后重新上架本服务。当然，如有报名，切记及时选定哦～");
+
+						messageService.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.serv_setTemplate_7, parameter);
+						formid.setIsValid("0");
+						messageService.updateFormId(formid);
+					} catch (Exception e) {
+						logger.error("发送服务通知失败");
+					}
+				} else {
+					try {
+						String parameter = "";
+						List<String> wxMsg = new ArrayList<>();
+						wxMsg.add("求助已经超时下架");
+						wxMsg.add(service.getServiceName());
+						wxMsg.add(changeTime(service.getStartTime()));
+						wxMsg.add(changeTime(service.getEndTime()));
+						wxMsg.add("由于超过结束时间，您的求助已默认下架。噢，互助时已解冻～");
+						wxMsg.add("不如重新发布下求助信息吧~或者去服务列表页搜索并直接求助相关的服务者");
+
+						messageService.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_9, parameter);
+						formid.setIsValid("0");
+						messageService.updateFormId(formid);
+					} catch (Exception e) {
+						logger.error("发送服务通知失败");
+					}
+				}
+
+			}
 		} else {  // 互助时不足下架
 			content = "您发布的%s“%s”，由于互助时不足，无法继续生成订单，已自动下架。您可以赚取足够的互助时重新上架。";
 		}
@@ -355,7 +396,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			content = String.format(content, "服务", service.getServiceName());
 		}
 		messageService.messageSave(service.getId(), new AdminUser(), title, content, service.getUserId(), currentTime);
-		// TODO 发送服务通知
 	}
 
 	@Override
@@ -394,7 +434,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (param.getService().getCollectType() == null
 				|| param.getService().getCollectTime().equals(ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue())) {
 			logger.error("组织发布的服务传递时间币的类型错误或组织不能发布公益时的服务 {}", param.getService().getCollectType());
-			throw new MessageException("组织职能发布互助时的服务");
+			throw new MessageException("组织只能发布互助时的服务");
 		}
 		TService service = param.getService();
 		setServiceCommonField(user, service);
@@ -471,7 +511,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		service.setServeNum(user.getServeNum()); // 用户的服务数量
 		// 插入求助服务图片及描述
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
-
 		if (Objects.equals(user.getAuthenticationStatus(), AppConstant.AUTH_STATUS_NO)) {
 			throw new MessageException("请先实名后再发布服务");
 		}
@@ -482,7 +521,6 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("服务描述中包含敏感词");
 			}
-//			desc.setId(snowflakeIdWorker.nextId());
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
@@ -491,19 +529,20 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDescribeDao.batchInsert(listServiceDescribe);
 		}
 		//派生出第一张订单
-
 		try {
 			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
-		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
 		userService.addPublishTimes(user, ProductEnum.TYPE_SERVICE.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
-				super.afterCompletion(status);
-				updateServiceByKey(service);
+			super.afterCompletion(status);
+			//增加成长值
+			TUser tUser = userService.getUserById(user.getId());
+			userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
+			updateServiceByKey(service);
 			}
 		});
 	}
@@ -530,7 +569,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 		for (int i = 0; i < weekDayArray.length; i++) {
 			int weekDay = Integer.parseInt(weekDayArray[i]);
-			long countWeek = DateUtil.countWeek(service.getStartDateS(), service.getEndDateS(), weekDay);
+			long countWeek = DateUtil.countWeek(startBeginDate, service.getEndDateS(), weekDay);
 			if (countWeek > 0) {
 				isContainWeek = true;
 			}
@@ -573,14 +612,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
-		// 增加成长值
-		userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
+
 		//增加发布次数
 		userService.addPublishTimes(user, ProductEnum.TYPE_SEEK_HELP.getValue());
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
+				// 增加成长值
+				TUser tUser = userService.getUserById(user.getId());
+				userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, 1);
 				updateServiceByKey(service);
 			}
 		});

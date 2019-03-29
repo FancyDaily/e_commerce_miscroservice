@@ -1,6 +1,6 @@
-package com.e_commerce.miscroservice.commons.config.config;
+package com.e_commerce.miscroservice.commons.config;
 
-import com.e_commerce.miscroservice.commons.config.filter.InitInterceptor;
+import com.e_commerce.miscroservice.commons.filter.InitInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;

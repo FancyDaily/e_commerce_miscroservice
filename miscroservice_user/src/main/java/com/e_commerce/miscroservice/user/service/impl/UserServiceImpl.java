@@ -7,7 +7,6 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
-import com.e_commerce.miscroservice.commons.entity.colligate.AllTypeJsonEntity;
 import com.e_commerce.miscroservice.commons.entity.colligate.Category;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
@@ -19,16 +18,17 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
-import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
-import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.dao.*;
+import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.*;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
@@ -557,11 +557,12 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     public void collect(TUser user, Long orderId) {
+        Long userId = user.getId();
         if (orderId == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单Id不能为空!");
         }
 
-        TOrderRelationship orderRelationship = orderService.selectOrdertionshipByuserIdAndOrderId(user.getId(), orderId);
+        TOrderRelationship orderRelationship = orderService.selectCollectByOrderIdAndUserId(userId,orderId);
         //如果订单关系不存在，创建一条
         if (orderRelationship == null) {
             TOrder order = orderService.selectOrderById(orderId);
@@ -573,6 +574,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             orderRelationship.setOrderId(order.getId());
             orderRelationship.setServiceType(order.getType());
             orderRelationship.setFromUserId(order.getCreateUser());
+            orderRelationship.setReceiptUserId(userId);
             orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
             orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
@@ -591,13 +593,14 @@ public class UserServiceImpl extends BaseService implements UserService {
             orderRelationship.setUpdateUserName(order.getCreateUserName());
             orderRelationship.setUpdateTime(order.getCreateTime());
             orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+            //如果为创建者
+            if(order.getCreateUser().equals(user.getId())) {
+                orderRelationship.setReceiptUserId(null);
+            }
 
             orderService.insertOrderRelationship(orderRelationship);
             return;
         }
-        /*if (orderRelationship == null) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
-        }*/
         if (OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType() != orderRelationship.getServiceCollectionType()) {    //当前业务为收藏
             orderService.updateCollectStatus(orderRelationship.getId(), OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
         } else { //当前业务为取消收藏
@@ -2226,7 +2229,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void generateInviteCode(String token, String inviteCode) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         Long userId = user.getId();
         if (checkInviteCode(inviteCode)) {
             user = userDao.selectByPrimaryKey(userId);
@@ -3493,7 +3496,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void logOut(String token) {
         if (StringUtil.isNotEmpty(token) && redisUtil.hasKey(token)) {
-            TUser user = (TUser) redisUtil.get(token);
+            TUser user = UserUtil.getUser(token);
             String redisKey = "str" + user.getId();
             redisUtil.del(redisKey);// 删除登录凭证
             redisUtil.del(token);// 删除访问凭证
@@ -3572,13 +3575,16 @@ public class UserServiceImpl extends BaseService implements UserService {
         return companyDao.selectByPrimaryKey(companyId);
     }
 
-
     @Override
     public void addPublishTimes(TUser user, int type) {
+        TUser tUser = new TUser();
+        tUser.setId(user.getId());
+        int seekHelpPublishNum = user.getSeekHelpPublishNum();
+        int servicePublishNum = user.getServePublishNum();
         if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
-            user.setSeekHelpPublishNum(user.getSeekHelpPublishNum() + 1);
+            user.setSeekHelpPublishNum(seekHelpPublishNum + 1);
         } else {
-            user.setServePublishNum(user.getServePublishNum() + 1);
+            user.setServePublishNum(servicePublishNum + 1);
         }
         userDao.updateByPrimaryKey(user);
     }

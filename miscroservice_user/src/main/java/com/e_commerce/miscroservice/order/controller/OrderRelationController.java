@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
 import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
@@ -44,7 +45,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/enroll")
     public Object enroll(Long orderId, String token, String date, Long serviceId) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             orderRelationService.enroll(orderId, user.getId(), date, serviceId);
@@ -117,7 +118,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             orderRelationService.removeEnroll(orderId, user.getId());
@@ -162,7 +163,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/userList")
     public Object userList(Long orderId, int type, String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             List<UserInfoView> userInfoViewList = orderRelationService.userListByPperation(orderId, type, user.getId());
@@ -201,7 +202,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/chooseUser")
     public Object chooseUser(Long orderId, String token, String userIds) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -242,7 +243,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/unChooseUser")
     public Object unChooseUser(Long orderId, String token, String userIds) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -287,7 +288,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/pay")
     public Object pay(Long orderId, String token, String userIds , String payments) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -337,7 +338,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/startOrder")
     public Object startOrder(Long orderId, String token ,String userIds) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -383,7 +384,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/reports")
     public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , String token , String userIds) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -432,7 +433,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/remark")
     public Object remark(String token, String userIds, Long orderId , int credit, int major, int attitude, String message, String labels) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -475,7 +476,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/removeOrderTips")
     public Object removeOrderTips(String token , Long orderId ) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             long coin = orderRelationService.removeOrderTips(orderId , user.getId());
@@ -512,7 +513,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/removeOrder")
     public Object removeOrder(Long orderId , String userIds , String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -626,7 +627,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/reportOrder")
     public Object reportOrder(Long associationId , String token , long labelsId , String message , String voucherUrl) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             orderRelationService.reoprtOrder(associationId , user , labelsId , message , voucherUrl);
@@ -656,7 +657,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/orgOrderInfo")
     public Object orgOrderInfo(Long orderId , String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             OrgEnrollUserView orgEnrollUserView = orderRelationService.orgOrderInfo(orderId , user.getId());
@@ -692,7 +693,7 @@ public class OrderRelationController extends BaseController {
     @PostMapping("/enrollUserInfoList")
     public Object enrollUserInfoList(Long orderId, int status, int type, String value,
                                      int pageSize, int pageNum, String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<EnrollUserInfoView> enrollUserInfoViewList = orderRelationService.enrollUserInfoList(orderId , status , type , value ,pageSize ,pageNum ,user);

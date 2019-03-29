@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
@@ -45,7 +46,7 @@ public class MessageController extends BaseController {
     @RequestMapping("/collectFormId")
     public Object collectFormId(String formId, String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         try {
             messageService.insertFormId(formId, user.getId());
             result.setSuccess(true);
@@ -85,7 +86,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/notices")
     public Object notices(int pageSize , long lastTime , String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<TMessageNotice> messageNotices = messageService.notices(lastTime, user.getId(), pageSize);
@@ -128,7 +129,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/sendMessage")
     public Object sendMessage(String token , Long messageUserId ,  Long specialId , int type , String message , String url) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         if (type == MessageEnum.TYPE_TEXT.getType()) {
             //如果是文本，要看一下是否是空消息
@@ -181,7 +182,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/detail")
     public Object detail(Long toUserId , Long lastTime , int pageSize , String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId , lastTime , pageSize , user.getId());
@@ -224,7 +225,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/showList")
     public Object showList(Long lastTime , String token , Integer pageSize) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<MessageShowLIstView> list = messageService.list(user.getId() , lastTime , pageSize);
@@ -256,7 +257,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/noticesFirstInfo")
     public Object noticesFirstInfo(String token) {
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             NoticesFirstView noticesFirstView = messageService.noticesFirstInfo(user.getId());
@@ -297,7 +298,7 @@ public class MessageController extends BaseController {
             result.setData(0);
             return result;
         }
-        TUser user = (TUser) redisUtil.get(token);
+        TUser user = UserUtil.getUser(token);
         if (user == null){
             result.setSuccess(true);
             result.setMsg("查看成功");

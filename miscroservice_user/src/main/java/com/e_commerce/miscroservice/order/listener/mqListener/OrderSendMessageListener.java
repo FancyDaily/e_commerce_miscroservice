@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Objects;
 
@@ -21,13 +20,9 @@ public class OrderSendMessageListener extends MqListenerConvert {
 	@Autowired
 	private OrderRelationService relationService;
 
-	@RequestMapping("/testSendMessage")
-	public String test(String transferData) {
-		transferTo(transferData);
-		return "ok";
-	}
 	@Override
 	protected void transferTo(String transferData) {
+		logger.info("OrderSendMessageListener MQ监听器开始执行 >>>>>>");
 		JSONObject paramMap = JSONObject.parseObject(transferData);
 		System.out.println(paramMap);
 		// 获取参数
@@ -35,11 +30,15 @@ public class OrderSendMessageListener extends MqListenerConvert {
 		// 类型 1、提前俩小时发送消息  2、提前 一小时发送消息  3、在开始时间发送消息
 		Integer type = Integer.parseInt((String)paramMap.get("type"));
 		if (Objects.equals(type, 1)) {
-			// 提前俩小时发送消息
+			// 提前俩小时发送将要开始的消息
+			relationService.noChooseByTwoHour(orderId);
 		} else if (Objects.equals(type, 2)) {
-			// //提前一小时发送消息
+			// 订单开始一小时有人成单 提醒用户的消息
+			relationService.oneHourByStart(orderId);
 		} else if (Objects.equals(type, 3)) {
-			// 在开始时间发送消息
+			// 到开始时间无人报名提醒发布者  到开始时间未签到提醒服务者
+			relationService.noSignWhenStart(orderId);
+			relationService.noUserEnrollByStart(orderId);
 		}
 	}
 }

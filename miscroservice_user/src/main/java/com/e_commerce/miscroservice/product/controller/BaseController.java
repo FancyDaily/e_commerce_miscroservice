@@ -1,6 +1,9 @@
 package com.e_commerce.miscroservice.product.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TFormid;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +22,8 @@ public class BaseController {
 	protected ProductService productService;
 	@Autowired
 	protected RedisUtil redisUtil;
+	@Autowired
+	protected MessageCommonController messageCommonController;
 
 	/**
 	 * 有效
@@ -72,7 +77,7 @@ public class BaseController {
 	        }  
 	    }  
 	    return sw.toString();  
-	}  
-	
+	}
+
 
 }
