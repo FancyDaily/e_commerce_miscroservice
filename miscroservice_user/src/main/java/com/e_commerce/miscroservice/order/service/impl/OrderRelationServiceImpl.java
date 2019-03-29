@@ -1099,22 +1099,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             userCommonController.updateByPrimaryKey(nowUser);
         }
         //查看待支付人数，如果和支付人数相等，将发布用户状态置为待评价或已无效
-        long count = orderRelationshipDao.selectCountByStatusByEnroll(orderId, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
         if (seekHelpDoneNum > 0) {
-            //如果有有效支付人数，那么要改变发布者订单关系表，插入服务记录，判断是否首次完成，调用评价定时任务
+            //如果有有效支付人数，那么插入服务记录，判断是否首次完成，调用评价定时任务
 
             sendMqByEndPay(order , successUserIdList , nowUserId);
 
-            if (count == (userIdList.size() - msgList.size())) {
-                //没有要支付的人，就将发布者订单关系置为待评价
-                TOrderRelationship publishOrderRela = orderRelationshipDao.selectByOrderIdAndUserId(orderId, publishUserId);
-                publishOrderRela.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
-                publishOrderRela.setUpdateTime(nowTime);
-                publishOrderRela.setUpdateUser(nowUserId);
-                publishOrderRela.setUpdateUserName(nowUser.getName());
-
-                orderRelationshipDao.updateByPrimaryKey(publishOrderRela);
-            }
             //插入服务记录
             recoreSave(orderId, content, nowUser, nowTime);
 
@@ -1123,20 +1112,22 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 //增加完成求助成长值
                 nowUser =  userCommonController.taskComplete(nowUser , GrowthValueEnum.GROWTH_TYPE_REP_HELP_DONE , seekHelpDoneNum);
             }
-        } else {
-            //如果支付成功的人都是支付的0
-            if (count == (userIdList.size() - msgList.size())) {
-                //没有要支付的人，就将发布者订单关系置为无关系
-                TOrderRelationship publishOrderRela = orderRelationshipDao.selectByOrderIdAndUserId(orderId, publishUserId);
-                publishOrderRela.setStatus(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
-                publishOrderRela.setUpdateTime(nowTime);
-                publishOrderRela.setUpdateUser(nowUserId);
-                publishOrderRela.setUpdateUserName(nowUser.getName());
-
-                orderRelationshipDao.updateByPrimaryKey(publishOrderRela);
-            }
         }
 
+
+
+        //修改发布者订单关系状态
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCompletion(int status) {
+
+                if(status<0){
+                    return;
+                }
+                changePublishOrderRela(order , order.getCreateUser());
+                super.afterCommit();
+            }
+        });
 
         return msgList;
     }
