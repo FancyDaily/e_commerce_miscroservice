@@ -26,7 +26,7 @@ public enum TimerSchedulerTypeEnum {
     /**
      * 订单结束自动支付
      */
-    ORDER_OVERTIME_PAY(4, "order_overtime_pay"),
+    ORDER_OVERTIME_PAY(7, "order_overtime_pay"),
     /**
      * 订单支付自动评价
      */

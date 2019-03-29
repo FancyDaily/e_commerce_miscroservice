@@ -95,12 +95,14 @@
         </if>
         ,source DESC
         ,CASE
-        WHEN distance <![CDATA[>=]]> 10000 THEN
+        WHEN distance <![CDATA[<=]]> 10000 THEN
         1
         ELSE
         0
         END
-        DESC
+        DESC,
+        service_place
+        DESC,
         <choose>
             <when test="type != null and type == 1">
                 ,end_time DESC

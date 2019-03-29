@@ -13,7 +13,7 @@ import java.util.Objects;
  * @author 马晓晨
  * @date 2019/3/27
  */
-//@Component
+@Component
 public class OrderSendMessageListener extends MqListenerConvert {
 	Log logger = Log.getInstance(OrderEndListener.class);
 

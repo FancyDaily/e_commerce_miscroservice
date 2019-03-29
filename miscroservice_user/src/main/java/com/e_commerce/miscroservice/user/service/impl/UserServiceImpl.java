@@ -3577,10 +3577,14 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public void addPublishTimes(TUser user, int type) {
+        TUser tUser = new TUser();
+        tUser.setId(user.getId());
+        int seekHelpPublishNum = user.getSeekHelpPublishNum();
+        int servicePublishNum = user.getServePublishNum();
         if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
-            user.setSeekHelpPublishNum(user.getSeekHelpPublishNum() + 1);
+            user.setSeekHelpPublishNum(seekHelpPublishNum + 1);
         } else {
-            user.setServePublishNum(user.getServePublishNum() + 1);
+            user.setServePublishNum(servicePublishNum + 1);
         }
         userDao.updateByPrimaryKey(user);
     }

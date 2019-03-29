@@ -951,9 +951,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					}
 				}
 			}
-			// 24小时后自动支付
-			sendMqByEndOrder(order, userIds, paymentList, payUserIds);
 		}
+		// 24小时后自动支付
+		sendMqByEndOrder(order, userIds, paymentList, payUserIds);
 	}
 
 	/**
