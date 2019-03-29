@@ -346,9 +346,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			content = "您发布的%s“%s”，由于已超过原定结束时间，已自动下架。您可以修改时间后重新上架。当然，如有报名，切记及时选定哦～";
 			// 发送模板消息
 			TUser toUser = userService.getUserById(service.getUserId());
-			TFormid formid =findFormId(currentTime, toUser);
+			TFormid formid = findFormId(currentTime, toUser);
 			if (formid != null) {
-				if (service.getType() == ProductEnum.TYPE_SERVICE.getValue()){
+				if (service.getType() == ProductEnum.TYPE_SERVICE.getValue()) {
 					try {
 						String parameter = "";
 						List<String> wxMsg = new ArrayList<>();
@@ -434,7 +434,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (param.getService().getCollectType() == null
 				|| param.getService().getCollectTime().equals(ProductEnum.COLLECT_TYPE_COMMONWEAL.getValue())) {
 			logger.error("组织发布的服务传递时间币的类型错误或组织不能发布公益时的服务 {}", param.getService().getCollectType());
-			throw new MessageException("组织职能发布互助时的服务");
+			throw new MessageException("组织只能发布互助时的服务");
 		}
 		TService service = param.getService();
 		setServiceCommonField(user, service);
@@ -538,11 +538,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
-				super.afterCompletion(status);
-				//增加成长值
-				TUser tUser = userService.getUserById(user.getId());
-				userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
-				updateServiceByKey(service);
+			super.afterCompletion(status);
+			//增加成长值
+			TUser tUser = userService.getUserById(user.getId());
+			userService.taskComplete(tUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_SERV_SEND, 1);
+			updateServiceByKey(service);
 			}
 		});
 	}

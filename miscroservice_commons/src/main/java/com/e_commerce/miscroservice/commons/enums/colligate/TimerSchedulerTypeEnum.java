@@ -1,5 +1,9 @@
 package com.e_commerce.miscroservice.commons.enums.colligate;
 
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * 定时任务类型枚举
  * 普通定是任务命名随意
@@ -14,7 +18,7 @@ public enum TimerSchedulerTypeEnum {
     TEST(2, "test"),
     WITHDRAW_DEPOSIT_BANK_DELAY_TASK(-30000, "withdraw_deposit_bank_delay_task"),
 
-    BONUS_PACKAGE_SEND_BACK_TASK(4,"bonus_package_send_back_task"),
+    BONUS_PACKAGE_SEND_BACK_TASK(4, "bonus_package_send_back_task"),
     /**
      * 订单超时自动结束
      */
@@ -26,7 +30,7 @@ public enum TimerSchedulerTypeEnum {
     /**
      * 订单结束自动支付
      */
-    ORDER_OVERTIME_PAY(4, "order_overtime_pay"),
+    ORDER_OVERTIME_PAY(7, "order_overtime_pay"),
     /**
      * 订单支付自动评价
      */
@@ -36,6 +40,23 @@ public enum TimerSchedulerTypeEnum {
     private int key;
 
     private String value;
+
+    static {
+        Set<Integer> keySets = new HashSet<>();
+        EnumSet<TimerSchedulerTypeEnum> enums = EnumSet.noneOf(TimerSchedulerTypeEnum.class);
+        TimerSchedulerTypeEnum[] values = values();
+        for (TimerSchedulerTypeEnum schedulerTypeEnum : values) {
+            if (!keySets.add(schedulerTypeEnum.key)) {
+                enums.add(schedulerTypeEnum);
+            }
+        }
+
+        if (enums.size() > 0) {
+            throw new RuntimeException("timerSchedulerTypeEnum has conflict \n" + enums);
+        }
+
+    }
+
 
     TimerSchedulerTypeEnum(int key, String value) {
         this.key = key;
