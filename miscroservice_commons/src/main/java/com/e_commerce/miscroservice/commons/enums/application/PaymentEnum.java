@@ -21,14 +21,14 @@ public enum PaymentEnum {
 	/**
 	 * 支出
 	 */
-	PAYMENT_TYPE_ACEPT_SERV(1,"接受一次服务",-1l),	
+	PAYMENT_TYPE_ACEPT_SERV(1,"发布求助",-1l),
 	PAYMENT_TYPE_BONUS_PACKAGE_OUT(9,"生成红包",-1l),
 	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_OUT(11,"取消订单赔付",-1l),	//订单违约赔款
 	
 	/**
 	 * 收入
 	 */
-	PAYMENT_TYPE_PROVIDE_SERV(1,"提供一次服务",-1l),
+	PAYMENT_TYPE_PROVIDE_SERV(1,"提供服务",-1l),
 	PAYMENT_TYPE_SIGNUP_BONUS(2,"奖励-签到",-1l),		//不固定收入的奖励为-1
 	PAYMENT_TYPE_INVITE_BONUS(3,"奖励-成功邀请新用户",30l),
 	PAYMENT_TYPE_FIRSTHELP_BONUS(4,"奖励-首次完成",30l),	//TODO 确认是首次完成需求 还是首次互助

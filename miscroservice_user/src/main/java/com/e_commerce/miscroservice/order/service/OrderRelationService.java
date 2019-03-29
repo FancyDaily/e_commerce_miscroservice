@@ -204,6 +204,15 @@ public interface OrderRelationService {
                                                               int pageSize, int pageNum, TUser nowUser);
 
     /**
+     * 批量报名
+     * @param userIdList
+     * @param date
+     * @param serviceId
+     * @return
+     */
+    List<String> orgEnroll(Long orderId , List<Long> userIdList  , String date , Long serviceId);
+
+    /**
      * 两个小时还未选人的通知方法
      * @param orderId
      */

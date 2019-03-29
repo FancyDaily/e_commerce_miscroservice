@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
+import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
@@ -34,6 +35,9 @@ import java.util.Map;
 public class UserController extends BaseController {
 
     Log logger = Log.getInstance(UserController.class);
+
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     private UserService userService;
@@ -1841,7 +1845,6 @@ public class UserController extends BaseController {
      * 创建一个红包
      *
      * @param token          登录凭证
-     * @param bonusPackageId 红包编号
      *                       {
      *                       "success": true,
      *                       "errorCode": "",
@@ -1852,7 +1855,7 @@ public class UserController extends BaseController {
      */
     @RequestMapping("bonusPackage/generate")
     @Consume(TBonusPackage.class)
-    public Object bonusPackageGenerate(String token, Long bonusPackageId, String description, Long time) {
+    public Object bonusPackageGenerate(String token, String description, Long time) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser(token);
         TBonusPackage bonuspackage = (TBonusPackage) ConsumeHelper.getObj();
@@ -2801,13 +2804,14 @@ public class UserController extends BaseController {
     }
 
     @PostMapping("test")
-    public void test(String token, Integer counts) {
+    public void test(Long userId,Integer counts) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = userDao.selectByPrimaryKey(userId);
         try {
-            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_HELP_SEND, counts);
+            userService.taskComplete(user, GrowthValueEnum.GROWTH_TYPE_REP_SERV_DONE,counts);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }
