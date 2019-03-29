@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 @Component
 public class OrderSendMessageListener extends MqListenerConvert {
-	Log logger = Log.getInstance(OrderEndListener.class);
+	Log logger = Log.getInstance(OrderSendMessageListener.class);
 
 	@Autowired
 	private OrderRelationService relationService;
@@ -26,9 +26,9 @@ public class OrderSendMessageListener extends MqListenerConvert {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
 		System.out.println(paramMap);
 		// 获取参数
-		Long orderId = Long.parseLong((String)paramMap.get("orderId"));
+		Long orderId = paramMap.getLong("orderId");
 		// 类型 1、提前俩小时发送消息  2、提前 一小时发送消息  3、在开始时间发送消息
-		Integer type = Integer.parseInt((String)paramMap.get("type"));
+		Integer type = paramMap.getInteger("type");
 		if (Objects.equals(type, 1)) {
 			// 提前俩小时发送将要开始的消息
 			relationService.noChooseByTwoHour(orderId);

@@ -32,6 +32,10 @@ public enum TimerSchedulerTypeEnum {
      */
     ORDER_OVERTIME_PAY(7, "order_overtime_pay"),
     /**
+     * 取消订单后拒绝时间赠礼
+     */
+    REMOVE_ORDER_PUNISHMENT(8, "remove_order_punishment"),
+    /**
      * 订单支付自动评价
      */
     ORDER_OVERTIME_REMARK(5, "order_overtime_remark"),

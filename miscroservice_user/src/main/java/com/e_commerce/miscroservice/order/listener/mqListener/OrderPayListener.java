@@ -17,7 +17,7 @@ import java.util.List;
 @Component
 public class OrderPayListener extends MqListenerConvert {
 
-	Log logger = Log.getInstance(OrderEndListener.class);
+	Log logger = Log.getInstance(OrderPayListener.class);
 	@Autowired
 	private OrderRelationService relationService;
 
@@ -27,10 +27,10 @@ public class OrderPayListener extends MqListenerConvert {
 		System.out.println(paramMap);
 		logger.info("OrderPayListener MQ监听器开始执行 >>>>>>");
 		// 获取参数
-		List<Long> userIds = (List)paramMap.get("userIds");
-		List<Long> paymentList = (List)paramMap.get("paymentList");
-		Long orderId = (Long)paramMap.get("orderId");
-		List<Long> payUserIds = (List)paramMap.get("payUserIds");
+		List<Long> userIds = paramMap.getJSONArray("userIds").toJavaList(Long.class);
+		List<Long> paymentList = paramMap.getJSONArray("paymentList").toJavaList(Long.class);
+		Long orderId = paramMap.getLong("orderId");
+		List<Long> payUserIds = paramMap.getJSONArray("payUserIds").toJavaList(Long.class);
 		//支付
 		for (Long payUserId : payUserIds) {
 			try {

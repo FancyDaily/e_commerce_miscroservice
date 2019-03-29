@@ -24,7 +24,6 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
-import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;
@@ -32,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -1103,7 +1101,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (seekHelpDoneNum > 0) {
             //如果有有效支付人数，那么要改变发布者订单关系表，插入服务记录，判断是否首次完成，调用评价定时任务
 
-            sendMqByEndPay(order , successUserIdList , nowUserId);
+            sendMqByEndPay(order , successUserIdList , nowUserId, nowTime);
 
             if (count == (userIdList.size() - msgList.size())) {
                 //没有要支付的人，就将发布者订单关系置为待评价
@@ -1302,6 +1300,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             String msg = remark(orderRelationship, nowUser, toUser, nowTime, true);
             if (msg != null) {
                 throw new MessageException("499", msg);
+            } else {
+                //插入评价，并且更新用户评分数据
+                insertRemarkAndUpdateUser(nowUser , toUser , order , credit , major , attitude , message , labels , nowTime );
             }
         }
         //修改发布者订单关系状态
@@ -1830,7 +1831,34 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         event.setIsValid(AppConstant.IS_VALID_YES);
 
         messageCommonController.insertTevent(event);
+        // 发送MQ定时任务
+        sendMqByRemoveOrderPunishment(userTimeRecordId, event.getId(), nowTime);
     }
+
+    /**
+     * 发送到时间调度一小时后调用拒绝时间赠礼
+     *
+     * @param eventId
+     * @param userTimeRecordId
+     */
+    private void sendMqByRemoveOrderPunishment(Long userTimeRecordId , Long eventId, long nowTime) {
+//        String cron = DateUtil.genCron(DateUtil.addHours(nowTime, 1));
+        //TODO
+        String cron = DateUtil.genCron(nowTime + 300000L);
+        TimerScheduler scheduler = new TimerScheduler();
+        scheduler.setType(TimerSchedulerTypeEnum.REMOVE_ORDER_PUNISHMENT.toNum());
+//        scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
+        scheduler.setName("remove_order_punishment" + UUID.randomUUID().toString());
+        scheduler.setCron(cron);
+        Map<String, Long> map = new HashMap<>();
+        //支付用户ID
+        map.put("userTimeRecordId", userTimeRecordId);
+        map.put("eventId", eventId);
+        // 自动支付所需要的参数
+        scheduler.setParams(JSON.toJSONString(map));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+    }
+
     /**
      * 判断限制时间
      * @param order
@@ -2191,7 +2219,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //调用发送定时任务，被支付者向支付者发表评价
             List<Long> remarkUserIdList = new ArrayList<>();
             remarkUserIdList.add(nowUser.getId());
-            sendMqByEndPay(order , remarkUserIdList , toUser.getId());
+            sendMqByEndPay(order , remarkUserIdList , toUser.getId(), nowTime);
 
         } else {
             orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
@@ -2819,13 +2847,13 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param userIds 被评价者
      * @param appraiserId 评价者
      */
-    private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId) {
+    private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId, Long nowTime) {
         // TODO
-//        String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+//        String cron = DateUtil.genCron(DateUtil.addDays(nowTime, 1));
         TimerScheduler scheduler = new TimerScheduler();
         scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
         scheduler.setName("remark_order" + UUID.randomUUID().toString());
-        String cron = DateUtil.genCron(order.getEndTime() + 180000L);
+        String cron = DateUtil.genCron(nowTime + 300000L);
         scheduler.setCron(cron);
         Map map = new HashMap();
         map.put("userIds", userIds);

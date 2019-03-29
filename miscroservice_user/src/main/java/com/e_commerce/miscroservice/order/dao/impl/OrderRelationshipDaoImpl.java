@@ -404,7 +404,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	@Override
 	public List<TOrderRelationship> selectWaitPay(Long orderId) {
 		return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+				.eq(TOrderRelationship::getOrderId, orderId)
 				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.eq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())
 				.neq(TOrderRelationship::getOrderReportType, OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType())
 				.neq(TOrderRelationship::getOrderReportType, OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType())
