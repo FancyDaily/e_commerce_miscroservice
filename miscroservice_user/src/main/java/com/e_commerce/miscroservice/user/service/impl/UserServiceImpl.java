@@ -3602,6 +3602,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public CompanyDailyPaymentView queryPaymentToDay(TUser user) {
+        //与今日有关的所有订单以及收支情况
         user = userDao.selectByPrimaryKey(user.getId());
 
         Long userId = user.getId();
@@ -3611,7 +3612,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         long startStamp = DateUtil.getStartStamp(currentTimeMillis);
         long endStamp = DateUtil.getEndStamp(currentTimeMillis);
 
-        List<TOrder> orders = orderService.selectDailyCreatedOrders(userId);    //查找当天派生出的订单
+        List<TOrder> orders = orderService.selectDailyOrders(userId);    //查找当天派生出的订单
 
         //构建订单ids
         List<Long> orderIds = new ArrayList<>();
@@ -3656,11 +3657,12 @@ public class UserServiceImpl extends BaseService implements UserService {
             return new CompanyDailyPaymentView();
         }
 
-        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectDailyByUserIdInOrderIds(userId, orderIds);  //查找当日生成的流水
+        List<TUserTimeRecord> userTimeRecords = userTimeRecordDao.selectByUserIdInOrderIds(userId, orderIds);  //查找当日生成的流水
 
         //初始化 serviceId-payOrGainNum map
         Map<Long, Long> payOrGainNumMap = new HashMap<>();
         for (TUserTimeRecord userTimeRecord : userTimeRecords) {
+            Long time = userTimeRecord.getTime();
             Long targetId = userTimeRecord.getTargetId();    //订单id
             TOrder order = orderMap.get(targetId);
             Long serviceId = order.getServiceId();
@@ -3668,7 +3670,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (payOrGainNum == null) {
                 payOrGainNum = 0l;
             }
-            payOrGainNum += userTimeRecord.getTime();
+            if(userTimeRecord.getCreateTime()>=startStamp && userTimeRecord.getCreateTime()<=endStamp) {
+                payOrGainNum += time;
+            }
             payOrGainNumMap.put(serviceId, payOrGainNum);
         }
 
