@@ -1803,7 +1803,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         //修改红包记录
         TBonusPackage bonusPackage = bonusPackageDao.selectByPrimaryKey(bonusPackageId);
         //红包不存在
-        if (bonusPackage == null) {
+        if (bonusPackage == null || AppConstant.IS_VALID_NO.equals(bonusPackage.getIsValid())) {
             return;
         }
         bonusPackage.setId(bonusPackageId);
@@ -1843,8 +1843,6 @@ public class UserServiceImpl extends BaseService implements UserService {
                 super.afterCompletion(status);
             }
         });
-
-
     }
 
     /**
@@ -2850,10 +2848,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         GrowthValueEnum superGrowthValueEnum = null;
 
         // 日期信息
-        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
-        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
-        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
-        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+        long currentTimeMillis = System.currentTimeMillis();
+        Long beginStamp = DateUtil.getStartStamp(currentTimeMillis);
+        Long endStamp = DateUtil.getEndStamp(currentTimeMillis);
 
         List<Integer> needTOConfirmList = Arrays.asList(AppConstant.GROWTH_VALUE_ENUM_NEED_CONFIRM_ARRAY);
         //如果为特定类型
@@ -2877,12 +2874,12 @@ public class UserServiceImpl extends BaseService implements UserService {
         //遍历筛选次数
         for (TTypeRecord typeRecord : typeRecords) {
             Integer num = typeRecord.getNum().intValue();
-            if (typeRecord.getType().equals(growthValueEnum.getCode())) {    //重复
+            if (!typeRecord.getType().equals(growthValueEnum.getCode())) {    //一次型
                 superCountTotal += num;
                 if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) {
                     superCountToday += num;
                 }
-            } else {    //一次型
+            } else {    //重复
                 countTotal += num;
                 if (typeRecord.getCreateTime() >= beginStamp && typeRecord.getCreateTime() < endStamp) {
                     countToday += num;
@@ -3368,10 +3365,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<Integer> noobTaskList = Arrays.asList(noobTaskArray);
 //      List<Integer> dailyTaskList = Arrays.asList(dailyTaskArray);
 
-        String today = DateUtil.timeStamp2Date(System.currentTimeMillis());
-        Map<String, Object> ym2BetweenStamp = DateUtil.ym2BetweenStamp(today);
-        Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
-        Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
+        long currentTimeMillis = System.currentTimeMillis();
+        Long beginStamp = DateUtil.getStartStamp(currentTimeMillis);
+        Long endStamp = DateUtil.getEndStamp(currentTimeMillis);
 
         List<TTypeRecord> dailyGrowthRecords = growthValueService.findOnesGrowthRecords(user.getId());
         //map
@@ -3408,9 +3404,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 continue;
             }
             DailyTask dailyTask = new DailyTask();
-            if (targetId != null) {
-                dailyTask.setTargetId(Long.valueOf(targetId));
-            }
+            dailyTask.setTargetId(Long.valueOf(type));
             dailyTask.setName(taskEnum.getDesc());
             dailyTask.setBonus(taskEnum.getReward().intValue());
             dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
@@ -3713,6 +3707,9 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage) {
+        //余额变动
+        user = userDao.selectByPrimaryKey(user.getId());    //最新数据
+
         Long time = bonusPackage.getTime();
         Long currentMills = System.currentTimeMillis();
         //判穷
@@ -3731,8 +3728,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         bonusPackage.setIsValid(AppConstant.IS_VALID_YES);
         bonusPackageDao.insert(bonusPackage);
 
-        //余额变动
-        user = userDao.selectByPrimaryKey(user.getId());    //最新数据
         user.setSurplusTime(user.getSurplusTime() - time);
         //updater
         user.setUpdateTime(currentMills);
@@ -3756,17 +3751,20 @@ public class UserServiceImpl extends BaseService implements UserService {
         record.setIsValid(AppConstant.IS_VALID_YES);
         userTimeRecordDao.insert(record);
 
-        //TODO 定时任务-红包退回
         TimerScheduler timerScheduler = new TimerScheduler();
         timerScheduler.setType(TimerSchedulerTypeEnum.BONUS_PACKAGE_SEND_BACK_TASK.toNum());
         timerScheduler.setName("红包" + UUID.randomUUID().toString());
-        String ymdStr = DateUtil.timeStamp2Seconds(currentTimeMillis);
+        String ymdStr = DateUtil.timeStamp2Seconds(currentTimeMillis + DateUtil.interval);
         String[] split = ymdStr.split(" ");
+        String[] ymd = split[0].split("-");
         String[] times = split[1].split(":");
+        String month = ymd[1];
+        if(month.startsWith("0")) {
+            month = month.substring(1,month.length());
+        }
         StringBuilder appender = new StringBuilder().append(times[2]).append(" ").append(times[1]).append(" ").append(times[0]).append(" ");
-        String cron = appender.append("*/1 * ? *").toString();
+        String cron = appender.append(ymd[2]).append(" ").append(month).append(" ? ").append(ymd[0]).toString();
 
-        cron = "*/20 * * * * ? *";
         timerScheduler.setCron(cron);
 
         Map<String,Object> param = new HashMap<>();

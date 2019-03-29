@@ -48,6 +48,10 @@ public class FocusServiceImpl implements FocusService {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "关注对象id不能为空");
         }
 
+        if (user.getId() == userFollowId) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请不要关注自己");
+        }
+
         //获取目标用户
         TUser targetUser = userDao.selectByPrimaryKey(userFollowId);
         Integer followNum = targetUser.getFollowNum();

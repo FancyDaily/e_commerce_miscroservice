@@ -18,7 +18,7 @@ package com.e_commerce.miscroservice.commons.enums.application;
  * 1.
  * 2.
  */
-public enum GrowthValueEnum {    //TODO 数值还没有确定
+public enum GrowthValueEnum {
     //new
     //一次性
     GROWTH_TYPE_UNREP_REGISTER(10, 0,0, "注册", 10, 1, 10, 10),    //注册
