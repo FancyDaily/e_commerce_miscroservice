@@ -18,7 +18,7 @@ import java.util.Objects;
  * @author 马晓晨
  * @date 2019/3/25
  */
-//@Component
+@Component
 public class OrderEndListener extends MqListenerConvert {
 
 	Log logger = Log.getInstance(OrderEndListener.class);
@@ -33,8 +33,8 @@ public class OrderEndListener extends MqListenerConvert {
 		JSONObject paramMap = JSONObject.parseObject(transferData);
 		System.out.println(paramMap);
 		logger.info("OrderEndListener 监听器开始执行 >>>>>>");
-		Long serviceId = Long.parseLong((String) paramMap.get("serviceId"));
-		Long orderId = Long.parseLong((String) paramMap.get("orderId"));
+		Long serviceId = paramMap.getLong("serviceId");
+		Long orderId = paramMap.getLong("orderId");
 		//获取商品信息
 		TService service = productService.getProductById(serviceId);
 		//下架订单

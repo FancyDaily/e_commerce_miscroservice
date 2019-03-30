@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.product.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
@@ -104,7 +103,7 @@ public class ProductDaoImpl implements ProductDao {
 		return MybatisOperaterUtil.getInstance().finAll(new TService() , new MybatisSqlWhereBuild(TService.class)
 				.eq(TService::getCreateUser , userId)
 				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
-				.eq(TService::getType , ProductEnum.TYPE_SERVICE));
+				.eq(TService::getType , ProductEnum.TYPE_SERVICE.getValue()));
 	}
 
 	/**

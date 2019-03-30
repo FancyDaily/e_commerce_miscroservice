@@ -4,11 +4,13 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
 import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
+import com.e_commerce.miscroservice.product.controller.SeekHelpController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v2/orderRelation")
 public class OrderRelationController extends BaseController {
+
+    Log logger = Log.getInstance(OrderRelationController.class);
 
     @Autowired
     private OrderRelationService orderRelationService;

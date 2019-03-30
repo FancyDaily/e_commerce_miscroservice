@@ -308,7 +308,7 @@ public class SeekHelpController extends BaseController {
 			int count = 0;
 			List<Integer> weekArray = new ArrayList<>();
 			while (cal.getTimeInMillis() < endTimeMill) {
-				count ++;
+				count++;
 				weekArray.add(DateUtil.getWeekDay(cal.getTimeInMillis()));
 				if (count == 7) {
 					break;
@@ -316,7 +316,7 @@ public class SeekHelpController extends BaseController {
 				cal.add(Calendar.DAY_OF_YEAR, 1);
 			}
 			// 排序一下
-			Object[] weekArr =  weekArray.toArray();
+			Object[] weekArr = weekArray.toArray();
 			Arrays.sort(weekArr);
 			result.setSuccess(true);
 			result.setData(weekArr);
@@ -505,10 +505,10 @@ public class SeekHelpController extends BaseController {
 			if (StringUtil.isNotEmpty(resultView.getEndDateS()) && StringUtil.isNotEmpty(resultView.getEndTimeS())) {
 				resultView.setEndTime(DateUtil.commonParse(resultView.getEndDateS() + resultView.getEndTimeS(), "yyyy-MM-ddHH:mm"));
 			}
-			if (resultView.getStartTime()!=null&&resultView.getStartTime() == 0) {
+			if (resultView.getStartTime() != null && resultView.getStartTime() == 0) {
 				resultView.setStartTime(null);
 			}
-			if (resultView.getEndTime()!=null&&resultView.getEndTime() == 0) {
+			if (resultView.getEndTime() != null && resultView.getEndTime() == 0) {
 				resultView.setEndTime(null);
 			}
 		}

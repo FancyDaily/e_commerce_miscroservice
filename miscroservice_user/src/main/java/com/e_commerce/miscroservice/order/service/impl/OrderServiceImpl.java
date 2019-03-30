@@ -178,11 +178,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
 		// 求助 展示求助者评分
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
-			userView.setTotalEvaluate(tUser.getServTotalEvaluate());
-			userView.setServeNum(tUser.getServeNum());
-		} else {
 			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 			userView.setServeNum(tUser.getSeekHelpNum());
+		} else {
+			userView.setTotalEvaluate(tUser.getServTotalEvaluate());
+			userView.setServeNum(tUser.getServeNum());
 		}
 		// 是否关注该用户
 		if (user != null) {
@@ -477,7 +477,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				} else {
 					userView.setCareStatus(1);
 				}
-				// 求助 展示求助者评分
+				// 求助 对于接单者来说是服务者  显示服务者的分数
 				if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 					userView.setTotalEvaluate(receiver.getServTotalEvaluate());
 					userView.setServeNum(receiver.getServeNum());
@@ -567,13 +567,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else {
 				userView.setCareStatus(1);
 			}
-			// 求助 展示求助者评分
+			// 求助 对方是发布者 展示求助者评分
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
-				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
-				userView.setServeNum(tUser.getServeNum());
-			} else {
 				userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 				userView.setServeNum(tUser.getSeekHelpNum());
+			} else {
+				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
+				userView.setServeNum(tUser.getServeNum());
 			}
 			List<BaseUserView> listUserView = new ArrayList<>();
 			listUserView.add(userView);
@@ -725,12 +725,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				//发送服务通知
 				long nowTime = System.currentTimeMillis();
 				TUser toUser = userService.getUserById(order.getCreateUser());
-				TFormid formid = findFormId(nowTime , toUser);
+				TFormid formid = findFormId(nowTime, toUser);
 				if (formid != null) {
 					try {
 						List<String> msg = new ArrayList<>();
 						String parameter = "";
-						if (service.getType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
+						if (service.getType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
 							msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
 									.append(service.getCollectTime() * service.getServicePersonnel())
 									.append("分钟").toString());
@@ -741,7 +741,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						msg.add(changeTime(order.getStartTime()));
 						msg.add(changeAddress(order.getAddressName()));
 						msg.add("如果您暂时不再需要，可以在「我的-我发布的」下架本条求助。");
-						messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+						messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.help_setTemplate_3, parameter);
 						formid.setIsValid("0");
 						messageCommonController.updateFormId(formid);
 					} catch (Exception e) {
@@ -798,7 +798,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		TimerScheduler orderBeforeSendMessageScheduler = new TimerScheduler();
 		orderBeforeSendMessageScheduler.setType(TimerSchedulerTypeEnum.ORDER_SEND_MESSAGE.toNum());
 		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
-		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
+//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
+		// TODO
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 300000L));
 		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("orderId", String.valueOf(order.getId()));
 		paramMap.put("type", "1");
@@ -807,7 +809,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		// 订单开始一小时有人成单 提醒用户的消息
 		// TODO
 //		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
-		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 2000L));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 120000L));
 		Map<String, String> paramMap2 = new HashMap<>();
 		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
 		paramMap2.put("orderId", String.valueOf(order.getId()));
@@ -854,10 +856,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		if (Objects.equals(order.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {// 如果是求助
 			// 求助 发布者为付钱者
 			payUserIds.add(order.getCreateUser());
-			listWaitPay.stream().forEach(waitPayUser -> {
-				paymentList.add(waitPayUser.getCollectTime());
-				userIds.add(waitPayUser.getReceiptUserId());
-			});
+			if (listWaitPay.size() != 0) {
+				listWaitPay.stream().forEach(waitPayUser -> {
+					paymentList.add(waitPayUser.getCollectTime());
+					userIds.add(waitPayUser.getReceiptUserId());
+				});
+			}
 			String title = "求助订单结束通知";
 			String content = null;
 			lowerFrameSeekHelpOrder(order);
@@ -911,10 +915,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			// 发布者为收钱用户  接单者为付钱用户
 			userIds.add(order.getCreateUser());
 			// 付钱用户
-			listWaitPay.stream().forEach(waitPayUser -> {
-				payUserIds.add(waitPayUser.getReceiptUserId());
-				paymentList.add(waitPayUser.getCollectTime());
-			});
+			if (listWaitPay.size() != 0) {
+				listWaitPay.stream().forEach(waitPayUser -> {
+					payUserIds.add(waitPayUser.getReceiptUserId());
+					paymentList.add(waitPayUser.getCollectTime());
+				});
+			}
 			String title = "服务订单结束通知";
 			String content = "您于 %s - %s 的互助“%s”到结束时间已结束。";
 			content = String.format(content, DateUtil.formatShow(order.getStartTime())
@@ -953,7 +959,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 		}
 		// 24小时后自动支付
-		sendMqByEndOrder(order, userIds, paymentList, payUserIds);
+		if (listWaitPay.size() != 0) {
+			sendMqByEndOrder(order, userIds, paymentList, payUserIds);
+		}
 	}
 
 	/**
@@ -966,7 +974,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	private void sendMqByEndOrder(TOrder order, List<Long> userIds, List<Long> paymentList, List<Long> payUserIds) {
 		// TODO
 //		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
-		String cron = DateUtil.genCron(order.getEndTime() + 180000L);
+		String cron = DateUtil.genCron(order.getEndTime() + 120000L);
 		TimerScheduler scheduler = new TimerScheduler();
 		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_PAY.toNum());
 		scheduler.setName("pay_order" + UUID.randomUUID().toString());
@@ -998,7 +1006,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		for (TOrderRelationship relationship : enrollList) {
 			enrollIdList.add(relationship.getReceiptUserId());
 		}
-		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		if (enrollIdList.size() != 0) {
+			orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		}
 	}
 
 	/**

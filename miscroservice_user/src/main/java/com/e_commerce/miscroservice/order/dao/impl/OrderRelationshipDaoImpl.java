@@ -419,7 +419,9 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	@Override
 	public List<TOrderRelationship> selectWaitPay(Long orderId) {
 		return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+				.eq(TOrderRelationship::getOrderId, orderId)
 				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
+				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.eq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())
 				.neq(TOrderRelationship::getOrderReportType, OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType())
 				.neq(TOrderRelationship::getOrderReportType, OrderRelationshipEnum.ORDER_REPORT_IS_TURE.getType())
@@ -511,12 +513,12 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	public long selectJoinUser(Long orderId) {
 		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
-				.count(TOrderRelationship::getId)
+				.eq(TOrderRelationship::getOrderId, orderId)
 				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
-				.eq(TOrderRelationship::getIsValid, AppConstant.ACCREDIT_STATUS_YES));
+				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 

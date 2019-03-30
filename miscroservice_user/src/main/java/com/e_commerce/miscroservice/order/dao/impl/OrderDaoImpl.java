@@ -496,7 +496,7 @@ public class OrderDaoImpl implements OrderDao {
         return MybatisOperaterUtil.getInstance().finAll(new TOrder() , new MybatisSqlWhereBuild(TOrder.class)
                 .eq(TOrder::getCreateUser , userId)
                 .eq(TOrder::getIsValid , AppConstant.IS_VALID_YES)
-                .eq(TOrder::getType , ProductEnum.TYPE_SERVICE));
+                .eq(TOrder::getType , ProductEnum.TYPE_SERVICE.getValue()));
     }
 
     /**
