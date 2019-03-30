@@ -2561,6 +2561,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         int typeToRemark = 0;
         int typeNoPay = 0;
         int typeCompleted = 0;
+        int typeBeRemark = 0;
+        int typeNoRemark = 0;
         for (int i = 0 ; i < orderRelationshipEnrollList.size() ; i++ ){
             if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType()){
                 //如果有人还未支付，那么发布者状态就要变成待支付
@@ -2568,9 +2570,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 break;
             }
             if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_REMARK.getType()){
-                typeToRemark++;
+                typeNoRemark++;
             } else if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_IS_REMARK.getType()){
-                typeToRemark++;
+                typeBeRemark++;
             } else if (orderRelationshipEnrollList.get(i).getStatus() == OrderRelationshipEnum.STATUS_BE_REMARK.getType()){
                 typeToRemark++;
             }
@@ -2584,9 +2586,15 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (typeToPay > 0){
             //如果有未支付的
             orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
-        } else if (typeToRemark > 0 ){
-            //如果有待评价的
+        } else if (typeNoRemark > 0){
+            //如果有未评价的-设置为未评价
             orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+        } else if (typeBeRemark > 0){
+            //如果有被评价次数，说明我未评价，说明我要去评价，状态改成被评价
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+        } else if (typeToRemark > 0 ){
+            //如果有已评价次数，说明有人还没评价我，说明我是带评价，状态改为已评价
+            orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
         } else if (typeCompleted > 0){
             //如果有已完成的
             orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
