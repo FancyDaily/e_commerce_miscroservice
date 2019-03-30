@@ -2568,9 +2568,10 @@ public class UserController extends BaseController {
 
     /**
      * 分享（查看二维码)
-     *
-     * @param token  登录凭证
-     * @param option 1个人分享、2服务分享、3求助分享 4加入组织
+     * @param token
+     * @param serviceId orderId
+     * @param option 操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
+     * @param userId 用户id
      * @return
      */
     @PostMapping("share")

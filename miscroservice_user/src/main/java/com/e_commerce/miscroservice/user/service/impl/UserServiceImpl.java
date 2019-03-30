@@ -2644,6 +2644,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid) {
+        Map<String, Object> resultMap = new HashMap<>();
+        boolean isRegister = false;
         checkSMS(telephone, validCode);
         TUser user = new TUser();
         TUser tmpUser = null;
@@ -2652,6 +2654,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             // 注册
             user.setDeviceId(uuid);
             tmpUser = rigester(user);
+            isRegister = true;
         }
         user = getUserAccountByTelephone(telephone);
 
@@ -2684,14 +2687,13 @@ public class UserServiceImpl extends BaseService implements UserService {
         redisUtil.set(token, user, getUserTokenInterval());
         redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
         redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
-        Map<String, Object> resultMap = new HashMap<>();
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
         DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
-        //设置token
+        /*//设置token
         if (user.getToken() == null) {
             Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
             if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
@@ -2699,6 +2701,10 @@ public class UserServiceImpl extends BaseService implements UserService {
                 //设置token
                 resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
             }
+        }*/
+        resultMap.put("isRegister",false);
+        if(isRegister) {
+            resultMap.put("isRegister",true);
         }
         return resultMap;
     }
@@ -3352,6 +3358,10 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private Map<String, Object> queryTasks(TUser user) {
         Map<Integer, TaskEnum> taskEnumMap = new HashMap<>();
+        Map<Integer, Integer> growthTaskCodeMap = new HashMap<>();
+        for(GrowthValueEnum growthValueEnum:GrowthValueEnum.values()) {
+            growthTaskCodeMap.put(growthValueEnum.getCode(),growthValueEnum.getTaskCode());
+        }
         for (TaskEnum taskEnum : TaskEnum.values()) {
             taskEnumMap.put(taskEnum.getType(), taskEnum);
         }
@@ -3385,7 +3395,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (counts == null) {
                 counts = 0;
             }
-            map.put(dailyGrowthRecord.getType(), ++counts);
+            map.put(growthTaskCodeMap.get(dailyGrowthRecord.getType()), ++counts);
         }
 
         List<TUserTask> tasks = userTaskDao.findOnesTasks(user.getId());
@@ -3403,16 +3413,18 @@ public class UserServiceImpl extends BaseService implements UserService {
                 noobTaskMap.put(type, noobTask);
                 continue;
             }
-            DailyTask dailyTask = new DailyTask();
-            dailyTask.setTargetId(Long.valueOf(type));
-            dailyTask.setName(taskEnum.getDesc());
-            dailyTask.setBonus(taskEnum.getReward().intValue());
-            dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
-            dailyTask.setCurrentNum(taskEnum.getDailyMaxNum());
-            if (dailyTask.getTotalNum().equals(dailyTask.getCurrentNum())) {
-                dailyTask.setDone(true);
+            if(task.getCreateTime() > beginStamp && task.getCreateTime() < endStamp) {
+                DailyTask dailyTask = new DailyTask();
+                dailyTask.setTargetId(Long.valueOf(type));
+                dailyTask.setName(taskEnum.getDesc());
+                dailyTask.setBonus(taskEnum.getReward().intValue());
+                dailyTask.setTotalNum(taskEnum.getDailyMaxNum());
+                dailyTask.setCurrentNum(taskEnum.getDailyMaxNum());
+                if (dailyTask.getTotalNum().equals(dailyTask.getCurrentNum())) {
+                    dailyTask.setDone(true);
+                }
+                dailyTaskMap.put(type, dailyTask);
             }
-            dailyTaskMap.put(type, dailyTask);
         }
 
         for (TaskEnum taskEnum : TaskEnum.values()) {
