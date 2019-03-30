@@ -225,6 +225,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param serviceId
      * @return
      */
+    @Transactional(rollbackFor = Throwable.class)
     public List<String> orgEnroll(Long orderId , List<Long> userIdList  , String date , Long serviceId){
         List<String> msgList = new ArrayList<>();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
@@ -1607,6 +1608,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param userTimeRecordId
      * @param eventId
      */
+    @Transactional(rollbackFor = Throwable.class)
     public void unAcceptGiftForRemove( Long userTimeRecordId , Long eventId){
         TUserTimeRecord userTimeRecord = userCommonController.selectUserTimeRecordById(userTimeRecordId);
         TUser getUser = userCommonController.getUserById(userTimeRecord.getFromUserId());
@@ -1746,6 +1748,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         long nowTime = System.currentTimeMillis();
         //移除事件
         TEvent event = messageCommonController.selectTeventById(eventId);
+        if (event.getIsValid() == AppConstant.IS_VALID_NO){
+            throw new MessageException("499", "该赠礼已被处理");
+        }
         event.setIsValid(AppConstant.IS_VALID_NO);
         messageCommonController.updateTevent(event);
         //增加流水
@@ -2593,7 +2598,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果有被评价次数，说明我未评价，说明我要去评价，状态改成被评价
             orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
         } else if (typeToRemark > 0 ){
-            //如果有已评价次数，说明有人还没评价我，说明我是带评价，状态改为已评价
+            //如果有已评价次数，说明有人还没评价我，说明我是已评价，状态改为已评价
             orderRelationshipForPublish.setStatus(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
         } else if (typeCompleted > 0){
             //如果有已完成的
