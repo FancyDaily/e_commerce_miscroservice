@@ -42,7 +42,7 @@ public enum PaymentEnum {
 	 * 特殊收入
 	 */
 	PAYMENT_TYPE_BONUS_PAC_SEND_BACK(900,"退款-红包超时",-1l),	//红包超时退款
-	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_BACK(901,"退款-赔付领取超时",-1l),	//赔付超时退款
+	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_BACK(901,"退款-返还赔付",-1l),	//返还赔付
 	PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_IN(902,"被取消订单致歉礼",-1l),	//订单违约赔款
 	PAYMENT_TYPE_OTHERS(999,"特殊奖励",-1l);	//活动或者其他非常驻收入类型
 	
