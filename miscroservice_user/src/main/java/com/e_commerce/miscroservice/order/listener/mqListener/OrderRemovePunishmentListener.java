@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.listener.mqListener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,10 @@ public class OrderRemovePunishmentListener extends MqListenerConvert {
 		// 获取参数
 		Long userTimeRecordId = paramMap.getLong("userTimeRecordId");
 		Long eventId = paramMap.getLong("eventId");
-		relationService.unAcceptGiftForRemove(userTimeRecordId, eventId);
+		try {
+			relationService.unAcceptGiftForRemove(userTimeRecordId, eventId);
+		} catch (MessageException e) {
+			logger.info(e.getMessage());
+		}
 	}
 }

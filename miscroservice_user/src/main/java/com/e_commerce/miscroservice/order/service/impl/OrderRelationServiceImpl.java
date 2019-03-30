@@ -129,7 +129,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
         if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
             //如果是求助
-            if (orderRelationshipDao.selectJoinUser(order.getId()) == 0){
+            if (orderRelationshipDao.selectJoinUser(order.getId()) == 0L){
                 //如果是首次报名
                 String title = "您的求助收到报名啦";
                 String content = new StringBuilder().append("您的求助“").append(order.getServiceName())

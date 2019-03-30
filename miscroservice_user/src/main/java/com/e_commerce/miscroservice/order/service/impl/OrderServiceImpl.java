@@ -178,11 +178,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
 		// 求助 展示求助者评分
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
-			userView.setTotalEvaluate(tUser.getServTotalEvaluate());
-			userView.setServeNum(tUser.getServeNum());
-		} else {
 			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 			userView.setServeNum(tUser.getSeekHelpNum());
+		} else {
+			userView.setTotalEvaluate(tUser.getServTotalEvaluate());
+			userView.setServeNum(tUser.getServeNum());
 		}
 		// 是否关注该用户
 		if (user != null) {
@@ -477,7 +477,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				} else {
 					userView.setCareStatus(1);
 				}
-				// 求助 展示求助者评分
+				// 求助 对于接单者来说是服务者  显示服务者的分数
 				if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 					userView.setTotalEvaluate(receiver.getServTotalEvaluate());
 					userView.setServeNum(receiver.getServeNum());
@@ -567,13 +567,13 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			} else {
 				userView.setCareStatus(1);
 			}
-			// 求助 展示求助者评分
+			// 求助 对方是发布者 展示求助者评分
 			if (tOrder.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
-				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
-				userView.setServeNum(tUser.getServeNum());
-			} else {
 				userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
 				userView.setServeNum(tUser.getSeekHelpNum());
+			} else {
+				userView.setTotalEvaluate(tUser.getServTotalEvaluate());
+				userView.setServeNum(tUser.getServeNum());
 			}
 			List<BaseUserView> listUserView = new ArrayList<>();
 			listUserView.add(userView);
@@ -1006,7 +1006,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		for (TOrderRelationship relationship : enrollList) {
 			enrollIdList.add(relationship.getReceiptUserId());
 		}
-		orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		if (enrollIdList.size() != 0) {
+			orderRelationService.unChooseUser(order.getId(), enrollIdList, order.getCreateUser(), 1);
+		}
 	}
 
 	/**
