@@ -134,7 +134,7 @@ public class UserController extends BaseController {
             result.setData(resultMap);
         } catch (MessageException e) {
             result.setMsg("手机号验证码登录异常: " + e.getMessage());
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,7 +162,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
         } catch (MessageException e) {
             result.setMsg("用户登出 (旧版迁移)异常: " + e.getMessage());
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             logger.error("手用户登出 (旧版迁移)异常", errInfo(e));
@@ -383,7 +383,7 @@ public class UserController extends BaseController {
             result.setData(payments);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("时间轨迹异常: " + e.getMessage());
+            logger.warn("时间轨迹异常: " + e.getMessage());
         } catch (Exception e) {
             logger.error("时间轨迹异常", errInfo(e));
             result.setSuccess(false);
@@ -433,7 +433,7 @@ public class UserController extends BaseController {
             result.setData(queryResult);
         } catch (MessageException e) {
             result.setMsg("冻结明细异常: " + e.getMessage());
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             logger.error("冻结明细异常", errInfo(e));
@@ -488,7 +488,7 @@ public class UserController extends BaseController {
             result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("公益历程列表异常: " + e.getMessage());
+            logger.warn("公益历程列表异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("公益历程列表异常", errInfo(e));
@@ -554,7 +554,7 @@ public class UserController extends BaseController {
             result.setData(skillView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("查看技能异常: " + e.getMessage());
+            logger.warn("查看技能异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("查看技能异常", errInfo(e));
@@ -589,7 +589,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
         } catch (MessageException e) {
             result.setMsg(e.getMessage());
-            logger.error("添加技能异常: " + e.getMessage());
+            logger.warn("添加技能异常: " + e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -624,7 +624,7 @@ public class UserController extends BaseController {
             userService.skillModify(user, skill);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("修改技能异常: " + e.getMessage());
+            logger.warn("修改技能异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -656,7 +656,7 @@ public class UserController extends BaseController {
             userService.skillDelete(user, id);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("删除技能异常: " + e.getMessage());
+            logger.warn("删除技能异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -730,7 +730,7 @@ public class UserController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("收藏列表异常: " + e.getMessage());
+            logger.warn("收藏列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -763,7 +763,7 @@ public class UserController extends BaseController {
             userService.collect(user, orderId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("收藏/取消收藏异常: " + e.getMessage());
+            logger.warn("收藏/取消收藏异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -857,7 +857,7 @@ public class UserController extends BaseController {
             result.setData(userView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("查看个人基本信息异常: " + e.getMessage());
+            logger.warn("查看个人基本信息异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1225,7 +1225,7 @@ public class UserController extends BaseController {
             result.setData(page);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("查看个人主页异常: " + e.getMessage());
+            logger.warn("查看个人主页异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1368,7 +1368,7 @@ public class UserController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("查看发布的服务/求助列表异常: " + e.getMessage());
+            logger.warn("查看发布的服务/求助列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1518,7 +1518,7 @@ public class UserController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("查看历史互助记录列表异常: " + e.getMessage());
+            logger.warn("查看历史互助记录列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1578,7 +1578,7 @@ public class UserController extends BaseController {
             result.setData(companies);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("加入的组织列表信息异常: " + e.getMessage());
+            logger.warn("加入的组织列表信息异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1655,7 +1655,7 @@ public class UserController extends BaseController {
             result.setData(activityList);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("组织发布的活动列表异常: " + e.getMessage());
+            logger.warn("组织发布的活动列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1732,7 +1732,7 @@ public class UserController extends BaseController {
             result.setData(myActivityList);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("组织发布的活动列表异常: " + e.getMessage());
+            logger.warn("组织发布的活动列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1777,7 +1777,7 @@ public class UserController extends BaseController {
             result.setData(token);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("用户信息修改异常: " + e.getMessage());
+            logger.warn("用户信息修改异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1825,7 +1825,7 @@ public class UserController extends BaseController {
             result.setData(bonus);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("预创建红包异常: " + e.getMessage());
+            logger.warn("预创建红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1859,7 +1859,7 @@ public class UserController extends BaseController {
             result.setData(bonusPackage);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("创建红包异常: " + e.getMessage());
+            logger.warn("创建红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1902,7 +1902,7 @@ public class UserController extends BaseController {
                 result.setSuccess(false);
             }
         } catch (MessageException e) {
-            logger.error("查看红包异常: " + e.getMessage());
+            logger.warn("查看红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1935,7 +1935,7 @@ public class UserController extends BaseController {
             userService.openBonusPackage(user, bonusId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("打开红包异常: " + e.getMessage());
+            logger.warn("打开红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -1968,7 +1968,7 @@ public class UserController extends BaseController {
             userService.sendBackBonusPackage(user, bonusPackageId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("红包退回异常: " + e.getMessage());
+            logger.warn("红包退回异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2005,7 +2005,7 @@ public class UserController extends BaseController {
                 result.setSuccess(false);
             }
         } catch (MessageException e) {
-            logger.error("查看是否为我的红包异常: " + e.getMessage());
+            logger.warn("查看是否为我的红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2040,7 +2040,7 @@ public class UserController extends BaseController {
             userService.auth(token, user, cardId, cardName);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("个人认证信息提交异常: " + e.getMessage());
+            logger.warn("个人认证信息提交异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2080,7 +2080,7 @@ public class UserController extends BaseController {
             userService.companyAuth(user, company);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("组织审核信息提交异常: " + e.getMessage());
+            logger.warn("组织审核信息提交异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2138,7 +2138,7 @@ public class UserController extends BaseController {
             result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("认证信息查询异常: " + e.getMessage());
+            logger.warn("认证信息查询异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2202,7 +2202,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
             result.setData(signUpInfo);
         } catch (MessageException e) {
-            logger.error("每日签到信息查询异常: " + e.getMessage());
+            logger.warn("每日签到信息查询异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2235,7 +2235,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
             result.setData(reward);
         } catch (MessageException e) {
-            logger.error("每日签到异常: " + e.getMessage());
+            logger.warn("每日签到异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2271,7 +2271,7 @@ public class UserController extends BaseController {
             userService.feedBack(user, report);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("用户反馈异常: " + e.getMessage());
+            logger.warn("用户反馈异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2306,7 +2306,7 @@ public class UserController extends BaseController {
             result.setData(taskHallView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("任务信息查询异常: " + e.getMessage());
+            logger.warn("任务信息查询异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -2331,7 +2331,7 @@ public class UserController extends BaseController {
             result.setData(publish);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("获取key—value值失败," + e.getMessage());
+            logger.warn("获取key—value值失败," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2366,7 +2366,7 @@ public class UserController extends BaseController {
                 result.setMsg(AppErrorConstant.SMS_NOT_SEND_MESSAGE);
             }
         } catch (MessageException e) {
-            logger.error("发送短信验证码异常," + e.getMessage());
+            logger.warn("发送短信验证码异常," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2492,7 +2492,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
             result.setData(queryResult);
         } catch (MessageException e) {
-            logger.error("发送短信验证码异常," + e.getMessage());
+            logger.warn("发送短信验证码异常," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2523,7 +2523,7 @@ public class UserController extends BaseController {
             userService.checkSMS(telephone, validCode);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("发送短信验证码异常," + e.getMessage());
+            logger.warn("发送短信验证码异常," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2556,7 +2556,7 @@ public class UserController extends BaseController {
             userService.payInviter(inviterId, mineId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("回馈邀请人异常," + e.getMessage());
+            logger.warn("回馈邀请人异常," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2582,7 +2582,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
             result.setData(shareServiceView);
         } catch (MessageException e) {
-            logger.error("分享（查看二维码)异常," + e.getMessage());
+            logger.warn("分享（查看二维码)异常," + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2610,7 +2610,7 @@ public class UserController extends BaseController {
             userService.wechatInfoAuth(user, token);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("微信授权基本信息更新异常" + e.getMessage());
+            logger.warn("微信授权基本信息更新异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2634,7 +2634,7 @@ public class UserController extends BaseController {
             result.setData(sceneView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("获取scene值异常" + e.getMessage());
+            logger.warn("获取scene值异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2658,7 +2658,7 @@ public class UserController extends BaseController {
             userService.generateInviteCode(token, inviteCode);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("激活（生成邀请码）异常" + e.getMessage());
+            logger.warn("激活（生成邀请码）异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2684,7 +2684,7 @@ public class UserController extends BaseController {
             result.setData(loginGroupByPwdMap);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("组织版登录（密码）" + e.getMessage());
+            logger.warn("组织版登录（密码）" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2709,7 +2709,7 @@ public class UserController extends BaseController {
             userService.modifyPwd(telephone, validCode, password);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("重置密码异常" + e.getMessage());
+            logger.warn("重置密码异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2734,7 +2734,7 @@ public class UserController extends BaseController {
             userService.joinCompany(user, companyId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("申请加入组织异常" + e.getMessage());
+            logger.warn("申请加入组织异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2762,7 +2762,7 @@ public class UserController extends BaseController {
             result.setData(view);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("组织时间轨迹查询" + e.getMessage());
+            logger.warn("组织时间轨迹查询" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
@@ -2788,7 +2788,7 @@ public class UserController extends BaseController {
             result.setSuccess(true);
             result.setData(dailyPaymentView);
         } catch (MessageException e) {
-            logger.error("每日时间流水查询" + e.getMessage());
+            logger.warn("每日时间流水查询" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
