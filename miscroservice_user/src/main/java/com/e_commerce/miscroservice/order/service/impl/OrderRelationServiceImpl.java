@@ -1756,7 +1756,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         //增加流水
         TUserTimeRecord myUserTimeRecord = new TUserTimeRecord();
         myUserTimeRecord.setUserId(getUser.getId());
-        myUserTimeRecord.setFromUserId(userTimeRecord.getUserId());
         myUserTimeRecord.setType(type);
         myUserTimeRecord.setTargetId(userTimeRecord.getTargetId());
         myUserTimeRecord.setTime(userTimeRecord.getTime());
@@ -1839,11 +1838,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     private void removeOrderPunishment(TUser nowUser , TUser toUser , Long payment , Long orderId , long nowTime){
         //插入支付流水
         TUserTimeRecord userTimeRecord = new TUserTimeRecord();
-        userTimeRecord.setUserId(toUser.getId());
         userTimeRecord.setFromUserId(nowUser.getId());
         userTimeRecord.setType(PaymentEnum.PAYMENT_TYPE_REMOVE_ORDER_INDEMNITY_OUT.getCode());
         userTimeRecord.setTargetId(orderId);
         userTimeRecord.setTime(payment);
+        userTimeRecord.setCreateTime(nowTime);
         userTimeRecord.setCreateUser(nowUser.getId());
         userTimeRecord.setCreateUserName(nowUser.getName());
         userTimeRecord.setUpdateTime(nowTime);
@@ -2042,7 +2041,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             List<TOrder> changeOrder = orderDao.selectUserServ(toUser.getId());
             List<Long> changeOrderId = new ArrayList<>();
             if (changeOrder != null && changeOrder.size() > 0) {
-                double average = (double)(attitude + major + credit)/toUser.getServeNum();
+                double average = (double)(toUser.getServTotalEvaluate() / 3 /toUser.getServeNum());
                 average = average * 10000;
                 int round = (int) Math.round(average);
                 for (int i = 0; i < changeOrder.size(); i++) {
@@ -2056,7 +2055,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             List<TService> changeServiceList = productCommonController.selectServProByUser(toUser.getId());
             List<Long> changeServiceIdList = new ArrayList<>();
             if (changeServiceList != null && changeServiceList.size() > 0){
-                double average = (double)(attitude + major + credit)/toUser.getServeNum();
+                double average = (double)(toUser.getServTotalEvaluate() / 3 /toUser.getServeNum());
                 average = average * 10000;
                 int round = (int) Math.round(average);
                 for (int i = 0 ; i < changeServiceList.size() ; i++){
