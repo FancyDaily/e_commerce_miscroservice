@@ -498,12 +498,12 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	public long selectJoinUser(Long orderId) {
 		return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TOrderRelationship.class)
-				.count(TOrderRelationship::getId)
+				.eq(TOrderRelationship::getOrderId, orderId)
 				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
-				.eq(TOrderRelationship::getIsValid, AppConstant.ACCREDIT_STATUS_YES));
+				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 
