@@ -201,6 +201,21 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	}
 
 	/**
+	 * 查询指定接单者,排除指定状态的订单记录
+	 *
+	 * @param userId
+	 * @return
+	 */
+	@Override
+	public List<TOrderRelationship> selectOrderRelationshipByReceiptUserIdNotEqStatus(Long userId, Integer status) {
+		return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+				.eq(TOrderRelationship::getReceiptUserId, userId)
+				.neq(TOrderRelationship::getStatus,status)
+				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+
+	}
+
+	/**
 	 * 查询用户收藏的订单关系记录
 	 *
 	 * @param id
