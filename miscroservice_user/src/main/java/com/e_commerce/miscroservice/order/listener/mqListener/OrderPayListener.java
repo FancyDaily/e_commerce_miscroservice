@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.listener.mqListener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ public class OrderPayListener extends MqListenerConvert {
 		for (Long payUserId : payUserIds) {
 			try {
 				relationService.payOrder(orderId, userIds, paymentList,payUserId, 2);
-			} catch (Exception e) {
-				logger.error("id为{}的用户为id{}的用户在订单ID为{}的互助中支付失败", payUserId, userIds.get(0), orderId);
+			} catch (MessageException e) {
+				logger.info(e.getMessage());
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.listener.mqListener;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqListenerConvert;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.order.service.OrderRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,8 @@ public class OrderRemarkListener extends MqListenerConvert {
 		// 评价
 		try {
 			relationService.remarkOrder(appraiserId, userIds, orderId, 5, 5, 5, "默认评价", "默认评价");
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("用户ID {} 评价失败，订单ID 为 {}", appraiserId, orderId, e);
+		} catch (MessageException e) {
+			logger.info(e.getMessage());
 		}
 	}
 }
