@@ -87,7 +87,7 @@ public class LoginController extends BaseController {
             result.setMsg("手机授权成功");
             result.setData(telephone);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
@@ -127,7 +127,7 @@ public class LoginController extends BaseController {
             result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
@@ -155,7 +155,7 @@ public class LoginController extends BaseController {
             result.setData(resMap);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
@@ -182,7 +182,7 @@ public class LoginController extends BaseController {
             result.setSuccess(true);
             result.setData(wechatService.checkAuthCode(code));
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
@@ -211,7 +211,7 @@ public class LoginController extends BaseController {
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {
-            logger.error(e.getMessage());
+            logger.warn(e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());

@@ -178,7 +178,9 @@ public interface OrderRelationshipDao {
      */
     List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId);
 
-    /**
+	List<TOrderRelationship> selectOrderRelationshipByReceiptUserIdNotEqStatus(Long userId, Integer status);
+
+	/**
      * 根据用户id查找订单关系记录
      * @param id
      * @return

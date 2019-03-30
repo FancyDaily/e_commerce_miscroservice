@@ -50,7 +50,7 @@ public class FocusController extends BaseController {
             focusService.submit(user, userFollowId);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("关注异常: " + e.getMessage());
+            logger.warn("关注异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
@@ -150,7 +150,7 @@ public class FocusController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("关注列表异常: " + e.getMessage());
+            logger.warn("关注列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         }  catch (Exception e) {
@@ -250,7 +250,7 @@ public class FocusController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.error("粉丝列表异常: " + e.getMessage());
+            logger.warn("粉丝列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
