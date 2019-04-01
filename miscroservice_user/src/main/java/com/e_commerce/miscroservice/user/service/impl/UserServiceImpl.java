@@ -2140,9 +2140,6 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         serviceView.setUrl(imgUrl);
 
-        // 获得分享奖励
-        user = growthValueService.addGrowthValue(user, GrowthValueEnum.GROWTH_TYPE_REP_SHARE_PRODUCT.getCode());
-
         // 刷新缓存
         flushRedisUser(token, user);
 
