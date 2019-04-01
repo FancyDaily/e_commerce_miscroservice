@@ -55,7 +55,7 @@ public interface UserService {
      * @param user
      * @param skill
      */
-    void skillAdd(TUser user, TUserSkill skill);
+    long skillAdd(TUser user, TUserSkill skill);
 
     /**
      * 修改技能

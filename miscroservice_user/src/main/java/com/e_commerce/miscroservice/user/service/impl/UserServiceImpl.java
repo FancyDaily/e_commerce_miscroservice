@@ -441,7 +441,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void skillAdd(TUser user, TUserSkill skill) {
+    public long skillAdd(TUser user, TUserSkill skill) {
         //校验
         skillPass(user, skill, false);
 
@@ -488,6 +488,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 super.afterCompletion(status);
             }
         });
+        return skill.getId();
     }
 
     /**
