@@ -763,7 +763,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Exception.class)
     public void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
         //跟新用户冻结信息
         TUser tUser = userDao.selectByPrimaryKey(userId);
@@ -3576,11 +3576,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         int seekHelpPublishNum = user.getSeekHelpPublishNum();
         int servicePublishNum = user.getServePublishNum();
         if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
-            user.setSeekHelpPublishNum(seekHelpPublishNum + 1);
+            tUser.setSeekHelpPublishNum(seekHelpPublishNum + 1);
         } else {
-            user.setServePublishNum(servicePublishNum + 1);
+            tUser.setServePublishNum(servicePublishNum + 1);
         }
-        userDao.updateByPrimaryKey(user);
+        userDao.updateByPrimaryKey(tUser);
     }
 
     @Override

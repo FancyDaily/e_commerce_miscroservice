@@ -798,18 +798,16 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		TimerScheduler orderBeforeSendMessageScheduler = new TimerScheduler();
 		orderBeforeSendMessageScheduler.setType(TimerSchedulerTypeEnum.ORDER_SEND_MESSAGE.toNum());
 		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
-//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
-		// TODO
-		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 300000L));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -2)));
+//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 300000L));
 		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("orderId", String.valueOf(order.getId()));
 		paramMap.put("type", "1");
 		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap));
 		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
 		// 订单开始一小时有人成单 提醒用户的消息
-		// TODO
-//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
-		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 120000L));
+		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
+//		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 120000L));
 		Map<String, String> paramMap2 = new HashMap<>();
 		orderBeforeSendMessageScheduler.setName("order_send_message" + UUID.randomUUID().toString());
 		paramMap2.put("orderId", String.valueOf(order.getId()));
@@ -972,9 +970,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	 * @param paymentList 支付的金额
 	 */
 	private void sendMqByEndOrder(TOrder order, List<Long> userIds, List<Long> paymentList, List<Long> payUserIds) {
-		// TODO
-//		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
-		String cron = DateUtil.genCron(order.getEndTime() + 120000L);
+		String cron = DateUtil.genCron(DateUtil.addDays(order.getEndTime(), 1));
+//		String cron = DateUtil.genCron(order.getEndTime() + 120000L);
 		TimerScheduler scheduler = new TimerScheduler();
 		scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_PAY.toNum());
 		scheduler.setName("pay_order" + UUID.randomUUID().toString());

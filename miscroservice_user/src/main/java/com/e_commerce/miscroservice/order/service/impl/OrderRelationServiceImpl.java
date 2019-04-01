@@ -1879,9 +1879,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param userTimeRecordId
      */
     private void sendMqByRemoveOrderPunishment(Long userTimeRecordId , Long eventId, long nowTime) {
-//        String cron = DateUtil.genCron(DateUtil.addHours(nowTime, 1));
-        //TODO
-        String cron = DateUtil.genCron(nowTime + 300000L);
+        String cron = DateUtil.genCron(DateUtil.addHours(nowTime, 1));
+//        String cron = DateUtil.genCron(nowTime + 300000L);
         TimerScheduler scheduler = new TimerScheduler();
         scheduler.setType(TimerSchedulerTypeEnum.REMOVE_ORDER_PUNISHMENT.toNum());
 //        scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
@@ -2906,12 +2905,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      * @param appraiserId 评价者
      */
     private void sendMqByEndPay(TOrder order, List<Long> userIds, Long appraiserId, Long nowTime) {
-        // TODO
-//        String cron = DateUtil.genCron(DateUtil.addDays(nowTime, 1));
+        String cron = DateUtil.genCron(DateUtil.addDays(nowTime, 1));
         TimerScheduler scheduler = new TimerScheduler();
         scheduler.setType(TimerSchedulerTypeEnum.ORDER_OVERTIME_REMARK.toNum());
         scheduler.setName("remark_order" + UUID.randomUUID().toString());
-        String cron = DateUtil.genCron(nowTime + 300000L);
+//        String cron = DateUtil.genCron(nowTime + 300000L);
         scheduler.setCron(cron);
         Map map = new HashMap();
         map.put("userIds", userIds);
