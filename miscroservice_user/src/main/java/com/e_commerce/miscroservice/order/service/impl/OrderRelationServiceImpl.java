@@ -3267,7 +3267,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             wxMsg.add(changeAddress(order.getAddressName()));
                             wxMsg.add("好戏即将开始。当然，要记得点击「确认开始」哦！");
 
-                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.serv_setTemplate_11, parameter);
+                            messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_12, parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
                         } catch (Exception e) {
@@ -3303,7 +3303,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         wxMsg.add(changeAddress(order.getAddressName()));
                         wxMsg.add("好戏即将开始。切记：守时是一种美德哦！");
 
-                        messageCommonController.pushOneUserMsg(publishUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.serv_setTemplate_10, parameter);
+                        messageCommonController.pushOneUserMsg(publishUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_11, parameter);
                         formid.setIsValid("0");
                         messageCommonController.updateFormId(formid);
                     } catch (Exception e) {
