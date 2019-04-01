@@ -46,9 +46,9 @@ page:
   #个人主页
   person: package/my/pages/home/home
   #服务
-  service: package/service/pages/service_detail/service_detail
+  service: package/index/pages/helpServiceDetail/helpServiceDetail
   #求助
-  help: package/help/pages/help_detail/help_detail
+  help: package/index/pages/helpServiceDetail/helpServiceDetail
   #组织
   company: package/my/pages/sureJoinOrganize/sureJoinOrganize
 

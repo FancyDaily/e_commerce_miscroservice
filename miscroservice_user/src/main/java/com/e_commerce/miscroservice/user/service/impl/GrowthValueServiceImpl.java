@@ -245,7 +245,6 @@ public class GrowthValueServiceImpl implements GrowthValueService {
 
         // 插入成长值明细
         TTypeRecord record = new TTypeRecord();
-        record.setId(idGenerator.nextId());
         record.setUserId(user.getId());
         record.setType(type);
         record.setSubType(0);
