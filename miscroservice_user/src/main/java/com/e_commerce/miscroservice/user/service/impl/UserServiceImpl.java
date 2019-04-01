@@ -752,9 +752,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
+        startPage = PageHelper.startPage(pageNum, pageSize);
         if (userId != me.getId()) {    //查看别人的主页
-            startPage = PageHelper.startPage(pageNum, pageSize);
             orders = orderService.selectOdersByUserId(userId, isService, me);
+        } else {
+            orders = orderService.selectOdersByUserId(userId,isService);
         }
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
