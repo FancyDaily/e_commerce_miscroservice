@@ -316,4 +316,14 @@ public class OrderCommonController extends BaseController {
 	public TOrderRelationship selectCollectByOrderIdAndUserId(Long userId, Long orderId) {
 		return orderRelationshipDao.selectCollectByOrderIdAndUserId(orderId, userId);
 	}
+
+	/**
+	 * 查询指定接单人、排除指定状态的订单关系记录
+	 * @param userId
+	 * @param type
+	 * @return
+	 */
+	public List<TOrderRelationship> selectOrderRelationshipByReceiptUserIdNotEqStatus(Long userId, int type) {
+		return orderRelationshipDao.selectOrderRelationshipByReceiptUserIdNotEqStatus(userId,type);
+	}
 }

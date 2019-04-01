@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
@@ -198,7 +199,7 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         // 查询我作为接单者的所有订单关系
-        List<TOrderRelationship> orderRelationships = orderService.selectOrderrelationshipListByReceiptUserId(userId);
+        List<TOrderRelationship> orderRelationships = orderService.selectOrderRelationshipByReceiptUserIdNotEqStatus(userId, OrderRelationshipEnum.STATUS_NO_STATE.getType());
         List<Long> idList = new ArrayList<>();
         for(TOrderRelationship orderRelationship:orderRelationships) {
             idList.add(orderRelationship.getOrderId());
