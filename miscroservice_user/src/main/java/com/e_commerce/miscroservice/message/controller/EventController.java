@@ -8,10 +8,12 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 
@@ -25,6 +27,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v2/event")
 public class EventController extends BaseController {
+
+    @Value("${test1}")
+    private String test1;
+
+
+    @Value("${test2}")
+    private String test2;
+
+
+    @PostConstruct
+    public void init(){
+        System.out.println("test1"+test1);
+        System.out.println("test2"+test2);
+
+    }
 
 
     @Autowired

@@ -19,7 +19,7 @@ import org.springframework.context.annotation.PropertySource;
  * 创建时间:2018年11月17日 下午9:13:47
  */
 @Configuration
-@PropertySource("properties/config-environ-test.properties")
+@PropertySource("properties/config-environ-test-gather.properties")
 public class OSSClientConfig {
 	
 	@Value("${endpoint}")

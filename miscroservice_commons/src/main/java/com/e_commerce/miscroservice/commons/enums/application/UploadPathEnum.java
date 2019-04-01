@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
  * 2.
  */
 @Component
-@PropertySource("properties/config-environ-test.properties")
+@PropertySource("properties/config-environ-test-gather.properties")
 public class UploadPathEnum {
 	/*
 	 * 读取配置文件
