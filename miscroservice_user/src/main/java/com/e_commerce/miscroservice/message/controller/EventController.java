@@ -28,21 +28,6 @@ import java.util.List;
 @RequestMapping("/api/v2/event")
 public class EventController extends BaseController {
 
-    @Value("${test1}")
-    private String test1;
-
-
-    @Value("${test2}")
-    private String test2;
-
-
-    @PostConstruct
-    public void init(){
-        System.out.println("test1"+test1);
-        System.out.println("test2"+test2);
-
-    }
-
 
     @Autowired
     private EventService eventService;
