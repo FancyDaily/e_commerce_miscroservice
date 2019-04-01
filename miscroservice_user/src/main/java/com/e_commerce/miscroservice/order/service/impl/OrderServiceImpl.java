@@ -730,7 +730,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					try {
 						List<String> msg = new ArrayList<>();
 						String parameter = "";
-						if (service.getType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
+						if (service.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
 							msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
 									.append(service.getCollectTime() * service.getServicePersonnel())
 									.append("分钟").toString());
@@ -741,7 +741,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 						msg.add(changeTime(order.getStartTime()));
 						msg.add(changeAddress(order.getAddressName()));
 						msg.add("如果您暂时不再需要，可以在「我的-我发布的」下架本条求助。");
-						messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.help_setTemplate_3, parameter);
+						messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.help_setTemplate_23, parameter);
 						formid.setIsValid("0");
 						messageCommonController.updateFormId(formid);
 					} catch (Exception e) {
@@ -901,7 +901,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 							wxMsg.add("是时候为这一段时光画上一个句号了，请及时点击「确认支付」哦");
 							wxMsg.add("若长时间没有操作，我们将于24小时后自动确认并结算时间哦");
 
-							messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_13, parameter);
+							messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), wxMsg, SetTemplateIdEnum.help_setTemplate_15, parameter);
 							formid.setIsValid("0");
 							messageCommonController.updateFormId(formid);
 						} catch (Exception e) {
