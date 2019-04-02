@@ -585,7 +585,7 @@ public class UserController extends BaseController {
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
         TUser user = UserUtil.getUser(token);
         try {
-            userService.skillAdd(user, skill);
+            result.setData(userService.skillAdd(user, skill));
             result.setSuccess(true);
         } catch (MessageException e) {
             result.setMsg(e.getMessage());

@@ -388,7 +388,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		} else {  // 互助时不足下架
 			content = "您发布的%s“%s”，由于互助时不足，无法继续生成订单，已自动下架。您可以赚取足够的互助时重新上架。";
 		}
-		if (Objects.equals(type, ProductEnum.TYPE_SEEK_HELP.getValue())) {
+		if (Objects.equals(service.getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
 			title = String.format(title, "求助");
 			content = String.format(content, "求助", service.getServiceName());
 		} else {
@@ -400,7 +400,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Override
 	public DetailProductView detail(TUser user, Long serviceId) {
-		DetailProductView productView = new DetailProductView();
+		DetailProductView productView = new DetailProductView(  );
 		TService service = productDao.selectByPrimaryKey(serviceId);
 		List<TServiceDescribe> productDesc = productDao.getProductDesc(serviceId);
 		productView.setService(service);

@@ -441,7 +441,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     @Transactional(rollbackFor = Throwable.class)
-    public void skillAdd(TUser user, TUserSkill skill) {
+    public long skillAdd(TUser user, TUserSkill skill) {
         //校验
         skillPass(user, skill, false);
 
@@ -488,6 +488,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 super.afterCompletion(status);
             }
         });
+        return skill.getId();
     }
 
     /**
@@ -752,9 +753,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     private QueryResult getOnesAvailableItems(Long userId, Integer pageNum, Integer pageSize, boolean isService, TUser me) {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
+        startPage = PageHelper.startPage(pageNum, pageSize);
         if (userId != me.getId()) {    //查看别人的主页
-            startPage = PageHelper.startPage(pageNum, pageSize);
             orders = orderService.selectOdersByUserId(userId, isService, me);
+        } else {
+            orders = orderService.selectOdersByUserId(userId,isService);
         }
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
@@ -763,7 +766,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
+    @Transactional(rollbackFor = Exception.class)
     public void freezeTimeCoin(Long userId, long freeTime, Long serviceId, String serviceName) {
         //跟新用户冻结信息
         TUser tUser = userDao.selectByPrimaryKey(userId);
@@ -3585,11 +3588,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         int seekHelpPublishNum = user.getSeekHelpPublishNum();
         int servicePublishNum = user.getServePublishNum();
         if (ProductEnum.TYPE_SEEK_HELP.getValue() == type) {
-            user.setSeekHelpPublishNum(seekHelpPublishNum + 1);
+            tUser.setSeekHelpPublishNum(seekHelpPublishNum + 1);
         } else {
-            user.setServePublishNum(servicePublishNum + 1);
+            tUser.setServePublishNum(servicePublishNum + 1);
         }
-        userDao.updateByPrimaryKey(user);
+        userDao.updateByPrimaryKey(tUser);
     }
 
     @Override
