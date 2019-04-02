@@ -2811,6 +2811,26 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
             }
 
+        } else {
+            List<Integer> statusList = new ArrayList<>();
+            statusList.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_UNDER_WAY.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_WAIT_PAY.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_WAIT_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_IS_COMPLETED.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_IS_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_BE_REMARK.getType());
+            statusList.add(OrderRelationshipEnum.STATUS_NOT_ESTABLISHED.getType());
+            if (userIdFindList.size() > 0){
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnrollInUserList(orderId , statusList , userIdFindList);
+            } else {
+                orderRelationshipList = orderRelationshipDao.selectListByStatusListByEnroll(orderId , statusList);
+            }
         }
 
         if (orderRelationshipList == null || orderRelationshipList.size() <= 0) {
@@ -2823,7 +2843,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         List<Long> userIds = new ArrayList<>();
 
         for (int i = 0; i < orderRelationshipList.size(); i++) {
-            userIds.add(orderRelationshipList.get(i).getUpdateUser());
+            userIds.add(orderRelationshipList.get(i).getReceiptUserId());
         }
 
         List<TUser> userList = userCommonController.selectUserByIds(userIds);
@@ -2835,7 +2855,10 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         }
 
         Long companyId = userCommonController.getOwnCompanyId(nowUser.getId());
-        List<TUserCompany> userCompanieList = userCommonController.selectUserCompanyByIdAndUserIdList(userIdFindList , companyId);
+        List<TUserCompany> userCompanieList = new ArrayList<>();
+        if (userIdFindList.size() > 0){
+            userCompanieList = userCommonController.selectUserCompanyByIdAndUserIdList(userIdFindList , companyId);
+        }
 
         for (int i = 0; i < orderRelationshipList.size(); i++) {
             TUser thisUser = null;

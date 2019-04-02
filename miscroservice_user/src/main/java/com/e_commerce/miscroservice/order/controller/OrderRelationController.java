@@ -744,12 +744,37 @@ public class OrderRelationController extends BaseController {
      * 组织选人列表
      *
      * @param orderId 订单id
-     * @param status 1-可选择 2-已选择 3-被拒绝 4-已取消
-     * @param type 1-查找姓名 2-查找电话 3-查找组内姓名，搜索栏前面的选项
+     * @param status 1-可选择 2-已选择 3-被拒绝 4-已取消 0-全部
+     * @param type 1-查找姓名 2-查找电话 3-查找组内姓名 0-不查询，搜索栏前面的选项
      * @param value 对应值，搜索栏里面的内容
      * @param pageSize 分页大小
      * @param pageNum 分页页码
      * @param token token
+     *
+     *     "success": true,
+     *     "errorCode": "",
+     *     "msg": "查看成功",
+     *     "data": {
+     *         "resultList": [
+     *             {
+     *                 "userIdToString": 6, 用户id
+     *                 "userNameForTeam": "", 组内姓名（如果不是组织成员，会没有）
+     *                 "userName": "姜修弘", 昵称（小程序名称）
+     *                 "userUrl": "https://timebank-tes...4582129.png",头像
+     *                 "sex": 0,年龄
+     *                 "age": "未知",性别
+     *                 "occupation": "无业游民",职业
+     *                 "isGroup": false,是否组内成员
+     *                 "skill": "未设定",技能
+     *                 "serve_num": 10,发布服务数量
+     *                 "total_eva": 55,总评分
+     *                 "creatTime": "2019-03-27 16:37", 报名时间
+     *                 "status": 10 状态（同小程序）
+     *             }
+     *         ],
+     *         "totalCount": 1 total数量
+     *     }
+     *
      * @return
      */
     @PostMapping("/enrollUserInfoList")
