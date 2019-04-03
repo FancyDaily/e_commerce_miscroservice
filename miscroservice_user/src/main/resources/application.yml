@@ -51,6 +51,8 @@ page:
   help: package/index/pages/helpServiceDetail/helpServiceDetail
   #组织
   company: package/my/pages/sureJoinOrganize/sureJoinOrganize
+  #报名页面
+  join: package/my/pages/sureJoinOrganize/sureJoinOrganize
 
 ---
 #debug
