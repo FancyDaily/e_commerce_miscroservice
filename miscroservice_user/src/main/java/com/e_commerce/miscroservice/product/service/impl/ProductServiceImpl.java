@@ -207,6 +207,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			productDao.updateByPrimaryKeySelective(tService);
 			//将该商品派生出来的订单的service_status进行修改
 			orderService.synOrderServiceStatus(productId, ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue());
+			//TODO 将那些没有人报名的订单进行删除
+			orderService.lowerFrame(productId);
+
 			// 手动下架不需要发送通知
 //			String title = "";
 //			String content = "";

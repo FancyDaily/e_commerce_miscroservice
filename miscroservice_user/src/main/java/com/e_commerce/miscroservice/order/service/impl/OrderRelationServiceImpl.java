@@ -191,7 +191,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
                     TUser toUser = userCommonController.getUserById(order.getCreateUser());
                     //发送短信
-                    String msgCount = new StringBuilder().append("【壹晓时】您的“").append(order.getServiceName())
+                    String msgCount = new StringBuilder().append("【晓时互助】您的“").append(order.getServiceName())
                             .append("”服务，已有小伙伴报名咯，赶快去看看吧！").toString();
                     userCommonController.sendSMS(toUser.getUserTel() , msgCount);
 
@@ -499,7 +499,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 messageCommonController.messageSave(orderId ,nowUser , title , content , orderRelationshipList.get(i).getReceiptUserId() , nowTime);
                 if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
                     //如果是互助时，发送短信
-                    String msgContent =  new StringBuilder().append("【壹晓时】在“").append(order.getServiceName())
+                    String msgContent =  new StringBuilder().append("【晓时互助】在“").append(order.getServiceName())
                             .append("”的求助中，您已被求助者").append(nowUser.getName())
                             .append("选定为服务者啦！感谢您的热心，请与求助者保持联系并准时提供服务哦～").toString();
 
@@ -956,7 +956,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                                     wxMsg.add("叮！收到了一份时间谢礼");
                                     wxMsg.add(orderRelationship.getServiceName());
                                     wxMsg.add(nowUser.getName());
-                                    wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                                    wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「晓时互助」的时间账户看一看~");
                                     messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_17 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
@@ -982,7 +982,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                                     String parameter = "?returnHome=true";
                                     wxMsg.add("叮！你的公益时长有了新变化");
                                     wxMsg.add(paymentList.get(i)+"分钟");
-                                    wxMsg.add("你做过最有意义的事情，已成功被时间记录，您可移步「壹晓时」查看。");
+                                    wxMsg.add("你做过最有意义的事情，已成功被时间记录，您可移步「晓时互助」查看。");
                                     messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.help_setTemplate_18 , parameter);
                                     formid.setIsValid("0");
                                     messageCommonController.updateFormId(formid);
@@ -1068,7 +1068,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             wxMsg.add("叮！收到时间谢礼");
                             wxMsg.add(orderRelationship.getServiceName());
                             wxMsg.add(nowUser.getName());
-                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「晓时互助」的时间账户看一看~");
                             messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.serv_setTemplate_15 , parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
@@ -1105,7 +1105,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             wxMsg.add("叮！收到了一份时间谢礼");
                             wxMsg.add(orderRelationship.getServiceName());
                             wxMsg.add(nowUser.getName());
-                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「壹晓时」的时间账户看一看~");
+                            wxMsg.add("发生的故事永远会被记住，如果您想回忆，就去「晓时互助」的时间账户看一看~");
                             messageCommonController.pushOneUserMsg(toUserList.get(0).getVxOpenId() , formid.getFormId() , wxMsg , SetTemplateIdEnum.serv_setTemplate_16 , parameter);
                             formid.setIsValid("0");
                             messageCommonController.updateFormId(formid);
@@ -2973,7 +2973,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
 
 
                     //发送消息
-                    String messageContent = new StringBuilder().append("【壹晓时】您的求助“").append(orderRelationshipByPublish.getServiceName())
+                    String messageContent = new StringBuilder().append("【晓时互助】您的求助“").append(orderRelationshipByPublish.getServiceName())
                             .append("””开始时间只剩下2小时啦！已经有").append(orderRelationshipList.size())
                             .append("位小天使报名，快去选定您需要的人吧~").toString();
                     userCommonController.sendSMS(publishUser.getUserTel() , messageContent);
@@ -3013,7 +3013,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                             .append("位小伙伴，排排坐等您确认是否开始，请尽快决定吧~").toString();
 
                     //发送消息
-                    String messageContent = new StringBuilder().append("【壹晓时】您“").append(orderRelationshipByPublish.getServiceName())
+                    String messageContent = new StringBuilder().append("【晓时互助】您“").append(orderRelationshipByPublish.getServiceName())
                             .append("””的服务2小时后就要开始咯，还有").append(orderRelationshipList.size())
                             .append("位小伙伴，排排坐等您确认是否开始，请尽快选定吧~").toString();
                     userCommonController.sendSMS(publishUser.getUserTel() , messageContent);

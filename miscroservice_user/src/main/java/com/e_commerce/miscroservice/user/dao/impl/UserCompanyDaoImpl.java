@@ -189,11 +189,11 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
                 .eq(TUserCompany::getState,joinStateCompanyPass)
                 .eq(TUserCompany::getCompanyJob, AppConstant.JOB_COMPANY_MEMBER)
                 .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES);
-        if(param!=null) {
+        if(param!=null && !"".equals(param)) {
             build.eq(TUserCompany::getTeamName,param);
         }
 
-        if(groupId!=null) {
+        if(groupId!=null && !"".equals(param)) {
             build.eq(TUserCompany::getGroupId,groupId);
         }
 
