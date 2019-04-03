@@ -90,7 +90,7 @@ public class AliOSSUtil {
 		String savePath = UploadPathEnum.innerEnum.PERSON.getPath();
 		
 		// 获取图片后缀名
-		String fileName = savePath + "/" + "QR" + secen;
+		String fileName = savePath + "/" + "QR" + secen+".jpg";
 		try {
 			ossClient.putObject(bucket, fileName, in);
 			String imgPath = "https://" + bucket + "." + endpoint + "/" + fileName;

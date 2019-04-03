@@ -2087,7 +2087,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
             case "2":
                 scene = String.valueOf(inviterId) + "," + "" + "," + String.valueOf(serviceId);
-                page = pageValueJoin;
+                page = pageValueService;
 //                serviceDetail = serviceService.serviceDetail(Long.valueOf(serviceId), user);  //TODO 调用订单模块的商品或者订单详情接口
                 subType = DictionaryEnum.SHARE_SERVICE.getSubType();
                 //成长值

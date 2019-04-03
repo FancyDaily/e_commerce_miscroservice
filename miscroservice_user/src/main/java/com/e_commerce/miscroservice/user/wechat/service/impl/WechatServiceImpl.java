@@ -162,7 +162,8 @@ public class WechatServiceImpl implements WechatService {
 			// flush输出流的缓冲
 			printWriter.flush();
 			// 开始获取数据
-			BufferedInputStream bis = new BufferedInputStream(httpURLConnection.getInputStream());
+			InputStream inputStream = httpURLConnection.getInputStream();
+			BufferedInputStream bis = new BufferedInputStream(inputStream);
 
 			// 上传到阿里云
 			imgUrl = AliOSSUtil.uploadQrImg(bis, scene);
