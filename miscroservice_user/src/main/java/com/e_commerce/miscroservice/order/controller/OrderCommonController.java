@@ -326,4 +326,12 @@ public class OrderCommonController extends BaseController {
 	public List<TOrderRelationship> selectOrderRelationshipByReceiptUserIdNotEqStatus(Long userId, int type) {
 		return orderRelationshipDao.selectOrderRelationshipByReceiptUserIdNotEqStatus(userId,type);
 	}
+
+	/**
+	 * 根据商品id下架订单(无人报名的订单)
+	 * @param productId
+	 */
+	public void lowerFrame(Long productId) {
+		orderService.lowerFrameOrderByProductId(productId);
+	}
 }

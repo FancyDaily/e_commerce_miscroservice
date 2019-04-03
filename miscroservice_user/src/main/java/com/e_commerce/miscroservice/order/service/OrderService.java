@@ -150,4 +150,10 @@ public interface OrderService {
 	 * @return
 	 */
 	TOrder getOrderById(Long orderId);
+
+	/**
+	 * 根据商品id下架订单
+	 * @param productId
+	 */
+    void lowerFrameOrderByProductId(Long productId);
 }

@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.order.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
@@ -990,6 +991,45 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Override
 	public TOrder getOrderById(Long orderId) {
 		return orderDao.selectByPrimaryKey(orderId);
+	}
+
+	/**
+	 * 根据商品id下架订单
+	 * @param productId
+	 */
+	@Override
+	public void lowerFrameOrderByProductId(Long productId) {
+		//根据商品id查询到所有订单记录
+		List<TOrder> orders = orderDao.selectOrdersByProductId(productId);
+
+		TService product = productService.selectByProductId(productId);
+		Long createrId = product.getUserId();
+		TUser creater = userService.getUserById(createrId);
+		//根据订单的enroll_num和confirm_num判断是否可以下架
+		for(TOrder order:orders) {
+			if(order.getEnrollNum()>0 || order.getConfirmNum()>0) {
+				continue;
+			}
+			//将订单置为无效IS_VALID_NO
+			order.setIsValid(AppConstant.IS_VALID_NO);
+			orderDao.updateByPrimaryKey(order);
+			//如果商品性质为求助，
+			//退还钱款：
+			//冻结返还，总额增加
+			if(ProductEnum.TYPE_SEEK_HELP.getValue()!=order.getType().intValue()) {
+				continue;
+			}
+			Long beenFreezedTime = order.getCollectTime();
+			creater.setFreezeTime(creater.getFreezeTime() - beenFreezedTime);
+			userService.updateByPrimaryKey(creater);
+			//对应冻结流水置为无效
+			TUserFreeze userFreeze = userService.selectUserFreezeByUserIdAndOrderId(createrId, order.getId());
+			if(userFreeze==null) {
+				continue;
+			}
+			userFreeze.setIsValid(AppConstant.IS_VALID_NO);
+			userService.updateUserFreeze(userFreeze);
+		}
 	}
 
 	/**

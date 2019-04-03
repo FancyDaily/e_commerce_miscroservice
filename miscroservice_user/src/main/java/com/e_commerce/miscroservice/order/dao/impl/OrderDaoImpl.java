@@ -108,6 +108,9 @@ public class OrderDaoImpl implements OrderDao {
         List<Integer> companyIds = new ArrayList<>();
         if (split.length > 0) {
             for (String str : split) {
+                if("".equals(str)) {
+                    continue;
+                }
                 companyIds.add(Integer.valueOf(str));
             }
         }
@@ -525,5 +528,12 @@ public class OrderDaoImpl implements OrderDao {
                 .in(TOrder::getId, idList)
                 .in(TOrder::getStatus, collectionAvailableStatusArray)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TOrder> selectOrdersByProductId(Long productId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+        .eq(TOrder::getServiceId,productId)
+        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 }

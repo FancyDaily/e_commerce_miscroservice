@@ -93,4 +93,7 @@ public class ProductCommonController extends BaseController {
 		return  productDao.updateServiceByList(serviceList ,serviceIdList);
 	}
 
+    public TService selectByProductId(Long productId) {
+		return productDao.selectByPrimaryKey(productId);
+    }
 }

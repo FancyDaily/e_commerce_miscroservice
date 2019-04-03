@@ -199,4 +199,6 @@ public interface OrderDao {
 	List<TOrder> selectDailyOrders(Long userId);
 
 	List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray);
+
+    List<TOrder> selectOrdersByProductId(Long productId);
 }
