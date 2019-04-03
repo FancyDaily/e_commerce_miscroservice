@@ -1893,18 +1893,17 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
 
-        // 查询是否未到预设的发送间隔 TODO 有效时间为600秒而发送间隔为60s
+*/
+
+        // 查询是否未到预设的发送间隔 => 有效时间为600秒而发送间隔为60s
         if (redisUtil.hasKey(telephone)) {
-            long expire = redisUtil.getExpire(telephone); // TODO 获取剩余时间(为0则永久有效)
+            long expire = redisUtil.getExpire(telephone); // 获取剩余时间(为0则永久有效)
             long expectedTime = AppConstant.SMS_EXPIRED - AppConstant.SMS_INTERVAL_MILLIS / 1000;
             if (expire > expectedTime) {
                 throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,
                         AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码!");
             }
         }
-*/
-
-//        String debug = "debug"; //根据配置文件读取
 
         // 生成6位随机数
         String validCode = "666666";

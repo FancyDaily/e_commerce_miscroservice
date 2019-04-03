@@ -5,10 +5,12 @@ import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.HttpAPIService;
 import com.e_commerce.miscroservice.commons.util.colligate.MD5;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TextFormater;
 import com.e_commerce.miscroservice.user.service.api.APIService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +40,7 @@ import java.util.Map;
 @Service("sendSmsService")
 public class SendSmsService implements APIService {
 	
-//	@Autowired
+	@Autowired
 	private HttpAPIService httpService;
 
 	private static Logger LOG = LoggerFactory.getLogger(SendSmsService.class);
@@ -58,7 +60,7 @@ public class SendSmsService implements APIService {
 		params.put("username",userName);
 		params.put("password", password);
 		params.put("tkey",tkey);
-		String template=smsTemplate;
+		String template = StringUtil.decodeStr2Unicode(smsTemplate);
 		params.put("content", String.format(template,params.get(AppConstant.VALID_CODE)));
 		return sendSms(params);
 		
