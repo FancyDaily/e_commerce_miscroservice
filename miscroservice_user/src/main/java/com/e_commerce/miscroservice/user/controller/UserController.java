@@ -616,7 +616,7 @@ public class UserController extends BaseController {
      */
     @RequestMapping("skill/modify")
     @Consume(TUserSkill.class)
-    public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrl) {
+    public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
         TUserSkill skill = (TUserSkill) ConsumeHelper.getObj();
         TUser user = UserUtil.getUser(token);
