@@ -497,7 +497,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 }
 
                 messageCommonController.messageSave(orderId ,nowUser , title , content , orderRelationshipList.get(i).getReceiptUserId() , nowTime);
-                if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()){
+                if (order.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue() && order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
                     //如果是互助时，发送短信
                     String msgContent =  new StringBuilder().append("【晓时互助】在“").append(order.getServiceName())
                             .append("”的求助中，您已被求助者").append(nowUser.getName())
