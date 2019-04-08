@@ -560,6 +560,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		if (DateUtil.parse(endDateTime) < System.currentTimeMillis()) {
 			throw new MessageException("重复的结束时间不能小于当前时间");
 		}
+		String startDateStartTime = service.getStartDateS() + service.getStartTimeS();
+		String startDateEndTime = service.getStartDateS() + service.getEndTimeS();
+		if (DateUtil.parse(startDateEndTime) < DateUtil.parse(startDateStartTime)) {
+			throw new MessageException("重复的互助不能跨天");
+		}
 		//是否包含用户选择的周期
 		boolean isContainWeek = false;
 		String[] weekDayArray = service.getDateWeekNumber().split(",");

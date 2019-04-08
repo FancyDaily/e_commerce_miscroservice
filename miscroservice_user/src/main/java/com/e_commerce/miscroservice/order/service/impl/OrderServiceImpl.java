@@ -717,6 +717,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					logger.error("商品存在错误的状态，无法继续派生订单");
 					throw new MessageException("商品状态错误");
 				}
+				// 如果结束时间比开始时间小 是错误的
+				if (order.getEndTime() < order.getStartTime()) {
+					logger.error("订单结束时间比开始时间小，生成错误，重复性订单不能跨天");
+					throw new MessageException("商品时间有误");
+				}
 				TUser tUser = userService.getUserById(service.getUserId());
 				if (!checkEnoughTimeCoin(tUser, service)) {
 					throw new NoEnoughCreditException("用户授信不足");
