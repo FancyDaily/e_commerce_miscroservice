@@ -193,7 +193,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
             build.eq(TUserCompany::getTeamName,param);
         }
 
-        if(groupId!=null && !"".equals(param)) {
+        if(groupId!=null && !"".equals(groupId)) {
             build.eq(TUserCompany::getGroupId,groupId);
         }
 

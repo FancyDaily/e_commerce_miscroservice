@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
@@ -109,4 +110,5 @@ public interface GroupService {
 	QueryResult<SmartUserView> userWaitToJoin(TUser user, Integer pageNum, Integer pageSize, String param, String skill);
 
 	CompanyRecentView companyPaymentDiagram(TUser user);
+
 }

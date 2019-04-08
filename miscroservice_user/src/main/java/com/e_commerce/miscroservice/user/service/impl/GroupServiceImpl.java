@@ -310,7 +310,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
 
-        List<TUser> users = userDao.selectByTelephoneInInIds(param,userIds);
+        List<TUser> users = userDao.selectByTelephoneInInIds(telephone,userIds);
         // 处理数据
         for (TUser thisUser : users) {
             SmartUserView view = BeanUtil.copy(thisUser, SmartUserView.class);
