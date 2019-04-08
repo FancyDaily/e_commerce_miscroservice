@@ -636,6 +636,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			String visiableStatus = tOrder.getVisiableStatus();
 			if (Objects.equals(OrderEnum.VISIABLE_YES.getStringValue(), visiableStatus)) {
 				TOrder order = orderDao.selectNearNotVisiable(tOrder.getServiceId());
+				order.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
+				orderDao.updateByPrimaryKey(tOrder);
 			} else { // 满人的订单为不可见 现在置位可见
 				tOrder.setVisiableStatus(OrderEnum.VISIABLE_YES.getStringValue());
 				orderDao.updateByPrimaryKey(tOrder);
