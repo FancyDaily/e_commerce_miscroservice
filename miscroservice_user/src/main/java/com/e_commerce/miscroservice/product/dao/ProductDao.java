@@ -73,9 +73,10 @@ public interface ProductDao {
 	 *
 	 * @param userId   当前用户ID
 	 * @param type     类型 1、求助 2、服务
+	 * @param keyName where条件的like
 	 * @return
 	 */
-	List<TService> getListProductByUserId(Long userId, Integer type);
+	List<TService> getListProductByUserId(Long userId, Integer type, String keyName);
 
 	/**
 	 * 组织账号发布的、状态下、时间区间下

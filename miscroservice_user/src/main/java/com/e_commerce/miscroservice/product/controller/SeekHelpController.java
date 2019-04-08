@@ -80,11 +80,11 @@ public class SeekHelpController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/pageMine")
-	public Object pageMine(String token, Integer pageNum, Integer pageSize) {
+	public Object pageMine(String token, Integer pageNum, Integer pageSize, String keyName) {
 		AjaxResult result = new AjaxResult();
 		TUser user = UserUtil.getUser(token);
 		try {
-			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, ProductEnum.TYPE_SEEK_HELP.getValue());
+			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, keyName, ProductEnum.TYPE_SEEK_HELP.getValue());
 			result.setData(list);
 			result.setSuccess(true);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);

@@ -287,14 +287,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	}
 
 	@Override
-	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type) {
+	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize,String keyName, Integer type) {
 		user = userService.getUserById(user.getId());
 		QueryResult<PageMineReturnView> result = new QueryResult<PageMineReturnView>();
 		List<PageMineReturnView> listPageMineReturnView = new ArrayList<>();
 		//分页插件
 		Page<TService> page = PageHelper.startPage(pageNum, pageSize);
 		//我发布的列表
-		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(), type);
+		List<TService> listProductByUserId = productDao.getListProductByUserId(user.getId(), type, keyName);
 		if (listProductByUserId.size() == 0) {
 			result.setResultList(new ArrayList<>());
 			result.setTotalCount(0L);

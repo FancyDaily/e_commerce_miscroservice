@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.mapper.ProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,8 +68,12 @@ public class ProductDaoImpl implements ProductDao {
 	}
 
 	@Override
-	public List<TService> getListProductByUserId(Long userId, Integer type) {
-		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class)
+	public List<TService> getListProductByUserId(Long userId, Integer type, String keyName) {
+		MybatisSqlWhereBuild sqlWhere = new MybatisSqlWhereBuild(TService.class);
+		if (StringUtil.isNotEmpty(keyName)) {
+			sqlWhere.like(TService::getServiceName,"%" + keyName + "%");
+		}
+		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), sqlWhere
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
 				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;

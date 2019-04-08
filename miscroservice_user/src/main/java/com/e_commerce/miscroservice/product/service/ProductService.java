@@ -21,16 +21,18 @@ public interface ProductService {
 	 * 功能描述:提交求助
 	 * 作者:马晓晨
 	 * 创建时间:2018/10/30 下午12:06
+	 *
 	 * @param token
 	 * @param
 	 * @return
 	 */
 	void submitSeekHelp(TUser user, ServiceParamView param, String token);
+
 	/**
-	 *
 	 * 功能描述:提交服务
 	 * 作者:马晓晨
 	 * 创建时间:2018年10月31日 下午2:58:14
+	 *
 	 * @param user
 	 * @param param
 	 * @param token
@@ -39,6 +41,7 @@ public interface ProductService {
 
 	/**
 	 * 获取商品信息根据商品的idList
+	 *
 	 * @param productIds 商品ID的list
 	 * @return 商品list
 	 */
@@ -46,6 +49,7 @@ public interface ProductService {
 
 	/**
 	 * 获取商品的所有desc根据商品的idList
+	 *
 	 * @param productIds 商品id的list
 	 * @return 所有商品的desc
 	 */
@@ -53,6 +57,7 @@ public interface ProductService {
 
 	/**
 	 * 根据产品ID获取产品详情
+	 *
 	 * @param serviceId
 	 * @return
 	 */
@@ -60,37 +65,43 @@ public interface ProductService {
 
 	/**
 	 * 求助服务下架
-	 * @param user 当前用户
+	 *
+	 * @param user      当前用户
 	 * @param productId 商品ID
 	 */
 	void lowerFrame(TUser user, Long productId);
 
 	/**
 	 * 求助服务删除
-	 * @param user 当前用户
+	 *
+	 * @param user      当前用户
 	 * @param productId 商品ID
 	 */
 	void del(TUser user, Long productId);
 
 	/**
 	 * 求助服务上架
-	 * @param user 当前用户
+	 *
+	 * @param user      当前用户
 	 * @param productId 上架的产品ID
 	 */
 	void upperFrame(TUser user, Long productId);
 
 	/**
 	 * 分页我发布的
-	 * @param user 当前用户
-	 * @param pageNum 页数
+	 *
+	 * @param user     当前用户
+	 * @param pageNum  页数
 	 * @param pageSize 每页数量
-	 * @param type 类型 1、求助 2、服务
+	 * @param keyName 模糊查询的service名称
+	 * @param type     类型 1、求助 2、服务
 	 * @return
 	 */
-	QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, Integer type);
+	QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize, String keyName, Integer type);
 
 	/**
 	 * 根据商品ID获取商品
+	 *
 	 * @param serviceId 商品ID
 	 * @return 商品
 	 */
@@ -98,15 +109,17 @@ public interface ProductService {
 
 	/**
 	 * 根据主键修改信息
+	 *
 	 * @param service 要修改的实体类，需要带主键ID
-	 * @param type 1、超过结束时间下架 2、互助时不足下架
+	 * @param type    1、超过结束时间下架 2、互助时不足下架
 	 * @return
 	 */
 	void autoLowerFrameService(TService service, Integer type);
 
 	/**
 	 * 查看商品详情
-	 * @param user 当前用户
+	 *
+	 * @param user      当前用户
 	 * @param serviceId 服务求助ID
 	 * @return
 	 */
@@ -114,21 +127,24 @@ public interface ProductService {
 
 	/**
 	 * 更新商品信息
+	 *
 	 * @param service
 	 */
 	void updateServiceByKey(TService service);
 
 	/**
 	 * 发布精彩瞬间
+	 *
 	 * @param serviceId
 	 * @param description
 	 * @param url
 	 * @param nowUser
 	 */
-	void sendServiceSummary(Long serviceId , String description , String url , TUser nowUser);
+	void sendServiceSummary(Long serviceId, String description, String url, TUser nowUser);
 
 	/**
 	 * 查找精彩瞬间
+	 *
 	 * @param serviceId
 	 * @return
 	 */
@@ -136,6 +152,7 @@ public interface ProductService {
 
 	/**
 	 * 获取用户的可用金额（发布时候获取用户金额）
+	 *
 	 * @param user
 	 * @return
 	 */
