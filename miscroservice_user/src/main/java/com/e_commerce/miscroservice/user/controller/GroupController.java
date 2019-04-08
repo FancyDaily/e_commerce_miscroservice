@@ -1,29 +1,34 @@
 package com.e_commerce.miscroservice.user.controller;
 
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.http.MethodType;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
+import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.GroupService;
+import com.e_commerce.miscroservice.user.vo.BaseGroupView;
 import com.e_commerce.miscroservice.user.vo.CompanyRecentView;
 import com.e_commerce.miscroservice.user.vo.SmartUserView;
 import com.e_commerce.miscroservice.user.vo.UserCompanyView;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import com.e_commerce.miscroservice.commons.entity.application.TGroup;
-import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
-import com.e_commerce.miscroservice.user.vo.BaseGroupView;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +46,72 @@ public class GroupController extends BaseController {
     private GroupService groupService;
 
     Log logger = Log.getInstance(UserController.class);
+
+	private String endpoint = "sts.aliyuncs.com";
+	private String roleArn = "acs:ram::1833330782534832:role/aliyunosstokengeneratorrole";
+	private String roleSessionName = "session-name";
+	private String policy = "{\n" +
+			"    \"Version\": \"1\", \n" +
+			"    \"Statement\": [\n" +
+			"        {\n" +
+			"            \"Action\": [\n" +
+			"                \"oss:*\"\n" +
+			"            ], \n" +
+			"            \"Resource\": [\n" +
+			"                \"acs:oss:*:*:*\" \n" +
+			"            ], \n" +
+			"            \"Effect\": \"Allow\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
+
+	/**
+	 *
+	 * 功能描述:获取操作oss时的临时token
+	 * 作者:马晓晨
+	 * 创建时间:2019年1月29日 下午10:53:05
+	 * @return
+	 */
+	@ResponseBody
+	@PostMapping("/getStsToken")
+	public Object getStsToken(String accessKeyId, String accessKeySecret) {
+		AjaxResult result = new AjaxResult();
+		try {
+			// 添加endpoint（直接使用STS endpoint，前两个参数留空，无需添加region ID）
+			DefaultProfile.addEndpoint("", "", "Sts", endpoint);
+			// 构造default profile（参数留空，无需添加region ID）
+			IClientProfile profile = DefaultProfile.getProfile("", accessKeyId, accessKeySecret);
+			// 用profile构造client
+			DefaultAcsClient client = new DefaultAcsClient(profile);
+			final AssumeRoleRequest request = new AssumeRoleRequest();
+			request.setMethod(MethodType.POST);
+			request.setRoleArn(roleArn);
+			request.setRoleSessionName(roleSessionName);
+			request.setPolicy(policy); // Optional
+			request.setDurationSeconds(900L); //持续时间
+			final AssumeRoleResponse response = client.getAcsResponse(request);
+			Map<String, String> tokenInfo = new HashMap<>();
+			tokenInfo.put("securityToken", response.getCredentials().getSecurityToken());
+			tokenInfo.put("accessKeyId", response.getCredentials().getAccessKeyId());
+			tokenInfo.put("accessKeySecret", response.getCredentials().getAccessKeySecret());
+			result.setSuccess(true);
+			result.setData(tokenInfo);
+/*            System.out.println("Expiration: " + response.getCredentials().getExpiration());
+            System.out.println("Access Key Id: " + response.getCredentials().getAccessKeyId());
+            System.out.println("Access Key Secret: " + response.getCredentials().getAccessKeySecret());
+            System.out.println("Security Token: " + response.getCredentials().getSecurityToken());
+            System.out.println("RequestId: " + response.getRequestId());*/
+		} catch (ClientException e) {
+			result.setSuccess(false);
+			result.setMsg("获取token失败");
+			logger.error(e.getErrMsg());
+/*            System.out.println("Failed：");
+            System.out.println("Error code: " + e.getErrCode());
+            System.out.println("Error message: " + e.getErrMsg());
+            System.out.println("RequestId: " + e.getRequestId());*/
+		}
+		return result;
+	}
 
     /**
      * 组织概况
