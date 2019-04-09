@@ -1042,6 +1042,23 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 	}
 
+	@Override
+	public List<GroupChooseOrderView> listGroupOrder(TUser user) {
+		List<GroupChooseOrderView> listView = new ArrayList<>();
+		GroupChooseOrderView view = new GroupChooseOrderView();
+		List<TOrder> listOrder = orderDao.selectGroupHelpEnrollList(user.getId());
+		if (listOrder.size() == 0) {
+			return listView;
+		}
+		for (TOrder tOrder : listOrder) {
+			TService service = productService.selectByProductId(tOrder.getServiceId());
+			view.setOrder(tOrder);
+			view.setService(service);
+			listView.add(view);
+		}
+		return listView;
+	}
+
 	/**
 	 * 下架服务订单
 	 *
