@@ -188,4 +188,27 @@ public interface UserCompanyDao {
     List<TUserCompany> selectInUserIdAndCompanyJob(ArrayList<Long> idList, Integer jobCompanyMember);
 
     TUserCompany selectByPrimaryKey(Long companyId);
+
+    /**
+     * 根据组织id和用户idList查找还在组织内的用户
+     * @param userIdList
+     * @param companyId
+     * @return
+     */
+    List<TUserCompany> selectUserConpanysByUserIdsAndCompayId(List<Long> userIdList , Long companyId);
+    /**
+     * 批量更新userCompanyList
+     * @param userCompanyList
+     * @param userCompanyIdList
+     * @return
+     */
+    long updateUserCompanyByLIst(List<TUserCompany> userCompanyList, List<Long> userCompanyIdList);
+
+    /**
+     * 根据组织id和用户idList查找还在组织内的用户
+     * @param userId
+     * @param companyId
+     * @return
+     */
+    TUserCompany selectUserConpanysByUserIdAndCompayId(Long userId , Long companyId);
 }
