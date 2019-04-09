@@ -156,4 +156,11 @@ public interface OrderService {
 	 * @param productId
 	 */
     void lowerFrameOrderByProductId(Long productId);
+
+	/**
+	 * 组织用于选人的订单列表
+	 * @param user
+	 * @return
+	 */
+	List<TOrder> listGroupOrder(TUser user);
 }

@@ -201,4 +201,11 @@ public interface OrderDao {
 	List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray);
 
     List<TOrder> selectOrdersByProductId(Long productId);
+
+	/**
+	 * 查询组织帮人报名的订单列表
+	 * @param id
+	 * @return
+	 */
+	List<TOrder> selectGroupHelpEnrollList(Long id);
 }

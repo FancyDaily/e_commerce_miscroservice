@@ -1039,6 +1039,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 	}
 
+	@Override
+	public List<TOrder> listGroupOrder(TUser user) {
+		return orderDao.selectGroupHelpEnrollList(user.getId());
+	}
+
 	/**
 	 * 下架服务订单
 	 *

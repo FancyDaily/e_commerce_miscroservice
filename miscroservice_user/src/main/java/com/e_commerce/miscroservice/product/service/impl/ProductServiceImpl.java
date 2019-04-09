@@ -288,7 +288,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 
 	@Override
 	public QueryResult<PageMineReturnView> pageMine(TUser user, Integer pageNum, Integer pageSize,String keyName, Integer type) {
-		user = userService.getUserById(user.getId());
+//		user = userService.getUserById(user.getId());
 		QueryResult<PageMineReturnView> result = new QueryResult<PageMineReturnView>();
 		List<PageMineReturnView> listPageMineReturnView = new ArrayList<>();
 		//分页插件
