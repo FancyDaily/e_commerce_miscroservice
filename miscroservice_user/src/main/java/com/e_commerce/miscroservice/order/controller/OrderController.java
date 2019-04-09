@@ -54,8 +54,10 @@ public class OrderController extends BaseController {
 		AjaxResult result = new AjaxResult();
 		TUser user = UserUtil.getUser(token);
 		try {
+			QueryResult<TOrder> data = new QueryResult<>();
 			List<TOrder> listOrder = orderService.listGroupOrder(user);
-			result.setData(listOrder);
+			data.setResultList(listOrder);
+			result.setData(data);
 			result.setSuccess(true);
 			result.setMsg("查询成功");
 		} catch (MessageException e) {
