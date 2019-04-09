@@ -310,7 +310,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
 
-        List<TUser> users = userDao.selectByTelephoneInInIds(param,userIds);
+        List<TUser> users = userDao.selectByTelephoneInInIds(telephone,userIds);
         // 处理数据
         for (TUser thisUser : users) {
             SmartUserView view = BeanUtil.copy(thisUser, SmartUserView.class);
@@ -1100,6 +1100,77 @@ public class GroupServiceImpl extends BaseService implements GroupService {
     private List<TUserTimeRecord> getUserTimeRecords(Long userId, Integer year) {
         Map<String, Object> yearBetween = DateUtil.y2BetweenStamp(year);
         return userTimeRecordDao.selectByUserIdOrFromUserIdAndTypeBetween(userId,PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode(),(long) yearBetween.get("betLeft"), (long) yearBetween.get("betRight"));
+    }
+
+    /**
+     * 成员移动
+     * @param nowUser
+     * @param groupId
+     * @param userIds
+     */
+    public void userMove(TUser nowUser, Long groupId, List<Long> userIds) {
+        Long nowTime = System.currentTimeMillis();
+        Long companyId = getOwnCompanyId(nowUser.getId());
+        List<TUserCompany> userCompanies = userCompanyDao.selectUserConpanysByUserIdsAndCompayId(userIds , companyId);
+        if (userCompanies == null || userCompanies.size() <= 0) {
+            throw new MessageException("选择用户非组内成员，请后退重试");
+        }
+        List<Long> userCompanyIdList = new ArrayList<>();
+        for (int i = 0; i < userIds.size(); i++) {
+            for (int j = 0; j < userCompanies.size(); j++) {
+                if (userIds.get(i) == userCompanies.get(j).getUserId().longValue()) {
+                    userCompanies.get(j).setGroupId(groupId);
+                    userCompanies.get(j).setUpdateTime(nowTime);
+                    userCompanies.get(j).setUpdateUser(nowUser.getId());
+                    userCompanies.get(j).setUpdateUserName(nowUser.getName());
+                    userCompanyIdList.add(userCompanies.get(j).getId());
+                }
+            }
+        }
+        if (userCompanies.size() > 0) {
+            userCompanyDao.updateUserCompanyByLIst(userCompanies , userCompanyIdList);
+        }
+    }
+
+    /**
+     * 成员修改
+     * @param nowUser
+     * @param userName
+     * @param userId
+     * @param sex
+     * @param groupId
+     */
+    public void userModify(TUser nowUser, String userName, Long userId, Integer sex, Long groupId) {
+        long nowTime = System.currentTimeMillis();
+        Long companyId = getOwnCompanyId(nowUser.getId());
+        TUserCompany userCompany = null;
+        userCompany = userCompanyDao.selectUserConpanysByUserIdAndCompayId(userId , companyId);
+        if (userCompany == null ) {
+            throw new MessageException("选择用户非组内成员，请后退重试");
+        }
+        //修改组内姓名
+        if (userName != null){
+            userCompany.setTeamName(userName);
+        }
+        //修改分组ID
+        if (groupId != null){
+            userCompany.setGroupId(groupId);
+        }
+        //修改性别
+        if (sex != null){
+            TUser user = new TUser();
+            user.setId(userId);
+            user.setSex(sex);
+            userDao.updateByPrimaryKey(user);
+        }
+        if (userName != null || groupId != null){
+            userCompany.setUpdateTime(nowTime);
+            userCompany.setUpdateUser(nowUser.getId());
+            userCompany.setUpdateUserName(nowUser.getName());
+            userCompanyDao.updateByPrimaryKey(userCompany);
+        }
+
+
     }
 
 }
