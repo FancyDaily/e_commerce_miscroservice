@@ -1786,6 +1786,8 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void feedBack(TUser user, TReport report) {
         final long currentTimeMillis = System.currentTimeMillis();
         //creater & updater
+        report.setType(ReportEnum.TYPE_SYSTEM.getType());
+        report.setStatus(ReportEnum.STATUS_PENDING_DISPOSAL.getType());
         report.setCreateUser(user.getId());
         report.setCreateUserName(user.getName());
         report.setCreateTime(currentTimeMillis);

@@ -606,7 +606,7 @@ public class UserController extends BaseController {
      * @param name        技能名
      * @param description 描述
      * @param headUrl     封面图
-     * @param detailUrl   内容图，多张图使用逗号分隔
+     * @param detailUrls   内容图，多张图使用逗号分隔
      *                    <p>
      *                    {
      *                    "success": true, //成功
