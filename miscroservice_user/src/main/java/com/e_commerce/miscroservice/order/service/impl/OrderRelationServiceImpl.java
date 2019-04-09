@@ -2126,7 +2126,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TReport report = new TReport();
         report.setReportUserId(toUser.getId());
         report.setType(ReportEnum.TYPE_ORDER.getType());
-        report.setAssociationId(orderRelationship.getOrderId());
+        report.setAssociationId(orderRelationship.getId());
         report.setLabelsId(labelsId);
         report.setMessage(message);
         report.setVoucherUrl(voucherUrl);

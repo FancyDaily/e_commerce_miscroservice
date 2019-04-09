@@ -79,6 +79,7 @@ public class OrderRelationController extends BaseController {
      * @param userIds   用户id，逗号分割
      * @param date      日期
      * @param serviceId 商品id
+     * @param orderId 订单id
      *
      *                  "success": true,
      *                  "msg": "批量报名成功"
