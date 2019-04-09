@@ -162,5 +162,5 @@ public interface OrderService {
 	 * @param user
 	 * @return
 	 */
-	List<TOrder> listGroupOrder(TUser user);
+	List<GroupChooseOrderView> listGroupOrder(TUser user);
 }

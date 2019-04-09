@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.order.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -54,9 +53,9 @@ public class OrderController extends BaseController {
 		AjaxResult result = new AjaxResult();
 		TUser user = UserUtil.getUser(token);
 		try {
-			QueryResult<TOrder> data = new QueryResult<>();
-			List<TOrder> listOrder = orderService.listGroupOrder(user);
-			data.setResultList(listOrder);
+			QueryResult<GroupChooseOrderView> data = new QueryResult<>();
+			List<GroupChooseOrderView> listGroupOrder = orderService.listGroupOrder(user);
+			data.setResultList(listGroupOrder);
 			result.setData(data);
 			result.setSuccess(true);
 			result.setMsg("查询成功");
