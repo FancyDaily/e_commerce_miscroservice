@@ -960,7 +960,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
 //		createCriteria.andIsValidEqualTo(IS_VALID_YES).andGroupIdEqualTo(groupId).andStateEqualTo(2);
 //		long countUser = userCompanyDao.countByExample(userCompanyExample);
 		if (countUser > 0) {
-			throw new NoAuthChangeException("该分组下还有用户，无法删除，请将用户移动到其他分组再进行删除");
+			throw new NoAuthChangeException("该分组下还有用户，无法删除，请将用户晓时互助到其他分组再进行删除");
 		}
 		delGroup.setIsValid(AppConstant.IS_VALID_NO);
 		delGroup.setUpdateTime(currentTime);
