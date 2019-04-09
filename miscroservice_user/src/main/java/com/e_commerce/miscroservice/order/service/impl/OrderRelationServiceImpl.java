@@ -247,6 +247,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果错误消息不为空，说明该订单有部分问题不允许报名，抛出错误信息，并在外面接到这个异常后将报名日历移除
             throw new MessageException("401", errorMsg);
         }
+        long canChooseSum = order.getServicePersonnel() - order.getConfirmNum();
+
+        if (canChooseSum < userIdList.size()){
+            throw new MessageException("499", "对不起，您仅可选"+canChooseSum+"人");
+        }
 
         List<TUser> userList = userCommonController.selectUserByIds(userIdList);
 
