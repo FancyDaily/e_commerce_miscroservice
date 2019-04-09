@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 订单模块
  *
@@ -20,6 +22,56 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v2/order")
 public class OrderController extends BaseController {
+
+	/**
+	 * 组织接口：我发布的可以报名的订单列表
+	 * @param token token信息
+	 * {
+	 *     "success": true,
+	 *     "errorCode": "",
+	 *     "msg": "查询成功",
+	 *     "data": [
+	 *         {
+	 *             "id": 订单ID,
+	 *             "serviceId": 求助服务ID,
+	 *             "serviceName": "求助服务名称",
+	 *             "servicePersonnel": 需要人数,
+	 *             "type": 类型 1、求助 2、服务,
+	 *             "startTime": 开始时间,
+	 *             "endTime": 结束时间,
+	 *             "timeType": 0 一次性 1、重复性,
+	 *             "collectTime": 金额,
+	 *             "collectType": 1、互助时 2、公益时,
+	 *             "createUser": 发布者id,
+	 *         }
+	 *     ]
+	 * }
+	 * @return
+	 */
+	@PostMapping("/listGroupOrder")
+	public Object listGroupOrder(String token) {
+		AjaxResult result = new AjaxResult();
+		TUser user = UserUtil.getUser(token);
+		try {
+			QueryResult<GroupChooseOrderView> data = new QueryResult<>();
+			List<GroupChooseOrderView> listGroupOrder = orderService.listGroupOrder(user);
+			data.setResultList(listGroupOrder);
+			result.setData(data);
+			result.setSuccess(true);
+			result.setMsg("查询成功");
+		} catch (MessageException e) {
+			logger.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败," + e.getMessage());
+		} catch (Exception e) {
+			logger.error("查询失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败");
+		}
+		return result;
+	}
 
 	/**
 	 * 我的订单详情

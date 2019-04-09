@@ -536,4 +536,15 @@ public class OrderDaoImpl implements OrderDao {
         .eq(TOrder::getServiceId,productId)
         .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TOrder> selectGroupHelpEnrollList(Long id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(), new MybatisSqlWhereBuild(TOrder.class)
+                .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
+                .eq(TOrder::getServiceStatus, ProductEnum.STATUS_UPPER_FRAME.getValue())
+                .neq(TOrder::getServicePersonnel, TOrder::getConfirmNum)
+                .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                .eq(TOrder::getCreateUser, id)
+                .eq(TOrder::getVisiableStatus, OrderEnum.VISIABLE_YES.getStringValue()));
+    }
 }

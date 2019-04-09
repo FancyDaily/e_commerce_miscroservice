@@ -303,5 +303,48 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
 
+    /**
+     * 根据组织id和用户idList查找还在组织内的用户
+     * @param userIdList
+     * @param companyId
+     * @return
+     */
+    public List<TUserCompany> selectUserConpanysByUserIdsAndCompayId(List<Long> userIdList , Long companyId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(),
+                new MybatisSqlWhereBuild(TUserCompany.class)
+                        .eq(TUserCompany::getCompanyId, companyId)
+                        .in(TUserCompany::getUserId, userIdList)
+                        .eq(TUserCompany::getState, 2)
+                        .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 根据组织id和用户idList查找还在组织内的用户
+     * @param userId
+     * @param companyId
+     * @return
+     */
+    public TUserCompany selectUserConpanysByUserIdAndCompayId(Long userId , Long companyId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TUserCompany(),
+                new MybatisSqlWhereBuild(TUserCompany.class)
+                        .eq(TUserCompany::getCompanyId, companyId)
+                        .eq(TUserCompany::getUserId, userId)
+                        .eq(TUserCompany::getState, 2)
+                        .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    /**
+     * 批量更新userCompanyList
+     * @param userCompanyList
+     * @param userCompanyIdList
+     * @return
+     */
+    public long updateUserCompanyByLIst(List<TUserCompany> userCompanyList, List<Long> userCompanyIdList) {
+        long count = MybatisOperaterUtil.getInstance().update(userCompanyList,
+                new MybatisSqlWhereBuild(TUserCompany.class)
+                        .in(TUserCompany::getId, userCompanyIdList));
+        return count;
+    }
+
 }
 

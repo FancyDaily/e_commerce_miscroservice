@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -514,6 +515,91 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
         }
         return result;
+    }
+
+    /**
+     * 成员移动
+     *
+     * @param token token
+     * @param userIds 要修改的用户id，逗号拼接
+     * @param groupId 修改至分组的组编号
+     *
+     *      "success": true,
+     *      "errorCode": "",
+     *      "msg": "移动成功",
+     *      "data": ""
+     *
+     * @return
+     */
+    @PostMapping("/userMove")
+    public Object userMove(String token, String userIds, Long groupId) {
+        TUser nowUser = (TUser) redisUtil.get(token);
+        AjaxResult result = new AjaxResult();
+        String[] split = userIds.split(",");
+        List<Long> list = new ArrayList<>();
+        for (int i = 0; i < split.length; i++) {
+            list.add(Long.valueOf(split[i]));
+        }
+        try {
+            groupService.userMove(nowUser, groupId, list);
+            result.setSuccess(true);
+            result.setMsg("移动成功！");
+            return result;
+        } catch (MessageException e) {
+            logger.error("已知移动失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("移动失败," + e.getMessage());
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("未知移动失败：" + errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("移动失败");
+            return result;
+        }
+    }
+
+    /**
+     * 成员修改
+     *
+     * @param token token
+     * @param userName 修改的名字
+     * @param userId 修改用户的id
+     * @param sex 修改的性别
+     * @param groupId 修改的分组
+     *
+     *      "success": true,
+     *      "errorCode": "",
+     *      "msg": "修改成功",
+     *      "data": ""
+     *
+     * @return
+     */
+    @PostMapping("/userModify")
+    public Object userModify(String token, String userName, Long userId, Integer sex, Long groupId) {
+        TUser nowUser = (TUser) redisUtil.get(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            groupService.userModify(nowUser, userName, userId, sex, groupId);
+            result.setSuccess(true);
+            result.setMsg("修改成功！");
+            return result;
+        } catch (MessageException e) {
+            logger.error("已知修改失败," + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode("499");
+            result.setMsg("修改失败," + e.getMessage());
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("未知修改失败：" + errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode("500");
+            result.setMsg("修改失败");
+            return result;
+        }
     }
 
 }

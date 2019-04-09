@@ -730,32 +730,35 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				}
 				//可以成功创建订单
 				saveOrder(order);
-				//发送服务通知
-				long nowTime = System.currentTimeMillis();
-				TUser toUser = userService.getUserById(order.getCreateUser());
-				TFormid formid = findFormId(nowTime, toUser);
-				if (formid != null) {
-					try {
-						List<String> msg = new ArrayList<>();
-						String parameter = "";
-						if (service.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
-							msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
-									.append(service.getCollectTime() * service.getServicePersonnel())
-									.append("分钟").toString());
-						} else {
-							msg.add("您的最新求助信息自动发布成功");
+				if (order.getType() == ProductEnum.TYPE_SEEK_HELP.getValue()){
+					//如果事情求助发送服务通知
+					long nowTime = System.currentTimeMillis();
+					TUser toUser = userService.getUserById(order.getCreateUser());
+					TFormid formid = findFormId(nowTime, toUser);
+					if (formid != null) {
+						try {
+							List<String> msg = new ArrayList<>();
+							String parameter = "";
+							if (service.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
+								msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
+										.append(service.getCollectTime() * service.getServicePersonnel())
+										.append("分钟").toString());
+							} else {
+								msg.add("您的最新求助信息自动发布成功");
+							}
+							msg.add(order.getServiceName());
+							msg.add(changeTime(order.getStartTime()));
+							msg.add(changeAddress(order.getAddressName()));
+							msg.add("如果您暂时不再需要，可以在「我的-我发布的」下架本条求助。");
+							messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.help_setTemplate_23, parameter);
+							formid.setIsValid("0");
+							messageCommonController.updateFormId(formid);
+						} catch (Exception e) {
+							logger.error("发送服务通知失败");
 						}
-						msg.add(order.getServiceName());
-						msg.add(changeTime(order.getStartTime()));
-						msg.add(changeAddress(order.getAddressName()));
-						msg.add("如果您暂时不再需要，可以在「我的-我发布的」下架本条求助。");
-						messageCommonController.pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, SetTemplateIdEnum.help_setTemplate_23, parameter);
-						formid.setIsValid("0");
-						messageCommonController.updateFormId(formid);
-					} catch (Exception e) {
-						logger.error("发送服务通知失败");
 					}
 				}
+
 				//发送MQ消息，将定时下架订单任务发送到调度中心
 				sendMqBySaveOrder(service, order);
 				return order;
@@ -1037,6 +1040,23 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			userFreeze.setIsValid(AppConstant.IS_VALID_NO);
 			userService.updateUserFreeze(userFreeze);
 		}
+	}
+
+	@Override
+	public List<GroupChooseOrderView> listGroupOrder(TUser user) {
+		List<GroupChooseOrderView> listView = new ArrayList<>();
+		GroupChooseOrderView view = new GroupChooseOrderView();
+		List<TOrder> listOrder = orderDao.selectGroupHelpEnrollList(user.getId());
+		if (listOrder.size() == 0) {
+			return listView;
+		}
+		for (TOrder tOrder : listOrder) {
+			TService service = productService.selectByProductId(tOrder.getServiceId());
+			view.setOrder(tOrder);
+			view.setService(service);
+			listView.add(view);
+		}
+		return listView;
 	}
 
 	/**

@@ -110,5 +110,22 @@ public interface GroupService {
 	QueryResult<SmartUserView> userWaitToJoin(TUser user, Integer pageNum, Integer pageSize, String param, String skill);
 
 	CompanyRecentView companyPaymentDiagram(TUser user);
+	/**
+	 * 成员移动
+	 * @param nowUser
+	 * @param groupId
+	 * @param userIds
+	 */
+	void userMove(TUser nowUser, Long groupId, List<Long> userIds);
+
+	/**
+	 * 成员修改
+	 * @param nowUser
+	 * @param userName
+	 * @param userId
+	 * @param sex
+	 * @param groupId
+	 */
+	void userModify(TUser nowUser, String userName, Long userId, Integer sex, Long groupId);
 
 }
