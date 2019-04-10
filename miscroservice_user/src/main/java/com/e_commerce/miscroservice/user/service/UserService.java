@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -361,12 +362,7 @@ public interface UserService {
      */
     void logOut(String token);
 
-    /**
-     * 通过手机号获取用户
-     * @param telephone
-     * @return
-     */
-    List<TUser> getUserByTelephone(String telephone);
+    abstract TUser getUserByTelephone(String telephone);
 
     /**
      * 任务大厅
@@ -403,4 +399,14 @@ public interface UserService {
      * @return
      */
     TBonusPackage generateBonusPackage(TUser user, TBonusPackage bonusPackage);
+
+    List<Long> getUsersByName(String param);
+
+    QueryResult<UserDetailView> list(String param, Integer pageNum, Integer pageSize);
+
+    UserDetailView info(Long userId);
+
+    void changeAvailableStatus(Long userId, String avaliableStatus, String userType, TUser manager);
+
+    void loginPwd(String account, String password, HttpServletResponse response) throws Exception;
 }

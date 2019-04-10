@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.EasyUIPageResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -849,7 +853,7 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("infos")
-    public Object info(String token, Long userId) {
+    public Object infos(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser(token);
         try {
@@ -1769,7 +1773,7 @@ public class UserController extends BaseController {
      */
     @RequestMapping("modify")
     @Consume(TUser.class)
-    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex, String vxId, String remarks) {
+    public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex, String vxId, String remarks, String userType) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
         try {
@@ -2797,6 +2801,174 @@ public class UserController extends BaseController {
             result.setSuccess(false);
         }
         return result;
+    }
+
+    /**
+     * 功能描述: 查询所有用户
+     * 作者: 许方毅
+     * 创建时间: 2018年12月18日 下午4:08:57
+     * @param param
+     * @param page
+     * @param rows
+     * @return
+     */
+    @RequestMapping("list")
+    public Object list(String param, Integer page, Integer rows) {
+        EasyUIPageResult easyUIPageResult = new EasyUIPageResult();
+        Integer pageNum = page;
+        Integer pageSize = rows;
+        try {
+            QueryResult<UserDetailView> queryResult = userService.list(param, pageNum, pageSize);
+            easyUIPageResult.setRows(queryResult.getResultList());
+            easyUIPageResult.setTotal(queryResult.getTotalCount());
+        } catch (MessageException e) {
+            logger.warn(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn(errInfo(e));
+        }
+        return easyUIPageResult;
+    }
+
+    /**
+     * 功能描述: 查看用户详情
+     * 作者: 许方毅
+     * 创建时间: 2018年12月18日 下午4:09:32
+     * @return
+     */
+    @RequestMapping("details")
+    public Object details(String token, Long userId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            if(token!=null) {
+                TUser user = (TUser) redisUtil.get(token);
+                userId = user.getId();
+            }
+            UserDetailView user = userService.info(userId);
+            result.setData(user);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.warn(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 功能描述: 更新用户可用状态
+     * 作者: 许方毅
+     * 创建时间: 2018年12月26日 下午3:26:44
+     * @param avaliableStatus
+     * @return
+     */
+    @RequestMapping("modifyAvaliableAndType")
+    public Object modifyAvaliableAndType(Long userId, String avaliableStatus, String userType, HttpServletRequest request) {
+        AjaxResult result = new AjaxResult();
+        try {
+            String token = (String) request.getAttribute("token");
+            TUser manager = (TUser) redisUtil.get(token);
+            userService.changeAvailableStatus(userId, avaliableStatus, userType, manager);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.warn(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 功能描述: 密码登录
+     * 作者: 许方毅
+     * 创建时间: 2018年12月28日 下午2:36:53
+     * @param account
+     * @param password
+     * @return
+     */
+    @RequestMapping("/login/pwd")
+    public Object loginPwd(String account, String password, HttpServletResponse response) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.loginPwd(account, password,response);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.warn(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    // 非注解方式获取cookie中对应的key值
+    @RequestMapping("getcookies")
+    public String getCookies(HttpServletRequest request) {
+        // HttpServletRequest 装请求信息类
+        // HttpServletRespionse 装相应信息的类
+        // Cookie cookie=new Cookie("sessionId","CookieTestInfo");
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("token")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 功能描述: 管理后台用户登出
+     * 作者: 许方毅
+     * 创建时间: 2019年1月9日 上午11:16:04
+     * @param token
+     * @return
+     */
+    @PostMapping("logOut/manager")
+    public Object logOutManager(String token, HttpServletResponse response) {
+        AjaxResult result = new AjaxResult();
+        try {
+            Cookie cookie = new Cookie("token", null);
+            userService.logOut(token);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            logger.error(e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            logger.error(errInfo(e));
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+
     }
 
 }

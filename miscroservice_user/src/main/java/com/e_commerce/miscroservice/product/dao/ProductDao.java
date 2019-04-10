@@ -110,4 +110,6 @@ public interface ProductDao {
 	 * @return
 	 */
 	long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList);
+
+    List<TService> selectByUserId(Long userId);
 }

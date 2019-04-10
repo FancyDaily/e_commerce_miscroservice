@@ -164,6 +164,52 @@ public class UserDaoImpl implements UserDao {
     }
 
     /**
+     * 根据手机号和权限查询
+     * @param telephone
+     * @param jurisdictionNormal
+     * @return
+     */
+    @Override
+    public List<TUser> selectByTelephoneAndJurisdiction(String telephone, Integer jurisdictionNormal) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserTel,telephone)
+        .eq(TUser::getJurisdiction,jurisdictionNormal)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUser> selectByName(String param) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getName,param)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUser> selectByJurisdictionAndCreateTimeDesc(Integer jurisdictionNormal) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getJurisdiction,jurisdictionNormal)
+        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
+    }
+
+    @Override
+    public List<TUser> selectByNameAndJurisdictionCreateTimeDesc(String param, Integer jurisdictionNormal) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getName,param)
+        .eq(TUser::getJurisdiction,jurisdictionNormal)
+                .eq(TUser::getIsValid,AppConstant.IS_VALID_YES)
+        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
+    }
+
+    @Override
+    public List<TUser> selectByUserAccountAndPasswordAndJurisdiction(String account, String password, Integer jurisdictionAdmin) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserAccount,account)
+        .eq(TUser::getPassword,password)
+        .eq(TUser::getJurisdiction,jurisdictionAdmin)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    /**
      * 获取该账号的分身
      *
      * @param user

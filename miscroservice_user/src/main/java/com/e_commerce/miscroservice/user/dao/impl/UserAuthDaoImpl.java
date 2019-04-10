@@ -29,4 +29,10 @@ public class UserAuthDaoImpl implements UserAuthDao {
         .eq(TUserAuth::getUserId,id)
         .eq(TUserAuth::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TUserAuth> selectAll() {
+        return MybatisOperaterUtil.getInstance().finAll(new TUserAuth(),new MybatisSqlWhereBuild(TUserAuth.class)
+        .eq(TUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }
