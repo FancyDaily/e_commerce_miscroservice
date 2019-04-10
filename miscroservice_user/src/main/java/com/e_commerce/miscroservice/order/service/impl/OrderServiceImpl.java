@@ -149,6 +149,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setOrder(order);
 			//设置封面图
 			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
+			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
+			returnView.setDescription(listProductDesc.get(0).getDepict());
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
 			returnView.setUser(userView);
