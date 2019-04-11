@@ -1017,6 +1017,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		TService product = productService.selectByProductId(productId);
 		Long createrId = product.getUserId();
 		TUser creater = userService.getUserById(createrId);
+
 		//根据订单的enroll_num和confirm_num判断是否可以下架
 		for(TOrder order:orders) {
 			if(order.getEnrollNum()>0 || order.getConfirmNum()>0) {
@@ -1025,6 +1026,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//将订单置为无效IS_VALID_NO
 			order.setIsValid(AppConstant.IS_VALID_NO);
 			orderDao.updateByPrimaryKey(order);
+			//将发布者相关订单关系置为无效
+			Long orderId = order.getId();
+			TOrderRelationship orderRelationship = orderRelationshipDao.selectorderrelationshipByFromuserIdAndNULLReceiptUserIdAndOrderId(orderId, order.getCreateUser());
+			orderRelationship.setIsValid(AppConstant.IS_VALID_NO);
+			orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+
 			//如果商品性质为求助，
 			//退还钱款：
 			//冻结返还，总额增加
@@ -1035,7 +1042,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			creater.setFreezeTime(creater.getFreezeTime() - beenFreezedTime);
 			userService.updateByPrimaryKey(creater);
 			//对应冻结流水置为无效
-			TUserFreeze userFreeze = userService.selectUserFreezeByUserIdAndOrderId(createrId, order.getId());
+			TUserFreeze userFreeze = userService.selectUserFreezeByUserIdAndOrderId(createrId, orderId);
 			if(userFreeze==null) {
 				continue;
 			}

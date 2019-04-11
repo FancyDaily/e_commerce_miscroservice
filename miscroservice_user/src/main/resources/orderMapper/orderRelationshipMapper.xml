@@ -46,6 +46,7 @@
         OR (receipt_user_id = #{userId}
         AND `status` IN (1, 2, 3, 9, 10, 11, 12))
         )
+        AND `is_valid` = '1'
         ORDER BY
         CASE
         WHEN `STATUS` = 3 THEN
