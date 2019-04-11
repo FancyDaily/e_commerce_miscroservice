@@ -173,7 +173,7 @@ public interface UserService {
      * @param pageSize
      * @return
      */
-    QueryResult<List<TOrder>> collectList(TUser user, Integer pageNum, Integer pageSize);
+    QueryResult collectList(TUser user, Integer pageNum, Integer pageSize);
 
     /**
      * 用户认证信息更新(实名认证)

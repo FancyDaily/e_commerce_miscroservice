@@ -22,6 +22,8 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
+import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -41,7 +44,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -120,6 +122,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private ProductCommonController productService;
 
     @Value("${debug}")
     private String debug;
@@ -587,6 +592,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
             orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
             orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+            orderRelationship.setServiceCollectionTime(System.currentTimeMillis());
             orderRelationship.setServiceName(order.getServiceName());
             orderRelationship.setStartTime(order.getStartTime());
             orderRelationship.setEndTime(order.getEndTime());
@@ -1250,7 +1256,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public QueryResult<List<TOrder>> collectList(TUser user, Integer pageNum, Integer pageSize) {
+    public QueryResult collectList(TUser user, Integer pageNum, Integer pageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -1262,8 +1268,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrderRelationship> orderRelationships = orderService.selectCollectList(user.getId());
 
         List<Long> idList = new ArrayList<>();
+        Map<Long,Long> collectTimeMap = new HashMap<>();
         for (TOrderRelationship orderRelationship : orderRelationships) {
-            idList.add(orderRelationship.getOrderId());
+            Long orderId = orderRelationship.getOrderId();
+            idList.add(orderId);
+            collectTimeMap.put(orderId,orderRelationship.getServiceCollectionTime());
         }
 
         if (idList.isEmpty()) {
@@ -1273,8 +1282,27 @@ public class UserServiceImpl extends BaseService implements UserService {
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
         List<TOrder> orders = orderService.selectOrdersInOrderIdsInStatus(idList, AppConstant.COLLECTION_AVAILABLE_STATUS_ARRAY);
 
+        List<Long> productIds = new ArrayList<>();
+        for(TOrder order:orders) {
+            productIds.add(order.getServiceId());
+        }
+        //获取封面图
+        Map<Long, String> productCoverPic = productService.getProductCoverPic(productIds);
+        List<CollectionView> collectionViews = new ArrayList<>();
+        for(TOrder order:orders) {
+            Long serviceId = order.getServiceId();
+            String coverPic = productCoverPic.get(serviceId);
+            Long collectionTime = collectTimeMap.get(order.getId());
+            CollectionView collectionView = BeanUtil.copy(order, CollectionView.class);
+            collectionView.setCoverPic(coverPic);
+            if(collectionTime!=null) {
+                collectionView.setCollectionTime(DateUtil.timeStamp2Date(collectionTime));
+            }
+            collectionViews.add(collectionView);
+        }
+
         QueryResult queryResult = new QueryResult();
-        queryResult.setResultList(orders);
+        queryResult.setResultList(collectionViews);
         queryResult.setTotalCount(startPage.getTotal());
 
         return queryResult;
