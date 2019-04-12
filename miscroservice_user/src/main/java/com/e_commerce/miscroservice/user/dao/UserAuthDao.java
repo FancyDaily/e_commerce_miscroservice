@@ -10,4 +10,6 @@ public interface UserAuthDao {
     int insert(TUserAuth userAuth);
 
     List<TUserAuth> selectByUserId(Long id);
+
+    List<TUserAuth> selectAll();
 }

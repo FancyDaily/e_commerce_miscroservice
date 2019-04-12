@@ -3110,6 +3110,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (order.getType() == ProductEnum.TYPE_SERVICE.getValue()){
             //如果是服务，看是不是所有人都点击确认开始了
 
+            if(orderRelationshipList.isEmpty()) {
+                //如果没有成立的订单关系记录(当然是排除了收藏和举报的无状态订单关系记录)
+                return;
+            }
+
             for (int i = 0 ; i < orderRelationshipList.size(); i++){
                 if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType());{
                     //如果有已签到的人，无需发消息
@@ -3127,7 +3132,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 try {
                     List<String> wxMsg = new ArrayList<>();
                     String parameter = "?orderId="+order.getId()+"&returnHome=true";
-                    wxMsg.add("按下按钮才算啊");
+                    wxMsg.add("按下按钮才算啊");//TODO TO_MODIFY_REMARK
                     wxMsg.add(order.getServiceName());
                     wxMsg.add(publishUser.getName());
                     wxMsg.add(changeTime(order.getStartTime()));

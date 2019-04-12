@@ -779,4 +779,6 @@ public interface AppConstant {
     Integer[] COMPANY_PUBLISHED_STATUS_ARRAY = {ProductEnum.STATUS_UPPER_FRAME.getValue()
             ,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue(),ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()
     ,ProductEnum.STATUS_DELETE.getValue()}; //TODO 组织版组织概况中发布的商品
+
+    Integer JURISDICTION_ADMIN = 1;
 }

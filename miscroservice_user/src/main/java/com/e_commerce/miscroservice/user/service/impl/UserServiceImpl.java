@@ -22,6 +22,8 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
+import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -42,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
@@ -117,6 +122,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private ProductCommonController productService;
 
     @Value("${debug}")
     private String debug;
@@ -584,6 +592,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_NO.getType());
             orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
             orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_TURE.getType());
+            orderRelationship.setServiceCollectionTime(System.currentTimeMillis());
             orderRelationship.setServiceName(order.getServiceName());
             orderRelationship.setStartTime(order.getStartTime());
             orderRelationship.setEndTime(order.getEndTime());
@@ -900,7 +909,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (telephone != null) {
             // 若对手机号进行修改
             if (!idHolder.getUserTel().equals(telephone)) {
-                if (!getUserByTelephone(telephone).isEmpty()) {
+                if (!getUsersByTelephone(telephone).isEmpty()) {
                     throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已存在！");
                 }
 //				return flushRedisUserNewToken(token, user);
@@ -1247,7 +1256,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public QueryResult<List<TOrder>> collectList(TUser user, Integer pageNum, Integer pageSize) {
+    public QueryResult collectList(TUser user, Integer pageNum, Integer pageSize) {
         if (pageNum == null) {
             pageNum = 1;
         }
@@ -1259,8 +1268,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrderRelationship> orderRelationships = orderService.selectCollectList(user.getId());
 
         List<Long> idList = new ArrayList<>();
+        Map<Long,Long> collectTimeMap = new HashMap<>();
         for (TOrderRelationship orderRelationship : orderRelationships) {
-            idList.add(orderRelationship.getOrderId());
+            Long orderId = orderRelationship.getOrderId();
+            idList.add(orderId);
+            collectTimeMap.put(orderId,orderRelationship.getServiceCollectionTime());
         }
 
         if (idList.isEmpty()) {
@@ -1270,8 +1282,27 @@ public class UserServiceImpl extends BaseService implements UserService {
         Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
         List<TOrder> orders = orderService.selectOrdersInOrderIdsInStatus(idList, AppConstant.COLLECTION_AVAILABLE_STATUS_ARRAY);
 
+        List<Long> productIds = new ArrayList<>();
+        for(TOrder order:orders) {
+            productIds.add(order.getServiceId());
+        }
+        //获取封面图
+        Map<Long, String> productCoverPic = productService.getProductCoverPic(productIds);
+        List<CollectionView> collectionViews = new ArrayList<>();
+        for(TOrder order:orders) {
+            Long serviceId = order.getServiceId();
+            String coverPic = productCoverPic.get(serviceId);
+            Long collectionTime = collectTimeMap.get(order.getId());
+            CollectionView collectionView = BeanUtil.copy(order, CollectionView.class);
+            collectionView.setCoverPic(coverPic);
+            if(collectionTime!=null) {
+                collectionView.setCollectionTime(DateUtil.timeStamp2Date(collectionTime));
+            }
+            collectionViews.add(collectionView);
+        }
+
         QueryResult queryResult = new QueryResult();
-        queryResult.setResultList(orders);
+        queryResult.setResultList(collectionViews);
         queryResult.setTotalCount(startPage.getTotal());
 
         return queryResult;
@@ -3237,7 +3268,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param telephone
      * @return
      */
-    public List<TUser> getUserByTelephone(String telephone) {
+    public List<TUser> getUsersByTelephone(String telephone) {
         return userDao.queryUsersByTelephone(telephone);
     }
 
@@ -3819,6 +3850,257 @@ public class UserServiceImpl extends BaseService implements UserService {
             logger.error("解析字典表allType关键字的json出错，" + e.getMessage());
             return "";
         }
+    }
+
+    /**
+     * 功能描述: 通过手机号获取用户
+     * 作者: 许方毅
+     * 创建时间: 2018年10月29日 下午2:57:03
+     * @param telephone
+     * @return
+     */
+    @Override
+    public TUser getUserByTelephone(String telephone) {
+        List<TUser> userList = userDao.selectByTelephoneAndJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL);
+        TUser user = null;
+        if (userList != null && !userList.isEmpty()) {
+            user = userList.get(0);
+        }
+        return user;
+    }
+
+    /**
+     * 功能描述: 根据用户姓名返回多个用户id
+     * 作者: 许方毅
+     * 创建时间: 2018年12月17日 下午4:25:13
+     * @param param
+     * @return
+     */
+    @Override
+    public List<Long> getUsersByName(String param) {
+        List<TUser> users = userDao.selectByName(param);
+        List<Long> userIds = new ArrayList<>();
+        for (TUser user : users) {
+            userIds.add(user.getId());
+        }
+        return userIds;
+    }
+
+    /**
+     * 功能描述: 查询所有用户
+     * 作者: 许方毅
+     * 创建时间: 2018年12月18日 下午2:30:19
+     * @param param
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public QueryResult<UserDetailView> list(String param, Integer pageNum, Integer pageSize) {
+        // 分页
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+        QueryResult<UserDetailView> queryResult = new QueryResult<UserDetailView>();
+
+        // 初始化返回集
+        List<TUser> userList = new ArrayList<TUser>();
+
+        // 处理请求参数
+        String regex_num = "^\\d+$";
+        String regex_tel = "^[1](([3][0-9])|([4][5,7,9])|([5][^4,6,9])|([6][6])|([7][3,5,6,7,8])|([8][0-9])|([9][8,9]))[0-9]{8}$";
+        if (param == null) { // TODO 空串或多个空格
+            userList = userDao.selectByJurisdictionAndCreateTimeDesc(AppConstant.JURISDICTION_NORMAL);
+        } else {
+            if (param.matches(regex_num)) {
+                if (param.matches(regex_tel)) { // 手机号
+                    TUser user = getUserByTelephone(param);
+                    if(user!=null) {
+                        userList.add(user);
+                    }
+                } else { // 服务/求助ID
+                    TOrder order = orderService.selectOrderById(Long.valueOf(param));
+                    TUser user = userDao.selectByPrimaryKey(order.getCreateUser());
+                    if(user!=null && AppConstant.JURISDICTION_NORMAL.equals(user.getJurisdiction())) {	//只展示普通用户
+                        userList.add(user);
+                    }
+                }
+            } else { // 姓名
+                // 初始化查询条件
+                userList = userDao.selectByNameAndJurisdictionCreateTimeDesc(param,AppConstant.JURISDICTION_NORMAL);
+            }
+        }
+
+        List<UserDetailView> viewList = new ArrayList<UserDetailView>();
+        // 装载身份证信息
+        List<TUserAuth> userAuths = userAuthDao.selectAll();
+        Map<String, Object> authMap = new HashMap<String, Object>();
+        for (TUserAuth userAuth : userAuths) {
+            authMap.put(String.valueOf(userAuth.getUserId()), userAuth.getCardId());
+        }
+
+        // String化
+        for (TUser user : userList) {
+            UserDetailView view = BeanUtil.copy(user, UserDetailView.class);
+            view.setIdString(String.valueOf(view.getId()));
+            // 对用户可用性作健壮处理
+            if (view.getAvaliableStatus() == null) {
+                view.setAvaliableStatus(AppConstant.AVALIABLE_STATUS_AVALIABLE);
+            }
+
+            // 获取身份证号码
+            String cardId = (String) authMap.get(String.valueOf(user.getId()));
+            if (cardId != null) {
+                view.setCardId(cardId);
+            } else {
+                view.setCardId("无");
+            }
+            viewList.add(view);
+        }
+
+		/*//按注册时间倒序
+		Collections.sort(viewList, new Comparator<UserDetailView>() {
+
+			@Override
+			public int compare(UserDetailView o1, UserDetailView o2) {
+				return (int) (o2.getCreateTime() - o1.getCreateTime());
+			}
+
+		});*/
+
+        queryResult.setResultList(viewList);
+        queryResult.setTotalCount(startPage.getTotal());
+
+        return queryResult;
+    }
+
+    /**
+     * 功能描述: 查看用户详情
+     * 作者: 许方毅
+     * 创建时间: 2018年12月18日 下午4:32:36
+     * @param userId
+     * @return
+     */
+    @Override
+    public UserDetailView info(Long userId) {
+        TUser user = userDao.selectByPrimaryKey(userId);
+        UserDetailView view = BeanUtil.copy(user, UserDetailView.class);
+        view.setIdString(String.valueOf(view.getId()));
+        // 评价(平均分)
+        Double averageScore = 0.0;
+        if (user.getServeNum() != 0) {
+            averageScore = (user.getServAttitudeEvaluate() + user.getServMajorEvaluate() + user.getServAttitudeEvaluate()) / 3.0
+                    / user.getServeNum();
+        }
+        view.setAverageScore(averageScore);
+        // 可用状态(健壮)
+        if (user.getAvaliableStatus() == null) {
+            view.setAvaliableStatus(AppConstant.AVALIABLE_STATUS_AVALIABLE);
+        }
+        // 在列服务、求助查询,统计次数
+        int onSaleServCnt = 0;
+        int onSaleHelpCnt = 0;
+        List<TService> services = productDao.selectByUserId(userId);
+        for (TService service : services) {
+            if (ProductEnum.TYPE_SEEK_HELP.getValue() == service.getType()) {
+                onSaleHelpCnt++;
+            } else if (ProductEnum.TYPE_SERVICE.getValue() == service.getType()) {
+                onSaleServCnt++;
+            }
+        }
+        view.setHelpOnSaleNum(Integer.valueOf(onSaleHelpCnt));
+        view.setServOnSaleNum(Integer.valueOf(onSaleServCnt));
+
+        // 身份证号码
+        List<TUserAuth> userAuths = userAuthDao.selectByUserId(userId);
+        if (!userAuths.isEmpty()) {
+            TUserAuth userAuth = userAuths.get(0);
+            view.setCardId(userAuth.getCardId());
+        } else {
+            view.setCardId("无"); // TODO
+        }
+
+        return view;
+    }
+
+    /**
+     * 功能描述: 更新用户可用状态
+     * 作者: 许方毅
+     * 创建时间: 2018年12月26日 下午3:28:32
+     * @param userId
+     * @param avaliableStatus
+     */
+    @Override
+    public void changeAvailableStatus(Long userId, String avaliableStatus, String userType, TUser manager) { // TODO 是否要判断下用户的存在性
+        long currentTimeMillis = System.currentTimeMillis();
+        TUser user = new TUser();
+        user.setId(userId);
+        if(avaliableStatus!=null) {
+            user.setAvaliableStatus(avaliableStatus);
+        }
+        if(userType!=null) {
+            user.setUserType(userType);
+        }
+        // updater
+        user.setUpdateTime(currentTimeMillis);
+//        user.setUpdateUser(manager.getId());
+//        user.setUpdateUserName(manager.getName());
+        userDao.updateByPrimaryKey(user);
+
+        if(AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(avaliableStatus)) {	//禁用 => 强制下线
+            String redisKey = "str" + userId;
+            String token = (String) redisUtil.get(redisKey);
+            if(token!=null) {
+                redisUtil.del(token);
+                redisUtil.del(redisKey);
+                redisUtil.del(String.valueOf(userId));
+            }
+        }
+
+        // 日志记录
+        String logContent = "";
+        // 处理结果
+        String result = AppConstant.AVALIABLE_STATUS_AVALIABLE.equals(avaliableStatus) ? "\"恢复\"" : "\"禁用\"";
+        if(userType!=null) {
+            result = "3".equals(userType)?"\"认定为公益组织\"":"\"认定为普通组织\"";
+        }
+        // 处理时间
+        String time = changeTime(currentTimeMillis);
+//        logContent += "管理员:" + manager.getName() + "(ID:" + manager.getId() + ")" + " 于 " + time + " 对 编号为" + userId
+//                + "的用户 的可用状态" + "进行了 => " + result;
+//        logger.warn(logContent);
+    }
+
+    /**
+     * 功能描述: 密码登录
+     * 作者: 许方毅
+     * 创建时间: 2018年12月28日 下午2:38:36
+     * @param account
+     * @param password
+     * @throws Exception
+     */
+    @Override
+    public void loginPwd(String account, String password, HttpServletResponse response) throws Exception {
+        Integer COOKIE_INTERVAL = 60 * 60 * 24 * 15;
+        // 处理密码 -> 对已经在前端md5加密过的数据，对称加密一次
+        password = AESCommonUtil.encript(password);
+
+        TUser user = null;
+        List<TUser> users = userDao.selectByUserAccountAndPasswordAndJurisdiction(account,password,AppConstant.JURISDICTION_ADMIN);
+        if (!users.isEmpty()) {
+            user = users.get(0);
+        }
+        if (user == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户名或密码错误,或没有对应的权限");
+        }
+        // 生成token，向cookie存放值
+        String token = TokenUtil.genToken(String.valueOf(user.getId()));
+        // 向redis存放token和用户信息
+        redisUtil.set(token, user, COOKIE_INTERVAL); // 应当与cookie时效统一
+        redisUtil.set(String.valueOf(user.getId()), user, COOKIE_INTERVAL);
+        redisUtil.set("str" + user.getId(), token, COOKIE_INTERVAL);
+        Cookie cookie = new Cookie("token", token);
+        cookie.setMaxAge(COOKIE_INTERVAL); // cookie有效时效
+        cookie.setPath("/");
+        response.addCookie(cookie);
     }
 
 }

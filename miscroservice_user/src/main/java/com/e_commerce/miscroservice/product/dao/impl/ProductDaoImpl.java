@@ -123,4 +123,11 @@ public class ProductDaoImpl implements ProductDao {
 						.in(TService::getId, serviceIdList));
 		return count;
 	}
+
+    @Override
+    public List<TService> selectByUserId(Long userId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+		.eq(TService::getCreateUser,userId)
+		.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

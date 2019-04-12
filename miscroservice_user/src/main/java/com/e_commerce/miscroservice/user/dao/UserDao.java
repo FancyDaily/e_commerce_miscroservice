@@ -41,4 +41,14 @@ public interface UserDao {
     List<TUser> selectUserByTelephone(String telephone);
 
     List<TUser> selectInUserIds(String[] split);
+
+    List<TUser> selectByTelephoneAndJurisdiction(String telephone, Integer jurisdictionNormal);
+
+    List<TUser> selectByName(String param);
+
+    List<TUser> selectByJurisdictionAndCreateTimeDesc(Integer jurisdictionNormal);
+
+    List<TUser> selectByNameAndJurisdictionCreateTimeDesc(String param, Integer jurisdictionNormal);
+
+    List<TUser> selectByUserAccountAndPasswordAndJurisdiction(String account, String password, Integer jurisdictionAdmin);
 }

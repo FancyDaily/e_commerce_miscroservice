@@ -268,4 +268,8 @@ public interface OrderRelationshipDao {
 	long selectEnrollUserCount(Long orderId);
 
 	TOrderRelationship selectCollectByOrderIdAndUserId(Long orderId, Long id);
+
+    List<TOrderRelationship> selectOrderRelationshipByFromUserIdAndReceiptUserIdAndServiceId(Long productId, Long fromUserId, Long receiptUserId);
+
+	TOrderRelationship selectorderrelationshipByFromuserIdAndNULLReceiptUserIdAndOrderId(Long orderId, Long fromUserId);
 }
