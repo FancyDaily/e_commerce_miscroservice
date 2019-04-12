@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.message.vo.WxMssVo;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.util.Map;
  *
  */
 @Component
+@Data
 public class MessageCommonController extends BaseController {
 
 
@@ -114,10 +116,10 @@ public class MessageCommonController extends BaseController {
 //			wxMssVo.setEmphasis_keyword("keyword" + setTemplateIdEnum.getEnlarge()+".DATA");
 //		}
 
-        logger.info("小程序推送结果={}", url);
-        logger.info("小程序推送结果={}", wxMssVo.toString());
+        log.info("小程序推送结果={}", url);
+        log.info("小程序推送结果={}", wxMssVo.toString());
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, wxMssVo, String.class);
-        logger.info("小程序推送结果={}", responseEntity.getBody());
+        log.info("小程序推送结果={}", responseEntity.getBody());
         return responseEntity.getBody();
     }
 

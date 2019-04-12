@@ -85,6 +85,23 @@ public class AliOSSUtil {
 		}
 	}
 
+	public static String uploadFile(InputStream inputStream, String savePath, String fileName) throws Exception {
+		if (savePath == null) {
+			savePath = "";
+		}
+		// 获取图片后缀名
+		fileName = savePath + "/" + fileName;
+		try {
+			ossClient.putObject(bucket, fileName, inputStream);
+			String imgPath = "https://" + bucket + "." + endpoint + "/" + fileName;
+			return imgPath;
+		} catch (OSSException | ClientException e) {
+			logger.error("图片上传oss发生错误");
+			e.printStackTrace();
+			throw new Exception("图片上传oss发生错误");
+		}
+	}
+
 	public static String uploadQrImg(InputStream in, String secen) throws Exception {
 		// 判空
 		String savePath = UploadPathEnum.innerEnum.PERSON.getPath();

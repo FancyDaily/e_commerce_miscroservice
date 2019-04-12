@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,12 +30,11 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/publish")
+@Data
 public class PublishController extends BaseController {
-
 
     @Autowired
     private PublishService publishService;
-
 
     /**
      *
@@ -60,13 +60,13 @@ public class PublishController extends BaseController {
             result.setMsg("插入成功！");
             return result;
         } catch (MessageException e) {
-            logger.warn("插入失败," + e.getMessage());
+            log.warn("插入失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("插入失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("插入失败" + errInfo(e));
+            log.error("插入失败", e);
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("投诉失败");
@@ -104,13 +104,13 @@ public class PublishController extends BaseController {
             result.setData(publish);
             return result;
         } catch (MessageException e) {
-            logger.warn("查询失败," + e.getMessage());
+            log.warn("查询失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查询失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("查询失败" + errInfo(e));
+            log.error("查询失败" , e);
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查询失败");
@@ -136,13 +136,13 @@ public class PublishController extends BaseController {
             result.setData(broadcastViewList);
             return result;
         } catch (MessageException e) {
-            logger.warn("查询失败," + e.getMessage());
+            log.warn("查询失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查询失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("查询失败" + errInfo(e));
+            log.error("查询失败" , e);
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查询失败");

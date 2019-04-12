@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +21,6 @@ import java.util.List;
  */
 @Component
 public class UserCommonController {
-
-
-	Log logger = Log.getInstance(UserCommonController.class);
 
 	@Autowired
 	private UserService userService;

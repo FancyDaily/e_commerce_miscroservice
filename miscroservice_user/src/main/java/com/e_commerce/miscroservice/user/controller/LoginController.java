@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v2/login")
+@Data
 public class LoginController extends BaseController {
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private LoginService loginService;
@@ -87,13 +87,13 @@ public class LoginController extends BaseController {
             result.setMsg("手机授权成功");
             result.setData(telephone);
         } catch (MessageException e) {
-            logger.warn(e.getMessage());
+            log.warn("手机号码授权: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(errInfo(e));
+            log.error("手机号码授权" , e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -127,13 +127,13 @@ public class LoginController extends BaseController {
             result.setData(map);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn(e.getMessage());
+            log.warn("校验短信异常: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(errInfo(e));
+            log.error("校验短信异常" , e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -155,13 +155,13 @@ public class LoginController extends BaseController {
             result.setData(resMap);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn(e.getMessage());
+            log.warn("登陆校验异常: "  + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(errInfo(e));
+            log.error("登陆校验异常" , e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -182,13 +182,13 @@ public class LoginController extends BaseController {
             result.setSuccess(true);
             result.setData(wechatService.checkAuthCode(code));
         } catch (MessageException e) {
-            logger.warn(e.getMessage());
+            log.warn("与微信校验授权异常: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(errInfo(e));
+            log.error("与微信校验授权异常" , e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -211,13 +211,13 @@ public class LoginController extends BaseController {
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {
-            logger.warn(e.getMessage());
+            log.warn("请求token异常: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(errInfo(e));
+            log.error("请求token异常" , e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());

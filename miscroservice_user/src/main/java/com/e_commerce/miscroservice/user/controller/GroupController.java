@@ -23,6 +23,7 @@ import com.e_commerce.miscroservice.user.vo.BaseGroupView;
 import com.e_commerce.miscroservice.user.vo.CompanyRecentView;
 import com.e_commerce.miscroservice.user.vo.SmartUserView;
 import com.e_commerce.miscroservice.user.vo.UserCompanyView;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +39,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api/v2/group")
+@Data
 public class GroupController extends BaseController {
 
     @Autowired
@@ -46,7 +48,7 @@ public class GroupController extends BaseController {
     @Autowired
     private GroupService groupService;
 
-    Log logger = Log.getInstance(UserController.class);
+//    Log log = Log.getInstance(UserController.class);
 
 	private String endpoint = "sts.aliyuncs.com";
 	private String roleArn = "acs:ram::1833330782534832:role/aliyunosstokengeneratorrole";
@@ -105,7 +107,7 @@ public class GroupController extends BaseController {
 		} catch (ClientException e) {
 			result.setSuccess(false);
 			result.setMsg("获取token失败");
-			logger.error(e.getErrMsg());
+			log.error(e.getErrMsg());
 /*            System.out.println("Failed：");
             System.out.println("Error code: " + e.getErrCode());
             System.out.println("Error message: " + e.getErrMsg());
@@ -129,11 +131,11 @@ public class GroupController extends BaseController {
             result.setData(gatherInfo);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("组织概况查询" + e.getMessage());
+            log.warn("组织概况查询" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("组织概况查询" + errInfo(e));
+            log.error("组织概况查询" , e);
             result.setSuccess(false);
         }
         return result;
@@ -155,11 +157,11 @@ public class GroupController extends BaseController {
             result.setData(companyRecentView);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("组织近况(年度服务、需求、新增人员数目统计)查询" + e.getMessage());
+            log.warn("组织近况(年度服务、需求、新增人员数目统计)查询" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("组织近况(年度服务、需求、新增人员数目统计)查询" + errInfo(e));
+            log.error("组织近况(年度服务、需求、新增人员数目统计)查询" , e);
             result.setSuccess(false);
         }
         return result;
@@ -183,11 +185,11 @@ public class GroupController extends BaseController {
             result.setData(userList);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("组内成员列表异常" + e.getMessage());
+            log.warn("组内成员列表异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("组内成员列表异常" + errInfo(e));
+            log.error("组内成员列表异常" , e);
             result.setSuccess(false);
         }
         return result;
@@ -208,11 +210,11 @@ public class GroupController extends BaseController {
             groupService.userAdd(user, groupId, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("成员新增(批量)异常" + e.getMessage());
+            log.warn("成员新增(批量)异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("成员新增(批量)异常" + errInfo(e));
+            log.error("成员新增(批量)异常" , e);
             result.setSuccess(false);
         }
         return result;
@@ -235,11 +237,11 @@ public class GroupController extends BaseController {
             groupService.userInsert(user, groupId, phone, userName, sex);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" + e.getMessage());
+            log.warn("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" + errInfo(e));
+            log.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" , e);
             result.setSuccess(false);
         }
         return result;
@@ -259,12 +261,12 @@ public class GroupController extends BaseController {
             groupService.delete(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("删除组织成员(成员删除)" + e.getMessage());
+            log.warn("删除组织成员(成员删除)" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("删除组织成员(成员删除)" + errInfo(e));
+            log.error("删除组织成员(成员删除)" , e);
             result.setSuccess(false);
         }
         return result;
@@ -284,11 +286,11 @@ public class GroupController extends BaseController {
             groupService.userPass(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("成员审核通过异常" + e.getMessage());
+            log.warn("成员审核通过异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("成员审核通过异常" + errInfo(e));
+            log.error("成员审核通过异常" , e);
             result.setSuccess(false);
         }
         return result;
@@ -308,11 +310,11 @@ public class GroupController extends BaseController {
             groupService.userReject(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("成员审核拒绝异常" + e.getMessage());
+            log.warn("成员审核拒绝异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("成员审核拒绝异常" + errInfo(e));
+            log.error("成员审核拒绝异常" , e);
             result.setSuccess(false);
         }
         return result;
@@ -333,16 +335,16 @@ public class GroupController extends BaseController {
             result.setData(errorInfoList);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("批量插入成员(Excel文件)异常" + e.getMessage());
+            log.warn("批量插入成员(Excel文件)异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (IOException e) {
-            logger.error(errInfo(e));
+            log.error("批量插入成员(Excel文件)异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.IOError.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("批量插入成员(Excel文件)异常" + errInfo(e));
+            log.error("批量插入成员(Excel文件)异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -366,12 +368,12 @@ public class GroupController extends BaseController {
 		} catch (IllegalArgumentException e) {
 			result.setSuccess(false);
 			result.setMsg("查询分组列表失败");
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		} catch (Exception e) {
 			e.printStackTrace();
 			result.setSuccess(false);
 			result.setMsg("查询分组列表失败");
-//			logger.error(errInfo(e), e);
+			log.error("查询所有分组列表失败", e);
 		}
 		return result;
 	}
@@ -394,11 +396,11 @@ public class GroupController extends BaseController {
 		} catch (IllegalArgumentException e) {
 			result.setSuccess(false);
 			result.setMsg("新建分组失败");
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		} catch (Exception e) {
 			result.setSuccess(false);
 			result.setMsg("新建分组失败");
-//			logger.error(errInfo(e), e);
+			log.error("新建分组失败", e);
 		}
 		return result;
 	}
@@ -421,15 +423,15 @@ public class GroupController extends BaseController {
 		} catch (NoAuthChangeException e) {
 			result.setSuccess(false);
 			result.setMsg(e.getMessage());
-			logger.info(e.getMessage(), e);
+			log.info(e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
 			result.setSuccess(false);
 			result.setMsg("修改分组名称失败");
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		} catch (Exception e) {
 			result.setSuccess(false);
 			result.setMsg("修改分组名称失败");
-//			logger.error(errInfo(e), e);
+			log.error("修改分组名称失败", e);
 		}
 		return result;
 	}
@@ -452,15 +454,15 @@ public class GroupController extends BaseController {
 		} catch (NoAuthChangeException e) {
 			result.setSuccess(false);
 			result.setMsg(e.getMessage());
-			logger.info(e.getMessage(), e);
+			log.info(e.getMessage(), e);
 		} catch (IllegalArgumentException e) {
 			result.setSuccess(false);
 			result.setMsg("删除分组失败");
-			logger.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 		} catch (Exception e) {
 			result.setSuccess(false);
 			result.setMsg("删除分组失败");
-//			logger.error(errInfo(e), e);
+			log.error("删除分组失败", e);
 		}
 		return result;
 	}
@@ -483,11 +485,11 @@ public class GroupController extends BaseController {
             result.setData(userViews);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("新成员列表(待处理申请名单)异常" + e.getMessage());
+            log.warn("新成员列表(待处理申请名单)异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("新成员列表(待处理申请名单)异常" + errInfo(e));
+            log.error("新成员列表(待处理申请名单)异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -507,11 +509,11 @@ public class GroupController extends BaseController {
             result.setData(view);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("组织年度流水折线图数据异常" + e.getMessage());
+            log.warn("组织年度流水折线图数据异常" + e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("组织年度流水折线图数据异常" + errInfo(e));
+            log.error("组织年度流水折线图数据异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -546,14 +548,14 @@ public class GroupController extends BaseController {
             result.setMsg("移动成功！");
             return result;
         } catch (MessageException e) {
-            logger.error("已知移动失败," + e.getMessage());
+            log.error("已知移动失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("移动失败," + e.getMessage());
             return result;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("未知移动失败：" + errInfo(e));
+            log.error("未知移动失败：", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("移动失败");
@@ -587,14 +589,14 @@ public class GroupController extends BaseController {
             result.setMsg("修改成功！");
             return result;
         } catch (MessageException e) {
-            logger.error("已知修改失败," + e.getMessage());
+            log.warn("已知修改失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("修改失败," + e.getMessage());
             return result;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("未知修改失败：" + errInfo(e));
+            log.error("成员修改失败：",e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("修改失败");

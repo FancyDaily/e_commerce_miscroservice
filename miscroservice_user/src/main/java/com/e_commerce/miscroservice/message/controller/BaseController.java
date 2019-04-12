@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.order.service.OrderService;
 import com.e_commerce.miscroservice.product.controller.SeekHelpController;
 import com.e_commerce.miscroservice.product.service.ProductService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -16,9 +17,8 @@ import java.io.StringWriter;
  * 功能描述:Controller的公共方法
  *
  */
+@Data
 public class BaseController {
-
-	Log logger = Log.getInstance(SeekHelpController.class);
 
 	@Autowired
 	protected ProductService seekHelpService;

@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
 import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v2/focus")
+@Data
 public class FocusController extends BaseController {
-
-    Log logger = Log.getInstance(FocusController.class);
 
     @Autowired
     private FocusService focusService;
@@ -48,14 +48,15 @@ public class FocusController extends BaseController {
         TUser user = UserUtil.getUser(token);
         try {
             focusService.submit(user, userFollowId);
+//            log.info("dddd{}hhdhd{}","forexample","aa");
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("关注异常: " + e.getMessage());
+            log.warn("关注异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("关注异常", errInfo(e));
+            log.error("关注异常",e);
             result.setSuccess(false);
         }
         return result;
@@ -150,12 +151,12 @@ public class FocusController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("关注列表异常: " + e.getMessage());
+            log.warn("关注列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         }  catch (Exception e) {
             e.printStackTrace();
-            logger.error("关注列表异常", errInfo(e));
+            log.error("关注列表异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -250,12 +251,12 @@ public class FocusController extends BaseController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            logger.warn("粉丝列表异常: " + e.getMessage());
+            log.warn("粉丝列表异常: " + e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("关注列表异常", errInfo(e));
+            log.error("关注列表异常", e);
             result.setSuccess(false);
         }
         return result;

@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @RequestMapping("/api/v2/message")
+@Data
 public class MessageController extends BaseController {
 
     @Autowired
@@ -55,7 +57,7 @@ public class MessageController extends BaseController {
         } catch (Exception e) {
             result.setSuccess(false);
             result.setMsg("收集formId失败");
-            logger.error("收集formId错误：" + errInfo(e));
+            log.error("收集formId错误：" , e);
             return result;
         }
     }
@@ -95,13 +97,13 @@ public class MessageController extends BaseController {
             result.setData(messageNotices);;
             return result;
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e));
+            log.error("查看失败" , e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -145,13 +147,13 @@ public class MessageController extends BaseController {
             result.setMsg("发送成功");
             return result;
         } catch (MessageException e) {
-            logger.warn("发送失败," + e.getMessage());
+            log.warn("发送失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("发送失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("发送失败" + errInfo(e));
+            log.error("发送失败" , e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("发送失败");
@@ -190,12 +192,12 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(messageDetailViewQueryResult);
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e));
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -233,12 +235,12 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(list);
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e));
+            log.error("查看失败" ,e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -265,12 +267,12 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(noticesFirstView);
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e));
+            log.error("查看失败" , e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -311,12 +313,12 @@ public class MessageController extends BaseController {
             result.setMsg("查看成功");
             result.setData(unReadMsg);
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e));
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");

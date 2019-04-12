@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,9 +32,8 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/v2/seekHelp")
+@Data
 public class SeekHelpController extends BaseController {
-
-	Log logger = Log.getInstance(SeekHelpController.class);
 
 	@Autowired
 	private RedisUtil redisUtil;
@@ -89,12 +89,12 @@ public class SeekHelpController extends BaseController {
 			result.setSuccess(true);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
+			log.error(AppMessageConstant.PRODUCT_QUERY_ERROR, e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
@@ -156,12 +156,12 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
+			log.error(AppMessageConstant.PRODUCT_QUERY_ERROR, e);
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
 			return result;
@@ -191,13 +191,13 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + errInfo(e));
+			log.error(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR);
@@ -228,13 +228,13 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_DEL_ERROR + errInfo(e));
+			log.error(AppMessageConstant.PRODUCT_DEL_ERROR , e);
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR);
 			return result;
@@ -263,13 +263,13 @@ public class SeekHelpController extends BaseController {
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + errInfo(e));
+			log.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR , e);
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
 			return result;
@@ -368,13 +368,13 @@ public class SeekHelpController extends BaseController {
 			}
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.SEEKHELP_SUBMIT_ERROR + errInfo(e));
+			log.error(AppMessageConstant.SEEKHELP_SUBMIT_ERROR , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_ERROR);
@@ -409,7 +409,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/analysisWord")
 	public AnalysisAudioView analysisWord(String text, String city) {
 		String[] dateWeekArray = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
-		logger.info("解析的文本为 {}, city 为 {} >>>>>>", text, city);
+		log.info("解析的文本为 {}, city 为 {} >>>>>>", text, city);
 		AnalysisAudioView resultView = new AnalysisAudioView();
 		AutoAnalysisWord analysisWord = new AutoAnalysisWord();
 		Map<String, Object> map = analysisWord.parse(text, city);

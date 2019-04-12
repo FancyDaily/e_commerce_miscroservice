@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.vo.*;
+import lombok.Data;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v2/order")
+@Data
 public class OrderController extends BaseController {
 
 	/**
@@ -60,12 +62,12 @@ public class OrderController extends BaseController {
 			result.setSuccess(true);
 			result.setMsg("查询成功");
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			log.warn("查询失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
+			log.error("查询失败" , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败");
@@ -134,12 +136,12 @@ public class OrderController extends BaseController {
 			result.setSuccess(true);
 			result.setMsg("查询成功");
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			log.warn("查询失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("查询失败" + errInfo(e), e);
+			log.error("查询失败" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败");
@@ -194,7 +196,7 @@ public class OrderController extends BaseController {
 			result.setSuccess(true);
 			result.setMsg("查询成功");
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			log.warn("查询失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
@@ -266,7 +268,7 @@ public class OrderController extends BaseController {
 			result.setSuccess(true);
 			result.setMsg("查询成功");
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			log.warn("查询失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("查询失败," + e.getMessage());
@@ -336,12 +338,12 @@ public class OrderController extends BaseController {
 			result.setData(data);
 			result.setMsg("获取详情成功");
 		} catch (MessageException e) {
-			logger.warn("获取详情失败," + e.getMessage());
+			log.warn("获取详情失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取详情失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("获取详情失败" + errInfo(e), e);
+			log.error("获取详情失败" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取详情失败");
@@ -393,12 +395,12 @@ public class OrderController extends BaseController {
 			result.setData(data);
 			result.setMsg("获取报名列表成功");
 		} catch (MessageException e) {
-			logger.warn("获取报名选人列表失败," + e.getMessage());
+			log.warn("获取报名选人列表失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取报名选人列表失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("获取报名选人列表失败" + errInfo(e), e);
+			log.error("获取报名选人列表失败" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取报名选人列表失败");
@@ -459,11 +461,11 @@ public class OrderController extends BaseController {
 			result.setData(data);
 			result.setMsg("获取报名列表成功");
 		} catch (MessageException e) {
-			logger.warn("查询失败," + e.getMessage());
+			log.warn("查询失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setMsg("查询失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("获取报名列表成功" + errInfo(e), e);
+			log.error("获取报名列表成功" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setMsg("获取报名列表失败");
 		}
@@ -520,12 +522,12 @@ public class OrderController extends BaseController {
 			result.setData(data);
 			result.setMsg("获取详情成功");
 		} catch (MessageException e) {
-			logger.warn("获取详情失败," + e.getMessage());
+			log.warn("获取详情失败," + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取详情失败," + e.getMessage());
 		} catch (Exception e) {
-			logger.error("获取详情失败" + errInfo(e), e);
+			log.error("获取详情失败" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg("获取详情失败");

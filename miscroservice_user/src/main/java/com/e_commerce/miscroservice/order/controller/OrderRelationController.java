@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
 import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.SeekHelpController;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +27,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v2/orderRelation")
+@Data
 public class OrderRelationController extends BaseController {
-
-    Log logger = Log.getInstance(OrderRelationController.class);
 
     @Autowired
     private OrderRelationService orderRelationService;
@@ -60,12 +60,12 @@ public class OrderRelationController extends BaseController {
             if (e.getErrorCode().equals("401") && serviceId != null){
                 orderRelationService.removeCanEnrollDate(date ,serviceId);
             }
-            logger.warn("报名失败," + e.getMessage());
+            log.warn("报名失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("报名失败" + errInfo(e), e);
+            log.error("报名失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("报名失败");
@@ -103,12 +103,12 @@ public class OrderRelationController extends BaseController {
             if (e.getErrorCode().equals("401") && serviceId != null){
                 orderRelationService.removeCanEnrollDate(date ,serviceId);
             }
-            logger.warn("批量报名失败," + e.getMessage());
+            log.warn("批量报名失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("批量报名失败" + errInfo(e), e);
+            log.error("批量报名失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("批量报名失败");
@@ -140,12 +140,12 @@ public class OrderRelationController extends BaseController {
             result.setData(msg);
             result.setMsg("查看成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -173,12 +173,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("取消报名成功");
         } catch (MessageException e) {
-            logger.warn("取消报名失败," + e.getMessage());
+            log.warn("取消报名失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("取消报名失败" + errInfo(e), e);
+            log.error("取消报名失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("取消报名失败");
@@ -219,12 +219,12 @@ public class OrderRelationController extends BaseController {
             result.setData(userInfoViewList);
             result.setMsg("查看成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -264,12 +264,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("选人成功");
         } catch (MessageException e) {
-            logger.warn("选人失败," + e.getMessage());
+            log.warn("选人失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("选人失败" + errInfo(e), e);
+            log.error("选人失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("选人失败");
@@ -305,12 +305,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("拒绝成功");
         } catch (MessageException e) {
-            logger.warn("拒绝失败," + e.getMessage());
+            log.warn("拒绝失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("拒绝失败" + errInfo(e), e);
+            log.error("拒绝失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("拒绝失败");
@@ -356,12 +356,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("支付成功");
         } catch (MessageException e) {
-            logger.warn("支付失败," + e.getMessage());
+            log.warn("支付失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("支付失败" + errInfo(e), e);
+            log.error("支付失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("支付失败");
@@ -399,12 +399,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("开始成功");
         } catch (MessageException e) {
-            logger.warn("开始失败," + e.getMessage());
+            log.warn("开始失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("开始失败," + e.getMessage());
         } catch (Exception e) {
-            logger.error("开始失败" + errInfo(e), e);
+            log.error("开始失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("开始失败");
@@ -446,12 +446,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("投诉成功");
         } catch (MessageException e) {
-            logger.warn("投诉失败," + e.getMessage());
+            log.warn("投诉失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg( e.getMessage());
         } catch (Exception e) {
-            logger.error("投诉失败" + errInfo(e), e);
+            log.error("投诉失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("投诉失败");
@@ -495,12 +495,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("评价成功");
         } catch (MessageException e) {
-            logger.warn("评价失败," + e.getMessage());
+            log.warn("评价失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("评价失败" + errInfo(e), e);
+            log.error("评价失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("评价失败");
@@ -532,12 +532,12 @@ public class OrderRelationController extends BaseController {
             result.setData(coin);
             result.setMsg("查看成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -575,12 +575,12 @@ public class OrderRelationController extends BaseController {
             result.setData(errorMsgList);
             result.setMsg("取消成功");
         } catch (MessageException e) {
-            logger.warn("取消失败," + e.getMessage());
+            log.warn("取消失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("取消失败" + errInfo(e), e);
+            log.error("取消失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("取消失败");
@@ -609,12 +609,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("接受赠礼成功");
         } catch (MessageException e) {
-            logger.warn("接受赠礼失败," + e.getMessage());
+            log.warn("接受赠礼失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("接受赠礼失败" + errInfo(e), e);
+            log.error("接受赠礼失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("接受赠礼失败");
@@ -644,12 +644,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("拒绝赠礼成功");
         } catch (MessageException e) {
-            logger.warn("拒绝赠礼失败," + e.getMessage());
+            log.warn("拒绝赠礼失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("拒绝赠礼失败" + errInfo(e), e);
+            log.error("拒绝赠礼失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("拒绝赠礼失败");
@@ -682,12 +682,12 @@ public class OrderRelationController extends BaseController {
             result.setSuccess(true);
             result.setMsg("举报成功");
         } catch (MessageException e) {
-            logger.warn("举报失败," + e.getMessage());
+            log.warn("举报失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("举报失败" + errInfo(e), e);
+            log.error("举报失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("举报失败");
@@ -728,12 +728,12 @@ public class OrderRelationController extends BaseController {
             result.setData(orgEnrollUserView);
             result.setMsg("查看成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -789,12 +789,12 @@ public class OrderRelationController extends BaseController {
             result.setData(enrollUserInfoViewList);
             result.setMsg("查看成功");
         } catch (MessageException e) {
-            logger.warn("查看失败," + e.getMessage());
+            log.warn("查看失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg( e.getMessage());
         } catch (Exception e) {
-            logger.error("查看失败" + errInfo(e), e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");

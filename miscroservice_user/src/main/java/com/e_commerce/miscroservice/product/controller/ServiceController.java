@@ -7,10 +7,10 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
+import lombok.Data;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +26,8 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/api/v2/service")
+@Data
 public class ServiceController extends BaseController{
-	Log logger = Log.getInstance(ServiceController.class);
 
 	/**
 	 * 我发布的服务
@@ -81,12 +81,12 @@ public class ServiceController extends BaseController{
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_QUERY_ERROR + errInfo(e), e);
+			log.error(AppMessageConstant.PRODUCT_QUERY_ERROR, e);
 			result.setSuccess(false);
 			result.setMsg(AppMessageConstant.PRODUCT_QUERY_ERROR);
 			return result;
@@ -115,13 +115,13 @@ public class ServiceController extends BaseController{
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_DEL_ERROR + errInfo(e));
+			log.error(AppMessageConstant.PRODUCT_DEL_ERROR , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_DEL_ERROR);
@@ -151,13 +151,13 @@ public class ServiceController extends BaseController{
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + errInfo(e));
+			log.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR);
@@ -189,13 +189,13 @@ public class ServiceController extends BaseController{
 			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_SUCCESS);
 			return result;
 		} catch (MessageException e) {
-			logger.warn(AppMessageConstant.SERVICE_SUBMIT_ERROR + e.getMessage());
+			log.warn(AppMessageConstant.SERVICE_SUBMIT_ERROR + e.getMessage());
 			result.setSuccess(false);
 			result.setErrorCode(e.getErrorCode());
 			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_ERROR + e.getMessage());
 			return result;
 		} catch (Exception e) {
-			logger.error(AppMessageConstant.SERVICE_SUBMIT_ERROR + errInfo(e));
+			log.error(AppMessageConstant.SERVICE_SUBMIT_ERROR , e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
 			result.setMsg(AppMessageConstant.SERVICE_SUBMIT_ERROR);
@@ -219,13 +219,13 @@ public class ServiceController extends BaseController{
 		try {
 			productService.sendServiceSummary(serviceId , description , url , user);
 			result.setSuccess(true);
-			result.setMsg("发布成功");
+			result.setMsg("发布精彩瞬间成功");
 			return result;
 		}  catch (Exception e) {
-			logger.error("发布失败"+ errInfo(e));
+			log.error("发布精彩瞬间失败", e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("发布失败");
+			result.setMsg("发布精彩瞬间失败");
 			return result;
 		}
 	}
@@ -242,14 +242,14 @@ public class ServiceController extends BaseController{
 		try {
 			TServiceSummary serviceSummary = productService.findServiceSummary(serviceId);
 			result.setSuccess(true);
-			result.setMsg("查看成功");
+			result.setMsg("查看精彩瞬间成功");
 			result.setData(serviceSummary);
 			return result;
 		}  catch (Exception e) {
-			logger.error("查看失败"+ errInfo(e));
+			log.error("查看精彩瞬间失败", e);
 			result.setSuccess(false);
 			result.setErrorCode("500");
-			result.setMsg("查看失败");
+			result.setMsg("查看精彩瞬间失败");
 			return result;
 		}
 	}

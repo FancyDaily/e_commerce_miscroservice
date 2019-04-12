@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.EventService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/event")
+@Data
 public class EventController extends BaseController {
 
 
@@ -64,13 +66,13 @@ public class EventController extends BaseController {
             result.setData(eventList);
             return result;
         } catch (MessageException e) {
-            logger.warn("查询失败," + e.getMessage());
+            log.warn("查询失败," + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查询失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            logger.error("查询失败" + errInfo(e));
+            log.error("查询失败" , e);
             result.setSuccess(false);
             result.setErrorCode("499");
             result.setMsg("查询失败");
