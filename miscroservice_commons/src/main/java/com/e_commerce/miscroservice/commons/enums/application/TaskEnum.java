@@ -1,10 +1,8 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 
-@AllArgsConstructor
-@Getter
+@Data
 public enum TaskEnum {
 
     // 注册类型
@@ -36,4 +34,12 @@ public enum TaskEnum {
 
     private Integer dailyMaxNum; //当日最大次数
     private Long targetId;
+
+    TaskEnum(Integer type, Long reward, String desc, Integer dailyMaxNum, Long targetId) {
+        this.type = type;
+        this.reward = reward;
+        this.desc = desc;
+        this.dailyMaxNum = dailyMaxNum;
+        this.targetId = targetId;
+    }
 }

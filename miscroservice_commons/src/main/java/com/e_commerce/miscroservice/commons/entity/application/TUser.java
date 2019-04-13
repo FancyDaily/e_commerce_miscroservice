@@ -2,13 +2,11 @@ package com.e_commerce.miscroservice.commons.entity.application;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@Setter
-@Getter
+@Data
 public class TUser implements Serializable {
     @Id
     private Long id;

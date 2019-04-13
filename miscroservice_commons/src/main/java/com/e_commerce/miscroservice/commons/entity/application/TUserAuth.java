@@ -1,13 +1,11 @@
 package com.e_commerce.miscroservice.commons.entity.application;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
 public class TUserAuth implements Serializable {
     @Id
     private Long id;
