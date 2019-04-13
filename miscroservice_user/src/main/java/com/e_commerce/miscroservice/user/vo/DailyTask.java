@@ -1,12 +1,8 @@
 package com.e_commerce.miscroservice.user.vo;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-@Setter
-@Getter
 public class DailyTask {
 
     private Long targetId;  //id

@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -23,8 +22,7 @@ import java.io.Serializable;
  * 1.
  * 2.
  */
-@Setter
-@Getter
+@Data
 public class PaymentView implements Serializable{
 	
 	/**

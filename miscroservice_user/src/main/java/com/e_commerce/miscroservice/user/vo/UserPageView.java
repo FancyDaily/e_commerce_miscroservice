@@ -3,11 +3,8 @@ package com.e_commerce.miscroservice.user.vo;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class UserPageView {
 
     DesensitizedUserView desensitizedUserView;    //基本信息

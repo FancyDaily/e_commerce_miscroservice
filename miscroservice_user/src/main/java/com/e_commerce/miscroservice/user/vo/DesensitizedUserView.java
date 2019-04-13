@@ -1,9 +1,6 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -26,8 +23,6 @@ import java.io.Serializable;
  * 2.
  */
 @Data
-@Getter
-@Setter
 public class DesensitizedUserView implements Serializable {
 	/**
 	 * 
