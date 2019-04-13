@@ -12,7 +12,7 @@ import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
-import lombok.Log;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 消息模块
- *
+ * <p>
  * 消息controller
  **/
 @RestController
 @RequestMapping("/api/v2/message")
-@Log
+@Data
 public class MessageController extends BaseController {
 
     @Autowired
@@ -35,14 +35,14 @@ public class MessageController extends BaseController {
 
     /**
      * 收集formid
+     *
      * @param formId formid
-     * @param token   token
-     *
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "收集formId成功",
-     *     "data": ""
-     *
+     * @param token  token
+     *               <p>
+     *               "success": true,
+     *               "errorCode": "",
+     *               "msg": "收集formId成功",
+     *               "data": ""
      * @return
      */
     @RequestMapping("/collectFormId")
@@ -57,7 +57,7 @@ public class MessageController extends BaseController {
         } catch (Exception e) {
             result.setSuccess(false);
             result.setMsg("收集formId失败");
-            log.error("收集formId错误：" , e);
+            log.error("收集formId错误：", e);
             return result;
         }
     }
@@ -67,9 +67,9 @@ public class MessageController extends BaseController {
      *
      * @param pageSize 分页大小
      * @param lastTime 上一条的时间
-     * @param token   token
-     *
-     *
+     * @param token    token
+     *                 <p>
+     *                 <p>
      *                 "id": 81732352618790912, //系统消息编号
      *                 "noticeUserId": 68813259653775360, //接受者编号
      *                 "relevanceId": 81731245683245056, //关联id编号
@@ -83,18 +83,18 @@ public class MessageController extends BaseController {
      *                 "updateTime": 1547268911378,
      *                 "isValid": "1",
      *                 "noticeTitle": "恭喜您已被求助者选定"//通知标题
-     *
      * @return
      */
     @PostMapping("/notices")
-    public Object notices(int pageSize , long lastTime , String token) {
+    public Object notices(int pageSize, long lastTime, String token) {
         TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<TMessageNotice> messageNotices = messageService.notices(lastTime, user.getId(), pageSize);
             result.setSuccess(true);
             result.setMsg("查看成功");
-            result.setData(messageNotices);;
+            result.setData(messageNotices);
+            ;
             return result;
         } catch (MessageException e) {
             log.warn("查看失败," + e.getMessage());
@@ -103,7 +103,7 @@ public class MessageController extends BaseController {
             result.setMsg("查看失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            log.error("查看失败" , e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -115,22 +115,21 @@ public class MessageController extends BaseController {
     /**
      * 发送消息
      *
-     * @param token   token
+     * @param token         token
      * @param messageUserId 发送给用户id
-     * @param specialId 系统特殊操作id
-     * @param type 类型 0-图片 1-文本
-     * @param message 消息内容
-     * @param url 图片链接
-     *
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "发送成功",
-     *     "data": ""
-     *
+     * @param specialId     系统特殊操作id
+     * @param type          类型 0-图片 1-文本
+     * @param message       消息内容
+     * @param url           图片链接
+     *                      <p>
+     *                      "success": true,
+     *                      "errorCode": "",
+     *                      "msg": "发送成功",
+     *                      "data": ""
      * @return
      */
     @PostMapping("/sendMessage")
-    public Object sendMessage(String token , Long messageUserId ,  Long specialId , int type , String message , String url) {
+    public Object sendMessage(String token, Long messageUserId, Long specialId, int type, String message, String url) {
         TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         if (type == MessageEnum.TYPE_TEXT.getType()) {
@@ -142,7 +141,7 @@ public class MessageController extends BaseController {
             }
         }
         try {
-            messageService.send(user.getId() , messageUserId , specialId , type , message , url);
+            messageService.send(user.getId(), messageUserId, specialId, type, message, url);
             result.setSuccess(true);
             result.setMsg("发送成功");
             return result;
@@ -153,7 +152,7 @@ public class MessageController extends BaseController {
             result.setMsg("发送失败," + e.getMessage());
             return result;
         } catch (Exception e) {
-            log.error("发送失败" , e);
+            log.error("发送失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("发送失败");
@@ -168,8 +167,8 @@ public class MessageController extends BaseController {
      * @param toUserId 对方用户编号
      * @param lastTime 上一条读取时间
      * @param pageSize 分页编号
-     * @param token   token
-     *{
+     * @param token    token
+     *                 {
      *                 "id": 102098442918035456,  消息id
      *                 "userName": "马晓晨", //发送者名字
      *                 "userUrl": "https://timebank-p...9.png",//发送者头像
@@ -179,15 +178,14 @@ public class MessageController extends BaseController {
      *                 "message": "测试2", //文本内容
      *                 "type": 1, //消息是文本还是图片 0-图片 1-文本
      *                 "url": "" //图片链接
-     *
      * @return
      */
     @PostMapping("/detail")
-    public Object detail(Long toUserId , Long lastTime , int pageSize , String token) {
+    public Object detail(Long toUserId, Long lastTime, int pageSize, String token) {
         TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
-            QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId , lastTime , pageSize , user.getId());
+            QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId, lastTime, pageSize, user.getId());
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(messageDetailViewQueryResult);
@@ -202,18 +200,17 @@ public class MessageController extends BaseController {
             result.setErrorCode("500");
             result.setMsg("查看失败");
         }
-            return result;
+        return result;
     }
-
 
 
     /**
      * 消息展示list
      *
      * @param lastTime 上次读取时间
-     * @param token   token
+     * @param token    token
      * @param pageSize 分页大小
-     *
+     *                 <p>
      *                 "parent": 72400059177631744, 分组id
      *                 "userName": "马晓晨", 发送者姓名
      *                 "userUrl": "https://time。。。.png",发送者头像
@@ -222,15 +219,14 @@ public class MessageController extends BaseController {
      *                 "parentToString": "72400059177631744",string型的分组ID
      *                 "toUserIdToString": "68813260748488704",string型的对方id
      *                 "unReadSum": 18 未读消息数量
-     *
      * @return
      */
     @PostMapping("/showList")
-    public Object showList(Long lastTime , String token , Integer pageSize) {
+    public Object showList(Long lastTime, String token, Integer pageSize) {
         TUser user = UserUtil.getUser(token);
         AjaxResult result = new AjaxResult();
         try {
-            QueryResult<MessageShowLIstView> list = messageService.list(user.getId() , lastTime , pageSize);
+            QueryResult<MessageShowLIstView> list = messageService.list(user.getId(), lastTime, pageSize);
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(list);
@@ -240,7 +236,7 @@ public class MessageController extends BaseController {
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            log.error("查看失败" ,e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -250,11 +246,11 @@ public class MessageController extends BaseController {
 
     /**
      * 查看第一条的系统消息时间和未读消息数量
-     * @param token   token
      *
-     *         "sysTime": 1547437340571,//最新一条的时间
-     *         "sysUnReadSum": 8 未读消息数量
-     *
+     * @param token token
+     *              <p>
+     *              "sysTime": 1547437340571,//最新一条的时间
+     *              "sysUnReadSum": 8 未读消息数量
      * @return
      */
     @PostMapping("/noticesFirstInfo")
@@ -272,7 +268,7 @@ public class MessageController extends BaseController {
             result.setErrorCode("499");
             result.setMsg("查看失败," + e.getMessage());
         } catch (Exception e) {
-            log.error("查看失败" , e);
+            log.error("查看失败", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("查看失败");
@@ -282,26 +278,26 @@ public class MessageController extends BaseController {
 
     /**
      * 是否有未读消息
-     * @param token   token
      *
-     *     "success": true,
-     *     "errorCode": "",
-     *     "msg": "查看成功",
-     *     "data": 1 1-有未读消息 0-没有未读消息
-     *
+     * @param token token
+     *              <p>
+     *              "success": true,
+     *              "errorCode": "",
+     *              "msg": "查看成功",
+     *              "data": 1 1-有未读消息 0-没有未读消息
      * @return
      */
     @PostMapping("/unReadMsg")
     public Object unReadMsg(String token) {
         AjaxResult result = new AjaxResult();
-        if (token == null){
+        if (token == null) {
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(0);
             return result;
         }
         TUser user = UserUtil.getUser(token);
-        if (user == null){
+        if (user == null) {
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(0);

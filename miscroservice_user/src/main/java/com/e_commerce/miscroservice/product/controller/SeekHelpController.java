@@ -15,7 +15,7 @@ import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
-import lombok.Log;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +31,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/v2/seekHelp")
-@Log
+@Data
 public class SeekHelpController extends BaseController {
 
 	@Autowired

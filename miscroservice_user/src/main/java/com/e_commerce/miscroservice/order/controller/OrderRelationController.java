@@ -10,7 +10,7 @@ import com.e_commerce.miscroservice.order.vo.EnrollUserInfoView;
 import com.e_commerce.miscroservice.order.vo.OrgEnrollUserView;
 import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.SeekHelpController;
-import lombok.Log;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v2/orderRelation")
-@Log
+@Data
 public class OrderRelationController extends BaseController {
 
     @Autowired

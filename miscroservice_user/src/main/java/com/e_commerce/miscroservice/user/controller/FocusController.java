@@ -8,7 +8,7 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
 import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
-import lombok.Log;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v2/focus")
-@Log
+@Data
 public class FocusController extends BaseController {
 
     @Autowired

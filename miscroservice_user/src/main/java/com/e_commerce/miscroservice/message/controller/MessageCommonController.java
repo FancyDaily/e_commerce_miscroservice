@@ -13,7 +13,7 @@ import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.TemplateData;
 import com.e_commerce.miscroservice.message.vo.WxMssVo;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
-import lombok.Log;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ import java.util.Map;
  *
  */
 @Component
-@Log
+@Data
 public class MessageCommonController extends BaseController {
 
 

@@ -15,7 +15,7 @@ import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
-import lombok.Log;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +36,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api/v2/user")
-@Log
+@Data
 public class UserController extends BaseController {
 
     @Autowired
