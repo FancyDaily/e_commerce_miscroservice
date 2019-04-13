@@ -14,7 +14,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
-import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
@@ -24,6 +23,7 @@ import com.e_commerce.miscroservice.user.vo.CompanyRecentView;
 import com.e_commerce.miscroservice.user.vo.SmartUserView;
 import com.e_commerce.miscroservice.user.vo.UserCompanyView;
 import lombok.Data;
+import lombok.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +39,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api/v2/group")
-@Data
+@Log
 public class GroupController extends BaseController {
 
     @Autowired

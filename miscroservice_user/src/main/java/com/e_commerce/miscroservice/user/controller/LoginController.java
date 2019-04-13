@@ -15,7 +15,7 @@ import com.e_commerce.miscroservice.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
-import lombok.Data;
+import lombok.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v2/login")
-@Data
+@Log
 public class LoginController extends BaseController {
 
     @Autowired

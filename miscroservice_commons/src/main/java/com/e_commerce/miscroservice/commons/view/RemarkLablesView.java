@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.commons.view;
 
-import lombok.Data;
 
 /**
  * 功能描述:
@@ -20,7 +19,6 @@ import lombok.Data;
  * 1.
  * 2.
  */
-@Data
 public class RemarkLablesView {
 
     private String goodCredit;//好的可信评价
@@ -35,4 +33,51 @@ public class RemarkLablesView {
 
     private String badAttitude;//坏的专业评价
 
+    public String getGoodCredit() {
+        return goodCredit;
+    }
+
+    public void setGoodCredit(String goodCredit) {
+        this.goodCredit = goodCredit;
+    }
+
+    public String getBadCredit() {
+        return badCredit;
+    }
+
+    public void setBadCredit(String badCredit) {
+        this.badCredit = badCredit;
+    }
+
+    public String getGoodMajor() {
+        return goodMajor;
+    }
+
+    public void setGoodMajor(String goodMajor) {
+        this.goodMajor = goodMajor;
+    }
+
+    public String getBadMajor() {
+        return badMajor;
+    }
+
+    public void setBadMajor(String badMajor) {
+        this.badMajor = badMajor;
+    }
+
+    public String getGoodAttitude() {
+        return goodAttitude;
+    }
+
+    public void setGoodAttitude(String goodAttitude) {
+        this.goodAttitude = goodAttitude;
+    }
+
+    public String getBadAttitude() {
+        return badAttitude;
+    }
+
+    public void setBadAttitude(String badAttitude) {
+        this.badAttitude = badAttitude;
+    }
 }

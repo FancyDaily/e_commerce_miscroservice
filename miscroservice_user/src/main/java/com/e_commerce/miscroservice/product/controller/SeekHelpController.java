@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
@@ -16,7 +15,7 @@ import com.e_commerce.miscroservice.product.vo.AnalysisAudioView;
 import com.e_commerce.miscroservice.product.vo.DetailProductView;
 import com.e_commerce.miscroservice.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.product.vo.ServiceParamView;
-import lombok.Data;
+import lombok.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +31,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/api/v2/seekHelp")
-@Data
+@Log
 public class SeekHelpController extends BaseController {
 
 	@Autowired

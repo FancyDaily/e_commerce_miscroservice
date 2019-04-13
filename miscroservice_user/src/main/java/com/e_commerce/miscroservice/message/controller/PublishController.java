@@ -13,13 +13,11 @@ import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.security.util.Length;
-
+import lombok.Log;
 import java.util.List;
 
 
@@ -30,7 +28,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/publish")
-@Data
+@Log
 public class PublishController extends BaseController {
 
     @Autowired

@@ -7,7 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.EventService;
-import lombok.Data;
+import lombok.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +27,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/event")
-@Data
+@Log
 public class EventController extends BaseController {
 
 

@@ -12,7 +12,7 @@ import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
 import com.e_commerce.miscroservice.message.vo.MessageShowLIstView;
 import com.e_commerce.miscroservice.message.vo.NoticesFirstView;
-import lombok.Data;
+import lombok.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @RequestMapping("/api/v2/message")
-@Data
+@Log
 public class MessageController extends BaseController {
 
     @Autowired
