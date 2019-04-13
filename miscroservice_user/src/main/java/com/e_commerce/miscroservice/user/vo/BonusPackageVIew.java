@@ -1,12 +1,8 @@
 package com.e_commerce.miscroservice.user.vo;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-@Getter
-@Setter
 public class BonusPackageVIew {
 
     private Long id;

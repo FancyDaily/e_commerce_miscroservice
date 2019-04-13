@@ -1,7 +1,5 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
-import lombok.Data;
-
 /**
  * 功能描述: 等级枚举类
  * 模块:
@@ -20,7 +18,6 @@ import lombok.Data;
  * 1.
  * 2.
  */
-@Data
 public enum LevelEnum {    //TODO 待给出细则
 
     LEVEL_ONE(1, "爱心人士", 0l, 80l,60l), LEVEL_TWO(2, "爱心义工", 80l, 130l,75l), LEVEL_THREE(3, "爱心先锋", 130l, 210l,80l), LEVEL_FOUR(4, "公益志愿者", 210l, 240l,90l),
@@ -31,6 +28,46 @@ public enum LevelEnum {    //TODO 待给出细则
     private Long min;    //下限
     private Long max;    //上限
     private Long credit;    //授信
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Long getMin() {
+        return min;
+    }
+
+    public void setMin(Long min) {
+        this.min = min;
+    }
+
+    public Long getMax() {
+        return max;
+    }
+
+    public void setMax(Long max) {
+        this.max = max;
+    }
+
+    public Long getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Long credit) {
+        this.credit = credit;
+    }
 
     LevelEnum(Integer level, String name, Long min, Long max, Long credit) {
         this.level = level;

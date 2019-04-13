@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.product.util.AnsjUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.huaban.analysis.jieba.JiebaSegmenter;
-import lombok.Data;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
@@ -280,7 +279,6 @@ public class AutoAnalysisWord {
     /**
      * 时间返回类
      */
-    @Data
     private class TimeInfo {
         private String startDate;
         private String endDate;
@@ -288,6 +286,54 @@ public class AutoAnalysisWord {
         private String endTime;
         private String text;
         private String weekDay;
+
+        public String getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(String startDate) {
+            this.startDate = startDate;
+        }
+
+        public String getEndDate() {
+            return endDate;
+        }
+
+        public void setEndDate(String endDate) {
+            this.endDate = endDate;
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
+        }
+
+        public String getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getWeekDay() {
+            return weekDay;
+        }
+
+        public void setWeekDay(String weekDay) {
+            this.weekDay = weekDay;
+        }
     }
 
     /**
@@ -447,24 +493,70 @@ public class AutoAnalysisWord {
     }
 
 
-    @Data
     private class PayInfo {
         private Integer payCount;
         private String text;
+
+        public Integer getPayCount() {
+            return payCount;
+        }
+
+        public void setPayCount(Integer payCount) {
+            this.payCount = payCount;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
     }
 
 
-    @Data
     private class PersonInfo {
         private Integer personCount;
         private String text;
+
+        public Integer getPersonCount() {
+            return personCount;
+        }
+
+        public void setPersonCount(Integer personCount) {
+            this.personCount = personCount;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
     }
 
-    @Data
     private class PushInfo {
         private Integer pushType;
         private String text;
+
+        public Integer getPushType() {
+            return pushType;
+        }
+
+        public void setPushType(Integer pushType) {
+            this.pushType = pushType;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
     }
+
 
 
     /**
@@ -778,13 +870,52 @@ public class AutoAnalysisWord {
     }
 
 
-    @Data
     private class DateInfo {
         private String startDate;
         private String endDate;
         private String periodWeekDay;
         private String text;
         private String replaceStr;
+
+        public String getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(String startDate) {
+            this.startDate = startDate;
+        }
+
+        public String getEndDate() {
+            return endDate;
+        }
+
+        public void setEndDate(String endDate) {
+            this.endDate = endDate;
+        }
+
+        public String getPeriodWeekDay() {
+            return periodWeekDay;
+        }
+
+        public void setPeriodWeekDay(String periodWeekDay) {
+            this.periodWeekDay = periodWeekDay;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getReplaceStr() {
+            return replaceStr;
+        }
+
+        public void setReplaceStr(String replaceStr) {
+            this.replaceStr = replaceStr;
+        }
     }
 
     /**
@@ -1175,12 +1306,34 @@ public class AutoAnalysisWord {
     /**
      * 文本信息
      */
-    @Data
     private class TextInfo {
         private List<WordInfo> headInfo;
         private LocationInfo location;
         private List<WordInfo> tailInfo;
 
+        public List<WordInfo> getHeadInfo() {
+            return headInfo;
+        }
+
+        public void setHeadInfo(List<WordInfo> headInfo) {
+            this.headInfo = headInfo;
+        }
+
+        public LocationInfo getLocation() {
+            return location;
+        }
+
+        public void setLocation(LocationInfo location) {
+            this.location = location;
+        }
+
+        public List<WordInfo> getTailInfo() {
+            return tailInfo;
+        }
+
+        public void setTailInfo(List<WordInfo> tailInfo) {
+            this.tailInfo = tailInfo;
+        }
     }
 
     /**
@@ -1227,10 +1380,25 @@ public class AutoAnalysisWord {
     }
 
 
-    @Data
     private class WordInfo {
         private String wordName;
         private String wordNature;
+
+        public String getWordName() {
+            return wordName;
+        }
+
+        public void setWordName(String wordName) {
+            this.wordName = wordName;
+        }
+
+        public String getWordNature() {
+            return wordNature;
+        }
+
+        public void setWordNature(String wordNature) {
+            this.wordNature = wordNature;
+        }
     }
 
     /**
@@ -1436,11 +1604,34 @@ public class AutoAnalysisWord {
     /**
      * 地理位置的信息
      */
-    @Data
     private class LocationInfo {
         private Double longitude;
         private Double latitude;
         private String location;
+
+        public Double getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(Double longitude) {
+            this.longitude = longitude;
+        }
+
+        public Double getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(Double latitude) {
+            this.latitude = latitude;
+        }
+
+        public String getLocation() {
+            return location;
+        }
+
+        public void setLocation(String location) {
+            this.location = location;
+        }
     }
 
     /**
