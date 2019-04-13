@@ -17,6 +17,7 @@ dependencies {
     compile group: 'org.powermock', name: 'powermock-api-mockito', version: '1.7.4'
     compile 'org.ansj:ansj_seg:5.1.1'
     compile project(":miscroservice_commons")
+    annotationProcessor project(":miscroservice_commons")
 
 
 }

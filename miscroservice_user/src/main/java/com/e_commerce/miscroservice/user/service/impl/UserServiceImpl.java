@@ -3982,7 +3982,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public UserDetailView info(Long userId) {
         TUser user = userDao.selectByPrimaryKey(userId);
-        UserDetailView view = BeanUtil.copy(user, UserDetailView.class);
+        UserDetailView view =BeanUtil.copy(user, UserDetailView.class);
         view.setIdString(String.valueOf(view.getId()));
         // 评价(平均分)
         Double averageScore = 0.0;

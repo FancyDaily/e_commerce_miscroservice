@@ -12,4 +12,13 @@ public class NoobTask {
     private Integer bonus;  //金额
 
     private boolean isDone; //是否完成
+
+
+    public boolean isDone() {
+        return isDone;
+    }
+
+    public void setDone(boolean done) {
+        isDone = done;
+    }
 }
