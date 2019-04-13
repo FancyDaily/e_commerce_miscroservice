@@ -1,5 +1,8 @@
 package com.e_commerce.miscroservice.user.vo;
 
+import lombok.Data;
+
+@Data
 public class DailyTask {
 
     private Long targetId;  //id

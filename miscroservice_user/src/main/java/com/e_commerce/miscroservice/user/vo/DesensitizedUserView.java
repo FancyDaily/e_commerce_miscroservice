@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+
 import java.io.Serializable;
 
 /**

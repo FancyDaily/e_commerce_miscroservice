@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.vo;
 
 import lombok.Data;
+
 import java.io.Serializable;
 
 /**
