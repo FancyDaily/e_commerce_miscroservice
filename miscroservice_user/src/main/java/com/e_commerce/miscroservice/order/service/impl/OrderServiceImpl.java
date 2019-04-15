@@ -153,6 +153,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setDescription(listProductDesc.get(0).getDepict());
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+
 			returnView.setUser(userView);
 			// 用户类型
 			listReturn.add(returnView);

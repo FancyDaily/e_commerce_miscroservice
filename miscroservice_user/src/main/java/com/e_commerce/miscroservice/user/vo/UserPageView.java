@@ -1,15 +1,14 @@
 package com.e_commerce.miscroservice.user.vo;
 
-import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 
 public class UserPageView {
 
     DesensitizedUserView desensitizedUserView;    //基本信息
 
-    QueryResult<TOrder> services;  //提供的服务列表
+    QueryResult services;  //提供的服务列表
 
-    QueryResult<TOrder> helps; //提供的求助列表
+    QueryResult helps; //提供的求助列表
 
     UserSkillListView skills;    //技能列表
 
@@ -21,11 +20,11 @@ public class UserPageView {
         this.desensitizedUserView = desensitizedUserView;
     }
 
-    public void setServices(QueryResult<TOrder> services) {
+    public void setServices(QueryResult services) {
         this.services = services;
     }
 
-    public void setHelps(QueryResult<TOrder> helps) {
+    public void setHelps(QueryResult helps) {
         this.helps = helps;
     }
 
@@ -45,11 +44,11 @@ public class UserPageView {
         return desensitizedUserView;
     }
 
-    public QueryResult<TOrder> getServices() {
+    public QueryResult getServices() {
         return services;
     }
 
-    public QueryResult<TOrder> getHelps() {
+    public QueryResult getHelps() {
         return helps;
     }
 

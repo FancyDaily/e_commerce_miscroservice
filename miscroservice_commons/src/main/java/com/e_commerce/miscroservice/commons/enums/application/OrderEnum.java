@@ -37,7 +37,7 @@ public enum OrderEnum {
 	DETAIL_SHOW_STATUS_COMPLAINT(9, "投诉中"),
 
 
-		//显示状态: 1、已结束  2、已取消 3、待选人 4、被拒绝  5、已报名 6、已入选
+	//显示状态: 1、已结束  2、已取消 3、待选人 4、被拒绝  5、已报名 6、已入选
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END(1, "已结束"),
 	SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CANCEL(2, "已取消"),
 	SHOW_STATUS_ENROLL_CHOOSE_WAIT_CHOOSE(3,"待选人"),
