@@ -44,7 +44,7 @@ public class FocusController extends BaseController {
     @RequestMapping("submit")
     public Object submit(String token, Long userFollowId) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             focusService.submit(user, userFollowId);
 //            log.info("dddd{}hhdhd{}","forexample","aa");
@@ -144,7 +144,7 @@ public class FocusController extends BaseController {
     @RequestMapping("focusList")
     public Object focusList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, true);
             result.setData(queryResult);
@@ -244,7 +244,7 @@ public class FocusController extends BaseController {
     @RequestMapping("fanList")
     public Object fanList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             QueryResult<DesensitizedUserView> queryResult = focusService.myList(user, lastTime, pageSize, false);
             result.setData(queryResult);

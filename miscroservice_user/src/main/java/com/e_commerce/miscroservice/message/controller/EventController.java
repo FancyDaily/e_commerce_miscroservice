@@ -54,7 +54,7 @@ public class EventController extends BaseController {
      */
     @PostMapping("/eventList")
     public Object eventList(String token, String tiggerId) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             List<TEvent> eventList = eventService.selectTeventListByUserIdAndTiggetId(user.getId(), tiggerId);

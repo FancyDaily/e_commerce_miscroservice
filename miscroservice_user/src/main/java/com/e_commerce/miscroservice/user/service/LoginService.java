@@ -52,6 +52,6 @@ public interface LoginService {
 	 * 创建时间: 2018年11月27日 下午6:29:37
 	 * @param openid
 	 */
-	Map<String, Object> loginByOpenid(String openid);
+	Map<String, Object> loginByOpenid(String openid,String uuid);
 
 }

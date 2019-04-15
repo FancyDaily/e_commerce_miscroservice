@@ -265,7 +265,7 @@ public class OrderCommonController extends BaseController {
 	 * @return
 	 */
 	public DetailOrderReturnView detailIndexOrder(Long orderId, String token) {
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		return orderService.orderDetail(orderId, user);
 	}
 

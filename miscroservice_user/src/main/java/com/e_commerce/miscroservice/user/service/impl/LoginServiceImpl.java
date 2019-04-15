@@ -1,9 +1,6 @@
 package com.e_commerce.miscroservice.user.service.impl;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
@@ -21,6 +18,7 @@ import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,17 +157,17 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         // token
         String userId = String.valueOf(user.getId());
         String token = TokenUtil.genToken(userId);
+
 		// redis
 		redisUtil.set(token, user, getUserTokenInterval());
 		redisUtil.set("" + userId, user, getUserTokenInterval());
 		redisUtil.set("str" + userId, token, getUserTokenInterval());
 
 		Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
+
+		token = checkLogin(uuid,user,token,Boolean.FALSE);
 		resultMap.put(AppConstant.USER_TOKEN, token);
 
-        if(user.getToken()!=null &&  !"".equals(user.getToken())) {
-            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
-        }
         return resultMap; // 返回登录状态
     }
 
@@ -233,13 +231,9 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
         resultMap.put("userId", userId);
-        resultMap.put(AppConstant.USER_TOKEN, token);
 
-//        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
-//
-//        if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
-//            resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());
-//        }
+        token = checkLogin(view.getUid(), user, token, Boolean.FALSE);
+        resultMap.put(AppConstant.USER_TOKEN, token);
 
         // 返回map，包含自定义状态
         return resultMap;
@@ -323,7 +317,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      * @return
      */
     @Override
-    public Map<String, Object> loginByOpenid(String openid) {//TODO 用户封禁
+    public Map<String, Object> loginByOpenid(String openid, String uuid) {//TODO 用户封禁
         if (openid == null) {
             return new HashMap<String, Object>();
         }
@@ -338,6 +332,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         String userId = StringUtil.numberToString(user.getId());
         String token = TokenUtil.genToken(userId);
+        token = checkLogin(uuid,user,token,Boolean.FALSE);
 
         String key = "str" + userId;
 

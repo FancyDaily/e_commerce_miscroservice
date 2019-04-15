@@ -81,7 +81,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/pageMine")
 	public Object pageMine(String token, Integer pageNum, Integer pageSize, String keyName) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		try {
 			QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, keyName, ProductEnum.TYPE_SEEK_HELP.getValue());
 			result.setData(list);
@@ -147,7 +147,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/productDetail")
 	public Object detail(String token, Long serviceId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		try {
 			DetailProductView detailProductView = productService.detail(user, serviceId);
 			result.setData(detailProductView);
@@ -183,7 +183,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/upperFrame")
 	public Object upperFrame(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		try {
 			productService.upperFrame(user, productId);
 			result.setSuccess(true);
@@ -220,7 +220,7 @@ public class SeekHelpController extends BaseController {
 	@RequestMapping("/delSeekHelp")
 	public Object delSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		try {
 			productService.del(user, productId);
 			result.setSuccess(true);
@@ -255,7 +255,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/lowerFrameSeekHelp")
 	public Object lowerFrameSeekHelp(String token, Long productId) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		try {
 			productService.lowerFrame(user, productId);
 			result.setSuccess(true);
@@ -284,7 +284,7 @@ public class SeekHelpController extends BaseController {
 	@PostMapping("/getUserAvaliableMoney")
 	public Object getUserAvaliableMoney(String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		Map<String, Long> data = productService.getUserAvaliableMoney(user);
 		result.setData(data);
 		result.setSuccess(true);
@@ -349,7 +349,7 @@ public class SeekHelpController extends BaseController {
 			param.getService().setStartDateS("");
 			param.getService().setEndDateS("");
 		}
-		TUser user = UserUtil.getUser(token);
+		TUser user = UserUtil.getUser();
 		//这一层可判断出是求助，手动设置type参数
 //		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {

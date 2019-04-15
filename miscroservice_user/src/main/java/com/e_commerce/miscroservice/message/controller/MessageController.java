@@ -48,7 +48,7 @@ public class MessageController extends BaseController {
     @RequestMapping("/collectFormId")
     public Object collectFormId(String formId, String token) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             messageService.insertFormId(formId, user.getId());
             result.setSuccess(true);
@@ -87,7 +87,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/notices")
     public Object notices(int pageSize, long lastTime, String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<TMessageNotice> messageNotices = messageService.notices(lastTime, user.getId(), pageSize);
@@ -130,7 +130,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/sendMessage")
     public Object sendMessage(String token, Long messageUserId, Long specialId, int type, String message, String url) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         if (type == MessageEnum.TYPE_TEXT.getType()) {
             //如果是文本，要看一下是否是空消息
@@ -182,7 +182,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/detail")
     public Object detail(Long toUserId, Long lastTime, int pageSize, String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<MessageDetailView> messageDetailViewQueryResult = messageService.detail(toUserId, lastTime, pageSize, user.getId());
@@ -223,7 +223,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/showList")
     public Object showList(Long lastTime, String token, Integer pageSize) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<MessageShowLIstView> list = messageService.list(user.getId(), lastTime, pageSize);
@@ -255,7 +255,7 @@ public class MessageController extends BaseController {
      */
     @PostMapping("/noticesFirstInfo")
     public Object noticesFirstInfo(String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             NoticesFirstView noticesFirstView = messageService.noticesFirstInfo(user.getId());
@@ -296,7 +296,7 @@ public class MessageController extends BaseController {
             result.setData(0);
             return result;
         }
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         if (user == null) {
             result.setSuccess(true);
             result.setMsg("查看成功");

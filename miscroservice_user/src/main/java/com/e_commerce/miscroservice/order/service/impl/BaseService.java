@@ -4,12 +4,14 @@ import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
 import com.e_commerce.miscroservice.product.dao.ProductDescDao;
+import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.HtmlUtils;
 
@@ -18,6 +20,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX;
 
 /**
  * @author 马晓晨
@@ -64,8 +69,8 @@ public class BaseService {
 	@Autowired
 	protected OrderDao orderDao;
 
-
-
+	@Autowired
+	private AuthorizeRpcService authorizeRpcService;
 
 	/**
 	 * 赋值servcieDesc公共字段
@@ -338,6 +343,19 @@ public class BaseService {
 			return "线上";
 		}
 		return address.replace("&" , "");
+	}
+
+	protected String checkLogin(String uuid, TUser user, String token, boolean opt) {
+		Token load = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid); //从认证中心获取
+		if(load.getToken() != null && !"".equals(load.getToken())) {
+			token = load.getToken();
+		} else {    //注册到认证中心
+			Token reg = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), uuid, opt);
+			if(reg.getToken() != null && !"".equals(reg.getToken())) {
+				token = load.getToken();
+			}
+		}
+		return token;
 	}
 
 }

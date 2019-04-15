@@ -72,7 +72,7 @@ public class ServiceController extends BaseController {
     @PostMapping("/pageMine")
     public Object pageMine(String token, Integer pageNum, Integer pageSize, String keyName) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             QueryResult<PageMineReturnView> list = productService.pageMine(user, pageNum, pageSize, keyName, ProductEnum.TYPE_SERVICE.getValue());
             result.setData(list);
@@ -107,7 +107,7 @@ public class ServiceController extends BaseController {
     @PostMapping("/delService")
     public Object delService(String token, Long productId) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             productService.del(user, productId);
             result.setSuccess(true);
@@ -143,7 +143,7 @@ public class ServiceController extends BaseController {
     @PostMapping("/lowerFrameService")
     public Object lowerFrameService(String token, Long productId) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             productService.lowerFrame(user, productId);
             result.setSuccess(true);
@@ -178,7 +178,7 @@ public class ServiceController extends BaseController {
 //		request.removeAttribute("paramString");
 //		ServiceParamView param = JsonUtil.parseFromJson(paramString, ServiceParamView.class);
 //		String token = param.getToken();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
                 productService.submitSeekHelp(user, param, token);
@@ -215,7 +215,7 @@ public class ServiceController extends BaseController {
     @PostMapping("/sendServiceSummary")
     public Object sendServiceSummary(String token, Long serviceId, String description, String url) {
         AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         try {
             productService.sendServiceSummary(serviceId, description, url, user);
             result.setSuccess(true);

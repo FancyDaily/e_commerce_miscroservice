@@ -113,7 +113,7 @@ public class LoginController extends BaseController {
             Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid);
             String loginStatus = (String) resultMap.get(LOGIN_STATUS);
             String token = (String) resultMap.get(AppConstant.USER_TOKEN);
-            TUser user = UserUtil.getUser(token);
+            TUser user = UserUtil.getUser();
             String certStatus = userService.getCertStatus(user.getId()); // 获取实名信息
             Map<String, String> map = new HashMap<>();
             map.put(CERT_STATUS, certStatus);
@@ -201,11 +201,11 @@ public class LoginController extends BaseController {
      * @return
      */
     @PostMapping("reLogin")
-    public Object reLogin(String openid) {
+    public Object reLogin(String openid, String uuid) {
         //TODO uid
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = loginService.loginByOpenid(openid);
+            Map<String, Object> resultMap = loginService.loginByOpenid(openid,uuid);
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {

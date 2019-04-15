@@ -2274,7 +2274,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void generateInviteCode(String token, String inviteCode) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         Long userId = user.getId();
         if (checkInviteCode(inviteCode)) {
             user = userDao.selectByPrimaryKey(userId);
@@ -2644,7 +2644,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public Map<String, Object> loginGroupByPwd(String telephone, String password) {
+    public Map<String, Object> loginGroupByPwd(String telephone, String password,String uuid) {
         // 对前端给的password作处理(AES)
         password = AESCommonUtil.encript(password);
         TUser user = null;
@@ -2672,6 +2672,10 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
         Map<String, Object> resultMap = new HashMap<>();
+
+        // 从认证中心获取token
+        token = checkLogin(uuid, user, token, Boolean.FALSE);
+
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
         DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
@@ -2740,15 +2744,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
-        /*//设置token
-        if (user.getToken() == null) {
-            Token tokenDto = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid);
-            if (tokenDto != null && tokenDto.getToken() != null && !"".equals(tokenDto.getToken())) {
-                user.setToken(tokenDto.getToken());
-                //设置token
-                resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, user.getToken());
-            }
-        }*/
+        token = checkLogin(uuid,user,token,Boolean.FALSE);
+        //设置token
+        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, token);
+
         resultMap.put("isRegister",false);
         if(isRegister) {
             resultMap.put("isRegister",true);
@@ -3549,7 +3548,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public void logOut(String token) {
         if (StringUtil.isNotEmpty(token) && redisUtil.hasKey(token)) {
-            TUser user = UserUtil.getUser(token);
+            TUser user = UserUtil.getUser();
             String redisKey = "str" + user.getId();
             redisUtil.del(redisKey);// 删除登录凭证
             redisUtil.del(token);// 删除访问凭证
@@ -4090,7 +4089,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @throws Exception
      */
     @Override
-    public void loginPwd(String account, String password, HttpServletResponse response) throws Exception {
+    public void loginPwd(String account, String password, HttpServletResponse response,String uuid) throws Exception {
         Integer COOKIE_INTERVAL = 60 * 60 * 24 * 15;
         // 处理密码 -> 对已经在前端md5加密过的数据，对称加密一次
         password = AESCommonUtil.encript(password);
@@ -4105,6 +4104,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 生成token，向cookie存放值
         String token = TokenUtil.genToken(String.valueOf(user.getId()));
+        token = checkLogin(uuid,user,token,Boolean.FALSE);
         // 向redis存放token和用户信息
         redisUtil.set(token, user, COOKIE_INTERVAL); // 应当与cookie时效统一
         redisUtil.set(String.valueOf(user.getId()), user, COOKIE_INTERVAL);

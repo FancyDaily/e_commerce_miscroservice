@@ -339,9 +339,10 @@ public interface UserService {
      * 组织版登录(密码)
      * @param telephone
      * @param password
+     * @param uuid
      * @return
      */
-    Map<String, Object> loginGroupByPwd(String telephone, String password);
+    Map<String, Object> loginGroupByPwd(String telephone, String password,String uuid);
 
     /**
      * 手机号验证码登录
@@ -408,5 +409,5 @@ public interface UserService {
 
     void changeAvailableStatus(Long userId, String avaliableStatus, String userType, TUser manager);
 
-    void loginPwd(String account, String password, HttpServletResponse response) throws Exception;
+    void loginPwd(String account, String password, HttpServletResponse response,String uuid) throws Exception;
 }

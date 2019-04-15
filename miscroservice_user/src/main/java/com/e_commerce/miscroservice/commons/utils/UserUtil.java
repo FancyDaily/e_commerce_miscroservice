@@ -5,11 +5,14 @@ import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Map;
 
 /**
  * @Description 获取用户
@@ -53,6 +56,13 @@ public class UserUtil {
             }
 
         }
+        return user;
+    }
+
+    public static TUser getUser() {
+        Integer currentId = IdUtil.getId();
+        TUser user = new TUser();
+        user.setId(Long.valueOf(currentId));
         return user;
     }
 

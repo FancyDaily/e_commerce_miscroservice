@@ -48,7 +48,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/enroll")
     public Object enroll(Long orderId, String token, String date, Long serviceId) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
 
         try {
@@ -165,7 +165,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/removeEnroll")
     public Object removeEnroll(Long orderId, String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             orderRelationService.removeEnroll(orderId, user.getId());
@@ -210,7 +210,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/userList")
     public Object userList(Long orderId, int type, String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             List<UserInfoView> userInfoViewList = orderRelationService.userListByPperation(orderId, type, user.getId());
@@ -249,7 +249,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/chooseUser")
     public Object chooseUser(Long orderId, String token, String userIds) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -290,7 +290,7 @@ public class OrderRelationController extends BaseController {
      */
     @RequestMapping("/unChooseUser")
     public Object unChooseUser(Long orderId, String token, String userIds) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -335,7 +335,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/pay")
     public Object pay(Long orderId, String token, String userIds , String payments) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -385,7 +385,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/startOrder")
     public Object startOrder(Long orderId, String token ,String userIds) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -431,7 +431,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/reports")
     public Object reports(long orderId , long labelsId , String message ,   String voucherUrl , String token , String userIds) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -480,7 +480,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/remark")
     public Object remark(String token, String userIds, Long orderId , int credit, int major, int attitude, String message, String labels) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -523,7 +523,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/removeOrderTips")
     public Object removeOrderTips(String token , Long orderId ) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             long coin = orderRelationService.removeOrderTips(orderId , user.getId());
@@ -560,7 +560,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/removeOrder")
     public Object removeOrder(Long orderId , String userIds , String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         String[] userId = userIds.split(",");
         List<Long> userIdList = new ArrayList<>();
@@ -674,7 +674,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/reportOrder")
     public Object reportOrder(Long associationId , String token , long labelsId , String message , String voucherUrl) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             orderRelationService.reoprtOrder(associationId , user , labelsId , message , voucherUrl);
@@ -719,7 +719,7 @@ public class OrderRelationController extends BaseController {
      */
     @PostMapping("/orgOrderInfo")
     public Object orgOrderInfo(Long orderId , String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             OrgEnrollUserView orgEnrollUserView = orderRelationService.orgOrderInfo(orderId , user.getId());
@@ -780,7 +780,7 @@ public class OrderRelationController extends BaseController {
     @PostMapping("/enrollUserInfoList")
     public Object enrollUserInfoList(Long orderId, int status, int type, String value,
                                      int pageSize, int pageNum, String token) {
-        TUser user = UserUtil.getUser(token);
+        TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<EnrollUserInfoView> enrollUserInfoViewList = orderRelationService.enrollUserInfoList(orderId , status , type , value ,pageSize ,pageNum ,user);
