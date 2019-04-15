@@ -656,10 +656,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         result.setDesensitizedUserView(view);
         user = userDao.selectByPrimaryKey(user.getId());
         //求助列表
-        QueryResult<TOrder> helps = getOnesAvailableItems(userId, 1, 8, false, user);
+        QueryResult helps = getOnesAvailableItems(userId, 1, 8, false, user);
 
         //服务列表
-        QueryResult<TOrder> services = getOnesAvailableItems(userId, 1, 8, true, user);
+        QueryResult services = getOnesAvailableItems(userId, 1, 8, true, user);
 
         //技能列表
         user = new TUser();
@@ -766,14 +766,26 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<TOrder> orders = new ArrayList<>();
         Page<Object> startPage = new Page<>();
         startPage = PageHelper.startPage(pageNum, pageSize);
+        boolean flag = false;
         if (userId != me.getId()) {    //查看别人的主页
             orders = orderService.selectOdersByUserId(userId, isService, me);
         } else {
             orders = orderService.selectOdersByUserId(userId,isService);
+            flag = true;
         }
+
+        List<UserPageServiceVO> resultList = new ArrayList<>();
+        for(TOrder order:orders) {
+            //查询自己与对方订单的报名状态
+            String status = orderService.queryIsReceipt(me.getId(), order.getId(),me.getId());
+            UserPageServiceVO copy = BeanUtil.copy(order, UserPageServiceVO.class);
+            copy.setReceiptStatus(status);
+            resultList.add(copy);
+        }
+
         QueryResult queryResult = new QueryResult();
         queryResult.setTotalCount(startPage.getTotal());
-        queryResult.setResultList(orders);
+        queryResult.setResultList(resultList);
         return queryResult;
     }
 

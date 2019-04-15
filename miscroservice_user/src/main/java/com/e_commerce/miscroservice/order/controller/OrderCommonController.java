@@ -334,4 +334,13 @@ public class OrderCommonController extends BaseController {
 	public void lowerFrame(Long productId) {
 		orderService.lowerFrameOrderByProductId(productId);
 	}
+
+	/**
+	 * 查询报名状态
+	 * @param receiptId
+	 * @return
+	 */
+    public String queryIsReceipt(Long receiptId, Long orderId, Long mineId) {
+		return orderRelationshipDao.queryIsReceipt(receiptId, orderId, mineId);
+    }
 }

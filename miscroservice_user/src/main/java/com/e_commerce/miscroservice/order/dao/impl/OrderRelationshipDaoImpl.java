@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.order.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.enums.application.OrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 功能描述:
@@ -605,5 +607,43 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 		.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
+    @Override
+    public String queryIsReceipt(Long receiptId, Long orderId, Long mineId) {
+		String result;
+		Integer status = 0;
+		TOrderRelationship orderRelationship = MybatisOperaterUtil.getInstance().findOne(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+				.eq(TOrderRelationship::getReceiptUserId, receiptId)
+				.isNotNull(TOrderRelationship::getFromUserId)
+				.eq(TOrderRelationship::getOrderId, orderId)
+				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
+				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
+		if(orderRelationship == null) {
+			return "0";
+		}
+
+		if (orderRelationship.getFromUserId().equals(mineId)) { //当前用户是发布者
+			if (orderRelationship.getEndTime() < System.currentTimeMillis()) {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue();
+			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_PUBLISH_CANCEL.getType())) {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CANCEL.getValue();
+			} else {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_WAIT_CHOOSE.getValue();
+			}
+		} else if (Objects.equals(orderRelationship.getReceiptUserId(), mineId)) { //当前用户是接单者
+			if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType())) {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_BE_REFUSED.getValue();
+			} else if (orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())) {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_ENROLL.getValue();
+			} else {
+				status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_CHOOSED.getValue();
+			}
+		}
+
+		if(Objects.equals(orderRelationship.getStatus(),OrderRelationshipEnum.STATUS_IS_COMPLETED.getType())) {
+			status = OrderEnum.SHOW_STATUS_ENROLL_CHOOSE_ALREADY_END.getValue();	//已结束
+		}
+
+		return String.valueOf(status);
+    }
 
 }
