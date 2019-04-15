@@ -18,7 +18,6 @@ dependencies {
     compile 'org.ansj:ansj_seg:5.1.1'
     compile project(":miscroservice_commons")
     annotationProcessor project(":miscroservice_commons")
-//    annotationProcessor fileTree(dir: "src/main/resources/lib", include: "*.jar")
 
 
 }
