@@ -130,4 +130,10 @@ public class ProductDaoImpl implements ProductDao {
 		.eq(TService::getCreateUser,userId)
 		.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+	@Override
+	public TServiceDescribe getProductDescTop(Long serviceId) {
+		return MybatisOperaterUtil.getInstance().findOne(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+				.eq(TServiceDescribe::getServiceId, serviceId) );
+	}
 }

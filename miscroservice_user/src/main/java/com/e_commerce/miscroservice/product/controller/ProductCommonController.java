@@ -96,4 +96,9 @@ public class ProductCommonController extends BaseController {
     public TService selectByProductId(Long productId) {
 		return productDao.selectByPrimaryKey(productId);
     }
+
+	public TServiceDescribe getProductDescTop(Long serviceId) {
+		return productService.getProductDescTop(serviceId);
+
+	}
 }
