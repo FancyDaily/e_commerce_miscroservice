@@ -2,9 +2,10 @@ package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.user.vo.DateTypeDictionaryView;
+import lombok.Data;
 
 import java.io.Serializable;
-
+@Data
 public class TUserTask implements Serializable {
     @Id
     private Long id;

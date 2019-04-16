@@ -152,7 +152,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
 			returnView.setDescription(listProductDesc.get(0).getDepict());
 			TUser tUser = userService.getUserById(order.getCreateUser());
-			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+			com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
+			tUser1.exchangeTUser(tUser);
+			BaseUserView userView = tUser1.copyBaseUserView();
 
 			returnView.setUser(userView);
 			// 用户类型
@@ -179,7 +181,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
-		BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+		com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
+
+		BaseUserView userView = tUser1.copyBaseUserView();
 		// 求助 展示求助者评分
 		if (order.getType().equals(ProductEnum.TYPE_SEEK_HELP.getValue())) {
 			userView.setTotalEvaluate(tUser.getHelpTotalEvaluate());
@@ -472,7 +476,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if (listRelationship.size() == 1) {
 				Long userId = listRelationship.get(0).getReceiptUserId();
 				TUser receiver = userService.getUserById(userId);
-				BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
+				com.e_commerce.miscroservice.order.po.TUser tUser = new com.e_commerce.miscroservice.order.po.TUser();
+				BaseUserView userView = tUser.copyBaseUserView();
 				// 是否关注该用户
 				boolean isCare = userService.isCareUser(user.getId(), userId);
 				if (isCare) {
@@ -497,7 +502,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				// 对接单者进行基本用户信息的映射
 				for (TOrderRelationship tOrderRelationship : listRelationship) {
 					TUser receiver = userService.getUserById(tOrderRelationship.getReceiptUserId());
-					BaseUserView userView = BeanUtil.copy(receiver, BaseUserView.class);
+					com.e_commerce.miscroservice.order.po.TUser tUser = new com.e_commerce.miscroservice.order.po.TUser();
+					BaseUserView userView = tUser.copyBaseUserView();
+
 					// 是否关注该用户
 					boolean isCare = userService.isCareUser(user.getId(), receiver.getId());
 					if (isCare) {
@@ -562,7 +569,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			tOrder.setServicePersonnel(1);
 			Long fromUserId = relationship.getFromUserId();
 			TUser tUser = userService.getUserById(fromUserId);
-			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+			com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
+			BaseUserView userView = tUser1.copyBaseUserView();
+
 			// 是否关注该用户
 			boolean isCare = userService.isCareUser(user.getId(), tUser.getId());
 			if (isCare) {
@@ -596,7 +605,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			List<BaseUserView> listUser = new ArrayList<>();
 			for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
 				TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
-				BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+				com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
+				BaseUserView userView = tUser1.copyBaseUserView();
+
 				boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
 				if (isCare) {
 					// 关注状态 1、显示关注 2、显示已关注
@@ -609,7 +620,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			result.setListUser(listUser);
 		} else {
 			TUser tUser = userService.getUserById(order.getCreateUser());
-			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
+			com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
+			BaseUserView userView = tUser1.copyBaseUserView();
+
 			boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
 			if (isCare) {
 				// 关注状态 1、显示关注 2、显示已关注

@@ -3,9 +3,11 @@ package com.e_commerce.miscroservice.user.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.user.vo.BaseGroupView;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 public class TGroup implements Serializable {
     @Id
     private Long id;

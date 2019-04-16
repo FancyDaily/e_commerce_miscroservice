@@ -4,9 +4,10 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.user.vo.SinglePaymentView;
 import com.e_commerce.miscroservice.user.vo.UserFreezeView;
+import lombok.Data;
 
 import java.io.Serializable;
-
+@Data
 public class TUserFreeze implements Serializable {
     @Id
     private Long id;

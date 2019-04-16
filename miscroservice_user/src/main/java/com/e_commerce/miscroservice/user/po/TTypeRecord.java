@@ -2,9 +2,11 @@ package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.user.vo.SingleGrowthValueView;
+import lombok.Data;
 
 import java.io.Serializable;
 
+@Data
 public class TTypeRecord implements Serializable {
     @Id
     private Long id;

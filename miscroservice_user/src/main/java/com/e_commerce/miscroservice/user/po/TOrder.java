@@ -6,9 +6,10 @@ import com.e_commerce.miscroservice.user.vo.CollectionView;
 import com.e_commerce.miscroservice.user.vo.SinglePaymentView;
 import com.e_commerce.miscroservice.user.vo.StrServiceView;
 import com.e_commerce.miscroservice.user.vo.UserPageServiceVO;
+import lombok.Data;
 
 import java.io.Serializable;
-
+@Data
 public class TOrder implements Serializable {
     @Id
     private Long id;
