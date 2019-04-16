@@ -2,9 +2,7 @@ package com.e_commerce.miscroservice;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.init.Start;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-@EnableTransactionManagement
 @Start
 public class UserStartMain {
 
