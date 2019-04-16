@@ -23,7 +23,6 @@ import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
-import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
@@ -35,7 +34,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -894,12 +892,16 @@ public class UserServiceImpl extends BaseService implements UserService {
      *
      * @param token
      * @param user
+     * @param formerUser
      * @return
      */
     @Transactional(rollbackFor = Throwable.class)
     @Override
-    public String modify(String token, TUser user) {
-        TUser idHolder = (TUser) redisUtil.get(token);
+    public String modify(String token, TUser user, TUser formerUser) {
+        if(formerUser==null) {
+            formerUser = (TUser) redisUtil.get(token);
+        }
+        TUser idHolder = formerUser;
         TUser updateData = user; // 原始数据
 
         // 判空
@@ -974,10 +976,6 @@ public class UserServiceImpl extends BaseService implements UserService {
                         redisUtil.del(redisKey);// 删除登录凭证
                     }
                 }
-
-                // 刷新缓存
-                flushRedisUser(token, tUser);
-
                 super.afterCompletion(status);
             }
         });
@@ -2083,8 +2081,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         // TODO 刷新缓存
         String key = "str" + inviterId;
         if (redisUtil.hasKey(key)) {
-            String inviterToken = (String) redisUtil.get(key);
-            flushRedisUser(inviterToken, inviter);
+//            String inviterToken = (String) redisUtil.get(key);
+//            flushRedisUser(inviterToken, inviter);
         }
     }
 
@@ -2104,6 +2102,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         if ((option == "2" || option == "3") && serviceId == null || option == null) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "服务id和操作不能为空！");
         }
+
+        user = userDao.selectByPrimaryKey(user.getId());
 
         Long inviterId = user.getId();
 
@@ -2191,7 +2191,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         serviceView.setUrl(imgUrl);
 
         // 刷新缓存
-        flushRedisUser(token, user);
+//        flushRedisUser(token, user);
 
         return serviceView;
     }
@@ -2216,7 +2216,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         user = userDao.selectByPrimaryKey(user.getId());
 
-        flushRedisUser(token, user);
+//        flushRedisUser(token, user);
     }
 
     /**
@@ -2283,7 +2283,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 // 激活
                 user.setInviteCode(RandomUtil.generateUniqueChars());
                 userDao.updateByPrimaryKey(user);
-                flushRedisUser(token, user);
+//                flushRedisUser(token, user);
             }
         }
     }
@@ -2672,9 +2672,6 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
         Map<String, Object> resultMap = new HashMap<>();
-
-        // 从认证中心获取token
-        token = checkLogin(uuid, user, token, Boolean.FALSE);
 
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化

@@ -346,12 +346,24 @@ public class BaseService {
 	}
 
 	protected String checkLogin(String uuid, TUser user, String token, boolean opt) {
-		Token load = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid); //从认证中心获取
+		/*Token load = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid); //从认证中心获取
 		if(load.getToken() != null && !"".equals(load.getToken())) {
 			token = load.getToken();
 		} else {    //注册到认证中心
 			Token reg = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), uuid, opt);
 			if(reg.getToken() != null && !"".equals(reg.getToken())) {
+				token = load.getToken();
+			}
+		}*/
+
+		Token reg = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), uuid, opt);  //注册到认证中心
+		System.out.println("reg ============>" + DEFAULT_PASS);
+		if(reg.getToken() != null && !"".equals(reg.getToken())) {
+			token = reg.getToken();
+		} else {
+			Token load = authorizeRpcService.load(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, uuid); //从认证中心获取
+			System.out.println("load ============>" + DEFAULT_PASS);
+			if(load.getToken() != null && !"".equals(load.getToken())) {
 				token = load.getToken();
 			}
 		}

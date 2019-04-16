@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.MessageEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.message.service.MessageService;
 import com.e_commerce.miscroservice.message.vo.MessageDetailView;
@@ -45,7 +46,7 @@ public class MessageController extends BaseController {
      *               "data": ""
      * @return
      */
-    @RequestMapping("/collectFormId")
+    @RequestMapping("/collectFormId/" + TokenUtil.AUTH_SUFFIX)
     public Object collectFormId(String formId, String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -85,7 +86,7 @@ public class MessageController extends BaseController {
      *                 "noticeTitle": "恭喜您已被求助者选定"//通知标题
      * @return
      */
-    @PostMapping("/notices")
+    @PostMapping("/notices/" + TokenUtil.AUTH_SUFFIX)
     public Object notices(int pageSize, long lastTime, String token) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -128,7 +129,7 @@ public class MessageController extends BaseController {
      *                      "data": ""
      * @return
      */
-    @PostMapping("/sendMessage")
+    @PostMapping("/sendMessage/" + TokenUtil.AUTH_SUFFIX)
     public Object sendMessage(String token, Long messageUserId, Long specialId, int type, String message, String url) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -180,7 +181,7 @@ public class MessageController extends BaseController {
      *                 "url": "" //图片链接
      * @return
      */
-    @PostMapping("/detail")
+    @PostMapping("/detail/" + TokenUtil.AUTH_SUFFIX)
     public Object detail(Long toUserId, Long lastTime, int pageSize, String token) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -221,7 +222,7 @@ public class MessageController extends BaseController {
      *                 "unReadSum": 18 未读消息数量
      * @return
      */
-    @PostMapping("/showList")
+    @PostMapping("/showList/" + TokenUtil.AUTH_SUFFIX)
     public Object showList(Long lastTime, String token, Integer pageSize) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -253,7 +254,7 @@ public class MessageController extends BaseController {
      *              "sysUnReadSum": 8 未读消息数量
      * @return
      */
-    @PostMapping("/noticesFirstInfo")
+    @PostMapping("/noticesFirstInfo/" + TokenUtil.AUTH_SUFFIX)
     public Object noticesFirstInfo(String token) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -287,15 +288,15 @@ public class MessageController extends BaseController {
      *              "data": 1 1-有未读消息 0-没有未读消息
      * @return
      */
-    @PostMapping("/unReadMsg")
+    @PostMapping({"/unReadMsg/" + TokenUtil.AUTH_SUFFIX,"unReadMsg"})
     public Object unReadMsg(String token) {
         AjaxResult result = new AjaxResult();
-        if (token == null) {
+        /*if (token == null) {
             result.setSuccess(true);
             result.setMsg("查看成功");
             result.setData(0);
             return result;
-        }
+        }*/
         TUser user = UserUtil.getUser();
         if (user == null) {
             result.setSuccess(true);

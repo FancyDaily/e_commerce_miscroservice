@@ -167,6 +167,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
 		token = checkLogin(uuid,user,token,Boolean.FALSE);
 		resultMap.put(AppConstant.USER_TOKEN, token);
+		resultMap.put(AppConstant.USER, user);
 
         return resultMap; // 返回登录状态
     }
@@ -232,7 +233,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
         resultMap.put("userId", userId);
 
-        token = checkLogin(view.getUid(), user, token, Boolean.FALSE);
+        token = checkLogin(view.getUuid(), user, token, Boolean.FALSE);
         resultMap.put(AppConstant.USER_TOKEN, token);
 
         // 返回map，包含自定义状态
@@ -355,7 +356,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         resultMap.put("userId", userId);
 
 /*
-        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUid());
+        Token load = authorizeRpcService.load(AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX + user.getId(), AuthorizeRpcService.DEFAULT_PASS, view.getUUid());
 
         if (load != null && load.getToken()!=null && !"".equals(load.getToken())) {
             resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, load.getToken());

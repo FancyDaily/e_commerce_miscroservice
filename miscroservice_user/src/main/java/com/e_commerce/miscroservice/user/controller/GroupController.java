@@ -125,7 +125,7 @@ public class GroupController extends BaseController {
     public Object gatherInfo(String token) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser(); // 组织账号
+            TUser user = UserUtil.getUser(token); // 组织账号
             UserCompanyView gatherInfo = groupService.gatherInfo(user);
             result.setData(gatherInfo);
             result.setSuccess(true);
@@ -151,7 +151,7 @@ public class GroupController extends BaseController {
     public Object companyRecent(String token) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             CompanyRecentView companyRecentView = groupService.companyRecent(user);
             result.setData(companyRecentView);
             result.setSuccess(true);
@@ -179,7 +179,7 @@ public class GroupController extends BaseController {
     public Object userList(String token, Long groupId, String param, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             QueryResult<SmartUserView> userList = groupService.userList(user, groupId, param, pageNum, pageSize);
             result.setData(userList);
             result.setSuccess(true);
@@ -205,7 +205,7 @@ public class GroupController extends BaseController {
     public Object userAdd(String token, Long groupId, String userIds) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             groupService.userAdd(user, groupId, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -232,7 +232,7 @@ public class GroupController extends BaseController {
     public Object userInsert(String token, Long groupId, String phone, String userName, Integer sex) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             groupService.userInsert(user, groupId, phone, userName, sex);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -256,7 +256,7 @@ public class GroupController extends BaseController {
     public Object userDelete(String token, String userIds) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             groupService.delete(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -281,7 +281,7 @@ public class GroupController extends BaseController {
     public Object userPass(String token, String userIds) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             groupService.userPass(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -305,7 +305,7 @@ public class GroupController extends BaseController {
     public Object userReject(String token, String userIds) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             groupService.userReject(user, userIds);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -329,7 +329,7 @@ public class GroupController extends BaseController {
     public Object multiUserInsert(@RequestParam("file") MultipartFile file, String token) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             List<String> errorInfoList = groupService.multiUserInsert(user, file);
             result.setData(errorInfoList);
             result.setSuccess(true);
@@ -358,7 +358,7 @@ public class GroupController extends BaseController {
 	@PostMapping("/list")
 	public Object listGroup(String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		try {
 			List<BaseGroupView> listGroup = groupService.listGroup(user);
 			result.setData(listGroup);
@@ -386,7 +386,7 @@ public class GroupController extends BaseController {
 	 */
 	@PostMapping("/insert")
 	public Object insertGroup(TGroup group, String token) {
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			groupService.insert(group, user);
@@ -413,7 +413,7 @@ public class GroupController extends BaseController {
 	 */
 	@PostMapping("/modify")
 	public Object updateGroup(TGroup group, String token) {
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			groupService.updateGroup(group, user);
@@ -444,7 +444,7 @@ public class GroupController extends BaseController {
 	 */
 	@PostMapping("/delete")
 	public Object deleteGroup(Long groupId, String token) {
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			groupService.deleteGroup(groupId, user);
@@ -479,7 +479,7 @@ public class GroupController extends BaseController {
     public Object userWaitToJoin(String token, Integer pageNum, Integer pageSize, String param, String skill) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             QueryResult<SmartUserView> userViews = groupService.userWaitToJoin(user, pageNum, pageSize, param, skill);
             result.setData(userViews);
             result.setSuccess(true);
@@ -503,7 +503,7 @@ public class GroupController extends BaseController {
     public Object companyPaymentDiagram(String token) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             CompanyRecentView view = groupService.companyPaymentDiagram(user);
             result.setData(view);
             result.setSuccess(true);

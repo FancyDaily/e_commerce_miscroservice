@@ -113,7 +113,7 @@ public class LoginController extends BaseController {
             Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid);
             String loginStatus = (String) resultMap.get(LOGIN_STATUS);
             String token = (String) resultMap.get(AppConstant.USER_TOKEN);
-            TUser user = UserUtil.getUser();
+            TUser user = (TUser) resultMap.get(AppConstant.USER);
             String certStatus = userService.getCertStatus(user.getId()); // 获取实名信息
             Map<String, String> map = new HashMap<>();
             map.put(CERT_STATUS, certStatus);

@@ -43,16 +43,19 @@ public class WechatLoginVIew implements Serializable{
 	private String openid;
 	private String session_key;
 	/***设备标识**/
-	private String uid;
+	private String uuid;
 
-	public String getUid() {
-		return uid;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
-	public void setUid(String uid) {
-		this.uid = uid;
+	public String getUuid() {
+		return uuid;
 	}
 
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
 	public String getNickName() {
 		return nickName;
 	}

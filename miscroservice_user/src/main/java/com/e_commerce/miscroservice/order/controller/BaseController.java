@@ -17,7 +17,6 @@ import java.io.StringWriter;
  * 功能描述:Controller的公共方法
  *
  */
-@Data
 public class BaseController {
 
 	@Autowired

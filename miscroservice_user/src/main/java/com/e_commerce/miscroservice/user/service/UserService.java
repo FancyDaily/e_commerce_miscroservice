@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface UserService {
 
@@ -131,9 +130,10 @@ public interface UserService {
      *
      * @param token
      * @param user
+     * @param idHolder
      * @return
      */
-    String modify(String token, TUser user);
+    String modify(String token, TUser user, TUser idHolder);
 
     /**
      * 预生成一个红包

@@ -247,6 +247,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
     public List<TUserCompany> listCompanyUser(Long companyId) {
         return MybatisOperaterUtil.getInstance().finAll(new TUserCompany(), new MybatisSqlWhereBuild(TUserCompany.class)
                 .eq(TUserCompany::getState, 2).eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
+                .eq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_MEMBER)
                 .eq(TUserCompany::getCompanyId, companyId).isNotNull(TUserCompany::getGroupId));
     }
 

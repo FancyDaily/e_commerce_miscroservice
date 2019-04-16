@@ -150,7 +150,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//设置封面图
 			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
 			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
-			returnView.setDescription(listProductDesc.get(0).getDepict());
+			if(!listProductDesc.isEmpty()) {
+				returnView.setDescription(listProductDesc.get(0).getDepict());
+			}
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
 
@@ -597,7 +599,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
 				TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
 				BaseUserView userView = BeanUtil.copy(tUser, BaseUserView.class);
-				boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+				boolean isCare = userService.isCareUser(user.getId(), tOrderRelationship.getReceiptUserId());
 				if (isCare) {
 					// 关注状态 1、显示关注 2、显示已关注
 					userView.setCareStatus(2);

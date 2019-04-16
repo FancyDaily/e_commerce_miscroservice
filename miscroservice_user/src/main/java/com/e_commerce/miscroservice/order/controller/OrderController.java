@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.order.vo.*;
@@ -53,7 +54,7 @@ public class OrderController extends BaseController {
 	@PostMapping("/listGroupOrder")
 	public Object listGroupOrder(String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<GroupChooseOrderView> data = new QueryResult<>();
 			List<GroupChooseOrderView> listGroupOrder = orderService.listGroupOrder(user);
@@ -126,10 +127,84 @@ public class OrderController extends BaseController {
 	 *                }
 	 * @return
 	 */
+	@PostMapping("detailMineOrder/" + TokenUtil.AUTH_SUFFIX)
+	public Object detailMineOrderAuth(Long orderId, String token) {
+		AjaxResult result = new AjaxResult();
+		TUser user = UserUtil.getUser();
+		try {
+			DetailMineOrderReturnView detailMineOrder = orderService.detailMineOrder(user, orderId);
+			result.setData(detailMineOrder);
+			result.setSuccess(true);
+			result.setMsg("查询成功");
+		} catch (MessageException e) {
+			log.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败," + e.getMessage());
+		} catch (Exception e) {
+			log.error("查询失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败");
+		}
+		return result;
+	}
+
+	/**
+	 * 我的订单详情
+	 *
+	 * @param orderId 用户订单
+	 * @param token   当前用户token
+	 *                <p>
+	 *                {
+	 *                "success": 是否成功,
+	 *                "msg": "成功失败的消息",
+	 *                "data": {
+	 *                "order": {
+	 *                "id": 订单ID,
+	 *                "serviceId": 商品ID,
+	 *                "serviceName": "订单标题",
+	 *                "servicePersonnel": 订单需要人数,
+	 *                "servicePlace": 订单服务场所 1、线下 2、线上,
+	 *                "labels": "标签",
+	 *                "type": 1、求助  2、服务,
+	 *                "source": 1、个人 2组织,
+	 *                "startTime": 开始时间,
+	 *                "endTime": 结束时间,
+	 *                "collectTime": 收取时长,
+	 *                "collectType": 收取类型 1、互助时 2、公益时,
+	 *                },
+	 *                "record": [
+	 *                {
+	 *                "content": "服务记录",
+	 *                "creatTime": 服务记录时间（毫秒值）
+	 *                }
+	 *                ],
+	 *                "listUserView": [
+	 *                {
+	 *                "id": 报名者ID,
+	 *                "name": "报名者名称",
+	 *                "userHeadPortraitPath": "报名者头像",
+	 *                "pointStatus": 显示状态  待看到UI图定,
+	 *                "idString": "68813258559062016"
+	 *                ],
+	 *                "status": "显示订单状态", 订单状态: 0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中，
+	 *                "reportAction": 举报行为 1、投诉 2、举报，
+	 *                "listDesc": [
+	 *                {
+	 *                "depict": "服务求助详情",
+	 *                "url": "图片地址",
+	 *                "isCover": 是否封面图  字符串 1、是 0、不是,
+	 *                }
+	 *                ]
+	 *                }
+	 *                }
+	 * @return
+	 */
 	@PostMapping("/detailMineOrder")
 	public Object detailMineOrder(Long orderId, String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		try {
 			DetailMineOrderReturnView detailMineOrder = orderService.detailMineOrder(user, orderId);
 			result.setData(detailMineOrder);
@@ -186,10 +261,64 @@ public class OrderController extends BaseController {
 	 *                 }
 	 * @return
 	 */
+	@RequestMapping("listMineOrder/" + TokenUtil.AUTH_SUFFIX)
+	public Object listMineOrderAuth(Integer pageNum, Integer pageSize, String token) {
+		AjaxResult result = new AjaxResult();
+		TUser user = UserUtil.getUser();
+		try {
+			QueryResult<PageOrderReturnView> list = orderService.listMineOrder(pageNum, pageSize, user);
+			result.setData(list);
+			result.setSuccess(true);
+			result.setMsg("查询成功");
+		} catch (MessageException e) {
+			log.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("查询失败," + e.getMessage());
+		}
+		return result;
+	}
+
+	/**
+	 * 订单列表
+	 *
+	 * @param pageNum  分页页数
+	 * @param pageSize 每页数量
+	 * @param token    当前用户token
+	 *                 <p>
+	 *                 {
+	 *                 "success": true,
+	 *                 "msg": "查询成功",
+	 *                 "data": {
+	 *                 "resultList": [
+	 *                 {
+	 *                 "order": {
+	 *                 "id": 订单ID,
+	 *                 "serviceName": "名称",
+	 *                 "servicePersonnel": 需要人数,
+	 *                 "servicePlace": 1、线上 2、线下,
+	 *                 "labels": "标签",
+	 *                 "type": 类型 1、求助 2、服务,
+	 *                 "source": 来源 1、个人 2、组织,
+	 *                 "startTime": 1552526400000,
+	 *                 "endTime": 1552527600000,
+	 *                 "collectTime": 收取时长,
+	 *                 "collectType": 收取类型  1、互助时 2、公益时,
+	 *                 },
+	 *                 "imgUrl": "封面图",
+	 *                 "status": 订单状态: 0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中，
+	 *                 "orderIdString": "101675590041468928"
+	 *                 }
+	 *                 ],
+	 *                 "totalCount": 2
+	 *                 }
+	 *                 }
+	 * @return
+	 */
 	@RequestMapping("/listMineOrder")
 	public Object listMineOrder(Integer pageNum, Integer pageSize, String token) {
 		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		try {
 			QueryResult<PageOrderReturnView> list = orderService.listMineOrder(pageNum, pageSize, user);
 			result.setData(list);
@@ -255,7 +384,7 @@ public class OrderController extends BaseController {
 	 *                      }
 	 * @return
 	 */
-	@PostMapping("/list")
+	@PostMapping({"/list/" + TokenUtil.AUTH_SUFFIX, "list"})
 	@Consume(PageOrderParamView.class)
 	public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
 							Integer pageSize, String condition, String token) {
@@ -328,7 +457,7 @@ public class OrderController extends BaseController {
 	 *                }
 	 * @return
 	 */
-	@RequestMapping("/detail")
+	@RequestMapping("/detail/" + TokenUtil.AUTH_SUFFIX)
 	public Object detailIndexOrder(Long orderId, String token) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
@@ -385,7 +514,7 @@ public class OrderController extends BaseController {
 	 *                 }
 	 * @return
 	 */
-	@PostMapping("/enrollList")
+	@PostMapping("/enrollList/" + TokenUtil.AUTH_SUFFIX)
 	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
@@ -451,8 +580,8 @@ public class OrderController extends BaseController {
 	 *                 }
 	 * @return
 	 */
-	@PostMapping("/mineChooseList")
-	public Object mineChooseList(String token, Integer pageNum, Integer pageSize) {
+	@PostMapping("mineChooseList/" + TokenUtil.AUTH_SUFFIX)
+	public Object mineChooseListAuth(String token, Integer pageNum, Integer pageSize) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
 		try {
@@ -471,6 +600,136 @@ public class OrderController extends BaseController {
 		}
 		return result;
 	}
+
+	/**
+	 * 我的选人列表 --> 组织专属
+	 *
+	 * @param token    用户token
+	 * @param pageNum  页数
+	 * @param pageSize 每页数量
+	 *                 {
+	 *                 "success": true,
+	 *                 "errorCode": "",
+	 *                 "msg": "获取报名列表成功",
+	 *                 "data": {
+	 *                 "resultList": [
+	 *                 {
+	 *                 "order": {
+	 *                 "id": 订单ID,
+	 *                 "nameAudioUrl": "音频地址",
+	 *                 "serviceName": "求助服务名称",
+	 *                 "servicePersonnel": 要求人数,
+	 *                 "servicePlace": 1、线上 2、线下,
+	 *                 "labels": "标签",
+	 *                 "type": 类型 1、求助 2、服务,
+	 *                 "source": 来源 1、个人 2、组织,
+	 *                 "addressName": 地址名称,
+	 *                 "longitude": 经度,
+	 *                 "latitude": 纬度,
+	 *                 "enrollNum": 报名人数,
+	 *                 "confirmNum": 确认人数,
+	 *                 "startTime": 开始时间,
+	 *                 "endTime": 结束时间,
+	 *                 "timeType": 0 一次性 1、可重复,
+	 *                 "collectTime": 收取时间,
+	 *                 "collectType": 收取分类 1、互助时 2、公益时,
+	 *                 "createUser": 创建人ID,
+	 *                 },
+	 *                 "porductCoverPic": 封面图地址,
+	 *                 "status": 状态： 1、已结束 2、已取消 3、待选人
+	 *                 }
+	 *                 ],
+	 *                 "totalCount": 总条数
+	 *                 }
+	 *                 }
+	 * @return
+	 */
+	@PostMapping("/mineChooseList")
+	public Object mineChooseList(String token, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		TUser user = UserUtil.getUser(token);
+		try {
+			QueryResult<PageEnrollAndChooseReturnView> data = orderService.mineChooseList(pageNum, pageSize, user);
+			result.setSuccess(true);
+			result.setData(data);
+			result.setMsg("获取报名列表成功");
+		} catch (MessageException e) {
+			log.warn("查询失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setMsg("查询失败," + e.getMessage());
+		} catch (Exception e) {
+			log.error("获取报名列表成功" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setMsg("获取报名列表失败");
+		}
+		return result;
+	}
+
+
+	/**
+	 * 选人详情
+	 *
+	 * @param token   用户token
+	 * @param orderId 订单ID
+	 *                {
+	 *                "success": 是否成功,
+	 *                "errorCode": "",
+	 *                "msg": "获取报名列表成功",
+	 *                "data": {
+	 *                "order": {
+	 *                "nameAudioUrl": "音频地址",
+	 *                "serviceName": "名称",
+	 *                "servicePersonnel": 要求人数,
+	 *                "servicePlace": 平台 1、线上 2、线下,
+	 *                "labels": "hehe,haha",
+	 *                "type": 1,
+	 *                "status": 1,
+	 *                "source": 1,
+	 *                "serviceTypeId": 15000,
+	 *                "addressName": "地址",
+	 *                "longitude": "经度",
+	 *                "latitude": "纬度",
+	 *                "startTime": 开始时间,
+	 *                "endTime": 结束时间,
+	 *                "collectTime": 收取时长,
+	 *                "collectType": 收取分类 1、互助时  2、公益时,
+	 *                },
+	 *                "listUser": [  "报名者列表"
+	 *                {
+	 *                "id": 68813259653775360,
+	 *                "name": "左岸",
+	 *                "userHeadPortraitPath": 头像地址,
+	 *                "careStatus": 关注状态 1、显示关注 2、显示已关注,
+	 *                }
+	 *                ]
+	 *                }
+	 *                }
+	 * @return
+	 */
+	@PostMapping("chooseDetail/" + TokenUtil.AUTH_SUFFIX)
+	public Object chooseDetailAuth(String token, Long orderId) {
+		TUser user = UserUtil.getUser();
+		AjaxResult result = new AjaxResult();
+		try {
+			DetailChooseReturnView data = orderService.chooseDetail(orderId, user);
+			result.setSuccess(true);
+			result.setData(data);
+			result.setMsg("获取详情成功");
+		} catch (MessageException e) {
+			log.warn("获取详情失败," + e.getMessage());
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败," + e.getMessage());
+		} catch (Exception e) {
+			log.error("获取详情失败" + errInfo(e), e);
+			result.setSuccess(false);
+			result.setErrorCode("500");
+			result.setMsg("获取详情失败");
+		}
+		return result;
+	}
+
+
 
 	/**
 	 * 选人详情
@@ -514,7 +773,7 @@ public class OrderController extends BaseController {
 	 */
 	@PostMapping("/chooseDetail")
 	public Object chooseDetail(String token, Long orderId) {
-		TUser user = UserUtil.getUser();
+		TUser user = UserUtil.getUser(token);
 		AjaxResult result = new AjaxResult();
 		try {
 			DetailChooseReturnView data = orderService.chooseDetail(orderId, user);

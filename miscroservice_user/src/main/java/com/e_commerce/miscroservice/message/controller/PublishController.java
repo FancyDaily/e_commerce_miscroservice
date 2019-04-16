@@ -4,6 +4,7 @@ package com.e_commerce.miscroservice.message.controller;
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.message.service.PublishService;
 import com.e_commerce.miscroservice.message.vo.BroadcastView;
 import lombok.Data;
@@ -39,7 +40,7 @@ public class PublishController extends BaseController {
      *               "msg": "插入成功！"
      * @return
      */
-    @PostMapping("/set")
+    @PostMapping({"/set", "set" + TokenUtil.AUTH_SUFFIX})
     public Object repors(Long id, String key, String value, String extend) {
         AjaxResult result = new AjaxResult();
         try {
@@ -81,7 +82,7 @@ public class PublishController extends BaseController {
      *            "value": "[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]"//对其进行json解析
      * @return
      */
-    @PostMapping("/publishGet")
+    @PostMapping({"/publishGet", "publishGet/" + TokenUtil.AUTH_SUFFIX})
     public Object get(String key) {
         AjaxResult result = new AjaxResult();
         try {
@@ -113,7 +114,7 @@ public class PublishController extends BaseController {
      * @param width
      * @return
      */
-    @PostMapping("/publishGetBroadcast")
+    @PostMapping({"/publishGetBroadcast","/publishGetBroadcast" + TokenUtil.AUTH_SUFFIX})
     public Object publishGetBroadcast(String length, String width) {
         AjaxResult result = new AjaxResult();
         try {

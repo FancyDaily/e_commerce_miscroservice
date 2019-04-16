@@ -7,8 +7,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.EasyUIPageResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.product.controller.BaseController;
@@ -380,12 +380,12 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("payments")
+    @RequestMapping("payments/" + TokenUtil.AUTH_SUFFIX)
     public Object payments(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
-        Integer id = IdUtil.getId();
         TUser user = UserUtil.getUser();
         try {
+
             Map<String, Object> payments = userService.payments(user, ymString, option);
             result.setData(payments);
             result.setSuccess(true);
@@ -430,8 +430,8 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("freezeList")
-    public Object freezeList(String token, Long lastTime, Integer pageSize) {
+    @RequestMapping("freezeList/" + TokenUtil.AUTH_SUFFIX)
+    public Object   freezeList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {
@@ -486,7 +486,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("publicWelfareList")
+    @RequestMapping("publicWelfareList/" + TokenUtil.AUTH_SUFFIX)
     public Object publicWelfareList(String token, Long lastTime, Integer pageSize, Integer year) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -552,7 +552,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @RequestMapping("skill/list")
+    @RequestMapping("skill/list/" + TokenUtil.AUTH_SUFFIX)
     public Object skillList(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -585,7 +585,7 @@ public class UserController extends BaseController {
      *                    }
      * @return
      */
-    @RequestMapping("skill/add")
+    @RequestMapping("skill/add/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TUserSkill.class)
     public Object skillAdd(String token, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
@@ -621,7 +621,7 @@ public class UserController extends BaseController {
      *                    }
      * @return
      */
-    @RequestMapping("skill/modify")
+    @RequestMapping("skill/modify/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TUserSkill.class)
     public Object skillModify(String token, Long id, String name, String description, String headUrl, String detailUrls) {
         AjaxResult result = new AjaxResult();
@@ -654,7 +654,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @RequestMapping("skill/delete")
+    @RequestMapping("skill/delete/" + TokenUtil.AUTH_SUFFIX)
     @Transactional(rollbackFor = Throwable.class)
     public Object skillDelete(String token, Long id) {
         AjaxResult result = new AjaxResult();
@@ -728,7 +728,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("collect/list")
+    @RequestMapping("collect/list/" + TokenUtil.AUTH_SUFFIX)
     public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -762,7 +762,7 @@ public class UserController extends BaseController {
      *                }
      * @return
      */
-    @RequestMapping("collect")
+    @RequestMapping("collect/" + TokenUtil.AUTH_SUFFIX)
     public Object collect(String token, Long orderId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -855,7 +855,7 @@ public class UserController extends BaseController {
      *               }
      * @return
      */
-    @RequestMapping("infos")
+    @RequestMapping("infos/" + TokenUtil.AUTH_SUFFIX)
     public Object infos(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1223,8 +1223,8 @@ public class UserController extends BaseController {
      *               }
      * @return
      */
-    @RequestMapping("page")
-    public Object page(String token, Long userId) {
+    @RequestMapping("page/" + TokenUtil.AUTH_SUFFIX)
+    public Object pageAuth(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {
@@ -1242,6 +1242,375 @@ public class UserController extends BaseController {
         }
         return result;
     }
+
+    /**
+     * 查看个人主页(基本信息、技能列表、提供的服务、提供的求助)
+     *
+     * @param token  登录凭证
+     * @param userId 目标用户的id
+     *               <p>
+     *               {
+     *               "success": true,
+     *               "msg": "",
+     *               "data": {
+     *               "desensitizedUserView": {
+     *               "isAtten": 0,    //我与对方的关注状态，0未关注，1我已关注她，2我们俩互关
+     *               "authStatus": 1,
+     *               "vxId": "无",
+     *               "id": 68813260748488704,
+     *               "name": "马晓晨",   //昵称
+     *               "jurisdiction": 0,
+     *               "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/person/15446050826379.png",  //用户头像
+     *               "userPicturePath": "http://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_background.png",   //个人主页背景图
+     *               "vxOpenId": "oMgmu4vtWtuG_eFCMgvfJB8buPhI",  //openId
+     *               "occupation": "",
+     *               "birthday": 19940704,    //生日
+     *               "sex": 1,    //性别，1男，2女
+     *               "maxEducation": "本科",    //最大学历
+     *               "followNum": 0,  //粉丝数量
+     *               "receiptNum": 0,
+     *               "remarks": "",
+     *               "level": 4,
+     *               "growthValue": 475,  //成长值
+     *               "seekHelpNum": 18,
+     *               "serveNum": 10,
+     *               "surplusTime": 47,   //总金额
+     *               "freezeTime": 210,   //冻结金额
+     *               "creditLimit": 200,  //授信额度
+     *               "publicWelfareTime": 0,  //公益时
+     *               "authenticationStatus": 2, //实名认证状态,1未认证，2已认证
+     *               "authenticationType": 1, //实名认证类型，1个人认证，2组织认证
+     *               "totalEvaluate": 146, //三项评分总和
+     *               "creditEvaluate": 48,    //信用评分
+     *               "majorEvaluate": 49, //专业评分
+     *               "attitudeEvaluate": 49,  //态度评分
+     *               "skill": "",
+     *               "integrity": 100,    //用户完整度
+     *               "isCompanyAccount": 0,   //是否为组织账号 0个人账号 1组织账号(个人账号提交组织认证类型的请求得到处理通过之后，会诞生一个组织账号)
+     *               "userType": "1", //用户类型 用于确定显示何种标签,1个人 2普通组织(除公益组织之外的组织) 3公益组织
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1537941095000,
+     *               "updateUser": 68813262698840064,
+     *               "updateUserName": "冰茬子",
+     *               "updateTime": 1548135643427,
+     *               "isValid": "1",
+     *               "inviteCode": "EuciNL",
+     *               "joinCompany": false
+     *               },
+     *               "services": {
+     *               "resultList": [
+     *               {
+     *               "id": 101430540338462777,
+     *               "serviceId": 101430539319246848,
+     *               "mainId": 101430540338462720,
+     *               "serviceName": "可重复读Repeatable Read777", //名字
+     *               "servicePlace": 1,   //线上
+     *               "labels": "hehe,haha",   //标签
+     *               "type": 2,   //服务
+     *               "status": 1, //状态
+     *               "source": 1, //来源, 1个人，2组织
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,  //报名人数
+     *               "confirmNum": 0, //确认人数
+     *               "startTime": 1552022400000,  //开始时间
+     *               "endTime": 1552023600000,    //结束时间
+     *               "timeType": 1,   //时间类型,0指定时间，1可重复
+     *               "collectTime": 10,   //单价
+     *               "collectType": 1,    //收取类型,1互助时，2公益时
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1551965325000,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1551965325062,
+     *               "isValid": "1"
+     *               }
+     *               ],
+     *               "totalCount": 1
+     *               },
+     *               "helps": {
+     *               "resultList": [
+     *               {
+     *               "id": 101675891532234752,
+     *               "serviceId": 101675890827591680,
+     *               "mainId": 101675891532234752,
+     *               "serviceName": "新版本重复9",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1552267200000,
+     *               "endTime": 1552268400000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552023821420,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552023821420,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101641267686932480,
+     *               "serviceId": 101641267305250816,
+     *               "mainId": 101641267686932480,
+     *               "serviceName": "新版本重复6",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1551921600000,
+     *               "endTime": 1551922800000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552015566529,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552015566529,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101640613451005952,
+     *               "serviceId": 101640612591173632,
+     *               "mainId": 101640613451005952,
+     *               "serviceName": "新版本重复4",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1552612800000,
+     *               "endTime": 1552614000000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552015410433,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552015410433,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101640871165820928,
+     *               "serviceId": 101640870670893056,
+     *               "mainId": 101640871165820928,
+     *               "serviceName": "新版本重复5",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1551921600000,
+     *               "endTime": 1551922800000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552015471964,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552015471964,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101675590041468928,
+     *               "serviceId": 101675589445877760,
+     *               "mainId": 101675590041468928,
+     *               "serviceName": "新版本重复7",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 3,
+     *               "confirmNum": 0,
+     *               "startTime": 1552526400000,
+     *               "endTime": 1552527600000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552023749565,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552023749565,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101637659306229760,
+     *               "serviceId": 101637658576420864,
+     *               "mainId": 101637659306229760,
+     *               "serviceName": "新版本重复3",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1552008000000,
+     *               "endTime": 1552009200000,
+     *               "timeType": 1,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1552014706141,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1552014706141,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101430540338462999,
+     *               "serviceId": 101430539319246848,
+     *               "mainId": 101430540338462720,
+     *               "serviceName": "幻想读Serializable999",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 1,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1552022400000,
+     *               "endTime": 1552023600000,
+     *               "timeType": 0,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1551965325000,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1551965325062,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "id": 101430540338462888,
+     *               "serviceId": 101430539319246848,
+     *               "mainId": 101430540338462720,
+     *               "serviceName": "读已提交Read Commited888",
+     *               "servicePlace": 1,
+     *               "labels": "hehe,haha",
+     *               "type": 1,
+     *               "status": 2,
+     *               "source": 1,
+     *               "serviceTypeId": 15000,
+     *               "enrollNum": 0,
+     *               "confirmNum": 0,
+     *               "startTime": 1552022400000,
+     *               "endTime": 1552023600000,
+     *               "timeType": 0,
+     *               "collectTime": 10,
+     *               "collectType": 1,
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "马晓晨",
+     *               "createTime": 1551965325000,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "马晓晨",
+     *               "updateTime": 1551965325062,
+     *               "isValid": "1"
+     *               }
+     *               ],
+     *               "totalCount": 8
+     *               },
+     *               "skills": {
+     *               "skillCnt": 2,
+     *               "userSkills": [
+     *               {
+     *               "idString": "95167783989411840", //技能id
+     *               "id": 95167783989411840,
+     *               "userId": 68813260748488704,
+     *               "name": "歌剧二",//技能名
+     *               "description": "海豚音，大家好，才是真的好",//技能描述
+     *               "headUrl": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/1545625655755109.png",//技能封面
+     *               "detailUrls": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154562668004844.png,https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/1545702131965137.png",
+     *               "detailUrlArray": [  //详细内容图
+     *               "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154562668004844.png",
+     *               "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/1545702131965137.png"
+     *               ],
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "盖伦😂",
+     *               "createTime": 1550472167835,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "盖伦😂",
+     *               "updateTime": 1550472167835,
+     *               "isValid": "1"
+     *               },
+     *               {
+     *               "idString": "95160769636728832",
+     *               "id": 95160769636728832,
+     *               "userId": 68813260748488704,
+     *               "name": "书法",
+     *               "description": "精通国学书法，三百年，好品质",
+     *               "headUrl": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154803914219080.png",
+     *               "detailUrls": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154502975982719.png,https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154443075139314.png",
+     *               "detailUrlArray": [
+     *               "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154502975982719.png",
+     *               "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/release/154443075139314.png"
+     *               ],
+     *               "createUser": 68813260748488704,
+     *               "createUserName": "盖伦😂",
+     *               "createTime": 1550470495483,
+     *               "updateUser": 68813260748488704,
+     *               "updateUserName": "盖伦😂",
+     *               "updateTime": 1550472853539,
+     *               "isValid": "1"
+     *               }
+     *               ]
+     *               }
+     *               }
+     *               }
+     * @return
+     */
+    @RequestMapping("page")
+    public Object page(String token, Long userId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = UserUtil.getUser(token);
+        try {
+            UserPageView page = userService.page(user, userId);
+            result.setData(page);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("查看个人主页异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("查看个人主页异常", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
 
     /**
      * 查看发布的服务/求助列表(个人主页)
@@ -1366,7 +1735,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @RequestMapping("page/service")
+    @RequestMapping("page/service/" + TokenUtil.AUTH_SUFFIX)
     public Object pageService(String token, Long userId, Integer pageNum, Integer pageSize, boolean isService) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1516,7 +1885,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("historyService")
+    @RequestMapping("historyService/" + TokenUtil.AUTH_SUFFIX)
     public Object historyService(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1576,7 +1945,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("company/list")
+    @RequestMapping("company/list/" + TokenUtil.AUTH_SUFFIX)
     public Object companyList(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1653,7 +2022,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @RequestMapping("company/social/list")
+    @RequestMapping("company/social/list/" + TokenUtil.AUTH_SUFFIX)
     public Object companySocialList(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1730,7 +2099,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @RequestMapping("company/social/list/mine")
+    @RequestMapping("company/social/list/mine/" + TokenUtil.AUTH_SUFFIX)
     public Object companySocialListMine(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1774,13 +2143,14 @@ public class UserController extends BaseController {
      *                             }
      * @return
      */
-    @RequestMapping("modify")
+    @RequestMapping("modify")   //TODO DELETE
     @Consume(TUser.class)
     public Object modify(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex, String vxId, String remarks, String userType) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
+        TUser idHolder = UserUtil.getUser(token);
         try {
-            token = userService.modify(token, user);
+            token = userService.modify(token, user, idHolder);
             result.setData(token);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -1794,6 +2164,53 @@ public class UserController extends BaseController {
         }
         return result;
     }
+
+    /**
+     * 用户信息修改(包括修改手机号码)
+     *
+     * @param token                登录凭证
+     * @param name                 昵称
+     * @param userTel              手机号
+     * @param userHeadPortraitPath 头像
+     * @param userPicturePath      背景
+     * @param occupation           职业
+     * @param workPlace            公司
+     * @param college              学校
+     * @param age                  年龄
+     * @param sex                  性别 1男 2女
+     * @param vxId                 微信号
+     * @param remarks              个人宣言
+     *                             {
+     *                             "success": true,
+     *                             "errorCode": "",
+     *                             "msg": "",
+     *                             "data": ""
+     *                             }
+     * @return
+     */
+    @RequestMapping("modify/" + TokenUtil.AUTH_SUFFIX)
+    @Consume(TUser.class)
+    public Object modifyAuth(String token, String name, String userTel, String userHeadPortraitPath, String userPicturePath, String occupation, String workPlace, String college, Integer age, Integer sex, String vxId, String remarks, String userType) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) ConsumeHelper.getObj();
+        TUser idHolder = UserUtil.getUser();
+        try {
+            token = userService.modify(token, user, idHolder);
+            result.setData(token);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("用户信息修改异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("用户信息修改异常", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    
 
     /**
      * 预创建一个红包
@@ -1855,7 +2272,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/generate")
+    @RequestMapping("bonusPackage/generate/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TBonusPackage.class)
     public Object bonusPackageGenerate(String token, String description, Long time) {
         AjaxResult result = new AjaxResult();
@@ -1897,7 +2314,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/infos")
+    @RequestMapping({"bonusPackage/infos/" + TokenUtil.AUTH_SUFFIX,"bonusPackage/infos"})
     public Object bonusPackageInfo(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1933,7 +2350,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/open")
+    @RequestMapping("bonusPackage/open/" + TokenUtil.AUTH_SUFFIX)
     public Object bonusPackageOpen(String token, String bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1967,7 +2384,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/sendBack")
+    @RequestMapping("bonusPackage/sendBack/" + TokenUtil.AUTH_SUFFIX)
     public Object bonusPackageSendBack(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2000,7 +2417,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/isMine")
+    @RequestMapping("bonusPackage/isMine/" + TokenUtil.AUTH_SUFFIX)
     public Object isMyBonusPackage(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2038,7 +2455,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("cert")
+    @RequestMapping("cert/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TUserAuth.class)
     public Object cert(String token, String cardId, String cardName) {
         AjaxResult result = new AjaxResult();
@@ -2078,7 +2495,7 @@ public class UserController extends BaseController {
      * @return
      */
     @Consume(TCompany.class)
-    @RequestMapping("company/cert")
+    @RequestMapping("company/cert/" + TokenUtil.AUTH_SUFFIX)
     public Object companyAuth(String token, Integer type, String name, String province, String city, String county, String depict, String url, String contactsName, String contactsTel, String contactsCardId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2136,7 +2553,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @PostMapping("company/infos")
+    @PostMapping("company/infos/" + TokenUtil.AUTH_SUFFIX)
     public Object companyInfo(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2200,7 +2617,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @PostMapping("signUpInfo")
+    @PostMapping("signUpInfo/" + TokenUtil.AUTH_SUFFIX)
     public Object signUpInfo(String token, String ymString) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2233,7 +2650,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @PostMapping("/signUp")
+    @PostMapping("/signUp/" + TokenUtil.AUTH_SUFFIX)
     public Object signUp(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2268,7 +2685,7 @@ public class UserController extends BaseController {
      *                   }
      * @return
      */
-    @RequestMapping("feedBack")
+    @RequestMapping("feedBack/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TReport.class)
     public Object feedBack(String token, long labelsId, String message, String voucherUrl) {
         AjaxResult result = new AjaxResult();
@@ -2304,7 +2721,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @RequestMapping("taskList")
+    @RequestMapping("taskList/" + TokenUtil.AUTH_SUFFIX)
     public Object taskList(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2361,7 +2778,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @PostMapping("generateSMS")
+    @PostMapping({"generateSMS","generateSMS/" + TokenUtil.AUTH_SUFFIX})
     public Object generateSMS(String telephone) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2490,7 +2907,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("scoreList")
+    @RequestMapping("scoreList/" + TokenUtil.AUTH_SUFFIX)
     public Object scoreList(String token, String ymString, String option) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2523,7 +2940,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @PostMapping("checkSMS")
+    @PostMapping({"checkSMS","checkSMS/" + TokenUtil.AUTH_SUFFIX})
     public Object checkSMS(String telephone, String validCode) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2554,7 +2971,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @PostMapping("payInviter")
+    @PostMapping("payInviter/" + TokenUtil.AUTH_SUFFIX)
     public Object payInviter(String token, Long inviterId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2584,6 +3001,33 @@ public class UserController extends BaseController {
     @PostMapping("share")
     public Object share(String token, String serviceId, String option, String userId) {
         AjaxResult result = new AjaxResult();
+        TUser user = UserUtil.getUser(token);
+        try {
+            ShareServiceView shareServiceView = userService.share(user, serviceId, option, token, userId);
+            result.setSuccess(true);
+            result.setData(shareServiceView);
+        } catch (MessageException e) {
+            log.warn("分享（查看二维码)异常," + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("分享（查看二维码)异常" , e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 分享（查看二维码)
+     * @param token
+     * @param serviceId orderId
+     * @param option 操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
+     * @param userId 用户id
+     * @return
+     */
+    @PostMapping("share/" + TokenUtil.AUTH_SUFFIX)
+    public Object shareAuth(String token, String serviceId, String option, String userId) {
+        AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {
             ShareServiceView shareServiceView = userService.share(user, serviceId, option, token, userId);
@@ -2609,7 +3053,7 @@ public class UserController extends BaseController {
      * @param sex                  性别 1男2女
      * @return
      */
-    @RequestMapping("wechat/infosAuth")
+    @RequestMapping("wechat/infosAuth/" + TokenUtil.AUTH_SUFFIX)
     @Consume(TUser.class)
     public Object wechatInfosAuth(String token, String userHeadPortraitPath, String name, Integer sex) {
         AjaxResult result = new AjaxResult();
@@ -2634,7 +3078,7 @@ public class UserController extends BaseController {
      * @param scene 场景值
      * @return
      */
-    @PostMapping("scene")
+    @PostMapping("scene/" + TokenUtil.AUTH_SUFFIX)
     public Object scene(Long scene) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2659,7 +3103,7 @@ public class UserController extends BaseController {
      * @param inviteCode 邀请码(激活码)
      * @return
      */
-    @PostMapping("invite/activate")
+    @PostMapping("invite/activate/" + TokenUtil.AUTH_SUFFIX)
     public Object generateInviteCode(String token, String inviteCode) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2734,7 +3178,7 @@ public class UserController extends BaseController {
      * @param companyId 组织编号
      * @return
      */
-    @PostMapping("company/join")
+    @PostMapping("company/join/" + TokenUtil.AUTH_SUFFIX)
     public Object joinCompany(String token, Long companyId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2765,7 +3209,7 @@ public class UserController extends BaseController {
     public Object queryPayments(String token, String year, String month, String type) {
         AjaxResult result = new AjaxResult();
         try {
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             CompanyPaymentView view = userService.queryPayment(user, year, month, type);
             result.setData(view);
             result.setSuccess(true);
@@ -2791,7 +3235,7 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         try {
 
-            TUser user = UserUtil.getUser();
+            TUser user = UserUtil.getUser(token);
             CompanyDailyPaymentView dailyPaymentView = userService.queryPaymentToDay(user);
             result.setSuccess(true);
             result.setData(dailyPaymentView);
