@@ -9,7 +9,6 @@ import com.e_commerce.miscroservice.user.vo.UserPageServiceVO;
 import lombok.Data;
 
 import java.io.Serializable;
-@Data
 public class TOrder implements Serializable {
     @Id
     private Long id;

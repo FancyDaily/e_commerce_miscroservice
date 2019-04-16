@@ -334,131 +334,6 @@ public class OrderController extends BaseController {
 	}
 
 	/**
-	 * 订单列表
-	 *
-	 * @param pageNum  分页页数
-	 * @param pageSize 每页数量
-	 * @param token    当前用户token
-	 *                 <p>
-	 *                 {
-	 *                 "success": true,
-	 *                 "msg": "查询成功",
-	 *                 "data": {
-	 *                 "resultList": [
-	 *                 {
-	 *                 "order": {
-	 *                 "id": 订单ID,
-	 *                 "serviceName": "名称",
-	 *                 "servicePersonnel": 需要人数,
-	 *                 "servicePlace": 1、线上 2、线下,
-	 *                 "labels": "标签",
-	 *                 "type": 类型 1、求助 2、服务,
-	 *                 "source": 来源 1、个人 2、组织,
-	 *                 "startTime": 1552526400000,
-	 *                 "endTime": 1552527600000,
-	 *                 "collectTime": 收取时长,
-	 *                 "collectType": 收取类型  1、互助时 2、公益时,
-	 *                 },
-	 *                 "imgUrl": "封面图",
-	 *                 "status": 订单状态: 0、无人报名 1、待支付 2、待开始 3、待对方支付  4、待评价 5、待对方评价 6、已取消 7、被取消  8 已完成 9投诉中，
-	 *                 "orderIdString": "101675590041468928"
-	 *                 }
-	 *                 ],
-	 *                 "totalCount": 2
-	 *                 }
-	 *                 }
-	 * @return
-	 */
-	@RequestMapping("/listMineOrder")
-	public Object listMineOrder(Integer pageNum, Integer pageSize, String token) {
-		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
-		try {
-			QueryResult<PageOrderReturnView> list = orderService.listMineOrder(pageNum, pageSize, user);
-			result.setData(list);
-			result.setSuccess(true);
-			result.setMsg("查询成功");
-		} catch (MessageException e) {
-			log.warn("查询失败," + e.getMessage());
-			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("查询失败," + e.getMessage());
-		}
-		return result;
-	}
-
-
-    /**
-     * 列出求助服务订单列表
-     *
-     * @param type          类型 1、求助 2、服务
-     * @param serviceTypeId 类型ID 如：温暖公益的ID 用于筛选 全部的id为1000000
-     * @param longitude     经度 获取不到传递0
-     * @param latitude      纬度 获取不到传递0
-     * @param pageNum       分页页数
-     * @param pageSize      每页数量
-     * @param condition     查询条件
-     * @param token         当前用户token
-     *                      <p>
-     *                      {
-     *                      "success": 是否成功,
-     *                      "msg": 成功或失败的消息,
-     *                      "data": {
-     *                      "resultList": [
-     *                      {
-     *                      "user": {
-     *                      "id": 用户ID,
-     *                      "name": "用户名称",
-     *                      "userHeadPortraitPath": "用户头像",
-     *                      authenticationStatus;1、未实名  2、已实名
-     *                      "userType":用户类型 1、个人 2、公益组织 3、一般组织
-     *                      "idString": "用户ID"
-     *                      },
-     *                      "order": {
-     *                      "id":订单ID
-     *                      "nameAudioUrl": "音频url",
-     *                      "serviceName": "求助服务名称",
-     *                      "servicePlace": 线上还是线下  1、线上 2、线下,
-     *                      "status": 1 进行中 2、已结束,
-     *                      "source": 1,
-     *                      "serviceTypeId": 15000,
-     *                      "enrollNum": 报名人数,
-     *                      "servicePersonnel":需要的人数
-     *                      "confirmNum": 确定人数（确定人数等于需要报名的人数，显示已满额）,
-     *                      "collectTime": 10,
-     *                      "collectType": 收取类型 1、互助时  2、公益时,
-     *                      "isValid": "1"
-     *                      },
-     *                      "imgUrl": 封面图url   没有则不会返回这个字段,
-     *                      "orderIdString": 订单ID
-     *                      }
-     *                      ],
-     *                      "totalCount": 总记录数
-     *                      }
-     *                      }
-     * @return
-     */
-    @PostMapping("/list")
-    @Consume(PageOrderParamView.class)
-    public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
-                            Integer pageSize, String condition, String token) {
-        AjaxResult result = new AjaxResult();
-        TUser user = UserUtil.getUser(token);
-        PageOrderParamView param = (PageOrderParamView) ConsumeHelper.getObj();
-        try {
-            QueryResult<PageOrderReturnView> list = orderService.list(param, user);
-            result.setData(list);
-            result.setSuccess(true);
-            result.setMsg("查询成功");
-        } catch (MessageException e) {
-            log.warn("查询失败," + e.getMessage());
-            result.setSuccess(false);
-            result.setErrorCode("500");
-            result.setMsg("查询失败," + e.getMessage());
-        }
-        return result;
-    }
-	/**
 	 * 列出求助服务订单列表
 	 *
 	 * @param type          类型 1、求助 2、服务
@@ -656,7 +531,7 @@ public class OrderController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping("/detail/" + TokenUtil.AUTH_SUFFIX)
-	public Object detailIndexOrder(Long orderId, String token) {
+	public Object detailIndexOrderAuth(Long orderId, String token) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
 		try {
@@ -769,7 +644,7 @@ public class OrderController extends BaseController {
 	 * @return
 	 */
 	@PostMapping("/enrollList/" + TokenUtil.AUTH_SUFFIX)
-	public Object enrollList(String token, Integer pageNum, Integer pageSize) {
+	public Object enrollListAuth(String token, Integer pageNum, Integer pageSize) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
 		try {
@@ -855,69 +730,6 @@ public class OrderController extends BaseController {
 		return result;
 	}
 
-    /**
-     * 我的选人列表 --> 组织专属
-     *
-     * @param token    用户token
-     * @param pageNum  页数
-     * @param pageSize 每页数量
-     *                 {
-     *                 "success": true,
-     *                 "errorCode": "",
-     *                 "msg": "获取报名列表成功",
-     *                 "data": {
-     *                 "resultList": [
-     *                 {
-     *                 "order": {
-     *                 "id": 订单ID,
-     *                 "nameAudioUrl": "音频地址",
-     *                 "serviceName": "求助服务名称",
-     *                 "servicePersonnel": 要求人数,
-     *                 "servicePlace": 1、线上 2、线下,
-     *                 "labels": "标签",
-     *                 "type": 类型 1、求助 2、服务,
-     *                 "source": 来源 1、个人 2、组织,
-     *                 "addressName": 地址名称,
-     *                 "longitude": 经度,
-     *                 "latitude": 纬度,
-     *                 "enrollNum": 报名人数,
-     *                 "confirmNum": 确认人数,
-     *                 "startTime": 开始时间,
-     *                 "endTime": 结束时间,
-     *                 "timeType": 0 一次性 1、可重复,
-     *                 "collectTime": 收取时间,
-     *                 "collectType": 收取分类 1、互助时 2、公益时,
-     *                 "createUser": 创建人ID,
-     *                 },
-     *                 "porductCoverPic": 封面图地址,
-     *                 "status": 状态： 1、已结束 2、已取消 3、待选人
-     *                 }
-     *                 ],
-     *                 "totalCount": 总条数
-     *                 }
-     *                 }
-     * @return
-     */
-    @PostMapping("/mineChooseList")
-    public Object mineChooseList(String token, Integer pageNum, Integer pageSize) {
-        TUser user = UserUtil.getUser(token);
-        AjaxResult result = new AjaxResult();
-        try {
-            QueryResult<PageEnrollAndChooseReturnView> data = orderService.mineChooseList(pageNum, pageSize, user);
-            result.setSuccess(true);
-            result.setData(data);
-            result.setMsg("获取报名列表成功");
-        } catch (MessageException e) {
-            log.warn("查询失败," + e.getMessage());
-            result.setSuccess(false);
-            result.setMsg("查询失败," + e.getMessage());
-        } catch (Exception e) {
-            log.error("获取报名列表成功" + errInfo(e), e);
-            result.setSuccess(false);
-            result.setMsg("获取报名列表失败");
-        }
-        return result;
-    }
 	/**
 	 * 我的选人列表 --> 组织专属
 	 *
@@ -1110,68 +922,6 @@ public class OrderController extends BaseController {
 
 
 
-	/**
-	 * 选人详情
-	 *
-	 * @param token   用户token
-	 * @param orderId 订单ID
-	 *                {
-	 *                "success": 是否成功,
-	 *                "errorCode": "",
-	 *                "msg": "获取报名列表成功",
-	 *                "data": {
-	 *                "order": {
-	 *                "nameAudioUrl": "音频地址",
-	 *                "serviceName": "名称",
-	 *                "servicePersonnel": 要求人数,
-	 *                "servicePlace": 平台 1、线上 2、线下,
-	 *                "labels": "hehe,haha",
-	 *                "type": 1,
-	 *                "status": 1,
-	 *                "source": 1,
-	 *                "serviceTypeId": 15000,
-	 *                "addressName": "地址",
-	 *                "longitude": "经度",
-	 *                "latitude": "纬度",
-	 *                "startTime": 开始时间,
-	 *                "endTime": 结束时间,
-	 *                "collectTime": 收取时长,
-	 *                "collectType": 收取分类 1、互助时  2、公益时,
-	 *                },
-	 *                "listUser": [  "报名者列表"
-	 *                {
-	 *                "id": 68813259653775360,
-	 *                "name": "左岸",
-	 *                "userHeadPortraitPath": 头像地址,
-	 *                "careStatus": 关注状态 1、显示关注 2、显示已关注,
-	 *                }
-	 *                ]
-	 *                }
-	 *                }
-	 * @return
-	 */
-	@PostMapping("/chooseDetail")
-	public Object chooseDetail(String token, Long orderId) {
-		TUser user = UserUtil.getUser(token);
-		AjaxResult result = new AjaxResult();
-		try {
-			DetailChooseReturnView data = orderService.chooseDetail(orderId, user);
-			result.setSuccess(true);
-			result.setData(data);
-			result.setMsg("获取详情成功");
-		} catch (MessageException e) {
-			log.warn("获取详情失败," + e.getMessage());
-			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("获取详情失败," + e.getMessage());
-		} catch (Exception e) {
-			log.error("获取详情失败" + errInfo(e), e);
-			result.setSuccess(false);
-			result.setErrorCode("500");
-			result.setMsg("获取详情失败");
-		}
-		return result;
-	}
 
 
 }

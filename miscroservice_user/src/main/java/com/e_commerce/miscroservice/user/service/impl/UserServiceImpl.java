@@ -2846,7 +2846,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // others
         user.setUserPicturePath(AppConstant.DEFAULT_BACKGROUNDPIC);
-        user.setOccupation(AppConstant.DEFAULT_OCCUPATION);
+//        user.setOccupation(AppConstant.DEFAULT_OCCUPATION);
         user.setMaxEducation(AppConstant.DEFAULT_EDUCATION);
         user.setLevel(AppConstant.DEFAULT_LEVEL);
         user.setMasterStatus(AppConstant.MASTER_STATUS_DEFAULT); // 达人标记
