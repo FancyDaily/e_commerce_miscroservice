@@ -1,32 +1,21 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.BonusPackageVIew;
+import lombok.Data;
 
 import java.io.Serializable;
 
-public class TUserCompany implements Serializable {
+@Data
+public class TBonusPackage implements Serializable {
     @Id
     private Long id;
 
-    private Long companyId;
-
-    private Long groupId;
-
     private Long userId;
 
-    private String companyName;
+    private String description;
 
-    private Integer companyJob;
-
-    private String teamName;
-
-    private Integer teamJob;
-
-    private String teamUserCode;
-
-    private String extend;
-
-    private Integer state;
+    private Long time;
 
     private Long createUser;
 
@@ -52,22 +41,6 @@ public class TUserCompany implements Serializable {
         this.id = id;
     }
 
-    public Long getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
-
     public Long getUserId() {
         return userId;
     }
@@ -76,60 +49,20 @@ public class TUserCompany implements Serializable {
         this.userId = userId;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getDescription() {
+        return description;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName == null ? null : companyName.trim();
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
     }
 
-    public Integer getCompanyJob() {
-        return companyJob;
+    public Long getTime() {
+        return time;
     }
 
-    public void setCompanyJob(Integer companyJob) {
-        this.companyJob = companyJob;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName == null ? null : teamName.trim();
-    }
-
-    public Integer getTeamJob() {
-        return teamJob;
-    }
-
-    public void setTeamJob(Integer teamJob) {
-        this.teamJob = teamJob;
-    }
-
-    public String getTeamUserCode() {
-        return teamUserCode;
-    }
-
-    public void setTeamUserCode(String teamUserCode) {
-        this.teamUserCode = teamUserCode == null ? null : teamUserCode.trim();
-    }
-
-    public String getExtend() {
-        return extend;
-    }
-
-    public void setExtend(String extend) {
-        this.extend = extend == null ? null : extend.trim();
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
-    public void setState(Integer state) {
-        this.state = state;
+    public void setTime(Long time) {
+        this.time = time;
     }
 
     public Long getCreateUser() {
@@ -188,4 +121,7 @@ public class TUserCompany implements Serializable {
         this.isValid = isValid == null ? null : isValid.trim();
     }
 
+    public BonusPackageVIew copyBonusPackageVIew(){
+        return null;
+    }
 }

@@ -1,24 +1,34 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.StrUserCompanyView;
+import lombok.Data;
 
 import java.io.Serializable;
-
-public class TTypeRecord implements Serializable {
+@Data
+public class TUserCompany implements Serializable {
     @Id
     private Long id;
 
+    private Long companyId;
+
+    private Long groupId;
+
     private Long userId;
 
-    private Integer type;
+    private String companyName;
 
-    private Integer subType;
+    private Integer companyJob;
 
-    private String title;
+    private String teamName;
 
-    private String content;
+    private Integer teamJob;
 
-    private Long num;
+    private String teamUserCode;
+
+    private String extend;
+
+    private Integer state;
 
     private Long createUser;
 
@@ -44,6 +54,22 @@ public class TTypeRecord implements Serializable {
         this.id = id;
     }
 
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -52,44 +78,60 @@ public class TTypeRecord implements Serializable {
         this.userId = userId;
     }
 
-    public Integer getType() {
-        return type;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName == null ? null : companyName.trim();
     }
 
-    public Integer getSubType() {
-        return subType;
+    public Integer getCompanyJob() {
+        return companyJob;
     }
 
-    public void setSubType(Integer subType) {
-        this.subType = subType;
+    public void setCompanyJob(Integer companyJob) {
+        this.companyJob = companyJob;
     }
 
-    public String getTitle() {
-        return title;
+    public String getTeamName() {
+        return teamName;
     }
 
-    public void setTitle(String title) {
-        this.title = title == null ? null : title.trim();
+    public void setTeamName(String teamName) {
+        this.teamName = teamName == null ? null : teamName.trim();
     }
 
-    public String getContent() {
-        return content;
+    public Integer getTeamJob() {
+        return teamJob;
     }
 
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
+    public void setTeamJob(Integer teamJob) {
+        this.teamJob = teamJob;
     }
 
-    public Long getNum() {
-        return num;
+    public String getTeamUserCode() {
+        return teamUserCode;
     }
 
-    public void setNum(Long num) {
-        this.num = num;
+    public void setTeamUserCode(String teamUserCode) {
+        this.teamUserCode = teamUserCode == null ? null : teamUserCode.trim();
+    }
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend == null ? null : extend.trim();
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
 
     public Long getCreateUser() {
@@ -146,5 +188,9 @@ public class TTypeRecord implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public StrUserCompanyView copyStrUserCompanyView(){
+        return null;
     }
 }

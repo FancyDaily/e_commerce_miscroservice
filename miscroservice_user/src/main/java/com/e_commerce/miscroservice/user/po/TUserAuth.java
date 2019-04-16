@@ -1,9 +1,11 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.AuthView;
+import lombok.Data;
 
 import java.io.Serializable;
-
+@Data
 public class TUserAuth implements Serializable {
     @Id
     private Long id;
@@ -158,4 +160,7 @@ public class TUserAuth implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    public AuthView copyAuthView(){
+        return null;
+    }
 }

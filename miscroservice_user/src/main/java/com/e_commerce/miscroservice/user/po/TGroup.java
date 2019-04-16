@@ -1,32 +1,24 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.user.vo.BaseGroupView;
+import lombok.Data;
 
 import java.io.Serializable;
 
-public class TUserCompany implements Serializable {
+@Data
+public class TGroup implements Serializable {
     @Id
     private Long id;
 
     private Long companyId;
 
-    private Long groupId;
+    private String groupName;
 
-    private Long userId;
-
-    private String companyName;
-
-    private Integer companyJob;
-
-    private String teamName;
-
-    private Integer teamJob;
-
-    private String teamUserCode;
+    private Integer auth;
 
     private String extend;
-
-    private Integer state;
 
     private Long createUser;
 
@@ -60,60 +52,20 @@ public class TUserCompany implements Serializable {
         this.companyId = companyId;
     }
 
-    public Long getGroupId() {
-        return groupId;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName == null ? null : groupName.trim();
     }
 
-    public Long getUserId() {
-        return userId;
+    public Integer getAuth() {
+        return auth;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName == null ? null : companyName.trim();
-    }
-
-    public Integer getCompanyJob() {
-        return companyJob;
-    }
-
-    public void setCompanyJob(Integer companyJob) {
-        this.companyJob = companyJob;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    public void setTeamName(String teamName) {
-        this.teamName = teamName == null ? null : teamName.trim();
-    }
-
-    public Integer getTeamJob() {
-        return teamJob;
-    }
-
-    public void setTeamJob(Integer teamJob) {
-        this.teamJob = teamJob;
-    }
-
-    public String getTeamUserCode() {
-        return teamUserCode;
-    }
-
-    public void setTeamUserCode(String teamUserCode) {
-        this.teamUserCode = teamUserCode == null ? null : teamUserCode.trim();
+    public void setAuth(Integer auth) {
+        this.auth = auth;
     }
 
     public String getExtend() {
@@ -122,14 +74,6 @@ public class TUserCompany implements Serializable {
 
     public void setExtend(String extend) {
         this.extend = extend == null ? null : extend.trim();
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
-    public void setState(Integer state) {
-        this.state = state;
     }
 
     public Long getCreateUser() {
@@ -188,4 +132,11 @@ public class TUserCompany implements Serializable {
         this.isValid = isValid == null ? null : isValid.trim();
     }
 
+    public TGroup exchangeTGroup(com.e_commerce.miscroservice.commons.entity.application.TGroup tGroup){
+        return BeanUtil.copy(tGroup,TGroup.class);
+    }
+
+    public BaseGroupView copyBaseGroupView(){
+        return null;
+    }
 }

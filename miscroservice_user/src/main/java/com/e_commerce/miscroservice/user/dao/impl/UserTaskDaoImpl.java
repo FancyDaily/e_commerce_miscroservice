@@ -1,10 +1,9 @@
 package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TUserTask;
+import com.e_commerce.miscroservice.user.po.TUserTask;
 import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlDefaultUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.user.dao.UserTaskDao;
 import org.springframework.stereotype.Repository;

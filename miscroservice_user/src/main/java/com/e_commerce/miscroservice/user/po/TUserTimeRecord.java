@@ -1,32 +1,29 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.user.vo.SingleUserTimeRecordView;
+import lombok.Data;
 
 import java.io.Serializable;
-
-public class TUserCompany implements Serializable {
+@Data
+public class TUserTimeRecord implements Serializable {
     @Id
     private Long id;
 
-    private Long companyId;
-
-    private Long groupId;
-
     private Long userId;
 
-    private String companyName;
+    private Long fromUserId;
 
-    private Integer companyJob;
+    private Integer type;
 
-    private String teamName;
+    private Long targetId;
 
-    private Integer teamJob;
+    private Long time;
 
-    private String teamUserCode;
+    private String orderId;
 
     private String extend;
-
-    private Integer state;
 
     private Long createUser;
 
@@ -52,22 +49,6 @@ public class TUserCompany implements Serializable {
         this.id = id;
     }
 
-    public Long getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
-
     public Long getUserId() {
         return userId;
     }
@@ -76,44 +57,44 @@ public class TUserCompany implements Serializable {
         this.userId = userId;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public Long getFromUserId() {
+        return fromUserId;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName == null ? null : companyName.trim();
+    public void setFromUserId(Long fromUserId) {
+        this.fromUserId = fromUserId;
     }
 
-    public Integer getCompanyJob() {
-        return companyJob;
+    public Integer getType() {
+        return type;
     }
 
-    public void setCompanyJob(Integer companyJob) {
-        this.companyJob = companyJob;
+    public void setType(Integer type) {
+        this.type = type;
     }
 
-    public String getTeamName() {
-        return teamName;
+    public Long getTargetId() {
+        return targetId;
     }
 
-    public void setTeamName(String teamName) {
-        this.teamName = teamName == null ? null : teamName.trim();
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
     }
 
-    public Integer getTeamJob() {
-        return teamJob;
+    public Long getTime() {
+        return time;
     }
 
-    public void setTeamJob(Integer teamJob) {
-        this.teamJob = teamJob;
+    public void setTime(Long time) {
+        this.time = time;
     }
 
-    public String getTeamUserCode() {
-        return teamUserCode;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setTeamUserCode(String teamUserCode) {
-        this.teamUserCode = teamUserCode == null ? null : teamUserCode.trim();
+    public void setOrderId(String orderId) {
+        this.orderId = orderId == null ? null : orderId.trim();
     }
 
     public String getExtend() {
@@ -122,14 +103,6 @@ public class TUserCompany implements Serializable {
 
     public void setExtend(String extend) {
         this.extend = extend == null ? null : extend.trim();
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
-    public void setState(Integer state) {
-        this.state = state;
     }
 
     public Long getCreateUser() {
@@ -188,4 +161,10 @@ public class TUserCompany implements Serializable {
         this.isValid = isValid == null ? null : isValid.trim();
     }
 
+    public TUserTimeRecord exchangeTUserTimeRecord(com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord tUserTimeRecord){
+        return BeanUtil.copy(tUserTimeRecord,TUserTimeRecord.class);
+    }
+    public SingleUserTimeRecordView copySingleUserTimeRecordView(){
+        return null;
+    }
 }

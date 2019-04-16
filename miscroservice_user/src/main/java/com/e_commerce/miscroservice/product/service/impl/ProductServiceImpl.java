@@ -899,4 +899,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		data.put("avaliableMoney", user.getSurplusTime() + user.getCreditLimit());
 		return data;
 	}
+
+	@Override
+	public TServiceDescribe getProductDescTop(Long serviceId) {
+		return productDao.getProductDescTop(serviceId);
+
+	}
 }

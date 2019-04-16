@@ -1,18 +1,24 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.DateTypeDictionaryView;
+import lombok.Data;
 
 import java.io.Serializable;
-
-public class TBonusPackage implements Serializable {
+@Data
+public class TUserTask implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
-    private String description;
+    private String value;
 
-    private Long time;
+    private String targetId;
+
+    private Integer targetNum;
+
+    private Integer type;
 
     private Long createUser;
 
@@ -46,20 +52,36 @@ public class TBonusPackage implements Serializable {
         this.userId = userId;
     }
 
-    public String getDescription() {
-        return description;
+    public String getValue() {
+        return value;
     }
 
-    public void setDescription(String description) {
-        this.description = description == null ? null : description.trim();
+    public void setValue(String value) {
+        this.value = value == null ? null : value.trim();
     }
 
-    public Long getTime() {
-        return time;
+    public String getTargetId() {
+        return targetId;
     }
 
-    public void setTime(Long time) {
-        this.time = time;
+    public void setTargetId(String targetId) {
+        this.targetId = targetId == null ? null : targetId.trim();
+    }
+
+    public Integer getTargetNum() {
+        return targetNum;
+    }
+
+    public void setTargetNum(Integer targetNum) {
+        this.targetNum = targetNum;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public Long getCreateUser() {
@@ -116,5 +138,9 @@ public class TBonusPackage implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public DateTypeDictionaryView copyDateTypeDictionaryView(){
+        return null;
     }
 }

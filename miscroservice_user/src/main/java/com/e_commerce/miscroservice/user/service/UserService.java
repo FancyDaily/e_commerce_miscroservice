@@ -4,6 +4,8 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
+import com.e_commerce.miscroservice.user.po.TBonusPackage;
+import com.e_commerce.miscroservice.user.po.TUserSkill;
 import com.e_commerce.miscroservice.user.vo.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

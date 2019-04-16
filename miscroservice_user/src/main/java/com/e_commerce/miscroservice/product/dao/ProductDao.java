@@ -112,4 +112,11 @@ public interface ProductDao {
 	long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList);
 
     List<TService> selectByUserId(Long userId);
+
+	/**
+	 * 获取商品详情第一个
+	 * @param serviceId
+	 * @return
+	 */
+    TServiceDescribe getProductDescTop(Long serviceId);
 }

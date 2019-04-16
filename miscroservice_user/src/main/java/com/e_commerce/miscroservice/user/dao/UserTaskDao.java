@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TUserTask;
+import com.e_commerce.miscroservice.user.po.TUserTask;
 
 import java.util.List;
 

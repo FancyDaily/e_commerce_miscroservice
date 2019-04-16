@@ -1,18 +1,17 @@
 package com.e_commerce.miscroservice.user.controller;
 
-import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
-import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.user.dao.*;
+import com.e_commerce.miscroservice.user.po.TUserCompany;
 import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -214,8 +213,10 @@ public class UserCommonController {
 	 * @param name
 	 * @return
 	 */
-	public List<TUserCompany> selectUserCompanyByName(String name){
-		return userCompanyDao.selectUserCompanyByName(name);
+	public List<com.e_commerce.miscroservice.commons.entity.application.TUserCompany>  selectUserCompanyByName(String name){
+		List<TUserCompany>  companys = userCompanyDao.selectUserCompanyByName(name);
+
+		return exchangeUserCompanyList(companys);
 	}
 
 	/**
@@ -233,8 +234,25 @@ public class UserCommonController {
 	 * @param companyId
 	 * @return
 	 */
-	public List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
-		return userCompanyDao.selectUserCompanyByIdAndUserIdList(userIdList , companyId);
+	public List<com.e_commerce.miscroservice.commons.entity.application.TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
+		List<TUserCompany> companies = userCompanyDao.selectUserCompanyByIdAndUserIdList(userIdList , companyId);
+		return exchangeUserCompanyList(companies);
+	}
+
+	/**
+	 * 转换TUserCompanyList
+	 * @param companies
+	 * @return
+	 */
+	public List<com.e_commerce.miscroservice.commons.entity.application.TUserCompany> exchangeUserCompanyList(List<TUserCompany> companies){
+		List<com.e_commerce.miscroservice.commons.entity.application.TUserCompany> companyList = new ArrayList<>();
+		companies.forEach(
+				company->{
+					com.e_commerce.miscroservice.commons.entity.application.TUserCompany companyB = BeanUtil.copy(company,com.e_commerce.miscroservice.commons.entity.application.TUserCompany.class);
+					companyList.add(companyB);
+				}
+		);
+		return companyList;
 	}
 
 	/**

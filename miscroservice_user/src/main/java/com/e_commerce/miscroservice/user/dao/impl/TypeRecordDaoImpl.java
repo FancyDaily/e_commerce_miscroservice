@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TTypeRecord;
+import com.e_commerce.miscroservice.user.po.TTypeRecord;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;

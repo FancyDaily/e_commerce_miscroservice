@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TUserAuth;
+import com.e_commerce.miscroservice.user.po.TUserAuth;
 
 import java.util.List;
 

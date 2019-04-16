@@ -24,6 +24,7 @@ import com.e_commerce.miscroservice.order.vo.UserInfoView;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
+import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.base.Joiner;

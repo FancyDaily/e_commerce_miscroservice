@@ -1,22 +1,27 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.SingleGrowthValueView;
+import lombok.Data;
 
 import java.io.Serializable;
 
-public class TUserTask implements Serializable {
+@Data
+public class TTypeRecord implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
-    private String value;
-
-    private String targetId;
-
-    private Integer targetNum;
-
     private Integer type;
+
+    private Integer subType;
+
+    private String title;
+
+    private String content;
+
+    private Long num;
 
     private Long createUser;
 
@@ -50,36 +55,44 @@ public class TUserTask implements Serializable {
         this.userId = userId;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value == null ? null : value.trim();
-    }
-
-    public String getTargetId() {
-        return targetId;
-    }
-
-    public void setTargetId(String targetId) {
-        this.targetId = targetId == null ? null : targetId.trim();
-    }
-
-    public Integer getTargetNum() {
-        return targetNum;
-    }
-
-    public void setTargetNum(Integer targetNum) {
-        this.targetNum = targetNum;
-    }
-
     public Integer getType() {
         return type;
     }
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public Integer getSubType() {
+        return subType;
+    }
+
+    public void setSubType(Integer subType) {
+        this.subType = subType;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title == null ? null : title.trim();
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content == null ? null : content.trim();
+    }
+
+    public Long getNum() {
+        return num;
+    }
+
+    public void setNum(Long num) {
+        this.num = num;
     }
 
     public Long getCreateUser() {
@@ -136,5 +149,9 @@ public class TUserTask implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public SingleGrowthValueView copySingleGrowthValueView(){
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.service;
 
-import com.e_commerce.miscroservice.commons.entity.application.TTypeRecord;
+import com.e_commerce.miscroservice.user.po.TTypeRecord;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 
 import java.util.List;
