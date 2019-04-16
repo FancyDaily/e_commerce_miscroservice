@@ -15,7 +15,7 @@ import java.util.Objects;
 @FeignClient(value = "AUTHORIZE")
 public interface AuthorizeRpcService {
 
-    String DEFAULT_PASS = "XIOASHI_AUTHORIZE_" + Objects.hashCode(AuthorizeRpcService.class);
+    String DEFAULT_PASS = "XIOASHI_AUTHORIZE_" + Objects.hash(AuthorizeRpcService.class);
     String DEFAULT_USER_NAME_PREFIX = "XIOASHI_AUTHORIZE_";
 
 
