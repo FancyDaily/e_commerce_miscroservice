@@ -2,11 +2,10 @@ package com.e_commerce.miscroservice.user.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TTypeRecord;
+import com.e_commerce.miscroservice.user.po.TTypeRecord;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -96,7 +95,7 @@ public class GrowthValueServiceImpl implements GrowthValueService {
 
         // 筛选数据、统计总和
         for (TTypeRecord record : totalList) {
-            SingleGrowthValueView view = BeanUtil.copy(record, SingleGrowthValueView.class);
+            SingleGrowthValueView view = record.copySingleGrowthValueView();
             view.setIdString(String.valueOf(view.getId()));	//String化
 
             view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));

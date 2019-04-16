@@ -1,22 +1,33 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.StrUserCompanyView;
 
 import java.io.Serializable;
 
-public class TUserTask implements Serializable {
+public class TUserCompany implements Serializable {
     @Id
     private Long id;
 
+    private Long companyId;
+
+    private Long groupId;
+
     private Long userId;
 
-    private String value;
+    private String companyName;
 
-    private String targetId;
+    private Integer companyJob;
 
-    private Integer targetNum;
+    private String teamName;
 
-    private Integer type;
+    private Integer teamJob;
+
+    private String teamUserCode;
+
+    private String extend;
+
+    private Integer state;
 
     private Long createUser;
 
@@ -42,6 +53,22 @@ public class TUserTask implements Serializable {
         this.id = id;
     }
 
+    public Long getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -50,36 +77,60 @@ public class TUserTask implements Serializable {
         this.userId = userId;
     }
 
-    public String getValue() {
-        return value;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setValue(String value) {
-        this.value = value == null ? null : value.trim();
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName == null ? null : companyName.trim();
     }
 
-    public String getTargetId() {
-        return targetId;
+    public Integer getCompanyJob() {
+        return companyJob;
     }
 
-    public void setTargetId(String targetId) {
-        this.targetId = targetId == null ? null : targetId.trim();
+    public void setCompanyJob(Integer companyJob) {
+        this.companyJob = companyJob;
     }
 
-    public Integer getTargetNum() {
-        return targetNum;
+    public String getTeamName() {
+        return teamName;
     }
 
-    public void setTargetNum(Integer targetNum) {
-        this.targetNum = targetNum;
+    public void setTeamName(String teamName) {
+        this.teamName = teamName == null ? null : teamName.trim();
     }
 
-    public Integer getType() {
-        return type;
+    public Integer getTeamJob() {
+        return teamJob;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setTeamJob(Integer teamJob) {
+        this.teamJob = teamJob;
+    }
+
+    public String getTeamUserCode() {
+        return teamUserCode;
+    }
+
+    public void setTeamUserCode(String teamUserCode) {
+        this.teamUserCode = teamUserCode == null ? null : teamUserCode.trim();
+    }
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend == null ? null : extend.trim();
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
 
     public Long getCreateUser() {
@@ -136,5 +187,9 @@ public class TUserTask implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public StrUserCompanyView copyStrUserCompanyView(){
+        return null;
     }
 }

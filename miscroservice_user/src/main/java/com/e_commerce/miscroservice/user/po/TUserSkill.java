@@ -1,18 +1,25 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.UserSkillView;
 
 import java.io.Serializable;
 
-public class TBonusPackage implements Serializable {
+public class TUserSkill implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
+    private String name;
+
     private String description;
 
-    private Long time;
+    private String headUrl;
+
+    private String detailUrls;
+
+    private String extend;
 
     private Long createUser;
 
@@ -46,6 +53,14 @@ public class TBonusPackage implements Serializable {
         this.userId = userId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
+    }
+
     public String getDescription() {
         return description;
     }
@@ -54,12 +69,28 @@ public class TBonusPackage implements Serializable {
         this.description = description == null ? null : description.trim();
     }
 
-    public Long getTime() {
-        return time;
+    public String getHeadUrl() {
+        return headUrl;
     }
 
-    public void setTime(Long time) {
-        this.time = time;
+    public void setHeadUrl(String headUrl) {
+        this.headUrl = headUrl == null ? null : headUrl.trim();
+    }
+
+    public String getDetailUrls() {
+        return detailUrls;
+    }
+
+    public void setDetailUrls(String detailUrls) {
+        this.detailUrls = detailUrls == null ? null : detailUrls.trim();
+    }
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend == null ? null : extend.trim();
     }
 
     public Long getCreateUser() {
@@ -116,5 +147,8 @@ public class TBonusPackage implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+    public UserSkillView copyUserSkillView(){
+        return null;
     }
 }

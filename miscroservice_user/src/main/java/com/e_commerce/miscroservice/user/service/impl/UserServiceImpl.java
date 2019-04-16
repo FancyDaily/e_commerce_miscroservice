@@ -6,6 +6,11 @@ import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
+import com.e_commerce.miscroservice.commons.entity.application.TGroup;
+import com.e_commerce.miscroservice.commons.entity.application.TOrder;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
+import com.e_commerce.miscroservice.commons.entity.application.TUserTimeRecord;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.Category;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -23,8 +28,9 @@ import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.product.controller.ProductCommonController;
-import com.e_commerce.miscroservice.product.service.ProductService;
 import com.e_commerce.miscroservice.user.dao.*;
+import com.e_commerce.miscroservice.user.po.*;
+import com.e_commerce.miscroservice.user.po.TUserCompany;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
@@ -35,7 +41,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -197,7 +202,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // 筛选数据、统计总和
         for (TUserTimeRecord record : totalList) {
-            SingleUserTimeRecordView view = BeanUtil.copy(record, SingleUserTimeRecordView.class);
+            com.e_commerce.miscroservice.user.po.TUserTimeRecord tUserTimeRecord = new com.e_commerce.miscroservice.user.po.TUserTimeRecord();
+            tUserTimeRecord.exchangeTUserTimeRecord(record);
+            SingleUserTimeRecordView view = tUserTimeRecord.copySingleUserTimeRecordView();
             view.setIdString(String.valueOf(view.getId()));
             view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
             Integer type = record.getType();
@@ -295,7 +302,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 遍历装载 -> 冻结金额、分页时间、服务id
         for (TUserFreeze userFreeze : userFreezes) {
             idList.add(userFreeze.getOrderId());
-            UserFreezeView result = BeanUtil.copy(userFreeze, UserFreezeView.class); //TODO 装载分页时间戳、冻结时间、订单id
+            com.e_commerce.miscroservice.user.po.TUserFreeze tUserFreeze = new com.e_commerce.miscroservice.user.po.TUserFreeze();
+            tUserFreeze.exchangeTUserFreeze(userFreeze);
+            UserFreezeView result = tUserFreeze.copyUserFreezeView();//TODO 装载分页时间戳、冻结时间、订单id
             resultList.add(result);
         }
 
@@ -428,7 +437,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         UserSkillListView skillView = new UserSkillListView();
         List<UserSkillView> userSkillList = new ArrayList<UserSkillView>();
         for (TUserSkill userSkill : userSkills) {
-            UserSkillView theView = BeanUtil.copy(userSkill, UserSkillView.class);
+            UserSkillView theView = userSkill.copyUserSkillView();
             theView.setIdString(String.valueOf(theView.getId()));
             if (theView.getDetailUrls() != null && theView.getDetailUrls().contains(",")) {    //多张图
                 theView.setDetailUrlArray(theView.getDetailUrls().split(","));
@@ -649,7 +658,9 @@ public class UserServiceImpl extends BaseService implements UserService {
                 }
             }
         }
-        DesensitizedUserView view = BeanUtil.copy(theUser, DesensitizedUserView.class);
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser.exchangeTUser(theUser);
+        DesensitizedUserView view = tUser.copyDesensitizedUserView();
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
         view.setIsAtten(attenStatus);
@@ -778,7 +789,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         for(TOrder order:orders) {
             //查询自己与对方订单的报名状态
             String status = orderService.queryIsReceipt(me.getId(), order.getId(),me.getId());
-            UserPageServiceVO copy = BeanUtil.copy(order, UserPageServiceVO.class);
+            com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+            tOrder.exchangeOrder(order);
+            UserPageServiceVO copy = tOrder.copyUserPageServiceVO();
             copy.setReceiptStatus(status);
             resultList.add(copy);
         }
@@ -868,7 +881,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
-        DesensitizedUserView view = BeanUtil.copy(findUser, DesensitizedUserView.class);
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser.exchangeTUser(findUser);
+        DesensitizedUserView view = tUser.copyDesensitizedUserView();
         String companyNames = view.getCompanyNames();
         if (companyNames != null) {
             StringBuilder stringBuilder = new StringBuilder();
@@ -1183,7 +1198,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (info == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该红包不存在！");
         }
-        BonusPackageVIew copy = BeanUtil.copy(info, BonusPackageVIew.class);
+        BonusPackageVIew copy = info.copyBonusPackageVIew();
         TUser theUser = userDao.selectByPrimaryKey(info.getCreateUser());
         copy.setUserHeadPortraitPath(theUser.getUserHeadPortraitPath());
         copy.setName(theUser.getName());
@@ -1305,7 +1320,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             Long serviceId = order.getServiceId();
             String coverPic = productCoverPic.get(serviceId);
             Long collectionTime = collectTimeMap.get(order.getId());
-            CollectionView collectionView = BeanUtil.copy(order, CollectionView.class);
+            com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+            tOrder.exchangeOrder(order);
+            CollectionView collectionView = tOrder.copyCollectionView();
             collectionView.setCoverPic(coverPic);
             if(collectionTime!=null) {
                 collectionView.setCollectionTime(DateUtil.timeStamp2Date(collectionTime));
@@ -1718,7 +1735,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         List<DateTypeDictionaryView> resultList = new ArrayList<>();
         // 处理成日期格式
         for (TUserTask signUPInfo : userTasks) {
-            DateTypeDictionaryView view = BeanUtil.copy(signUPInfo, DateTypeDictionaryView.class);
+            DateTypeDictionaryView view = signUPInfo.copyDateTypeDictionaryView();
             view.setCreateDate(DateUtil.timeStamp2Date(view.getCreateTime()));
             view.setUpdateDate(DateUtil.timeStamp2Date(view.getUpdateTime()));
             view.setIdString(String.valueOf(view.getId()));
@@ -2408,7 +2425,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             List<TUserFreeze> userFreezes = userFreezeDao.selectByUserIdBetween(userId, beginStamp, endStamp);
             if (!userFreezes.isEmpty()) {
                 for (TUserFreeze userFreeze : userFreezes) {
-                    SinglePaymentView view = BeanUtil.copy(userFreeze, SinglePaymentView.class);
+                    com.e_commerce.miscroservice.user.po.TUserFreeze tUserFreeze = new com.e_commerce.miscroservice.user.po.TUserFreeze();
+                    tUserFreeze.exchangeTUserFreeze(userFreeze);
+                    SinglePaymentView view = tUserFreeze.copySinglePaymentView();
                     view.setIdString(String.valueOf(userFreeze.getId()));
                     view.setServIdString(String.valueOf(userFreeze.getOrderId())); // 订单id
                     view.setServiceName(userFreeze.getServiceName()); // 名称
@@ -2498,7 +2517,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             // 判断targetId是否在列
             if (!targetIdList.contains(targetId)) {
                 TOrder order = receiptMap.get(targetId);
-                SinglePaymentView thView = BeanUtil.copy(in, SinglePaymentView.class);
+                com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+                tOrder.exchangeOrder(order);
+                SinglePaymentView thView = tOrder.copySinglePaymentView();
                 thView.setIdString(String.valueOf(in.getId())); // 没什么用的流水id
                 thView.setServiceName(order.getServiceName());// 服务名字
                 thView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
@@ -2517,7 +2538,9 @@ public class UserServiceImpl extends BaseService implements UserService {
             // 判断targetId是否在列
             if (!targetIdList.contains(targetId)) {
                 TOrder order = receiptMap.get(targetId);
-                SinglePaymentView thisView = BeanUtil.copy(out, SinglePaymentView.class);
+                com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+                tOrder.exchangeOrder(order);
+                SinglePaymentView thisView = tOrder.copySinglePaymentView();
                 thisView.setIdString(String.valueOf(out.getId())); // 没什么用的流水id
                 thisView.setServiceName(order.getServiceName());// 服务名字
                 thisView.setServReceiptStatus(String.valueOf(order.getStatus()));// 订单状态
@@ -2674,7 +2697,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         Map<String, Object> resultMap = new HashMap<>();
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
-        DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser.exchangeTUser(user);
+        DesensitizedUserView userView = tUser.copyDesensitizedUserView();
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
@@ -2736,7 +2761,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
-        DesensitizedUserView userView = BeanUtil.copy(user, DesensitizedUserView.class);
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser.exchangeTUser(user);
+        DesensitizedUserView userView = tUser.copyDesensitizedUserView();
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
@@ -3951,7 +3978,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         // String化
         for (TUser user : userList) {
-            UserDetailView view = BeanUtil.copy(user, UserDetailView.class);
+            com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+            tUser.exchangeTUser(user);
+            UserDetailView view = tUser.copyUserDetailView();
             view.setIdString(String.valueOf(view.getId()));
             // 对用户可用性作健壮处理
             if (view.getAvaliableStatus() == null) {
@@ -3994,7 +4023,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Override
     public UserDetailView info(Long userId) {
         TUser user = userDao.selectByPrimaryKey(userId);
-        UserDetailView view =BeanUtil.copy(user, UserDetailView.class);
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser.exchangeTUser(user);
+        UserDetailView view = tUser.copyUserDetailView();
         view.setIdString(String.valueOf(view.getId()));
         // 评价(平均分)
         Double averageScore = 0.0;

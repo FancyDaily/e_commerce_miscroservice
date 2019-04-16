@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TTypeRecord;
+import com.e_commerce.miscroservice.user.po.TTypeRecord;
 
 import java.util.List;
 

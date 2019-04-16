@@ -1,26 +1,23 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.DateTypeDictionaryView;
 
 import java.io.Serializable;
 
-public class TUserAuth implements Serializable {
+public class TUserTask implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
-    private String cardId;
+    private String value;
 
-    private String cardName;
+    private String targetId;
 
-    private Integer sex;
+    private Integer targetNum;
 
-    private Long birthday;
-
-    private String address;
-
-    private String photo;
+    private Integer type;
 
     private Long createUser;
 
@@ -35,6 +32,8 @@ public class TUserAuth implements Serializable {
     private Long updateTime;
 
     private String isValid;
+
+    private static final long serialVersionUID = 1L;
 
     public Long getId() {
         return id;
@@ -52,52 +51,36 @@ public class TUserAuth implements Serializable {
         this.userId = userId;
     }
 
-    public String getCardId() {
-        return cardId;
+    public String getValue() {
+        return value;
     }
 
-    public void setCardId(String cardId) {
-        this.cardId = cardId;
+    public void setValue(String value) {
+        this.value = value == null ? null : value.trim();
     }
 
-    public String getCardName() {
-        return cardName;
+    public String getTargetId() {
+        return targetId;
     }
 
-    public void setCardName(String cardName) {
-        this.cardName = cardName;
+    public void setTargetId(String targetId) {
+        this.targetId = targetId == null ? null : targetId.trim();
     }
 
-    public Integer getSex() {
-        return sex;
+    public Integer getTargetNum() {
+        return targetNum;
     }
 
-    public void setSex(Integer sex) {
-        this.sex = sex;
+    public void setTargetNum(Integer targetNum) {
+        this.targetNum = targetNum;
     }
 
-    public Long getBirthday() {
-        return birthday;
+    public Integer getType() {
+        return type;
     }
 
-    public void setBirthday(Long birthday) {
-        this.birthday = birthday;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(String photo) {
-        this.photo = photo;
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public Long getCreateUser() {
@@ -113,7 +96,7 @@ public class TUserAuth implements Serializable {
     }
 
     public void setCreateUserName(String createUserName) {
-        this.createUserName = createUserName;
+        this.createUserName = createUserName == null ? null : createUserName.trim();
     }
 
     public Long getCreateTime() {
@@ -137,7 +120,7 @@ public class TUserAuth implements Serializable {
     }
 
     public void setUpdateUserName(String updateUserName) {
-        this.updateUserName = updateUserName;
+        this.updateUserName = updateUserName == null ? null : updateUserName.trim();
     }
 
     public Long getUpdateTime() {
@@ -153,9 +136,10 @@ public class TUserAuth implements Serializable {
     }
 
     public void setIsValid(String isValid) {
-        this.isValid = isValid;
+        this.isValid = isValid == null ? null : isValid.trim();
     }
 
-    private static final long serialVersionUID = 1L;
-
+    public DateTypeDictionaryView copyDateTypeDictionaryView(){
+        return null;
+    }
 }

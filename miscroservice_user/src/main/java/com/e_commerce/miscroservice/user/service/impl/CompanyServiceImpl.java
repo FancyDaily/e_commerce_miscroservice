@@ -7,13 +7,14 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.user.dao.CompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserAuthDao;
 import com.e_commerce.miscroservice.user.dao.UserCompanyDao;
 import com.e_commerce.miscroservice.user.dao.UserDao;
+import com.e_commerce.miscroservice.user.po.TUserAuth;
+import com.e_commerce.miscroservice.user.po.TUserCompany;
 import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.vo.AuthView;
 import com.e_commerce.miscroservice.user.vo.StrServiceView;
@@ -102,7 +103,7 @@ public class CompanyServiceImpl implements CompanyService {
         //String化
         List<StrUserCompanyView> companies = new ArrayList<>();
         for (TUserCompany company : select) {
-            StrUserCompanyView userCompanyView = BeanUtil.copy(company, StrUserCompanyView.class);
+            StrUserCompanyView userCompanyView = company.copyStrUserCompanyView();
             userCompanyView.setCompanyIdString(String.valueOf(userCompanyView.getCompanyId()));
             userCompanyView.setNum(numberCountMap.get(userCompanyView.getCompanyId()));
             companies.add(userCompanyView);
@@ -161,7 +162,9 @@ public class CompanyServiceImpl implements CompanyService {
         List<StrServiceView> serviceViews = new ArrayList<StrServiceView>();
         // String化
         for (TOrder order : orders) {
-            StrServiceView strServiceView = BeanUtil.copy(order, StrServiceView.class);
+            com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+            tOrder.exchangeOrder(order);
+            StrServiceView strServiceView = tOrder.copyStrServiceViewByExchange();
             strServiceView.setIdString(String.valueOf(strServiceView.getId()));
             strServiceView.setServiceIdString(String.valueOf(strServiceView.getServiceId()));
             serviceViews.add(strServiceView);
@@ -227,7 +230,9 @@ public class CompanyServiceImpl implements CompanyService {
         //String化
         List<StrServiceView> views = new ArrayList<StrServiceView>();
         for(TOrder order:orders) {
-            StrServiceView view = BeanUtil.copy(order, StrServiceView.class);
+            com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+            tOrder.exchangeOrder(order);
+            StrServiceView view = tOrder.copyStrServiceViewByExchange();
             view.setIdString(String.valueOf(view.getId()));
             view.setServiceIdString(String.valueOf(view.getServiceId()));
             views.add(view);
@@ -254,7 +259,7 @@ public class CompanyServiceImpl implements CompanyService {
             auth = auths.get(0);
         }
 
-        AuthView authView = BeanUtil.copy(auth, AuthView.class);
+        AuthView authView = auth.copyAuthView();
 
         authView.setUserTel(user.getUserTel());
 

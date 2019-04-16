@@ -1,24 +1,19 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.user.vo.BonusPackageVIew;
 
 import java.io.Serializable;
 
-public class TTypeRecord implements Serializable {
+public class TBonusPackage implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
-    private Integer type;
+    private String description;
 
-    private Integer subType;
-
-    private String title;
-
-    private String content;
-
-    private Long num;
+    private Long time;
 
     private Long createUser;
 
@@ -52,44 +47,20 @@ public class TTypeRecord implements Serializable {
         this.userId = userId;
     }
 
-    public Integer getType() {
-        return type;
+    public String getDescription() {
+        return description;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
     }
 
-    public Integer getSubType() {
-        return subType;
+    public Long getTime() {
+        return time;
     }
 
-    public void setSubType(Integer subType) {
-        this.subType = subType;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title == null ? null : title.trim();
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
-    }
-
-    public Long getNum() {
-        return num;
-    }
-
-    public void setNum(Long num) {
-        this.num = num;
+    public void setTime(Long time) {
+        this.time = time;
     }
 
     public Long getCreateUser() {
@@ -146,5 +117,9 @@ public class TTypeRecord implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public BonusPackageVIew copyBonusPackageVIew(){
+        return null;
     }
 }

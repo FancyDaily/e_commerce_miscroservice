@@ -1,22 +1,23 @@
-package com.e_commerce.miscroservice.commons.entity.application;
+package com.e_commerce.miscroservice.user.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
+import com.e_commerce.miscroservice.user.vo.SinglePaymentView;
+import com.e_commerce.miscroservice.user.vo.UserFreezeView;
 
 import java.io.Serializable;
 
-public class TUserSkill implements Serializable {
+public class TUserFreeze implements Serializable {
     @Id
     private Long id;
 
     private Long userId;
 
-    private String name;
+    private Long orderId;
 
-    private String description;
+    private String serviceName;
 
-    private String headUrl;
-
-    private String detailUrls;
+    private Long freezeTime;
 
     private String extend;
 
@@ -52,36 +53,28 @@ public class TUserSkill implements Serializable {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
-    public String getDescription() {
-        return description;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setDescription(String description) {
-        this.description = description == null ? null : description.trim();
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName == null ? null : serviceName.trim();
     }
 
-    public String getHeadUrl() {
-        return headUrl;
+    public Long getFreezeTime() {
+        return freezeTime;
     }
 
-    public void setHeadUrl(String headUrl) {
-        this.headUrl = headUrl == null ? null : headUrl.trim();
-    }
-
-    public String getDetailUrls() {
-        return detailUrls;
-    }
-
-    public void setDetailUrls(String detailUrls) {
-        this.detailUrls = detailUrls == null ? null : detailUrls.trim();
+    public void setFreezeTime(Long freezeTime) {
+        this.freezeTime = freezeTime;
     }
 
     public String getExtend() {
@@ -146,5 +139,16 @@ public class TUserSkill implements Serializable {
 
     public void setIsValid(String isValid) {
         this.isValid = isValid == null ? null : isValid.trim();
+    }
+
+    public TUserFreeze exchangeTUserFreeze(com.e_commerce.miscroservice.commons.entity.application.TUserFreeze tUserFreeze){
+        return BeanUtil.copy(tUserFreeze,TUserFreeze.class);
+    }
+
+    public UserFreezeView copyUserFreezeView(){
+        return null;
+    }
+    public SinglePaymentView copySinglePaymentView(){
+        return null;
     }
 }

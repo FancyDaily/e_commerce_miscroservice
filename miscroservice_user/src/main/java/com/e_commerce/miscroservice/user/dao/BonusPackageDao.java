@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TBonusPackage;
+import com.e_commerce.miscroservice.user.po.TBonusPackage;
 
 public interface BonusPackageDao {
     int insert(TBonusPackage bonusPackage);

@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
+import com.e_commerce.miscroservice.user.po.TUserCompany;
 
 import java.util.ArrayList;
 import java.util.List;

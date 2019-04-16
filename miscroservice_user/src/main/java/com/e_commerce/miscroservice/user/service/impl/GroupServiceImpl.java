@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
 import com.e_commerce.miscroservice.order.service.impl.BaseService;
@@ -15,7 +14,7 @@ import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.commons.entity.application.TCompany;
 import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.application.TUserCompany;
+import com.e_commerce.miscroservice.user.po.TUserCompany;
 import com.e_commerce.miscroservice.commons.enums.application.GroupEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
@@ -313,7 +312,9 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         List<TUser> users = userDao.selectByTelephoneInInIds(telephone,userIds);
         // 处理数据
         for (TUser thisUser : users) {
-            SmartUserView view = BeanUtil.copy(thisUser, SmartUserView.class);
+            com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+
+            SmartUserView view = tUser.copySmartUserView();
             Integer sex = thisUser.getSex();
             view.setIdString(String.valueOf(thisUser.getId()));
             String sexString = "";
@@ -865,7 +866,10 @@ public class GroupServiceImpl extends BaseService implements GroupService {
 		// 进行view的转换 并将分组人数加入
 		List<BaseGroupView> listGroupView = new ArrayList<BaseGroupView>();
 		for (TGroup group : listGroup) {
-			BaseGroupView groupView = BeanUtil.copy(group, BaseGroupView.class);
+		    com.e_commerce.miscroservice.user.po.TGroup tGroup = new com.e_commerce.miscroservice.user.po.TGroup();
+		    tGroup.exchangeTGroup(group);
+
+			BaseGroupView groupView = tGroup.copyBaseGroupView();
 			Integer groupPersonNum = groupPersonNumMap.get(group.getId());
 			groupView.setPersonNum(groupPersonNum);
 			listGroupView.add(groupView);
@@ -1017,7 +1021,9 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         List<TUser> users = userDao.selectByNameAndTelephoneLikeSkillInIds(name,telephone,skill,idList);
         // 处理数据
         for (TUser theUser : users) {
-            SmartUserView userView = BeanUtil.copy(theUser, SmartUserView.class);
+            com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+            tUser.exchangeTUser(theUser);
+            SmartUserView userView = tUser.copySmartUserView();
             userView.setIdString(String.valueOf(userView.getId()));
             Integer sex = theUser.getSex();
             String sexString = "未设置";

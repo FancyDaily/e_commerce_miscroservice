@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.user.dao;
 
-import com.e_commerce.miscroservice.commons.entity.application.TUserSkill;
+import com.e_commerce.miscroservice.user.po.TUserSkill;
 
 import java.util.List;
 

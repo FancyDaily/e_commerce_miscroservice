@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFollow;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.SnowflakeIdWorker;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.dao.UserFollowDao;
@@ -172,7 +171,9 @@ public class FocusServiceImpl implements FocusService {
         //String化
         List<DesensitizedUserView> userList = new ArrayList<>();
         for (TUser theUser : users) {
-            DesensitizedUserView userView = BeanUtil.copy(theUser, DesensitizedUserView.class);
+            com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+            tUser.exchangeTUser(theUser);
+            DesensitizedUserView userView = tUser.copyDesensitizedUserView();
             userView.setIdStr(String.valueOf(userView.getId()));
             userView.setTimeStamp(String.valueOf(timeStampMap.get(userView.getId())));
             //互相关注状态
