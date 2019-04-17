@@ -4043,7 +4043,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 在列服务、求助查询,统计次数
         int onSaleServCnt = 0;
         int onSaleHelpCnt = 0;
-        List<TService> services = productDao.selectByUserId(userId);
+        List<TService> services = productService.selectProductsByUserId(userId);
         for (TService service : services) {
             if (ProductEnum.TYPE_SEEK_HELP.getValue() == service.getType()) {
                 onSaleHelpCnt++;

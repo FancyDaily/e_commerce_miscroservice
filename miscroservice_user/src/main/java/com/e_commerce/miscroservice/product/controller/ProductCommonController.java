@@ -101,4 +101,8 @@ public class ProductCommonController extends BaseController {
 		return productService.getProductDescTop(serviceId);
 
 	}
+
+    public List<TService> selectProductsByUserId(Long userId) {
+		return productDao.selectByUserId(userId);
+    }
 }

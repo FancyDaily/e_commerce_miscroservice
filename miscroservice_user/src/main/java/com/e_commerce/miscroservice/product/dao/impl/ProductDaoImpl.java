@@ -8,8 +8,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.product.dao.ProductDao;
-import com.e_commerce.miscroservice.product.mapper.ProductMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,9 +18,6 @@ import java.util.List;
  */
 @Repository
 public class ProductDaoImpl implements ProductDao {
-	@Autowired
-	ProductMapper productMapper;
-
 
 	@Override
 	public int insert(TService service) {
