@@ -207,7 +207,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // 筛选数据、统计总和
         for (TUserTimeRecord record : totalList) {
             com.e_commerce.miscroservice.user.po.TUserTimeRecord tUserTimeRecord = new com.e_commerce.miscroservice.user.po.TUserTimeRecord();
-            tUserTimeRecord.exchangeTUserTimeRecord(record);
+            tUserTimeRecord = tUserTimeRecord.exchangeTUserTimeRecord(record);
             SingleUserTimeRecordView view = tUserTimeRecord.copySingleUserTimeRecordView();
             view.setIdString(String.valueOf(view.getId()));
             view.setDate(DateUtil.timeStamp2Date(record.getCreateTime()));
@@ -307,7 +307,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         for (TUserFreeze userFreeze : userFreezes) {
             idList.add(userFreeze.getOrderId());
             com.e_commerce.miscroservice.user.po.TUserFreeze tUserFreeze = new com.e_commerce.miscroservice.user.po.TUserFreeze();
-            tUserFreeze.exchangeTUserFreeze(userFreeze);
+            tUserFreeze = tUserFreeze.exchangeTUserFreeze(userFreeze);
             UserFreezeView result = tUserFreeze.copyUserFreezeView();//TODO 装载分页时间戳、冻结时间、订单id
             resultList.add(result);
         }
@@ -663,7 +663,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
         com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-        tUser.exchangeTUser(theUser);
+        tUser = tUser.exchangeTUser(theUser);
         DesensitizedUserView view = tUser.copyDesensitizedUserView();
         //关注状态
         Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
@@ -794,7 +794,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             //查询自己与对方订单的报名状态
             String status = orderService.queryIsReceipt(me.getId(), order.getId(),me.getId());
             com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-            tOrder.exchangeOrder(order);
+            tOrder = tOrder.exchangeOrder(order);
             UserPageServiceVO copy = tOrder.copyUserPageServiceVO();
             copy.setReceiptStatus(status);
             resultList.add(copy);
@@ -886,7 +886,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
         com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-        tUser.exchangeTUser(findUser);
+        tUser = tUser.exchangeTUser(findUser);
         DesensitizedUserView view = tUser.copyDesensitizedUserView();
         String companyNames = view.getCompanyNames();
         if (companyNames != null) {
@@ -1325,7 +1325,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             String coverPic = productCoverPic.get(serviceId);
             Long collectionTime = collectTimeMap.get(order.getId());
             com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-            tOrder.exchangeOrder(order);
+            tOrder = tOrder.exchangeOrder(order);
             CollectionView collectionView = tOrder.copyCollectionView();
             collectionView.setCoverPic(coverPic);
             if(collectionTime!=null) {
@@ -2432,7 +2432,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (!userFreezes.isEmpty()) {
                 for (TUserFreeze userFreeze : userFreezes) {
                     com.e_commerce.miscroservice.user.po.TUserFreeze tUserFreeze = new com.e_commerce.miscroservice.user.po.TUserFreeze();
-                    tUserFreeze.exchangeTUserFreeze(userFreeze);
+                    tUserFreeze = tUserFreeze.exchangeTUserFreeze(userFreeze);
                     SinglePaymentView view = tUserFreeze.copySinglePaymentView();
                     view.setIdString(String.valueOf(userFreeze.getId()));
                     view.setServIdString(String.valueOf(userFreeze.getOrderId())); // 订单id
@@ -2524,7 +2524,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (!targetIdList.contains(targetId)) {
                 TOrder order = receiptMap.get(targetId);
                 com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-                tOrder.exchangeOrder(order);
+                tOrder = tOrder.exchangeOrder(order);
                 SinglePaymentView thView = tOrder.copySinglePaymentView();
                 thView.setIdString(String.valueOf(in.getId())); // 没什么用的流水id
                 thView.setServiceName(order.getServiceName());// 服务名字
@@ -2545,7 +2545,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (!targetIdList.contains(targetId)) {
                 TOrder order = receiptMap.get(targetId);
                 com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-                tOrder.exchangeOrder(order);
+                tOrder = tOrder.exchangeOrder(order);
                 SinglePaymentView thisView = tOrder.copySinglePaymentView();
                 thisView.setIdString(String.valueOf(out.getId())); // 没什么用的流水id
                 thisView.setServiceName(order.getServiceName());// 服务名字
@@ -2705,7 +2705,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
         com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-        tUser.exchangeTUser(user);
+        tUser = tUser.exchangeTUser(user);
         DesensitizedUserView userView = tUser.copyDesensitizedUserView();
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
@@ -2769,7 +2769,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         resultMap.put(AppConstant.USER_TOKEN, token);
         // String化
         com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-        tUser.exchangeTUser(user);
+        tUser = tUser.exchangeTUser(user);
         DesensitizedUserView userView = tUser.copyDesensitizedUserView();
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
@@ -3981,7 +3981,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // String化
         for (TUser user : userList) {
             com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-            tUser.exchangeTUser(user);
+            tUser = tUser.exchangeTUser(user);
             UserDetailView view = tUser.copyUserDetailView();
             view.setIdString(String.valueOf(view.getId()));
             // 对用户可用性作健壮处理
@@ -4026,7 +4026,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public UserDetailView info(Long userId) {
         TUser user = userDao.selectByPrimaryKey(userId);
         com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-        tUser.exchangeTUser(user);
+        tUser = tUser.exchangeTUser(user);
         UserDetailView view = tUser.copyUserDetailView();
         view.setIdString(String.valueOf(view.getId()));
         // 评价(平均分)
@@ -4147,6 +4147,17 @@ public class UserServiceImpl extends BaseService implements UserService {
         cookie.setMaxAge(COOKIE_INTERVAL); // cookie有效时效
         cookie.setPath("/");
         response.addCookie(cookie);
+    }
+
+    public static void main(String[] args) {
+        TOrder tOrdes = new TOrder();
+        tOrdes.setIsValid("sdf");
+        tOrdes.setEndTime(1111L);
+        tOrdes.setType(1);
+        com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
+        tOrder = tOrder.exchangeOrder(tOrdes);
+        UserPageServiceVO copy = tOrder.copyUserPageServiceVO();
+        System.out.println(copy.getEndTime());
     }
 
 }
