@@ -662,6 +662,8 @@ public class TUser implements Serializable {
         return null;
     }
     public DesensitizedUserView copyDesensitizedUserView(){
+        DesensitizedUserView desensitizedUserView = new DesensitizedUserView();
+        desensitizedUserView.setMasterStatus(String.valueOf(getMasterStatus()));
         return null;
     }
     public UserDetailView copyUserDetailView(){

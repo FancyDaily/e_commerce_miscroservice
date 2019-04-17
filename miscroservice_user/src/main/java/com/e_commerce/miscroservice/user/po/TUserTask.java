@@ -141,6 +141,9 @@ public class TUserTask implements Serializable {
     }
 
     public DateTypeDictionaryView copyDateTypeDictionaryView(){
+        DateTypeDictionaryView dateTypeDictionaryView = new DateTypeDictionaryView();
+        dateTypeDictionaryView.setTargetId(Long.valueOf(getTargetId()));
+        dateTypeDictionaryView.setTargetNum(Long.valueOf(getTargetNum()));
         return null;
     }
 }
