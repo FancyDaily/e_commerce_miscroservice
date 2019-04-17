@@ -156,7 +156,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			}
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
-			tUser1.exchangeTUser(tUser);
+			tUser1 = tUser1.exchangeTUser(tUser);
 			BaseUserView userView = tUser1.copyBaseUserView();
 //			BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 
@@ -186,6 +186,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
 		com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
+		tUser1 = tUser1.exchangeTUser(tUser);
 		BaseUserView userView = tUser1.copyBaseUserView();
 //		BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 		// 求助 展示求助者评分

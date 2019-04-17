@@ -1218,6 +1218,9 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
     @Override
     public void openBonusPackage(TUser user, Long bonusId) {
+        if(user==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "你没有登录，暂时无法领取!");
+        }
         long currentTimeMillis = System.currentTimeMillis();
         // 判空
         if (bonusId == null) {
