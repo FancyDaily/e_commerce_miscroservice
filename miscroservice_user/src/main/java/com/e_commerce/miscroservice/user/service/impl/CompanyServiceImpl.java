@@ -163,7 +163,7 @@ public class CompanyServiceImpl implements CompanyService {
         // String化
         for (TOrder order : orders) {
             com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-            tOrder.exchangeOrder(order);
+            tOrder = tOrder.exchangeOrder(order);
             StrServiceView strServiceView = tOrder.copyStrServiceViewByExchange();
             strServiceView.setIdString(String.valueOf(strServiceView.getId()));
             strServiceView.setServiceIdString(String.valueOf(strServiceView.getServiceId()));
@@ -231,7 +231,7 @@ public class CompanyServiceImpl implements CompanyService {
         List<StrServiceView> views = new ArrayList<StrServiceView>();
         for(TOrder order:orders) {
             com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-            tOrder.exchangeOrder(order);
+            tOrder = tOrder.exchangeOrder(order);
             StrServiceView view = tOrder.copyStrServiceViewByExchange();
             view.setIdString(String.valueOf(view.getId()));
             view.setServiceIdString(String.valueOf(view.getServiceId()));

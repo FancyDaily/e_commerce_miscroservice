@@ -172,7 +172,7 @@ public class FocusServiceImpl implements FocusService {
         List<DesensitizedUserView> userList = new ArrayList<>();
         for (TUser theUser : users) {
             com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-            tUser.exchangeTUser(theUser);
+            tUser = tUser.exchangeTUser(theUser);
             DesensitizedUserView userView = tUser.copyDesensitizedUserView();
             userView.setIdStr(String.valueOf(userView.getId()));
             userView.setTimeStamp(String.valueOf(timeStampMap.get(userView.getId())));

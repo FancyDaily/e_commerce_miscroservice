@@ -867,7 +867,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
 		List<BaseGroupView> listGroupView = new ArrayList<BaseGroupView>();
 		for (TGroup group : listGroup) {
 		    com.e_commerce.miscroservice.user.po.TGroup tGroup = new com.e_commerce.miscroservice.user.po.TGroup();
-		    tGroup.exchangeTGroup(group);
+		    tGroup = tGroup.exchangeTGroup(group);
 
 			BaseGroupView groupView = tGroup.copyBaseGroupView();
 			Integer groupPersonNum = groupPersonNumMap.get(group.getId());
@@ -1022,7 +1022,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         // 处理数据
         for (TUser theUser : users) {
             com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
-            tUser.exchangeTUser(theUser);
+            tUser = tUser.exchangeTUser(theUser);
             SmartUserView userView = tUser.copySmartUserView();
             userView.setIdString(String.valueOf(userView.getId()));
             Integer sex = theUser.getSex();

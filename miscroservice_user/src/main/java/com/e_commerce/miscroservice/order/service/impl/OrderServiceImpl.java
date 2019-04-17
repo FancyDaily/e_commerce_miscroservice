@@ -151,7 +151,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
 //			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
 			TServiceDescribe listProductDesc = productService.getProductDescTop(order.getServiceId());
-			returnView.setDescription(listProductDesc.getDepict());
+			if(listProductDesc!=null) {
+				returnView.setDescription(listProductDesc.getDepict());
+			}
 			TUser tUser = userService.getUserById(order.getCreateUser());
 //			com.e_commerce.miscroservice.order.po.TUser tUser1 = new com.e_commerce.miscroservice.order.po.TUser();
 //			tUser1.exchangeTUser(tUser);
