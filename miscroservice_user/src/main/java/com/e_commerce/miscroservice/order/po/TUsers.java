@@ -5,13 +5,12 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.order.vo.BaseUserView;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 
 import java.io.Serializable;
 
 @Data
-public class TUser implements Serializable {
+public class TUsers implements Serializable {
     @Id
     private Long id;
 
@@ -660,10 +659,8 @@ public class TUser implements Serializable {
     }
     private static final long serialVersionUID = 1L;
 
-    public TUser exchangeTUser(com.e_commerce.miscroservice.commons.entity.application.TUser tUser){
-        TUser t = new TUser();
-        BeanUtils.copyProperties(tUser,t);
-        return t;
+    public TUsers exchangeTUser(com.e_commerce.miscroservice.commons.entity.application.TUser tUser){
+        return BeanUtil.copy(tUser, TUsers.class);
     }
 
 
