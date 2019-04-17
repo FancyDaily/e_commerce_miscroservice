@@ -129,7 +129,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Page<TOrder> page = PageHelper.startPage(param.getPageNum(), param.getPageSize());
 		List<TOrder> listOrder = orderDao.pageOrder(param);
 		// 装载要查询的商品ID
-		List<Long> serviceIds = new ArrayList<>();
+		/*List<Long> serviceIds = new ArrayList<>();
 		// 装载所有需要查询的用户id
 		List<Long> userIds = new ArrayList<>();
 		for (int i = 0; i < listOrder.size(); i++) {
@@ -140,21 +140,30 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			result.setResultList(listReturn);
 			result.setTotalCount(0L);
 			return result;
+		}*/
+		if (listOrder==null||listOrder.size()==0){
+			result.setResultList(listReturn);
+			result.setTotalCount(0L);
+			return result;
 		}
 		// 获取商品封面图
-		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
+//		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
 		for (int i = 0; i < listOrder.size(); i++) {
 			PageOrderReturnView returnView = new PageOrderReturnView();
 			TOrder order = listOrder.get(i);
 			returnView.setOrder(order);
-			//设置封面图
-			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
-//			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
 			TServiceDescribe listProductDesc = productService.getProductDescTop(order.getServiceId());
-			returnView.setDescription(listProductDesc.getDepict());
+			if (listProductDesc!=null){
+				returnView.setDescription(listProductDesc.getDepict());
+				returnView.setImgUrl(listProductDesc.getUrl());
+
+			}
+			//设置封面图
+//			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
+//			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
-			tUser1.exchangeTUser(tUser);
+			tUser1 = tUser1.exchangeTUser(tUser);
 			BaseUserView userView = tUser1.copyBaseUserView();
 //			BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 
