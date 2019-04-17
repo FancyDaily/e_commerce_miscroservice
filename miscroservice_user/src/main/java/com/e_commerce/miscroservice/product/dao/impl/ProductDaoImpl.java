@@ -129,6 +129,6 @@ public class ProductDaoImpl implements ProductDao {
 	@Override
 	public TServiceDescribe getProductDescTop(Long serviceId) {
 		return MybatisOperaterUtil.getInstance().findOne(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
-				.eq(TServiceDescribe::getServiceId, serviceId) );
+				.eq(TServiceDescribe::getServiceId, serviceId).eq(TServiceDescribe::getIsCover,"1") );
 	}
 }
