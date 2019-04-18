@@ -245,6 +245,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				returnView.setCoverImgUrl(listDesc.get(i).getUrl());
 			}
 		}
+		TOrderRelationship orderRelationship = returnView.getOrderRelationship();
+		List<Integer> targetList = Arrays.asList(AppConstant.MY_VISION_FULL_STATUS_ARRAY);
+		if(targetList.contains(orderRelationship.getStatus())) {
+			orderRelationship.setStatus(0);
+			returnView.setOrderRelationship(orderRelationship);
+		}
 		returnView.setListServiceDescribe(listDesc);
 		return returnView;
 	}
@@ -489,6 +495,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				Long userId = listRelationship.get(0).getReceiptUserId();
 				TUser receiver = userService.getUserById(userId);
 				com.e_commerce.miscroservice.order.po.TUsers tUser = new com.e_commerce.miscroservice.order.po.TUsers();
+				tUser = tUser.exchangeTUser(receiver);
 				BaseUserView userView = tUser.copyBaseUserView();
 //				BaseUserView userView = BeanUtil.copy(receiver,BaseUserView.class);
 				// 是否关注该用户
@@ -516,6 +523,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				for (TOrderRelationship tOrderRelationship : listRelationship) {
 					TUser receiver = userService.getUserById(tOrderRelationship.getReceiptUserId());
 					com.e_commerce.miscroservice.order.po.TUsers tUser = new com.e_commerce.miscroservice.order.po.TUsers();
+					tUser = tUser.exchangeTUser(receiver);
 					BaseUserView userView = tUser.copyBaseUserView();
 //					BaseUserView userView = BeanUtil.copy(receiver,BaseUserView.class);
 					// 是否关注该用户
@@ -583,6 +591,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			Long fromUserId = relationship.getFromUserId();
 			TUser tUser = userService.getUserById(fromUserId);
 			com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
+			tUser1 = tUser1.exchangeTUser(tUser);
 			BaseUserView userView = tUser1.copyBaseUserView();
 //			BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 			// 是否关注该用户
@@ -619,6 +628,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			for (TOrderRelationship tOrderRelationship : tOrderRelationships) {
 				TUser tUser = userService.getUserById(tOrderRelationship.getReceiptUserId());
 				com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
+				tUser1 = tUser1.exchangeTUser(tUser);
 				BaseUserView userView = tUser1.copyBaseUserView();
 //				BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 				boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
@@ -634,6 +644,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		} else {
 			TUser tUser = userService.getUserById(order.getCreateUser());
 			com.e_commerce.miscroservice.order.po.TUsers tUser1 = new com.e_commerce.miscroservice.order.po.TUsers();
+			tUser1 = tUser1.exchangeTUser(tUser);
 			BaseUserView userView = tUser1.copyBaseUserView();
 //			BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
 			boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
