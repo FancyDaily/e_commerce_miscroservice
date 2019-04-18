@@ -610,6 +610,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
+			if(listServiceDescribe.size()==1) {
+				desc.setIsCover("1");
+			}
 		}
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
@@ -729,6 +732,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
+			if(listServiceDescribe.size()==1) {
+				desc.setIsCover("1");
+			}
 		}
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
