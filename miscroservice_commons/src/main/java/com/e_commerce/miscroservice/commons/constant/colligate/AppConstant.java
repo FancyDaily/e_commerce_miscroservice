@@ -781,4 +781,6 @@ public interface AppConstant {
     ,ProductEnum.STATUS_DELETE.getValue()}; //TODO 组织版组织概况中发布的商品
 
     Integer JURISDICTION_ADMIN = 1;
+
+    Integer[] MY_VISION_FULL_STATUS_ARRAY = {2,7,8,9,10,11,12};
 }

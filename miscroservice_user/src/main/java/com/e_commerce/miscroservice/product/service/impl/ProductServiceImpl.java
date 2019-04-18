@@ -633,6 +633,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("求助描述中包含敏感词");
 			}
+            if(listServiceDescribe.size()==1) {
+                desc.setIsCover("1");
+            }
 			//			首页普通 以及 描述信息
 			if (desc.getIsCover().equals("1")){
 				JSONObject jsonObject = new JSONObject();
@@ -644,6 +647,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
+
 		}
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
@@ -771,6 +775,9 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
+            if(listServiceDescribe.size()==1) {
+                desc.setIsCover("1");
+            }
 			//			首页普通 以及 描述信息
 			if (desc.getIsCover().equals("1")){
 				JSONObject jsonObject = new JSONObject();

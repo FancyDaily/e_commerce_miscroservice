@@ -31,6 +31,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -2354,6 +2355,39 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("bonusPackage/open/" + TokenUtil.AUTH_SUFFIX)
+    public Object bonusPackageOpenAuth(String token, String bonusPackageId) {
+        AjaxResult result = new AjaxResult();
+        TUser user = UserUtil.getUser();
+        try {
+            Long bonusId = Long.valueOf(bonusPackageId);
+            userService.openBonusPackage(user, bonusId);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("打开红包异常: " + e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("打开红包异常", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 打开红包
+     *
+     * @param token          登录凭证
+     * @param bonusPackageId 红包编号
+     *                       {
+     *                       "success": false,
+     *                       "errorCode": "",
+     *                       "msg": "您不能领取自己的红包!",
+     *                       "data": ""
+     *                       }
+     * @return
+     */
+    @RequestMapping("bonusPackage/open")
     public Object bonusPackageOpen(String token, String bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2420,17 +2454,18 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping("bonusPackage/isMine/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("bonusPackage/isMine")
     public Object isMyBonusPackage(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {
             Map<String, Object> resultMap = userService.isMyBonusPackage(user, bonusPackageId);
+            if (resultMap == null) {
+                resultMap = new HashMap<>();
+                resultMap.put("isMine", Boolean.FALSE);
+            }
             result.setData(resultMap);
             result.setSuccess(true);
-            if (resultMap == null) {
-                result.setSuccess(false);
-            }
         } catch (MessageException e) {
             log.warn("查看是否为我的红包异常: " + e.getMessage());
             result.setMsg(e.getMessage());
