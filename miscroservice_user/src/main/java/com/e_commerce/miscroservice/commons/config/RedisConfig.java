@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.commons.config;
 import com.e_commerce.miscroservice.commons.config.colligate.RedisTemplateConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
@@ -15,4 +16,10 @@ public class RedisConfig extends RedisTemplateConfig {
 	public RedisTemplate create() {
 		return createTemplateCache(OperateEnum.STR);
 	}
+
+	    @Bean(name = "userRedisTemplate")
+    public HashOperations<String, String, String> createUserRedisTemplate() {
+        return createTemplateCache(OperateEnum.HASH).opsForHash();
+
+    }
 }

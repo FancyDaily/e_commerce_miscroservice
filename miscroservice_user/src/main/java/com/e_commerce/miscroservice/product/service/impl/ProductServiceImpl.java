@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.product.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -23,6 +24,9 @@ import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +52,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	@Autowired
 	private serviceSummaryDao serviceSummaryDao;
 
+
+	@Autowired
+	@Qualifier("userRedisTemplate")
+	HashOperations<String, String, String> userRedisTemplate;
+
+	public static String HOME_SERVICE_DESCRIBE = "home:service:%s";
 	/**
 	 * 功能描述:发布求助
 	 * 作者:马晓晨
@@ -465,6 +475,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 					throw new MessageException("服务描述中包含敏感词");
 				}
 			}
+			//			首页普通 以及 描述信息
+			if (desc.getIsCover().equals("1")){
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("serviceId",service.getId());
+				jsonObject.put("url",desc.getUrl());
+				jsonObject.put("depict",desc.getDepict());
+				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
+			}
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
@@ -523,6 +541,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		for (TServiceDescribe desc : listServiceDescribe) {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("服务描述中包含敏感词");
+			}
+			//			首页普通 以及 描述信息
+			if (desc.getIsCover().equals("1")){
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("serviceId",service.getId());
+				jsonObject.put("url",desc.getUrl());
+				jsonObject.put("depict",desc.getDepict());
+				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
 			}
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
@@ -607,6 +633,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("求助描述中包含敏感词");
 			}
+			//			首页普通 以及 描述信息
+			if (desc.getIsCover().equals("1")){
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("serviceId",service.getId());
+				jsonObject.put("url",desc.getUrl());
+				jsonObject.put("depict",desc.getDepict());
+				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
+			}
 			desc.setType(service.getType());
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
@@ -684,6 +718,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 					throw new MessageException("求助描述中包含敏感词");
 				}
 			}
+			//			首页普通 以及 描述信息
+			if (desc.getIsCover().equals("1")){
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("serviceId",service.getId());
+				jsonObject.put("url",desc.getUrl());
+				jsonObject.put("depict",desc.getDepict());
+				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
+			}
 			desc.setServiceId(service.getId()); // 求助id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
@@ -729,6 +771,14 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
+			//			首页普通 以及 描述信息
+			if (desc.getIsCover().equals("1")){
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("serviceId",service.getId());
+				jsonObject.put("url",desc.getUrl());
+				jsonObject.put("depict",desc.getDepict());
+				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
+			}
 		}
 		if (listServiceDescribe.size() > 0) {
 			productDescribeDao.batchInsert(listServiceDescribe);
