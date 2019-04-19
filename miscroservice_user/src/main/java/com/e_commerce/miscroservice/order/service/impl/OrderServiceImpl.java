@@ -778,7 +778,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 					if (formid != null) {
 						try {
 							List<String> msg = new ArrayList<>();
-							String parameter = "";
+							String parameter = "?returnHome=true";
 							if (service.getCollectType() == ProductEnum.COLLECT_TYPE_EACHHELP.getValue()) {
 								msg.add(new StringBuilder().append("您的最新求助信息自动发布成功,已冻结互助时")
 										.append(service.getCollectTime() * service.getServicePersonnel())

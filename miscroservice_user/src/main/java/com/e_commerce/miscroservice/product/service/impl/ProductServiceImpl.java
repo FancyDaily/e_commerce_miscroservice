@@ -353,7 +353,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			if (formid != null) {
 				if (service.getType() == ProductEnum.TYPE_SERVICE.getValue()) {
 					try {
-						String parameter = "";
+						String parameter = "?returnHome=true";
 						List<String> wxMsg = new ArrayList<>();
 						wxMsg.add("服务已经超时下架");
 						wxMsg.add(service.getServiceName());
@@ -370,7 +370,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 					}
 				} else {
 					try {
-						String parameter = "";
+						String parameter = "?returnHome=true";
 						List<String> wxMsg = new ArrayList<>();
 						wxMsg.add("求助已经超时下架");
 						wxMsg.add(service.getServiceName());

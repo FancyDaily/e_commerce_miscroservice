@@ -623,7 +623,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         //如果是求助
                         if (formid != null) {
                             try {
-                                String parameter = "";
+                                String parameter = "?returnHome=true";
                                 List<String> msg = new ArrayList<>();
                                 msg.add("很遗憾，您未被求助者选中");
                                 msg.add(order.getServiceName());
@@ -644,7 +644,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         //如果是服务
                         if (formid != null) {
                             try {
-                                String parameter = "";
+                                String parameter = "?returnHome=true";
                                 List<String> msg = new ArrayList<>();
                                 msg.add("啊喔…TA似乎不太方便");
                                 msg.add(order.getServiceName());
@@ -675,7 +675,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         if (formid != null) {
                             try {
                                 List<String> msg = new ArrayList<>();
-                                String parameter = "";
+                                String parameter = "?returnHome=true";
                                 msg.add("很遗憾，该求助已下架");
                                 msg.add(order.getServiceName());
                                 msg.add(toUser.getName());
@@ -696,7 +696,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                         if (formid != null) {
                             try {
                                 List<String> msg = new ArrayList<>();
-                                String parameter = "";
+                                String parameter = "?returnHome=true";
                                 msg.add("很遗憾，该服务已下架");
                                 msg.add(order.getServiceName());
                                 msg.add(toUser.getName());
@@ -1486,7 +1486,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                                 try {
                                     List<String> wxMsg = new ArrayList<>();
                                     String orderType = "2";//服务通知的接收者是报名者
-                                    String parameter = "";
+                                    String parameter = "?returnHome=true";
                                     wxMsg.add("：很遗憾，TA因故取消了互助");
                                     wxMsg.add(orderRelationship.getServiceName());
                                     wxMsg.add(nowUser.getName());
