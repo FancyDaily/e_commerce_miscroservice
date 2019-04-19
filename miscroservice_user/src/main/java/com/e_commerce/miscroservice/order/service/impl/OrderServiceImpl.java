@@ -32,7 +32,10 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +67,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 	@Lazy
 	MqTemplate mqTemplate;
 
+    @Autowired
+    @Qualifier("userRedisTemplate")
+    HashOperations<String, String, String> userRedisTemplate;
+    public static String HOME_SERVICE_DESCRIBE = "home:service:%s";
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -152,12 +159,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			PageOrderReturnView returnView = new PageOrderReturnView();
 			TOrder order = listOrder.get(i);
 			returnView.setOrder(order);
-			TServiceDescribe listProductDesc = productService.getProductDescTop(order.getServiceId());
-			if (listProductDesc!=null){
-				returnView.setDescription(listProductDesc.getDepict());
-				returnView.setImgUrl(listProductDesc.getUrl());
+            // TODO: 2019-04-17 从缓存中获取
+			 String str = userRedisTemplate.get(String.format(HOME_SERVICE_DESCRIBE,order.getServiceId()),String.valueOf(order.getServiceId()));
+            JSONObject jsonObject = JSONObject.parseObject(str);
+			logger.info("获取缓存={}",jsonObject);
+			if (jsonObject!=null){
+                returnView.setDescription(jsonObject.getString("depict"));
+                returnView.setImgUrl(jsonObject.getString("url"));
+            }else {
+                TServiceDescribe listProductDesc = productService.getProductDescTop(order.getServiceId());
+                if (listProductDesc!=null){
+                    returnView.setDescription(listProductDesc.getDepict());
+                    returnView.setImgUrl(listProductDesc.getUrl());
+                    JSONObject jsonObject2 = new JSONObject();
+                    jsonObject2.put("serviceId",order.getServiceId());
+                    jsonObject2.put("url",listProductDesc.getUrl());
+                    jsonObject2.put("depict",listProductDesc.getDepict());
+                    userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE, order.getServiceId()),String.valueOf(order.getServiceId()),jsonObject2.toJSONString());
+                }
+            }
 
-			}
 			//设置封面图
 //			List<TServiceDescribe> listProductDesc = productService.getProductDesc(order.getServiceId());
 //			returnView.setImgUrl(productCoverPic.get(order.getServiceId()));
