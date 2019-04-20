@@ -106,6 +106,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
+        enrollPri(order , nowTime , nowUser);
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
             try {
@@ -124,7 +125,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             //如果错误消息不为空，说明该订单有部分问题不允许报名，抛出错误信息，并在外面接到这个异常后将报名日历移除
             throw new MessageException("401", errorMsg);
         }
-        enrollPri(order , nowTime , nowUser);
 
         //报名的通知
 

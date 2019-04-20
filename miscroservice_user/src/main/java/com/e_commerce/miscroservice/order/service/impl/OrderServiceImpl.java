@@ -30,6 +30,7 @@ import com.e_commerce.miscroservice.product.util.DateUtil;
 import com.e_commerce.miscroservice.user.controller.UserCommonController;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import jodd.json.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,6 +72,8 @@ public class OrderServiceImpl extends BaseService implements OrderService {
     @Qualifier("userRedisTemplate")
     HashOperations<String, String, String> userRedisTemplate;
     public static String HOME_SERVICE_DESCRIBE = "home:service:%s";
+
+	public static String PRODUCT_DETAIL_DESCRIBE = "product:detail:%s";
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
@@ -258,14 +261,31 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
 			returnView.setOrderRelationship(orderRelationship);
 		}
-		List<TServiceDescribe> listDesc = productService.getProductDesc(order.getServiceId());
-		//将详情汇中的封面图取出来
-		for (int i = 0; i < listDesc.size(); i++) {
-			if (listDesc.get(i).getIsCover().equals(IS_COVER_YES)) {
-				//将封面图取出来单独存
-				returnView.setCoverImgUrl(listDesc.get(i).getUrl());
+
+		String coverImgUrl = null;
+		//从缓存获取
+		String str = userRedisTemplate.get(String.format(PRODUCT_DETAIL_DESCRIBE,order.getServiceId()),String.valueOf(order.getServiceId()));
+		JSONObject jsonObject = JSONObject.parseObject(str);
+		logger.info("获取缓存={}",jsonObject);
+		List<TServiceDescribe> listDesc = null;
+		if(jsonObject!=null) {
+			coverImgUrl = jsonObject.getString("coverImgUrl");
+			listDesc= jsonObject.getObject("listDesc", List.class);
+		} else {
+			listDesc = productService.getProductDesc(order.getServiceId());
+			//将详情汇中的封面图取出来
+			for (int i = 0; i < listDesc.size(); i++) {
+				if (listDesc.get(i).getIsCover().equals(IS_COVER_YES)) {
+					//将封面图取出来单独存
+					coverImgUrl = listDesc.get(i).getUrl();
+					JSONObject jsonObject1 = new JSONObject();
+					jsonObject1.put("coverImgUrl", coverImgUrl);
+					jsonObject1.put("listDesc", listDesc);
+					userRedisTemplate.put(String.format(PRODUCT_DETAIL_DESCRIBE, order.getServiceId()), String.valueOf(order.getServiceId()),jsonObject1.toJSONString());
+				}
 			}
 		}
+		returnView.setCoverImgUrl(coverImgUrl);
 		TOrderRelationship orderRelationship = returnView.getOrderRelationship();
 		List<Integer> targetList = Arrays.asList(AppConstant.MY_VISION_FULL_STATUS_ARRAY);
 		if(targetList.contains(orderRelationship.getStatus())) {
