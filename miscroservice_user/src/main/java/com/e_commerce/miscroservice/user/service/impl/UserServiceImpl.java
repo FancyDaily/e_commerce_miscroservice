@@ -3676,7 +3676,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public boolean isCareUser(Long userId, Long userFollowId) {
-        return userFollowDao.countUserFollow(userId, userFollowId).equals(1L) ? true : false;
+        return userFollowDao.isAtten(userId, userFollowId);
     }
 
     /**

@@ -543,7 +543,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				throw new MessageException("服务描述中包含敏感词");
 			}
 			//			首页普通 以及 描述信息
-			if (desc.getIsCover().equals("1")){
+			String isCover = desc.getIsCover();
+			if (Objects.equals(isCover,"1")){
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("serviceId",service.getId());
 				jsonObject.put("url",desc.getUrl());

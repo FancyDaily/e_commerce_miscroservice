@@ -672,7 +672,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 				tUser1 = tUser1.exchangeTUser(tUser);
 				BaseUserView userView = tUser1.copyBaseUserView();
 //				BaseUserView userView = BeanUtil.copy(tUser,BaseUserView.class);
-				boolean isCare = userService.isCareUser(user.getId(), order.getCreateUser());
+				boolean isCare = userService.isCareUser(user.getId(), tOrderRelationship.getReceiptUserId());
 				if (isCare) {
 					// 关注状态 1、显示关注 2、显示已关注
 					userView.setCareStatus(2);
