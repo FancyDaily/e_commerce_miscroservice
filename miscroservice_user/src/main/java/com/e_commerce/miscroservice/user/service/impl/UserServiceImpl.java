@@ -666,7 +666,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         tUser = tUser.exchangeTUser(theUser);
         DesensitizedUserView view = tUser.copyDesensitizedUserView();
         //关注状态
-        Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
+//        Integer attenStatus = userFollowDao.queryAttenStatus(user.getId(), userId);
+        Integer attenStatus = 0;
+        boolean atten = userFollowDao.isAtten(user.getId(), userId);
+        attenStatus = atten?1:0;
         view.setIsAtten(attenStatus);
         result.setDesensitizedUserView(view);
         user = userDao.selectByPrimaryKey(user.getId());
