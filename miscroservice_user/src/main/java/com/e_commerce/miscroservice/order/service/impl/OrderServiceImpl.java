@@ -161,6 +161,12 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		for (int i = 0; i < listOrder.size(); i++) {
 			PageOrderReturnView returnView = new PageOrderReturnView();
 			TOrder order = listOrder.get(i);
+			//判断订单对应商品是否下架
+            Integer serviceStatus = order.getServiceStatus();
+            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+                continue;
+            }
+
 			returnView.setOrder(order);
             // TODO: 2019-04-17 从缓存中获取
 			 String str = userRedisTemplate.get(String.format(HOME_SERVICE_DESCRIBE,order.getServiceId()),String.valueOf(order.getServiceId()));

@@ -674,7 +674,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         result.setDesensitizedUserView(view);
         user = userDao.selectByPrimaryKey(user.getId());
         //求助列表
-        QueryResult helps = getOnesAvailableItems(userId, 1, 8, false, user);
+//        QueryResult helps = getOnesAvailableItems(userId, 1, 8, false, user);
 
         //服务列表
         QueryResult services = getOnesAvailableItems(userId, 1, 8, true, user);
@@ -684,7 +684,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setId(userId);
         UserSkillListView skills = skills(user);
 
-        result.setHelps(helps);
+//        result.setHelps(helps);
         result.setServices(services);
         result.setSkills(skills);
 
