@@ -592,11 +592,13 @@ public class SeekHelpController extends BaseController {
 //		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
-				productService.submitSeekHelp(user, param, token);
+				Long orderId = productService.submitSeekHelp(user, param, token);
+				result.setData(orderId);
 				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
-				productService.submitService(user, param, token);
+				Long orderId = productService.submitService(user, param, token);
+				result.setData(orderId);
 				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else {
@@ -647,11 +649,13 @@ public class SeekHelpController extends BaseController {
 //		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
 		try {
 			if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
-				productService.submitSeekHelp(user, param, token);
+				Long orderId = productService.submitSeekHelp(user, param, token);
+				result.setData(orderId);
 				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SERVICE.getValue())) {
-				productService.submitService(user, param, token);
+				Long orderId = productService.submitService(user, param, token);
+				result.setData(orderId);
 				result.setMsg(AppMessageConstant.SEEKHELP_SUBMIT_SUCCESS);
 				result.setSuccess(true);
 			} else {

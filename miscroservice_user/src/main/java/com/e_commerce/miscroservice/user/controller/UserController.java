@@ -3473,4 +3473,31 @@ public class UserController extends BaseController {
         return result;
     }
 
+    /**
+     * 功能描述: 单位认证审核
+     * 作者: 许方毅
+     * 创建时间: 2018年12月14日 下午3:33:12
+     * @param companyId
+     * @param option 操作：1通过、2拒绝
+     * @return
+     */
+    @RequestMapping("modifyCompany")
+    public Object modify(Long companyId, String option, HttpServletRequest request) {
+        AjaxResult result = new AjaxResult();
+        try {
+            companyService.modify(companyId, option);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
 }

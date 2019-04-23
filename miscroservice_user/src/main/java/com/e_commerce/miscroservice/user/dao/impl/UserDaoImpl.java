@@ -1,16 +1,25 @@
 package com.e_commerce.miscroservice.user.dao.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.user.dao.UserDao;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class UserDaoImpl implements UserDao {
+
+    @Autowired
+    @Qualifier("userRedisTemplate")
+    private HashOperations<String,String,String> userRedisTemplate;
 
     /**
      * 根据主键查找
@@ -40,8 +49,18 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public int updateByPrimaryKey(TUser tUser) {
-        return MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
                 .eq(TUser::getId, tUser.getId()));
+//        UserUtil.flushRedisUser(tUser);
+        flushRedisUser(tUser);
+        return 1;
+    }
+
+    private void flushRedisUser(TUser user) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("user",user);
+
+        userRedisTemplate.put(String.format(AppConstant.MINE_INFOS,user.getId()),String.valueOf(user.getId()),jsonObject.toJSONString());
     }
 
     @Override
@@ -206,6 +225,15 @@ public class UserDaoImpl implements UserDao {
         .eq(TUser::getUserAccount,account)
         .eq(TUser::getPassword,password)
         .eq(TUser::getJurisdiction,jurisdictionAdmin)
+        .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TUser> selectByUserTelAndJurisAndIsCompany(String userTel, Integer jurisdictionNormal, Integer isCompanyAccountYes) {
+        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getUserTel,userTel)
+        .eq(TUser::getJurisdiction,jurisdictionNormal)
+        .eq(TUser::getIsCompanyAccount,isCompanyAccountYes)
         .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 

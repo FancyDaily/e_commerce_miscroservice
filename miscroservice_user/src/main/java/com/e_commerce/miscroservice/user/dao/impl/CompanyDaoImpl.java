@@ -52,4 +52,10 @@ public class CompanyDaoImpl implements CompanyDao {
         .eq(TCompany::getId,companyId)
         .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public int updateByPrimaryKey(TCompany company) {
+        return MybatisOperaterUtil.getInstance().update(company,new MybatisSqlWhereBuild(TCompany.class)
+        .eq(TCompany::getId,company.getId()));
+    }
 }

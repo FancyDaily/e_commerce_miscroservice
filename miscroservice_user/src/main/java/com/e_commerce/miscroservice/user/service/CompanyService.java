@@ -29,4 +29,6 @@ public interface CompanyService {
      * @return
      */
     Map<String, Object> companyInfo(TUser user);
+
+    void modify(Long companyId, String option);
 }

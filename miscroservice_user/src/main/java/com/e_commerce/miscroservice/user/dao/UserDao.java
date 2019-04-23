@@ -51,4 +51,6 @@ public interface UserDao {
     List<TUser> selectByNameAndJurisdictionCreateTimeDesc(String param, Integer jurisdictionNormal);
 
     List<TUser> selectByUserAccountAndPasswordAndJurisdiction(String account, String password, Integer jurisdictionAdmin);
+
+    List<TUser> selectByUserTelAndJurisAndIsCompany(String userTel, Integer jurisdictionNormal, Integer isCompanyAccountYes);
 }

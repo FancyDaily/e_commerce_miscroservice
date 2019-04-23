@@ -26,7 +26,6 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +67,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	@Override
-	public void submitSeekHelp(TUser user, ServiceParamView param, String token) {
+	public Long submitSeekHelp(TUser user, ServiceParamView param, String token) {
 		user = userService.getUserById(user.getId());
 		//校验是否合规
 		checkProductLegal(user, param);
@@ -84,10 +83,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			Long companyId = userService.getOwnCompanyId(user.getId());
 			param.getService().setCompanyId(companyId);
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
-			submitCompanySeekHelp(user, param);
+			return submitCompanySeekHelp(user, param);
 		} else {// 个人发布
 			param.getService().setSource(ProductEnum.SOURCE_PERSONAL.getValue());
-			submitUserSeekHelp(user, param, token);
+			return submitUserSeekHelp(user, param, token);
 		}
 	}
 
@@ -141,13 +140,13 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * 功能描述:发布服务
 	 * 作者:马晓晨
 	 * 创建时间:2018年10月31日 下午3:02:35
-	 *
-	 * @param user  当前发布用户
+	 *  @param user  当前发布用户
 	 * @param param 发布服务所需要的参数
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	@Override
-	public void submitService(TUser user, ServiceParamView param, String token) {
+	public Long submitService(TUser user, ServiceParamView param, String token) {
+		Long orderId = null;
 		user = userService.getUserById(user.getId());
 		//校验重复时间
 		if (param.getService().getTimeType().equals(ProductEnum.TIME_TYPE_REPEAT.getValue())) {
@@ -175,10 +174,10 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			param.getService().setCompanyId(companyId);
 			//这一层可以判断出是组织，将source字段值写为组织
 			param.getService().setSource(ProductEnum.SOURCE_GROUP.getValue());
-			submitCompanyService(user, param);
+			return submitCompanyService(user, param);
 		} else {// 个人发布
 			param.getService().setSource(ProductEnum.SOURCE_PERSONAL.getValue());
-			submitUserService(user, param, token);
+			return submitUserService(user, param, token);
 		}
 	}
 
@@ -437,11 +436,11 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * 功能描述:组织用来发布服务
 	 * 作者:马晓晨
 	 * 创建时间:2019年1月18日 下午9:47:30
-	 *
-	 * @param user  当前的组织用户
+	 *  @param user  当前的组织用户
 	 * @param param 发布服务的参数
 	 */
-	private void submitCompanyService(TUser user, ServiceParamView param) {
+	private Long submitCompanyService(TUser user, ServiceParamView param) {
+		Long orderId = null;
 //		user = userDao.selectByPrimaryKey(user.getId());
 		// 做一层校验
 		if (param.getService().getCollectType() == null
@@ -492,7 +491,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			orderId = order.getId();
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -504,18 +504,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				updateServiceByKey(service);
 			}
 		});
+		return orderId;
 	}
 
 	/**
 	 * 功能描述:个人发布服务（小程序的发布服务）
 	 * 作者:马晓晨
 	 * 创建时间:2019年1月18日 下午9:41:27
-	 *
-	 * @param user  当前用户
+	 *  @param user  当前用户
 	 * @param param 发布服务的参数
 	 * @param token 当前用户的token
 	 */
-	private void submitUserService(TUser user, ServiceParamView param, String token) {
+	private Long submitUserService(TUser user, ServiceParamView param, String token) {
+		Long orderId = null;
 //		user = userDao.selectByPrimaryKey(user.getId());
 		TService service = param.getService();
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue()); // 互助时
@@ -560,7 +561,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			orderId = order.getId();
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -575,6 +577,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			updateServiceByKey(service);
 			}
 		});
+		return orderId;
 	}
 
 	/**
@@ -618,12 +621,12 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 	 * 功能描述:个人用户发布求助
 	 * 作者:马晓晨
 	 * 创建时间:2019年1月17日 下午3:52:52
-	 *
-	 * @param user
+	 *  @param user
 	 * @param param
 	 * @param token
 	 */
-	private void submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
+	private Long submitUserSeekHelp(TUser user, ServiceParamView param, String token) {
+		Long orderId = null;
 		TService service = param.getService();
 		service.setCollectType(ProductEnum.COLLECT_TYPE_EACHHELP.getValue());
 		setServiceCommonField(user, service);
@@ -655,7 +658,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			orderId = order.getId();
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -672,16 +676,16 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				updateServiceByKey(service);
 			}
 		});
+		return orderId;
 	}
 
 
 	/**
 	 * 组织发布求助
-	 *
-	 * @param user  组织用户
+	 *  @param user  组织用户
 	 * @param param 发布参数view
 	 */
-	private void submitCompanySeekHelp(TUser user, ServiceParamView param) {
+	private Long submitCompanySeekHelp(TUser user, ServiceParamView param) {
 		// 做一层校验
 //		if (param.getService().getCollectType() == null) {
 //			logger.error("组织发布的求助传递时间币的类型错误");
@@ -689,23 +693,23 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		}
 		// 时间币类型为互助时
 		if (param.getService().getCollectType().equals(ProductEnum.COLLECT_TYPE_EACHHELP.getValue())) {
-			companySubmitEachHelp(user, param);
+			return companySubmitEachHelp(user, param);
 		} else { // 时间币类型为公益时
-			companySubmitCommonweal(user, param);
+			return companySubmitCommonweal(user, param);
 		}
 	}
 
 
 	/**
 	 * 组织发布公益时求助
-	 *
-	 * @param user  当前组织用户
+	 *  @param user  当前组织用户
 	 * @param param 发布的参数view
 	 */
-	private void companySubmitCommonweal(TUser user, ServiceParamView param) {
+	private Long companySubmitCommonweal(TUser user, ServiceParamView param) {
 		/*
 		 * 公益时组织可以随便发，不需要检测组织是否有足够公益时 公益时不需要创建冻结流水
 		 */
+		Long orderId = null;
 		TService service = param.getService();
 		if (!user.getUserType().equals(IS_PUBLIC_WELFARE_YES)) {
 			throw new MessageException("您不是公益组织，没有权限发布公益时的项目");
@@ -740,7 +744,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			orderId = order.getId();
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -752,17 +757,18 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				updateServiceByKey(service);
 			}
 		});
+		return orderId;
 	}
 
 	/**
 	 * 功能描述:组织发布的互助时
 	 * 作者:马晓晨
 	 * 创建时间:2019年1月18日 下午3:28:53
-	 *
-	 * @param user
+	 *  @param user
 	 * @param param
 	 */
-	private void companySubmitEachHelp(TUser user, ServiceParamView param) {
+	private Long companySubmitEachHelp(TUser user, ServiceParamView param) {
+		Long orderId = null;
 		TService service = param.getService();
 		setServiceCommonField(user, service);
 		productDao.insert(service);
@@ -793,7 +799,8 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		}
 		//派生出第一张订单
 		try {
-			orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
+			orderId = order.getId();
 		} catch (NoEnoughCreditException e) {
 			throw new MessageException("没有足够的授信");
 		}
@@ -805,6 +812,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				updateServiceByKey(service);
 			}
 		});
+		return orderId;
 	}
 
 	/**

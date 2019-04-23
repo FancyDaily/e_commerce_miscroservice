@@ -45,9 +45,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import jodd.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,6 +137,10 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private ProductCommonController productService;
+
+    @Autowired
+    @Qualifier("userRedisTemplate")
+    HashOperations<String,String,String> userRedisTemplate;
 
     @Value("${debug}")
     private String debug;
@@ -555,7 +562,6 @@ public class UserServiceImpl extends BaseService implements UserService {
                 finalUser.setUpdateUser(finalUser.getId());
                 finalUser.setUpdateUserName(finalUser.getName());
                 userDao.updateByPrimaryKey(finalUser);
-                //TODO 刷新缓存
 
                 super.afterCompletion(status);
             }
@@ -649,7 +655,19 @@ public class UserServiceImpl extends BaseService implements UserService {
 
         UserPageView result = new UserPageView();
         //基本信息
-        TUser theUser = userDao.selectByPrimaryKey(userId);
+        //从缓存中获取
+        TUser theUser = null;
+        String str = userRedisTemplate.get(String.format(AppConstant.MINE_INFOS, user.getId()), String.valueOf(user.getId()));
+        JSONObject jsonObject = JSONObject.parseObject(str);
+        logger.info("获取缓存={}",jsonObject);
+        if(jsonObject!=null) {
+            theUser = jsonObject.getObject("user",TUser.class);
+        } else {
+            theUser = userDao.info(userId);
+            if(theUser!=null) {
+                flushRedisUser(theUser);
+            }
+        }
         Integer isCompanyAccount = theUser.getIsCompanyAccount();
         if(AppConstant.IS_COMPANY_ACCOUNT_YES.equals(isCompanyAccount)) {   //如果是组织账号
             result.setCompanyAccount(true);
@@ -873,7 +891,6 @@ public class UserServiceImpl extends BaseService implements UserService {
                 finalUser.setUpdateUserName(finalUser.getName());
 
                 userDao.updateByPrimaryKey(finalUser);
-                //TODO 刷新缓存
                 super.afterCompletion(status);
             }
         });
@@ -884,7 +901,20 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (userId == null) {
             userId = user.getId();
         }
-        TUser findUser = userDao.info(userId);
+        //从缓存中获取
+        TUser findUser = null;
+        String str = userRedisTemplate.get(String.format(AppConstant.MINE_INFOS, user.getId()), String.valueOf(user.getId()));
+        JSONObject jsonObject = JSONObject.parseObject(str);
+        logger.info("获取缓存={}",jsonObject);
+        if(jsonObject!=null) {
+            findUser = jsonObject.getObject("user",TUser.class);
+        } else {
+            findUser = userDao.info(userId);
+            if(findUser!=null) {
+                flushRedisUser(findUser);
+            }
+        }
+
         if (findUser == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户不存在！");
         }
@@ -1274,6 +1304,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         userTimeRecord.setUpdateUserName(user.getName());
         userTimeRecord.setIsValid(AppConstant.IS_VALID_YES);
         userTimeRecordDao.insert(userTimeRecord);
+
+        //刷新缓存
+//        flushRedisUser(user);
 
         // 写一条通知(通知红包发起人)
        /* String content = String.format(SysMsgEnum.BONUS_PACKAGE_DONE.getContent(), bonusRecord.getDescription(),
@@ -1917,6 +1950,9 @@ public class UserServiceImpl extends BaseService implements UserService {
                 finalUser.setUpdateUser(finalUser.getId());
                 finalUser.setUpdateUserName(finalUser.getName());
                 userDao.updateByPrimaryKey(finalUser);
+
+                //刷新缓存
+//                flushRedisUser(user);
 
                 super.afterCompletion(status);
             }
@@ -3866,8 +3902,18 @@ public class UserServiceImpl extends BaseService implements UserService {
         timerScheduler.setParams(JSON.toJSONString(param));
 
         mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName() ,JSONObject.toJSONString(timerScheduler));
+        //刷新缓存
+//        flushRedisUser(user);
 
         return bonusPackage;
+    }
+
+    //刷新"我的"缓存数据
+    private void flushRedisUser(TUser user) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("user",user);
+
+        userRedisTemplate.put(String.format(AppConstant.MINE_INFOS,user.getId()),String.valueOf(user.getId()),jsonObject.toJSONString());
     }
 
     /**

@@ -783,4 +783,6 @@ public interface AppConstant {
     Integer JURISDICTION_ADMIN = 1;
 
     Integer[] MY_VISION_FULL_STATUS_ARRAY = {2,7,8,9,10,11,12};
+
+    String MINE_INFOS = "mine:infos:%s";
 }

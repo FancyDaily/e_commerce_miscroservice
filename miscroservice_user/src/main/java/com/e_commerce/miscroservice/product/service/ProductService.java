@@ -22,22 +22,21 @@ public interface ProductService {
 	 * 作者:马晓晨
 	 * 创建时间:2018/10/30 下午12:06
 	 *
-	 * @param token
 	 * @param
+	 * @param token
 	 * @return
 	 */
-	void submitSeekHelp(TUser user, ServiceParamView param, String token);
+	Long submitSeekHelp(TUser user, ServiceParamView param, String token);
 
 	/**
 	 * 功能描述:提交服务
 	 * 作者:马晓晨
 	 * 创建时间:2018年10月31日 下午2:58:14
-	 *
-	 * @param user
+	 *  @param user
 	 * @param param
-	 * @param token
-	 */
-	void submitService(TUser user, ServiceParamView param, String token);
+     * @param token
+     */
+	Long submitService(TUser user, ServiceParamView param, String token);
 
 	/**
 	 * 获取商品信息根据商品的idList

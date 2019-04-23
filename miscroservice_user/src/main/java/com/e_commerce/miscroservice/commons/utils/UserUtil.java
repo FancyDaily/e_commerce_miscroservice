@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.commons.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -11,7 +13,14 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 /**
@@ -22,7 +31,11 @@ import java.util.Map;
  * @Version 1.0
  */
 public class UserUtil {
+
+    public static UserUtil userUtil;
+
     public static Log logger = Log.getInstance(UserUtil.class);
+
 
     /**
      * 根据用户token获取User
