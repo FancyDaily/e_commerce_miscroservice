@@ -657,7 +657,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         //基本信息
         //从缓存中获取
         TUser theUser = null;
-        String str = userRedisTemplate.get(String.format(AppConstant.MINE_INFOS, user.getId()), String.valueOf(user.getId()));
+        String str = userRedisTemplate.get(String.format(AppConstant.MINE_INFOS, userId), String.valueOf(user.getId()));
         JSONObject jsonObject = JSONObject.parseObject(str);
         logger.info("获取缓存={}",jsonObject);
         if(jsonObject!=null) {

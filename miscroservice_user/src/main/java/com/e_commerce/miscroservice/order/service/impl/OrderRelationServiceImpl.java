@@ -107,7 +107,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        enrollPri(order , nowTime , nowUser);
+        try{
+            enrollPri(order , nowTime , nowUser);
+        }catch (MessageException e){
+            throw new MessageException(e.getErrorCode(), e.getMessage());
+        }
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
             try {
@@ -2621,6 +2625,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 
     private void enrollPri(TOrder order , long nowTime , TUser nowUser){
+        if (nowUser.getAuthenticationStatus() != 2){
+            throw new MessageException("9527", "对不起，您未实名，无法报名求助");
+        }
         String errorMsg = canEnroll(nowUser , order);
         if (errorMsg != null) {
             //如果错误消息不为空，说明该用户有部分问题不允许报名，抛出错误信息
