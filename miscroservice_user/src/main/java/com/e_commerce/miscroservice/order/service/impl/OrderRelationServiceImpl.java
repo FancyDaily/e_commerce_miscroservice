@@ -13,7 +13,6 @@ import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEn
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.exception.colligate.NoEnoughCreditException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
-import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.commons.view.RemarkLablesView;
 import com.e_commerce.miscroservice.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.order.controller.OrderCommonController;
@@ -2625,15 +2624,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 
     private void enrollPri(TOrder order , long nowTime , TUser nowUser){
-        if (nowUser.getAuthenticationStatus() != 2){
-            throw new MessageException("9527", "对不起，您未实名，无法报名求助");
-        }
         String errorMsg = canEnroll(nowUser , order);
         if (errorMsg != null) {
             //如果错误消息不为空，说明该用户有部分问题不允许报名，抛出错误信息
             throw new MessageException("499", errorMsg);
         }
-        helpEnroll(order, nowUser, nowTime);
         if (order.getType() == OrderRelationshipEnum.SERVICE_TYPE_SERV.getType()) {
             //如果是服务
 
@@ -2649,6 +2644,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 throw new MessageException("9527", "对不起，您未实名，无法报名求助");
             }
         }
+        helpEnroll(order, nowUser, nowTime);
 
         order.setEnrollNum(order.getEnrollNum() + 1);
         orderDao.updateByPrimaryKey(order);
