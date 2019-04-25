@@ -1124,7 +1124,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			if(ProductEnum.TYPE_SEEK_HELP.getValue()!=order.getType().intValue()) {
 				continue;
 			}
-			Long beenFreezedTime = order.getCollectTime();
+			Long beenFreezedTime = order.getCollectTime() * order.getServicePersonnel();
 			creater.setFreezeTime(creater.getFreezeTime() - beenFreezedTime);
 			userService.updateByPrimaryKey(creater);
 			//对应冻结流水置为无效
