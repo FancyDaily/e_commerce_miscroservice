@@ -60,6 +60,7 @@
             </otherwise>
         </choose>
         AND  (status = 1 or status = 2)
+        AND  service_status != 5
         AND (
         source = 1
         OR (source = 2 AND open_auth = 1)
