@@ -52,6 +52,8 @@ public class UserDaoImpl implements UserDao {
         MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
                 .eq(TUser::getId, tUser.getId()));
 //        UserUtil.flushRedisUser(tUser);
+        tUser = MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        .eq(TUser::getId, tUser.getId()));
         flushRedisUser(tUser);
         return 1;
     }
