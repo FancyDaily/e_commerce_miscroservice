@@ -955,7 +955,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if(formerUser==null) {
             formerUser = (TUser) redisUtil.get(token);
         }
-        TUser idHolder = formerUser;
+        TUser idHolder = userDao.selectByPrimaryKey(formerUser.getId());
         TUser updateData = user; // 原始数据
 
         // 判空

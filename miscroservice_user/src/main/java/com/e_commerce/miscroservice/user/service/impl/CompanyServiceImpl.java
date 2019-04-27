@@ -161,7 +161,7 @@ public class CompanyServiceImpl implements CompanyService {
 
 
         // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         // 查询名下发布的以组织名义的活动
         List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatuses(AppConstant.SERV_TYPE_CORP,userId,availableStatusArray);
@@ -231,7 +231,7 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         // PageHelper
-        Page<Object> startPage = PageHelper.startPage(0, pageSize);
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 
         List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatusesInIds(ProductEnum.SOURCE_GROUP.getValue(), masterId, AppConstant.AVAILABLE_STATUS_ARRAY, idList);
 

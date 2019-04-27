@@ -16,12 +16,12 @@ import lombok.Data;
  * 创建时间:2019年1月16日 下午2:43:09
  */
 @Data
-public class BaseGroupView extends TGroup {
+public class BaseGroupView {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 4226493331327630638L;
+	private static final long serialVersionUID = 1L;
 	/**
 	 * 该组织下的人数
 	 */

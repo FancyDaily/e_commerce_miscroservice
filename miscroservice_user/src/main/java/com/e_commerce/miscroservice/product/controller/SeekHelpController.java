@@ -513,6 +513,28 @@ public class SeekHelpController extends BaseController {
 		}
 	}
 
+	@RequestMapping("lowerFrame")
+	public Object lowerFrame(String[] productIds) {
+		AjaxResult result = new AjaxResult();
+		try {
+			for(String productId:productIds) {
+				if(productId==null||productId.trim()=="") {
+					continue;
+				}
+				TUser user = new TUser();
+				user.setId(1l);
+				productService.lowerFrame(user,Long.valueOf(productId));
+				result.setSuccess(true);
+				result.setMsg(AppMessageConstant.PRODUCT_LOWERFRAME_SUCCESS);
+			}
+		} catch (MessageException e) {
+			log.warn(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR + e.getMessage());
+		} catch (Exception e) {
+			log.error(AppMessageConstant.PRODUCT_LOWERFRAME_ERROR , e);
+		}
+		return result;
+	}
+
 	/**
 	 * 获取当前用户可用余额
 	 *
