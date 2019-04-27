@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.order.vo;
 
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRelationship;
+import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import lombok.Data;
 
@@ -28,6 +29,22 @@ public class DetailOrderReturnView {
 	 * 订单关系
 	 */
 	private TOrderRelationship orderRelationship;
+
+	/**
+	 * 服务信息
+	 */
+	private TService service;
+
+	/**
+	 * 服务总开始时间
+	 */
+	private String serviceStartTime;
+
+	/**
+	 * 服务结束时间
+	 */
+	private String serviceEndTime;
+
 	/**
 	 * 服务求助详细描述
 	 */

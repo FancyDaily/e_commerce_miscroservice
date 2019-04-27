@@ -300,6 +300,26 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setOrderRelationship(orderRelationship);
 		}
 		returnView.setListServiceDescribe(listDesc);
+		TService tService = productDao.selectByPrimaryKey(order.getServiceId());
+		String startDateS = tService.getStartDateS();
+		String startTimeS = tService.getStartTimeS();
+		StringBuilder builder = new StringBuilder();
+		String startYear = startDateS.substring(0, 4);
+		String startMonth = startDateS.substring(4,6);
+		String startDay = startDateS.substring(6);
+		String startHour = startTimeS.substring(0,2);
+		String startMinute = startTimeS.substring(2);
+		returnView.setServiceStartTime(builder.append(startYear).append("-").append(startMonth).append("-").append(startDay).append(" ").append(startHour).append(":").append(startMinute).append(":").append("00").toString());
+		String endDateS = tService.getEndDateS();
+		String endTimeS = tService.getEndTimeS();
+		String endYear = endDateS.substring(0, 4);
+		String endMonth = endDateS.substring(4, 6);
+		String endDay = endDateS.substring(6);
+		String endHour = endTimeS.substring(0, 2);
+		String endMinute = endTimeS.substring(2);
+		returnView.setServiceEndTime(builder.append(endYear).append("-").append(endMonth).append("-").append(endDay).append(" ").append(endHour).append(":").append(endMinute).append(":").append("00").toString());
+		returnView.setService(tService);
+
 		return returnView;
 	}
 
