@@ -1368,7 +1368,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             CollectionView collectionView = tOrder.copyCollectionView();
             collectionView.setCoverPic(coverPic);
             if(collectionTime!=null) {
-                collectionView.setCollectionTime(DateUtil.timeStamp2Date(collectionTime));
+                collectionView.setCollectionTime(DateUtil.timeStamp2Seconds(collectionTime));
             }
             collectionViews.add(collectionView);
         }

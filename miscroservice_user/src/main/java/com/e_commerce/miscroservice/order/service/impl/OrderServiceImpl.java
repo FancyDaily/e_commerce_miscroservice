@@ -328,7 +328,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		//订单列表
 		List<TOrder> listOrder = orderDao.selectOrderByOrderIds(orderIds);
 		for (TOrder tOrder : listOrder) {
-			orderMap.put(tOrder.getId(), tOrder);
+			if(Objects.equals(tOrder.getServiceStatus(), ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) && (tOrder.getConfirmNum() >= tOrder.getServicePersonnel() || tOrder.getEnrollNum() == 0 || tOrder.getEnrollNum().equals(tOrder.getConfirmNum()))) { //如果为手动下架 TODO
+				continue;
+			}
+				orderMap.put(tOrder.getId(), tOrder);
 		}
 		//商品封面图
 		Map<Long, String> productCoverPic = productService.getProductCoverPic(serviceIds);
@@ -336,7 +339,11 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		for (TOrderRelationship orderRelationship : pageEnrollAndChooseList) {
 			PageEnrollAndChooseReturnView returnView = new PageEnrollAndChooseReturnView();
 			//显示的订单列表
-			returnView.setOrder(orderMap.get(orderRelationship.getOrderId()));
+			TOrder order = orderMap.get(orderRelationship.getOrderId());
+			if(order==null) {
+				continue;
+			}
+			returnView.setOrder(order);
 			//显示的封面url
 			returnView.setPorductCoverPic(productCoverPic.get(orderRelationship.getServiceId()));
 			//根据当前用户是发布者及接单者判断显示状态

@@ -736,6 +736,10 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         } else {
             throw new MessageException("499", "对不起，没有可供操作的用户");
         }
+
+        order.setEnrollNum(order.getEnrollNum() - orderRelationshipIdList.size());
+        orderDao.updateByPrimaryKey(order);
+
         return errorMsg;
     }
 
