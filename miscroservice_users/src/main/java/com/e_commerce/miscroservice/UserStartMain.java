@@ -7,9 +7,6 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Applicat
 public class UserStartMain {
 
 	public static void main(String[] args) {
-		System.out.println("___________________");
-		System.out.println("___________________");
-		System.out.println("___________________");
 		ApplicationContextUtil.run(UserStartMain.class, Boolean.TRUE, args);
 	}
 }
