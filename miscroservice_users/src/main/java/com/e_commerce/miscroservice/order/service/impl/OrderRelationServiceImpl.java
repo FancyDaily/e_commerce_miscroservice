@@ -772,8 +772,8 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                 for (int j = 0; j < toUserList.size(); j++) {
                     if (toUserList.get(j).getId() == orderRelationshipList.get(i).getReceiptUserId().longValue()) {
                         toUser = toUserList.get(j);
+                        break;
                     }
-                    break;
                 }
                 if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_YES.getType()) {
                     //如果用户已经被签到过了
