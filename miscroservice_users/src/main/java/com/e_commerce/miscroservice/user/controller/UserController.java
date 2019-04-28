@@ -3456,7 +3456,7 @@ public class UserController extends BaseController {
 
     }
 
-    @RequestMapping("upload")
+//    @RequestMapping("upload")
     public Object uploadBannerImg(String path) {
         if(path==null) {
             path = "";
