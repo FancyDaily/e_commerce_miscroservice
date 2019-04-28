@@ -304,8 +304,12 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             throw new MessageException("499", "异常，该订单没有您参与信息，请后退重试");
         }
         if (!orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())) {
-            //如果订单关系表状态不为待确认
-            throw new MessageException("499", "异常，该订单没有您报名信息，请后退重试");
+            if(orderRelationship.getStatus().equals(OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())) {
+                throw new MessageException("499", "您已经被选定，无法取消报名");
+            } else {
+                //如果订单关系表状态不为待确认或已确认
+                throw new MessageException("499", "抱歉，当前状态无法取消报名");
+            }
         }
         orderRelationship.setStatus(OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType());
         orderRelationship.setUpdateTime(nowTime);

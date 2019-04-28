@@ -1453,12 +1453,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
 //                AppConstant.TARGET_ID_TASK_AUTH);
 
-        //TODO 成长值记录
-        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
-
-        userDao.updateByPrimaryKey(user);
-
-        user = userDao.selectByPrimaryKey(user.getId());
+        user= taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
 
 //      flushRedisUser(token, user);  //刷新缓存
     }
