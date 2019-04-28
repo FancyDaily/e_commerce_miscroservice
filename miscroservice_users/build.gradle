@@ -1,8 +1,9 @@
+
 apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
 jar {
-    baseName "miscroservice_user"
+    baseName "miscroservice_users"
     mainClassName = 'com.e_commerce.miscroservice.UserStartMain'
 }
 
@@ -18,7 +19,6 @@ dependencies {
     compile 'org.ansj:ansj_seg:5.1.1'
     compile project(":miscroservice_commons")
     annotationProcessor project(":miscroservice_commons")
-
 
 }
 
