@@ -1643,47 +1643,47 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      */
     @Transactional(rollbackFor = Throwable.class)
     public void reoprtOrder(Long orderId , TUser nowUser , long labelsId , String message , String voucherUrl){
-    TOrder order = orderDao.selectByPrimaryKey(orderId);
-    if(order.getCreateUser() == nowUser.getId().longValue()){
-        throw new MessageException("499", "这是您自己的订单～");
-    }
-    long nowTime = System.currentTimeMillis();
-    TOrderRelationship orderRelationship = null;
-    orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUser.getId());
-    if (orderRelationship == null){
-        //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
-        orderRelationship = new TOrderRelationship();
-        orderRelationship.setServiceId(order.getServiceId());
-        orderRelationship.setOrderId(order.getId());
-        orderRelationship.setServiceType(order.getType());
-        orderRelationship.setFromUserId(order.getCreateUser());
-        orderRelationship.setReceiptUserId(nowUser.getId());
-        orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
-        orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
-        orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
-        orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
-        orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
-        orderRelationship.setServiceName(order.getServiceName());
-        orderRelationship.setStartTime(order.getStartTime());
-        orderRelationship.setEndTime(order.getEndTime());
-        orderRelationship.setTimeType(order.getTimeType());
-        orderRelationship.setCollectTime(order.getCollectTime());
-        orderRelationship.setCollectType(order.getCollectType());
-        orderRelationship.setCreateUser(nowUser.getId());
-        orderRelationship.setCreateUserName(nowUser.getName());
-        orderRelationship.setCreateTime(nowTime);
-        orderRelationship.setUpdateUser(nowUser.getId());
-        orderRelationship.setUpdateUserName(nowUser.getName());
-        orderRelationship.setUpdateTime(nowTime);
-        orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
-        orderRelationshipDao.insert(orderRelationship);
-    } else {
-        if (orderRelationship.getServiceReportType() == OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType()){
-            throw new MessageException("499", "您已投诉，请勿多次投诉");
+        TOrder order = orderDao.selectByPrimaryKey(orderId);
+        if(order.getCreateUser() == nowUser.getId().longValue()){
+            throw new MessageException("499", "这是您自己的订单～");
         }
-        orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
-        orderRelationshipDao.updateByPrimaryKey(orderRelationship);
-    }
+        long nowTime = System.currentTimeMillis();
+        TOrderRelationship orderRelationship = null;
+        orderRelationship = orderRelationshipDao.selectByOrderIdAndUserId(orderId ,nowUser.getId());
+        if (orderRelationship == null){
+            //如果没有订单，那么就创建一张无状态订单,并且将详情举报状态设置为举报
+            orderRelationship = new TOrderRelationship();
+            orderRelationship.setServiceId(order.getServiceId());
+            orderRelationship.setOrderId(order.getId());
+            orderRelationship.setServiceType(order.getType());
+            orderRelationship.setFromUserId(order.getCreateUser());
+            orderRelationship.setReceiptUserId(nowUser.getId());
+            orderRelationship.setSignType(OrderRelationshipEnum.SIGN_TYPE_NO.getType());
+            orderRelationship.setStatus(OrderRelationshipEnum.STATUS_NO_STATE.getType());
+            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+            orderRelationship.setOrderReportType(OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType());
+            orderRelationship.setServiceCollectionType(OrderRelationshipEnum.SERVICE_COLLECTION_IS_NO.getType());
+            orderRelationship.setServiceName(order.getServiceName());
+            orderRelationship.setStartTime(order.getStartTime());
+            orderRelationship.setEndTime(order.getEndTime());
+            orderRelationship.setTimeType(order.getTimeType());
+            orderRelationship.setCollectTime(order.getCollectTime());
+            orderRelationship.setCollectType(order.getCollectType());
+            orderRelationship.setCreateUser(nowUser.getId());
+            orderRelationship.setCreateUserName(nowUser.getName());
+            orderRelationship.setCreateTime(nowTime);
+            orderRelationship.setUpdateUser(nowUser.getId());
+            orderRelationship.setUpdateUserName(nowUser.getName());
+            orderRelationship.setUpdateTime(nowTime);
+            orderRelationship.setIsValid(AppConstant.IS_VALID_YES);
+            orderRelationshipDao.insert(orderRelationship);
+        } else {
+            if (orderRelationship.getServiceReportType() == OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType()){
+                throw new MessageException("499", "您已投诉，请勿多次投诉");
+            }
+            orderRelationship.setServiceReportType(OrderRelationshipEnum.SERVICE_REPORT_IS_TURE.getType());
+            orderRelationshipDao.updateByPrimaryKey(orderRelationship);
+        }
 
 
         TReport report = new TReport();
@@ -1812,7 +1812,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         if (orderRelationship.getStatus() == OrderRelationshipEnum.STATUS_ENROLL_CANCEL.getType()){
             //如果是报名者取消
             if (isPublish){
-               //如果操作用户是发布者
+                //如果操作用户是发布者
                 msg = "对不起，用户"+toUser.getName()+"已将该订单取消";
             } else {
                 msg = "对不起，您已将"+toUser.getName()+"的订单取消";

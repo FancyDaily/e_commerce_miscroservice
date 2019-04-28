@@ -4196,15 +4196,4 @@ public class UserServiceImpl extends BaseService implements UserService {
         response.addCookie(cookie);
     }
 
-    public static void main(String[] args) {
-        TOrder tOrdes = new TOrder();
-        tOrdes.setIsValid("sdf");
-        tOrdes.setEndTime(1111L);
-        tOrdes.setType(1);
-        com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-        tOrder = tOrder.exchangeOrder(tOrdes);
-        UserPageServiceVO copy = tOrder.copyUserPageServiceVO();
-        System.out.println(copy.getEndTime());
-    }
-
 }

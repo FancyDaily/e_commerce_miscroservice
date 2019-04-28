@@ -300,7 +300,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
     @Override
     public TUserCompany selectByPrimaryKey(Long companyId) {
         return MybatisOperaterUtil.getInstance().findOne(new TUserCompany(),new MybatisSqlWhereBuild(TUserCompany.class)
-        .eq(TUserCompany::getId,companyId)
+        .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
 

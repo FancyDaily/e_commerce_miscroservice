@@ -4,7 +4,9 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
@@ -574,6 +576,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         theUser.setUpdateUser(user.getId());
         theUser.setUpdateUserName(user.getName());
         userDao.updateByPrimaryKey(theUser);
+        userService.taskComplete(theUser, GrowthValueEnum.GROWTH_TYPE_UNREP_FIRST_JOIN_COMPANY,1);
     }
 
     /**

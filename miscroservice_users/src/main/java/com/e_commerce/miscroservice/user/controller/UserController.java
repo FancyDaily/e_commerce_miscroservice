@@ -3456,13 +3456,13 @@ public class UserController extends BaseController {
 
     }
 
-//    @RequestMapping("upload")
+    @RequestMapping("upload")
     public Object uploadBannerImg(String path) {
         if(path==null) {
             path = "";
         }
         String savePath = "default";
-        String fileName = "banner2.0_1.jpeg";
+        String fileName = "redBagT.png";
         String result = "";
         try {
             InputStream fis =  new FileInputStream(new File(path));
