@@ -274,4 +274,8 @@ public interface OrderRelationshipDao {
 	TOrderRelationship selectorderrelationshipByFromuserIdAndNULLReceiptUserIdAndOrderId(Long orderId, Long fromUserId);
 
 	String queryIsReceipt(Long receiptId, Long orderId, Long mineId);
+
+    List<TOrderRelationship> selectOrderRelationshipByOrderIdAndReceiptIdInStatus(Long orderId, Long id, Integer[] relationshipAlreadyEnrollStatus);
+
+	List<TOrderRelationship> selectOrderRelationshipBInOrderIdsAndReceiptIdInStatus(List<Long> orderIds, Long id, Integer[] relationshipAlreadyEnrollStatus);
 }

@@ -106,11 +106,6 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         TUser nowUser = userCommonController.getUserById(userId);
         long nowTime = System.currentTimeMillis();
         TOrder order = orderDao.selectByPrimaryKey(orderId);
-        try{
-            enrollPri(order , nowTime , nowUser);
-        }catch (MessageException e){
-            throw new MessageException(e.getErrorCode(), e.getMessage());
-        }
         if (order.getTimeType() == ProductEnum.TIME_TYPE_REPEAT.getValue()){
             //如果是重复性的，根据日历来进行查找订单，如果没有就创建新订单
             try {
@@ -122,6 +117,11 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if(order == null){
                 throw new MessageException("401", "该日期已超出可报名日期");
             }
+        }
+        try{
+            enrollPri(order , nowTime , nowUser);
+        }catch (MessageException e){
+            throw new MessageException(e.getErrorCode(), e.getMessage());
         }
 
         String errorMsg = enrollCantByOrder(order , nowTime);

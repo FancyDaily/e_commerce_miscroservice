@@ -208,4 +208,6 @@ public interface OrderDao {
 	 * @return
 	 */
 	List<TOrder> selectGroupHelpEnrollList(Long id);
+
+    List<TOrder> selectByServiceId(Long serviceId);
 }

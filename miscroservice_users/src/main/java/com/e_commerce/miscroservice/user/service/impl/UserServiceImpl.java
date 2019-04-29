@@ -1356,6 +1356,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         for(TOrder order:orders) {
             productIds.add(order.getServiceId());
         }
+        if(productIds.isEmpty()) {
+            return new QueryResult();
+        }
         //获取封面图
         Map<Long, String> productCoverPic = productService.getProductCoverPic(productIds);
         List<CollectionView> collectionViews = new ArrayList<>();

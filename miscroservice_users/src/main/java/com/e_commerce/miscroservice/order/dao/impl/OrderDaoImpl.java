@@ -547,4 +547,11 @@ public class OrderDaoImpl implements OrderDao {
                 .eq(TOrder::getCreateUser, id)
                 .eq(TOrder::getVisiableStatus, OrderEnum.VISIABLE_YES.getStringValue()));
     }
+
+    @Override
+    public List<TOrder> selectByServiceId(Long serviceId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrder(),new MybatisSqlWhereBuild(TOrder.class)
+        .eq(TOrder::getServiceId,serviceId)
+        .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
+    }
 }

@@ -787,4 +787,6 @@ public interface AppConstant {
     Integer[] MY_VISION_FULL_STATUS_ARRAY = {7,8,9,10,11,12};
 
     String MINE_INFOS = "mine:infos:%s";
+
+    Integer[] RELATIONSHIP_ALREADY_ENROLL_STATUS = {1,2,7,8,9,10,11,12,13};
 }

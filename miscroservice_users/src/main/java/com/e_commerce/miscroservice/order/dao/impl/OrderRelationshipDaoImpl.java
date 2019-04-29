@@ -646,4 +646,22 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 		return String.valueOf(status);
     }
 
+    @Override
+    public List<TOrderRelationship> selectOrderRelationshipByOrderIdAndReceiptIdInStatus(Long orderId, Long id, Integer[] relationshipAlreadyEnrollStatus) {
+        return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+		.eq(TOrderRelationship::getOrderId,orderId)
+		.eq(TOrderRelationship::getReceiptUserId,id)
+				.in(TOrderRelationship::getStatus,relationshipAlreadyEnrollStatus)
+		.eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TOrderRelationship> selectOrderRelationshipBInOrderIdsAndReceiptIdInStatus(List<Long> orderIds, Long id, Integer[] relationshipAlreadyEnrollStatus) {
+		return MybatisOperaterUtil.getInstance().finAll(new TOrderRelationship(), new MybatisSqlWhereBuild(TOrderRelationship.class)
+				.in(TOrderRelationship::getOrderId,orderIds)
+				.eq(TOrderRelationship::getReceiptUserId,id)
+				.in(TOrderRelationship::getStatus,relationshipAlreadyEnrollStatus)
+				.eq(TOrderRelationship::getIsValid,AppConstant.IS_VALID_YES));
+    }
+
 }

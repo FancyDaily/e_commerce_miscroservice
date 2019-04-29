@@ -545,6 +545,7 @@ public class OrderController extends BaseController {
 			result.setErrorCode("500");
 			result.setMsg("获取详情失败," + e.getMessage());
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("获取详情失败" + errInfo(e), e);
 			result.setSuccess(false);
 			result.setErrorCode("500");

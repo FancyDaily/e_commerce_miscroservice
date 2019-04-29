@@ -62,6 +62,11 @@ public class DetailOrderReturnView {
 	 */
 	private String[] enrollDate;
 
+	/**
+	 * 再次报名标记
+	 */
+	private boolean alreadyEnroll;
+
 	public String getOrderIdString() {
 		if (order != null) {
 			return order.getId() + "";
