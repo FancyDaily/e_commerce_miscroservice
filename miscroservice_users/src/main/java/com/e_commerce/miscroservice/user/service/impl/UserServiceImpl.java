@@ -46,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import jodd.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -2819,7 +2820,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         token = checkLogin(uuid,user,token,Boolean.FALSE);
         //设置token
         resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, token);
-
+        Integer isOpenId = 0;
+        if (StringUtils.isNotEmpty(user.getVxOpenId())){
+            isOpenId=1;
+        }
+        resultMap.put("isOpenId", String.valueOf(isOpenId));
         resultMap.put("isRegister",false);
         if(isRegister) {
             resultMap.put("isRegister",true);

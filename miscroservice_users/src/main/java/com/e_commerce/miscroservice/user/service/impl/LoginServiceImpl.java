@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,6 +233,12 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
         resultMap.put("userId", userId);
+
+        Integer isOpenId = 0;
+        if (StringUtils.isNotEmpty(user.getVxOpenId())){
+            isOpenId=1;
+        }
+        resultMap.put("isOpenId", String.valueOf(isOpenId));
 
         token = checkLogin(view.getUuid(), user, token, Boolean.FALSE);
         resultMap.put(AppConstant.USER_TOKEN, token);
