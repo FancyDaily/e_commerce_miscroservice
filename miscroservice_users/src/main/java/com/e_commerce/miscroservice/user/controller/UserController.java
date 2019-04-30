@@ -3462,7 +3462,7 @@ public class UserController extends BaseController {
             path = "";
         }
         String savePath = "default";
-        String fileName = "banner2.0_1.jpeg";
+        String fileName = "redBagT.png";
         String result = "";
         try {
             InputStream fis =  new FileInputStream(new File(path));

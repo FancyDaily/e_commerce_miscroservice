@@ -213,12 +213,35 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		DetailOrderReturnView returnView = new DetailOrderReturnView();
 		TOrder order = orderDao.selectByPrimaryKey(orderId);
 		returnView.setOrder(order);
+		boolean alreadyEnroll = false;
 		TService product = productService.getProductById(order.getServiceId());
 		//报名日期
 		String enrollDate = product.getEnrollDate();
 		if (StringUtil.isNotEmpty(enrollDate)) {
 			String[] enrollDateArray = enrollDate.split(",");
-			returnView.setEnrollDate(enrollDateArray);
+			//获取已报名的日期
+			Integer[] relationshipAlreadyEnrollStatus = AppConstant.RELATIONSHIP_ALREADY_ENROLL_STATUS;
+			List<TOrder> orders = orderDao.selectByServiceId(order.getServiceId());
+			List<Long> orderIds = new ArrayList<>();
+			for(TOrder tOrder:orders) {
+				orderIds.add(tOrder.getId());
+			}
+			List<TOrderRelationship> orderRelationships = orderRelationshipDao.selectOrderRelationshipBInOrderIdsAndReceiptIdInStatus(orderIds, user.getId(), relationshipAlreadyEnrollStatus);
+			List<String> enrollDateList = Arrays.asList(enrollDateArray);
+			enrollDateList = new ArrayList<>(enrollDateList);
+			//遍历已报名的订单关系记录
+			for(TOrderRelationship orderRelationship:orderRelationships) {
+				alreadyEnroll = true;
+				Long startTime = orderRelationship.getStartTime();
+				String alreadyEnrollDate = com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(startTime);
+				if(enrollDateList.contains(alreadyEnrollDate)) {
+					int index = enrollDateList.indexOf(alreadyEnrollDate);
+					enrollDateList.remove(index);
+				}
+			}
+			String[] enrollDateArrayFinal = Arrays.deepToString(enrollDateList.toArray()).replace("[","").replace("]","").split(",");
+			returnView.setAlreadyEnroll(alreadyEnroll);
+			returnView.setEnrollDate(enrollDateArrayFinal);
 		} else {
 			returnView.setEnrollDate(new String[0]);
 		}

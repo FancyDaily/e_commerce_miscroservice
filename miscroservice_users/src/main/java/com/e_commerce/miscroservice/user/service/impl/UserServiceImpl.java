@@ -1357,6 +1357,9 @@ public class UserServiceImpl extends BaseService implements UserService {
         for(TOrder order:orders) {
             productIds.add(order.getServiceId());
         }
+        if(productIds.isEmpty()) {
+            return new QueryResult();
+        }
         //获取封面图
         Map<Long, String> productCoverPic = productService.getProductCoverPic(productIds);
         List<CollectionView> collectionViews = new ArrayList<>();
@@ -1454,12 +1457,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
 //                AppConstant.TARGET_ID_TASK_AUTH);
 
-        //TODO 成长值记录
-        taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
-
-        userDao.updateByPrimaryKey(user);
-
-        user = userDao.selectByPrimaryKey(user.getId());
+        user= taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);
 
 //      flushRedisUser(token, user);  //刷新缓存
     }
@@ -4204,17 +4202,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         cookie.setMaxAge(COOKIE_INTERVAL); // cookie有效时效
         cookie.setPath("/");
         response.addCookie(cookie);
-    }
-
-    public static void main(String[] args) {
-        TOrder tOrdes = new TOrder();
-        tOrdes.setIsValid("sdf");
-        tOrdes.setEndTime(1111L);
-        tOrdes.setType(1);
-        com.e_commerce.miscroservice.user.po.TOrder tOrder = new com.e_commerce.miscroservice.user.po.TOrder();
-        tOrder = tOrder.exchangeOrder(tOrdes);
-        UserPageServiceVO copy = tOrder.copyUserPageServiceVO();
-        System.out.println(copy.getEndTime());
     }
 
 }

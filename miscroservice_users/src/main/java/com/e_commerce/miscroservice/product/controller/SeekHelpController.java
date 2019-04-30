@@ -513,7 +513,7 @@ public class SeekHelpController extends BaseController {
 		}
 	}
 
-	@RequestMapping("lowerFrame")
+//	@RequestMapping("lowerFrame")
 	public Object lowerFrame(String[] productIds) {
 		AjaxResult result = new AjaxResult();
 		try {
