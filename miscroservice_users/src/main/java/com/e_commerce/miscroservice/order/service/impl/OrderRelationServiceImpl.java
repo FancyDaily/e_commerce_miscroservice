@@ -1910,7 +1910,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         map.put("eventId", eventId);
         // 自动支付所需要的参数
         scheduler.setParams(JSON.toJSONString(map));
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**
@@ -2958,7 +2958,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         map.put("appraiserId", appraiserId);
         // 自动支付所需要的参数
         scheduler.setParams(JSON.toJSONString(map));
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**

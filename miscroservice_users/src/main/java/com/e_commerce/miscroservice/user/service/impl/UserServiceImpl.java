@@ -3899,7 +3899,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         param.put("bonusPackage",bonusPackage);
         timerScheduler.setParams(JSON.toJSONString(param));
 
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName() ,JSONObject.toJSONString(timerScheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName() ,JSONObject.toJSONString(timerScheduler));
         //刷新缓存
 //        flushRedisUser(user);
 
