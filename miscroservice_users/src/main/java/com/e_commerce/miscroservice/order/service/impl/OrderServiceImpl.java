@@ -165,9 +165,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			TOrder order = listOrder.get(i);
 			//判断订单对应商品是否下架
             Integer serviceStatus = order.getServiceStatus();
-            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
-                continue;
-            }
+//            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+//				totalCnt--;
+//                continue;
+//            }
 
 			returnView.setOrder(order);
             // TODO: 2019-04-17 从缓存中获取
