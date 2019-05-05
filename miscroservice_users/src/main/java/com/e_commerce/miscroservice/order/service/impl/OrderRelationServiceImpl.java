@@ -618,6 +618,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()) {
                 orderRelationshipList.get(i).setStatus(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType());
                 orderRelationshipList.get(i).setCreateTime(nowTime);
+                orderRelationshipList.get(i).setUpdateTime(nowTime);
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
