@@ -11,7 +11,6 @@ import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.order.dao.OrderDao;
 import com.e_commerce.miscroservice.order.mapper.OrderMapper;
 import com.e_commerce.miscroservice.order.vo.PageOrderParamView;
-import org.apache.commons.math.stat.descriptive.summary.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 

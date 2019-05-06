@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
@@ -18,9 +19,7 @@ import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.service.apiImpl.SendSmsService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoginServiceImpl extends BaseService implements LoginService {
 
-    private static Logger LOG = LoggerFactory.getLogger(LoginServiceImpl.class);
+    private static Log LOG = Log.getInstance(LoginServiceImpl.class);
     @Autowired
     private UserDao userDao;
 
@@ -158,16 +157,16 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         String userId = String.valueOf(user.getId());
         String token = TokenUtil.genToken(userId);
 
-		// redis
-		redisUtil.set(token, user, getUserTokenInterval());
-		redisUtil.set("" + userId, user, getUserTokenInterval());
-		redisUtil.set("str" + userId, token, getUserTokenInterval());
+        // redis
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set("" + userId, user, getUserTokenInterval());
+        redisUtil.set("str" + userId, token, getUserTokenInterval());
 
-		Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
+        Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
 
-		token = checkLogin(uuid,user,token,Boolean.FALSE);
-		resultMap.put(AppConstant.USER_TOKEN, token);
-		resultMap.put(AppConstant.USER, user);
+        token = checkLogin(uuid, user, token, Boolean.FALSE);
+        resultMap.put(AppConstant.USER_TOKEN, token);
+        resultMap.put(AppConstant.USER, user);
 
         return resultMap; // 返回登录状态
     }
@@ -327,13 +326,13 @@ public class LoginServiceImpl extends BaseService implements LoginService {
             return new HashMap<String, Object>();
         }
 
-        if(!AppConstant.AVALIABLE_STATUS_AVALIABLE.equals(user.getAvaliableStatus())) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,"该用户被封禁，禁止登录!");
+        if (!AppConstant.AVALIABLE_STATUS_AVALIABLE.equals(user.getAvaliableStatus())) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该用户被封禁，禁止登录!");
         }
 
         String userId = StringUtil.numberToString(user.getId());
         String token = TokenUtil.genToken(userId);
-        token = checkLogin(uuid,user,token,Boolean.FALSE);
+        token = checkLogin(uuid, user, token, Boolean.FALSE);
 
         String key = "str" + userId;
 
