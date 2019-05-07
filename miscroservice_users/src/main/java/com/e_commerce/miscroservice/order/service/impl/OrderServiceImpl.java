@@ -244,7 +244,9 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			returnView.setAlreadyEnroll(alreadyEnroll);
 			returnView.setEnrollDate(enrollDateArrayFinal);
 		} else {
-			returnView.setEnrollDate(new String[0]);
+			String[] strs = new String[1];
+			strs[0] = "";
+			returnView.setEnrollDate(strs);
 		}
 		Long publisherId = order.getCreateUser();
 		TUser tUser = userService.getUserById(publisherId);
