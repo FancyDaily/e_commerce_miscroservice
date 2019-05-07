@@ -648,6 +648,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		setServiceCommonField(user, service);
 		productDao.insert(service);
 		// 插入求助服务图片及描述
+		boolean batchFlag = true;
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (TServiceDescribe desc : listServiceDescribe) {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
@@ -667,10 +668,20 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setType(service.getType());
 			desc.setServiceId(service.getId()); // 求助id关联
 			setCommonServcieDescField(user, desc);
-
+			String depict = desc.getDepict();
+			if(depict!=null && depict.contains("\n")) {
+				batchFlag = false;
+			}
 		}
+
 		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
+			if(batchFlag) {
+				productDescribeDao.batchInsert(listServiceDescribe);
+			} else {
+				for(TServiceDescribe serviceDescribe:listServiceDescribe) {
+					productDescribeDao.insert(serviceDescribe);
+				}
+			}
 		}
 		//派生出第一张订单
 		try {
@@ -735,6 +746,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 //		checkRepeat(user, service, listServiceDescribe);
 		productDao.insert(service);
 		// 插入求助服务图片及描述
+		boolean batchFlag = true;
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
 			TServiceDescribe desc = listServiceDescribe.get(i);
@@ -754,9 +766,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 求助id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
+			String depict = desc.getDepict();
+			if(depict!=null && depict.contains("\n")) {
+				batchFlag = false;
+			}
 		}
 		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
+			if(batchFlag) {
+				productDescribeDao.batchInsert(listServiceDescribe);
+			} else {
+				for(TServiceDescribe serviceDescribe:listServiceDescribe) {
+					productDescribeDao.insert(serviceDescribe);
+				}
+			}
 		}
 		//派生出第一张订单
 		try {
@@ -789,6 +811,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		setServiceCommonField(user, service);
 		productDao.insert(service);
 		// 插入求助服务图片及描述
+		boolean batchFlag = true;
 		List<TServiceDescribe> listServiceDescribe = param.getListServiceDescribe();
 		for (int i = 0; i < listServiceDescribe.size(); i++) {
 			TServiceDescribe desc = listServiceDescribe.get(i);
@@ -809,9 +832,19 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 				jsonObject.put("depict",desc.getDepict());
 				userRedisTemplate.put(String.format(HOME_SERVICE_DESCRIBE,service.getId()),String.valueOf(service.getId()),jsonObject.toJSONString());
 			}
+			String depict = desc.getDepict();
+			if(depict!=null && depict.contains("\n")) {
+				batchFlag = false;
+			}
 		}
 		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
+			if(batchFlag) {
+				productDescribeDao.batchInsert(listServiceDescribe);
+			} else {
+				for(TServiceDescribe serviceDescribe:listServiceDescribe) {
+					productDescribeDao.insert(serviceDescribe);
+				}
+			}
 		}
 		//派生出第一张订单
 		try {
