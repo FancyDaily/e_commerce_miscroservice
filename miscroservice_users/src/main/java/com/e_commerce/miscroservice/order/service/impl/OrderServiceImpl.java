@@ -165,9 +165,10 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			TOrder order = listOrder.get(i);
 			//判断订单对应商品是否下架
             Integer serviceStatus = order.getServiceStatus();
-            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
-                continue;
-            }
+//            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+//				totalCnt--;
+//                continue;
+//            }
 
 			returnView.setOrder(order);
             // TODO: 2019-04-17 从缓存中获取
@@ -954,7 +955,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		map.put("serviceId", String.valueOf(service.getId()));
 		map.put("orderId", String.valueOf(order.getId()));
 		scheduler.setParams(JSON.toJSONString(map));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
 		/*    定时开始前俩小时发送消息 */
 		TimerScheduler orderBeforeSendMessageScheduler = new TimerScheduler();
 		orderBeforeSendMessageScheduler.setType(TimerSchedulerTypeEnum.ORDER_SEND_MESSAGE.toNum());
@@ -965,7 +966,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		paramMap.put("orderId", String.valueOf(order.getId()));
 		paramMap.put("type", "1");
 		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
 		// 订单开始一小时有人成单 提醒用户的消息
 		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(DateUtil.addHours(order.getStartTime(), -1)));
 //		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime() - 120000L));
@@ -974,7 +975,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		paramMap2.put("orderId", String.valueOf(order.getId()));
 		paramMap2.put("type", "2");
 		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap2));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
 		// 到开始时间无人报名提醒发布者  到开始时间未签到 提醒服务者
 		orderBeforeSendMessageScheduler.setCron(DateUtil.genCron(order.getStartTime()));
 		Map<String, String> paramMap3 = new HashMap<>();
@@ -982,7 +983,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		paramMap3.put("orderId", String.valueOf(order.getId()));
 		paramMap3.put("type", "3");
 		orderBeforeSendMessageScheduler.setParams(JSON.toJSONString(paramMap3));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(orderBeforeSendMessageScheduler));
 	}
 
 	/**
@@ -1145,7 +1146,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		map.put("paymentList", paymentList);
 		// 自动支付所需要的参数
 		scheduler.setParams(JSON.toJSONString(map));
-		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+		mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
 	}
 
 	@Override

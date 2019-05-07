@@ -535,6 +535,20 @@ public class SeekHelpController extends BaseController {
 		return result;
 	}
 
+//	@RequestMapping("myUpperFrame")
+	public void upperFrameMine(Long productId) {
+		TUser user = new TUser();
+		user.setId(1l);
+		user.setName("系统管理员");
+		try {
+			productService.upperFrame(user, productId);
+		} catch (MessageException e) {
+			log.warn(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR + e.getMessage());
+		} catch (Exception e) {
+			log.error(AppMessageConstant.PRODUCT_UPPERFRAME_ERROR , e);
+		}
+	}
+
 	/**
 	 * 获取当前用户可用余额
 	 *

@@ -618,6 +618,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
             if (orderRelationshipList.get(i).getStatus() == OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType()) {
                 orderRelationshipList.get(i).setStatus(OrderRelationshipEnum.STATUS_NOT_CHOOSE.getType());
                 orderRelationshipList.get(i).setCreateTime(nowTime);
+                orderRelationshipList.get(i).setUpdateTime(nowTime);
                 orderRelationshipList.get(i).setCreateUser(nowUser.getId());
                 orderRelationshipList.get(i).setCreateUserName(nowUser.getName());
                 orderRelationshipIdList.add(orderRelationshipList.get(i).getId());
@@ -1910,7 +1911,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         map.put("eventId", eventId);
         // 自动支付所需要的参数
         scheduler.setParams(JSON.toJSONString(map));
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**
@@ -2958,7 +2959,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         map.put("appraiserId", appraiserId);
         // 自动支付所需要的参数
         scheduler.setParams(JSON.toJSONString(map));
-        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_ACCEPT.toName(), JSONObject.toJSONString(scheduler));
+        mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
     }
 
     /**

@@ -137,6 +137,8 @@ public class OrderDaoImpl implements OrderDao {
                         .eq(TOrder::getCreateUser, userId)
                         .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
                         .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .neq(TOrder::getServiceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+                        .neq(TOrder::getServiceStatus, ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrder::getStatus))  //TODO status ASC
                 );
             } else {
@@ -159,6 +161,8 @@ public class OrderDaoImpl implements OrderDao {
                         .eq(TOrder::getCreateUser, userId)
                         .eq(TOrder::getType, ProductEnum.TYPE_SERVICE.getValue())
                         .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .neq(TOrder::getServiceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+                        .neq(TOrder::getServiceStatus, ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrder::getStatus))  //TODO status ASC
                 );
             }
@@ -185,6 +189,8 @@ public class OrderDaoImpl implements OrderDao {
                         .eq(TOrder::getCreateUser, userId)
                         .eq(TOrder::getType, ProductEnum.TYPE_SEEK_HELP.getValue())
                         .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .neq(TOrder::getServiceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+                        .neq(TOrder::getServiceStatus, ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrder::getStatus))
                 );
             } else {    //TODO sql拼接有点问题
@@ -209,6 +215,8 @@ public class OrderDaoImpl implements OrderDao {
                         .eq(TOrder::getCreateUser, userId)
                         .eq(TOrder::getType, ProductEnum.TYPE_SEEK_HELP.getValue())
                         .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
+                        .neq(TOrder::getServiceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue())
+                        .neq(TOrder::getServiceStatus, ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())
                         .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisSqlWhereBuild.OrderBuild.buildAsc(TOrder::getStatus))
                 );
             }

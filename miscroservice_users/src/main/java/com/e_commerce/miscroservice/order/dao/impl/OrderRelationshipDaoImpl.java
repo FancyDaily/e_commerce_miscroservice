@@ -265,6 +265,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 		TOrderRelationship orderRelationship = new TOrderRelationship();
 		orderRelationship.setId(orderRelationshipId);
 		orderRelationship.setServiceCollectionType(collectStatus);
+		orderRelationship.setServiceCollectionTime(System.currentTimeMillis());
 		return MybatisOperaterUtil.getInstance().update(orderRelationship, new MybatisSqlWhereBuild(TOrderRelationship.class)
 				.eq(TOrderRelationship::getId, orderRelationshipId));
 	}

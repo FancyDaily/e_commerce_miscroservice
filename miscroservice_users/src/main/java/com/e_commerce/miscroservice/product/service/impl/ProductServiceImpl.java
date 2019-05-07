@@ -539,6 +539,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 		// 查询最新的一条服务是否和当前发布的重叠，如果重叠的话就给提示不让发布(抛出异常)
 		productDao.insert(service);
 //		checkRepeat(user, service, listServiceDescribe);
+		boolean batchFlag = true;
 		for (TServiceDescribe desc : listServiceDescribe) {
 			if (StringUtil.isNotEmpty(desc.getDepict()) && BadWordUtil.isContaintBadWord(desc.getDepict(), 2)) {
 				throw new MessageException("服务描述中包含敏感词");
@@ -555,10 +556,25 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			desc.setServiceId(service.getId()); // 服务id关联
 			desc.setType(service.getType());
 			setCommonServcieDescField(user, desc);
+			//处理"\n"
+			String depict = desc.getDepict();
+			if(depict!=null && depict.contains("\n")) {
+				/*depict = depict.replaceAll("\n", "\t");
+				desc.setDepict(depict);*/
+				batchFlag = false;
+			}
 		}
+
 		if (listServiceDescribe.size() > 0) {
-			productDescribeDao.batchInsert(listServiceDescribe);
+			if(batchFlag) {
+				productDescribeDao.batchInsert(listServiceDescribe);
+			} else {
+				for(TServiceDescribe serviceDescribe:listServiceDescribe) {
+					productDescribeDao.insert(serviceDescribe);
+				}
+			}
 		}
+
 		//派生出第一张订单
 		try {
 			TOrder order = orderService.produceOrder(service, OrderEnum.PRODUCE_TYPE_SUBMIT.getValue(), "");
