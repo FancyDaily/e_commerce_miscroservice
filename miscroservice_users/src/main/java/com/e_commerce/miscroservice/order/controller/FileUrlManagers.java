@@ -34,15 +34,19 @@ public class FileUrlManagers {
      *
      * @param fileName 文件名
      */
-    public void push(String fileName) {
+    public Boolean push(String fileName) {
+        Boolean pushSuccessFlag=Boolean.FALSE;
         if(fileName==null||fileName.isEmpty()){
-            return;
+            return pushSuccessFlag;
         }
         try {
             upload.upload(fileName);
+            pushSuccessFlag=Boolean.TRUE;
+
         } catch (QiniuException e) {
 
         }
+        return pushSuccessFlag;
     }
 
     /**
