@@ -47,7 +47,6 @@ public class GZUserLessonServiceImpl implements GZUserLessonService {
 
         tGzUserLesson.setLessonCompletionStatus(GZUserLessonEnum.LESSON_COMPLETION_STATUS_YES.getCode());
         //更新章节学习进度
-        tGzUserLesson.setUpdateTime(currentTimeMillis);
         tGzUserLesson.setUpdateUser(userId);
         gzUserLessonDao.update(tGzUserLesson);
 
@@ -70,7 +69,6 @@ public class GZUserLessonServiceImpl implements GZUserLessonService {
         //更新课程学习进度
         TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, lessonId);
         tGzUserSubject.setCompletion(completion);
-        tGzUserSubject.setUpdateTime(currentTimeMillis);
         tGzUserSubject.setUpdateUser(userId);
         gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
     }
