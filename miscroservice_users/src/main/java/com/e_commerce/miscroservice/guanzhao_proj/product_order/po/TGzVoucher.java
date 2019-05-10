@@ -16,7 +16,7 @@ public class TGzVoucher implements Serializable {
     private Long subjectId;
 
     @Column(commit = "代金券金额")
-    private Integer price;
+    private Double price;
 
     @Column(commit = "满减下限")
     private Integer reductionLimit;
