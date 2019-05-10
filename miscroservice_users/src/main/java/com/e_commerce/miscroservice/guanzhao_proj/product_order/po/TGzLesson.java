@@ -7,7 +7,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-@Table
+@Table(commit = "观照-章节表")
 @Data
 public class TGzLesson implements Serializable {
     @Id

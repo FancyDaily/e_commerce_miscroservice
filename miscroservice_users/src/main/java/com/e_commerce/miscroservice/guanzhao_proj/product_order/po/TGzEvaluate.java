@@ -6,7 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Data;
 
 import java.io.Serializable;
-@Table
+@Table(commit = "观照-评价表")
 @Data
 public class TGzEvaluate implements Serializable {
     @Id

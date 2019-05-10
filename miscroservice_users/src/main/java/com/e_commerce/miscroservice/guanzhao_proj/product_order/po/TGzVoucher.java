@@ -7,7 +7,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 
-@Table
+@Table(commit = "观照-代金券表")
 @Data
 public class TGzVoucher implements Serializable {
     @Id

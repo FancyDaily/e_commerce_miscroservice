@@ -9,7 +9,7 @@ import lombok.Data;
  * @Author: FangyiXu
  * @Date: 2019-05-09 19:22
  */
-@Table
+@Table(commit = "观照key-value表")
 @Data
 public class TGzKeyValue {
 
