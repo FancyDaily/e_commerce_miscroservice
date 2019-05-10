@@ -1,11 +1,14 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import lombok.Data;
 
 import java.io.Serializable;
 
-@Table
+@Table(commit = "观照-用户课程关联表")
+@Data
 public class TGzUserSubject implements Serializable {
     @Id
     private Long id;
@@ -14,169 +17,48 @@ public class TGzUserSubject implements Serializable {
 
     private Long subjectId;
 
+    @Column(commit = "状态")
     private Integer status;
 
+    @Column(commit = "笔记数量")
     private Integer notesNum;
 
+    @Column(commit = "作业总数")
     private Integer homeworkExpectedNum;
 
+    @Column(commit = "作业完成数")
     private Integer homeworkDoneNum;
 
+    @Column(commit = "学习进度")
     private Integer completion;
 
+    @Column(commit = "失效时间戳")
     private Long expireTime;
 
+    @Column(commit = "扩展字段")
     private String extend;
 
+    @Column(commit = "创建者编号")
     private Long createUser;
 
+    @Column(commit = "创建者姓名")
     private String createUserName;
 
+    @Column(commit = "创建时间戳")
     private Long createTime;
 
+    @Column(commit = "更新者编号")
     private Long updateUser;
 
+    @Column(commit = "更新者姓名")
     private String updateUserName;
 
+    @Column(commit = "更新时间戳")
     private Long updateTime;
 
+    @Column(commit = "有效性")
     private String isValid;
 
     private static final long serialVersionUID = 1L;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getSubjectId() {
-        return subjectId;
-    }
-
-    public void setSubjectId(Long subjectId) {
-        this.subjectId = subjectId;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getNotesNum() {
-        return notesNum;
-    }
-
-    public void setNotesNum(Integer notesNum) {
-        this.notesNum = notesNum;
-    }
-
-    public Integer getHomeworkExpectedNum() {
-        return homeworkExpectedNum;
-    }
-
-    public void setHomeworkExpectedNum(Integer homeworkExpectedNum) {
-        this.homeworkExpectedNum = homeworkExpectedNum;
-    }
-
-    public Integer getHomeworkDoneNum() {
-        return homeworkDoneNum;
-    }
-
-    public void setHomeworkDoneNum(Integer homeworkDoneNum) {
-        this.homeworkDoneNum = homeworkDoneNum;
-    }
-
-    public Integer getCompletion() {
-        return completion;
-    }
-
-    public void setCompletion(Integer completion) {
-        this.completion = completion;
-    }
-
-    public Long getExpireTime() {
-        return expireTime;
-    }
-
-    public void setExpireTime(Long expireTime) {
-        this.expireTime = expireTime;
-    }
-
-    public String getExtend() {
-        return extend;
-    }
-
-    public void setExtend(String extend) {
-        this.extend = extend == null ? null : extend.trim();
-    }
-
-    public Long getCreateUser() {
-        return createUser;
-    }
-
-    public void setCreateUser(Long createUser) {
-        this.createUser = createUser;
-    }
-
-    public String getCreateUserName() {
-        return createUserName;
-    }
-
-    public void setCreateUserName(String createUserName) {
-        this.createUserName = createUserName == null ? null : createUserName.trim();
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    public Long getUpdateUser() {
-        return updateUser;
-    }
-
-    public void setUpdateUser(Long updateUser) {
-        this.updateUser = updateUser;
-    }
-
-    public String getUpdateUserName() {
-        return updateUserName;
-    }
-
-    public void setUpdateUserName(String updateUserName) {
-        this.updateUserName = updateUserName == null ? null : updateUserName.trim();
-    }
-
-    public Long getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Long updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public String getIsValid() {
-        return isValid;
-    }
-
-    public void setIsValid(String isValid) {
-        this.isValid = isValid == null ? null : isValid.trim();
-    }
 }

@@ -4259,7 +4259,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             //2.奖励双方(代金券)
             long currentTimeMillis = System.currentTimeMillis();
             Integer expireDayCnt = 15;
-            Integer price = 50;
+            Double price = 50.00;
             Long effectiveTimeStamp = 15 * DateUtil.interval;   //15天
             TGzVoucher voucher = new TGzVoucher();
             voucher.setUserId(user.getId());    //分发给注册人
