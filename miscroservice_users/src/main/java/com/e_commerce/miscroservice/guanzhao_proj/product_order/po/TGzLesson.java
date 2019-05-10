@@ -22,10 +22,10 @@ public class TGzLesson implements Serializable {
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")
-    private Integer availableDate;
+    private String availableDate;
 
     @Column(commit = "可用时间")
-    private Integer availableTime;
+    private String availableTime;
 
     @Column(commit = "扩展字段")
     private String extend;
