@@ -19,6 +19,10 @@ dependencies {
     compile 'org.ansj:ansj_seg:5.1.1'
     compile project(":miscroservice_commons")
     annotationProcessor project(":miscroservice_commons")
+    compile 'com.aliyun:aliyun-java-sdk-alidns:2.0.6'
+    compile 'com.aliyun:aliyun-java-sdk-core:2.4.2'
+    compile 'com.qiniu:qiniu-java-sdk:7.2.+'
+
 
 }
 
