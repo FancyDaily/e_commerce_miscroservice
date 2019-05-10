@@ -119,6 +119,8 @@ public class TUser implements Serializable {
 
     private Integer isFake;
 
+    private Integer application;
+
     private String extend;
 
     private Long createUser;
@@ -576,6 +578,10 @@ public class TUser implements Serializable {
     public void setIsFake(Integer isFake) {
         this.isFake = isFake;
     }
+
+    public Integer getApplication() {return application;}
+
+    public void setApplication(Integer application) {this.application = application; }
 
     public String getExtend() {
         return extend;

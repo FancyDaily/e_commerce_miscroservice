@@ -6,10 +6,11 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.OrderRelationshipEnum;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.message.controller.MessageCommonController;
-import com.e_commerce.miscroservice.order.controller.OrderCommonController;
-import com.e_commerce.miscroservice.order.dao.OrderDao;
+import com.e_commerce.miscroservice.xiaoshi_proj.message.controller.MessageCommonController;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.dao.OrderDao;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.po.TUserAuth;
 import com.e_commerce.miscroservice.user.po.TUserCompany;
@@ -87,7 +88,7 @@ public class CompanyServiceImpl implements CompanyService {
         user = userDao.selectByPrimaryKey(userId);
         if(AppConstant.AUTH_TYPE_CORP.equals(user.getAuthenticationType())) {
             //寻找对应的组织账号
-            TUser companyUser = userDao.queryDoppelganger(user);
+            TUser companyUser = userDao.queryDoppelganger(user, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
             if(companyUser!=null) {
                 companyUserId = companyUser.getId();
             }
@@ -317,7 +318,7 @@ public class CompanyServiceImpl implements CompanyService {
             userDao.updateByPrimaryKey(user);
 
             //重复创建判断
-            List<TUser> userList = userDao.selectByUserTelAndJurisAndIsCompany(user.getUserTel(), AppConstant.JURISDICTION_NORMAL, AppConstant.IS_COMPANY_ACCOUNT_YES);
+            List<TUser> userList = userDao.selectByUserTelAndJurisAndIsCompany(user.getUserTel(), AppConstant.JURISDICTION_NORMAL, AppConstant.IS_COMPANY_ACCOUNT_YES, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
             if (!userList.isEmpty()) {
                 return;
             }
@@ -354,7 +355,7 @@ public class CompanyServiceImpl implements CompanyService {
             companyUser.setUpdateUserName("默认管理员");
             companyUser.setUpdateTime(currentTimeMillis);
             companyUser.setPraise(0);
-            userDao.insert(companyUser);
+            userDao.insert(companyUser,ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 
             /*
              * 创建t_user_company记录

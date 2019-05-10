@@ -30,7 +30,7 @@ public class MybatisPlugConfig {
         dbHandler.setAlwaysDrop(Boolean.FALSE);
         dbHandler.setDataSource(dataSource);
 //        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.entity,com.e_commerce.miscroservice.commons.entity.application.user");
-        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.controller");
+        dbHandler.setPackageBase("com.e_commerce.miscroservice.guanzhao_proj.product_order.po");
         dbHandler.setShowSql(Boolean.TRUE);
         dbHandler.setAlwaysInit(Boolean.TRUE);
 //        dbHandler.generate(false,"t" ,"com.e_commerce.miscroservice.user.controller.doz","t*");

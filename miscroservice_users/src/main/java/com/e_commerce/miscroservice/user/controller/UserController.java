@@ -6,12 +6,13 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.EasyUIPageResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.product.controller.BaseController;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.po.TBonusPackage;
 import com.e_commerce.miscroservice.user.po.TUserAuth;
 import com.e_commerce.miscroservice.user.po.TUserSkill;
@@ -54,7 +55,7 @@ public class UserController extends BaseController {
     private GrowthValueService growthValueService;
 
     /**
-     * 手机号验证码登录
+     * 手机号验证码登录——晓时互助app专用
      *
      * @param telephone 手机号
      * @param validCode 短信验证码
@@ -139,7 +140,7 @@ public class UserController extends BaseController {
     public Object loginUserBySMS(String telephone, String validCode, @RequestParam(required = false) String uuid) {
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = userService.loginUserBySMS(telephone, validCode, uuid);
+            Map<String, Object> resultMap = userService.loginUserBySMS(telephone, validCode, uuid, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {
@@ -3486,6 +3487,61 @@ public class UserController extends BaseController {
         AjaxResult result = new AjaxResult();
         try {
             companyService.modify(companyId, option);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 观照app密码登录
+     * @param telephone
+     * @param password
+     * @return
+     */
+    @RequestMapping("login/gz/pwd")
+    public Object loginByPwdGZ(String telephone, String password, HttpServletResponse response, @RequestParam(required = true) String uuid) {
+        AjaxResult result = new AjaxResult();
+        try {
+            Map<String,Object> resultMap = userService.loginByPwd(telephone, password, response, uuid, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            result.setData(resultMap);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
+    /**
+     * 观照app手机号密码注册账号
+     * @param userTel
+     * @param password
+     * @param validCode
+     * @param inviteCode
+     * @return
+     */
+    @Consume(TUser.class)
+    @RequestMapping("rigester/gz")
+    public Object rigesterGZ(String userTel, String password, String validCode, String inviteCode) {
+        AjaxResult result = new AjaxResult();
+        TUser user = (TUser) ConsumeHelper.getObj();
+        try {
+            userService.registerGZ(user, validCode);
             result.setSuccess(true);
         } catch (MessageException e) {
             result.setSuccess(false);

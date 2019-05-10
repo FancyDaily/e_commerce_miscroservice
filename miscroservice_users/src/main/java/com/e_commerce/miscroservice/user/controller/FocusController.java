@@ -6,12 +6,11 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.product.controller.BaseController;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.FocusService;
 import com.e_commerce.miscroservice.user.vo.DesensitizedUserView;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

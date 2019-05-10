@@ -1,7 +1,14 @@
 package com.e_commerce.miscroservice.order.controller;
 
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
+import com.e_commerce.miscroservice.user.service.UserService;
+import com.netflix.discovery.converters.Auto;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,22 +26,30 @@ public class TestDo {
     @Autowired
     private FileUrlManagers fileUrlManagers;
 
+    @Autowired
+    private GZSubjectService gzSubjectService;
+
+    @Autowired
+    private GZLessonService gzLessonService;
+
     private final String EMPTY = "";
     private final Pattern filePattern=Pattern.compile("(.*)\\.mp4$");
 
 
-
     /**
      * 推送
-     *
+     * @param subjectId
      * @param fileName
      */
     @GetMapping("push")
     @ResponseBody
-    public void push(String fileName) {
-
+    public void push(Long subjectId, String fileName) {
         log.info("开始推送文件={}",fileName);
-        fileUrlManagers.push(fileName);
+        Boolean isPushSuccess = fileUrlManagers.push(fileName);
+        if(isPushSuccess) {
+            gzLessonService.sendUnlockTask(subjectId, fileName);
+        }
+
     }
 
 
@@ -47,8 +62,12 @@ public class TestDo {
      * @param fileName 文件名称
      * @return
      */
-    @GetMapping("play")
-    public String play(String fileName) {
+    @GetMapping("play" + TokenUtil.AUTH_SUFFIX)
+    public String play(String fileName, String sign, Long productId, Long lessonId) {
+        TUser user = UserUtil.getUser();
+        user = new TUser();
+        user.setId(42l);
+        user.setName("三胖");
         if(StringUtil.isEmpty(fileName)||
                 !filePattern.matcher(fileName).matches()){
 
@@ -56,10 +75,10 @@ public class TestDo {
             return EMPTY;
         }
 
-
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
-        // TODO:
+        // TODO
+        gzLessonService.authCheck(sign, user.getId(), fileName, productId, lessonId);
 
         request.setAttribute(fileName, Md5Util.md5(fileName));
         return "forward:/doPlay";

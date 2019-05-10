@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.util.colligate.BeanUtil;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.po.TUserCompany;
@@ -195,7 +196,7 @@ public class UserCommonController {
 	 * @return
 	 */
 	public List<TUser> selectUserByName(String name){
-		return userDao.selectUserByName(name);
+		return userDao.selectUserByName(name, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 	}
 
 	/**
@@ -204,7 +205,7 @@ public class UserCommonController {
 	 * @return
 	 */
 	public List<TUser> selectUserByTelephone(String telephone){
-		return userDao.selectUserByName(telephone);
+		return userDao.selectUserByName(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 	}
 
 	/**

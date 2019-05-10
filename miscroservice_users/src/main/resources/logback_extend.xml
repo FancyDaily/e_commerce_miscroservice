@@ -1,5 +1,5 @@
 <springProfile name="test,dev">
-    <logger name="com.e_commerce.miscroservice.user.mapper,com.e_commerce.miscroservice.order.mapper" level="debug" additivity="false">
+    <logger name="com.e_commerce.miscroservice.user.mapper,com.e_commerce.miscroservice.xiaoshi_proj.order.mapper" level="debug" additivity="false">
         <appender-ref ref="CONSOLE_FILE"/>
         <appender-ref ref="INFO_FILE"/>
     </logger>

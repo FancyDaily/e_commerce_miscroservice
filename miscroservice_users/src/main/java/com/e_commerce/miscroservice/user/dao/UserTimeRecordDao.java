@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public interface UserTimeRecordDao {
     /**
      * 查找月度流水记录

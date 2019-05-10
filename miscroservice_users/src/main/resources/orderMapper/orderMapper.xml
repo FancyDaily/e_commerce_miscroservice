@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.e_commerce.miscroservice.order.mapper.OrderMapper">
+<mapper namespace="com.e_commerce.miscroservice.xiaoshi_proj.order.mapper.OrderMapper">
     <resultMap id="BaseResultMap" type="com.e_commerce.miscroservice.commons.entity.application.TOrder">
         <id column="id" jdbcType="BIGINT" property="id" />
         <result column="service_id" jdbcType="BIGINT" property="serviceId" />
@@ -43,7 +43,7 @@
     collect_time, collect_type, create_user, create_user_name, create_time, update_user,
     update_user_name, update_time, company_id, is_valid
   </sql>
-    <select id="pageOrder" parameterType="com.e_commerce.miscroservice.order.vo.PageOrderParamView" resultMap="BaseResultMap">
+    <select id="pageOrder" parameterType="com.e_commerce.miscroservice.xiaoshi_proj.order.vo.PageOrderParamView" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>, IFNULL(st_distance (point (latitude, longitude),point(#{latitude},#{longitude}) ) / 0.0111, 0) AS distance
         FROM
         t_order

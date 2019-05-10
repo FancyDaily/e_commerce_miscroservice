@@ -19,7 +19,7 @@ public interface AuthorizeRpcService {
 
     String DEFAULT_USER_NAME_PREFIX = "XIOASHI_AUTHORIZE_";
 
-
+    String GUANZHAO_USER_NAME_PREFIX = "GUANZHAO_AUTHORIZE_";
 
     /**
      * 校验
