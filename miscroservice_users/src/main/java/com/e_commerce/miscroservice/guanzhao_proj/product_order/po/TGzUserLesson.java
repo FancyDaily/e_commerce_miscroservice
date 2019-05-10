@@ -3,10 +3,12 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import lombok.Data;
 
 import java.io.Serializable;
 
 @Table
+@Data
 public class TGzUserLesson implements Serializable {
     @Id
     private Long id;

@@ -16,6 +16,9 @@ public class TGzSubject implements Serializable {
     @Column(commit = "课程")
     private String name;
 
+    @Column(commit = "周期(天数时长)")
+    private Integer period;
+
     @Column(commit = "课程封面图")
     private String subjectHeadPortraitPath;
 
