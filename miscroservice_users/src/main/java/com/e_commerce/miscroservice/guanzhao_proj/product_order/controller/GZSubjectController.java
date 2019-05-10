@@ -187,22 +187,4 @@ public class GZSubjectController {
         return result;
     }
 
-    @RequestMapping("lesson/unlock")
-    public Object lessonUnlock(Long lessonId) {
-        AjaxResult result = new AjaxResult();
-        try {
-            gzLessonService.unlockLesson(lessonId);
-            result.setSuccess(true);
-        } catch (MessageException e) {
-            log.warn("====方法描述: {}, Message: {}====", "解锁课程", e.getMessage());
-            result.setMsg(e.getMessage());
-            result.setSuccess(false);
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("解锁课程", e);
-            result.setSuccess(false);
-        }
-        return result;
-    }
-
 }
