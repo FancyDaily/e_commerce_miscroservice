@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -24,10 +25,12 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlW
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.message.controller.MessageCommonController;
-import com.e_commerce.miscroservice.order.controller.OrderCommonController;
-import com.e_commerce.miscroservice.order.service.impl.BaseService;
-import com.e_commerce.miscroservice.product.controller.ProductCommonController;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.controller.GZProductOrderCommonController;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
+import com.e_commerce.miscroservice.xiaoshi_proj.message.controller.MessageCommonController;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.OrderCommonController;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.service.impl.BaseService;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.ProductCommonController;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.user.po.*;
 //import com.e_commerce.miscroservice.user.po.TOrder;
@@ -45,8 +48,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import jodd.json.JsonObject;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,9 +63,10 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
-import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_USER_NAME_PREFIX;
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.*;
 
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
@@ -138,6 +140,9 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private ProductCommonController productService;
+
+    @Autowired
+    private GZProductOrderCommonController gzproductOrderService;
 
     @Autowired
     @Qualifier("userRedisTemplate")
@@ -1013,7 +1018,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 final TUser tUser = finalUser[0];
                 // 如果为组织账号的个人账号,并且进行的是修改手机号操作 => 增加一步，同步修改组织账号的手机号
                 if (updateData != null && updateData.getUserTel() != null) {
-                    TUser companyAccount = userDao.queryDoppelganger(idHolder); //TODO 查找组织账号
+                    TUser companyAccount = userDao.queryDoppelganger(idHolder, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); //TODO 查找组织账号
                     if (companyAccount != null && !idHolder.getId().equals(companyAccount.getId())
                             && !idHolder.getUserTel().equals(updateData.getUserTel())) { // 当前为组织账号的个人账号进行手机号修改
                         companyAccount.setUserTel(telephone);
@@ -2340,7 +2345,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public void generateInviteCode(String token, String inviteCode) {
         TUser user = UserUtil.getUser();
         Long userId = user.getId();
-        if (checkInviteCode(inviteCode)) {
+        if (checkInviteCode(inviteCode, ApplicationEnum.XIAOSHI_APPLICATION.toCode())) {
             user = userDao.selectByPrimaryKey(userId);
             // 未激活
             if (user.getInviteCode() == null) {
@@ -2719,7 +2724,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         password = AESCommonUtil.encript(password);
         TUser user = null;
 
-        List<TUser> users = userDao.selectByUserTelByPasswordByIsCompanyAccYes(telephone, password, AppConstant.IS_COMPANY_ACCOUNT_YES);
+        List<TUser> users = userDao.selectByUserTelByPasswordByIsCompanyAccYes(telephone, password, AppConstant.IS_COMPANY_ACCOUNT_YES, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         if (!users.isEmpty()) {
             user = users.get(0);
         }
@@ -2763,7 +2768,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid) {
+    public Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid, Integer application) {
         Map<String, Object> resultMap = new HashMap<>();
         boolean isRegister = false;
         checkSMS(telephone, validCode);
@@ -2773,10 +2778,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             user.setUserTel(telephone);
             // 注册
             user.setDeviceId(uuid);
-            tmpUser = rigester(user);
+            tmpUser = rigester(user, application);
             isRegister = true;
         }
-        user = getUserAccountByTelephone(telephone);
+        user = getUserAccountByTelephone(telephone, application);
 
         if (tmpUser != null) {
             user.setToken(tmpUser.getToken());
@@ -2815,14 +2820,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         userView.setIdStr(String.valueOf(userView.getId()));
         resultMap.put(AppConstant.USER, userView);
 
-        token = checkLogin(uuid,user,token,Boolean.FALSE);
+        token = checkLogin(uuid,user,token,Boolean.FALSE, application);
         //设置token
         resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, token);
-        Integer isOpenId = 0;
-        if (StringUtils.isNotEmpty(user.getVxOpenId())){
-            isOpenId=1;
-        }
-        resultMap.put("isOpenId", String.valueOf(isOpenId));
+
         resultMap.put("isRegister",false);
         if(isRegister) {
             resultMap.put("isRegister",true);
@@ -2836,7 +2837,9 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param user
      */
     @Override
-    public TUser rigester(TUser user) {
+    public TUser rigester(TUser user, Integer application) {
+        boolean isGZApp = ApplicationEnum.GUANZHAO_APPLICATION.toCode() == application.intValue();  //认为当前只有两个app
+
         // 默认昵称
         String defaultName = RandomUtil.getDefaultName();
         // 默认账号
@@ -2911,7 +2914,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setIsValid(AppConstant.IS_VALID_YES);
 
         // 插入一条用户记录
-        userDao.insert(user);
+        userDao.insert(user, isGZApp? ApplicationEnum.GUANZHAO_APPLICATION.toCode(): ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         user.setCreateUser(user.getId());
         user.setUpdateUser(user.getId());
 
@@ -2922,7 +2925,8 @@ public class UserServiceImpl extends BaseService implements UserService {
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
         //注册用户中心数据
-        Token token = authorizeRpcService.reg(DEFAULT_USER_NAME_PREFIX + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
+        String namePrefix = isGZApp? GUANZHAO_USER_NAME_PREFIX: DEFAULT_USER_NAME_PREFIX;
+        Token token = authorizeRpcService.reg(namePrefix + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
 
         if (token != null&&token.getToken()!=null) {
             user.setToken(token.getToken());
@@ -2945,7 +2949,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     private boolean isUser(String telephone) {
         boolean result = false;
-        List<TUser> userList = userDao.selectByTelephone(telephone);
+        List<TUser> userList = userDao.selectByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         if (userList != null && !userList.isEmpty()) {
             result = true;
         }
@@ -3090,7 +3094,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     private TUser levelUp(TUser user, Integer price) {
         //增加成长值之前同步数据
-//		user = userDao.selectByPrimaryKey(user.getId());	//TODO
+//		user = userDao.selectByUserIdAndLessonId(user.getId());	//TODO
 
         Long growthValue = user.getGrowthValue();
 
@@ -3266,7 +3270,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     private TUser getCompanyAccountByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone, AppConstant.JURISDICTION_NORMAL, AppConstant.IS_COMPANY_ACCOUNT_YES);
+        List<TUser> userList = userDao.selectUserTelByJurisdictionAndIsCompany(telephone, AppConstant.JURISDICTION_NORMAL, AppConstant.IS_COMPANY_ACCOUNT_YES, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
@@ -3284,10 +3288,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param inviteCode
      * @return
      */
-    private boolean checkInviteCode(String inviteCode) {
+    private boolean checkInviteCode(String inviteCode, Integer application) {
         boolean flag = false;
 
-        List<TUser> userList = userDao.selectByInviteCode(inviteCode);
+        List<TUser> userList = userDao.selectByInviteCode(inviteCode, application);
         if (!userList.isEmpty()) {
             flag = true;
         }
@@ -3355,7 +3359,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     public List<TUser> getUsersByTelephone(String telephone) {
-        return userDao.queryUsersByTelephone(telephone);
+        return userDao.queryUsersByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
     }
 
     /**
@@ -3599,8 +3603,8 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @return
      */
     @Override
-    public TUser getUserAccountByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectUserTelByJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL);
+    public TUser getUserAccountByTelephone(String telephone, Integer application) {
+        List<TUser> userList = userDao.selectUserTelByJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL, application);
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             for (TUser thisUser : userList) {
@@ -3957,7 +3961,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TUser getUserByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectByTelephoneAndJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL);
+        List<TUser> userList = userDao.selectByTelephoneAndJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             user = userList.get(0);
@@ -3974,7 +3978,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public List<Long> getUsersByName(String param) {
-        List<TUser> users = userDao.selectByName(param);
+        List<TUser> users = userDao.selectByName(param, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         List<Long> userIds = new ArrayList<>();
         for (TUser user : users) {
             userIds.add(user.getId());
@@ -4004,7 +4008,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         String regex_num = "^\\d+$";
         String regex_tel = "^[1](([3][0-9])|([4][5,7,9])|([5][^4,6,9])|([6][6])|([7][3,5,6,7,8])|([8][0-9])|([9][8,9]))[0-9]{8}$";
         if (param == null) { // TODO 空串或多个空格
-            userList = userDao.selectByJurisdictionAndCreateTimeDesc(AppConstant.JURISDICTION_NORMAL);
+            userList = userDao.selectByJurisdictionAndCreateTimeDesc(AppConstant.JURISDICTION_NORMAL, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         } else {
             if (param.matches(regex_num)) {
                 if (param.matches(regex_tel)) { // 手机号
@@ -4021,7 +4025,7 @@ public class UserServiceImpl extends BaseService implements UserService {
                 }
             } else { // 姓名
                 // 初始化查询条件
-                userList = userDao.selectByNameAndJurisdictionCreateTimeDesc(param,AppConstant.JURISDICTION_NORMAL);
+                userList = userDao.selectByNameAndJurisdictionCreateTimeDesc(param,AppConstant.JURISDICTION_NORMAL, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
             }
         }
 
@@ -4170,7 +4174,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     /**
-     * 功能描述: 密码登录
+     * 功能描述: 密码登录——晓时app
      * 作者: 许方毅
      * 创建时间: 2018年12月28日 下午2:38:36
      * @param account
@@ -4184,7 +4188,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         password = AESCommonUtil.encript(password);
 
         TUser user = null;
-        List<TUser> users = userDao.selectByUserAccountAndPasswordAndJurisdiction(account,password,AppConstant.JURISDICTION_ADMIN);
+        List<TUser> users = userDao.selectByUserAccountAndPasswordAndJurisdiction(account,password,AppConstant.JURISDICTION_ADMIN, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         if (!users.isEmpty()) {
             user = users.get(0);
         }
@@ -4193,7 +4197,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         // 生成token，向cookie存放值
         String token = TokenUtil.genToken(String.valueOf(user.getId()));
-        token = checkLogin(uuid,user,token,Boolean.FALSE);
+        token = checkLogin(uuid,user,token,Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         // 向redis存放token和用户信息
         redisUtil.set(token, user, COOKIE_INTERVAL); // 应当与cookie时效统一
         redisUtil.set(String.valueOf(user.getId()), user, COOKIE_INTERVAL);
@@ -4202,6 +4206,150 @@ public class UserServiceImpl extends BaseService implements UserService {
         cookie.setMaxAge(COOKIE_INTERVAL); // cookie有效时效
         cookie.setPath("/");
         response.addCookie(cookie);
+    }
+
+    /**
+     * 注册——观照app
+     * @param user
+     * @param validCode
+     */
+    @Override
+    public void registerGZ(TUser user, String validCode) {
+        Integer application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
+        String userTel = user.getUserTel();
+        String password = user.getPassword();
+        String inviteCode = user.getInviteCode();
+
+        checkSMS(userTel, validCode);
+        //手机号重复性校验
+        List<TUser> tUsers = userDao.selectByTelephone(userTel, application);
+        TUser tempUser = null;
+        if(!tUsers.isEmpty()) {
+            tempUser = tUsers.get(0);
+        }
+        if(tempUser!=null) {
+            throw new MessageException("该手机号已存在！");
+        }
+        //TODO 正则校验
+        String regx = "";
+        Pattern pattern = Pattern.compile(regx);
+        Matcher matcher = pattern.matcher(password);
+
+        if(!matcher.matches()) {
+            throw new MessageException("密码不符合格式!");
+        }
+
+        password = AESCommonUtil.encript(password);
+        user.setPassword(password);
+
+        //注册
+        user = rigester(user, application);
+
+        if(!StringUtil.isEmpty(inviteCode)) {
+            //TODO 奖励推荐码双方，以代金券
+            //1.校验推荐码有效性,寻找推荐码拥有者
+            List<TUser> users = userDao.selectByInviteCode(inviteCode, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            TUser inviter = null;
+            for(TUser theUser:users) {
+                inviter = tUsers.get(0);
+            }
+            if(Objects.isNull(inviter)) {
+                return;
+            }
+            //2.奖励双方(代金券)
+            long currentTimeMillis = System.currentTimeMillis();
+            Integer expireDayCnt = 15;
+            Integer price = 50;
+            Long effectiveTimeStamp = 15 * DateUtil.interval;   //15天
+            TGzVoucher voucher = new TGzVoucher();
+            voucher.setUserId(user.getId());    //分发给注册人
+            voucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());
+            voucher.setEffectiveTime(effectiveTimeStamp);
+            voucher.setActivationTime(currentTimeMillis);
+            voucher.setType(GZVoucherEnum.TYPE_ALLPOWERFUL.toCode()); //通用
+            voucher.setPrice(price);
+            //creater & updater
+            voucher.setCreateTime(currentTimeMillis);
+            voucher.setCreateUser(user.getId());
+            voucher.setCreateUserName(user.getName());
+            voucher.setUpdateTime(currentTimeMillis);
+            voucher.setUpdateUser(user.getId());
+            voucher.setUpdateUserName(user.getName());
+            TGzVoucher voucherCopy = BeanUtil.copy(voucher, TGzVoucher.class);
+            voucherCopy.setUserId(inviter.getId()); //分发给邀请人
+            gzproductOrderService.insertVoucher(voucher, voucherCopy);
+            //3.生成自己的推荐码update
+            user.setInviteCode(RandomUtil.generateUniqueChars());
+            userDao.updateByPrimaryKey(user);
+        }
+
+    }
+
+    /**
+     * 账号密码登录——观照app
+     * @param telephone
+     * @param password
+     * @param uuid
+     * @param application
+     * @return
+     */
+    @Override
+    public Map<String, Object> loginByPwd(String telephone, String password, HttpServletResponse response, String uuid, int application) {
+        Integer COOKIE_INTERVAL = 60 * 60 * 24 * 15;
+
+        Map<String, Object> resultMap = new HashMap<>();
+        //TODO 对密码加密
+        password = AESCommonUtil.encript(password);
+        TUser user = userDao.selectByUserAccountAndPassword(telephone, password, application);
+
+        if(user == null) {
+            throw new MessageException("用户名或密码错误");
+        }
+
+        //处理封禁
+        if (AppConstant.AVALIABLE_STATUS_NOT_AVALIABLE.equals(user.getAvaliableStatus())) {
+            throw new MessageException("当前用户被封禁!禁止登录！");
+        }
+
+        //激活假用户
+        if (AppConstant.IS_FAKE_YES.equals(user.getIsFake())) { // 如果为假用户
+            user.setIsFake(AppConstant.IS_FAKE_NO); // 转化为真实用户
+            userDao.updateByPrimaryKey(user);
+        }
+
+        // 登录
+        Long userId = user.getId();
+
+        // 使得之前的token失效
+        String redisKey = "str" + userId;
+        if (redisUtil.hasKey(redisKey)) {
+            String lastToken = (String) redisUtil.get(redisKey);
+            redisUtil.del(lastToken);
+        }
+
+        String token = genToken(user);
+        redisUtil.set(token, user, getUserTokenInterval());
+        redisUtil.set(String.valueOf(user.getId()), user, getUserTokenInterval());
+        redisUtil.set(redisKey, token, getUserTokenInterval()); // 登录状态的凭证
+        resultMap.put(AppConstant.USER_TOKEN, token);
+        // String化
+        com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
+        tUser = tUser.exchangeTUser(user);
+        DesensitizedUserView userView = tUser.copyDesensitizedUserView();
+        userView.setIdStr(String.valueOf(userView.getId()));
+        resultMap.put(AppConstant.USER, userView);
+
+        token = checkLogin(uuid,user,token,Boolean.FALSE, application);
+        //设置token
+        resultMap.put(com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil.TOKEN, token);
+
+        //TODO 向cookie存入信息
+        Cookie cookie = new Cookie("token", token);
+        cookie.setMaxAge(COOKIE_INTERVAL); // cookie有效时效
+        cookie.setPath("/");
+        response.addCookie(cookie);
+
+        return resultMap;
     }
 
 }

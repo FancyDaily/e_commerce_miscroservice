@@ -40,6 +40,10 @@ public enum TimerSchedulerTypeEnum {
      */
     ORDER_OVERTIME_REMARK(5, "order_overtime_remark"),
 
+    SUBJECT_UNLOCK(9, "subject_unlock"),
+
+    LESSON_UNLOCK(10, "lesson_unlock"),
+
     ORDER_DELAY_TASK(-20000, "orders6_delay_task");
     private int key;
 

@@ -353,11 +353,9 @@ public interface UserService {
      * @param uuid 设备号
      * @return
      */
-    Map<String, Object> loginUserBySMS(String telephone, String validCode,String uuid);
+    Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid, Integer application);
 
-    TUser rigester(TUser user);
-
-    TUser getUserAccountByTelephone(String telephone);
+    TUser getUserAccountByTelephone(String telephone, Integer application);
 
     /**
      * 用户登出
@@ -366,6 +364,8 @@ public interface UserService {
     void logOut(String token);
 
     abstract TUser getUserByTelephone(String telephone);
+
+    TUser rigester(TUser user, Integer application);
 
     /**
      * 任务大厅
@@ -412,4 +412,8 @@ public interface UserService {
     void changeAvailableStatus(Long userId, String avaliableStatus, String userType, TUser manager);
 
     void loginPwd(String account, String password, HttpServletResponse response,String uuid) throws Exception;
+
+    Map<String, Object> loginByPwd(String telephone, String password, HttpServletResponse response, String uuid, int application);
+
+    void registerGZ(TUser user, String validCode);
 }

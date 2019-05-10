@@ -20,7 +20,7 @@ feign.hystrix.enabled: true
 ---
 #mybatis的扫包路径
 mybatis:
-  typeAliasesPackage: com.e_commerce.miscroservice.user.po,com.e_commerce.miscroservice.order.po
+  typeAliasesPackage: com.e_commerce.miscroservice.user.po,com.e_commerce.miscroservice.xiaoshi_proj.order.po
 
 ---
 #打开数据库配置

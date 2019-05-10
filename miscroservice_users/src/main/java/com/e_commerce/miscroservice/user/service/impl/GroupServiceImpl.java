@@ -6,12 +6,12 @@ import com.e_commerce.miscroservice.commons.entity.application.*;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GrowthValueEnum;
 import com.e_commerce.miscroservice.commons.enums.application.PaymentEnum;
-import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
-import com.e_commerce.miscroservice.order.service.impl.BaseService;
-import com.e_commerce.miscroservice.product.dao.ProductDao;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.service.impl.BaseService;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.dao.ProductDao;
 import com.e_commerce.miscroservice.user.dao.*;
 import com.e_commerce.miscroservice.commons.entity.application.TCompany;
 import com.e_commerce.miscroservice.commons.entity.application.TGroup;
@@ -311,7 +311,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
 
-        List<TUser> users = userDao.selectByTelephoneInInIds(telephone,userIds);
+        List<TUser> users = userDao.selectByTelephoneInInIds(telephone,userIds, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         // 处理数据
         for (TUser thisUser : users) {
             com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();
@@ -480,14 +480,14 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         Long userId = user.getId();
         Long companyId = getOwnCompanyId(userId);
         // 判断是否为存在的用户
-        TUser userByTelephone = userService.getUserAccountByTelephone(phone);
+        TUser userByTelephone = userService.getUserAccountByTelephone(phone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         if (userByTelephone == null) { // 创建假用户
             userByTelephone= new TUser();
             userByTelephone.setName(userName);
             userByTelephone.setUserTel(phone);
             userByTelephone.setSex(sex);
             userByTelephone.setIsFake(AppConstant.IS_FAKE_YES);
-            userByTelephone = userService.rigester(userByTelephone);
+            userByTelephone = userService.rigester(userByTelephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         }
 
         if (groupId == null) { // 加入默认分组
@@ -604,7 +604,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
         userCompanyDao.updateByUserIdsAndCompanyJobAndCompanyIdSetUserCompany(idList,AppConstant.JOB_COMPANY_MEMBER,companyId,userCompany);
 
         //维护t_user的company_id、company_name字段
-        List<TUser> tUsers = userDao.selectInUserIds(split);
+        List<TUser> tUsers = userDao.selectInUserIds(split, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         //构建maps
         Map<Long,TUser> userMap = new HashMap<>();
         for(TUser tUser:tUsers) {
@@ -684,7 +684,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             split[0] = userIds;
         }
 
-        List<TUser> users = userDao.selectInUserIds(split);
+        List<TUser> users = userDao.selectInUserIds(split, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         Map<Long,TUser> userMap = new HashMap<>();
         //构建map
         for(TUser tUser:users) {
@@ -1021,7 +1021,7 @@ public class GroupServiceImpl extends BaseService implements GroupService {
             }
         }
 
-        List<TUser> users = userDao.selectByNameAndTelephoneLikeSkillInIds(name,telephone,skill,idList);
+        List<TUser> users = userDao.selectByNameAndTelephoneLikeSkillInIds(name,telephone,skill,idList, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         // 处理数据
         for (TUser theUser : users) {
             com.e_commerce.miscroservice.user.po.TUser tUser = new com.e_commerce.miscroservice.user.po.TUser();

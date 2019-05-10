@@ -125,6 +125,8 @@ public class TUser implements Serializable {
 
     private Integer isFake;
 
+    private Integer application;
+
     private String extend;
 
     private Long createUser;

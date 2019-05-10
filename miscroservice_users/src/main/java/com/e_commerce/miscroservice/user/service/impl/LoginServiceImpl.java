@@ -5,7 +5,7 @@ import java.util.*;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.service.Token;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
@@ -13,7 +13,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.e_commerce.miscroservice.order.service.impl.BaseService;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.service.impl.BaseService;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
@@ -164,7 +164,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
 
-        token = checkLogin(uuid, user, token, Boolean.FALSE);
+        token = checkLogin(uuid, user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         resultMap.put(AppConstant.USER_TOKEN, token);
         resultMap.put(AppConstant.USER, user);
 
@@ -189,7 +189,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         String telephone = wechatService.getPhoneNumber(view.getEncryptedData(), view.getIv(), session);
         TUser user = null;
         TUser openUser = getUser(openid); // 根据微信openid判定账户是否存在 TODO
-        TUser telephoneUser = userService.getUserAccountByTelephone(telephone); // 根据手机号判定账户是否存在 TODO
+        TUser telephoneUser = userService.getUserAccountByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); // 根据手机号判定账户是否存在 TODO
         Map<String, String> resultMap = new HashMap<>();
         Map<String, Object> redisMap = new HashMap<>();
         // 存储微信session
@@ -232,7 +232,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
         resultMap.put("userId", userId);
 
-        token = checkLogin(view.getUuid(), user, token, Boolean.FALSE);
+        token = checkLogin(view.getUuid(), user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         resultMap.put(AppConstant.USER_TOKEN, token);
 
         // 返回map，包含自定义状态
@@ -252,7 +252,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         LOG.info("/n-------------------数据库新建一个用户---------------------");
         user = getWechatUser(view);
         user.setVxOpenId(session.getOpenid()); // 往微信账户字段中记录openid
-        return userService.rigester(user);
+        return userService.rigester(user, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
     }
 
     /**
@@ -266,7 +266,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         if (StringUtil.isEmpty(openId)) {
             throw new MessageException(AppErrorConstant.Field_Error, "微信账号字段为空");
         }
-        List<TUser> list = userDao.selectByVxOpenId(openId);
+        List<TUser> list = userDao.selectByVxOpenId(openId, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         TUser user = null;
         if (list != null && !list.isEmpty()) {
             for (TUser thisUser : list) {
@@ -332,7 +332,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         String userId = StringUtil.numberToString(user.getId());
         String token = TokenUtil.genToken(userId);
-        token = checkLogin(uuid, user, token, Boolean.FALSE);
+        token = checkLogin(uuid, user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 
         String key = "str" + userId;
 

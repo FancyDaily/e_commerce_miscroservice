@@ -16,7 +16,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.product.controller.BaseController;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.vo.BaseGroupView;
 import com.e_commerce.miscroservice.user.vo.CompanyRecentView;
