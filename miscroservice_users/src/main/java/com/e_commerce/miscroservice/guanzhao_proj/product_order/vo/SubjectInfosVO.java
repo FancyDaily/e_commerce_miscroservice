@@ -1,19 +1,16 @@
-package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
+package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
-@Table(commit = "观照-课程表")
+/**
+ * @Author: FangyiXu
+ * @Date: 2019-05-10 14:01
+ */
 @Data
-public class TGzSubject implements Serializable {
-    @Id
+public class SubjectInfosVO {
     private Long id;
 
     @Column(commit = "课程")
@@ -49,6 +46,9 @@ public class TGzSubject implements Serializable {
     @Column(commit = "可用时间")
     private String availableTime;
 
+    @Column(commit = "描述图片地址数组", length = 2048)
+    private String[] descPicArray;
+
     @Column(commit = "描述图片地址", length = 2048)
     private String descPic;
 
@@ -61,21 +61,17 @@ public class TGzSubject implements Serializable {
     @Column(commit = "创建者编号")
     private Long createUser;
 
-    @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
+    @Column(commit = "创建时间戳")
     private Timestamp createTime;
 
     @Column(commit = "更新者编号")
     private Long updateUser;
 
-    @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
+    @Column(commit = "更新时间戳")
     private Timestamp updateTime;
 
     @Column(commit = "有效性")
     private String isValid;
 
     private static final long serialVersionUID = 1L;
-
-    public SubjectInfosVO copySubjectInfosVO() {
-        return null;
-    }
 }

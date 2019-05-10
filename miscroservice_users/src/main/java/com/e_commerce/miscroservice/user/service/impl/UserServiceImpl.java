@@ -4269,12 +4269,8 @@ public class UserServiceImpl extends BaseService implements UserService {
             voucher.setType(GZVoucherEnum.TYPE_ALLPOWERFUL.toCode()); //通用
             voucher.setPrice(price);
             //creater & updater
-            voucher.setCreateTime(currentTimeMillis);
             voucher.setCreateUser(user.getId());
-            voucher.setCreateUserName(user.getName());
-            voucher.setUpdateTime(currentTimeMillis);
             voucher.setUpdateUser(user.getId());
-            voucher.setUpdateUserName(user.getName());
             TGzVoucher voucherCopy = BeanUtil.copy(voucher, TGzVoucher.class);
             voucherCopy.setUserId(inviter.getId()); //分发给邀请人
             gzproductOrderService.insertVoucher(voucher, voucherCopy);

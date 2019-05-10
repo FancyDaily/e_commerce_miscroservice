@@ -95,7 +95,6 @@ public class GZLessonServiceImpl implements GZLessonService {
         Integer avaliableStatus = subject.getAvaliableStatus();
         if(Objects.isNull(avaliableStatus) || Objects.equals(GZSubjectEnum.AVAILABLE_STATUS_FALSE.getCode(),avaliableStatus)) {
             subject.setAvaliableStatus(GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
-            subject.setUpdateTime(currentTimeMillis);
             gzSubjectDao.updateByPrimaryKey(subject);
         }
 
@@ -109,9 +108,7 @@ public class GZLessonServiceImpl implements GZLessonService {
             userLesson.setLessonId(lessonId);
             userLesson.setSubjectId(subjectId);
             userLesson.setUserId(userId);
-            userLesson.setCreateTime(currentTimeMillis);
             userLesson.setCreateUser(userId);
-            userLesson.setUpdateTime(currentTimeMillis);
             userLesson.setUpdateUser(userId);
             userLesson.setIsValid(AppConstant.IS_VALID_YES);
             toInserter.add(userLesson);

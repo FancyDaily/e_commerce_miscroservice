@@ -60,18 +60,13 @@ public class GZSubjectServiceImpl implements GZSubjectService {
             throw new MessageException("该课程您已经评价过!");
         }
 
-        long currentTimeMillis = System.currentTimeMillis();
         TGzEvaluate gzEvaluate = new TGzEvaluate();
         gzEvaluate.setLessonId(lessonId);
         gzEvaluate.setSubjectId(subjectId);
         gzEvaluate.setLevel(level == null? 2:level);
         gzEvaluate.setComment(evaluate.getComment());
-        gzEvaluate.setCreateTime(currentTimeMillis);
         gzEvaluate.setCreateUser(user.getId());
-        gzEvaluate.setCreateUserName(user.getName());
-        gzEvaluate.setUpdateTime(currentTimeMillis);
         gzEvaluate.setUpdateUser(user.getId());
-        gzEvaluate.setUpdateUserName(user.getName());
         gzEvaluate.setIsValid(AppConstant.IS_VALID_YES);
         gzEvaluateDao.insert(gzEvaluate);
     }
@@ -91,7 +86,6 @@ public class GZSubjectServiceImpl implements GZSubjectService {
             //课程生效
             gzUserSubject.setStatus(GZUserSubjectEnum.STATUS_LEARNING.toCode());
             gzUserSubject.setExpireTime(currentTimeMillis + DateUtil.interval * period);
-            gzUserSubject.setUpdateTime(currentTimeMillis);
             updaters.add(gzUserSubject);
         }
         gzUserSubjectDao.batchUpdate(updaters,userSubjectIds);
