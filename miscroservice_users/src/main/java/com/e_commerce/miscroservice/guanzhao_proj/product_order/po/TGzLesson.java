@@ -3,9 +3,12 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Table(commit = "观照-章节表")
 @Data
@@ -15,10 +18,13 @@ public class TGzLesson implements Serializable {
 
     private Long subjectId;
 
+    @Column(commit = "章节序号", length = 11)
+    private Integer lessonIndex;
+
     @Column(commit = "章节名称")
     private String name;
 
-    @Column(commit = "可用状态")
+    @Column(commit = "可用状态", length = 11)
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")
@@ -30,26 +36,24 @@ public class TGzLesson implements Serializable {
     @Column(commit = "扩展字段")
     private String extend;
 
-    @Column(commit = "创建者编号")
+    @Column(commit = "创建者编号", isNUll = false)
     private Long createUser;
 
-    @Column(commit = "创建者姓名")
-    private String createUserName;
+    @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
+    private Timestamp createTime;
 
-    @Column(commit = "创建时间戳")
-    private Long createTime;
-
-    @Column(commit = "更新者编号")
+    @Column(commit = "更新者编号", isNUll = false)
     private Long updateUser;
 
-    @Column(commit = "更新者姓名")
-    private String updateUserName;
+    @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
+    private Timestamp updateTime;
 
-    @Column(commit = "更新时间戳")
-    private Long updateTime;
-
-    @Column(commit = "有效性")
+    @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
     private static final long serialVersionUID = 1L;
+
+    public MyLessonVO copyMyLessonVO() {
+        return null;
+    }
 }

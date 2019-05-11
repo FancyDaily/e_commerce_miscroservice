@@ -19,7 +19,7 @@ public class TGzSubject implements Serializable {
     @Column(commit = "课程")
     private String name;
 
-    @Column(commit = "周期(天数时长)")
+    @Column(commit = "周期(天数时长)", length = 11)
     private Integer period;
 
     @Column(commit = "课程封面图")
@@ -31,16 +31,16 @@ public class TGzSubject implements Serializable {
     @Column(commit = "优惠价", precision = 2)
     private Double forSalePrice;
 
-    @Column(commit = "优惠状态")
+    @Column(commit = "优惠状态", length = 11)
     private Integer forSaleStatus;
 
-    @Column(commit = "优惠剩余个数")
+    @Column(commit = "优惠剩余个数", length = 11)
     private Integer forSaleSurplusNum;
 
-    @Column(commit = "课程期次")
+    @Column(commit = "课程期次", length = 11)
     private Integer seriesIndex;
 
-    @Column(commit = "可用状态")
+    @Column(commit = "可用状态", length = 11)
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")
@@ -48,6 +48,12 @@ public class TGzSubject implements Serializable {
 
     @Column(commit = "可用时间")
     private String availableTime;
+
+    @Column(commit = "结束日期(课程结束日期)")
+    private String endDate;
+
+    @Column(commit = "结束时间")
+    private String endTime;
 
     @Column(commit = "描述图片地址", length = 2048)
     private String descPic;
@@ -58,19 +64,19 @@ public class TGzSubject implements Serializable {
     @Column(commit = "扩展字段")
     private String extend;
 
-    @Column(commit = "创建者编号")
+    @Column(commit = "创建者编号", isNUll = false)
     private Long createUser;
 
     @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
     private Timestamp createTime;
 
-    @Column(commit = "更新者编号")
+    @Column(commit = "更新者编号", isNUll = false)
     private Long updateUser;
 
     @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
     private Timestamp updateTime;
 
-    @Column(commit = "有效性")
+    @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
     private static final long serialVersionUID = 1L;

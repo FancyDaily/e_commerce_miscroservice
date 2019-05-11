@@ -19,19 +19,19 @@ public class TGzUserSubject implements Serializable {
 
     private Long subjectId;
 
-    @Column(commit = "状态")
+    @Column(commit = "状态", length = 11)
     private Integer status;
 
-    @Column(commit = "笔记数量")
+    @Column(commit = "笔记数量", length = 11)
     private Integer notesNum;
 
-    @Column(commit = "作业总数")
+    @Column(commit = "作业总数", length = 11)
     private Integer homeworkExpectedNum;
 
-    @Column(commit = "作业完成数")
+    @Column(commit = "作业完成数", length = 11)
     private Integer homeworkDoneNum;
 
-    @Column(commit = "学习进度")
+    @Column(commit = "学习进度", length = 11)
     private Integer completion;
 
     @Column(commit = "失效时间戳")
@@ -40,19 +40,19 @@ public class TGzUserSubject implements Serializable {
     @Column(commit = "扩展字段")
     private String extend;
 
-    @Column(commit = "创建者编号")
+    @Column(commit = "创建者编号", isNUll = false)
     private Long createUser;
 
     @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
     private Timestamp createTime;
 
-    @Column(commit = "更新者编号")
+    @Column(commit = "更新者编号", isNUll = false)
     private Long updateUser;
 
     @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
     private Timestamp updateTime;
 
-    @Column(commit = "有效性")
+    @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
     private static final long serialVersionUID = 1L;

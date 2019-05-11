@@ -2808,6 +2808,7 @@ public class UserController extends BaseController {
      * 发送短信验证码
      *
      * @param telephone 手机号
+     * @param application 应用类型
      *                  <p>
      *                  {
      *                  "success": true,
@@ -2818,10 +2819,10 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping({"generateSMS","generateSMS/" + TokenUtil.AUTH_SUFFIX})
-    public Object generateSMS(String telephone) {
+    public Object generateSMS(String telephone, Integer application) {
         AjaxResult result = new AjaxResult();
         try {
-            if (userService.genrateSMSCode(telephone).isSuccess()) { // 生成并发送成功
+            if (userService.genrateSMSCode(telephone, application).isSuccess()) { // 生成并发送成功
                 result.setSuccess(true);
             } else {
                 result.setSuccess(false);

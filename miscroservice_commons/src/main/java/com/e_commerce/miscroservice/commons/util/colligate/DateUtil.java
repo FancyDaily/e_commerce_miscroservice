@@ -100,6 +100,25 @@ public class DateUtil {
 		return res;
 	}
 
+	 /*
+	  * 将精确到分钟的时间转换为时间戳
+	  */
+
+	 public static String dateTimeToStamp(String s) {
+		 String res;
+		 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmm");
+		 Date date = null;
+		 try {
+			 date = simpleDateFormat.parse(s);
+		 } catch (ParseException e) {
+			 e.printStackTrace();
+		 }
+		 long ts = date.getTime();
+		 res = String.valueOf(ts);
+		 return res;
+	 }
+
+
 /*
 	 * 功能描述: 将年月字符串转换成时间戳区间 
 	 * 作者: 许方毅

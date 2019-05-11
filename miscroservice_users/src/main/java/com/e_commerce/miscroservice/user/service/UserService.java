@@ -236,9 +236,10 @@ public interface UserService {
     /**
      * 发送短信
      * @param telephone
+     * @param applicaiton
      * @return
      */
-    AjaxResult genrateSMSCode(String telephone);
+    AjaxResult genrateSMSCode(String telephone, Integer applicaiton);
 
     /**
      * 发送指定内容的短信

@@ -1,9 +1,10 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 
 import java.util.List;
 
@@ -12,15 +13,17 @@ public interface GZSubjectService {
     /**
      * 在售商品列表
      * @return
+     * @param pageNum
+     * @param pageSize
      */
-    List<TGzSubject> subjectList();
+    QueryResult subjectList(Integer pageNum, Integer pageSize);
 
     /**
      * 商品详情
      * @param subjectId
      * @return
      */
-    TGzSubject subjectDetail(Long subjectId);
+    SubjectInfosVO subjectDetail(Long subjectId);
 
     /**
      * 章节列表

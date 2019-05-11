@@ -1,9 +1,11 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @Author: FangyiXu
@@ -48,6 +50,8 @@ public class SubjectInfosVO {
 
     @Column(commit = "描述图片地址数组", length = 2048)
     private String[] descPicArray;
+
+    private List<TGzLesson> lessonList;
 
     @Column(commit = "描述图片地址", length = 2048)
     private String descPic;
