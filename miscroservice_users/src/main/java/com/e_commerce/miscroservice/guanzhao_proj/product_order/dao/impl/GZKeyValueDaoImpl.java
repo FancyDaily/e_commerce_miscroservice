@@ -22,7 +22,7 @@ public class GZKeyValueDaoImpl implements GZKeyValueDao {
     public TGzKeyValue selectByTypeAndValue(Integer toCode, String sign) {
         return MybatisOperaterUtil.getInstance().findOne(new TGzKeyValue(), new MybatisSqlWhereBuild(TGzKeyValue.class)
         .eq(TGzKeyValue::getType, toCode)
-        .eq(TGzKeyValue::getValue, sign)
+        .eq(TGzKeyValue::getGzvalue, sign)
         .eq(TGzKeyValue::getIsValid, AppConstant.IS_VALID_YES));
     }
 }

@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.vo;
 import lombok.Data;
 
 /**
- * 功能描述:key-value 权益view
+ * 功能描述:gzkey-gzvalue 权益view
  * 模块:
  * 项目:
  * 版本号:

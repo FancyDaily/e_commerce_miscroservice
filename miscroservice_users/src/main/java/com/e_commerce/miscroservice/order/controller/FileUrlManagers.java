@@ -45,6 +45,8 @@ public class FileUrlManagers {
 
         } catch (QiniuException e) {
 
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return pushSuccessFlag;
     }
@@ -246,7 +248,7 @@ public class FileUrlManagers {
     private class Upload {
 
 
-        private final String FILE_TOTAL_PATH = "/Users/ness/Downloads/";
+        private final String FILE_TOTAL_PATH = "/Users/xufangyi/Downloads/";
         private final String accessKey = "OJ5ePYgOmXHSdi7Wb8cebmB0OwDUDlGzeTeWORdH";
         private final String secretKey = "ldPnyGLV5NeIwtzVLPTX-W-BXut7vMKtVXLglLao";
         private final String bucket = "ness";

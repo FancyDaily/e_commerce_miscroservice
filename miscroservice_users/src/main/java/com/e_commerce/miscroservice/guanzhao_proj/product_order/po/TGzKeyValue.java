@@ -23,10 +23,10 @@ public class TGzKeyValue {
     private Integer type;
 
     @Column(commit = "键")
-    private String key;
+    private String gzkey;
 
     @Column(commit = "值")
-    private String value;
+    private String gzvalue;
 
     @Column(commit = "扩展字段")
     private String extend;

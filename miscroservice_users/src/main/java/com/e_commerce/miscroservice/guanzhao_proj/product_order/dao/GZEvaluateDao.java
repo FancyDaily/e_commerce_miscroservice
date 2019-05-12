@@ -13,4 +13,6 @@ public interface GZEvaluateDao {
     int insert(TGzEvaluate gzEvaluate);
 
     List<TGzEvaluate> selectByUserIdAndLessonId(Long userId, Long lessonId);
+
+    List<TGzEvaluate> selectByLessonId(Long lessonId);
 }

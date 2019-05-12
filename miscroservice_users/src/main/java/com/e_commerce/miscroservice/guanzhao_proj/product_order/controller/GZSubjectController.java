@@ -350,6 +350,56 @@ public class GZSubjectController {
     }
 
     /**
+     * 课程评价列表
+     * @param subjectId 课程编号
+     * @param lessonId 章节编号
+     * {
+     *         "resultList": [
+     *             {
+     *                 "id": 2,
+     *                 "userId": 42,
+     *                 "lessonId": 1,
+     *                 "subjectId": 1,
+     *                 "level": 0,
+     *                 "comment": "张三这个人真的无解",
+     *                 "extend": "",
+     *                 "createUser": 42,
+     *                 "createTime": 1557566044000,
+     *                 "updateUser": 42,
+     *                 "updateTime": 1557566044000,
+     *                 "isValid": "1"
+     *             }
+     *         ],
+     *         "totalCount": 1
+     *     }
+     *
+     * @return
+     */
+    @RequestMapping("lesson/evaluate/list/" + TokenUtil.AUTH_SUFFIX)
+    public Object subjectLessonEvaluateList(@RequestParam(required = true) Long subjectId, @RequestParam(required = true) Long lessonId, Integer pageNum, Integer pageSize) {
+        TUser user = UserUtil.getUser();
+        if (user == null) {
+            user = new TUser();
+            user.setId(42l);
+        }
+        AjaxResult result = new AjaxResult();
+        try {
+            QueryResult<TGzEvaluate> queryResult = gzLessonService.lessonEvaluateList(subjectId, lessonId, pageNum, pageSize);
+            result.setData(queryResult);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("====方法描述: {}, Message: {}====", "视频进度更新", e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("视频进度更新", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
      * 视频进度更新
      *
      * @param completion 视频进度

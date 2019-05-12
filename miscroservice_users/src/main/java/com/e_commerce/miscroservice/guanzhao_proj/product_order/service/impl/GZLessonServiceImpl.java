@@ -43,6 +43,9 @@ public class GZLessonServiceImpl implements GZLessonService {
     private GZKeyValueDao keyValueDao;
 
     @Autowired
+    private GZEvaluateDao gzEvaluateDao;
+
+    @Autowired
     @Lazy
     MqTemplate mqTemplate;
 
@@ -55,6 +58,9 @@ public class GZLessonServiceImpl implements GZLessonService {
     public void unlockLesson(Long subjectId, String fileName) {
         long currentTimeMillis = System.currentTimeMillis();
         //校验
+        if(fileName.contains(".")) {
+            fileName = fileName.substring(0, fileName.lastIndexOf("."));
+        }
         TGzLesson tGzLesson = gzLessonDao.selectBySubjectIdAndName(subjectId, fileName);
         if (Objects.isNull(tGzLesson)) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程下没有该章节！请确认您的文件名称!");
@@ -109,13 +115,13 @@ public class GZLessonServiceImpl implements GZLessonService {
             userLesson.setIsValid(AppConstant.IS_VALID_YES);
             toInserter.add(userLesson);
 
-            //生成sign，插入key-value
+            //生成sign，插入key-gzvalue
             String sourceStr = userId.toString() + lessonId.toString() + subjectId.toString();
             String sign = Md5Util.md5(sourceStr);
             TGzKeyValue keyValue = new TGzKeyValue();
             keyValue.setType(KeyValueEnum.TYPE_SIGN.toCode());
-            keyValue.setKey(userId.toString());
-            keyValue.setValue(sign);
+            keyValue.setGzkey(userId.toString());
+            keyValue.setGzvalue(sign);
             keyValueDao.insert(keyValue);
         }
 
@@ -143,8 +149,8 @@ public class GZLessonServiceImpl implements GZLessonService {
     }
 
     @Override
-    public void authCheck(String sign, Long userId, String name, Long productId, Long lessonId) {
-        String sourceStr = userId + lessonId + productId + "";
+    public void authCheck(String sign, Long userId, String name, Long subjectId, Long lessonId) {
+        String sourceStr = userId + "" + lessonId + "" + subjectId;
         String expectedSign = Md5Util.md5(sourceStr);
         //校验sign
         if (!Objects.equals(expectedSign, sign)) {
@@ -152,7 +158,7 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
         //校验user
         TGzKeyValue keyValue = keyValueDao.selectByTypeAndValue(KeyValueEnum.TYPE_SIGN.toCode(), sign);
-        if (!Objects.equals(userId + "", keyValue.getKey())) {
+        if (!Objects.equals(userId + "", keyValue.getGzkey())) {
             throw new MessageException("对不起, 您没有权限观看!");
         }
 
@@ -263,4 +269,18 @@ public class GZLessonServiceImpl implements GZLessonService {
         tGzUserSubject.setCompletion(subjectCompletion);
         gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
     }
+
+    @Override
+    public QueryResult<TGzEvaluate> lessonEvaluateList(Long subjectId, Long lessonId, Integer pageNum, Integer pageSize) {
+        pageNum = pageNum==null?1:pageNum;
+        pageSize = pageSize==null?0:pageSize;
+
+        Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+        List<TGzEvaluate> gzEvaluates = gzEvaluateDao.selectByLessonId(lessonId);
+        QueryResult queryResult = new QueryResult();
+        queryResult.setTotalCount(startPage.getTotal());
+        queryResult.setResultList(gzEvaluates);
+        return queryResult;
+    }
+
 }

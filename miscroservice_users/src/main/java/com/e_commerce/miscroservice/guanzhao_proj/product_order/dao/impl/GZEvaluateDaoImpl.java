@@ -28,4 +28,11 @@ public class GZEvaluateDaoImpl implements GZEvaluateDao {
         .eq(TGzEvaluate::getLessonId, lessonId)
         .eq(TGzEvaluate::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public List<TGzEvaluate> selectByLessonId(Long lessonId) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGzEvaluate(), new MybatisSqlWhereBuild(TGzEvaluate.class)
+        .eq(TGzEvaluate::getLessonId, lessonId)
+        .eq(TGzEvaluate::getIsValid, AppConstant.IS_VALID_YES));
+    }
 }

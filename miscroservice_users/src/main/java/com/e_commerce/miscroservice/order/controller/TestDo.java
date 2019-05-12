@@ -62,8 +62,8 @@ public class TestDo {
      * @param fileName 文件名称
      * @return
      */
-    @GetMapping("play" + TokenUtil.AUTH_SUFFIX)
-    public String play(String fileName, String sign, Long productId, Long lessonId) {
+    @GetMapping("play/" + TokenUtil.AUTH_SUFFIX)
+    public String play(String fileName, String sign, Long subjectId, Long lessonId) {
         TUser user = UserUtil.getUser();
         user = new TUser();
         user.setId(42l);
@@ -78,7 +78,7 @@ public class TestDo {
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
         // TODO
-        gzLessonService.authCheck(sign, user.getId(), fileName, productId, lessonId);
+        gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
 
         request.setAttribute(fileName, Md5Util.md5(fileName));
         return "forward:/doPlay";
