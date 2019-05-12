@@ -5,6 +5,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 
 import java.util.List;
 
@@ -44,4 +46,13 @@ public interface GZSubjectService {
      * @param subjectId
      */
     void unlockSubject(Long subjectId);
+
+    /**
+     * 查询我的正在学习
+     * @param id
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize);
 }

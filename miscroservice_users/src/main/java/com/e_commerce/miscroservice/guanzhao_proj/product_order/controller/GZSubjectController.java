@@ -7,12 +7,16 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -391,4 +395,37 @@ public class GZSubjectController {
         return null;
     }
 
+
+    /**
+     * 正在学习课程列表
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping("subject/learning/list")
+    public Object findMyLearningSubject(Integer pageNum,Integer pageSize){
+        AjaxResult result = new AjaxResult();
+        if (pageNum==null||pageSize==null){
+            result.setSuccess(false);
+            result.setMsg("参数为空");
+            return result;
+        }
+        try {
+            Integer id = IdUtil.getId();
+            QueryResult<MyLearningSubjectVO> list = gzSubjectService.findMyLearningSubject(id,pageNum,pageSize);
+            result.setSuccess(true);
+            result.setData(list);
+        }catch (MessageException e){
+            log.warn("正在学习课程列表 e={}",e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("正在学习课程列表={}",e);
+            result.setSuccess(false);
+        }
+        return result;
+
+
+    }
 }

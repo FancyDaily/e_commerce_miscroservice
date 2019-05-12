@@ -5,6 +5,8 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOper
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZSubjectDao;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,5 +35,11 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
         return MybatisOperaterUtil.getInstance().update(subject, new MybatisSqlWhereBuild(TGzSubject.class)
         .eq(TGzSubject::getId, subject.getId())
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<MyLearningSubjectVO> findMyLearningSubject(Integer id) {
+        return MybatisOperaterUtil.getInstance().finAll(new MyLearningSubjectVO(),new MybatisSqlWhereBuild(TGzUserSubject.class)
+                .eq(TGzUserSubject::getUserId,id));
     }
 }
