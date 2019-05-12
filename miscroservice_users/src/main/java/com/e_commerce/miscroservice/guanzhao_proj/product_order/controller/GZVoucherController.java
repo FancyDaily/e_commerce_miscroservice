@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 观照律师训练营
- * 代金券模块
+ * 观照代金券模块
  *
  */
 @RestController

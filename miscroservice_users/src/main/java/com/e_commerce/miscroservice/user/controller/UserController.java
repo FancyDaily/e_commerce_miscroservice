@@ -3538,9 +3538,10 @@ public class UserController extends BaseController {
      */
     @Consume(TUser.class)
     @RequestMapping("rigester/gz")
-    public Object rigesterGZ(String userTel, String password, String validCode, String inviteCode) {
+    public Object rigesterGZ(String userTel, String password, String validCode, String inviteCode, @RequestParam(required = true) String uuid) {
         AjaxResult result = new AjaxResult();
         TUser user = (TUser) ConsumeHelper.getObj();
+        user.setDeviceId(uuid);
         try {
             userService.registerGZ(user, validCode);
             result.setSuccess(true);

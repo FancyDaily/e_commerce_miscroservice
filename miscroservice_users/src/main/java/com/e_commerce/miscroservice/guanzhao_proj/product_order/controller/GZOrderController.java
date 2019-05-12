@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 观照律师训练营
- * 订单模块
+ * 观照订单模块
  *
  */
 @RestController

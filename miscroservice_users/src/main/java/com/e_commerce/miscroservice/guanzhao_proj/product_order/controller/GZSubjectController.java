@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 观照律师训练营
- * 商品模块
+ * 观照商品模块
+ *
  */
 @RestController
 @RequestMapping("gz/api/v1/subject")
