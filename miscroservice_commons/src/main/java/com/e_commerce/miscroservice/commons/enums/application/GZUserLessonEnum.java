@@ -6,6 +6,10 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum GZUserLessonEnum {
 
+    VEDIO_COMPLETION_STATUS_DONE_NO(0, "视频学习未完成"),
+    VEDIO_COMPLETION_STATUS_DONE_YES(1,"视频学习完成"),
+    LESSON_COMPLETION_STATUS_DONE_NO(0, "章节学习未完成"),
+    LESSON_COMPLETION_STATUS_DONE_YES(1,"视频学习完成"),
     STATUS_UNAVAILABLE(0,"不可用"),
     STATUS_AVAILABLE(1,"可用"),
     LESSON_COMPLETION_STATUS_NO(0, "未完成"),

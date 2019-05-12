@@ -38,9 +38,9 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
     }
 
     @Override
-    public List<TGzUserSubject> selectByPrimaryKey(Long subjectId) {
+    public List<TGzUserSubject> selectByPrimaryKey(Long id) {
         return MybatisOperaterUtil.getInstance().finAll(new TGzUserSubject(), new MybatisSqlWhereBuild(TGzUserSubject.class)
-        .eq(TGzUserSubject::getSubjectId, subjectId)
+        .eq(TGzUserSubject::getId, id)
         .eq(TGzUserSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
 

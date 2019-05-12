@@ -1,22 +1,19 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
-import com.e_commerce.miscroservice.commons.enums.application.GZLessonEnum;
-import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
-import com.e_commerce.miscroservice.commons.enums.application.KeyValueEnum;
-import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
-import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
-import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -59,7 +56,7 @@ public class GZLessonServiceImpl implements GZLessonService {
         long currentTimeMillis = System.currentTimeMillis();
         //校验
         TGzLesson tGzLesson = gzLessonDao.selectBySubjectIdAndName(subjectId, fileName);
-        if(Objects.isNull(tGzLesson)) {
+        if (Objects.isNull(tGzLesson)) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程下没有该章节！请确认您的文件名称!");
         }
 
@@ -80,20 +77,19 @@ public class GZLessonServiceImpl implements GZLessonService {
 */
 
         Integer lessonAvailableStatus = tGzLesson.getAvaliableStatus();
-        if(Objects.isNull(lessonAvailableStatus) || Objects.equals(GZLessonEnum.AVAILABLE_STATUS_NO.getCode(),lessonAvailableStatus)) {
+        if (Objects.isNull(lessonAvailableStatus) || Objects.equals(GZLessonEnum.AVAILABLE_STATUS_NO.getCode(), lessonAvailableStatus)) {
             tGzLesson.setAvaliableStatus(GZLessonEnum.AVAILABLE_STATUS_YES.getCode());
-            tGzLesson.setUpdateTime(currentTimeMillis);
             gzLessonDao.updateByPrimaryKey(tGzLesson);
         }
 
         //如果对应subject没有解锁，则解锁
         TGzSubject subject = gzSubjectDao.selectByPrimaryKey(subjectId);
-        if(Objects.isNull(subject)) {
+        if (Objects.isNull(subject)) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "找不到该课程！请确认课程编号");
         }
 
         Integer avaliableStatus = subject.getAvaliableStatus();
-        if(Objects.isNull(avaliableStatus) || Objects.equals(GZSubjectEnum.AVAILABLE_STATUS_FALSE.getCode(),avaliableStatus)) {
+        if (Objects.isNull(avaliableStatus) || Objects.equals(GZSubjectEnum.AVAILABLE_STATUS_FALSE.getCode(), avaliableStatus)) {
             subject.setAvaliableStatus(GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
             gzSubjectDao.updateByPrimaryKey(subject);
         }
@@ -101,7 +97,7 @@ public class GZLessonServiceImpl implements GZLessonService {
         //找到所有购买此课程的用户
         List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectBySubjectId(subjectId);
         List<TGzUserLesson> toInserter = new ArrayList<>();
-        for(TGzUserSubject tGzUserSubject:tGzUserSubjects) {
+        for (TGzUserSubject tGzUserSubject : tGzUserSubjects) {
             //创建user-lesson关系
             Long userId = tGzUserSubject.getUserId();
             TGzUserLesson userLesson = new TGzUserLesson();
@@ -151,12 +147,12 @@ public class GZLessonServiceImpl implements GZLessonService {
         String sourceStr = userId + lessonId + productId + "";
         String expectedSign = Md5Util.md5(sourceStr);
         //校验sign
-        if(!Objects.equals(expectedSign, sign)) {
+        if (!Objects.equals(expectedSign, sign)) {
             throw new MessageException("对不起，你没有权限观看!");
         }
         //校验user
         TGzKeyValue keyValue = keyValueDao.selectByTypeAndValue(KeyValueEnum.TYPE_SIGN.toCode(), sign);
-        if(!Objects.equals(userId + "", keyValue.getKey())) {
+        if (!Objects.equals(userId + "", keyValue.getKey())) {
             throw new MessageException("对不起, 您没有权限观看!");
         }
 
@@ -165,5 +161,106 @@ public class GZLessonServiceImpl implements GZLessonService {
     @Override
     public void sendUnlockTask(Long subjectId, String fileName) {
         unlockLesson(subjectId, fileName);
+    }
+
+    @Override
+    public QueryResult mySubjectLessonList(Long userId, Long subjectId, Integer pageNum, Integer pageSize) {
+        //校验开课
+        TGzSubject gzSubject = gzSubjectDao.selectByPrimaryKey(subjectId);
+
+        Integer avaliableStatus = gzSubject.getAvaliableStatus();
+        String dateTime = gzSubject.getAvailableDate() + gzSubject.getAvailableTime();
+        Long expectedStamp = Long.valueOf(DateUtil.dateTimeToStamp(dateTime));
+        long currentTimeMillis = System.currentTimeMillis();
+        boolean statusAvailableFlag = !Objects.equals(avaliableStatus, GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
+        boolean timeAvailableFlag = currentTimeMillis > expectedStamp;
+        if (timeAvailableFlag && !statusAvailableFlag) {    //如果到时间、状态错误，修正（仅修正课程状态）
+            gzSubject.setAvaliableStatus(GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
+            gzSubjectDao.updateByPrimaryKey(gzSubject);
+        }
+        //我的课程记录
+        TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
+        if (Objects.isNull(tGzUserSubject) || Objects.equals(tGzUserSubject.getStatus(), GZUserSubjectEnum.STATUS_EXPIRED)) {    //TODO 失效是否可以看
+            throw new MessageException("对不起, 您没有权限查看该课程");
+        }
+
+        //匹配查找我的章节状态
+        List<MyLessonVO> myLessonVOS = new ArrayList<>();
+        Page<Object> startPage = PageHelper.startPage(pageNum==null?1:pageNum, pageSize==null?0:pageSize);
+        List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
+
+        List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
+        Map<Long, Object> lessonIdAvailableStatusMap = new HashMap<>();
+        for (TGzUserLesson gzUserLesson : gzUserLessonList) {
+            Integer status = gzUserLesson.getStatus();
+            if (Objects.equals(status, GZUserLessonEnum.STATUS_AVAILABLE.getCode())) {
+                lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
+            }
+        }
+
+        for (TGzLesson tGzLesson : tGzLessons) {
+            MyLessonVO myLessonVO = tGzLesson.copyMyLessonVO();
+            Object existObject = lessonIdAvailableStatusMap.get(tGzLesson.getId());
+            Integer status = GZUserLessonEnum.STATUS_AVAILABLE.getCode();
+            Integer videoCompletion = 0;
+            Integer lessonCompletionStatus = GZUserLessonEnum.LESSON_COMPLETION_STATUS_NO.getCode();
+            if(existObject!=null) {
+                TGzUserLesson userLesson = (TGzUserLesson) existObject;
+                videoCompletion = userLesson.getVideoCompletion();
+                lessonCompletionStatus = userLesson.getLessonCompletionStatus();
+                status = GZUserLessonEnum.STATUS_UNAVAILABLE.getCode();
+            }
+            myLessonVO.setLessonIndex(tGzLesson.getLessonIndex());
+            myLessonVO.setAvaliableStatus(tGzLesson.getAvaliableStatus());
+            myLessonVO.setAvailableDate(tGzLesson.getAvailableDate());
+            myLessonVO.setAvailableTime(tGzLesson.getAvailableTime());
+            myLessonVO.setVideoCompletion(videoCompletion);
+            myLessonVO.setLessonCompletionStatus(lessonCompletionStatus);
+            myLessonVO.setLessonId(tGzLesson.getId());
+            myLessonVO.setStatus(status);
+            myLessonVO.setUserId(userId);
+            myLessonVOS.add(myLessonVO);
+        }
+
+        QueryResult result = new QueryResult();
+        result.setTotalCount(startPage.getTotal());
+        result.setResultList(myLessonVOS);
+
+        return result;
+    }
+
+    @Override
+    public void updateVideoCompletion(Long userId, Long lessonId, Integer completion) {
+        //校验
+        completion = completion > 100? 100:completion;
+        //更新
+        TGzUserLesson tGzUserLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
+        if(tGzUserLesson==null) {
+            return;
+        }
+        Integer comletionStatus = tGzUserLesson.getLessonCompletionStatus();
+        int expectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+        comletionStatus = Objects.equals(comletionStatus,GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode())? comletionStatus:expectedCompletionStatus;
+        tGzUserLesson.setVideoCompletion(completion);
+        tGzUserLesson.setVideoCompletionStatus(comletionStatus);
+        tGzUserLesson.setLessonCompletionStatus(comletionStatus);
+        gzUserLessonDao.update(tGzUserLesson);
+        //统计章节进度，更新课程学习进度
+        Long subjectId = tGzUserLesson.getSubjectId();
+        Integer completeCnt = 0;
+        Integer totalCnt = 0;
+        List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
+        totalCnt = tGzLessons.size();
+        List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
+        for(TGzUserLesson gzUserLesson:gzUserLessonList) {
+            if(Objects.equals(gzUserLesson.getLessonCompletionStatus(), GZUserLessonEnum.LESSON_COMPLETION_STATUS_DONE_YES.getCode())) {
+                completeCnt++;
+            }
+        }
+        Integer subjectCompletion = (totalCnt==0? 0:completeCnt/totalCnt) * 100;
+
+        TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
+        tGzUserSubject.setCompletion(subjectCompletion);
+        gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
     }
 }

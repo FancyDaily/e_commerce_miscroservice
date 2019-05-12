@@ -22,7 +22,7 @@ public class TGzVoucher implements Serializable {
     @Column(commit = "代金券金额")
     private Double price;
 
-    @Column(commit = "满减下限")
+    @Column(commit = "满减下限", length = 11)
     private Integer reductionLimit;
 
     @Column(commit = "有效时长(时间戳)")
@@ -31,28 +31,28 @@ public class TGzVoucher implements Serializable {
     @Column(commit = "激活时间点(时间戳)")
     private Long activationTime;
 
-    @Column(commit = "可用状态(未激活、可用、已使用、已过期 etc.)")
+    @Column(commit = "可用状态(未激活、可用、已使用、已过期 etc.)", length = 11)
     private Integer availableStatus;
 
-    @Column(commit = "类型(通用、特定类型)")
+    @Column(commit = "类型(通用、特定类型)", length = 11)
     private Integer type;
 
     @Column(commit = "扩展字段")
     private String extend;
 
-    @Column(commit = "创建者编号")
+    @Column(commit = "创建者编号", isNUll = false)
     private Long createUser;
 
     @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
     private Timestamp createTime;
 
-    @Column(commit = "更新者编号")
+    @Column(commit = "更新者编号", isNUll = false)
     private Long updateUser;
 
     @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
     private Timestamp updateTime;
 
-    @Column(commit = "有效性")
+    @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
     private static final long serialVersionUID = 1L;

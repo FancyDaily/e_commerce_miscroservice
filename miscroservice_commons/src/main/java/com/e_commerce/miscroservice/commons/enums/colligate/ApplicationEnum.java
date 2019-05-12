@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.commons.enums.colligate;
 
 public enum ApplicationEnum {
 
-    XIAOSHI_APPLICATION(1,"晓时互助小程序"),
+    XIAOSHI_APPLICATION(1,"晓时互助"),
     GUANZHAO_APPLICATION(2,"观照律师训练营");
 
     int code;

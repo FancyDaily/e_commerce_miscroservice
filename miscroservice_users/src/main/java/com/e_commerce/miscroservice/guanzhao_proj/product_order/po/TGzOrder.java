@@ -22,7 +22,7 @@ public class TGzOrder implements Serializable {
     @Column(commit = "课程名称")
     private Long subjectName;
 
-    @Column(commit = "订单状态")
+    @Column(commit = "订单状态", length = 11)
     private Integer status;
 
     @Column(commit = "订单价格")
@@ -34,19 +34,19 @@ public class TGzOrder implements Serializable {
     @Column(commit = "扩展字段")
     private String extend;
 
-    @Column(commit = "创建者编号")
+    @Column(commit = "创建者编号", isNUll = false)
     private Long createUser;
 
     @Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
     private Timestamp createTime;
 
-    @Column(commit = "更新者编号")
+    @Column(commit = "更新者编号", isNUll = false)
     private Long updateUser;
 
     @Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
     private Timestamp updateTime;
 
-    @Column(commit = "有效性")
+    @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
     private static final long serialVersionUID = 1L;

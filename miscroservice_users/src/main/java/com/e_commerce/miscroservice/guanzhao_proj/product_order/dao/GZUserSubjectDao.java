@@ -12,7 +12,7 @@ public interface GZUserSubjectDao {
 
     int updateByPrimaryKey(TGzUserSubject tGzUserSubject);
 
-    List<TGzUserSubject> selectByPrimaryKey(Long subjectId);
+    List<TGzUserSubject> selectByPrimaryKey(Long id);
 
     int batchUpdate(List<TGzUserSubject> updaters, List<Long> userSubjectIds);
 

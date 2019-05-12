@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.service.apiImpl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.HttpAPIService;
 import com.e_commerce.miscroservice.commons.util.colligate.MD5;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -55,16 +57,24 @@ public class SendSmsService implements APIService {
 	private String smsTemplate;
 	
 	public String execute(Map<String, Object> params) {
+		return execute(params, ApplicationEnum.XIAOSHI_APPLICATION);
+	}
+
+	public String execute(Map<String, Object> params, ApplicationEnum applicationEnum) {
 		String tkey = TextFormater.format(Calendar.getInstance().getTime(), "yyyyMMddHHmmss");
 		String password = MD5.crypt(MD5.crypt(passwd) + tkey );
 		params.put("username",userName);
 		params.put("password", password);
 		params.put("tkey",tkey);
 		String template = StringUtil.decodeStr2Unicode(smsTemplate);
+		if(Objects.equals(applicationEnum.toCode(), ApplicationEnum.GUANZHAO_APPLICATION.toCode())) {
+			template = template.replace(ApplicationEnum.XIAOSHI_APPLICATION.getDesc(), applicationEnum.getDesc());
+		}
 		params.put("content", String.format(template,params.get(AppConstant.VALID_CODE)));
 		return sendSms(params);
-		
+
 	}
+
 
 	public String sendServMsg(Map<String, Object> params) {
 		String tkey = TextFormater.format(Calendar.getInstance().getTime(), "yyyyMMddHHmmss");

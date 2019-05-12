@@ -21,9 +21,11 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
     @Override
     public TGzSubject selectByPrimaryKey(Long subjectId) {
-        return MybatisOperaterUtil.getInstance().findOne(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        MybatisOperaterUtil instance = MybatisOperaterUtil.getInstance();
+        TGzSubject one = instance.findOne(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
                 .eq(TGzSubject::getId, subjectId)
                 .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
+        return one;
     }
 
     @Override

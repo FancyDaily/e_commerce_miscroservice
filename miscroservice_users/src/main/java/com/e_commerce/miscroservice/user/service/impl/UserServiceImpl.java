@@ -1982,12 +1982,21 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 发送短信
      *
      * @param telephone
+     * @param applicaiton
      * @return
      */
     @Override
-    public AjaxResult genrateSMSCode(String telephone) {
+    public AjaxResult genrateSMSCode(String telephone, Integer applicaiton) {
         AjaxResult result = new AjaxResult();
         Long interval = getUserTokenInterval(); // TODO 可以修改时间周期
+
+        ApplicationEnum applicationEnum = ApplicationEnum.XIAOSHI_APPLICATION;
+        for(ApplicationEnum theEnum:ApplicationEnum.values()) {
+            if(Objects.equals(theEnum.toCode(), applicaiton)) {
+                applicationEnum = theEnum;
+                break;
+            }
+        }
 /*
         // 如果存在
         if (redisUtil.hasKey("time" + telephone)) {
@@ -2034,7 +2043,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
             resMsg = "true";
         } else {
-            resMsg = smsService.execute(params);
+            resMsg = smsService.execute(params, applicationEnum);
         }
 
         if (StringUtil.equals("true", resMsg)) {
@@ -4274,10 +4283,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             TGzVoucher voucherCopy = BeanUtil.copy(voucher, TGzVoucher.class);
             voucherCopy.setUserId(inviter.getId()); //分发给邀请人
             gzproductOrderService.insertVoucher(voucher, voucherCopy);
-            //3.生成自己的推荐码update
-            user.setInviteCode(RandomUtil.generateUniqueChars());
-            userDao.updateByPrimaryKey(user);
         }
+        //生成自己的推荐码update
+        user.setInviteCode(RandomUtil.generateUniqueChars());
+        userDao.updateByPrimaryKey(user);
 
     }
 

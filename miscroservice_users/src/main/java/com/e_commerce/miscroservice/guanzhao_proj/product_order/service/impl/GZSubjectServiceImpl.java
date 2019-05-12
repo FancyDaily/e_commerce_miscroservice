@@ -1,13 +1,18 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GZUserSubjectEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +39,30 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     private GZUserLessonDao gzUserLessonDao;
 
     @Override
-    public List<TGzSubject> subjectList() {
+    public QueryResult subjectList(Integer pageNum, Integer pageSize) {
         Integer availableStatus = 1;
-        return gzSubjectDao.selectByAvailableStatus(availableStatus);
+        Page<Object> startPage = PageHelper.startPage(pageNum == null ? 1 : pageNum, pageSize == null ? 0 : pageSize);
+        gzSubjectDao.selectByAvailableStatus(availableStatus);
+
+        QueryResult result = new QueryResult();
+        result.setTotalCount(startPage.getTotal());
+        result.setResultList(startPage.getResult());
+
+        return result;
     }
 
     @Override
-    public TGzSubject subjectDetail(Long subjectId) {
-        return gzSubjectDao.selectByPrimaryKey(subjectId);
+    public SubjectInfosVO subjectDetail(Long subjectId) {
+        TGzSubject subject = gzSubjectDao.selectByPrimaryKey(subjectId);
+        if(subject==null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程不存在");
+        }
+        SubjectInfosVO subjectInfosVO = subject.copySubjectInfosVO();
+        String descPic = subjectInfosVO.getDescPic();
+        subjectInfosVO.setDescPicArray(descPic!=null && descPic.contains(",")? descPic.split(","):new String[1]);
+        List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
+        subjectInfosVO.setLessonList(tGzLessons);
+        return subjectInfosVO;
     }
 
     @Override
@@ -57,10 +78,11 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         //校验是否已经评价过
         List<TGzEvaluate> gzEvaluateList = gzEvaluateDao.selectByUserIdAndLessonId(user.getId(), lessonId);
         if(!gzEvaluateList.isEmpty()) {
-            throw new MessageException("该课程您已经评价过!");
+            throw new MessageException("该章节您已经评价过!");
         }
 
         TGzEvaluate gzEvaluate = new TGzEvaluate();
+        gzEvaluate.setUserId(user.getId());
         gzEvaluate.setLessonId(lessonId);
         gzEvaluate.setSubjectId(subjectId);
         gzEvaluate.setLevel(level == null? 2:level);
@@ -77,7 +99,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         //从开课之日期计算有效期
         Integer period = subject.getPeriod();
         period = Objects.isNull(period)?0:period;
-        List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectByPrimaryKey(subjectId);
+        List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectBySubjectId(subjectId);
         List<Long> userSubjectIds = new ArrayList<>();
         List<TGzUserSubject> updaters = new ArrayList<>();
         long currentTimeMillis = System.currentTimeMillis();
