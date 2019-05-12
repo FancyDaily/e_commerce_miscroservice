@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.order.controller;
+package com.e_commerce.miscroservice.push_controller;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
@@ -7,8 +7,6 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
-import com.e_commerce.miscroservice.user.service.UserService;
-import com.netflix.discovery.converters.Auto;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Pattern;
-import sun.net.ftp.FtpClient;
 
 @Controller
 @Data

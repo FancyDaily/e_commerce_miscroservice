@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.order.controller;
+package com.e_commerce.miscroservice.push_controller;
 
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
