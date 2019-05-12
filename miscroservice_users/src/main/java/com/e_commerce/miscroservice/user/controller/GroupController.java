@@ -7,6 +7,7 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleRequest;
 import com.aliyuncs.sts.model.v20150401.AssumeRoleResponse;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
@@ -16,13 +17,12 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.exception.colligate.NoAuthChangeException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.GroupService;
 import com.e_commerce.miscroservice.user.vo.BaseGroupView;
 import com.e_commerce.miscroservice.user.vo.CompanyRecentView;
 import com.e_commerce.miscroservice.user.vo.SmartUserView;
 import com.e_commerce.miscroservice.user.vo.UserCompanyView;
-import lombok.Data;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api/v2/group")
-@Data
+@Log
 public class GroupController extends BaseController {
 
     @Autowired
@@ -49,71 +49,71 @@ public class GroupController extends BaseController {
 
 //    Log log = Log.getInstance(UserController.class);
 
-	private String endpoint = "sts.aliyuncs.com";
-	private String roleArn = "acs:ram::1833330782534832:role/aliyunosstokengeneratorrole";
-	private String roleSessionName = "session-name";
-	private String policy = "{\n" +
-			"    \"Version\": \"1\", \n" +
-			"    \"Statement\": [\n" +
-			"        {\n" +
-			"            \"Action\": [\n" +
-			"                \"oss:*\"\n" +
-			"            ], \n" +
-			"            \"Resource\": [\n" +
-			"                \"acs:oss:*:*:*\" \n" +
-			"            ], \n" +
-			"            \"Effect\": \"Allow\"\n" +
-			"        }\n" +
-			"    ]\n" +
-			"}";
+    private String endpoint = "sts.aliyuncs.com";
+    private String roleArn = "acs:ram::1833330782534832:role/aliyunosstokengeneratorrole";
+    private String roleSessionName = "session-name";
+    private String policy = "{\n" +
+            "    \"Version\": \"1\", \n" +
+            "    \"Statement\": [\n" +
+            "        {\n" +
+            "            \"Action\": [\n" +
+            "                \"oss:*\"\n" +
+            "            ], \n" +
+            "            \"Resource\": [\n" +
+            "                \"acs:oss:*:*:*\" \n" +
+            "            ], \n" +
+            "            \"Effect\": \"Allow\"\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}";
 
-	/**
-	 *
-	 * 功能描述:获取操作oss时的临时token
-	 * 作者:马晓晨
-	 * 创建时间:2019年1月29日 下午10:53:05
-	 * @return
-	 */
-	@ResponseBody
-	@PostMapping("/getStsToken")
-	public Object getStsToken(String accessKeyId, String accessKeySecret) {
-		AjaxResult result = new AjaxResult();
-		try {
-			// 添加endpoint（直接使用STS endpoint，前两个参数留空，无需添加region ID）
-			DefaultProfile.addEndpoint("", "", "Sts", endpoint);
-			// 构造default profile（参数留空，无需添加region ID）
-			IClientProfile profile = DefaultProfile.getProfile("", accessKeyId, accessKeySecret);
-			// 用profile构造client
-			DefaultAcsClient client = new DefaultAcsClient(profile);
-			final AssumeRoleRequest request = new AssumeRoleRequest();
-			request.setMethod(MethodType.POST);
-			request.setRoleArn(roleArn);
-			request.setRoleSessionName(roleSessionName);
-			request.setPolicy(policy); // Optional
-			request.setDurationSeconds(900L); //持续时间
-			final AssumeRoleResponse response = client.getAcsResponse(request);
-			Map<String, String> tokenInfo = new HashMap<>();
-			tokenInfo.put("securityToken", response.getCredentials().getSecurityToken());
-			tokenInfo.put("accessKeyId", response.getCredentials().getAccessKeyId());
-			tokenInfo.put("accessKeySecret", response.getCredentials().getAccessKeySecret());
-			result.setSuccess(true);
-			result.setData(tokenInfo);
+    /**
+     * 功能描述:获取操作oss时的临时token
+     * 作者:马晓晨
+     * 创建时间:2019年1月29日 下午10:53:05
+     *
+     * @return
+     */
+    @ResponseBody
+    @PostMapping("/getStsToken")
+    public Object getStsToken(String accessKeyId, String accessKeySecret) {
+        AjaxResult result = new AjaxResult();
+        try {
+            // 添加endpoint（直接使用STS endpoint，前两个参数留空，无需添加region ID）
+            DefaultProfile.addEndpoint("", "", "Sts", endpoint);
+            // 构造default profile（参数留空，无需添加region ID）
+            IClientProfile profile = DefaultProfile.getProfile("", accessKeyId, accessKeySecret);
+            // 用profile构造client
+            DefaultAcsClient client = new DefaultAcsClient(profile);
+            final AssumeRoleRequest request = new AssumeRoleRequest();
+            request.setMethod(MethodType.POST);
+            request.setRoleArn(roleArn);
+            request.setRoleSessionName(roleSessionName);
+            request.setPolicy(policy); // Optional
+            request.setDurationSeconds(900L); //持续时间
+            final AssumeRoleResponse response = client.getAcsResponse(request);
+            Map<String, String> tokenInfo = new HashMap<>();
+            tokenInfo.put("securityToken", response.getCredentials().getSecurityToken());
+            tokenInfo.put("accessKeyId", response.getCredentials().getAccessKeyId());
+            tokenInfo.put("accessKeySecret", response.getCredentials().getAccessKeySecret());
+            result.setSuccess(true);
+            result.setData(tokenInfo);
 /*            System.out.println("Expiration: " + response.getCredentials().getExpiration());
             System.out.println("Access Key Id: " + response.getCredentials().getAccessKeyId());
             System.out.println("Access Key Secret: " + response.getCredentials().getAccessKeySecret());
             System.out.println("Security Token: " + response.getCredentials().getSecurityToken());
             System.out.println("RequestId: " + response.getRequestId());*/
-		} catch (ClientException e) {
-			result.setSuccess(false);
-			result.setMsg("获取token失败");
-			log.error(e.getErrMsg());
+        } catch (ClientException e) {
+            result.setSuccess(false);
+            result.setMsg("获取token失败");
+            log.error(e.getErrMsg());
 /*            System.out.println("Failed：");
             System.out.println("Error code: " + e.getErrCode());
             System.out.println("Error message: " + e.getErrMsg());
             System.out.println("RequestId: " + e.getRequestId());*/
-		}
-		return result;
-	}
+        }
+        return result;
+    }
 
     /**
      * 组织概况
@@ -134,7 +134,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("组织概况查询" , e);
+            log.error("组织概况查询", e);
             result.setSuccess(false);
         }
         return result;
@@ -160,7 +160,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("组织近况(年度服务、需求、新增人员数目统计)查询" , e);
+            log.error("组织近况(年度服务、需求、新增人员数目统计)查询", e);
             result.setSuccess(false);
         }
         return result;
@@ -168,6 +168,7 @@ public class GroupController extends BaseController {
 
     /**
      * 组内成员列表
+     *
      * @param token
      * @param groupId
      * @param param
@@ -188,7 +189,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("组内成员列表异常" , e);
+            log.error("组内成员列表异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -196,6 +197,7 @@ public class GroupController extends BaseController {
 
     /**
      * 成员新增(批量)
+     *
      * @param token
      * @param groupId
      * @param userIds
@@ -213,7 +215,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("成员新增(批量)异常" , e);
+            log.error("成员新增(批量)异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -221,6 +223,7 @@ public class GroupController extends BaseController {
 
     /**
      * 创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)
+     *
      * @param token
      * @param groupId
      * @param phone
@@ -240,7 +243,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)" , e);
+            log.error("创建新成员(如果为存在用户，直接加入组织，不存在则创建假用户再加入组织)", e);
             result.setSuccess(false);
         }
         return result;
@@ -248,6 +251,7 @@ public class GroupController extends BaseController {
 
     /**
      * 删除组织成员(成员删除)
+     *
      * @param token
      * @param userIds
      * @return
@@ -265,7 +269,7 @@ public class GroupController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("删除组织成员(成员删除)" , e);
+            log.error("删除组织成员(成员删除)", e);
             result.setSuccess(false);
         }
         return result;
@@ -273,6 +277,7 @@ public class GroupController extends BaseController {
 
     /**
      * 成员审核通过
+     *
      * @param token
      * @param userIds
      * @return
@@ -289,7 +294,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("成员审核通过异常" , e);
+            log.error("成员审核通过异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -297,6 +302,7 @@ public class GroupController extends BaseController {
 
     /**
      * 成员审核拒绝
+     *
      * @param token
      * @param userIds
      * @return
@@ -313,7 +319,7 @@ public class GroupController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("成员审核拒绝异常" , e);
+            log.error("成员审核拒绝异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -321,6 +327,7 @@ public class GroupController extends BaseController {
 
     /**
      * 批量插入成员(Excel文件)
+     *
      * @param file
      * @param token
      * @return
@@ -349,125 +356,126 @@ public class GroupController extends BaseController {
         return result;
     }
 
-	/**
-	 * 查询所有分组列表
-	 *
-	 * @param token
-	 * @return
-	 */
-	@PostMapping("/list")
-	public Object listGroup(String token) {
-		AjaxResult result = new AjaxResult();
-		TUser user = UserUtil.getUser(token);
-		try {
-			List<BaseGroupView> listGroup = groupService.listGroup(user);
-			result.setData(listGroup);
-			result.setSuccess(true);
-			result.setMsg("查询分组列表成功");
-		} catch (IllegalArgumentException e) {
-			result.setSuccess(false);
-			result.setMsg("查询分组列表失败");
-			log.error(e.getMessage(), e);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.setSuccess(false);
-			result.setMsg("查询分组列表失败");
-			log.error("查询所有分组列表失败", e);
-		}
-		return result;
-	}
+    /**
+     * 查询所有分组列表
+     *
+     * @param token
+     * @return
+     */
+    @PostMapping("/list")
+    public Object listGroup(String token) {
+        AjaxResult result = new AjaxResult();
+        TUser user = UserUtil.getUser(token);
+        try {
+            List<BaseGroupView> listGroup = groupService.listGroup(user);
+            result.setData(listGroup);
+            result.setSuccess(true);
+            result.setMsg("查询分组列表成功");
+        } catch (IllegalArgumentException e) {
+            result.setSuccess(false);
+            result.setMsg("查询分组列表失败");
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setSuccess(false);
+            result.setMsg("查询分组列表失败");
+            log.error("查询所有分组列表失败", e);
+        }
+        return result;
+    }
 
-	/**
-	 * 插入分组
-	 *
-	 * @param group
-	 * @param token
-	 * @return
-	 */
-	@PostMapping("/insert")
-	public Object insertGroup(TGroup group, String token) {
-		TUser user = UserUtil.getUser(token);
-		AjaxResult result = new AjaxResult();
-		try {
-			groupService.insert(group, user);
-			result.setSuccess(true);
-			result.setMsg("新建分组成功");
-		} catch (IllegalArgumentException e) {
-			result.setSuccess(false);
-			result.setMsg("新建分组失败");
-			log.error(e.getMessage(), e);
-		} catch (Exception e) {
-			result.setSuccess(false);
-			result.setMsg("新建分组失败");
-			log.error("新建分组失败", e);
-		}
-		return result;
-	}
+    /**
+     * 插入分组
+     *
+     * @param group
+     * @param token
+     * @return
+     */
+    @PostMapping("/insert")
+    public Object insertGroup(TGroup group, String token) {
+        TUser user = UserUtil.getUser(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            groupService.insert(group, user);
+            result.setSuccess(true);
+            result.setMsg("新建分组成功");
+        } catch (IllegalArgumentException e) {
+            result.setSuccess(false);
+            result.setMsg("新建分组失败");
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            result.setSuccess(false);
+            result.setMsg("新建分组失败");
+            log.error("新建分组失败", e);
+        }
+        return result;
+    }
 
-	/**
-	 * 修改分组名称
-	 *
-	 * @param group
-	 * @param token
-	 * @return
-	 */
-	@PostMapping("/modify")
-	public Object updateGroup(TGroup group, String token) {
-		TUser user = UserUtil.getUser(token);
-		AjaxResult result = new AjaxResult();
-		try {
-			groupService.updateGroup(group, user);
-			result.setSuccess(true);
-			result.setMsg("修改分组名称成功");
-		} catch (NoAuthChangeException e) {
-			result.setSuccess(false);
-			result.setMsg(e.getMessage());
-			log.info(e.getMessage(), e);
-		} catch (IllegalArgumentException e) {
-			result.setSuccess(false);
-			result.setMsg("修改分组名称失败");
-			log.error(e.getMessage(), e);
-		} catch (Exception e) {
-			result.setSuccess(false);
-			result.setMsg("修改分组名称失败");
-			log.error("修改分组名称失败", e);
-		}
-		return result;
-	}
+    /**
+     * 修改分组名称
+     *
+     * @param group
+     * @param token
+     * @return
+     */
+    @PostMapping("/modify")
+    public Object updateGroup(TGroup group, String token) {
+        TUser user = UserUtil.getUser(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            groupService.updateGroup(group, user);
+            result.setSuccess(true);
+            result.setMsg("修改分组名称成功");
+        } catch (NoAuthChangeException e) {
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+            log.info(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            result.setSuccess(false);
+            result.setMsg("修改分组名称失败");
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            result.setSuccess(false);
+            result.setMsg("修改分组名称失败");
+            log.error("修改分组名称失败", e);
+        }
+        return result;
+    }
 
-	/**
-	 * 删除分组
-	 *
-	 * @param groupId
-	 * @param token
-	 * @return
-	 */
-	@PostMapping("/delete")
-	public Object deleteGroup(Long groupId, String token) {
-		TUser user = UserUtil.getUser(token);
-		AjaxResult result = new AjaxResult();
-		try {
-			groupService.deleteGroup(groupId, user);
-			result.setSuccess(true);
-			result.setMsg("删除分组成功");
-		} catch (NoAuthChangeException e) {
-			result.setSuccess(false);
-			result.setMsg(e.getMessage());
-			log.info(e.getMessage(), e);
-		} catch (IllegalArgumentException e) {
-			result.setSuccess(false);
-			result.setMsg("删除分组失败");
-			log.error(e.getMessage(), e);
-		} catch (Exception e) {
-			result.setSuccess(false);
-			result.setMsg("删除分组失败");
-			log.error("删除分组失败", e);
-		}
-		return result;
-	}
+    /**
+     * 删除分组
+     *
+     * @param groupId
+     * @param token
+     * @return
+     */
+    @PostMapping("/delete")
+    public Object deleteGroup(Long groupId, String token) {
+        TUser user = UserUtil.getUser(token);
+        AjaxResult result = new AjaxResult();
+        try {
+            groupService.deleteGroup(groupId, user);
+            result.setSuccess(true);
+            result.setMsg("删除分组成功");
+        } catch (NoAuthChangeException e) {
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+            log.info(e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            result.setSuccess(false);
+            result.setMsg("删除分组失败");
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            result.setSuccess(false);
+            result.setMsg("删除分组失败");
+            log.error("删除分组失败", e);
+        }
+        return result;
+    }
 
     /**
      * 新成员列表(待处理申请名单)
+     *
      * @param token
      * @param pageNum
      * @param pageSize
@@ -496,6 +504,7 @@ public class GroupController extends BaseController {
 
     /**
      * 组织年度流水折线图数据
+     *
      * @param token
      * @return
      */
@@ -521,15 +530,14 @@ public class GroupController extends BaseController {
     /**
      * 成员移动
      *
-     * @param token token
+     * @param token   token
      * @param userIds 要修改的用户id，逗号拼接
      * @param groupId 修改至分组的组编号
-     *
-     *      "success": true,
-     *      "errorCode": "",
-     *      "msg": "移动成功",
-     *      "data": ""
-     *
+     *                <p>
+     *                "success": true,
+     *                "errorCode": "",
+     *                "msg": "移动成功",
+     *                "data": ""
      * @return
      */
     @PostMapping("/userMove")
@@ -565,17 +573,16 @@ public class GroupController extends BaseController {
     /**
      * 成员修改
      *
-     * @param token token
+     * @param token    token
      * @param userName 修改的名字
-     * @param userId 修改用户的id
-     * @param sex 修改的性别
-     * @param groupId 修改的分组
-     *
-     *      "success": true,
-     *      "errorCode": "",
-     *      "msg": "修改成功",
-     *      "data": ""
-     *
+     * @param userId   修改用户的id
+     * @param sex      修改的性别
+     * @param groupId  修改的分组
+     *                 <p>
+     *                 "success": true,
+     *                 "errorCode": "",
+     *                 "msg": "修改成功",
+     *                 "data": ""
      * @return
      */
     @PostMapping("/userModify")
@@ -595,7 +602,7 @@ public class GroupController extends BaseController {
             return result;
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("成员修改失败：",e);
+            log.error("成员修改失败：", e);
             result.setSuccess(false);
             result.setErrorCode("500");
             result.setMsg("修改失败");

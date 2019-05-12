@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("api/v2/focus")
-@Data
+@Log
 public class FocusController extends BaseController {
 
     @Autowired

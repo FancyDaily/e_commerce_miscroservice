@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.message.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
@@ -29,7 +30,7 @@ import java.util.Map;
  *
  */
 @Component
-@Data
+@Log
 public class MessageCommonController extends BaseController {
 
 

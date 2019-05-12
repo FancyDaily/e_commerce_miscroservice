@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.message.controller;
 
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
@@ -26,7 +27,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/event")
-@Data
+@Log
 public class EventController extends BaseController {
 
 

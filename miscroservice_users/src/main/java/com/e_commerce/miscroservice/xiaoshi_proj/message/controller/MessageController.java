@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.message.controller;
 
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  **/
 @RestController
 @RequestMapping("/api/v2/message")
-@Data
+@Log
 public class MessageController extends BaseController {
 
     @Autowired

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("gz/api/v1/voucher")
-@Data
+@Log
 public class GZVoucherController {
 
     @Autowired

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.push_controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
@@ -17,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Pattern;
 
 @Controller
-@Data
+@Log
 public class TestDo {
 
     @Autowired

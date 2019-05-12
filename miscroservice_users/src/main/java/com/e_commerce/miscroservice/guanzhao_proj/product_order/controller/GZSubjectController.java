@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("gz/api/v1/subject")
-@Data
+@Log
 public class GZSubjectController {
 
     @Autowired

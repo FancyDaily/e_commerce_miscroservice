@@ -1,20 +1,17 @@
 package com.e_commerce.miscroservice.user.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
-import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.BaseController;
 import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.WechatLoginVIew;
-import lombok.Data;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 微信授权登录模块
  */
 @RestController
 @RequestMapping("api/v2/login")
-@Data
+@Log
 public class LoginController extends BaseController {
 
     @Autowired
@@ -90,7 +90,7 @@ public class LoginController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("手机号码授权" , e);
+            log.error("手机号码授权", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -130,7 +130,7 @@ public class LoginController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("校验短信异常" , e);
+            log.error("校验短信异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -152,13 +152,13 @@ public class LoginController extends BaseController {
             result.setData(resMap);
             result.setSuccess(true);
         } catch (MessageException e) {
-            log.warn("登陆校验异常: "  + e.getMessage());
+            log.warn("登陆校验异常: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("登陆校验异常" , e);
+            log.error("登陆校验异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -185,7 +185,7 @@ public class LoginController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("与微信校验授权异常" , e);
+            log.error("与微信校验授权异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -204,7 +204,7 @@ public class LoginController extends BaseController {
         //TODO uid
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = loginService.loginByOpenid(openid,uuid);
+            Map<String, Object> resultMap = loginService.loginByOpenid(openid, uuid);
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {
@@ -214,7 +214,7 @@ public class LoginController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("请求token异常" , e);
+            log.error("请求token异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());

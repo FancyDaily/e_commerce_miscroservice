@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.message.controller;
 
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -23,7 +24,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/api/v2/publish")
-@Data
+@Log
 public class PublishController extends BaseController {
 
     @Autowired

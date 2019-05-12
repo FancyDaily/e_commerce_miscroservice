@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.product.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppMessageConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceSummary;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
@@ -11,7 +12,6 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.Tok
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.vo.PageMineReturnView;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.vo.ServiceParamView;
-import lombok.Data;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/api/v2/service")
-@Data
+@Log
 public class ServiceController extends BaseController {
 
     /**
@@ -92,7 +92,6 @@ public class ServiceController extends BaseController {
             return result;
         }
     }
-
 
 
     /**
@@ -238,7 +237,6 @@ public class ServiceController extends BaseController {
             return result;
         }
     }
-
 
 
     /**

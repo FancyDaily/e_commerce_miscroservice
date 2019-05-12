@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.*;
@@ -12,7 +13,6 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.Tok
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import com.e_commerce.miscroservice.user.po.TBonusPackage;
 import com.e_commerce.miscroservice.user.po.TUserAuth;
 import com.e_commerce.miscroservice.user.po.TUserSkill;
@@ -20,7 +20,7 @@ import com.e_commerce.miscroservice.user.service.CompanyService;
 import com.e_commerce.miscroservice.user.service.GrowthValueService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.vo.*;
-import lombok.Data;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.controller.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("api/v2/user")
-@Data
+@Log
 public class UserController extends BaseController {
 
     @Autowired
@@ -436,7 +438,7 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("freezeList/" + TokenUtil.AUTH_SUFFIX)
-    public Object   freezeList(String token, Long lastTime, Integer pageSize) {
+    public Object freezeList(String token, Long lastTime, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {
@@ -618,7 +620,7 @@ public class UserController extends BaseController {
      * @param name        技能名
      * @param description 描述
      * @param headUrl     封面图
-     * @param detailUrls   内容图，多张图使用逗号分隔
+     * @param detailUrls  内容图，多张图使用逗号分隔
      *                    <p>
      *                    {
      *                    "success": true, //成功
@@ -2215,7 +2217,6 @@ public class UserController extends BaseController {
         return result;
     }
 
-    
 
     /**
      * 预创建一个红包
@@ -2268,13 +2269,13 @@ public class UserController extends BaseController {
     /**
      * 创建一个红包
      *
-     * @param token          登录凭证
-     *                       {
-     *                       "success": true,
-     *                       "errorCode": "",
-     *                       "msg": "",
-     *                       "data": ""
-     *                       }
+     * @param token 登录凭证
+     *              {
+     *              "success": true,
+     *              "errorCode": "",
+     *              "msg": "",
+     *              "data": ""
+     *              }
      * @return
      */
     @RequestMapping("bonusPackage/generate/" + TokenUtil.AUTH_SUFFIX)
@@ -2319,7 +2320,7 @@ public class UserController extends BaseController {
      *                       }
      * @return
      */
-    @RequestMapping({"bonusPackage/infos/" + TokenUtil.AUTH_SUFFIX,"bonusPackage/infos"})
+    @RequestMapping({"bonusPackage/infos/" + TokenUtil.AUTH_SUFFIX, "bonusPackage/infos"})
     public Object bonusPackageInfo(String token, Long bonusPackageId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2798,7 +2799,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("获取key—value值失败" , e);
+            log.error("获取key—value值失败", e);
             result.setSuccess(false);
         }
         return result;
@@ -2807,18 +2808,18 @@ public class UserController extends BaseController {
     /**
      * 发送短信验证码
      *
-     * @param telephone 手机号
+     * @param telephone   手机号
      * @param application 应用类型
-     *                  <p>
-     *                  {
-     *                  "success": true,
-     *                  "errorCode": "",
-     *                  "msg": "",
-     *                  "data": ""
-     *                  }
+     *                    <p>
+     *                    {
+     *                    "success": true,
+     *                    "errorCode": "",
+     *                    "msg": "",
+     *                    "data": ""
+     *                    }
      * @return
      */
-    @PostMapping({"generateSMS","generateSMS/" + TokenUtil.AUTH_SUFFIX})
+    @PostMapping({"generateSMS", "generateSMS/" + TokenUtil.AUTH_SUFFIX})
     public Object generateSMS(String telephone, Integer application) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2834,7 +2835,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("发送短信验证码异常" , e);
+            log.error("发送短信验证码异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -2960,7 +2961,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("发送短信验证码异常" , e);
+            log.error("发送短信验证码异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -2980,7 +2981,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @PostMapping({"checkSMS","checkSMS/" + TokenUtil.AUTH_SUFFIX})
+    @PostMapping({"checkSMS", "checkSMS/" + TokenUtil.AUTH_SUFFIX})
     public Object checkSMS(String telephone, String validCode) {
         AjaxResult result = new AjaxResult();
         try {
@@ -2991,7 +2992,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("发送短信验证码异常" , e);
+            log.error("发送短信验证码异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3024,7 +3025,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("回馈邀请人异常" , e);
+            log.error("回馈邀请人异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3032,10 +3033,11 @@ public class UserController extends BaseController {
 
     /**
      * 分享（查看二维码)
+     *
      * @param token
      * @param serviceId orderId
-     * @param option 操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
-     * @param userId 用户id
+     * @param option    操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
+     * @param userId    用户id
      * @return
      */
     @PostMapping("share")
@@ -3051,7 +3053,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("分享（查看二维码)异常" , e);
+            log.error("分享（查看二维码)异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3059,10 +3061,11 @@ public class UserController extends BaseController {
 
     /**
      * 分享（查看二维码)
+     *
      * @param token
      * @param serviceId orderId
-     * @param option 操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
-     * @param userId 用户id
+     * @param option    操作1.个人分享 2.求助分享 3.服务分享 4.加入组织
+     * @param userId    用户id
      * @return
      */
     @PostMapping("share/" + TokenUtil.AUTH_SUFFIX)
@@ -3078,7 +3081,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("分享（查看二维码)异常" , e);
+            log.error("分享（查看二维码)异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3106,7 +3109,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("微信授权基本信息更新异常" , e);
+            log.error("微信授权基本信息更新异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3130,7 +3133,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("获取scene值异常" , e);
+            log.error("获取scene值异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3154,7 +3157,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("激活（生成邀请码）异常" , e);
+            log.error("激活（生成邀请码）异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3180,7 +3183,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("组织版登录（密码）" , e);
+            log.error("组织版登录（密码）", e);
             result.setSuccess(false);
         }
         return result;
@@ -3205,7 +3208,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("重置密码异常" , e);
+            log.error("重置密码异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3230,7 +3233,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("申请加入组织异常" , e);
+            log.error("申请加入组织异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3258,7 +3261,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("组织时间轨迹查询异常" , e);
+            log.error("组织时间轨迹查询异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3284,7 +3287,7 @@ public class UserController extends BaseController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("每日时间流水查询异常" , e);
+            log.error("每日时间流水查询异常", e);
             result.setSuccess(false);
         }
         return result;
@@ -3294,6 +3297,7 @@ public class UserController extends BaseController {
      * 功能描述: 后台->查询所有用户
      * 作者: 许方毅
      * 创建时间: 2018年12月18日 下午4:08:57
+     *
      * @param param
      * @param page
      * @param rows
@@ -3312,7 +3316,7 @@ public class UserController extends BaseController {
             log.warn("后台->查询所有用户异常: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.warn("后台->查询所有用户异常" , e);
+            log.warn("后台->查询所有用户异常", e);
         }
         return easyUIPageResult;
     }
@@ -3321,13 +3325,14 @@ public class UserController extends BaseController {
      * 功能描述: 后台->查看用户详情
      * 作者: 许方毅
      * 创建时间: 2018年12月18日 下午4:09:32
+     *
      * @return
      */
     @RequestMapping("details")
     public Object details(String token, Long userId) {
         AjaxResult result = new AjaxResult();
         try {
-            if(token!=null) {
+            if (token != null) {
                 TUser user = (TUser) redisUtil.get(token);
                 userId = user.getId();
             }
@@ -3341,7 +3346,7 @@ public class UserController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.warn("后台->查看用户详情异常" , e);
+            log.warn("后台->查看用户详情异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -3353,6 +3358,7 @@ public class UserController extends BaseController {
      * 功能描述: 后台->更新用户可用状态
      * 作者: 许方毅
      * 创建时间: 2018年12月26日 下午3:26:44
+     *
      * @param avaliableStatus
      * @return
      */
@@ -3371,7 +3377,7 @@ public class UserController extends BaseController {
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.warn("后台->更新用户可用状态异常" , e);
+            log.warn("后台->更新用户可用状态异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -3383,6 +3389,7 @@ public class UserController extends BaseController {
      * 功能描述: 后台->密码登录
      * 作者: 许方毅
      * 创建时间: 2018年12月28日 下午2:36:53
+     *
      * @param account
      * @param password
      * @return
@@ -3391,16 +3398,16 @@ public class UserController extends BaseController {
     public Object loginPwd(String account, String password, HttpServletResponse response, String uuid) {
         AjaxResult result = new AjaxResult();
         try {
-            userService.loginPwd(account, password,response,uuid);
+            userService.loginPwd(account, password, response, uuid);
             result.setSuccess(true);
         } catch (MessageException e) {
-            log.warn("后台->密码登录异常: " +  e.getMessage());
+            log.warn("后台->密码登录异常: " + e.getMessage());
             result.setSuccess(false);
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            log.warn("后台->密码登录异常" , e);
+            log.warn("后台->密码登录异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -3430,6 +3437,7 @@ public class UserController extends BaseController {
      * 功能描述: 后台->管理后台用户登出
      * 作者: 许方毅
      * 创建时间: 2019年1月9日 上午11:16:04
+     *
      * @param token
      * @return
      */
@@ -3449,7 +3457,7 @@ public class UserController extends BaseController {
             result.setErrorCode(e.getErrorCode());
             result.setMsg(e.getMessage());
         } catch (Exception e) {
-            log.error("后台->管理后台用户登出异常" , e);
+            log.error("后台->管理后台用户登出异常", e);
             result.setSuccess(false);
             result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
             result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
@@ -3458,16 +3466,16 @@ public class UserController extends BaseController {
 
     }
 
-//    @RequestMapping("upload")
+    //    @RequestMapping("upload")
     public Object uploadBannerImg(String path) {
-        if(path==null) {
+        if (path == null) {
             path = "";
         }
         String savePath = "default";
         String fileName = "redBagT.png";
         String result = "";
         try {
-            InputStream fis =  new FileInputStream(new File(path));
+            InputStream fis = new FileInputStream(new File(path));
             result = AliOSSUtil.uploadFile(fis, savePath, fileName);
         } catch (Exception e) {
             e.printStackTrace();
@@ -3479,8 +3487,9 @@ public class UserController extends BaseController {
      * 功能描述: 单位认证审核
      * 作者: 许方毅
      * 创建时间: 2018年12月14日 下午3:33:12
+     *
      * @param companyId
-     * @param option 操作：1通过、2拒绝
+     * @param option    操作：1通过、2拒绝
      * @return
      */
     @RequestMapping("modifyCompany")
@@ -3504,6 +3513,7 @@ public class UserController extends BaseController {
 
     /**
      * 观照app密码登录
+     *
      * @param telephone
      * @param password
      * @return
@@ -3512,7 +3522,7 @@ public class UserController extends BaseController {
     public Object loginByPwdGZ(String telephone, String password, HttpServletResponse response, @RequestParam(required = true) String uuid) {
         AjaxResult result = new AjaxResult();
         try {
-            Map<String,Object> resultMap = userService.loginByPwd(telephone, password, response, uuid, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            Map<String, Object> resultMap = userService.loginByPwd(telephone, password, response, uuid, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
             result.setData(resultMap);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -3530,6 +3540,7 @@ public class UserController extends BaseController {
 
     /**
      * 观照app手机号密码注册账号
+     *
      * @param userTel
      * @param password
      * @param validCode
