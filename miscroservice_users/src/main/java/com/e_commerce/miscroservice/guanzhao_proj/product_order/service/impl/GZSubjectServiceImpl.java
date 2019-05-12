@@ -6,11 +6,15 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GZUserSubjectEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,8 @@ import java.util.Objects;
 
 @Service
 public class GZSubjectServiceImpl implements GZSubjectService {
+
+    Log log = Log.getInstance(GZSubjectServiceImpl.class);
 
     @Autowired
     private GZSubjectDao gzSubjectDao;
@@ -111,6 +117,18 @@ public class GZSubjectServiceImpl implements GZSubjectService {
             updaters.add(gzUserSubject);
         }
         gzUserSubjectDao.batchUpdate(updaters,userSubjectIds);
+    }
+
+    @Override
+    public QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize) {
+        log.info("查看我的正在学习id={},pageNum={},pageSize={}",id,pageNum,pageSize);
+        Page<MyLearningSubjectVO> page = PageHelper.startPage(pageNum,pageSize);
+        List<MyLearningSubjectVO> list = gzSubjectDao.findMyLearningSubject(id);
+        QueryResult<MyLearningSubjectVO> result = new QueryResult<>();
+        result.setResultList(list);
+        result.setTotalCount(page.getTotal());
+
+        return result;
     }
 
 
