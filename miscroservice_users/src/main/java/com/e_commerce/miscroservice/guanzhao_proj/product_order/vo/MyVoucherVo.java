@@ -1,24 +1,28 @@
-package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
+package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyVoucherVo;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
-@Table(commit = "观照-代金券表")
+/**
+ * @Author: FangyiXu
+ * @Date: 2019-05-13 13:49
+ */
 @Data
-public class TGzVoucher implements Serializable {
-    @Id
+public class MyVoucherVo {
+
     private Long id;
 
     private Long userId;
 
     private Long subjectId;
+
+    private Integer surplusDayCnt;  //剩余可用天数
+
+    private Integer surplusHourCnt; //剩余可用小时数
 
     @Column(commit = "代金券金额")
     private Double price;
@@ -26,7 +30,7 @@ public class TGzVoucher implements Serializable {
     @Column(commit = "满减下限", length = 11)
     private Integer reductionLimit;
 
-    @Column(commit = "有效时长(时间戳)")
+    @Column(commit = "预设有效时长(时间戳)")
     private Long effectiveTime;
 
     @Column(commit = "激活时间点(时间戳)")
@@ -57,9 +61,5 @@ public class TGzVoucher implements Serializable {
     private String isValid;
 
     private static final long serialVersionUID = 1L;
-
-    public MyVoucherVo copyMyVoucherVo() {
-        return null;
-    }
 
 }

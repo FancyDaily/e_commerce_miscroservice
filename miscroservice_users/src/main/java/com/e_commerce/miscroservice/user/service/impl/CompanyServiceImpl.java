@@ -355,6 +355,7 @@ public class CompanyServiceImpl implements CompanyService {
             companyUser.setUpdateUserName("默认管理员");
             companyUser.setUpdateTime(currentTimeMillis);
             companyUser.setPraise(0);
+            companyUser.setId(null);
             userDao.insert(companyUser,ApplicationEnum.XIAOSHI_APPLICATION.toCode());
 
             /*

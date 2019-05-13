@@ -1853,7 +1853,18 @@ public class StringUtil {
 		return str.replaceFirst(prefix, "");
 	}
 	
-	
+	public static Boolean isAnyEmpty(String... string) {
+		Boolean flag = false;
+		if(string==null || string.length == 0) {
+			flag = true;
+		}
+		for(String str:string) {
+			if(str == null || str.trim() == "") {
+				flag = true;
+			}
+		}
+		return flag;
+	}
 	
 	
 }

@@ -11,4 +11,12 @@ public interface GZOrderDao {
      * @return
      */
     List<TGzOrder> findMyOrderList(Integer id);
+
+    List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int i);
+
+    /**
+     * 保存订单
+     * @param payPo
+     */
+    void saveOrder(TGzOrder payPo);
 }

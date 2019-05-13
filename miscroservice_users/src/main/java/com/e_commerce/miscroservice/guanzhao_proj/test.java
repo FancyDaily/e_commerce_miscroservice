@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj;
 
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 
 public class test {
     public static void main(String[] args) {
@@ -8,6 +9,12 @@ public class test {
         if(str.contains(".")) {
             str = str.substring(0, str.lastIndexOf("."));
         }
+
+        String str1 = "";
+        String str2 = null;
+        Boolean anyEmpty = StringUtil.isAnyEmpty(str1);
+        System.out.println(anyEmpty);
+
     }
 
 }
