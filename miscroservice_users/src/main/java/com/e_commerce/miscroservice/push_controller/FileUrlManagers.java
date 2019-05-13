@@ -11,7 +11,6 @@ import com.qiniu.common.Zone;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.Auth;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

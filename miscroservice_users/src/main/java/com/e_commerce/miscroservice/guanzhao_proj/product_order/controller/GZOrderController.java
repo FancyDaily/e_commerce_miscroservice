@@ -24,6 +24,12 @@ public class GZOrderController {
     public GZOrderService gzOrderService;
 
 
+    /**
+     * 订单列表
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @RequestMapping("list")
     public Object findMyOrderList(Integer pageNum,Integer pageSize){
 
