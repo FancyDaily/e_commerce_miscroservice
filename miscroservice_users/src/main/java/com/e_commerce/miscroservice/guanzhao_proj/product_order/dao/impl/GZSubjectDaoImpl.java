@@ -42,4 +42,14 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
         return MybatisOperaterUtil.getInstance().finAll(new MyLearningSubjectVO(),new MybatisSqlWhereBuild(TGzUserSubject.class)
                 .eq(TGzUserSubject::getUserId,id));
     }
+
+    @Override
+    public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
+        return null;
+    }
+
+    @Override
+    public int insert(TGzSubject gzSubject) {
+        return MybatisOperaterUtil.getInstance().save(gzSubject);
+    }
 }

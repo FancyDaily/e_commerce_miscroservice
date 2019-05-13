@@ -19,4 +19,5 @@ public interface GZUserSubjectDao {
     TGzUserSubject selectByUserIdAndSubjectId(Long userId, Long lessonId);
 
     List<TGzUserSubject> selectBySubjectId(Long subjectId);
+
 }

@@ -11,4 +11,6 @@ public interface GZOrderDao {
      * @return
      */
     List<TGzOrder> findMyOrderList(Integer id);
+
+    List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int i);
 }

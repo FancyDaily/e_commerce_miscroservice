@@ -103,18 +103,10 @@ public class GZLessonServiceImpl implements GZLessonService {
         //找到所有购买此课程的用户
         List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectBySubjectId(subjectId);
         List<TGzUserLesson> toInserter = new ArrayList<>();
+        List<TGzUserLesson> toUpdater = new ArrayList<>();
+        List<Long> toUpdaterIds = new ArrayList<>();
         for (TGzUserSubject tGzUserSubject : tGzUserSubjects) {
-            //创建user-lesson关系
             Long userId = tGzUserSubject.getUserId();
-            TGzUserLesson userLesson = new TGzUserLesson();
-            userLesson.setLessonId(lessonId);
-            userLesson.setSubjectId(subjectId);
-            userLesson.setUserId(userId);
-            userLesson.setCreateUser(userId);
-            userLesson.setUpdateUser(userId);
-            userLesson.setIsValid(AppConstant.IS_VALID_YES);
-            toInserter.add(userLesson);
-
             //生成sign，插入key-gzvalue
             String sourceStr = userId.toString() + lessonId.toString() + subjectId.toString();
             String sign = Md5Util.md5(sourceStr);
@@ -123,10 +115,38 @@ public class GZLessonServiceImpl implements GZLessonService {
             keyValue.setGzkey(userId.toString());
             keyValue.setGzvalue(sign);
             keyValueDao.insert(keyValue);
+
+            //创建user-lesson关系
+            TGzUserLesson userLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
+            if(userLesson==null) {
+                userLesson = new TGzUserLesson();
+                userLesson.setLessonId(lessonId);
+                userLesson.setSubjectId(subjectId);
+                userLesson.setUserId(userId);
+                userLesson.setCreateUser(userId);
+                userLesson.setUpdateUser(userId);
+                userLesson.setIsValid(AppConstant.IS_VALID_YES);
+                userLesson.setVideoCompletion(0);
+                userLesson.setVideoCompletionStatus(GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode());
+                userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
+                userLesson.setSign(sign);
+                toInserter.add(userLesson);
+                continue;
+            }
+
+            userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
+            userLesson.setSign(sign);
+            toUpdaterIds.add(userLesson.getId());
+            toUpdater.add(userLesson);
         }
 
         try {
-            gzUserLessonDao.batchInsert(toInserter);
+            if(!toInserter.isEmpty()) {
+             gzUserLessonDao.batchInsert(toInserter);
+            }
+            if(!toUpdater.isEmpty()) {
+                gzUserLessonDao.batchUpdate(toUpdater, toUpdaterIds);
+            }
         } catch (Exception e) {
 
         }
@@ -210,12 +230,15 @@ public class GZLessonServiceImpl implements GZLessonService {
             Integer status = GZUserLessonEnum.STATUS_AVAILABLE.getCode();
             Integer videoCompletion = 0;
             Integer lessonCompletionStatus = GZUserLessonEnum.LESSON_COMPLETION_STATUS_NO.getCode();
+            String sign = null;
             if(existObject!=null) {
                 TGzUserLesson userLesson = (TGzUserLesson) existObject;
                 videoCompletion = userLesson.getVideoCompletion();
                 lessonCompletionStatus = userLesson.getLessonCompletionStatus();
                 status = GZUserLessonEnum.STATUS_UNAVAILABLE.getCode();
+                sign = userLesson.getSign();
             }
+            myLessonVO.setSign(sign);
             myLessonVO.setLessonIndex(tGzLesson.getLessonIndex());
             myLessonVO.setAvaliableStatus(tGzLesson.getAvaliableStatus());
             myLessonVO.setAvailableDate(tGzLesson.getAvailableDate());

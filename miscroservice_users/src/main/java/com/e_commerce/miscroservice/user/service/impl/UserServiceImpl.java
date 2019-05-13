@@ -4244,10 +4244,10 @@ public class UserServiceImpl extends BaseService implements UserService {
         Pattern pattern = Pattern.compile(regx);
         Matcher matcher = pattern.matcher(password);
 
-        if(!matcher.matches()) {
+        /*if(!matcher.matches()) {
             throw new MessageException("密码不符合格式!");
         }
-
+*/
         password = AESCommonUtil.encript(password);
         user.setPassword(password);
 

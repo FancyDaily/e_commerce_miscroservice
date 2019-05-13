@@ -19,4 +19,8 @@ public interface GZSubjectDao {
      * @return
      */
     List<MyLearningSubjectVO> findMyLearningSubject(Integer id);
+
+    List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex);
+
+    int insert(TGzSubject gzSubject);
 }

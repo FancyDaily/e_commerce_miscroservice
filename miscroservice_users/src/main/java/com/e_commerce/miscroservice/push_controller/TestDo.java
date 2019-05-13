@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.push_controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -61,11 +62,13 @@ public class TestDo {
      * @return
      */
     @GetMapping("play/" + TokenUtil.AUTH_SUFFIX)
-    public String play(String fileName, String sign, Long subjectId, Long lessonId) {
+    public Object play(String fileName, String sign, Long subjectId, Long lessonId) {
         TUser user = UserUtil.getUser();
-        user = new TUser();
-        user.setId(42l);
-        user.setName("三胖");
+        if(user==null) {
+            user = new TUser();
+            user.setId(42l);
+            user.setName("三胖");
+        }
         if(StringUtil.isEmpty(fileName)||
                 !filePattern.matcher(fileName).matches()){
 
@@ -91,17 +94,19 @@ public class TestDo {
      */
     @GetMapping("doPlay")
     @ResponseBody
-    public String doPlay(String fileName) {
-
+    public Object doPlay(String fileName) {
+        AjaxResult result = new AjaxResult();
 
         Object hash = request.getAttribute(fileName==null?EMPTY:fileName);
         if (hash == null ||
                 !Md5Util.md5(fileName).equals(hash)) {
-            return EMPTY;
+            result.setData(EMPTY);
+            result.setSuccess(false);
         }
 
-
-        return fileUrlManagers.getUrl(fileName);
+        result.setSuccess(true);
+        result.setData(fileUrlManagers.getUrl(fileName));
+        return result;
 
     }
 

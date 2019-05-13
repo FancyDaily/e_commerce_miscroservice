@@ -145,6 +145,57 @@ public class GZSubjectController {
     }
 
     /**
+     * 课程详情
+     *
+     * @param subjectId 课程编号
+     *                  {
+     *                  "resultList": [
+     *                  {
+     *                  "period": 15,
+     *                  "avaliableStatus": 1,
+     *                  "forSalePrice": 998,
+     *                  "isValid": "1",
+     *                  "forSaleSurplusNum": 15,
+     *                  "updateUser": 42,
+     *                  "availableDate": "20190510",
+     *                  "updateTime": 1557472345000,
+     *                  "seriesIndex": 1,
+     *                  "subjectHeadPortraitPath": "http://www.baidu.com",
+     *                  "availableTime": "1350",
+     *                  "descPic": "http://1.baidu.com,http://2.baidu.com,http://3.baidu.com,http://4.baidu.com,http://5.baidu.com,http://6.baidu.com,http://last.baidu.com",
+     *                  "forSaleStatus": 1,
+     *                  "createTime": 1557472194000,
+     *                  "price": 1288,
+     *                  "name": "Ivy的第一堂课",
+     *                  "createUser": 42,
+     *                  "id": 1,
+     *                  "remarks": "这是一段描述"
+     *                  }
+     *                  ],
+     *                  "totalCount": 2
+     *                  }
+     * @return
+     */
+    @RequestMapping("subject/detail" + TokenUtil.AUTH_SUFFIX)
+    public Object subjectDetailAuth(Long subjectId) {
+        AjaxResult result = new AjaxResult();
+        try {
+            SubjectInfosVO subjectVO = gzSubjectService.subjectDetail(subjectId);
+            result.setData(subjectVO);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("====方法描述: {}, Message: {}====", "课程详情", e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("课程详情", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
      * 章节列表
      *
      * @param subjectId 课程编号
@@ -442,8 +493,23 @@ public class GZSubjectController {
      * @return
      */
     @RequestMapping("subject/publish")
-    public Object subjectPublish() {
-        return null;
+    @Consume(TGzSubject.class)
+    public Object subjectPublish(@RequestParam(required = true) String name, Integer period,@RequestParam(required = true) String subjectHeadPortraitPath,@RequestParam(required = true) Double price, Double forSalePrice, Integer forSaleSurplusNum, Integer seriesIndex, String availableDate, String availableTime, String endDate, String endTime, String descPic, String remarks) {
+        AjaxResult result = new AjaxResult();
+        TGzSubject gzSubject = (TGzSubject) ConsumeHelper.getObj();
+        try {
+            gzSubjectService.publish(gzSubject);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("====方法描述: {}, Message: {}====", "发布新课程", e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("发布新课程", e);
+            result.setSuccess(false);
+        }
+        return result;
     }
 
 
@@ -453,7 +519,7 @@ public class GZSubjectController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("subject/learning/list")
+    @RequestMapping("subject/learning/list/" + TokenUtil.AUTH_SUFFIX)
     public Object findMyLearningSubject(Integer pageNum,Integer pageSize){
         AjaxResult result = new AjaxResult();
         if (pageNum==null||pageSize==null){

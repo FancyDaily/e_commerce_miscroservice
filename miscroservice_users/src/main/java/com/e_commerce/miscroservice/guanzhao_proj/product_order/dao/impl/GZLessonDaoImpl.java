@@ -43,4 +43,9 @@ public class GZLessonDaoImpl implements GZLessonDao {
         .eq(TGzLesson::getId, tGzLesson.getId())
         .eq(TGzLesson::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+    @Override
+    public int insert(List<TGzLesson> toInsert) {
+        return MybatisOperaterUtil.getInstance().save(toInsert);
+    }
 }

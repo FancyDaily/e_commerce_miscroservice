@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.Tok
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZVoucherService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyVoucherVo;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,15 +33,17 @@ public class GZVoucherController {
      * @param option
      * @return
      */
-    @RequestMapping("voucher/list/my" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("list/my/" + TokenUtil.AUTH_SUFFIX)
     public Object myVoucherList(Integer... option) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
-        user = new TUser();
-        user.setId(42l);
-        user.setName("三胖");
+        if(user==null) {
+            user = new TUser();
+            user.setId(42l);
+            user.setName("三胖");
+        }
         try {
-            List<TGzVoucher> vouchers = gzVoucherService.myVoucherList(user,option);
+            List<MyVoucherVo> vouchers = gzVoucherService.myVoucherList(user,option);
             result.setData(vouchers);
             result.setSuccess(true);
         } catch (MessageException e) {

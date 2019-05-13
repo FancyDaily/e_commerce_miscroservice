@@ -13,7 +13,6 @@ import lombok.Data;
  */
 @Data
 public class MyLearningSubjectVO {
-@Id
     private Long id;
 
     private Long userId;

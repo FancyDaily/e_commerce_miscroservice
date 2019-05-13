@@ -27,6 +27,8 @@ public interface GZSubjectService {
      */
     SubjectInfosVO subjectDetail(Long subjectId);
 
+    SubjectInfosVO subjectDetailAuth(Long userId, Long subjectId);
+
     /**
      * 章节列表
      * @param subjectId
@@ -55,4 +57,6 @@ public interface GZSubjectService {
      * @return
      */
     QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize);
+
+    void publish(TGzSubject gzSubject);
 }

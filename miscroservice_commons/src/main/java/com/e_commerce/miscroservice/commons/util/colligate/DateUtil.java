@@ -13,7 +13,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 
 
- /**
+/**
  * 功能描述: 日期工具
  * 模块:
  * 项目:timebank
@@ -483,4 +483,22 @@ Long[] dates = new Long[validTerm];
 		int week = (day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
 		return weekDayStrs[week];
 	}
-}
+
+     public static Map<String, Object> mills2DHms(Long availableMills) {
+		long hourInterval = 60 * 60 * 1000;
+		long minuteInterval = 60 * 1000;
+		long secondInterval = 1000;
+		long day = availableMills / interval;
+		availableMills -= day * interval;
+		long hour = availableMills / hourInterval;
+		availableMills -= hour * hourInterval;
+		long minute = availableMills / minuteInterval;
+		availableMills -= minute * minuteInterval;
+		long second = availableMills / secondInterval;
+		Map<String, Object> map = new HashMap<>();
+		String hms = hour + ":" + minute + ":" + second;
+		map.put("day", day);
+		map.put("hms", hms);
+		return map;
+	 }
+ }

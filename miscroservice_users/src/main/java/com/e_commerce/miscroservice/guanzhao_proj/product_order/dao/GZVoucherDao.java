@@ -21,4 +21,6 @@ public interface GZVoucherDao {
      * @return
      */
     List<TGzVoucher> selectByUserIdAndAvailableStatusWithCondition(Long userId, Integer... availableStatus);
+
+    int batchUpdate(List<TGzVoucher> toUpdater, List<Long> toUpdaterId);
 }

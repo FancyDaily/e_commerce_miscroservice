@@ -28,4 +28,11 @@ public class GZVoucherDaoImpl implements GZVoucherDao {
         return MybatisOperaterUtil.getInstance().finAll(new TGzVoucher(),mybatisSqlWhereBuild);
     }
 
+    @Override
+    public int batchUpdate(List<TGzVoucher> toUpdater, List<Long> toUpdaterId) {
+        return MybatisOperaterUtil.getInstance().update(toUpdater, new MybatisSqlWhereBuild(TGzVoucher.class)
+        .in(TGzVoucher::getId, toUpdaterId)
+        .eq(TGzVoucher::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
 }

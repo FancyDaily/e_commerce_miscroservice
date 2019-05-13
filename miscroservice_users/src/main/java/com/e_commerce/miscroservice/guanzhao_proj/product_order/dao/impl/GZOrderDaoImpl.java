@@ -18,4 +18,9 @@ public class GZOrderDaoImpl implements GZOrderDao {
                 .eq(TGzOrder::getUserId,id));
         return list;
     }
+
+    @Override
+    public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int i) {
+        return null;
+    }
 }
