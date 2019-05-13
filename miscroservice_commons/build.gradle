@@ -81,5 +81,6 @@ dependencies {
     //poi插件(excel文件读取)
     compile group: 'org.apache.poi', name: 'poi', version: '3.14'
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.14'
-
+//    阿里支付
+    compile 'com.alipay.sdk:alipay-sdk-java:3.4.27.ALL'
 }

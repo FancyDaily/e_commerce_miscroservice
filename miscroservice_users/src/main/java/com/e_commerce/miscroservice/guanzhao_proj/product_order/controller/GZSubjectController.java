@@ -451,6 +451,57 @@ public class GZSubjectController {
      * 正在学习课程列表
      * @param pageNum
      * @param pageSize
+     *
+     * {
+     * 	"success": true,
+     * 	"errorCode": "",
+     * 	"msg": "",
+     * 	"data": {
+     * 		"resultList": [{
+     * 			"id": 3,
+     * 			"userId": 1,
+     * 			"subjectId": 1,
+     * 			"status": 1,
+     * 			"notesNum": 0,
+     * 			"homeworkExpectedNum": 15,
+     * 			"homeworkDoneNum": 0,
+     * 			"completion": 0,
+     * 			"expireTime": 1560058601000,
+     * 			"afterTime": 26,
+     * 			"extend": "",
+     * 			"isValid": "1",
+     * 			"subjectName": "Ivy的第一堂课"
+     *                }, {
+     * 			"id": 4,
+     * 			"userId": 1,
+     * 			"subjectId": 1,
+     * 			"status": 1,
+     * 			"notesNum": 0,
+     * 			"homeworkExpectedNum": 15,
+     * 			"homeworkDoneNum": 0,
+     * 			"completion": 0,
+     * 			"expireTime": 1560058601000,
+     * 			"afterTime": 26,
+     * 			"extend": "",
+     * 			"isValid": "1",
+     * 			"subjectName": "Ivy的第一堂课"
+     *        }, {
+     * 			"id": 5,
+     * 			"userId": 1,
+     * 			"subjectId": 1,
+     * 			"status": 1,
+     * 			"notesNum": 0,
+     * 			"homeworkExpectedNum": 15,
+     * 			"homeworkDoneNum": 0,
+     * 			"completion": 0,
+     * 			"expireTime": 1560058601000,
+     * 			"afterTime": 26,
+     * 			"extend": "",
+     * 			"isValid": "1",
+     * 			"subjectName": "Ivy的第一堂课"
+     *        }],
+     * 		"totalCount": 14  	}
+     * }
      * @return
      */
     @RequestMapping("subject/learning/list")
@@ -462,7 +513,8 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = IdUtil.getId();
+            Integer id = 1;
+//            Integer id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findMyLearningSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);
@@ -479,4 +531,39 @@ public class GZSubjectController {
 
 
     }
+
+    /**
+     * 已结束的课程
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping("subject/ending/list")
+    public Object findEndingSubject(Integer pageNum,Integer pageSize){
+        AjaxResult result = new AjaxResult();
+        if (pageNum==null||pageSize==null){
+            result.setSuccess(false);
+            result.setMsg("参数为空");
+            return result;
+        }
+        try {
+            Integer id = 1;
+//            Integer id = IdUtil.getId();
+            QueryResult<MyLearningSubjectVO> list = gzSubjectService.findEndingSubject(id,pageNum,pageSize);
+            result.setSuccess(true);
+            result.setData(list);
+        }catch (MessageException e){
+            log.warn("正在学习课程列表 e={}",e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("正在学习课程列表={}",e);
+            result.setSuccess(false);
+        }
+        return result;
+
+
+    }
+
 }

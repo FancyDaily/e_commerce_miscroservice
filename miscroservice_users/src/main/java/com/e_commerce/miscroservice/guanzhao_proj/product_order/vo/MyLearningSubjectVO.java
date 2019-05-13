@@ -2,7 +2,10 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import lombok.Data;
+
+import java.sql.Timestamp;
 
 /**
  * @Description 我的正在学习
@@ -48,6 +51,9 @@ public class MyLearningSubjectVO {
     private String isValid;
 
     private String subjectName;
+    private Timestamp createTime;
+    private String startTime;
+    private String endTime;
 
     private static final long serialVersionUID = 1L;
 
@@ -55,6 +61,16 @@ public class MyLearningSubjectVO {
        Long mill = (expireTime-System.currentTimeMillis())/1000/3600/24;
         afterTime = mill.intValue();
         return afterTime;
+    }
+
+    public String getStartTime() {
+        return DateUtil.timeStamp2Date(createTime.getTime());
+    }
+
+    public String getEndTime() {
+
+        return DateUtil.timeStamp2Date(createTime.getTime()+expireTime);
+
     }
 
 }

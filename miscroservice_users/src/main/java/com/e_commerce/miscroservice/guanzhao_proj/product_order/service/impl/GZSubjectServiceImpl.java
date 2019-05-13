@@ -131,5 +131,19 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         return result;
     }
 
+    @Override
+    public QueryResult<MyLearningSubjectVO> findEndingSubject(Integer id, Integer pageNum, Integer pageSize) {
+        log.info("查看我的已结束课程id={},pageNum={},pageSize={}",id,pageNum,pageSize);
+
+        Page<MyLearningSubjectVO> page = PageHelper.startPage(pageNum,pageSize);
+        List<MyLearningSubjectVO> list = gzSubjectDao.findEndingSubject(id);
+
+        QueryResult<MyLearningSubjectVO> result = new QueryResult<>();
+        result.setResultList(list);
+        result.setTotalCount(page.getTotal());
+
+        return result;
+    }
+
 
 }
