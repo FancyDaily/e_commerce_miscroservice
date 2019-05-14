@@ -39,6 +39,7 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             boolean expired = intervel > voucher.getEffectiveTime();
             if(expired && voucher.getAvailableStatus().intValue() == GZVoucherEnum.STATUS_AVAILABLE.toCode().intValue()) {  //修正
                 voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
+                voucher.setUpdateUser(userId);
                 toUpdater.add(voucher);
                 toUpdaterId.add(voucher.getId());
             }

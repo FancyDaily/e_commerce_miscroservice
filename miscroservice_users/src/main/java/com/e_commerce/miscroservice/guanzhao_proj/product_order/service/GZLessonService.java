@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
+import org.apache.http.HttpRequest;
 
 /**
  * @Author: FangyiXu
@@ -18,7 +19,7 @@ public interface GZLessonService {
 
     QueryResult mySubjectLessonList(Long userId, Long subjectId, Integer pageNum, Integer pageSize);
 
-    void updateVideoCompletion(Long userId, Long lessonId, Integer completion);
+    void updateVideoCompletion(Long userId, Long lessonId, Integer currentSeconds, Integer totalSeconds);
 
     QueryResult<TGzEvaluate> lessonEvaluateList(Long subjectId, Long lessonId, Integer pageNum, Integer pageSize);
 }

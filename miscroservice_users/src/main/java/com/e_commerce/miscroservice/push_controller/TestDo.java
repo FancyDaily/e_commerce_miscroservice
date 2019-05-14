@@ -42,12 +42,19 @@ public class TestDo {
      */
     @GetMapping("push")
     @ResponseBody
-    public void push(Long subjectId, String fileName) {
+    public Object push(Long subjectId, String fileName) {
         log.info("开始推送文件={}",fileName);
-        Boolean isPushSuccess = fileUrlManagers.push(fileName);
-        if(isPushSuccess) {
-            gzLessonService.sendUnlockTask(subjectId, fileName);
+        AjaxResult result = new AjaxResult();
+        try {
+            Boolean isPushSuccess = fileUrlManagers.push(fileName);
+            if(isPushSuccess) {
+                gzLessonService.sendUnlockTask(subjectId, fileName);
+            }
+            result.setSuccess(true);
+        } catch (Exception e) {
+            log.error("推送error{}", e);
         }
+        return result;
 
     }
 

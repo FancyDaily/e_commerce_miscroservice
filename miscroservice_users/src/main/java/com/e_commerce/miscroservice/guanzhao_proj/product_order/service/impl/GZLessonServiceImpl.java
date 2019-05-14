@@ -14,10 +14,14 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLesson
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -48,6 +52,9 @@ public class GZLessonServiceImpl implements GZLessonService {
     @Autowired
     @Lazy
     MqTemplate mqTemplate;
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Override
     public void updateLearningCompletion(Long lessonId) {
@@ -259,18 +266,33 @@ public class GZLessonServiceImpl implements GZLessonService {
     }
 
     @Override
-    public void updateVideoCompletion(Long userId, Long lessonId, Integer completion) {
+    public void updateVideoCompletion(Long userId, Long lessonId, Integer currentSeconds, Integer totalSeconds) {
+        currentSeconds = currentSeconds==null? 0: currentSeconds;
+        totalSeconds = totalSeconds==null? 0:totalSeconds;
+        double currentDouble = currentSeconds;
+        double totalDouble = totalSeconds;
+        Integer completion = (int)(currentDouble / totalDouble * 100);
+
+        String key = userId.toString() + lessonId;
+        //校验该进度是否已经更新
+        Integer attribute = (Integer) request.getSession().getAttribute(key);
+        if(attribute!=null && !attribute.equals(completion)) {
+            return;
+        }
+
+        request.getSession().setAttribute(key, completion);
+
         //校验
-        completion = completion > 100? 100:completion;
+        currentSeconds = currentSeconds > 100? 100: currentSeconds;
         //更新
         TGzUserLesson tGzUserLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
         if(tGzUserLesson==null) {
             return;
         }
         Integer comletionStatus = tGzUserLesson.getLessonCompletionStatus();
-        int expectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+        int expectedCompletionStatus = currentSeconds > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
         comletionStatus = Objects.equals(comletionStatus,GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode())? comletionStatus:expectedCompletionStatus;
-        tGzUserLesson.setVideoCompletion(completion);
+        tGzUserLesson.setVideoCompletion(currentSeconds);
         tGzUserLesson.setVideoCompletionStatus(comletionStatus);
         tGzUserLesson.setLessonCompletionStatus(comletionStatus);
         gzUserLessonDao.update(tGzUserLesson);

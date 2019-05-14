@@ -42,7 +42,7 @@ public class TGzSubject implements Serializable {
     @Column(commit = "课程期次", length = 11)
     private Integer seriesIndex;
 
-    @Column(commit = "可用状态", length = 11)
+    @Column(commit = "可用状态", length = 11, defaultVal = "1")
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")

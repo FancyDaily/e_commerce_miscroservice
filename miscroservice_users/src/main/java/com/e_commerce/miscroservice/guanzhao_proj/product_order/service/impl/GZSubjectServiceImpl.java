@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
-import ch.qos.logback.core.joran.action.AppenderRefAction;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
@@ -16,20 +15,19 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
-import com.e_commerce.miscroservice.xiaoshi_proj.order.dao.OrderDao;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
-import org.apache.shiro.mgt.SubjectDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class GZSubjectServiceImpl implements GZSubjectService {
@@ -181,11 +179,15 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         return result;
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     @Override
-    public void publish(TGzSubject gzSubject) {
+    public void publish(TGzSubject gzSubject, Integer totalSeriesSize) {
         String subjectHeadPortraitPath = gzSubject.getSubjectHeadPortraitPath();
         String availableTime = gzSubject.getAvailableTime();
         String availableDate = gzSubject.getAvailableDate();
+        Integer forSaleStatus = gzSubject.getForSaleStatus();
+        forSaleStatus = forSaleStatus==null?GZSubjectEnum.FORSALE_STATUS_NO.getCode():forSaleStatus;
+        gzSubject.setForSaleStatus(forSaleStatus);
         String endTime = gzSubject.getEndTime();
         String endDate = gzSubject.getEndDate();
         Long endDateTime = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(endDate + endTime);
@@ -193,8 +195,22 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         if(StringUtil.isAnyEmpty(subjectHeadPortraitPath,availableDate,availableTime,endDate,endTime)) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必填参数为空");
         }
+
+        String reg = "[0-9]{8}";
+        String regTime = "[0-9]{4}";
+        Pattern pattern = Pattern.compile(reg);
+        Matcher matcher = pattern.matcher(availableDate);
+        Matcher matcher1 = pattern.matcher(endDate);
+        pattern = Pattern.compile(regTime);
+        Matcher matcher2 = pattern.matcher(availableTime);
+        Matcher matcher3 = pattern.matcher(endTime);
+        if(!matcher.matches() || !matcher1.matches() || !matcher2.matches() || !matcher3.matches()) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "日期、时间格式不正确!");
+        }
+
         Integer period = gzSubject.getPeriod();
         period = period==null?60:period;
+        gzSubject.setPeriod(period);
         Double forSalePrice = gzSubject.getForSalePrice();
         Integer forSaleSurplusNum = gzSubject.getForSaleSurplusNum();
         String descPic = gzSubject.getDescPic();
@@ -218,11 +234,12 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         }
 
         //inser subject
+        gzSubject.setAvaliableStatus(GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
         gzSubject.setCreateUser(0l);
         gzSubject.setUpdateUser(0l);
         gzSubjectDao.insert(gzSubject);
         //create default lessons
-        int totalSeriesSize = 8; //预设章节数
+        totalSeriesSize = totalSeriesSize==null? 8:totalSeriesSize; //预设章节数
         int intervalDayCnt = 7; //默认章节间隔
         int lessonSeriesIndex = 1;
         //按照每七日解锁方案创建章节
@@ -230,6 +247,10 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         String lessonAvailableTime = availableTime;
         String totalAvailableDateTime = availableDate + availableTime;
         Long lessonAvailableMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(totalAvailableDateTime);
+        String totalEndDateTime = endDate + endTime;
+        Long endMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(totalEndDateTime);
+        Long periodLong = (endMills - lessonAvailableMills) / DateUtil.interval;
+        period = periodLong.intValue();
 
         List<TGzLesson> toInsert = new ArrayList<>();
         for(int currentIndex = 0; currentIndex < totalSeriesSize; currentIndex++,lessonSeriesIndex++) {
@@ -249,7 +270,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
             StringBuilder builder = new StringBuilder();
             tGzLesson.setAvailableDate(builder.append(year).append(month).append(day).toString());
             builder = new StringBuilder();
-            tGzLesson.setAvailableTime(builder.append(hour).append(minute).append(second).toString());
+            tGzLesson.setAvailableTime(builder.append(hour).append(minute).toString());
             if(currentIndex != totalSeriesSize -1) {
                 lessonAvailableMills += intervalDayCnt * DateUtil.interval;
             }

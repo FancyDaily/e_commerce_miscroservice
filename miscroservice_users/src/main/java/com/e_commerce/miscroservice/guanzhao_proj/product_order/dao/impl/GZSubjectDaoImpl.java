@@ -60,7 +60,10 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
     @Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
-        return null;
+        return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        .eq(TGzSubject::getName, name)
+        .eq(TGzSubject::getSeriesIndex, seriesIndex)
+        .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override
