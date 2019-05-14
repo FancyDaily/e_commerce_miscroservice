@@ -20,4 +20,9 @@ public interface GZUserSubjectDao {
 
     List<TGzUserSubject> selectBySubjectId(Long subjectId);
 
+    /**
+     * 保存我的课程
+     * @param tGzUserSubject
+     */
+    void insert(TGzUserSubject tGzUserSubject);
 }

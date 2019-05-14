@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.dao;
 
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserLesson;
 
 import java.util.List;
@@ -25,4 +26,6 @@ public interface GZUserLessonDao {
     int batchUpdate(List<TGzUserLesson> toUpdater, List<Long> toUpdaterIds);
 
     int batchInsert(List<TGzUserLesson> toInserter);
+
+    void insertList(List<TGzLesson> list);
 }

@@ -6,15 +6,13 @@ import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
+import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZOrderDao;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZSubjectDao;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZVoucherDao;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import com.github.wxpay.sdk.WXPay;
 import com.github.wxpay.sdk.WXPayUtil;
@@ -22,7 +20,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +48,15 @@ public class GZPayServiceImpl implements GZPayService {
     private GZSubjectDao gzSubjectDao;
     @Autowired
     private GZVoucherDao gzVoucherDao;
+
+    @Autowired
+    private GZUserSubjectDao gzUserSubjectDao;
+     @Autowired
+    private GZUserLessonDao gzUserLessonDao;
+    @Autowired
+    private GZLessonDao gzLessonDao;
+
+
     @Override
     public AliPayPo qrCodeTradePre(AliPayPo payPo) {
         try {
@@ -125,10 +139,13 @@ public class GZPayServiceImpl implements GZPayService {
             money = tGzSubject.getPrice();
         }
         String subjectName = tGzSubject.getName();
-        TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
-        if (tGzVoucher!=null&&tGzVoucher.getReductionLimit()<=Double.valueOf(money)){
-            money = money - tGzVoucher.getPrice();
+        if(couponId!=null){
+            TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
+            if (tGzVoucher!=null&&tGzVoucher.getReductionLimit()<=Double.valueOf(money)&&(tGzVoucher.getEffectiveTime()+tGzVoucher.getActivationTime())>=System.currentTimeMillis()){
+                money = money - tGzVoucher.getPrice();
+            }
         }
+
         String attach = userId+","+couponId;
         String orderNo = UUIdUtil.generateOrderNo();
         Double minMon = money * 100;
@@ -180,6 +197,17 @@ public class GZPayServiceImpl implements GZPayService {
                     System.out.println("====" + resp.get("code_url"));
                     resp.put("realsign", sign);
                     url.append("prepay_id=" + prepay_id + "&signType=" + signType + "&sign=" + sign);
+                    resp.put("orderNo",orderNo);
+                    BufferedImage bufferedImage = QRCodeUtil.toBufferedImage(resp.get("code_url"), 300, 300);
+//            QRCodeUtil.writeToStream(result.get("code_url"),outputStream, 300, 300);
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+                    ImageIO.write(bufferedImage, "png", os);
+                    InputStream is = new ByteArrayInputStream(os.toByteArray());
+                    String img = AliOSSUtil.uploadQrImg(is,orderNo);
+//            ajaxResult.setSuccess(true);
+//            ajaxResult.setData();
+//            return ajaxResult;
+                    resp.put("img",img);
                     return resp;
                 } else {
                     log.warn("订单号：{},错误信息：{}", orderNo, errCodeDes);
@@ -242,6 +270,24 @@ public class GZPayServiceImpl implements GZPayService {
                             order.setTgzOrderNo(out_trade_no);
                             order.setStatus(GZOrderEnum.PAYED.getCode());
                             gzOrderDao.updateOrder(order);
+                            TGzUserSubject tGzUserSubject = new TGzUserSubject();
+                            tGzUserSubject.setUserId(tGzOrder.getUserId());
+                            tGzUserSubject.setSubjectId(tGzOrder.getSubjectId());
+                            gzUserSubjectDao.insert(tGzUserSubject);
+
+                            List<TGzLesson> list = gzLessonDao.selectBySubjectId(tGzOrder.getSubjectId());
+                            List<TGzUserLesson> lessonList = new ArrayList<>();
+                            list.forEach(tGzLesson -> {
+                                TGzUserLesson tGzUserLesson = new TGzUserLesson();
+                                tGzUserLesson.setUserId(tGzOrder.getUserId());
+                                tGzUserLesson.setSubjectId(tGzOrder.getSubjectId());
+                                tGzUserLesson.setLessonId(tGzLesson.getId());
+                                lessonList.add(tGzUserLesson);
+                            });
+
+
+                            gzUserLessonDao.insertList(list);
+
                             log.info("微信手机支付回调成功订单号:{}", out_trade_no);
                             xmlBack = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
 
