@@ -23,4 +23,6 @@ public interface GZVoucherDao {
     List<TGzVoucher> selectByUserIdAndAvailableStatusWithCondition(Long userId, Integer... availableStatus);
 
     int batchUpdate(List<TGzVoucher> toUpdater, List<Long> toUpdaterId);
+
+    int update(TGzVoucher voucher);
 }

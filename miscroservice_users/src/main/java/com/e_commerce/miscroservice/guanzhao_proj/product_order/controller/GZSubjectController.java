@@ -599,7 +599,7 @@ public class GZSubjectController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("subject/ending/list")
+    @RequestMapping("subject/ending/list/" + TokenUtil.AUTH_SUFFIX)
     public Object findEndingSubject(Integer pageNum,Integer pageSize){
         AjaxResult result = new AjaxResult();
         if (pageNum==null||pageSize==null){
@@ -608,8 +608,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = 1;
-//            Integer id = IdUtil.getId();
+            Integer id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findEndingSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);

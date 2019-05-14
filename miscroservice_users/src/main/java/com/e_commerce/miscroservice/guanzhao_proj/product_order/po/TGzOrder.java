@@ -27,7 +27,7 @@ public class TGzOrder implements Serializable {
     @Column(commit = "订单状态", length = 11)
     private Integer status;
 
-    @Column(commit = "订单价格")
+    @Column(commit = "订单价格", precision = 2)
     private Double price;
 
     @Column(commit = "订单创建时间戳")
