@@ -1,10 +1,14 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
@@ -16,13 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -116,16 +119,14 @@ public class PayController {
 
 
 
-    @RequestMapping(value = "/wx")
-    public void orderPay(@RequestParam(required = true,value = "user_id")String user_id,
-                           @RequestParam(required = true,value = "coupon_id")String coupon_id,
+    @RequestMapping(value = "/wx/" + TokenUtil.AUTH_SUFFIX)
+    public Object orderPay(
+                           @RequestParam(required = false,value = "orderNo")String orderNo,
+                           @RequestParam(required = false,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
-                           @RequestParam(required = true,value = "subjectName")String subjectName,
-                           @RequestParam(required = true,value = "out_trade_no")String out_trade_no,
-                           @RequestParam(required = true,value = "total_fee")String total_fee,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
         logger.info("进入微信支付申请");
-
+        AjaxResult ajaxResult = new AjaxResult();
         Date now = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");//可以方便地修改日期格式
         String hehe = dateFormat.format(now);
@@ -134,13 +135,23 @@ public class PayController {
 //        String total_fee="1";              //7777777  微信支付钱的单位为分
 //        String user_id="1";               //77777
 //        String coupon_id="7";               //777777
-
-        String attach=user_id+","+coupon_id;
+//        Integer userId = user_id;
+        Integer userId = IdUtil.getId();
         WXMyConfigUtil config = new WXMyConfigUtil();
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
         logger.info(spbill_create_ip);
-        Map<String,String> result = gzPayService.dounifiedOrder(attach,out_trade_no,total_fee,spbill_create_ip,1,subjectId,subjectName);
+        Map<String,String> result = gzPayService.dounifiedOrder(orderNo,userId,coupon_id,spbill_create_ip,1,subjectId);
+        if (result==null){
+            ajaxResult.setSuccess(false);
+            return ajaxResult;
+        }
+        if (result.get("result_code").equals("FAIL")){
+
+            ajaxResult.setMsg(result.get("err_code_des"));
+            ajaxResult.setSuccess(false);
+            return ajaxResult;
+        }
         String nonce_str = (String)result.get("nonce_str");
         String prepay_id = (String)result.get("prepay_id");
         Long time =System.currentTimeMillis()/1000;
@@ -160,24 +171,14 @@ public class PayController {
                 "\"noncestr\":\""+nonce_str+"\",\"timestamp\":"+timestamp+"," +
                 "\"prepayid\":\""+prepay_id+"\",\"sign\":\""+sign+"\"}";
         logger.info(resultString);
-
-        ServletOutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            QRCodeUtil.writeToStream(result.get("code_url"), outputStream, 300, 300);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("orderNo",result.get("orderNo"));
+        jsonObject.put("resultString",resultString);
+        jsonObject.put("img",result.get("img"));
+        ajaxResult.setSuccess(true);
+        ajaxResult.setData(jsonObject);
 //        return resultString;    //给前端app返回此字符串，再调用前端的微信sdk引起微信支付
-
+        return ajaxResult;
     }
 
     /**
@@ -186,7 +187,7 @@ public class PayController {
     @RequestMapping(value = "wx/native/notify")
     public String WXPayBack(HttpServletRequest request,HttpServletResponse response){
         String resXml="";
-        logger.info("进入异步通知");
+        logger.info("进入微信异步通知");
         try{
             //
             InputStream is = request.getInputStream();

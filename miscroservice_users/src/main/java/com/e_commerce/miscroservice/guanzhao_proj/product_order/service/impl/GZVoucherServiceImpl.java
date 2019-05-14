@@ -39,8 +39,11 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             boolean expired = intervel > voucher.getEffectiveTime();
             if(expired && voucher.getAvailableStatus().intValue() == GZVoucherEnum.STATUS_AVAILABLE.toCode().intValue()) {  //修正
                 voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
-                toUpdater.add(voucher);
-                toUpdaterId.add(voucher.getId());
+                voucher.setUpdateUser(userId);
+                gzVoucherDao.update(voucher);
+//                toUpdater.add(voucher);
+//                toUpdaterId.add(voucher.getId());
+                myVoucherVo.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
             }
             intervel = voucher.getEffectiveTime() - intervel;
             Long expectedDayCnt = intervel/ DateUtil.interval;
@@ -53,7 +56,7 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             myVoucherVo.setSurplusHourCnt(expectedHourCnt.intValue());
             resultList.add(myVoucherVo);
         }
-        gzVoucherDao.batchUpdate(toUpdater, toUpdaterId);
+//        gzVoucherDao.batchUpdate(toUpdater, toUpdaterId);
         return resultList;
     }
 

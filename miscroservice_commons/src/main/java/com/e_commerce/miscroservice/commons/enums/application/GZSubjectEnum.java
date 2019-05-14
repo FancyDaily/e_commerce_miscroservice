@@ -9,7 +9,7 @@ public enum GZSubjectEnum {
     FORSALE_STATUS_NO(0, "未优惠"),
     FORSALE_STATUS_YES(1, "优惠中"),
     AVAILABLE_STATUS_TRUE(1, "可用"),
-    AVAILABLE_STATUS_FALSE(2, "不可用");
+    AVAILABLE_STATUS_FALSE(0, "不可用");
 
     public static final Integer DEFAULTSURPLUSNUM = 15;
 

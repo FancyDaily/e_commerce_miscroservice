@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyVoucherVo;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 
 @Table(commit = "观照-代金券表")
 @Data
+@Builder
 public class TGzVoucher implements Serializable {
     @Id
     private Long id;
@@ -23,8 +25,8 @@ public class TGzVoucher implements Serializable {
     @Column(commit = "代金券金额")
     private Double price;
 
-    @Column(commit = "满减下限", length = 11)
-    private Integer reductionLimit;
+    @Column(commit = "满减下限", length = 11,precision = 2)
+    private Double reductionLimit;
 
     @Column(commit = "有效时长(时间戳)")
     private Long effectiveTime;

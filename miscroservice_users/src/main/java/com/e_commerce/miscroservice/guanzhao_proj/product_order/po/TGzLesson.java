@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 
 @Table(commit = "观照-章节表")
 @Data
+@Builder
 public class TGzLesson implements Serializable {
     @Id
     private Long id;
@@ -24,7 +26,10 @@ public class TGzLesson implements Serializable {
     @Column(commit = "章节名称")
     private String name;
 
-    @Column(commit = "可用状态", length = 11)
+    @Column(commit = "章节视频装载状态", length = 11, defaultVal = "0")
+    private Integer videoOnLoadStatus;
+
+    @Column(commit = "可用状态", length = 11, defaultVal = "0")
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")

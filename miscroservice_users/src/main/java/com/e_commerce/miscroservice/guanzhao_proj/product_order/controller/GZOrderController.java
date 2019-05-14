@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
@@ -30,12 +31,11 @@ public class GZOrderController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("list")
+    @RequestMapping("list/" + TokenUtil.AUTH_SUFFIX)
     public Object findMyOrderList(Integer pageNum,Integer pageSize){
 
         AjaxResult ajaxResult = new AjaxResult();
         try {
-//            Integer id = 1;
             Integer id = IdUtil.getId();
             QueryResult<TGzOrder> list = gzOrderService.findMyOrderList(id, pageNum, pageSize);
             ajaxResult.setData(list);
@@ -49,6 +49,30 @@ public class GZOrderController {
             ajaxResult.setSuccess(false);
         }
         return ajaxResult;
+    }
+
+    /**
+     * 查询我的订单详情
+     * @param orderId
+     * @return
+     */
+    @RequestMapping("detailed/"+TokenUtil.AUTH_SUFFIX)
+    public Object findOrderDetailed(String orderId){
+        AjaxResult result = new AjaxResult();
+        try {
+            Integer userId  = IdUtil.getId();
+            TGzOrder tGzOrder = gzOrderService.findOrderDetailed(orderId,userId);
+            result.setData(tGzOrder);
+            result.setSuccess(true);
+        }catch (MessageException e){
+            log.warn("我的订单={}",e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }catch (Exception e){
+            log.error("我的订单={}",e);
+            result.setSuccess(false);
+        }
+        return result;
     }
 
 

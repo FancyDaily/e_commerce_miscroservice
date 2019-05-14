@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjec
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 import lombok.Data;
+import org.apache.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -176,7 +177,7 @@ public class GZSubjectController {
      *                  }
      * @return
      */
-    @RequestMapping("subject/detail" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("subject/detail/" + TokenUtil.AUTH_SUFFIX)
     public Object subjectDetailAuth(Long subjectId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -440,12 +441,12 @@ public class GZSubjectController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            log.warn("====方法描述: {}, Message: {}====", "视频进度更新", e.getMessage());
+            log.warn("====方法描述: {}, Message: {}====", "课程评价列表", e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("视频进度更新", e);
+            log.error("课程评价列表", e);
             result.setSuccess(false);
         }
         return result;
@@ -453,19 +454,13 @@ public class GZSubjectController {
 
     /**
      * 视频进度更新
-     *
-     * @param completion 视频进度
-     * @param lessonId   章节编号
-     *                   {
-     *                   "success": true,
-     *                   "errorCode": "",
-     *                   "msg": "",
-     *                   "data": ""
-     *                   }
+     * @param currentSeconds
+     * @param totalSeconds
+     * @param lessonId
      * @return
      */
     @RequestMapping("lesson/completion/update/" + TokenUtil.AUTH_SUFFIX)
-    public Object lessonCompletionUpdate(@RequestParam(required = true) Integer completion, @RequestParam(required = true) Long lessonId) {
+    public Object lessonCompletionUpdate(@RequestParam(required = true) Integer currentSeconds, @RequestParam(required = true)  Integer totalSeconds, @RequestParam(required = true) Long lessonId) {
         TUser user = UserUtil.getUser();
         if (user == null) {
             user = new TUser();
@@ -473,7 +468,7 @@ public class GZSubjectController {
         }
         AjaxResult result = new AjaxResult();
         try {
-            gzLessonService.updateVideoCompletion(user.getId(), lessonId, completion);
+            gzLessonService.updateVideoCompletion(user.getId(), lessonId, currentSeconds, totalSeconds);
             result.setSuccess(true);
         } catch (MessageException e) {
             log.warn("====方法描述: {}, Message: {}====", "视频进度更新", e.getMessage());
@@ -494,11 +489,11 @@ public class GZSubjectController {
      */
     @RequestMapping("subject/publish")
     @Consume(TGzSubject.class)
-    public Object subjectPublish(@RequestParam(required = true) String name, Integer period,@RequestParam(required = true) String subjectHeadPortraitPath,@RequestParam(required = true) Double price, Double forSalePrice, Integer forSaleSurplusNum, Integer seriesIndex, String availableDate, String availableTime, String endDate, String endTime, String descPic, String remarks) {
+    public Object subjectPublish(Integer totalSeriesSize, @RequestParam(required = true) String name, Integer period,@RequestParam(required = true) String subjectHeadPortraitPath,@RequestParam(required = true) Double price, Double forSalePrice, Integer forSaleSurplusNum, Integer seriesIndex, String availableDate, String availableTime, String endDate, String endTime, String descPic, String remarks) {
         AjaxResult result = new AjaxResult();
         TGzSubject gzSubject = (TGzSubject) ConsumeHelper.getObj();
         try {
-            gzSubjectService.publish(gzSubject);
+            gzSubjectService.publish(gzSubject, totalSeriesSize);
             result.setSuccess(true);
         } catch (MessageException e) {
             log.warn("====方法描述: {}, Message: {}====", "发布新课程", e.getMessage());
@@ -579,8 +574,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = 1;
-//            Integer id = IdUtil.getId();
+            Integer id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findMyLearningSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);
@@ -604,7 +598,7 @@ public class GZSubjectController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("subject/ending/list")
+    @RequestMapping("subject/ending/list/" + TokenUtil.AUTH_SUFFIX)
     public Object findEndingSubject(Integer pageNum,Integer pageSize){
         AjaxResult result = new AjaxResult();
         if (pageNum==null||pageSize==null){
@@ -613,8 +607,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = 1;
-//            Integer id = IdUtil.getId();
+            Integer id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findEndingSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);
@@ -628,8 +621,6 @@ public class GZSubjectController {
             result.setSuccess(false);
         }
         return result;
-
-
     }
 
 }

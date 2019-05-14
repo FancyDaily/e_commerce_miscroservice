@@ -6,9 +6,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlW
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZSubjectDao;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.mapper.GZSubjectMapper;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -44,8 +42,8 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     }
 
     @Override
-    public List<MyLearningSubjectVO> findMyLearningSubject(Integer id) {
-        return gzSubjectMapper.findMyLearningSubject(id);
+    public List<MyLearningSubjectVO> findMyLearningSubject(Integer id, long currentTimeMillis) {
+        return gzSubjectMapper.findMyLearningSubject(id,currentTimeMillis);
 //        return MybatisOperaterUtil.getInstance().finAll(new MyLearningSubjectVO(),new MybatisSqlWhereBuild(TGzUserSubject.class)
 //                .eq(TGzUserSubject::getUserId,id));
     }
@@ -59,8 +57,16 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     }
 
     @Override
+    public TGzSubject findSubjectById(Long subjectId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TGzSubject(),new MybatisSqlWhereBuild(TGzSubject.class).eq(TGzSubject::getId,subjectId));
+    }
+
+    @Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
-        return null;
+        return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        .eq(TGzSubject::getName, name)
+        .eq(TGzSubject::getSeriesIndex, seriesIndex)
+        .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override

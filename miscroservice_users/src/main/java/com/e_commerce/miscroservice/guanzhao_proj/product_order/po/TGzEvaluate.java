@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 
 @Table(commit = "观照-评价表")
 @Data
+@Builder
 public class TGzEvaluate implements Serializable {
     @Id
     private Long id;
@@ -21,7 +23,7 @@ public class TGzEvaluate implements Serializable {
 
     private Long subjectId;
 
-    @Column(commit = "好评级别(差评、中评、好评)", length = 11)
+    @Column(commit = "好评级别(差评、中评、好评)", length = 11, defaultVal = "2")
     private Integer level;
 
     @Column(commit = "描述")

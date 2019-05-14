@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 
 @Table(commit = "观照-用户课程关联表")
 @Data
+@Builder
 public class TGzUserSubject implements Serializable {
     @Id
     private Long id;
@@ -22,16 +24,16 @@ public class TGzUserSubject implements Serializable {
     @Column(commit = "状态", length = 11)
     private Integer status;
 
-    @Column(commit = "笔记数量", length = 11)
+    @Column(commit = "笔记数量", length = 11, defaultVal = "0")
     private Integer notesNum;
 
-    @Column(commit = "作业总数", length = 11)
+    @Column(commit = "作业总数", length = 11, defaultVal = "0")
     private Integer homeworkExpectedNum;
 
-    @Column(commit = "作业完成数", length = 11)
+    @Column(commit = "作业完成数", length = 11, defaultVal = "0")
     private Integer homeworkDoneNum;
 
-    @Column(commit = "学习进度", length = 11)
+    @Column(commit = "学习进度", length = 11, defaultVal = "0")
     private Integer completion;
 
     @Column(commit = "失效时间戳")

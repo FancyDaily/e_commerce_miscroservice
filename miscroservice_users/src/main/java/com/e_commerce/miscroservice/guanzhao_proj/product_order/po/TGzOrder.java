@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.sql.Timestamp;
 
 @Table(commit = "观照-订单表")
 @Data
+@Builder
 public class TGzOrder implements Serializable {
     @Id
     private Long id;
@@ -19,13 +21,17 @@ public class TGzOrder implements Serializable {
 
     private Long subjectId;
 
+    private Long voucherId;
+
+    @Column(commit = "订单编号")
+    private String tgzOrderNo;
     @Column(commit = "课程名称")
     private String subjectName;
 
-    @Column(commit = "订单状态", length = 11)
+    @Column(commit = "订单状态", length = 11, defaultVal = "1", isNUll = false)
     private Integer status;
 
-    @Column(commit = "订单价格")
+    @Column(commit = "订单价格", precision = 2)
     private Double price;
 
     @Column(commit = "订单创建时间戳")

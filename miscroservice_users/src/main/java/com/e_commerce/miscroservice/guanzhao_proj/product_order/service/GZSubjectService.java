@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
@@ -59,7 +58,7 @@ public interface GZSubjectService {
      */
     QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize);
 
-    void publish(TGzSubject gzSubject);
+    void publish(TGzSubject gzSubject, Integer totalSeriesSize);
 
     /**
      * 已结束的课程

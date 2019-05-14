@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.dao;
 
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 
 import java.util.List;
@@ -17,9 +16,10 @@ public interface GZSubjectDao {
     /**
      * 查看我的正在学习列表
      * @param id
+     * @param currentTimeMillis
      * @return
      */
-    List<MyLearningSubjectVO> findMyLearningSubject(Integer id);
+    List<MyLearningSubjectVO> findMyLearningSubject(Integer id, long currentTimeMillis);
 
     List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex);
 
@@ -31,4 +31,11 @@ public interface GZSubjectDao {
      * @return
      */
     List<MyLearningSubjectVO> findEndingSubject(Integer id);
+
+    /**
+     * 查询课程
+     * @param subjectId
+     * @return
+     */
+    TGzSubject findSubjectById(Long subjectId);
 }

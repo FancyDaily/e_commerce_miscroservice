@@ -14,10 +14,15 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLesson
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.redisson.client.protocol.convertor.IntegerReplayConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -48,6 +53,9 @@ public class GZLessonServiceImpl implements GZLessonService {
     @Autowired
     @Lazy
     MqTemplate mqTemplate;
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Override
     public void updateLearningCompletion(Long lessonId) {
@@ -81,12 +89,8 @@ public class GZLessonServiceImpl implements GZLessonService {
 
         mqTemplate.sendMsg(MqChannelEnum.TIMER_SCHEDULER_TIMER_SEND.toName(), JSONObject.toJSONString(scheduler));
 */
-
-        Integer lessonAvailableStatus = tGzLesson.getAvaliableStatus();
-        if (Objects.isNull(lessonAvailableStatus) || Objects.equals(GZLessonEnum.AVAILABLE_STATUS_NO.getCode(), lessonAvailableStatus)) {
-            tGzLesson.setAvaliableStatus(GZLessonEnum.AVAILABLE_STATUS_YES.getCode());
-            gzLessonDao.updateByPrimaryKey(tGzLesson);
-        }
+        tGzLesson.setVideoOnLoadStatus(GZLessonEnum.VIDEO_STATUS_AVAILABLE_YES.getCode());
+        gzLessonDao.updateByPrimaryKey(tGzLesson);
 
         //如果对应subject没有解锁，则解锁
         TGzSubject subject = gzSubjectDao.selectByPrimaryKey(subjectId);
@@ -94,15 +98,8 @@ public class GZLessonServiceImpl implements GZLessonService {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "找不到该课程！请确认课程编号");
         }
 
-        Integer avaliableStatus = subject.getAvaliableStatus();
-        if (Objects.isNull(avaliableStatus) || Objects.equals(GZSubjectEnum.AVAILABLE_STATUS_FALSE.getCode(), avaliableStatus)) {
-            subject.setAvaliableStatus(GZSubjectEnum.AVAILABLE_STATUS_TRUE.getCode());
-            gzSubjectDao.updateByPrimaryKey(subject);
-        }
-
-        //找到所有购买此课程的用户
+        //找到所有购买此课程的用户 -> 写入sign
         List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectBySubjectId(subjectId);
-        List<TGzUserLesson> toInserter = new ArrayList<>();
         List<TGzUserLesson> toUpdater = new ArrayList<>();
         List<Long> toUpdaterIds = new ArrayList<>();
         for (TGzUserSubject tGzUserSubject : tGzUserSubjects) {
@@ -118,22 +115,6 @@ public class GZLessonServiceImpl implements GZLessonService {
 
             //创建user-lesson关系
             TGzUserLesson userLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
-            if(userLesson==null) {
-                userLesson = new TGzUserLesson();
-                userLesson.setLessonId(lessonId);
-                userLesson.setSubjectId(subjectId);
-                userLesson.setUserId(userId);
-                userLesson.setCreateUser(userId);
-                userLesson.setUpdateUser(userId);
-                userLesson.setIsValid(AppConstant.IS_VALID_YES);
-                userLesson.setVideoCompletion(0);
-                userLesson.setVideoCompletionStatus(GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode());
-                userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
-                userLesson.setSign(sign);
-                toInserter.add(userLesson);
-                continue;
-            }
-
             userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
             userLesson.setSign(sign);
             toUpdaterIds.add(userLesson.getId());
@@ -141,9 +122,6 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
 
         try {
-            if(!toInserter.isEmpty()) {
-             gzUserLessonDao.batchInsert(toInserter);
-            }
             if(!toUpdater.isEmpty()) {
                 gzUserLessonDao.batchUpdate(toUpdater, toUpdaterIds);
             }
@@ -151,35 +129,42 @@ public class GZLessonServiceImpl implements GZLessonService {
 
         }
 
-        //解锁
-        /*Long lessonId = tGzLesson.getId();
-        Long userId = null;
-        List<TGzUserLesson> tGzUserLessonList = gzUserLessonDao.selectByLessonId(lessonId);
-        List<TGzUserLesson> toUpdater = new ArrayList<>();
-        List<Long> toUpdaterIds = new ArrayList<>();
-        for(TGzUserLesson tGzUserLesson:tGzUserLessonList) {
-            toUpdaterIds.add(tGzUserLesson.getId());
-            userId = tGzUserLesson.getUserId();
-            tGzUserLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
-            tGzUserLesson.setUpdateTime(System.currentTimeMillis());
-            toUpdater.add(tGzUserLesson);
-        }
-        gzUserLessonDao.batchUpdate(toUpdater, toUpdaterIds);*/
-
     }
 
     @Override
     public void authCheck(String sign, Long userId, String name, Long subjectId, Long lessonId) {
         String sourceStr = userId + "" + lessonId + "" + subjectId;
         String expectedSign = Md5Util.md5(sourceStr);
+        MessageException messageException = new MessageException("对不起，你没有权限观看!");
         //校验sign
         if (!Objects.equals(expectedSign, sign)) {
-            throw new MessageException("对不起，你没有权限观看!");
+            throw messageException;
         }
         //校验user
         TGzKeyValue keyValue = keyValueDao.selectByTypeAndValue(KeyValueEnum.TYPE_SIGN.toCode(), sign);
         if (!Objects.equals(userId + "", keyValue.getGzkey())) {
-            throw new MessageException("对不起, 您没有权限观看!");
+            throw messageException;
+        }
+        //校验课程有效权限
+        TGzUserSubject userSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
+        if(Objects.isNull(userSubject) || System.currentTimeMillis() > userSubject.getExpireTime()) {
+            throw messageException;
+        }
+        //章节开放
+        TGzLesson tGzLesson = gzLessonDao.selectByPrimaryKey(lessonId);
+        messageException = new MessageException("当前章节未开放!");
+        boolean flag = false;
+        if(Objects.isNull(tGzLesson) || !Objects.equals(tGzLesson.getVideoOnLoadStatus(), GZLessonEnum.VIDEO_STATUS_AVAILABLE_YES)) {
+            throw messageException;
+        }
+        String availableDate = tGzLesson.getAvailableDate();
+        String availableTime = tGzLesson.getAvailableTime();
+        String wholeDateTime = availableDate + availableTime;
+        Long availableStamp = Long.valueOf(DateUtil.dateTimeToStamp(wholeDateTime));
+        flag = System.currentTimeMillis() < availableStamp; //未到章节开放时间
+
+        if(flag) {
+            throw messageException;
         }
 
     }
@@ -206,7 +191,9 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
         //我的课程记录
         TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
-        if (Objects.isNull(tGzUserSubject) || Objects.equals(tGzUserSubject.getStatus(), GZUserSubjectEnum.STATUS_EXPIRED)) {    //TODO 失效是否可以看
+        Long expireTime = tGzUserSubject.getExpireTime();   //过期时间
+        boolean expired = System.currentTimeMillis() > expireTime; //我的学习权限是否过期
+        if (Objects.isNull(tGzUserSubject) || expired) {    //TODO 失效是否可以看
             throw new MessageException("对不起, 您没有权限查看该课程");
         }
 
@@ -218,16 +205,13 @@ public class GZLessonServiceImpl implements GZLessonService {
         List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
         Map<Long, Object> lessonIdAvailableStatusMap = new HashMap<>();
         for (TGzUserLesson gzUserLesson : gzUserLessonList) {
-            Integer status = gzUserLesson.getStatus();
-            if (Objects.equals(status, GZUserLessonEnum.STATUS_AVAILABLE.getCode())) {
-                lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
-            }
+            lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
         }
 
         for (TGzLesson tGzLesson : tGzLessons) {
             MyLessonVO myLessonVO = tGzLesson.copyMyLessonVO();
             Object existObject = lessonIdAvailableStatusMap.get(tGzLesson.getId());
-            Integer status = GZUserLessonEnum.STATUS_AVAILABLE.getCode();
+            Integer videoOnLoadStatus = tGzLesson.getVideoOnLoadStatus();
             Integer videoCompletion = 0;
             Integer lessonCompletionStatus = GZUserLessonEnum.LESSON_COMPLETION_STATUS_NO.getCode();
             String sign = null;
@@ -235,18 +219,22 @@ public class GZLessonServiceImpl implements GZLessonService {
                 TGzUserLesson userLesson = (TGzUserLesson) existObject;
                 videoCompletion = userLesson.getVideoCompletion();
                 lessonCompletionStatus = userLesson.getLessonCompletionStatus();
-                status = GZUserLessonEnum.STATUS_UNAVAILABLE.getCode();
                 sign = userLesson.getSign();
             }
             myLessonVO.setSign(sign);
             myLessonVO.setLessonIndex(tGzLesson.getLessonIndex());
-            myLessonVO.setAvaliableStatus(tGzLesson.getAvaliableStatus());
-            myLessonVO.setAvailableDate(tGzLesson.getAvailableDate());
-            myLessonVO.setAvailableTime(tGzLesson.getAvailableTime());
+            String availableDate = tGzLesson.getAvailableDate();
+            String availableTime = tGzLesson.getAvailableTime();
+            String wholeDateTime = availableDate + availableTime;
+            Long dateTimeMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(wholeDateTime);
+            Integer lessonAvailableStatus = System.currentTimeMillis() > dateTimeMills? GZLessonEnum.AVAILABLE_STATUS_YES.getCode(): GZLessonEnum.AVAILABLE_STATUS_NO.getCode();
+            myLessonVO.setAvaliableStatus(lessonAvailableStatus);
+            myLessonVO.setAvailableDate(availableDate);
+            myLessonVO.setAvailableTime(availableTime);
             myLessonVO.setVideoCompletion(videoCompletion);
             myLessonVO.setLessonCompletionStatus(lessonCompletionStatus);
             myLessonVO.setLessonId(tGzLesson.getId());
-            myLessonVO.setStatus(status);
+            myLessonVO.setVideoOnloadStatus(videoOnLoadStatus);   //视频可播放状态
             myLessonVO.setUserId(userId);
             myLessonVOS.add(myLessonVO);
         }
@@ -259,18 +247,33 @@ public class GZLessonServiceImpl implements GZLessonService {
     }
 
     @Override
-    public void updateVideoCompletion(Long userId, Long lessonId, Integer completion) {
+    public void updateVideoCompletion(Long userId, Long lessonId, Integer currentSeconds, Integer totalSeconds) {
+        currentSeconds = currentSeconds==null? 0: currentSeconds;
+        totalSeconds = totalSeconds==null? 0:totalSeconds;
+        double currentDouble = currentSeconds;
+        double totalDouble = totalSeconds;
+        Integer completion = (int)(currentDouble / totalDouble * 100);
+
+        String key = userId.toString() + lessonId;
+        //校验该进度是否已经更新
+        Integer attribute = (Integer) request.getSession().getAttribute(key);
+        if(attribute!=null && !attribute.equals(completion)) {
+            return;
+        }
+
+        request.getSession().setAttribute(key, completion);
+
         //校验
-        completion = completion > 100? 100:completion;
+        currentSeconds = currentSeconds > 100? 100: currentSeconds;
         //更新
         TGzUserLesson tGzUserLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
         if(tGzUserLesson==null) {
             return;
         }
         Integer comletionStatus = tGzUserLesson.getLessonCompletionStatus();
-        int expectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+        int expectedCompletionStatus = currentSeconds > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
         comletionStatus = Objects.equals(comletionStatus,GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode())? comletionStatus:expectedCompletionStatus;
-        tGzUserLesson.setVideoCompletion(completion);
+        tGzUserLesson.setVideoCompletion(currentSeconds);
         tGzUserLesson.setVideoCompletionStatus(comletionStatus);
         tGzUserLesson.setLessonCompletionStatus(comletionStatus);
         gzUserLessonDao.update(tGzUserLesson);
