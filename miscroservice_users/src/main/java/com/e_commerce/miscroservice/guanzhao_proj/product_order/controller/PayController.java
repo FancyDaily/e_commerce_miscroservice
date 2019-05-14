@@ -121,7 +121,7 @@ public class PayController {
 
     @RequestMapping(value = "/wx/" + TokenUtil.AUTH_SUFFIX)
     public Object orderPay(
-                           @RequestParam(required = true,value = "user_id")Integer user_id,
+//                           @RequestParam(required = true,value = "user_id")Integer user_id,
                            @RequestParam(required = true,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
@@ -135,8 +135,8 @@ public class PayController {
 //        String total_fee="1";              //7777777  微信支付钱的单位为分
 //        String user_id="1";               //77777
 //        String coupon_id="7";               //777777
-        Integer userId = user_id;
-//        Integer userId = IdUtil.getId();
+//        Integer userId = user_id;
+        Integer userId = IdUtil.getId();
         WXMyConfigUtil config = new WXMyConfigUtil();
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
@@ -173,6 +173,7 @@ public class PayController {
         logger.info(resultString);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("orderNo",result.get("orderNo"));
+        jsonObject.put("resultString",resultString);
         jsonObject.put("img",result.get("img"));
         ajaxResult.setSuccess(true);
         ajaxResult.setData(jsonObject);

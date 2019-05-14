@@ -51,6 +51,25 @@ public class GZOrderController {
         return ajaxResult;
     }
 
+    @RequestMapping("detailed/"+TokenUtil.AUTH_SUFFIX)
+    public Object findOrderDetailed(String orderId){
+        AjaxResult result = new AjaxResult();
+        try {
+            Integer userId  = IdUtil.getId();
+            TGzOrder tGzOrder = gzOrderService.findOrderDetailed(orderId,userId);
+            result.setData(tGzOrder);
+            result.setSuccess(true);
+        }catch (MessageException e){
+            log.warn("我的订单={}",e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }catch (Exception e){
+            log.error("我的订单={}",e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
 
 
 

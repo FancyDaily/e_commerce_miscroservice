@@ -34,6 +34,12 @@ public class GZOrderDaoImpl implements GZOrderDao {
     }
 
     @Override
+    public TGzOrder findByOrderId(String orderId) {
+
+        return MybatisOperaterUtil.getInstance().findOne(new TGzOrder(),new MybatisSqlWhereBuild(TGzOrder.class).eq(TGzOrder::getId,orderId));
+    }
+
+    @Override
     public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int i) {
         return null;
     }

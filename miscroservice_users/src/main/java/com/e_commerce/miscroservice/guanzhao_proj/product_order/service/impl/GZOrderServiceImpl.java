@@ -28,4 +28,12 @@ public class GZOrderServiceImpl implements GZOrderService {
         result.setTotalCount(page.getTotal());
         return result;
     }
+
+    @Override
+    public TGzOrder findOrderDetailed(String orderId, Integer userId)
+    {
+        logger.info("查询我的订单order={},userId={}",orderId,userId);
+        TGzOrder tGzOrder = gzOrderDao.findByOrderId(orderId);
+        return tGzOrder;
+    }
 }
