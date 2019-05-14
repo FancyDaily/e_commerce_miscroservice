@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
@@ -101,6 +102,7 @@ public class GZPayServiceImpl implements GZPayService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        String orderNo = UUIdUtil.generateOrderNo();
         Double money = Double.valueOf(total_fee);
         Double minMon = money*100;
         TGzOrder tGzOrder = new TGzOrder();
@@ -109,6 +111,7 @@ public class GZPayServiceImpl implements GZPayService {
         tGzOrder.setSubjectName(subjectName);
         tGzOrder.setOrderTime(System.currentTimeMillis());
         tGzOrder.setStatus(GZOrderEnum.UN_PAY.getCode());
+        tGzOrder.setTgzOrderNo(orderNo);
         gzOrderDao.saveOrder(tGzOrder);
         WXPay wxpay = new WXPay(config);
         Map<String, String> data = new HashMap<String, String>();
@@ -117,7 +120,7 @@ public class GZPayServiceImpl implements GZPayService {
         data.put("nonce_str", WXPayUtil.generateNonceStr());
         String body="订单支付";
         data.put("body", body);
-        data.put("out_trade_no", out_trade_no);
+        data.put("out_trade_no", orderNo);
         data.put("total_fee", String.valueOf(minMon.intValue()));
         data.put("spbill_create_ip",spbill_create_ip);
         //异步通知地址（请注意必须是外网）
@@ -203,8 +206,7 @@ public class GZPayServiceImpl implements GZPayService {
                          *          此处需要判断一下。后面写入库操作的时候再写
                          *
                          */
-
-                        System.err.println(">>>>>支付成功");
+                        log.info(">>>>>支付成功");
 
                         log.info("微信手机支付回调成功订单号:{}",out_trade_no);
                         xmlBack = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
