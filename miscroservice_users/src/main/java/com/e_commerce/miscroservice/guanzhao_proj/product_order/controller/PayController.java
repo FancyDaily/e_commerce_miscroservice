@@ -4,6 +4,10 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
+import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
+import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -44,6 +49,7 @@ public class PayController {
         AjaxResult result = new AjaxResult();
 
         try {
+            gzPayService.appTrade(payPo);
 
         }catch (MessageException e){
             logger.warn("支付宝app支付失败={}",e.getMessage());
@@ -54,7 +60,6 @@ public class PayController {
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         }
-        gzPayService.appTrade(payPo);
 
         return result;
     }
@@ -110,89 +115,107 @@ public class PayController {
     }
 
 
-//
-//    @RequestMapping(value = "/wx")
-//    public String orderPay(@RequestParam(required = true,value = "user_id")String user_id,
-//                           @RequestParam(required = true,value = "coupon_id")String coupon_id,
-//                           @RequestParam(required = true,value = "out_trade_no")String out_trade_no,
-//                           @RequestParam(required = true,value = "total_fee")String total_fee,
-//                           HttpServletRequest req, HttpServletResponse response) throws Exception {
-//        logger.info("进入微信支付申请");
-//        Date now = new Date();
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");//可以方便地修改日期格式
-//        String hehe = dateFormat.format(now);
-//
-////        String out_trade_no=hehe+"wxpay";  //777777 需要前端给的参数
-////        String total_fee="1";              //7777777  微信支付钱的单位为分
-////        String user_id="1";               //77777
-////        String coupon_id="7";               //777777
-//
-//        String attach=user_id+","+coupon_id;
-//        WXMyConfigUtil config = new WXMyConfigUtil();
-////        String spbill_create_ip = GetIPAddrUtil.getIpAddr(req);
+
+    @RequestMapping(value = "/wx")
+    public void orderPay(@RequestParam(required = true,value = "user_id")String user_id,
+                           @RequestParam(required = true,value = "coupon_id")String coupon_id,
+                           @RequestParam(required = true,value = "subjectId")Long subjectId,
+                           @RequestParam(required = true,value = "subjectName")String subjectName,
+                           @RequestParam(required = true,value = "out_trade_no")String out_trade_no,
+                           @RequestParam(required = true,value = "total_fee")String total_fee,
+                           HttpServletRequest req, HttpServletResponse response) throws Exception {
+        logger.info("进入微信支付申请");
+
+        Date now = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");//可以方便地修改日期格式
+        String hehe = dateFormat.format(now);
+
+//        String out_trade_no=hehe+"wxpay";  //777777 需要前端给的参数
+//        String total_fee="1";              //7777777  微信支付钱的单位为分
+//        String user_id="1";               //77777
+//        String coupon_id="7";               //777777
+
+        String attach=user_id+","+coupon_id;
+        WXMyConfigUtil config = new WXMyConfigUtil();
+        String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
-//        logger.info(spbill_create_ip);
-//        Map<String,String> result = wxPayService.dounifiedOrder(attach,out_trade_no,total_fee,spbill_create_ip,1);
-//        String nonce_str = (String)result.get("nonce_str");
-//        String prepay_id = (String)result.get("prepay_id");
-//        Long time =System.currentTimeMillis()/1000;
-//        String timestamp=time.toString();
-//
-//        //签名生成算法
-//        Map<String,String> map = new HashMap<>();
-//        map.put("appid",config.getAppID());
-//        map.put("partnerid",config.getMchID());
-//        map.put("package","Sign=WXPay");
-//        map.put("noncestr",nonce_str);
-//        map.put("timestamp",timestamp);
-//        map.put("prepayid",prepay_id);
-//        String sign = MD5Util.getSign(map);
-//
-//        String resultString="{\"appid\":\""+config.getAppID()+"\",\"partnerid\":\""+config.getMchID()+"\",\"package\":\"Sign=WXPay\"," +
-//                "\"noncestr\":\""+nonce_str+"\",\"timestamp\":"+timestamp+"," +
-//                "\"prepayid\":\""+prepay_id+"\",\"sign\":\""+sign+"\"}";
-//        logger.info(resultString);
-//
+        logger.info(spbill_create_ip);
+        Map<String,String> result = gzPayService.dounifiedOrder(attach,out_trade_no,total_fee,spbill_create_ip,1,subjectId,subjectName);
+        String nonce_str = (String)result.get("nonce_str");
+        String prepay_id = (String)result.get("prepay_id");
+        Long time =System.currentTimeMillis()/1000;
+        String timestamp=time.toString();
+
+        //签名生成算法
+        Map<String,String> map = new HashMap<>();
+        map.put("appid",config.getAppID());
+        map.put("partnerid",config.getMchID());
+        map.put("package","Sign=WXPay");
+        map.put("noncestr",nonce_str);
+        map.put("timestamp",timestamp);
+        map.put("prepayid",prepay_id);
+        String sign = MD5Util.getSign(map);
+
+        String resultString="{\"appid\":\""+config.getAppID()+"\",\"partnerid\":\""+config.getMchID()+"\",\"package\":\"Sign=WXPay\"," +
+                "\"noncestr\":\""+nonce_str+"\",\"timestamp\":"+timestamp+"," +
+                "\"prepayid\":\""+prepay_id+"\",\"sign\":\""+sign+"\"}";
+        logger.info(resultString);
+
+        ServletOutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            QRCodeUtil.writeToStream(result.get("code_url"), outputStream, 300, 300);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 //        return resultString;    //给前端app返回此字符串，再调用前端的微信sdk引起微信支付
-//
-//    }
-//
-//    /**
-//     * 订单支付异步通知
-//     */
-//    @RequestMapping(value = "wx/notify")
-//    public String WXPayBack(HttpServletRequest request,HttpServletResponse response){
-//        String resXml="";
-//        logger.info("进入异步通知");
-//        try{
-//            //
-//            InputStream is = request.getInputStream();
-//            //将InputStream转换成String
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//            StringBuilder sb = new StringBuilder();
-//            String line = null;
-//            try {
-//                while ((line = reader.readLine()) != null) {
-//                    sb.append(line + "\n");
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } finally {
-//                try {
-//                    is.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            resXml=sb.toString();
-//            logger.info(resXml);
-//            String result = wxPayService.payBack(resXml);
-////            return "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
-//            return result;
-//        }catch (Exception e){
-//            logger.error("手机支付回调通知失败",e);
-//            String result = "<xml>" + "<return_code><![CDATA[FAIL]]></return_code>" + "<return_msg><![CDATA[报文为空]]></return_msg>" + "</xml> ";
-//            return result;
-//        }
-//    }
+
+    }
+
+    /**
+     * 订单支付异步通知
+     */
+    @RequestMapping(value = "wx/native/notify")
+    public String WXPayBack(HttpServletRequest request,HttpServletResponse response){
+        String resXml="";
+        logger.info("进入异步通知");
+        try{
+            //
+            InputStream is = request.getInputStream();
+            //将InputStream转换成String
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            resXml=sb.toString();
+            logger.info(resXml);
+            String result = gzPayService.payBack(resXml);
+//            return "<xml><return_code><![CDATA[SUCCESS]]></return_code> <return_msg><![CDATA[OK]]></return_msg></xml>";
+            return result;
+        }catch (Exception e){
+            logger.error("手机支付回调通知失败",e);
+            String result = "<xml>" + "<return_code><![CDATA[FAIL]]></return_code>" + "<return_msg><![CDATA[报文为空]]></return_msg>" + "</xml> ";
+            return result;
+        }
+    }
 }

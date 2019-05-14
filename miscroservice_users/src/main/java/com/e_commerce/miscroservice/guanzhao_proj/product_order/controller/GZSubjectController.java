@@ -614,12 +614,12 @@ public class GZSubjectController {
             result.setSuccess(true);
             result.setData(list);
         }catch (MessageException e){
-            log.warn("正在学习课程列表 e={}",e.getMessage());
+            log.warn("已结束的课程列表 e={}",e.getMessage());
             result.setSuccess(false);
             result.setMsg(e.getMessage());
         }catch (Exception e){
             e.printStackTrace();
-            log.error("正在学习课程列表={}",e);
+            log.error("已结束的课程列表={}",e);
             result.setSuccess(false);
         }
         return result;

@@ -53,6 +53,7 @@ public class MyLearningSubjectVO {
     private Timestamp createTime;
     private String startTime;
     private String endTime;
+    private String img;
 
     private static final long serialVersionUID = 1L;
 
