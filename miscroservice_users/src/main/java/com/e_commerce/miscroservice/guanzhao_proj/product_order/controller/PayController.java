@@ -121,8 +121,8 @@ public class PayController {
 
     @RequestMapping(value = "/wx/" + TokenUtil.AUTH_SUFFIX)
     public Object orderPay(
-                           @RequestParam(required = false,value = "user_id")Integer user_id,
-                           @RequestParam(required = true,value = "coupon_id")Integer coupon_id,
+                           @RequestParam(required = false,value = "orderNo")String orderNo,
+                           @RequestParam(required = false,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
         logger.info("进入微信支付申请");
@@ -141,7 +141,7 @@ public class PayController {
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
         logger.info(spbill_create_ip);
-        Map<String,String> result = gzPayService.dounifiedOrder(userId,coupon_id,spbill_create_ip,1,subjectId);
+        Map<String,String> result = gzPayService.dounifiedOrder(orderNo,userId,coupon_id,spbill_create_ip,1,subjectId);
         if (result==null){
             ajaxResult.setSuccess(false);
             return ajaxResult;

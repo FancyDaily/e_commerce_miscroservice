@@ -51,6 +51,11 @@ public class GZOrderController {
         return ajaxResult;
     }
 
+    /**
+     * 查询我的订单详情
+     * @param orderId
+     * @return
+     */
     @RequestMapping("detailed/"+TokenUtil.AUTH_SUFFIX)
     public Object findOrderDetailed(String orderId){
         AjaxResult result = new AjaxResult();

@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
+import com.e_commerce.miscroservice.commons.enums.application.GZVoucherEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
@@ -119,7 +120,7 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     @Override
-    public Map<String, String> dounifiedOrder(Integer userId, Integer couponId, String spbill_create_ip, int type, Long subjectId) {
+    public Map<String, String> dounifiedOrder(String orderNum, Integer userId, Integer couponId, String spbill_create_ip, int type, Long subjectId) {
         Map<String, String> fail = new HashMap<>();
         WXMyConfigUtil config = null;
         try {
@@ -139,26 +140,41 @@ public class GZPayServiceImpl implements GZPayService {
         }else {
             money = tGzSubject.getPrice();
         }
+
+        TGzOrder tGzOrder = new TGzOrder();
         String subjectName = tGzSubject.getName();
+        String orderNo = UUIdUtil.generateOrderNo();
+
+        //若查待支付订单
+        if (orderNum!=null){
+            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
+            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
+                orderNo = orderNum;
+                tGzOrder = order;
+            }
+        }
+        if (tGzOrder==null){
+            tGzOrder.setPrice(money);
+            tGzOrder.setSubjectId(subjectId);
+            tGzOrder.setSubjectName(subjectName);
+            tGzOrder.setOrderTime(System.currentTimeMillis());
+            tGzOrder.setStatus(GZOrderEnum.UN_PAY.getCode());
+            tGzOrder.setTgzOrderNo(orderNo);
+            tGzOrder.setUserId(Long.valueOf(userId));
+            gzOrderDao.saveOrder(tGzOrder);
+        }
+
+        Double couponMoney = 0d;
         if(couponId!=null){
             TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
             if (tGzVoucher!=null&&tGzVoucher.getReductionLimit()<=Double.valueOf(money)&&(tGzVoucher.getEffectiveTime()+tGzVoucher.getActivationTime())>=System.currentTimeMillis()){
-                money = money - tGzVoucher.getPrice();
+                couponMoney = money - tGzVoucher.getPrice();
+                tGzOrder.setVoucherId(tGzVoucher.getId());
             }
         }
-
         String attach = userId+","+couponId;
-        String orderNo = UUIdUtil.generateOrderNo();
-        Double minMon = money * 100;
-        TGzOrder tGzOrder = new TGzOrder();
-        tGzOrder.setPrice(money);
-        tGzOrder.setSubjectId(subjectId);
-        tGzOrder.setSubjectName(subjectName);
-        tGzOrder.setOrderTime(System.currentTimeMillis());
-        tGzOrder.setStatus(GZOrderEnum.UN_PAY.getCode());
-        tGzOrder.setTgzOrderNo(orderNo);
-        tGzOrder.setUserId(Long.valueOf(userId));
-        gzOrderDao.saveOrder(tGzOrder);
+        Double minMon = couponMoney * 100;
+
         WXPay wxpay = new WXPay(config);
         Map<String, String> data = new HashMap<String, String>();
         data.put("appid", config.getAppID());
@@ -271,6 +287,7 @@ public class GZPayServiceImpl implements GZPayService {
                             order.setTgzOrderNo(out_trade_no);
                             order.setStatus(GZOrderEnum.PAYED.getCode());
                             gzOrderDao.updateOrder(order);
+
                             TGzSubject tGzSubject = gzSubjectDao.selectByPrimaryKey(tGzOrder.getSubjectId());
                             TGzUserSubject tGzUserSubject = new TGzUserSubject();
                             tGzUserSubject.setUserId(tGzOrder.getUserId());
@@ -278,6 +295,13 @@ public class GZPayServiceImpl implements GZPayService {
                             Long endTime = DateUtil.yyyymmddToTime(tGzSubject.getEndTime())+30*24*3600;
                             tGzUserSubject.setExpireTime(endTime);
                             gzUserSubjectDao.insert(tGzUserSubject);
+
+                            if (tGzOrder.getVoucherId()!=null){
+                                TGzVoucher tGzVoucher = new TGzVoucher();
+                                tGzVoucher.setId(tGzOrder.getVoucherId());
+                                tGzVoucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());
+                                gzVoucherDao.update(tGzVoucher);
+                            }
 
                             List<TGzLesson> list = gzLessonDao.selectBySubjectId(tGzOrder.getSubjectId());
                             List<TGzUserLesson> lessonList = new ArrayList<>();
