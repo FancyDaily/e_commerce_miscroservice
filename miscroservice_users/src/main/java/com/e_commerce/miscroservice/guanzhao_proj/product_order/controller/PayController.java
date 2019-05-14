@@ -1,11 +1,13 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
@@ -17,14 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -120,6 +120,7 @@ public class PayController {
 
     @RequestMapping(value = "/wx")
     public Object orderPay(
+                           @RequestParam(required = true,value = "user_id")Integer user_id,
                            @RequestParam(required = true,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
@@ -133,12 +134,17 @@ public class PayController {
 //        String total_fee="1";              //7777777  微信支付钱的单位为分
 //        String user_id="1";               //77777
 //        String coupon_id="7";               //777777
-        Integer userId = IdUtil.getId();
+        Integer userId = user_id;
+//        Integer userId = IdUtil.getId();
         WXMyConfigUtil config = new WXMyConfigUtil();
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
         logger.info(spbill_create_ip);
         Map<String,String> result = gzPayService.dounifiedOrder(userId,coupon_id,spbill_create_ip,1,subjectId);
+        if (result==null){
+            ajaxResult.setSuccess(false);
+            return ajaxResult;
+        }
         if (result.get("result_code").equals("FAIL")){
 
             ajaxResult.setMsg(result.get("err_code_des"));
@@ -164,24 +170,11 @@ public class PayController {
                 "\"noncestr\":\""+nonce_str+"\",\"timestamp\":"+timestamp+"," +
                 "\"prepayid\":\""+prepay_id+"\",\"sign\":\""+sign+"\"}";
         logger.info(resultString);
-
-        ServletOutputStream outputStream = null;
-        try {
-            outputStream = response.getOutputStream();
-            QRCodeUtil.writeToStream(result.get("code_url"),outputStream, 300, 300);
-            ajaxResult.setSuccess(true);
-            return ajaxResult;
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("orderNo",result.get("orderNo"));
+        jsonObject.put("img",result.get("img"));
+        ajaxResult.setSuccess(true);
+        ajaxResult.setData(jsonObject);
 //        return resultString;    //给前端app返回此字符串，再调用前端的微信sdk引起微信支付
         return ajaxResult;
     }

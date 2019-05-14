@@ -61,4 +61,9 @@ public class QRCodeUtil {
         //toPath() 方法由 jdk1.7 及以上提供
         MatrixToImageWriter.writeToPath(bitMatrix, format, new File(path).toPath());
     }
+
+    public static void main(String[] args) throws IOException, WriterException {
+        BufferedImage bufferedImage = toBufferedImage("111",width,height);
+        System.out.println(bufferedImage.toString());
+    }
 }

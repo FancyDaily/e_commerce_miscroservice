@@ -31,6 +31,11 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
     }
 
     @Override
+    public void insert(TGzUserSubject tGzUserSubject) {
+        MybatisOperaterUtil.getInstance().save(tGzUserSubject);
+    }
+
+    @Override
     public int updateByPrimaryKey(TGzUserSubject tGzUserSubject) {
         return MybatisOperaterUtil.getInstance().update(tGzUserSubject, new MybatisSqlWhereBuild(TGzUserSubject.class)
         .eq(TGzUserSubject::getId, tGzUserSubject.getId())

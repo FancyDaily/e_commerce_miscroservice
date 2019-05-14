@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZUserLessonDao;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserLesson;
 import org.springframework.stereotype.Component;
 
@@ -68,5 +69,10 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
     @Override
     public int batchInsert(List<TGzUserLesson> toInserter) {
         return MybatisOperaterUtil.getInstance().save(toInserter);
+    }
+
+    @Override
+    public void insertList(List<TGzLesson> list) {
+        MybatisOperaterUtil.getInstance().save(list.toArray());
     }
 }
