@@ -44,4 +44,10 @@ public class GZVoucherDaoImpl implements GZVoucherDao {
                 .eq(TGzVoucher::getIsValid, AppConstant.IS_VALID_YES));
     }
 
+    @Override
+    public TGzVoucher findByUserIdCouponId(Integer userId, Integer couponId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TGzVoucher(),new MybatisSqlWhereBuild(TGzVoucher.class)
+                .eq(TGzVoucher::getUserId,userId).eq(TGzVoucher::getId,couponId));
+    }
+
 }

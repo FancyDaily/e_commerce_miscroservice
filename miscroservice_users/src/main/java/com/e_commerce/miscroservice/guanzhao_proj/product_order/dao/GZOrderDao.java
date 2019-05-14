@@ -19,4 +19,17 @@ public interface GZOrderDao {
      * @param payPo
      */
     void saveOrder(TGzOrder payPo);
+
+    /**
+     * 查询订单
+     * @param out_trade_no
+     * @return
+     */
+    TGzOrder findByOrderNo(String out_trade_no);
+
+    /**
+     * 更新订单
+     * @param order
+     */
+    void updateOrder(TGzOrder order);
 }

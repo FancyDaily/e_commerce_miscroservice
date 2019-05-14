@@ -27,7 +27,7 @@ public class MyVoucherVo {
     @Column(commit = "代金券金额")
     private Double price;
 
-    @Column(commit = "满减下限", length = 11)
+    @Column(commit = "满减下限", length = 11,precision = 2)
     private Double reductionLimit;
 
     @Column(commit = "预设有效时长(时间戳)")

@@ -249,16 +249,13 @@ public class GZLessonServiceImpl implements GZLessonService {
         List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
         Map<Long, Object> lessonIdAvailableStatusMap = new HashMap<>();
         for (TGzUserLesson gzUserLesson : gzUserLessonList) {
-            Integer status = gzUserLesson.getStatus();
-            if (Objects.equals(status, GZUserLessonEnum.STATUS_AVAILABLE.getCode())) {
-                lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
-            }
+            lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
         }
 
         for (TGzLesson tGzLesson : tGzLessons) {
             MyLessonVO myLessonVO = tGzLesson.copyMyLessonVO();
             Object existObject = lessonIdAvailableStatusMap.get(tGzLesson.getId());
-            Integer status = GZUserLessonEnum.STATUS_AVAILABLE.getCode();
+            Integer status = tGzLesson.getVideoOnLoadStatus();
             Integer videoCompletion = 0;
             Integer lessonCompletionStatus = GZUserLessonEnum.LESSON_COMPLETION_STATUS_NO.getCode();
             String sign = null;
@@ -266,7 +263,6 @@ public class GZLessonServiceImpl implements GZLessonService {
                 TGzUserLesson userLesson = (TGzUserLesson) existObject;
                 videoCompletion = userLesson.getVideoCompletion();
                 lessonCompletionStatus = userLesson.getLessonCompletionStatus();
-                status = GZUserLessonEnum.STATUS_UNAVAILABLE.getCode();
                 sign = userLesson.getSign();
             }
             myLessonVO.setSign(sign);
@@ -277,7 +273,7 @@ public class GZLessonServiceImpl implements GZLessonService {
             myLessonVO.setVideoCompletion(videoCompletion);
             myLessonVO.setLessonCompletionStatus(lessonCompletionStatus);
             myLessonVO.setLessonId(tGzLesson.getId());
-            myLessonVO.setStatus(status);
+            myLessonVO.setStatus(status);   //视频可播放状态
             myLessonVO.setUserId(userId);
             myLessonVOS.add(myLessonVO);
         }

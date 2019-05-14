@@ -574,8 +574,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = 1;
-//            Integer id = IdUtil.getId();
+            Integer id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findMyLearningSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);
