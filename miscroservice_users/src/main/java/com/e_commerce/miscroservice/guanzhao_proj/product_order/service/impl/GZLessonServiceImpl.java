@@ -191,9 +191,7 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
         //我的课程记录
         TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
-        Long expireTime = tGzUserSubject.getExpireTime();   //过期时间
-        boolean expired = System.currentTimeMillis() > expireTime; //我的学习权限是否过期
-        if (Objects.isNull(tGzUserSubject) || expired) {    //TODO 失效是否可以看
+        if (Objects.isNull(tGzUserSubject) || System.currentTimeMillis() > tGzUserSubject.getExpireTime()) {    //TODO 失效是否可以看
             throw new MessageException("对不起, 您没有权限查看该课程");
         }
 
