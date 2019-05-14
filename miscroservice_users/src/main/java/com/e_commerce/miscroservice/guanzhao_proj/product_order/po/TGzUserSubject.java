@@ -24,16 +24,16 @@ public class TGzUserSubject implements Serializable {
     @Column(commit = "状态", length = 11)
     private Integer status;
 
-    @Column(commit = "笔记数量", length = 11)
+    @Column(commit = "笔记数量", length = 11, defaultVal = "0")
     private Integer notesNum;
 
-    @Column(commit = "作业总数", length = 11)
+    @Column(commit = "作业总数", length = 11, defaultVal = "0")
     private Integer homeworkExpectedNum;
 
-    @Column(commit = "作业完成数", length = 11)
+    @Column(commit = "作业完成数", length = 11, defaultVal = "0")
     private Integer homeworkDoneNum;
 
-    @Column(commit = "学习进度", length = 11)
+    @Column(commit = "学习进度", length = 11, defaultVal = "0")
     private Integer completion;
 
     @Column(commit = "失效时间戳")

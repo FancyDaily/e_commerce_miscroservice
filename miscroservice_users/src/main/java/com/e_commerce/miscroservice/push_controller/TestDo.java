@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.push_controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -85,10 +86,19 @@ public class TestDo {
 
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
-        // TODO
-        gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
-
-        request.setAttribute(fileName, Md5Util.md5(fileName));
+        try {
+            gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
+            request.setAttribute(fileName, Md5Util.md5(fileName));
+        } catch (MessageException e) {
+            AjaxResult result = new AjaxResult();
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+//          request.setAttribute("errorMsg", e.getMessage());
+            return result;
+        } catch (Exception e) {
+            return new AjaxResult();
+        }
         return "forward:/doPlay";
     }
 
@@ -108,6 +118,12 @@ public class TestDo {
         if (hash == null ||
                 !Md5Util.md5(fileName).equals(hash)) {
             result.setData(EMPTY);
+            result.setSuccess(false);
+        }
+
+        String errorMsg = (String) request.getAttribute("errorMsg");
+        if(errorMsg != null) {
+            result.setMsg(errorMsg);
             result.setSuccess(false);
         }
 

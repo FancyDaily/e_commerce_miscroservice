@@ -7,7 +7,9 @@ package com.e_commerce.miscroservice.commons.enums.application;
 public enum GZLessonEnum {
 
     AVAILABLE_STATUS_NO(0, "不可用"),
-    AVAILABLE_STATUS_YES(1, "可用");
+    AVAILABLE_STATUS_YES(1, "可用"),
+    VIDEO_STATUS_AVAILABLE_NO(0, "视频未装载"),
+    VIDEO_STATUS_AVAILABLE_YES(1, "视频已装载" );
 
     int code;
     String desc;

@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
@@ -118,7 +119,7 @@ public class PayController {
 
 
 
-    @RequestMapping(value = "/wx")
+    @RequestMapping(value = "/wx/" + TokenUtil.AUTH_SUFFIX)
     public Object orderPay(
                            @RequestParam(required = true,value = "user_id")Integer user_id,
                            @RequestParam(required = true,value = "coupon_id")Integer coupon_id,
