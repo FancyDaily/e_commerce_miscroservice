@@ -11,9 +11,6 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderS
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.tools.jstat.Token;
-
-import java.security.cert.TrustAnchor;
 
 /**
  * 观照订单模块
@@ -53,5 +50,27 @@ public class GZOrderController {
         }
         return ajaxResult;
     }
+
+    @RequestMapping("detailed/"+TokenUtil.AUTH_SUFFIX)
+    public Object findOrderDetailed(String orderId){
+        AjaxResult result = new AjaxResult();
+        try {
+            Integer userId  = IdUtil.getId();
+            TGzOrder tGzOrder = gzOrderService.findOrderDetailed(orderId,userId);
+            result.setData(tGzOrder);
+            result.setSuccess(true);
+        }catch (MessageException e){
+            log.warn("我的订单={}",e.getMessage());
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }catch (Exception e){
+            log.error("我的订单={}",e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+
+
 
 }

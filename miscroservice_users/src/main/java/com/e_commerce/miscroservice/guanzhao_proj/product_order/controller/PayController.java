@@ -173,6 +173,7 @@ public class PayController {
         logger.info(resultString);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("orderNo",result.get("orderNo"));
+        jsonObject.put("resultString",resultString);
         jsonObject.put("img",result.get("img"));
         ajaxResult.setSuccess(true);
         ajaxResult.setData(jsonObject);

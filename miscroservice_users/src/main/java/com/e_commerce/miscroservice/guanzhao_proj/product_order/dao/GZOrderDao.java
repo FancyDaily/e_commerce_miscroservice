@@ -33,4 +33,11 @@ public interface GZOrderDao {
      */
     void updateOrder(TGzOrder order);
 
+    /**
+     * 查询我的订单
+     * @param orderId
+     * @return
+     */
+    TGzOrder findByOrderId(String orderId);
+
 }

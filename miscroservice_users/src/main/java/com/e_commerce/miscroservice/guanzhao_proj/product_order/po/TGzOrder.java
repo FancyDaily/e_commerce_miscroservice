@@ -21,6 +21,8 @@ public class TGzOrder implements Serializable {
 
     private Long subjectId;
 
+    private Long voucherId;
+
     @Column(commit = "订单编号")
     private String tgzOrderNo;
     @Column(commit = "课程名称")

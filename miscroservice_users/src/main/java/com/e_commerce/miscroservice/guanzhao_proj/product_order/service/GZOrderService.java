@@ -12,4 +12,12 @@ public interface GZOrderService {
      * @return
      */
     QueryResult<TGzOrder> findMyOrderList(Integer id, Integer pageNumber, Integer pageSize);
+
+    /**
+     * 查询我的订单
+     * @param orderId
+     * @param userId
+     * @return
+     */
+    TGzOrder findOrderDetailed(String orderId, Integer userId);
 }
