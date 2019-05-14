@@ -29,11 +29,12 @@ public interface GZPayService {
      * 微信支付
      * @param attach
      * @param out_trade_no
+     * @param orderNo
      * @param i
      * @param subjectId
      * @return
      */
-    Map<String, String> dounifiedOrder(Integer userId, Integer coupon_id, String spbill_create_ip, int i, Long subjectId);
+    Map<String, String> dounifiedOrder(String orderNo, Integer userId, Integer coupon_id, String spbill_create_ip, int i, Long subjectId);
 
     /**
      * 微信支付回调
