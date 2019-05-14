@@ -83,6 +83,8 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         availableTime = StringUtil.isEmpty(availableTime)?"0000":availableTime;
         String availableWholeTime = availableDate + availableTime;
         Long availableMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(availableWholeTime);
+        long currentTimeMillis = System.currentTimeMillis();
+        long toAvailableMills = availableMills > currentTimeMillis ? availableMills - currentTimeMillis: -1;
         SubjectInfosVO subjectInfosVO = subject.copySubjectInfosVO();
         String descPic = subjectInfosVO.getDescPic();
         subjectInfosVO.setDescPicArray(descPic!=null && descPic.contains(",")? descPic.split(","):new String[1]);
@@ -95,19 +97,25 @@ public class GZSubjectServiceImpl implements GZSubjectService {
             List<TGzOrder> gzOrders = gzOrderDao.selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(userId, subjectId, 0); //TODO 订单状态
             if(!gzOrders.isEmpty()) {
                 TGzOrder gzOrder = gzOrders.get(0);
+                gzOrder.getPrice();
                 String createTimeStr = gzOrder.getCreateTime().toString();
                 createTime = Long.valueOf(DateUtil.dateTimeToStamp(createTimeStr));
-                Long surplusMills = 30 * DateUtil.interval - (System.currentTimeMillis() - createTime);
+                Long surplusMills = 30 * DateUtil.interval - (currentTimeMillis - createTime);
+                surplusMills = surplusMills<0? -1l:surplusMills;
                 subjectInfosVO.setSurplusPayMills(surplusMills);
             }
         }
 
-        Map<String, Object> map = DateUtil.mills2DHms(availableMills);
-        String day = (String) map.get("day");
-        String dms = (String) map.get("dms");
-        subjectInfosVO.setSurplusToAvailableDayCnt(StringUtil.isEmpty(day)?0:Integer.valueOf(day));
-        subjectInfosVO.setSurplusToAvailableFormatStr(dms);
-        subjectInfosVO.setSurplusToAvailableTime(availableMills);
+        if(toAvailableMills!=-1) {
+            Map<String, Object> map = DateUtil.mills2DHms(toAvailableMills);
+            String day = (String) map.get("day");
+            String dms = (String) map.get("hms");
+            subjectInfosVO.setSurplusToAvailableDayCnt(StringUtil.isEmpty(day)?0:Integer.valueOf(day));
+            subjectInfosVO.setSurplusToAvailableFormatStr(dms);
+        } else {
+            subjectInfosVO.setSurplusToAvailableDayCnt(-1);
+        }
+        subjectInfosVO.setSurplusToAvailableTime(toAvailableMills);
         subjectInfosVO.setPayCreateTimeMills(createTime);
 
         return subjectInfosVO;

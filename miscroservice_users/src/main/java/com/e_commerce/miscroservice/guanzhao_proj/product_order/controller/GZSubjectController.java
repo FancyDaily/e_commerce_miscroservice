@@ -176,7 +176,7 @@ public class GZSubjectController {
      *                  }
      * @return
      */
-    @RequestMapping("subject/detail" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("subject/detail/" + TokenUtil.AUTH_SUFFIX)
     public Object subjectDetailAuth(Long subjectId) {
         AjaxResult result = new AjaxResult();
         try {
@@ -440,12 +440,12 @@ public class GZSubjectController {
             result.setData(queryResult);
             result.setSuccess(true);
         } catch (MessageException e) {
-            log.warn("====方法描述: {}, Message: {}====", "视频进度更新", e.getMessage());
+            log.warn("====方法描述: {}, Message: {}====", "课程评价列表", e.getMessage());
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("视频进度更新", e);
+            log.error("课程评价列表", e);
             result.setSuccess(false);
         }
         return result;
@@ -464,7 +464,7 @@ public class GZSubjectController {
      *                   }
      * @return
      */
-    @RequestMapping("lesson/completion/update/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("test" + TokenUtil.AUTH_SUFFIX)
     public Object lessonCompletionUpdate(@RequestParam(required = true) Integer completion, @RequestParam(required = true) Long lessonId) {
         TUser user = UserUtil.getUser();
         if (user == null) {
@@ -628,8 +628,6 @@ public class GZSubjectController {
             result.setSuccess(false);
         }
         return result;
-
-
     }
 
 }
