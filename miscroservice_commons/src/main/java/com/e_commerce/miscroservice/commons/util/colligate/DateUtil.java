@@ -507,4 +507,20 @@ public class DateUtil {
         map.put("hms", hms);
         return map;
     }
+
+    public static Long yyyymmddToTime(String time){
+        String format = "yyyyMMdd";
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        Date parse = null;
+        try {
+            parse = sdf.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return parse.getTime();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(yyyymmddToTime("20190801"));
+    }
 }

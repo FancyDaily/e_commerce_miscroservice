@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
@@ -270,9 +271,12 @@ public class GZPayServiceImpl implements GZPayService {
                             order.setTgzOrderNo(out_trade_no);
                             order.setStatus(GZOrderEnum.PAYED.getCode());
                             gzOrderDao.updateOrder(order);
+                            TGzSubject tGzSubject = gzSubjectDao.selectByPrimaryKey(tGzOrder.getSubjectId());
                             TGzUserSubject tGzUserSubject = new TGzUserSubject();
                             tGzUserSubject.setUserId(tGzOrder.getUserId());
                             tGzUserSubject.setSubjectId(tGzOrder.getSubjectId());
+                            Long endTime = DateUtil.yyyymmddToTime(tGzSubject.getEndTime())+30*24*3600;
+                            tGzUserSubject.setExpireTime(endTime);
                             gzUserSubjectDao.insert(tGzUserSubject);
 
                             List<TGzLesson> list = gzLessonDao.selectBySubjectId(tGzOrder.getSubjectId());

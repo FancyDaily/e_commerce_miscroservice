@@ -171,7 +171,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     public QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize) {
         log.info("查看我的正在学习id={},pageNum={},pageSize={}",id,pageNum,pageSize);
         Page<MyLearningSubjectVO> page = PageHelper.startPage(pageNum,pageSize);
-        List<MyLearningSubjectVO> list = gzSubjectDao.findMyLearningSubject(id);
+        List<MyLearningSubjectVO> list = gzSubjectDao.findMyLearningSubject(id,System.currentTimeMillis());
         QueryResult<MyLearningSubjectVO> result = new QueryResult<>();
         result.setResultList(list);
         result.setTotalCount(page.getTotal());

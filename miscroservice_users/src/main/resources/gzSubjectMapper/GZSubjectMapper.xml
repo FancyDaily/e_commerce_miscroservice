@@ -5,6 +5,9 @@
     <select id="findMyLearningSubject"
             resultType="com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO">
         select a.*,b.subject_head_portrait_path as img,b.name as subjectName from t_gz_user_subject a,t_gz_subject b where a.user_id = #{id}
+        and a.expire_time <![CDATA[
+                <
+                ]]> #{currentTimeMillis}
     </select>
     <select id="findEndingSubject"
             resultType="com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO">
