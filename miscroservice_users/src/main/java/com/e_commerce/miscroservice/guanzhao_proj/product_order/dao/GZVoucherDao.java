@@ -25,4 +25,12 @@ public interface GZVoucherDao {
     int batchUpdate(List<TGzVoucher> toUpdater, List<Long> toUpdaterId);
 
     int update(TGzVoucher voucher);
+
+    /**
+     * 查询优惠券
+     * @param userId
+     * @param couponId
+     * @return
+     */
+    TGzVoucher findByUserIdCouponId(Integer userId, Integer couponId);
 }

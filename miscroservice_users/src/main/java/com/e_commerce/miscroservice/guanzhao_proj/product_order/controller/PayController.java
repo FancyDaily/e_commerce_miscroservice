@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
@@ -118,12 +119,9 @@ public class PayController {
 
 
     @RequestMapping(value = "/wx")
-    public Object orderPay(@RequestParam(required = true,value = "user_id")String user_id,
-                           @RequestParam(required = true,value = "coupon_id")String coupon_id,
+    public Object orderPay(
+                           @RequestParam(required = true,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
-                           @RequestParam(required = true,value = "subjectName")String subjectName,
-                           @RequestParam(required = true,value = "out_trade_no")String out_trade_no,
-                           @RequestParam(required = true,value = "total_fee")String total_fee,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
         logger.info("进入微信支付申请");
         AjaxResult ajaxResult = new AjaxResult();
@@ -135,13 +133,12 @@ public class PayController {
 //        String total_fee="1";              //7777777  微信支付钱的单位为分
 //        String user_id="1";               //77777
 //        String coupon_id="7";               //777777
-
-        String attach=user_id+","+coupon_id;
+        Integer userId = IdUtil.getId();
         WXMyConfigUtil config = new WXMyConfigUtil();
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
         logger.info(spbill_create_ip);
-        Map<String,String> result = gzPayService.dounifiedOrder(attach,out_trade_no,total_fee,spbill_create_ip,1,subjectId,subjectName);
+        Map<String,String> result = gzPayService.dounifiedOrder(userId,coupon_id,spbill_create_ip,1,subjectId);
         if (result.get("result_code").equals("FAIL")){
 
             ajaxResult.setMsg(result.get("err_code_des"));

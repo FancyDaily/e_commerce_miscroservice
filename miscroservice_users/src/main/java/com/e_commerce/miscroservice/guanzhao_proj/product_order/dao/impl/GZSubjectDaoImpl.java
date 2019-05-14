@@ -59,6 +59,11 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     }
 
     @Override
+    public TGzSubject findSubjectById(Long subjectId) {
+        return MybatisOperaterUtil.getInstance().findOne(new TGzSubject(),new MybatisSqlWhereBuild(TGzSubject.class).eq(TGzSubject::getId,subjectId));
+    }
+
+    @Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
         return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
         .eq(TGzSubject::getName, name)

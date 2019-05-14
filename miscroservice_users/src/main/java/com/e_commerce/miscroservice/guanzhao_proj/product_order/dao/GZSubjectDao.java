@@ -31,4 +31,11 @@ public interface GZSubjectDao {
      * @return
      */
     List<MyLearningSubjectVO> findEndingSubject(Integer id);
+
+    /**
+     * 查询课程
+     * @param subjectId
+     * @return
+     */
+    TGzSubject findSubjectById(Long subjectId);
 }
