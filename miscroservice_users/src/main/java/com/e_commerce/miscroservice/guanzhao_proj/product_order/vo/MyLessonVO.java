@@ -19,6 +19,8 @@ public class MyLessonVO {
 
     private Long lessonId;
 
+    private Integer videoOnloadStatus;  //视频装载状态
+
     @Column(commit = "章节序号", length = 11)
     private Integer lessonIndex;
 
@@ -36,9 +38,6 @@ public class MyLessonVO {
 
     @Column(commit = "章节对应视频签名")
     private String sign;
-
-    @Column(commit = "我的章节状态(可用、不可用)", length = 11)
-    private Integer status;
 
     @Column(commit = "视频进度", length = 11)
     private Integer videoCompletion;

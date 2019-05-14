@@ -32,4 +32,5 @@ public interface GZOrderDao {
      * @param order
      */
     void updateOrder(TGzOrder order);
+
 }

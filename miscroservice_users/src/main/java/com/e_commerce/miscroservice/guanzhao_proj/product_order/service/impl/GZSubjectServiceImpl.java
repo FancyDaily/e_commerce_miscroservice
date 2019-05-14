@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.GZLessonEnum;
+import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZUserSubjectEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -92,7 +93,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         //查找我的订单
         Long createTime = null;
         if(userId != null) {
-            List<TGzOrder> gzOrders = gzOrderDao.selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(userId, subjectId, 0); //TODO 订单状态
+            List<TGzOrder> gzOrders = gzOrderDao.selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(userId, subjectId, GZOrderEnum.UN_PAY.getCode());
             if(!gzOrders.isEmpty()) {
                 TGzOrder gzOrder = gzOrders.get(0);
                 gzOrder.getPrice();

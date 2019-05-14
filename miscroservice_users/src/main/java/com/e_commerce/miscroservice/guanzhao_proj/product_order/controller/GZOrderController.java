@@ -11,6 +11,9 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderS
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sun.tools.jstat.Token;
+
+import java.security.cert.TrustAnchor;
 
 /**
  * 观照订单模块
@@ -50,8 +53,5 @@ public class GZOrderController {
         }
         return ajaxResult;
     }
-
-
-
 
 }

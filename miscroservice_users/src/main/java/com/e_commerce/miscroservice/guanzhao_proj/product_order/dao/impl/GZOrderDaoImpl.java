@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZOrderDao;
@@ -34,7 +35,12 @@ public class GZOrderDaoImpl implements GZOrderDao {
     }
 
     @Override
-    public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int i) {
-        return null;
+    public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int status) {
+       return  MybatisOperaterUtil.getInstance().finAll(new TGzOrder(), new MybatisSqlWhereBuild(TGzOrder.class)
+        .eq(TGzOrder::getUserId, userId)
+        .eq(TGzOrder::getSubjectId, subjectId)
+        .eq(TGzOrder::getStatus, status)
+        .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES)
+        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
     }
 }
