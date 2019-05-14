@@ -83,4 +83,10 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.14'
 //    阿里支付
     compile 'com.alipay.sdk:alipay-sdk-java:3.4.27.ALL'
+//    微信支付
+    compile 'com.github.wxpay:wxpay-sdk:0.0.3'
+    // 谷歌二维码生产
+//    compile group: 'com.google.zxing', name: 'core', version: '3.3.3'
+    compile 'com.google.zxing:javase:3.3.0'
+
 }

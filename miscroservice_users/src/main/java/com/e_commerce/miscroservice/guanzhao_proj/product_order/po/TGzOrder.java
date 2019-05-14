@@ -20,7 +20,7 @@ public class TGzOrder implements Serializable {
     private Long subjectId;
 
     @Column(commit = "课程名称")
-    private Long subjectName;
+    private String subjectName;
 
     @Column(commit = "订单状态", length = 11)
     private Integer status;

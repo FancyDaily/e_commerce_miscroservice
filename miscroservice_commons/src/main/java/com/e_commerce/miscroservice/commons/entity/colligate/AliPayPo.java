@@ -19,7 +19,7 @@ public class AliPayPo {
     /**
      * 课程名称
      */
-    private Long subjectName;
+    private String subjectName;
 
     /**
      * 订单编号
