@@ -28,7 +28,7 @@ public class MyVoucherVo {
     private Double price;
 
     @Column(commit = "满减下限", length = 11)
-    private Integer reductionLimit;
+    private Double reductionLimit;
 
     @Column(commit = "预设有效时长(时间戳)")
     private Long effectiveTime;

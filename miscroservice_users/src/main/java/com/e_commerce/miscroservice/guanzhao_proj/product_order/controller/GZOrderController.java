@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
@@ -30,12 +31,11 @@ public class GZOrderController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("list")
+    @RequestMapping("list/" + TokenUtil.AUTH_SUFFIX)
     public Object findMyOrderList(Integer pageNum,Integer pageSize){
 
         AjaxResult ajaxResult = new AjaxResult();
         try {
-//            Integer id = 1;
             Integer id = IdUtil.getId();
             QueryResult<TGzOrder> list = gzOrderService.findMyOrderList(id, pageNum, pageSize);
             ajaxResult.setData(list);
