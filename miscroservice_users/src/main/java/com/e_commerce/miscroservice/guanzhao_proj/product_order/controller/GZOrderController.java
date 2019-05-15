@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.Tok
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.OrderDetailVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,15 +54,15 @@ public class GZOrderController {
 
     /**
      * 查询我的订单详情
-     * @param orderId
+     * @param orderNo
      * @return
      */
     @RequestMapping("detailed/"+TokenUtil.AUTH_SUFFIX)
-    public Object findOrderDetailed(String orderId){
+    public Object findOrderDetailed(String orderNo){
         AjaxResult result = new AjaxResult();
         try {
             Integer userId  = IdUtil.getId();
-            TGzOrder tGzOrder = gzOrderService.findOrderDetailed(orderId,userId);
+            OrderDetailVO tGzOrder = gzOrderService.findOrderDetailed(orderNo,userId);
             result.setData(tGzOrder);
             result.setSuccess(true);
         }catch (MessageException e){

@@ -1,20 +1,18 @@
-package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
+package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.OrderDetailVO;
-import lombok.Builder;
 import lombok.Data;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 
-@Table(commit = "观照-订单表")
+/**
+ * @Author: FangyiXu
+ * @Date: 2019-05-15 10:26
+ */
 @Data
-@Builder
-public class TGzOrder implements Serializable {
+public class OrderDetailVO {
     @Id
     private Long id;
 
@@ -23,6 +21,8 @@ public class TGzOrder implements Serializable {
     private Long subjectId;
 
     private Long voucherId;
+
+    private Long paySurplusTime;    //支付剩余时间戳
 
     @Column(commit = "订单编号")
     private String tgzOrderNo;
@@ -55,11 +55,4 @@ public class TGzOrder implements Serializable {
 
     @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
-
-    private static final long serialVersionUID = 1L;
-
-    public OrderDetailVO copyOrderDetailVO() {
-        return null;
-    }
-
 }

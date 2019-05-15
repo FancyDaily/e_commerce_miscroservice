@@ -173,6 +173,10 @@ public class GZPayServiceImpl implements GZPayService {
             }
         }
         String attach = userId+","+couponId;
+        if(couponMoney==0) {
+            couponMoney = money;
+        }
+
         Double minMon = couponMoney * 100;
 
         WXPay wxpay = new WXPay(config);

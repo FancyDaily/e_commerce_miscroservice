@@ -26,6 +26,8 @@ public class SubjectInfosVO {
 
     private String surplusToAvailableFormatStr;   //格式化的距离开始时间的字符串h:m:s
 
+    private String orderNo;   //微信支付订单号
+
     @Column(commit = "课程")
     private String name;
 

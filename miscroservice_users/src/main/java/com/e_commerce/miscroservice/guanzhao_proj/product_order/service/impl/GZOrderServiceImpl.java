@@ -1,11 +1,13 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZOrderDao;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.OrderDetailVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +32,23 @@ public class GZOrderServiceImpl implements GZOrderService {
         return result;
     }
 
-
     @Override
-    public TGzOrder findOrderDetailed(String orderId, Integer userId)
-    {
-        logger.info("查询我的订单order={},userId={}",orderId,userId);
-        TGzOrder tGzOrder = gzOrderDao.findByOrderId(orderId);
-        return tGzOrder;
+    public OrderDetailVO findOrderDetailed(String orderNo, Integer userId) {
+        logger.info("查询我的订单order={},userId={}",orderNo,userId);
+        TGzOrder tGzOrder = gzOrderDao.findByOrderNo(orderNo);
+        if(tGzOrder==null) {
+            return null;
+        }
+        Long originalSurplusTime = AppConstant.PAY_SURPLUS_TIME_ORIGINAL;
+        Long paySurplusTime = originalSurplusTime - (System.currentTimeMillis() - tGzOrder.getOrderTime());
+        boolean expired = paySurplusTime < 0;
+        if(expired) {
+            tGzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
+            gzOrderDao.updateOrder(tGzOrder);
+        }
+        OrderDetailVO orderDetailVO = tGzOrder.copyOrderDetailVO();
+        paySurplusTime = expired? -1: paySurplusTime;
+        orderDetailVO.setPaySurplusTime(paySurplusTime);
+        return orderDetailVO;
     }
 }

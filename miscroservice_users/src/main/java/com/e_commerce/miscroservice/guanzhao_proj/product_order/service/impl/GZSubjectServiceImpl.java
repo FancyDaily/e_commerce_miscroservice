@@ -99,9 +99,17 @@ public class GZSubjectServiceImpl implements GZSubjectService {
                 gzOrder.getPrice();
                 String createTimeStr = gzOrder.getCreateTime().toString();
                 createTime = Long.valueOf(DateUtil.dateTimeToStamp(createTimeStr));
-                Long surplusMills = 30 * DateUtil.interval - (currentTimeMillis - createTime);
-                surplusMills = surplusMills<0? -1l:surplusMills;
+                Long surplusMills = 30 * 60 * 60 * 1000 - (currentTimeMillis - createTime);
+                boolean expired = surplusMills < 0;
+                surplusMills = expired? -1l:surplusMills;
                 subjectInfosVO.setSurplusPayMills(surplusMills);
+                if(expired && Objects.equals(gzOrder.getStatus(), GZOrderEnum.UN_PAY.getCode())) {  //修正
+                    gzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
+                    gzOrderDao.updateOrder(gzOrder);
+                } else {
+                    String tgzOrderNo = gzOrder.getTgzOrderNo();
+                    subjectInfosVO.setOrderNo(tgzOrderNo);
+                }
             }
         }
 

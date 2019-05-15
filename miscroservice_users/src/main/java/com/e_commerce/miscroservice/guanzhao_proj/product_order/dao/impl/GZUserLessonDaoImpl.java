@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserLesson;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,11 +61,21 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
     }
 
+    public static void main(String[] args) {
+        List<TGzUserLesson> toUpdater = new ArrayList<>();
+        List<Long> toUpdaterIds = new ArrayList<>();
+        toUpdater.add(TGzUserLesson.builder().id(555l).userId(42l).subjectId(1l).lessonId(3l).sign("DD1016D687D5960A8F279198A94D0CC5").status(1).videoCompletion(0).videoCompletionStatus(0)
+        .createUser(42l).build());
+        toUpdaterIds.add(555l);
+//        batchUpdate(toUpdater,toUpdaterIds);
+    }
+
     @Override
     public int batchUpdate(List<TGzUserLesson> toUpdater, List<Long> toUpdaterIds) {
-        return MybatisOperaterUtil.getInstance().update(toUpdater, new MybatisSqlWhereBuild(TGzUserLesson.class)
-                .in(TGzUserLesson::getId, toUpdaterIds)
+        int update = MybatisOperaterUtil.getInstance().update(toUpdater, new MybatisSqlWhereBuild(TGzUserLesson.class)
+                .in(TGzUserLesson::getId, 555)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
+        return update;
     }
 
     @Override

@@ -789,4 +789,9 @@ public interface AppConstant {
     String MINE_INFOS = "mine:infos:%s";
 
     Integer[] RELATIONSHIP_ALREADY_ENROLL_STATUS = {1,2,7,8,9,10,11,12,13};
+
+    /**
+     * 支付倒计时初始时间
+     */
+    Long PAY_SURPLUS_TIME_ORIGINAL = (long)(30 * 60 * 1000);
 }

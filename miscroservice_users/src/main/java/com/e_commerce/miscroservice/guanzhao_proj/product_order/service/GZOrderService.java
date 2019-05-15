@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.OrderDetailVO;
 
 public interface GZOrderService {
     /**
@@ -19,5 +20,5 @@ public interface GZOrderService {
      * @param userId
      * @return
      */
-    TGzOrder findOrderDetailed(String orderId, Integer userId);
+    OrderDetailVO findOrderDetailed(String orderId, Integer userId);
 }
