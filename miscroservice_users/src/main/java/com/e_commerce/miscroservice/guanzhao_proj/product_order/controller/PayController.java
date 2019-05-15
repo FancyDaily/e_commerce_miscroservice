@@ -146,7 +146,7 @@ public class PayController {
             ajaxResult.setSuccess(false);
             return ajaxResult;
         }
-        if (result.get("result_code").equals("FAIL")){
+        if (result.get("return_code").equals("FAIL")||result.get("result_code").equals("FAIL")){
 
             ajaxResult.setMsg(result.get("err_code_des"));
             ajaxResult.setSuccess(false);
