@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.user.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.user.po.TUserTask;
 import com.e_commerce.miscroservice.commons.enums.application.TaskEnum;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.user.dao.UserTaskDao;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +21,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> queryOnesSignUpBetweenTime(Long id, Long beginTimeStamp, Long endTimeStamp) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, beginTimeStamp, endTimeStamp)
                 .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
@@ -37,12 +37,12 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> queryOnessignUpBetweenTimeDesc(Long id, Long thisBeginStamp, Long thisEndStamp) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(), new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, thisBeginStamp, thisEndStamp)
                 .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
                 .eq(TUserTask::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
     }
 
     /**
@@ -52,22 +52,22 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> findlatestSignUps(Long id) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getType, TaskEnum.TASK_SIGN_UP.getType())
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES)
-        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
+        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserTask::getCreateTime)));
     }
 
     @Override
     public int insert(TUserTask userTask) {
-        return MybatisOperaterUtil.getInstance().save(userTask);
+        return MybatisPlus.getInstance().save(userTask);
     }
 
     @Override
     public List<TUserTask> findOnesTasks(Long id) {
         TUserTask userTask = new TUserTask();
-        return MybatisOperaterUtil.getInstance().finAll(userTask ,new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(userTask ,new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId,id)
                 .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
     }
@@ -80,7 +80,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> findTasksByTypeAndUserId(Integer type, Long id) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getType,type)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
@@ -88,7 +88,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
 
     @Override
     public List<TUserTask> findOnesTasksByType(Long id, int taskCode) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserTask(),new MybatisSqlWhereBuild(TUserTask.class)
+        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getType,taskCode)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));

@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TPublicWelfare;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.user.dao.PublicWelfareDao;
 import com.e_commerce.miscroservice.user.mapper.PublicWelfareMapper;
 import com.e_commerce.miscroservice.user.vo.WelfareParamView;
@@ -21,13 +21,13 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
     private PublicWelfareMapper mapper;
 
     @Override
-    public Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisSqlWhereBuild.ORDER desc) {
-        List<TPublicWelfare> publicWelfares = MybatisOperaterUtil.getInstance().finAll(new TPublicWelfare(), new MybatisSqlWhereBuild(TPublicWelfare.class)
+    public Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisPlusBuild.ORDER desc) {
+        List<TPublicWelfare> publicWelfares = MybatisPlus.getInstance().finAll(new TPublicWelfare(), new MybatisPlusBuild(TPublicWelfare.class)
                 .lt(TPublicWelfare::getCreateTime, lastTime)
                 .between(TPublicWelfare::getCreateTime, betLeft, betRight)
                 .eq(TPublicWelfare::getUserId, id)
                 .eq(TPublicWelfare::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TPublicWelfare::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TPublicWelfare::getCreateTime)));
         Long yearWelfare = mapper.getYearWelfare(param);
         Map<String,Object> resultMap = new HashMap<String,Object>();
         resultMap.put("yearWelfare",yearWelfare);
@@ -37,6 +37,6 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
 
     @Override
     public int insert(TPublicWelfare publicWelfare) {
-        return MybatisOperaterUtil.getInstance().save(publicWelfare);
+        return MybatisPlus.getInstance().save(publicWelfare);
     }
 }

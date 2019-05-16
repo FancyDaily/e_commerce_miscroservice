@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.dao.impl;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TMessageNotice;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.dao.MessageNoticeDao;
 import org.springframework.stereotype.Repository;
 
@@ -37,12 +37,12 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
      * @return
      */
     public List<TMessageNotice> selectMessageNoticeByLastTime(Long lastTIme , Long userId){
-        List<TMessageNotice> messageNoticeList = MybatisOperaterUtil.getInstance().finAll(new TMessageNotice(),
-                new MybatisSqlWhereBuild(TMessageNotice.class)
+        List<TMessageNotice> messageNoticeList = MybatisPlus.getInstance().finAll(new TMessageNotice(),
+                new MybatisPlusBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
                         .lt(TMessageNotice::getCreateTime , lastTIme)
                         .eq(TMessageNotice::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return messageNoticeList;
     }
     /**
@@ -52,12 +52,12 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
      * @return
      */
     public long selectMessageNoticeCountByLastTime(Long lastTIme , Long userId){
-        long count = MybatisOperaterUtil.getInstance().count(
-                new MybatisSqlWhereBuild(TMessageNotice.class)
+        long count = MybatisPlus.getInstance().count(
+                new MybatisPlusBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
                         .gt(TMessageNotice::getCreateTime , lastTIme)
                         .eq(TMessageNotice::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return count;
     }
 
@@ -67,11 +67,11 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
      * @return
      */
     public TMessageNotice selectFirstMessageNotice(Long userId){
-        TMessageNotice messageNotice = MybatisOperaterUtil.getInstance().findOne(new TMessageNotice(),
-                new MybatisSqlWhereBuild(TMessageNotice.class)
+        TMessageNotice messageNotice = MybatisPlus.getInstance().findOne(new TMessageNotice(),
+                new MybatisPlusBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
                         .eq(TMessageNotice::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessageNotice::getCreateTime)));
         return messageNotice;
     }
     /**
@@ -80,7 +80,7 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
      * @return
      */
     public long insert(TMessageNotice messageNotice){
-        long save = MybatisOperaterUtil.getInstance().save(messageNotice);
+        long save = MybatisPlus.getInstance().save(messageNotice);
         return save;
     }
 }

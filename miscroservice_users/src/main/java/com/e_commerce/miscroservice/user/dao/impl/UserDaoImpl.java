@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.user.dao.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,7 +28,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public TUser selectByPrimaryKey(Long id) {
-        return MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().findOne(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getId, id)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -41,18 +41,18 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> queryByIds(List<Long> idList) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(), new MybatisPlusBuild(TUser.class)
                 .in(TUser::getId, idList)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override
     public int updateByPrimaryKey(TUser tUser) {
-        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+        MybatisPlus.getInstance().update(tUser, new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getId, tUser.getId()));
 //        UserUtil.flushRedisUser(tUser);
         if(tUser.getAuthenticationStatus()==null) {
-            tUser = MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+            tUser = MybatisPlus.getInstance().findOne(new TUser(), new MybatisPlusBuild(TUser.class)
                     .eq(TUser::getId, tUser.getId()));
         }
         flushRedisUser(tUser);
@@ -68,14 +68,14 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public TUser info(Long userId) {
-        return MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().findOne(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getId, userId)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TUser> queryUsersByTelephone(String telephone,Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel, telephone)
                 .eq(TUser::getApplication, application)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES));
@@ -83,7 +83,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectByInviteCode(String inviteCode, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getInviteCode,inviteCode)
                 .eq(TUser::getApplication, application)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
@@ -91,7 +91,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectUserTelByJurisdictionAndIsCompany(String telephone, Integer jurisdictionNormal, Integer isCompanyAccountYes, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
                 .eq(TUser::getIsCompanyAccount,isCompanyAccountYes)
@@ -101,7 +101,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectByTelephone(String telephone, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getApplication,application)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
@@ -112,20 +112,20 @@ public class UserDaoImpl implements UserDao {
         if(application!=null) {
             user.setApplication(application);
         }
-        MybatisOperaterUtil.getInstance().save(user);
+        MybatisPlus.getInstance().save(user);
         return user.getId();
     }
 
     @Override
     public List<TUser> selectByVxOpenId(String openId, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getVxOpenId,openId)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TUser> selectUserTelByJurisdiction(String telephone, Integer jurisdictionNormal, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
@@ -140,7 +140,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> selectByUserTelByPasswordByIsCompanyAccYes(String telephone, String password, Integer isCompanyAccount, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getPassword,password)
                 .eq(TUser::getIsCompanyAccount,isCompanyAccount)
@@ -149,20 +149,20 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectByTelephoneInInIds(String param, List<Long> userIds, Integer application) {
-        MybatisSqlWhereBuild build = new MybatisSqlWhereBuild(TUser.class)
+        MybatisPlusBuild build = new MybatisPlusBuild(TUser.class)
                 .in(TUser::getId, userIds)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUser::getCreateTime));
         if(param!=null) {
             build.eq(TUser::getUserTel,param);
         }
 
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
+        return MybatisPlus.getInstance().finAll(new TUser(),build);
     }
 
     @Override
     public List<TUser> selectByNameAndTelephoneLikeSkillInIds(String name, String telephone, String skill, List<Long> idList, Integer application) {
-        MybatisSqlWhereBuild build = new MybatisSqlWhereBuild(TUser.class)
+        MybatisPlusBuild build = new MybatisPlusBuild(TUser.class)
                 .in(TUser::getId,idList)
                 .eq(TUser::getIsValid, AppConstant.IS_VALID_YES);
 
@@ -178,7 +178,7 @@ public class UserDaoImpl implements UserDao {
             build.like(TUser::getSkill, "%" + skill + "%");
         }
 
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),build);
+        return MybatisPlus.getInstance().finAll(new TUser(),build);
     }
 
     /**
@@ -188,7 +188,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> selectInUserIds(String[] split, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .in(TUser::getId,split)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
@@ -201,7 +201,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> selectByTelephoneAndJurisdiction(String telephone, Integer jurisdictionNormal, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
@@ -209,30 +209,30 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectByName(String param, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getName,param)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TUser> selectByJurisdictionAndCreateTimeDesc(Integer jurisdictionNormal, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
     }
 
     @Override
     public List<TUser> selectByNameAndJurisdictionCreateTimeDesc(String param, Integer jurisdictionNormal, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getName,param)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUser::getCreateTime)));
     }
 
     @Override
     public List<TUser> selectByUserAccountAndPasswordAndJurisdiction(String account, String password, Integer jurisdictionAdmin, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserAccount,account)
                 .eq(TUser::getPassword,password)
                 .eq(TUser::getJurisdiction,jurisdictionAdmin)
@@ -241,7 +241,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<TUser> selectByUserTelAndJurisAndIsCompany(String userTel, Integer jurisdictionNormal, Integer isCompanyAccountYes, Integer application) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUser(),new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,userTel)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
                 .eq(TUser::getIsCompanyAccount,isCompanyAccountYes)
@@ -286,7 +286,7 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> selectUserByName(String name,Integer application){
-        return MybatisOperaterUtil.getInstance().finAll(new TUser() , new MybatisSqlWhereBuild(TUser.class).eq(TUser::getName , name));
+        return MybatisPlus.getInstance().finAll(new TUser() , new MybatisPlusBuild(TUser.class).eq(TUser::getName , name));
     }
 
     /**
@@ -296,12 +296,12 @@ public class UserDaoImpl implements UserDao {
      */
     @Override
     public List<TUser> selectUserByTelephone(String telephone,Integer application){
-        return MybatisOperaterUtil.getInstance().finAll(new TUser() , new MybatisSqlWhereBuild(TUser.class).eq(TUser::getUserTel , telephone));
+        return MybatisPlus.getInstance().finAll(new TUser() , new MybatisPlusBuild(TUser.class).eq(TUser::getUserTel , telephone));
     }
 
     @Override
     public TUser selectByUserAccountAndPassword(String telephone, String password, int application) {
-        return MybatisOperaterUtil.getInstance().findOne(new TUser(), new MybatisSqlWhereBuild(TUser.class)
+        return MybatisPlus.getInstance().findOne(new TUser(), new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel, telephone)
         .eq(TUser::getPassword, password)
         .eq(TUser::getApplication, application)

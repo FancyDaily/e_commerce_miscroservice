@@ -4,8 +4,8 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TService;
 import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.dao.ProductDao;
 import org.springframework.stereotype.Repository;
@@ -21,62 +21,62 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public int insert(TService service) {
-		return MybatisOperaterUtil.getInstance().save(service);
+		return MybatisPlus.getInstance().save(service);
 	}
 
 	@Override
 	public TService selectByPrimaryKey(Long id) {
-		return MybatisOperaterUtil.getInstance().findOne(new TService(), new MybatisSqlWhereBuild(TService.class)
+		return MybatisPlus.getInstance().findOne(new TService(), new MybatisPlusBuild(TService.class)
 				.eq(TService::getId, id));
 	}
 
 	@Override
 	public int updateByPrimaryKeySelective(TService lowerFrameService) {
-		return MybatisOperaterUtil.getInstance().update(lowerFrameService, new MybatisSqlWhereBuild(TService.class)
+		return MybatisPlus.getInstance().update(lowerFrameService, new MybatisPlusBuild(TService.class)
 				.eq(TService::getId, lowerFrameService.getId()));
 	}
 
 	@Override
 	public TService selectUserNewOneRecord(Long userId, Integer type) {
-		return MybatisOperaterUtil.getInstance().findOne(new TService(), new MybatisSqlWhereBuild(TService.class)
+		return MybatisPlus.getInstance().findOne(new TService(), new MybatisPlusBuild(TService.class)
 				.eq(TService::getUserId, userId).eq(TService::getType, type).eq(TService::getIsValid, '1')
 				.eq(TService::getStatus, ProductEnum.STATUS_UPPER_FRAME.getValue())
-				.orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
+				.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 	}
 
 	@Override
 	public List<TService> selectListByIds(List<Long> productIds) {
-		return MybatisOperaterUtil.getInstance().finAll(new TService(), new MybatisSqlWhereBuild(TService.class).
+		return MybatisPlus.getInstance().finAll(new TService(), new MybatisPlusBuild(TService.class).
 				in(TService::getId, productIds));
 	}
 
 	@Override
 	public List<TServiceDescribe> getListProductDesc(List<Long> productIds) {
-		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+		return MybatisPlus.getInstance().finAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
 				.in(TServiceDescribe::getServiceId, productIds));
 	}
 
 	@Override
 	public List<TServiceDescribe> getProductDesc(Long serviceId) {
-		return MybatisOperaterUtil.getInstance().finAll(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+		return MybatisPlus.getInstance().finAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
 				.eq(TServiceDescribe::getServiceId, serviceId));
 	}
 
 	@Override
 	public List<TService> getListProductByUserId(Long userId, Integer type, String keyName) {
-		MybatisSqlWhereBuild sqlWhere = new MybatisSqlWhereBuild(TService.class);
+		MybatisPlusBuild sqlWhere = new MybatisPlusBuild(TService.class);
 		if (StringUtil.isNotEmpty(keyName)) {
 			sqlWhere.like(TService::getServiceName,"%" + keyName + "%");
 		}
-		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), sqlWhere
+		List<TService> listServie = MybatisPlus.getInstance().finAll(new TService(), sqlWhere
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
-				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
+				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;
 	}
 
     @Override
     public List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin, Long end) {
-        return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+        return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
 		.eq(TService::getUserId,userId)
 		.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
 				.in(TService::getStatus,companyPublishedStatusArray)
@@ -86,7 +86,7 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray) {
-		return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+		return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
 				.eq(TService::getUserId,userId)
 				.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
 				.in(TService::getStatus,companyPublishedStatusArray)
@@ -100,7 +100,7 @@ public class ProductDaoImpl implements ProductDao {
 	 * @return
 	 */
 	public List<TService> selectUserServ(Long userId){
-		return MybatisOperaterUtil.getInstance().finAll(new TService() , new MybatisSqlWhereBuild(TService.class)
+		return MybatisPlus.getInstance().finAll(new TService() , new MybatisPlusBuild(TService.class)
 				.eq(TService::getCreateUser , userId)
 				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
 				.eq(TService::getType , ProductEnum.TYPE_SERVICE.getValue()));
@@ -113,22 +113,22 @@ public class ProductDaoImpl implements ProductDao {
 	 * @return
 	 */
 	public long updateServiceByList(List<TService> serviceList, List<Long> serviceIdList) {
-		long count = MybatisOperaterUtil.getInstance().update(serviceList,
-				new MybatisSqlWhereBuild(TService.class)
+		long count = MybatisPlus.getInstance().update(serviceList,
+				new MybatisPlusBuild(TService.class)
 						.in(TService::getId, serviceIdList));
 		return count;
 	}
 
     @Override
     public List<TService> selectByUserId(Long userId) {
-        return MybatisOperaterUtil.getInstance().finAll(new TService(),new MybatisSqlWhereBuild(TService.class)
+        return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
 		.eq(TService::getCreateUser,userId)
 		.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
     }
 
 	@Override
 	public TServiceDescribe getProductDescTop(Long serviceId) {
-		return MybatisOperaterUtil.getInstance().findOne(new TServiceDescribe(), new MybatisSqlWhereBuild(TServiceDescribe.class)
+		return MybatisPlus.getInstance().findOne(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
 				.eq(TServiceDescribe::getServiceId, serviceId).eq(TServiceDescribe::getIsCover,"1") );
 	}
 }
