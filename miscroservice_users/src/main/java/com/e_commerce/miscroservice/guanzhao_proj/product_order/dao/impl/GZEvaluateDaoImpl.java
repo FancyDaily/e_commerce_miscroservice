@@ -15,6 +15,7 @@ import java.util.List;
  */
 @Component
 public class GZEvaluateDaoImpl implements GZEvaluateDao {
+    
 
     @Override
     public int insert(TGzEvaluate gzEvaluate) {
