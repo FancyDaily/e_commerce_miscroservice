@@ -4222,6 +4222,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      * @param user
      * @param validCode
      */
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public void registerGZ(TUser user, String validCode) {
         Integer application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
@@ -4259,9 +4260,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             //1.校验推荐码有效性,寻找推荐码拥有者
             List<TUser> users = userDao.selectByInviteCode(inviteCode, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
             TUser inviter = null;
-            for(TUser theUser:users) {
-                inviter = tUsers.get(0);
-            }
+            inviter = users.get(0);
             if(Objects.isNull(inviter)) {
                 return;
             }

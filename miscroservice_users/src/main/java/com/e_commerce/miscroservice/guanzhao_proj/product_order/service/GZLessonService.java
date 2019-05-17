@@ -11,6 +11,8 @@ import org.apache.http.HttpRequest;
 public interface GZLessonService {
     void updateLearningCompletion(Long lessonId);
 
+    void unlockMyLesson(Long userId, Long subjectId);
+
     void unlockLesson(Long subjectId, String fileName);
 
     void authCheck(String sign, Long id, String name, Long productId, Long fileName);

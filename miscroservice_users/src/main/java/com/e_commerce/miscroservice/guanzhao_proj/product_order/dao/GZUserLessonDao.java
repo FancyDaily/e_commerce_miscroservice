@@ -27,5 +27,7 @@ public interface GZUserLessonDao {
 
     int batchInsert(List<TGzUserLesson> toInserter);
 
-    void insertList(List<TGzLesson> list);
+    void insertList(List<TGzUserLesson> list);
+
+    List<TGzUserLesson> selectBySubjectId(Long subjectId);
 }

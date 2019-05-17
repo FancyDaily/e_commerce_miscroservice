@@ -5,22 +5,26 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZVoucherEnum;
+import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
+import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
 import com.github.wxpay.sdk.WXPay;
 import com.github.wxpay.sdk.WXPayUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -57,6 +61,9 @@ public class GZPayServiceImpl implements GZPayService {
     private GZUserLessonDao gzUserLessonDao;
     @Autowired
     private GZLessonDao gzLessonDao;
+
+    @Autowired
+    private GZLessonService gzLessonService;
 
 
     @Override
@@ -134,9 +141,12 @@ public class GZPayServiceImpl implements GZPayService {
             return fail;
         }
 
+        boolean isSalePrice = false;
+        Integer forSaleSurplusNum = tGzSubject.getForSaleSurplusNum();
         if (tGzSubject.getForSaleStatus().equals(GZSubjectEnum.FORSALE_STATUS_YES.getCode())
-                &&tGzSubject.getForSaleSurplusNum()>0){
+                && forSaleSurplusNum >0){
             money = tGzSubject.getForSalePrice();
+            isSalePrice = true;
         }else {
             money = tGzSubject.getPrice();
         }
@@ -155,6 +165,7 @@ public class GZPayServiceImpl implements GZPayService {
             }
         }
         if (tGzOrder==null||tGzOrder.getId()==null){
+            tGzOrder.setIsSalePrice(isSalePrice? GZOrderEnum.IS_SALE_PRICE_YES.getCode(): GZOrderEnum.IS_SALE_PRICE_NO.getCode());
             tGzOrder.setPrice(money);
             tGzOrder.setSubjectId(subjectId);
             tGzOrder.setSubjectName(subjectName);
@@ -163,6 +174,14 @@ public class GZPayServiceImpl implements GZPayService {
             tGzOrder.setTgzOrderNo(orderNo);
             tGzOrder.setUserId(Long.valueOf(userId));
             gzOrderDao.saveOrder(tGzOrder);
+            if(isSalePrice) {
+                int surplusNum = tGzSubject.getForSaleSurplusNum() - 1;
+                tGzSubject.setForSaleSurplusNum(surplusNum);
+                if(surplusNum < 1) {
+                    tGzSubject.setForSaleStatus(GZSubjectEnum.FORSALE_STATUS_NO.getCode());
+                }
+                gzSubjectDao.updateByPrimaryKey(tGzSubject);
+            }
         }
 
         Double couponMoney = 0d;
@@ -288,38 +307,7 @@ public class GZPayServiceImpl implements GZPayService {
                         log.info(">>>>>支付成功");
                         TGzOrder tGzOrder = gzOrderDao.findByOrderNo(out_trade_no);
                         if (tGzOrder != null || tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {
-                            TGzOrder order = new TGzOrder();
-                            order.setTgzOrderNo(out_trade_no);
-                            order.setStatus(GZOrderEnum.PAYED.getCode());
-                            gzOrderDao.updateOrder(order);
-
-                            TGzSubject tGzSubject = gzSubjectDao.selectByPrimaryKey(tGzOrder.getSubjectId());
-                            TGzUserSubject tGzUserSubject = new TGzUserSubject();
-                            tGzUserSubject.setUserId(tGzOrder.getUserId());
-                            tGzUserSubject.setSubjectId(tGzOrder.getSubjectId());
-                            Long endTime = DateUtil.yyyymmddToTime(tGzSubject.getEndTime())+30*24*3600;
-                            tGzUserSubject.setExpireTime(endTime);
-                            gzUserSubjectDao.insert(tGzUserSubject);
-
-                            if (tGzOrder.getVoucherId()!=null){
-                                TGzVoucher tGzVoucher = new TGzVoucher();
-                                tGzVoucher.setId(tGzOrder.getVoucherId());
-                                tGzVoucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());
-                                gzVoucherDao.update(tGzVoucher);
-                            }
-
-                            List<TGzLesson> list = gzLessonDao.selectBySubjectId(tGzOrder.getSubjectId());
-                            List<TGzUserLesson> lessonList = new ArrayList<>();
-                            list.forEach(tGzLesson -> {
-                                TGzUserLesson tGzUserLesson = new TGzUserLesson();
-                                tGzUserLesson.setUserId(tGzOrder.getUserId());
-                                tGzUserLesson.setSubjectId(tGzOrder.getSubjectId());
-                                tGzUserLesson.setLessonId(tGzLesson.getId());
-                                lessonList.add(tGzUserLesson);
-                            });
-
-
-                            gzUserLessonDao.insertList(list);
+                            afterPaySuccess(tGzOrder, out_trade_no);    //处理内部业务
 
                             log.info("微信手机支付回调成功订单号:{}", out_trade_no);
                             xmlBack = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>" + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
@@ -343,5 +331,66 @@ public class GZPayServiceImpl implements GZPayService {
             xmlBack = "<xml>" + "<return_code><![CDATA[FAIL]]></return_code>" + "<return_msg><![CDATA[报文为空]]></return_msg>" + "</xml> ";
         }
         return xmlBack;
+    }
+
+    @Override
+    public void afterPaySuccess(TGzOrder tGzOrder, String out_trade_no) {
+        if(out_trade_no == null) {
+            return;
+        }
+        if(tGzOrder==null) {
+            tGzOrder = gzOrderDao.findByOrderNo(out_trade_no);
+        }
+        if (tGzOrder != null || tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {
+            TGzOrder order = new TGzOrder();
+            order.setTgzOrderNo(out_trade_no);
+            order.setStatus(GZOrderEnum.PAYED.getCode());
+            gzOrderDao.updateOrder(order);
+            final TGzOrder finalOrder = tGzOrder;
+            Long userId = finalOrder.getUserId();
+            Long subjectId = finalOrder.getSubjectId();
+
+            if (tGzOrder.getVoucherId()!=null){
+                TGzVoucher tGzVoucher = new TGzVoucher();
+                tGzVoucher.setId(finalOrder.getVoucherId());
+                tGzVoucher.setAvailableStatus(GZVoucherEnum.STATUS_ALREADY_USED.toCode());
+                gzVoucherDao.update(tGzVoucher);
+            }
+
+            TGzSubject tGzSubject = gzSubjectDao.selectByPrimaryKey(subjectId);
+
+            TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
+            if(tGzUserSubject==null) {
+                tGzUserSubject = new TGzUserSubject();
+                tGzUserSubject.setUserId(userId);
+                tGzUserSubject.setSubjectId(subjectId);
+                Long endTime = DateUtil.parse(tGzSubject.getEndDate() + tGzSubject.getEndTime())+30l*24*3600*1000;
+                tGzUserSubject.setExpireTime(endTime);
+                gzUserSubjectDao.insert(tGzUserSubject);
+                List<TGzLesson> list = gzLessonDao.selectBySubjectId(subjectId);
+                List<TGzUserLesson> lessonList = new ArrayList<>();
+                list.forEach(tGzLesson -> {
+                    TGzUserLesson tGzUserLesson = new TGzUserLesson();
+                    tGzUserLesson.setUserId(userId);
+                    tGzUserLesson.setSubjectId(subjectId);
+                    tGzUserLesson.setLessonId(tGzLesson.getId());
+                    lessonList.add(tGzUserLesson);
+                });
+
+                gzUserLessonDao.insertList(lessonList);
+            } else if(tGzUserSubject.getExpireTime() < System.currentTimeMillis()) {    //这是一个已经过期的课程 -> 续费
+                tGzUserSubject.setExpireTime(System.currentTimeMillis() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
+                gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
+            }
+
+
+            gzLessonService.unlockMyLesson(userId, subjectId);
+           /* TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    super.afterCommit();
+                }
+            });*/
+        }
     }
 }

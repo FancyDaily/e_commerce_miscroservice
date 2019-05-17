@@ -38,4 +38,12 @@ public interface GZSubjectDao {
      * @return
      */
     TGzSubject findSubjectById(Long subjectId);
+
+    /**
+     * 查找所有正在售卖的课程
+     * @return
+     */
+    List<TGzSubject> selectAll();
+
+    List<TGzSubject> selectInPrimaryKeys(List<Long> subjectIds);
 }

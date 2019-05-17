@@ -69,6 +69,7 @@ public class ProductDaoImpl implements ProductDao {
 			sqlWhere.like(TService::getServiceName,"%" + keyName + "%");
 		}
 		List<TService> listServie = MybatisOperaterUtil.getInstance().finAll(new TService(), sqlWhere
+				.eq(TService::getIsValid, AppConstant.IS_VALID_YES)
 				.eq(TService::getUserId, userId).eq(TService::getType, type)
 				.neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TService::getCreateTime)));
 		return listServie;

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.GZVoucherEnum;
+import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZVoucherDao;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
@@ -19,9 +20,12 @@ public class GZVoucherServiceImpl implements GZVoucherService {
     @Autowired
     private GZVoucherDao gzVoucherDao;
 
+    private Log log = Log.getInstance(GZVoucherServiceImpl.class);
+
     @Override
     public List<MyVoucherVo> myVoucherList(TUser user, Integer... option) {
         Long userId = user.getId();
+        log.info("我的代金券列表userId={}, option={}", userId, option);
         if(userId == null) {
             return new ArrayList<>();
         }
@@ -40,9 +44,9 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             if(expired && voucher.getAvailableStatus().intValue() == GZVoucherEnum.STATUS_AVAILABLE.toCode().intValue()) {  //修正
                 voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
                 voucher.setUpdateUser(userId);
-                gzVoucherDao.update(voucher);
-//                toUpdater.add(voucher);
-//                toUpdaterId.add(voucher.getId());
+//                gzVoucherDao.update(voucher);
+                toUpdater.add(voucher);
+                toUpdaterId.add(voucher.getId());
                 myVoucherVo.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
             }
             intervel = voucher.getEffectiveTime() - intervel;
@@ -56,14 +60,8 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             myVoucherVo.setSurplusHourCnt(expectedHourCnt.intValue());
             resultList.add(myVoucherVo);
         }
-//        gzVoucherDao.batchUpdate(toUpdater, toUpdaterId);
+        gzVoucherDao.batchUpdate(toUpdater, toUpdaterId);
         return resultList;
     }
 
-    public static void main(String[] args) {
-        Long interval = (long)24*60*60*1000;
-        Long expectedDayCnt = interval/ DateUtil.interval;
-        Long expectedHourCnt = interval % DateUtil.interval/60/60/1000;
-        System.out.println(expectedDayCnt + "," + expectedHourCnt);
-    }
 }

@@ -25,4 +25,6 @@ public interface GZUserSubjectDao {
      * @param tGzUserSubject
      */
     void insert(TGzUserSubject tGzUserSubject);
+
+    List<TGzUserSubject> selectByUserId(Integer id);
 }

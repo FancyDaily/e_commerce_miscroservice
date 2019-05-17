@@ -2696,7 +2696,9 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
         OrgEnrollUserView orgEnrollUserView = new OrgEnrollUserView();
         orgEnrollUserView.setOrderId(orderId);
         orgEnrollUserView.setTitle(order.getServiceName());
-        orgEnrollUserView.setStatus(orderRelationship.getStatus());
+        if(orderRelationship!=null) {
+            orgEnrollUserView.setStatus(orderRelationship.getStatus());
+        }
         orgEnrollUserView.setStartTime(changeTime(order.getStartTime()));
         orgEnrollUserView.setEndTime(changeTime(order.getEndTime()));
         orgEnrollUserView.setIsRepeat(false);

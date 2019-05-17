@@ -24,6 +24,12 @@ public class TGzSubject implements Serializable {
     @Column(commit = "周期(天数时长)", length = 11)
     private Integer period;
 
+    @Column(commit = "简介(手机端竖图)")
+    private String introPic;
+
+    @Column(commit = "大纲(手机端竖图)")
+    private String outLinePic;
+
     @Column(commit = "课程封面图")
     private String subjectHeadPortraitPath;
 
@@ -36,7 +42,7 @@ public class TGzSubject implements Serializable {
     @Column(commit = "优惠状态", length = 11, defaultVal = "0")
     private Integer forSaleStatus;
 
-    @Column(commit = "优惠剩余个数", length = 11)
+    @Column(commit = "优惠剩余个数", length = 11, defaultVal = "0")
     private Integer forSaleSurplusNum;
 
     @Column(commit = "课程期次", length = 11)

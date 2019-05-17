@@ -124,6 +124,7 @@ public class PayController {
                            @RequestParam(required = false,value = "orderNo")String orderNo,
                            @RequestParam(required = false,value = "coupon_id")Integer coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
+                           @RequestParam(required = false) boolean isSalePrice,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
         logger.info("进入微信支付申请");
         AjaxResult ajaxResult = new AjaxResult();

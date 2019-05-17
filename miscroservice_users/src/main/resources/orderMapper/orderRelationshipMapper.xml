@@ -65,6 +65,7 @@
         t_order_relationship
         WHERE
         from_user_id = #{userId}
+        AND `is_valid` = '1'
         AND
         receipt_user_id is NULL
         ORDER BY

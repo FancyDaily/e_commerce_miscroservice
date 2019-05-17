@@ -7,6 +7,8 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZKeyValueDa
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzKeyValue;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-05-09 21:09
@@ -24,5 +26,10 @@ public class GZKeyValueDaoImpl implements GZKeyValueDao {
         .eq(TGzKeyValue::getType, toCode)
         .eq(TGzKeyValue::getGzvalue, sign)
         .eq(TGzKeyValue::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public int batchInsert(List<TGzKeyValue> keyValueToInsertList) {
+        return MybatisOperaterUtil.getInstance().save(keyValueToInsertList);
     }
 }

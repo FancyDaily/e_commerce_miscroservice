@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZUserSubjectDao;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,13 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
     @Override
     public void insert(TGzUserSubject tGzUserSubject) {
         MybatisOperaterUtil.getInstance().save(tGzUserSubject);
+    }
+
+    @Override
+    public List<TGzUserSubject> selectByUserId(Integer id) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGzUserSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        .eq(TGzUserSubject::getUserId, id)
+        .eq(TGzUserSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override

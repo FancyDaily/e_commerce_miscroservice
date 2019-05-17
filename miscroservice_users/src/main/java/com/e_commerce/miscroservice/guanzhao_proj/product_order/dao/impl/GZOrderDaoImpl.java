@@ -15,7 +15,8 @@ public class GZOrderDaoImpl implements GZOrderDao {
     @Override
     public List<TGzOrder> findMyOrderList(Integer id) {
         List<TGzOrder> list = MybatisOperaterUtil.getInstance().finAll(new TGzOrder(), new MybatisSqlWhereBuild(TGzOrder.class)
-                .eq(TGzOrder::getUserId,id));
+                .eq(TGzOrder::getUserId,id)
+                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
         return list;
     }
 
@@ -35,9 +36,23 @@ public class GZOrderDaoImpl implements GZOrderDao {
     }
 
     @Override
+    public void updateByPrimaryKey(TGzOrder order) {
+        MybatisOperaterUtil.getInstance().update(order, new MybatisSqlWhereBuild(TGzOrder.class)
+        .eq(TGzOrder::getId, order.getId())
+        .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
     public TGzOrder findByOrderId(String orderId) {
 
-        return MybatisOperaterUtil.getInstance().findOne(new TGzOrder(),new MybatisSqlWhereBuild(TGzOrder.class).eq(TGzOrder::getId,orderId));
+        return MybatisOperaterUtil.getInstance().findOne(new TGzOrder(), new MybatisSqlWhereBuild(TGzOrder.class).eq(TGzOrder::getId,orderId));
+    }
+
+    @Override
+    public List<TGzOrder> selectBySubjectIdAndStatus(Long id, Integer payStatus) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGzOrder(), new MybatisSqlWhereBuild(TGzOrder.class)
+        .eq(TGzOrder::getSubjectId, id)
+                .eq(TGzOrder::getStatus, payStatus));
     }
 
     @Override

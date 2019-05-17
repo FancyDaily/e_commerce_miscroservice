@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzOrder;
 
 import java.util.Map;
 
@@ -27,9 +28,10 @@ public interface GZPayService {
 
     /**
      * 微信支付
-     * @param attach
-     * @param out_trade_no
      * @param orderNo
+     * @param userId
+     * @param coupon_id
+     * @param spbill_create_ip
      * @param i
      * @param subjectId
      * @return
@@ -42,4 +44,6 @@ public interface GZPayService {
      * @return
      */
     String payBack(String resXml);
+
+    void afterPaySuccess(TGzOrder tGzOrder, String out_trade_no);
 }

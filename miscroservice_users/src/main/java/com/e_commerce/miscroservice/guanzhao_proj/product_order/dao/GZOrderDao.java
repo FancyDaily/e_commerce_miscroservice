@@ -33,6 +33,8 @@ public interface GZOrderDao {
      */
     void updateOrder(TGzOrder order);
 
+    void updateByPrimaryKey(TGzOrder order);
+
     /**
      * 查询我的订单
      * @param orderId
@@ -40,4 +42,11 @@ public interface GZOrderDao {
      */
     TGzOrder findByOrderId(String orderId);
 
+    /**
+     * 查询该课程的所有订单
+     * @param id
+     * @param payStatus
+     * @return
+     */
+    List<TGzOrder> selectBySubjectIdAndStatus(Long id, Integer payStatus);
 }

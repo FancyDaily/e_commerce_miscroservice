@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
 import lombok.Data;
 
@@ -33,6 +32,10 @@ public class SubjectInfosVO {
 
     @Column(commit = "周期(天数时长)", length = 11)
     private Integer period;
+
+    private String introPic;
+
+    private String outLinePic;
 
     @Column(commit = "课程封面图")
     private String subjectHeadPortraitPath;

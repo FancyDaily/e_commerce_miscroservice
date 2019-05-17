@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class GZOrderServiceImpl implements GZOrderService {
@@ -26,6 +27,15 @@ public class GZOrderServiceImpl implements GZOrderService {
         logger.info("我的订单列表 id={},pageNum={},pageSize={}",id,pageNumber,pageSize);
         Page<TGzOrder> page = PageHelper.startPage(pageNumber,pageSize);
         List<TGzOrder> list = gzOrderDao.findMyOrderList(id);
+        for(TGzOrder tGzOrder:list) {
+            Long originalSurplusTime = AppConstant.PAY_SURPLUS_TIME_ORIGINAL;
+            Long paySurplusTime = originalSurplusTime - (System.currentTimeMillis() - tGzOrder.getOrderTime());
+            boolean expired = paySurplusTime < 0;
+            if(expired && Objects.equals(tGzOrder.getStatus(), GZOrderEnum.UN_PAY.getCode())) {
+                tGzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
+                gzOrderDao.updateByPrimaryKey(tGzOrder);
+            }
+        }
         QueryResult<TGzOrder> result = new QueryResult<>();
         result.setResultList(list);
         result.setTotalCount(page.getTotal());
@@ -42,9 +52,9 @@ public class GZOrderServiceImpl implements GZOrderService {
         Long originalSurplusTime = AppConstant.PAY_SURPLUS_TIME_ORIGINAL;
         Long paySurplusTime = originalSurplusTime - (System.currentTimeMillis() - tGzOrder.getOrderTime());
         boolean expired = paySurplusTime < 0;
-        if(expired) {
+        if(expired && Objects.equals(tGzOrder.getStatus(), GZOrderEnum.UN_PAY.getCode())) {
             tGzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
-            gzOrderDao.updateOrder(tGzOrder);
+            gzOrderDao.updateByPrimaryKey(tGzOrder);
         }
         OrderDetailVO orderDetailVO = tGzOrder.copyOrderDetailVO();
         paySurplusTime = expired? -1: paySurplusTime;

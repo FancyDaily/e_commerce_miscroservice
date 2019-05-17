@@ -251,7 +251,6 @@ public class GZSubjectController {
      */
     @RequestMapping("lesson/list")
     public Object subjectLessonList(@RequestParam(required = true) Long subjectId) {
-        //TODO AUTH
         AjaxResult result = new AjaxResult();
         try {
             List<TGzLesson> resultList = gzSubjectService.lessonList(subjectId);
@@ -379,7 +378,6 @@ public class GZSubjectController {
     @Consume(TGzEvaluate.class)
     @RequestMapping("lesson/evaluate/send/" + TokenUtil.AUTH_SUFFIX)
     public Object subjectLessonEvaluateSend(@RequestParam(required = true) Long subjectId, @RequestParam(required = true) Long lessonId, Integer level, String comment) {
-        //TODO AUTH
         TGzEvaluate evaluate = (TGzEvaluate) ConsumeHelper.getObj();
         TUser user = UserUtil.getUser();
         if (user == null) {

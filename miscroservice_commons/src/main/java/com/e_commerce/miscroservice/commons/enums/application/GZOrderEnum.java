@@ -9,6 +9,9 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum  GZOrderEnum {
 
+    IS_SALE_PRICE_YES(1,"使用优惠价格"),
+    IS_SALE_PRICE_NO(0, "不使用优惠价格"),
+
     UN_PAY(1,"待支付"),
     PAYED(2,"支付完成"),
     TIMEOUT_PAY(3,"交易超时关闭"),

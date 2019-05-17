@@ -23,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,9 +52,11 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
     @Override
     public QueryResult subjectList(Integer pageNum, Integer pageSize) {
-        Integer availableStatus = 1;
+        log.info("在售课程列表pageNum={}, pageSize={}", pageNum, pageSize);
+//        Integer availableStatus = 1;
+//        gzSubjectDao.selectByAvailableStatus(availableStatus);
         Page<Object> startPage = PageHelper.startPage(pageNum == null ? 1 : pageNum, pageSize == null ? 0 : pageSize);
-        gzSubjectDao.selectByAvailableStatus(availableStatus);
+        gzSubjectDao.selectAll();
 
         QueryResult result = new QueryResult();
         result.setTotalCount(startPage.getTotal());
@@ -65,7 +64,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
         return result;
     }
-//TODO 课程详情追加倒计时(如果有待支付的订单,获取它的创建时间 - 计算出剩余时间
+
     @Override
     public SubjectInfosVO subjectDetail(Long subjectId) {
         return subjectDetailAuth(null, subjectId);
@@ -73,10 +72,30 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
     @Override
     public SubjectInfosVO subjectDetailAuth(Long userId, Long subjectId) {
+        log.info("课程详情userId={}, subjectId={}", userId, subjectId);
         TGzSubject subject = gzSubjectDao.selectByPrimaryKey(subjectId);
         if(subject==null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程不存在");
         }
+        // 查找过期的&使用优惠价格的订单 -> 修正
+        List<TGzOrder> gzOrders1 = gzOrderDao.selectBySubjectIdAndStatus(subject.getId(), GZOrderEnum.UN_PAY.getCode());
+        for(TGzOrder gzOrder:gzOrders1) {
+            long timePass = System.currentTimeMillis() - gzOrder.getCreateTime().getTime();
+            boolean isSalPrice = GZOrderEnum.IS_SALE_PRICE_YES.getCode().equals(gzOrder.getIsSalePrice());
+            Long paySurplusTimeOriginal = AppConstant.PAY_SURPLUS_TIME_ORIGINAL;
+            boolean isExpired = paySurplusTimeOriginal - timePass < 0;  //过期
+            if(Objects.equals(gzOrder.getStatus(), GZOrderEnum.UN_PAY.getCode()) && isExpired && isSalPrice) {   //如果状态为待支付，并且时间失效，并且使用优惠价格
+                //状态修改为超时,商品的优惠数目增加
+                gzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
+                gzOrderDao.updateByPrimaryKey(gzOrder);
+                Integer forSaleSurplusNum = subject.getForSaleSurplusNum();
+                forSaleSurplusNum = forSaleSurplusNum==null?0:forSaleSurplusNum;
+                subject.setForSaleSurplusNum(forSaleSurplusNum + 1);    //优惠数目返还
+                subject.setForSaleStatus(GZSubjectEnum.FORSALE_STATUS_YES.getCode());   //设置为优惠中
+                gzSubjectDao.updateByPrimaryKey(subject);
+            }
+        }
+
         String availableDate = subject.getAvailableDate();
         String availableTime = subject.getAvailableTime();
         availableTime = StringUtil.isEmpty(availableTime)?"0000":availableTime;
@@ -85,6 +104,8 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         long currentTimeMillis = System.currentTimeMillis();
         long toAvailableMills = availableMills > currentTimeMillis ? availableMills - currentTimeMillis: -1;
         SubjectInfosVO subjectInfosVO = subject.copySubjectInfosVO();
+        subjectInfosVO.setIntroPic(subject.getIntroPic());
+        subjectInfosVO.setOutLinePic(subject.getOutLinePic());
         String descPic = subjectInfosVO.getDescPic();
         subjectInfosVO.setDescPicArray(descPic!=null && descPic.contains(",")? descPic.split(","):new String[1]);
         List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
@@ -105,7 +126,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
                 subjectInfosVO.setSurplusPayMills(surplusMills);
                 if(expired && Objects.equals(gzOrder.getStatus(), GZOrderEnum.UN_PAY.getCode())) {  //修正
                     gzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
-                    gzOrderDao.updateOrder(gzOrder);
+                    gzOrderDao.updateByPrimaryKey(gzOrder);
                 } else {
                     String tgzOrderNo = gzOrder.getTgzOrderNo();
                     subjectInfosVO.setOrderNo(tgzOrderNo);
@@ -130,11 +151,13 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
     @Override
     public List<TGzLesson> lessonList(Long subjectId) {
+        log.info("章节列表subjectId={}",subjectId);
         return gzLessonDao.selectBySubjectId(subjectId);
     }
 
     @Override
     public void evaluateLesson(TUser user, TGzEvaluate evaluate) {
+        log.info("评价章节userId={}, evaluate={}", user.getId(), evaluate);
         Long lessonId = evaluate.getLessonId();
         Long subjectId = evaluate.getSubjectId();
         Integer level = evaluate.getLevel();

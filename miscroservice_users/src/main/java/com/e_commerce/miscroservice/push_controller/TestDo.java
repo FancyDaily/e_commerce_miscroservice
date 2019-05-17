@@ -9,11 +9,14 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Uti
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,9 +35,31 @@ public class TestDo {
     @Autowired
     private GZLessonService gzLessonService;
 
+    @Autowired
+    private GZPayService gzPayService;
+
     private final String EMPTY = "";
     private final Pattern filePattern=Pattern.compile("(.*)\\.mp4$");
 
+    /**
+     * 支付成功
+     * @param orderNo
+     * @return
+     */
+    @GetMapping("deals")
+    @RequestMapping
+    public Object deal(String orderNo) {
+        log.info("支付成功orderNo={}");
+        AjaxResult result = new AjaxResult();
+        try {
+            gzPayService.afterPaySuccess(null, orderNo);
+            result.setSuccess(true);
+        } catch (Exception e) {
+            log.error("支付成功错误={}", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
     /**
      * 推送
@@ -87,17 +112,19 @@ public class TestDo {
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
         try {
+            request.setAttribute(fileName, Md5Util.md5(fileName));
             gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
             request.setAttribute(fileName, Md5Util.md5(fileName));
         } catch (MessageException e) {
-            AjaxResult result = new AjaxResult();
-            result.setSuccess(false);
-            result.setErrorCode(e.getErrorCode());
-            result.setMsg(e.getMessage());
-//          request.setAttribute("errorMsg", e.getMessage());
-            return result;
+//            AjaxResult result = new AjaxResult();
+//            result.setSuccess(false);
+//            result.setErrorCode(e.getErrorCode());
+//            result.setMsg(e.getMessage());
+//            return result;
+            request.setAttribute("errorMsg", e.getMessage());
         } catch (Exception e) {
-            return new AjaxResult();
+//            return new AjaxResult();
+            request.setAttribute("errorMsg", e.getMessage());
         }
         return "forward:/doPlay";
     }
@@ -119,12 +146,14 @@ public class TestDo {
                 !Md5Util.md5(fileName).equals(hash)) {
             result.setData(EMPTY);
             result.setSuccess(false);
+            return result;
         }
 
         String errorMsg = (String) request.getAttribute("errorMsg");
         if(errorMsg != null) {
             result.setMsg(errorMsg);
             result.setSuccess(false);
+            return result;
         }
 
         result.setSuccess(true);

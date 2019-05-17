@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -54,6 +55,7 @@ public class MyLearningSubjectVO {
     private String startTime;
     private String endTime;
     private String img;
+    private String availableDate;
 
     private static final long serialVersionUID = 1L;
 
@@ -64,12 +66,19 @@ public class MyLearningSubjectVO {
     }
 
     public String getStartTime() {
-        return DateUtil.timeStamp2Date(createTime.getTime());
+        if(StringUtil.isEmpty(availableDate)) {
+            return "";
+        }
+        String year = availableDate.substring(0, 4);
+        String month = availableDate.substring(4, 6);
+        String day = availableDate.substring(6);
+        return year + "-" + month + "-" + day;
+//        return DateUtil.timeStamp2Date(createTime.getTime());
     }
 
     public String getEndTime() {
 
-        return DateUtil.timeStamp2Date(createTime.getTime()+expireTime);
+        return DateUtil.timeStamp2Date(expireTime);
 
     }
 

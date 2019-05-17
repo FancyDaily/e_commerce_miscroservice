@@ -62,6 +62,20 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     }
 
     @Override
+    public List<TGzSubject> selectAll() {
+        return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES)
+        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TGzSubject::getAvailableDate)));
+    }
+
+    @Override
+    public List<TGzSubject> selectInPrimaryKeys(List<Long> subjectIds) {
+        return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
+        .in(TGzSubject::getId, subjectIds)
+        .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
         return MybatisOperaterUtil.getInstance().finAll(new TGzSubject(), new MybatisSqlWhereBuild(TGzSubject.class)
         .eq(TGzSubject::getName, name)

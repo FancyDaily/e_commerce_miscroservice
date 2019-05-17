@@ -27,6 +27,7 @@ public class GZVoucherDaoImpl implements GZVoucherDao {
         if(availableStatus != null) {
             mybatisSqlWhereBuild.in(TGzVoucher::getAvailableStatus, availableStatus);
         }
+        mybatisSqlWhereBuild.orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TGzVoucher::getAvailableStatus), MybatisSqlWhereBuild.OrderBuild.buildDesc(TGzVoucher::getCreateTime));
         return MybatisOperaterUtil.getInstance().finAll(new TGzVoucher(),mybatisSqlWhereBuild);
     }
 
