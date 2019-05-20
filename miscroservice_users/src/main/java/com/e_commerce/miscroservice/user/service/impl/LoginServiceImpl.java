@@ -5,6 +5,7 @@ import java.util.*;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
 @Service
 public class LoginServiceImpl extends BaseService implements LoginService {
@@ -188,7 +191,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         // 解析手机号(仅用作判定账户唯一性，并不收集用户数据)
         String telephone = wechatService.getPhoneNumber(view.getEncryptedData(), view.getIv(), session);
         TUser user = null;
-        TUser openUser = getUser(openid); // 根据微信openid判定账户是否存在 TODO
+        TUser openUser = getUser(openid, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); // 根据微信openid判定账户是否存在 TODO
         TUser telephoneUser = userService.getUserAccountByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); // 根据手机号判定账户是否存在 TODO
         Map<String, String> resultMap = new HashMap<>();
         Map<String, Object> redisMap = new HashMap<>();
@@ -261,12 +264,12 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      * @param openId
      * @return
      */
-    private TUser getUser(String openId) {
+    private TUser getUser(String openId, Integer applicaiton) {
 
         if (StringUtil.isEmpty(openId)) {
             throw new MessageException(AppErrorConstant.Field_Error, "微信账号字段为空");
         }
-        List<TUser> list = userDao.selectByVxOpenId(openId, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        List<TUser> list = userDao.selectByVxOpenId(openId, applicaiton);
         TUser user = null;
         if (list != null && !list.isEmpty()) {
             for (TUser thisUser : list) {
@@ -321,7 +324,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         if (openid == null) {
             return new HashMap<String, Object>();
         }
-        TUser user = getUser(openid);
+        TUser user = getUser(openid, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
         if (user == null) {
             return new HashMap<String, Object>();
         }
@@ -362,6 +365,44 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         }
 */
 
+        return resultMap;
+    }
+
+    @Override
+    public Map<String, Object> gzWxLogin(String openid, String encryptedData, String iv, String session_key, String uuid) {
+        logger.info("观照公众号登录openid={},encryptedData={},iv={},sesison_key={}", openid, encryptedData, iv, session_key);
+        Map<String, Object> resultMap = new HashMap<>();
+        TUser user = null;
+        String token = null;
+        if(StringUtil.isEmpty(openid) && StringUtil.isAnyEmpty(encryptedData,iv,session_key)) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必要参数为空!");
+        }
+
+        if(!StringUtil.isEmpty(openid)) {   //校验用户，去注册
+            user = getUser(openid, ApplicationEnum.GUANZHAO_APPLICATION.toCode());//通过openid获取用户
+        }
+
+        if(user==null) {    //openid不存在
+            WechatSession wechatSession = new WechatSession();
+            wechatSession.setSession_key(session_key);
+            String telephone = wechatService.getPhoneNumber(encryptedData, iv, wechatSession);  //手机号是否存在
+            if(telephone==null) {
+                throw new MessageException("手机号解析错误");
+            }
+            user = userService.getUserByTelephone(telephone, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            if(user==null) { //注册gz
+                user = new TUser();
+                user.setUserTel(telephone);
+                user.setVxOpenId(openid);
+                user.setPassword("e10adc3949ba59abbe56e057f20f883e");
+                user = userService.registerGZWithOutValidCode(user);
+            }
+        }
+
+        token = checkLogin(uuid, user, false, ApplicationEnum.GUANZHAO_APPLICATION.toCode());//从认证中心获取
+
+        resultMap.put("token", token);
+        resultMap.put("user", user);
         return resultMap;
     }
 

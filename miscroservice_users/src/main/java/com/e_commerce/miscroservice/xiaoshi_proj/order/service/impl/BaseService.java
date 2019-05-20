@@ -371,4 +371,8 @@ public class BaseService {
 		return token;
 	}
 
+	protected String checkLogin(String uuid, TUser user, boolean opt, Integer applicaiton) {
+		return checkLogin(uuid, user, null, opt, applicaiton);
+	}
+
 }

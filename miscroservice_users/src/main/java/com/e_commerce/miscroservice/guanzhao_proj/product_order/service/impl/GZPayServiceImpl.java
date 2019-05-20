@@ -393,4 +393,26 @@ public class GZPayServiceImpl implements GZPayService {
             });*/
         }
     }
+
+    @Override
+    public void dealWithPrice(double price) {
+        List<TGzOrder> gzOrders = gzOrderDao.selectByPrice(price, GZOrderEnum.UN_PAY.getCode());    //所有待支付的对应金额的订单
+        if(gzOrders.isEmpty()) {
+            throw new MessageException("没有对应金额的订单！");
+        }
+        if(gzOrders.size() > 1) {
+            StringBuilder builder = new StringBuilder();
+            for(TGzOrder gzOrder:gzOrders) {
+                builder.append(gzOrder.getId()).append(",");
+            }
+            String ids = builder.toString();
+            if(ids.endsWith(",")){
+                ids.substring(0,ids.length()-1);
+            }
+            throw new MessageException("相同金额存在多笔订单! msg:", ids);
+        }
+
+        TGzOrder gzOrder = gzOrders.get(0);
+        afterPaySuccess(gzOrder, gzOrder.getTgzOrderNo());
+    }
 }

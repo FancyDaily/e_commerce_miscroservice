@@ -3966,11 +3966,12 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 作者: 许方毅
      * 创建时间: 2018年10月29日 下午2:57:03
      * @param telephone
+     * @param application
      * @return
      */
     @Override
-    public TUser getUserByTelephone(String telephone) {
-        List<TUser> userList = userDao.selectByTelephoneAndJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+    public TUser getUserByTelephone(String telephone, int application) {
+        List<TUser> userList = userDao.selectByTelephoneAndJurisdiction(telephone, AppConstant.JURISDICTION_NORMAL, application);
         TUser user = null;
         if (userList != null && !userList.isEmpty()) {
             user = userList.get(0);
@@ -4021,7 +4022,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         } else {
             if (param.matches(regex_num)) {
                 if (param.matches(regex_tel)) { // 手机号
-                    TUser user = getUserByTelephone(param);
+                    TUser user = getUserByTelephone(param, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
                     if(user!=null) {
                         userList.add(user);
                     }
@@ -4225,12 +4226,31 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional(rollbackFor = Throwable.class)
     @Override
     public void registerGZ(TUser user, String validCode) {
-        Integer application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
         String userTel = user.getUserTel();
+        checkSMS(userTel, validCode);
+
+        gzRigester(user);
+    }
+
+    /**
+     * 非验证码注册观照app
+     * @param user
+     */
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public TUser registerGZWithOutValidCode(TUser user) {
+        return gzRigester(user);
+    }
+
+    private TUser gzRigester(TUser user) {
+        String userTel = user.getUserTel();
+        if(StringUtil.isEmpty(userTel)) {
+            throw new MessageException("手机号不能为空!");
+        }
+
+        Integer application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
         String password = user.getPassword();
         String inviteCode = user.getInviteCode();
-
-        checkSMS(userTel, validCode);
         //手机号重复性校验
         List<TUser> tUsers = userDao.selectByTelephone(userTel, application);
         TUser tempUser = null;
@@ -4262,7 +4282,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             TUser inviter = null;
             inviter = users.get(0);
             if(Objects.isNull(inviter)) {
-                return;
+                return user;
             }
             //2.奖励双方(代金券)
             long currentTimeMillis = System.currentTimeMillis();
@@ -4287,6 +4307,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setInviteCode(RandomUtil.generateUniqueChars());
         userDao.updateByPrimaryKey(user);
 
+        return user;
     }
 
     /**

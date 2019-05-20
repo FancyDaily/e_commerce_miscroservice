@@ -49,4 +49,11 @@ public interface GZOrderDao {
      * @return
      */
     List<TGzOrder> selectBySubjectIdAndStatus(Long id, Integer payStatus);
+
+    /**
+     * 根据价格、状态查找订单
+     * @param price
+     * @return
+     */
+    List<TGzOrder> selectByPrice(double price, Integer Status);
 }

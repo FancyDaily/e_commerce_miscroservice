@@ -364,7 +364,7 @@ public interface UserService {
      */
     void logOut(String token);
 
-    abstract TUser getUserByTelephone(String telephone);
+    abstract TUser getUserByTelephone(String telephone, int i);
 
     TUser rigester(TUser user, Integer application);
 
@@ -414,7 +414,11 @@ public interface UserService {
 
     void loginPwd(String account, String password, HttpServletResponse response,String uuid) throws Exception;
 
+    @Transactional(rollbackFor = Throwable.class)
+    TUser registerGZWithOutValidCode(TUser user);
+
     Map<String, Object> loginByPwd(String telephone, String password, HttpServletResponse response, String uuid, int application);
 
     void registerGZ(TUser user, String validCode);
+
 }

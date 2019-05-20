@@ -46,4 +46,6 @@ public interface GZPayService {
     String payBack(String resXml);
 
     void afterPaySuccess(TGzOrder tGzOrder, String out_trade_no);
+
+    void dealWithPrice(double price);
 }

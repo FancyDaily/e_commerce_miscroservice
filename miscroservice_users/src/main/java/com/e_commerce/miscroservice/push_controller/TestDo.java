@@ -47,12 +47,31 @@ public class TestDo {
      * @return
      */
     @GetMapping("deals")
-    @RequestMapping
+    @ResponseBody
     public Object deal(String orderNo) {
-        log.info("支付成功orderNo={}");
+        log.info("支付成功orderNo={}", orderNo);
         AjaxResult result = new AjaxResult();
         try {
             gzPayService.afterPaySuccess(null, orderNo);
+            result.setSuccess(true);
+        } catch (Exception e) {
+            log.error("支付成功错误={}", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
+     * 根据订单金额去支付订单
+     * @return
+     */
+    @GetMapping("deal/price")
+    @ResponseBody
+    public Object dealWithPrice(double price) {
+        log.info("根据订单金额去支付订单={}", price);
+        AjaxResult result = new AjaxResult();
+        try {
+            gzPayService.dealWithPrice(price);
             result.setSuccess(true);
         } catch (Exception e) {
             log.error("支付成功错误={}", e);

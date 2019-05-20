@@ -54,4 +54,14 @@ public interface LoginService {
 	 */
 	Map<String, Object> loginByOpenid(String openid,String uuid);
 
+	/**
+	 * 观照微信公众号登录
+	 * @param openid
+	 * @param encryptedData
+	 * @param iv
+	 * @param session_key
+	 * @param uuid
+	 * @return
+	 */
+	Map<String, Object> gzWxLogin(String openid, String encryptedData, String iv, String session_key, String uuid);
 }
