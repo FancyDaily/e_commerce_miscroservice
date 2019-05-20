@@ -75,6 +75,7 @@ public class TestDo {
             result.setSuccess(true);
         } catch (Exception e) {
             log.error("支付成功错误={}", e);
+            result.setMsg(e.getMessage());
             result.setSuccess(false);
         }
         return result;

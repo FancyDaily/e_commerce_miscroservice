@@ -407,9 +407,9 @@ public class GZPayServiceImpl implements GZPayService {
             }
             String ids = builder.toString();
             if(ids.endsWith(",")){
-                ids.substring(0,ids.length()-1);
+                ids = ids.substring(0,ids.length()-1);
             }
-            throw new MessageException("相同金额存在多笔订单! msg:", ids);
+            throw new MessageException("相同金额存在多笔订单! msg:" + ids);
         }
 
         TGzOrder gzOrder = gzOrders.get(0);
