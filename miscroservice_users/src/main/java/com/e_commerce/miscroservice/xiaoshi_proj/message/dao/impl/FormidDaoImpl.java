@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TFormid;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.dao.FormidDao;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +37,7 @@ public class FormidDaoImpl implements FormidDao {
      * @return
      */
     public long insert(TFormid formid){
-        long save = MybatisOperaterUtil.getInstance().save(formid);
+        long save = MybatisPlus.getInstance().save(formid);
         return save;
     }
 
@@ -48,14 +48,14 @@ public class FormidDaoImpl implements FormidDao {
      * @return
      */
     public TFormid selectAllFormIdCanUse(Long findTime , Long userId){
-        return MybatisOperaterUtil.getInstance().findOne(new TFormid() ,
-                new MybatisSqlWhereBuild(TFormid.class)
+        return MybatisPlus.getInstance().findOne(new TFormid() ,
+                new MybatisPlusBuild(TFormid.class)
                         .eq(TFormid::getCreateUser , userId)
                         .eq(TFormid::getIsValid , AppConstant.ACCREDIT_STATUS_YES)
                         .gt(TFormid::getUpdateTime , findTime)
                         .neq(TFormid::getFormId , "undefined")
                         .neq(TFormid::getFormId , "the formId is a mock one")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildAsc(TFormid::getUpdateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TFormid::getUpdateTime)));
     }
 
     /**
@@ -64,8 +64,8 @@ public class FormidDaoImpl implements FormidDao {
      * @return
      */
     public long updateFormId(TFormid formid){
-        return MybatisOperaterUtil.getInstance().update(formid ,
-                new MybatisSqlWhereBuild(TFormid.class)
+        return MybatisPlus.getInstance().update(formid ,
+                new MybatisPlusBuild(TFormid.class)
                         .eq(TFormid::getId , formid.getId()));
     }
 }

@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.user.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFreeze;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.user.dao.UserFreezeDao;
 import org.springframework.stereotype.Component;
@@ -22,10 +22,10 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      */
     @Override
     public List<TUserFreeze> queryUserFreezeDESC(Long userId, Long lastTime) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
+        return MybatisPlus.getInstance().finAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
                 .lt(TUserFreeze::getCreateTime, lastTime)
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFreeze::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserFreeze::getCreateTime)));
     }
 
     /**
@@ -35,7 +35,7 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      */
     @Override
     public int insert(TUserFreeze userFreeze) {
-        return MybatisOperaterUtil.getInstance().save(userFreeze);
+        return MybatisPlus.getInstance().save(userFreeze);
     }
 
     /**
@@ -46,7 +46,7 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      */
     @Override
     public TUserFreeze selectUserFreezeByUserIdAndOrderId(Long userId, Long orderId) {
-        return MybatisOperaterUtil.getInstance().findOne(new TUserFreeze(),new MybatisSqlWhereBuild(TUserFreeze.class)
+        return MybatisPlus.getInstance().findOne(new TUserFreeze(),new MybatisPlusBuild(TUserFreeze.class)
         .eq(TUserFreeze::getUserId,userId)
         .eq(TUserFreeze::getOrderId,orderId)
         .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
@@ -59,20 +59,20 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      */
     @Override
     public int update(TUserFreeze userFreeze) {
-        return MybatisOperaterUtil.getInstance().update(userFreeze,new MybatisSqlWhereBuild(TUserFreeze.class)
+        return MybatisPlus.getInstance().update(userFreeze,new MybatisPlusBuild(TUserFreeze.class)
         .eq(TUserFreeze::getId,userFreeze.getId())
         .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public TUserFreeze getUserFreeze(Long createUser, Long orderId) {
-        return MybatisOperaterUtil.getInstance().findOne(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class)
+        return MybatisPlus.getInstance().findOne(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class)
                 .eq(TUserFreeze::getUserId, createUser).eq(TUserFreeze::getOrderId, orderId));
     }
 
     @Override
     public List<TUserFreeze> selectByUserIdBetween(Long userId, Long beginStamp, Long endStamp) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserFreeze(), new MybatisSqlWhereBuild(TUserFreeze.class)
+        return MybatisPlus.getInstance().finAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class)
         .eq(TUserFreeze::getUserId,userId)
                 .between(TUserFreeze::getCreateTime,beginStamp,endStamp)
                 .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));

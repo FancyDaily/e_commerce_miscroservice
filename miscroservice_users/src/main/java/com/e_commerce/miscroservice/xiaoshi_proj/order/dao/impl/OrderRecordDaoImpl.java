@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.order.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TOrderRecord;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.dao.OrderRecordDao;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.mapper.OrderRelationshipMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +44,14 @@ public class OrderRecordDaoImpl implements OrderRecordDao {
      * @return
      */
     public int insert(TOrderRecord orderRecord) {
-        int save = MybatisOperaterUtil.getInstance()
+        int save = MybatisPlus.getInstance()
                 .save(orderRecord);
         return save;
     }
 
     @Override
     public List<TOrderRecord> selectRecordByOrderId(Long orderId) {
-        return MybatisOperaterUtil.getInstance().finAll(new TOrderRecord(), new MybatisSqlWhereBuild(TOrderRecord.class)
+        return MybatisPlus.getInstance().finAll(new TOrderRecord(), new MybatisPlusBuild(TOrderRecord.class)
                 .eq(TOrderRecord::getOrderId, orderId).eq(TOrderRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
 

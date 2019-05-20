@@ -1,8 +1,8 @@
 package com.e_commerce.miscroservice.xiaoshi_proj.product.dao.impl;
 
 import com.e_commerce.miscroservice.commons.entity.application.TServiceSummary;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.dao.serviceSummaryDao;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +19,7 @@ public class serviceSummaryImpl implements serviceSummaryDao {
 	 * @return
 	 */
 	public long saveServiceSummary(TServiceSummary serviceSummary){
-		return MybatisOperaterUtil.getInstance().save(serviceSummary);
+		return MybatisPlus.getInstance().save(serviceSummary);
 	}
 
 	/**
@@ -28,7 +28,7 @@ public class serviceSummaryImpl implements serviceSummaryDao {
 	 * @return
 	 */
 	public TServiceSummary selectServiceSummaryByServiceId(Long serviceId){
-		return MybatisOperaterUtil.getInstance().findOne(new TServiceSummary(), new MybatisSqlWhereBuild(TServiceSummary.class)
+		return MybatisPlus.getInstance().findOne(new TServiceSummary(), new MybatisPlusBuild(TServiceSummary.class)
 				.eq(TServiceSummary::getServiceId, serviceId));
 	}
 

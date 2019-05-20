@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.user.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.application.TUserFollow;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.user.dao.UserFollowDao;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public boolean isAtten(Long userId, Long userFollowId) {
-        return !MybatisOperaterUtil.getInstance().finAll(new TUserFollow(), new MybatisSqlWhereBuild(TUserFollow.class)
+        return !MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId, userId)
                 .eq(TUserFollow::getUserFollowId, userFollowId)
                 .eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)).isEmpty();
@@ -37,7 +37,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
     @Override
     public Map<String, Object> findRecords(Long userId, Long userFollowId) {
         Map<String, Object> resultMap = new HashMap<>();
-        List<TUserFollow> userFollows = MybatisOperaterUtil.getInstance().finAll(new TUserFollow(), new MybatisSqlWhereBuild(TUserFollow.class)
+        List<TUserFollow> userFollows = MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .groupBefore().
                         eq(TUserFollow::getUserId, userId)
                 .eq(TUserFollow::getUserFollowId, userFollowId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
@@ -73,7 +73,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public int update(TUserFollow userFollow) {
-        return MybatisOperaterUtil.getInstance().update(userFollow,new MybatisSqlWhereBuild(TUserFollow.class).eq(TUserFollow::getId,userFollow.getId()));
+        return MybatisPlus.getInstance().update(userFollow,new MybatisPlusBuild(TUserFollow.class).eq(TUserFollow::getId,userFollow.getId()));
     }
 
     /**
@@ -82,7 +82,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public int insert(TUserFollow userFollow) {
-        return MybatisOperaterUtil.getInstance().save(userFollow);
+        return MybatisPlus.getInstance().save(userFollow);
     }
 
     /**
@@ -93,11 +93,11 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public List<TUserFollow> findUserIdRecords(Long userId, Long lastTime) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserFollow(),new MybatisSqlWhereBuild(TUserFollow.class)
+        return MybatisPlus.getInstance().finAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
     }
 
     /**
@@ -108,11 +108,11 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public List<TUserFollow> findUserFollowIdRecords(Long userId, Long lastTime) {
-        return MybatisOperaterUtil.getInstance().finAll(new TUserFollow(),new MybatisSqlWhereBuild(TUserFollow.class)
+        return MybatisPlus.getInstance().finAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserFollowId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
-                .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
+                .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserFollow::getCreateTime)));
     }
 
     /**
@@ -123,7 +123,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public Integer queryAttenStatus(Long id, Long userId) {
-        List<TUserFollow> userFollows = MybatisOperaterUtil.getInstance().finAll(new TUserFollow(), new MybatisSqlWhereBuild(TUserFollow.class)
+        List<TUserFollow> userFollows = MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .groupBefore().
                         eq(TUserFollow::getUserId, id)
                 .eq(TUserFollow::getUserFollowId, userId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
@@ -151,7 +151,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
 
     @Override
     public Long countUserFollow(Long userId, Long userFollowId) {
-        return MybatisOperaterUtil.getInstance().count(new MybatisSqlWhereBuild(TUserFollow.class)
+        return MybatisPlus.getInstance().count(new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId, userId).eq(TUserFollow::getUserFollowId, userFollowId)
                 .eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES));
     }

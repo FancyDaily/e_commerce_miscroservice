@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TEvent;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.dao.EventDao;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +39,7 @@ public class EventDaoImpl implements EventDao {
      * @return
      */
     public long insert(TEvent event){
-        long save = MybatisOperaterUtil.getInstance().save(event);
+        long save = MybatisPlus.getInstance().save(event);
         return save;
     }
 
@@ -49,8 +49,8 @@ public class EventDaoImpl implements EventDao {
      * @return
      */
     public TEvent selectById (long id){
-        return MybatisOperaterUtil.getInstance().findOne(new TEvent() ,
-                new MybatisSqlWhereBuild(TEvent.class)
+        return MybatisPlus.getInstance().findOne(new TEvent() ,
+                new MybatisPlusBuild(TEvent.class)
                         .eq(TEvent::getId , id)
                         .eq(TEvent::getIsValid , AppConstant.ACCREDIT_STATUS_YES)
         );
@@ -62,8 +62,8 @@ public class EventDaoImpl implements EventDao {
      * @return
      */
     public long updateById(TEvent event){
-        return MybatisOperaterUtil.getInstance().update(event,
-                new MybatisSqlWhereBuild(TEvent.class)
+        return MybatisPlus.getInstance().update(event,
+                new MybatisPlusBuild(TEvent.class)
                         .eq(TEvent::getId, event.getId()));
     }
 
@@ -74,8 +74,8 @@ public class EventDaoImpl implements EventDao {
      * @return
      */
     public List<TEvent> selectByUserIdAndTiggetId(Long userId , String tiggerId){
-        List<TEvent> events = MybatisOperaterUtil.getInstance().finAll(new TEvent() ,
-                new MybatisSqlWhereBuild(TEvent.class)
+        List<TEvent> events = MybatisPlus.getInstance().finAll(new TEvent() ,
+                new MybatisPlusBuild(TEvent.class)
                         .eq(TEvent::getUserId , userId)
                         .eq(TEvent::getTiggerId , tiggerId)
                         .eq(TEvent::getIsValid , AppConstant.ACCREDIT_STATUS_YES)

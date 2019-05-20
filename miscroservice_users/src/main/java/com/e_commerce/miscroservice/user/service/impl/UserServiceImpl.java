@@ -21,7 +21,7 @@ import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.MqChannelEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.TimerSchedulerTypeEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
@@ -402,7 +402,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         param.setYear(year);
 
         //查询
-        Map<String, Object> yearAndAllPBMap = publicWelfareDao.selectPublicWelfare(param, id, betLeft, betRight, lastTime, MybatisSqlWhereBuild.ORDER.DESC);
+        Map<String, Object> yearAndAllPBMap = publicWelfareDao.selectPublicWelfare(param, id, betLeft, betRight, lastTime, MybatisPlusBuild.ORDER.DESC);
 
         // 年度
         Long yearWelfare = (Long) yearAndAllPBMap.get("yearWelfare");
@@ -841,7 +841,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         tUser.setUpdateTime(System.currentTimeMillis());
         tUser.setFreezeTime(tUser.getFreezeTime() + freeTime);
         userDao.updateByPrimaryKey(tUser);
-//        MybatisOperaterUtil.getInstance().update(tUser, new MybatisSqlWhereBuild(TUser.class)
+//        MybatisPlus.getInstance().update(tUser, new MybatisPlusBuild(TUser.class)
 //                .eq(TUser::getAge, tUser.getId()));
         //创建用户冻结记录
         TUserFreeze userFreeze = new TUserFreeze();

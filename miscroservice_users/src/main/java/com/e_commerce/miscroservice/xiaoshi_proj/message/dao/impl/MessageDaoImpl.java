@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.dao.impl;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TMessage;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.dao.MessageDao;
 
 import com.e_commerce.miscroservice.xiaoshi_proj.message.mapper.MessageMapper;
@@ -44,8 +44,8 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public TMessage selectNewMessageByTwoUserId(Long fromUserId , Long toUserId){
-        TMessage message = MybatisOperaterUtil.getInstance().findOne(new TMessage(),
-                new MybatisSqlWhereBuild(TMessage.class)
+        TMessage message = MybatisPlus.getInstance().findOne(new TMessage(),
+                new MybatisPlusBuild(TMessage.class)
                         .groupBefore()
                             .eq(TMessage::getUserId ,toUserId)
                             .eq(TMessage::getMessageUserId , fromUserId)
@@ -55,7 +55,7 @@ public class MessageDaoImpl implements MessageDao {
                             .eq(TMessage::getMessageUserId , toUserId)
                         .groupAfter()
                         .eq(TMessage::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
         return message;
     }
 
@@ -66,12 +66,12 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public TMessage selectNewMessageByOneUserId(Long parent , Long userId){
-        TMessage message = MybatisOperaterUtil.getInstance().findOne(new TMessage(),
-                new MybatisSqlWhereBuild(TMessage.class)
+        TMessage message = MybatisPlus.getInstance().findOne(new TMessage(),
+                new MybatisPlusBuild(TMessage.class)
                         .eq(TMessage::getUserId , userId)
                         .eq(TMessage::getParent , parent)
                         .eq(TMessage::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
         return message;
     }
 
@@ -81,7 +81,7 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public TMessage insert(TMessage message){
-        MybatisOperaterUtil.getInstance().save(message);
+        MybatisPlus.getInstance().save(message);
         return message;
     }
 
@@ -91,8 +91,8 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public long updateUpdate(TMessage message){
-        return MybatisOperaterUtil.getInstance().update(message,
-                new MybatisSqlWhereBuild(TMessage.class)
+        return MybatisPlus.getInstance().update(message,
+                new MybatisPlusBuild(TMessage.class)
                         .eq(TMessage::getId, message.getId()));
     }
     /**
@@ -102,8 +102,8 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public List<TMessage> selectAllMessageByTwoUserId(Long fromUserId , Long toUserId , Long lastTime){
-        List<TMessage> messageList = MybatisOperaterUtil.getInstance().finAll(new TMessage(),
-                new MybatisSqlWhereBuild(TMessage.class)
+        List<TMessage> messageList = MybatisPlus.getInstance().finAll(new TMessage(),
+                new MybatisPlusBuild(TMessage.class)
                         .groupBefore()
                         .eq(TMessage::getUserId ,toUserId)
                         .eq(TMessage::getMessageUserId , fromUserId)
@@ -114,7 +114,7 @@ public class MessageDaoImpl implements MessageDao {
                         .groupAfter()
                         .lt(TMessage::getCreateTime , lastTime)
                         .eq(TMessage::getIsValid , "1")
-                        .orderBy(MybatisSqlWhereBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
+                        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TMessage::getCreateTime)));
         return messageList;
     }
 
@@ -136,8 +136,8 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public long selectCountByUnreade(Long parent , Long lastTime){
-        long count = MybatisOperaterUtil.getInstance().count(
-                new MybatisSqlWhereBuild(TMessage.class)
+        long count = MybatisPlus.getInstance().count(
+                new MybatisPlusBuild(TMessage.class)
                         .eq(TMessage::getParent , parent)
                         .eq(TMessage::getIsValid , "1")
                         .gt(TMessage::getCreateTime , lastTime));

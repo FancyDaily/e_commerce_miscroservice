@@ -2,8 +2,8 @@ package com.e_commerce.miscroservice.xiaoshi_proj.message.dao.impl;
 
 
 import com.e_commerce.miscroservice.commons.entity.application.TPublish;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisOperaterUtil;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisSqlWhereBuild;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.dao.PublishDao;
 import org.springframework.stereotype.Repository;
 
@@ -35,7 +35,7 @@ public class PublishDaoImpl implements PublishDao {
      * @return
      */
     public long insert(TPublish publish){
-        long save = MybatisOperaterUtil.getInstance().save(publish);
+        long save = MybatisPlus.getInstance().save(publish);
         return save;
     }
 
@@ -45,8 +45,8 @@ public class PublishDaoImpl implements PublishDao {
      * @return
      */
     public TPublish selecePublish(String key){
-        return MybatisOperaterUtil.getInstance().findOne(new TPublish()
-                , new MybatisSqlWhereBuild(TPublish.class)
+        return MybatisPlus.getInstance().findOne(new TPublish()
+                , new MybatisPlusBuild(TPublish.class)
                         .eq(TPublish::getMainKey , key));
     }
 }
