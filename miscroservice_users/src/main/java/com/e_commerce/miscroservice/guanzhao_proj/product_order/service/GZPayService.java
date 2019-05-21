@@ -36,7 +36,7 @@ public interface GZPayService {
      * @param subjectId
      * @return
      */
-    Map<String, String> dounifiedOrder(String orderNo, Integer userId, Integer coupon_id, String spbill_create_ip, int i, Long subjectId);
+    Map<String, String> dounifiedOrder(String orderNo, Long userId, Long coupon_id, String spbill_create_ip, int i, Long subjectId);
 
     /**
      * 微信支付回调
@@ -48,4 +48,15 @@ public interface GZPayService {
     void afterPaySuccess(TGzOrder tGzOrder, String out_trade_no);
 
     void dealWithPrice(double price);
+
+    /**
+     * 支付宝预生成(个人二维码生成)
+     * @param orderNo
+     * @param coupon_id
+     * @param subjectId
+     * @param userId
+     */
+    Map<String, Object> preOrder(String orderNo, Long coupon_id, Long subjectId, Long userId);
+
+
 }

@@ -14,6 +14,10 @@ public interface GZVoucherDao {
      */
     int insert(TGzVoucher voucher, TGzVoucher voucherCopy);
 
+    int save(TGzVoucher... voucher);
+
+    int multiInsert(List<TGzVoucher> vouchers);
+
     /**
      * 根据用户Id、可用状态、情形
      * @param userId
@@ -32,5 +36,7 @@ public interface GZVoucherDao {
      * @param couponId
      * @return
      */
-    TGzVoucher findByUserIdCouponId(Integer userId, Integer couponId);
+    TGzVoucher findByUserIdCouponId(Long userId, Long couponId);
+
+    TGzVoucher selectByPrimaryKey(Long voucherId);
 }

@@ -1,17 +1,20 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
-import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.WXMyConfigUtil;
+import com.e_commerce.miscroservice.commons.utils.SmsUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,6 +43,67 @@ public class PayController {
 
     @Autowired
     private GZPayService gzPayService;
+
+    @Autowired
+    private SmsUtil smsUtil;
+
+    /**
+     * 支付宝支付回调
+     * @param money
+     */
+    @PostMapping("earnNotify")
+    public Object pay(Double money){
+        logger.info("根据订单金额去支付订单={}", money);
+        AjaxResult result = new AjaxResult();
+        String telephone = "13867655157";
+        int application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String format = simpleDateFormat.format(date);
+        try {
+            gzPayService.dealWithPrice(money);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            smsUtil.sendSms(telephone, "提示:" + e.getMessage() + "，当前金额:" + money +  ", 时间:" + format, application);
+            logger.error("根据订单金额去支付订单错误={}", e);
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        } catch (Exception e) {
+            smsUtil.sendSms(telephone, "服务器错误，订单支付有误。目标金额" + money + ", 时间:" + format, application);
+            logger.error("根据订单金额去支付订单错误={}", e);
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }
+        return result;
+    }
+    
+    /**
+     * 预生成订单
+     * @return
+     */
+    @PostMapping("preOrder/" + TokenUtil.AUTH_SUFFIX)
+    public Object preOrder(@RequestParam(required = false,value = "orderNo")String orderNo,
+                           @RequestParam(required = false,value = "coupon_id")Long coupon_id,
+                           @RequestParam(required = true,value = "subjectId")Long subjectId,
+                           @RequestParam(required = false) boolean isSalePrice,
+                           HttpServletRequest req, HttpServletResponse response) {
+        TUser user = UserUtil.getUser();
+        if(user==null) {
+            user = new TUser();
+            user.setId(1153l);
+        }
+        logger.info("支付宝-预生成订单orderNo={},coupon_id={},subjectId={}",orderNo,coupon_id,subjectId);
+        AjaxResult result = new AjaxResult();
+        try {
+            gzPayService.preOrder(orderNo, coupon_id, subjectId, user.getId());
+            result.setSuccess(true);
+        } catch (Exception e) {
+            logger.error("支付成功错误={}", e);
+            result.setMsg(e.getMessage());
+            result.setSuccess(false);
+        }
+        return result;
+    }
 
     /**
      * 支付宝app支付
@@ -89,13 +150,10 @@ public class PayController {
     @RequestMapping("/alipay/qr_code/pre")
     public Object qrCodePre(AliPayPo payPo) {
         logger.info("支付宝当面付-二维码-预下单={}",payPo);
-
         AjaxResult ajaxResult = new AjaxResult();
-
         try {
-            ajaxResult.setSuccess(true);
-            ajaxResult.setData(payPo);
             gzPayService.qrCodeTradePre(payPo);
+            ajaxResult.setSuccess(true);
         }catch (Exception e){
             ajaxResult.setSuccess(false);
         }
@@ -122,7 +180,7 @@ public class PayController {
     @RequestMapping(value = "/wx/" + TokenUtil.AUTH_SUFFIX)
     public Object orderPay(
                            @RequestParam(required = false,value = "orderNo")String orderNo,
-                           @RequestParam(required = false,value = "coupon_id")Integer coupon_id,
+                           @RequestParam(required = false,value = "coupon_id")Long coupon_id,
                            @RequestParam(required = true,value = "subjectId")Long subjectId,
                            @RequestParam(required = false) boolean isSalePrice,
                            HttpServletRequest req, HttpServletResponse response) throws Exception {
@@ -137,7 +195,7 @@ public class PayController {
 //        String user_id="1";               //77777
 //        String coupon_id="7";               //777777
 //        Integer userId = user_id;
-        Integer userId = IdUtil.getId();
+        Long userId = Long.valueOf(IdUtil.getId());
         WXMyConfigUtil config = new WXMyConfigUtil();
         String spbill_create_ip = Iptools.gainRealIp(req);
 //        String spbill_create_ip="10.4.21.78";
@@ -220,4 +278,5 @@ public class PayController {
             return result;
         }
     }
+
 }

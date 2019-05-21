@@ -5,10 +5,10 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZVoucherEnum;
-import com.e_commerce.miscroservice.commons.enums.application.ProductEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
@@ -22,9 +22,9 @@ import com.github.wxpay.sdk.WXPay;
 import com.github.wxpay.sdk.WXPayUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -65,6 +65,14 @@ public class GZPayServiceImpl implements GZPayService {
     @Autowired
     private GZLessonService gzLessonService;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    public static String GZ_PAY_TIMESTAMP_DESCRIBE = "gz_pay:timestamp:%s"; //上次递减的时间
+
+    public static String GZ_PAY_NUM_DESCRIBE = "gz_pay:num:%s";   //递减次数
+
+    public static Integer INTEVAL = 60 * 30;    //单位s
 
     @Override
     public AliPayPo qrCodeTradePre(AliPayPo payPo) {
@@ -127,7 +135,7 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     @Override
-    public Map<String, String> dounifiedOrder(String orderNum, Integer userId, Integer couponId, String spbill_create_ip, int type, Long subjectId) {
+    public Map<String, String> dounifiedOrder(String orderNum, Long userId, Long couponId, String spbill_create_ip, int type, Long subjectId) {
         Map<String, String> fail = new HashMap<>();
         WXMyConfigUtil config = null;
         try {
@@ -135,68 +143,12 @@ public class GZPayServiceImpl implements GZPayService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Double money = 0d;
-        TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
-        if (tGzSubject==null){
-            return fail;
-        }
 
-        boolean isSalePrice = false;
-        Integer forSaleSurplusNum = tGzSubject.getForSaleSurplusNum();
-        if (tGzSubject.getForSaleStatus().equals(GZSubjectEnum.FORSALE_STATUS_YES.getCode())
-                && forSaleSurplusNum >0){
-            money = tGzSubject.getForSalePrice();
-            isSalePrice = true;
-        }else {
-            money = tGzSubject.getPrice();
-        }
+        Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);//TODO
+        Double couponMoney = (Double) resultMap.get("couponMoney");
+        String orderNo = (String) resultMap.get("orderNo");
 
-        TGzOrder tGzOrder = new TGzOrder();
-        String subjectName = tGzSubject.getName();
-        String orderNo = UUIdUtil.generateOrderNo();
-
-        //若查待支付订单
-        if (orderNum!=null){
-            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
-            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
-                log.info("已存在待支付订单={}",order);
-                orderNo = orderNum;
-                tGzOrder = order;
-            }
-        }
-        if (tGzOrder==null||tGzOrder.getId()==null){
-            tGzOrder.setIsSalePrice(isSalePrice? GZOrderEnum.IS_SALE_PRICE_YES.getCode(): GZOrderEnum.IS_SALE_PRICE_NO.getCode());
-            tGzOrder.setPrice(money);
-            tGzOrder.setSubjectId(subjectId);
-            tGzOrder.setSubjectName(subjectName);
-            tGzOrder.setOrderTime(System.currentTimeMillis());
-            tGzOrder.setStatus(GZOrderEnum.UN_PAY.getCode());
-            tGzOrder.setTgzOrderNo(orderNo);
-            tGzOrder.setUserId(Long.valueOf(userId));
-            gzOrderDao.saveOrder(tGzOrder);
-            if(isSalePrice) {
-                int surplusNum = tGzSubject.getForSaleSurplusNum() - 1;
-                tGzSubject.setForSaleSurplusNum(surplusNum);
-                if(surplusNum < 1) {
-                    tGzSubject.setForSaleStatus(GZSubjectEnum.FORSALE_STATUS_NO.getCode());
-                }
-                gzSubjectDao.updateByPrimaryKey(tGzSubject);
-            }
-        }
-
-        Double couponMoney = 0d;
-        if(couponId!=null){
-            TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
-            if (tGzVoucher!=null&&tGzVoucher.getReductionLimit()<=Double.valueOf(money)&&(tGzVoucher.getEffectiveTime()+tGzVoucher.getActivationTime())>=System.currentTimeMillis()){
-                couponMoney = money - tGzVoucher.getPrice();
-                tGzOrder.setVoucherId(tGzVoucher.getId());
-            }
-        }
         String attach = userId+","+couponId;
-        if(couponMoney==0) {
-            couponMoney = money;
-        }
-
         Double minMon = couponMoney * 100;
 
         WXPay wxpay = new WXPay(config);
@@ -266,6 +218,103 @@ public class GZPayServiceImpl implements GZPayService {
             log.info(e.getMessage());
         }
         return fail;
+    }
+
+    private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        Double money = 0d;
+        TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
+        if (tGzSubject==null){
+            return new HashMap<>();
+        }
+
+        boolean isSalePrice = false;
+        Integer forSaleSurplusNum = tGzSubject.getForSaleSurplusNum();
+        if (tGzSubject.getForSaleStatus().equals(GZSubjectEnum.FORSALE_STATUS_YES.getCode())
+                && forSaleSurplusNum >0){
+            money = tGzSubject.getForSalePrice();
+            isSalePrice = true;
+        }else {
+            money = tGzSubject.getPrice();
+        }
+
+        //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
+        long currentTimeMillis = System.currentTimeMillis();
+
+        TGzOrder tGzOrder = new TGzOrder();
+        String subjectName = tGzSubject.getName();
+        String orderNo = UUIdUtil.generateOrderNo();
+
+        //若查待支付订单
+        if (orderNum!=null){
+            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
+            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
+                log.info("已存在待支付订单={}",order);
+                orderNo = orderNum;
+                tGzOrder = order;
+            }
+        }
+
+        Double couponMoney = money;
+        if(couponId!=null){
+            TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
+            if(tGzVoucher!=null) {
+                Double reductionLimit = tGzVoucher.getReductionLimit();
+                reductionLimit = reductionLimit==null?0d:reductionLimit;
+                if (tGzVoucher!=null&&reductionLimit<=Double.valueOf(money)&&(tGzVoucher.getEffectiveTime()+tGzVoucher.getActivationTime())>= currentTimeMillis){
+                    couponMoney = money - tGzVoucher.getPrice();
+                    tGzOrder.setVoucherId(tGzVoucher.getId());
+                    tGzVoucher.setAvailableStatus(GZVoucherEnum.STATUS_ALREADY_USED.toCode());
+                    gzVoucherDao.update(tGzVoucher);
+                }
+            }
+
+        }
+
+        if(isRandomDisCount) {
+            //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
+//            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
+            Object exist = redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
+            double perTime = 0.01;
+            Integer num = 1;
+            if(exist==null) {
+//              redisUtil.set(GZ_PAY_NUM_DESCRIBE, 1, INTEVAL);
+//              redisUtil.set(GZ_PAY_TIMESTAMP_DESCRIBE, currentTimeMillis, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), 1, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString(), currentTimeMillis, INTEVAL);
+            } else {
+//              num = (Integer) redisUtil.get(GZ_PAY_NUM_DESCRIBE);
+                num = (int) redisUtil.hget(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString());
+                num = num==null? 1:num;
+//              redisUtil.set(GZ_PAY_NUM_DESCRIBE, ++num);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), ++num);
+            }
+            couponMoney = couponMoney - perTime * num;
+            log.info("立减后的金额couponMoney={}", couponMoney);
+        }
+
+        if (tGzOrder.getId()==null){
+            tGzOrder.setIsSalePrice(isSalePrice? GZOrderEnum.IS_SALE_PRICE_YES.getCode(): GZOrderEnum.IS_SALE_PRICE_NO.getCode());
+            tGzOrder.setPrice(couponMoney);
+            tGzOrder.setSubjectId(subjectId);
+            tGzOrder.setSubjectName(subjectName);
+            tGzOrder.setOrderTime(currentTimeMillis);
+            tGzOrder.setStatus(GZOrderEnum.UN_PAY.getCode());
+            tGzOrder.setTgzOrderNo(orderNo);
+            tGzOrder.setUserId(Long.valueOf(userId));
+            gzOrderDao.saveOrder(tGzOrder);
+            if(isSalePrice) {
+                int surplusNum = tGzSubject.getForSaleSurplusNum() - 1;
+                tGzSubject.setForSaleSurplusNum(surplusNum);
+                if(surplusNum < 1) {
+                    tGzSubject.setForSaleStatus(GZSubjectEnum.FORSALE_STATUS_NO.getCode());
+                }
+                gzSubjectDao.updateByPrimaryKey(tGzSubject);
+            }
+        }
+        HashMap<String, Object> resultMap = new HashMap<>();
+        resultMap.put("orderNo", orderNo);
+        resultMap.put("couponMoney", couponMoney);
+        return resultMap;
     }
 
 
@@ -350,12 +399,12 @@ public class GZPayServiceImpl implements GZPayService {
             Long userId = finalOrder.getUserId();
             Long subjectId = finalOrder.getSubjectId();
 
-            if (tGzOrder.getVoucherId()!=null){
+           /* if (tGzOrder.getVoucherId()!=null){
                 TGzVoucher tGzVoucher = new TGzVoucher();
                 tGzVoucher.setId(finalOrder.getVoucherId());
                 tGzVoucher.setAvailableStatus(GZVoucherEnum.STATUS_ALREADY_USED.toCode());
                 gzVoucherDao.update(tGzVoucher);
-            }
+            }*/
 
             TGzSubject tGzSubject = gzSubjectDao.selectByPrimaryKey(subjectId);
 
@@ -378,8 +427,9 @@ public class GZPayServiceImpl implements GZPayService {
                 });
 
                 gzUserLessonDao.insertList(lessonList);
-            } else if(tGzUserSubject.getExpireTime() < System.currentTimeMillis()) {    //这是一个已经过期的课程 -> 续费
-                tGzUserSubject.setExpireTime(System.currentTimeMillis() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
+            } else {    //再次购买 -> 续费
+//                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
+                tGzUserSubject.setExpireTime(tGzUserSubject.getExpireTime() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
                 gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
             }
 
@@ -409,10 +459,21 @@ public class GZPayServiceImpl implements GZPayService {
             if(ids.endsWith(",")){
                 ids = ids.substring(0,ids.length()-1);
             }
-            throw new MessageException("相同金额存在多笔订单! msg:" + ids);
+            throw new MessageException("相同金额存在多笔订单! orderIds:" + ids);
         }
 
         TGzOrder gzOrder = gzOrders.get(0);
         afterPaySuccess(gzOrder, gzOrder.getTgzOrderNo());
     }
+
+    @Override
+    public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
+        Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
+
+        String img = "";
+        resultMap.put("img", img);
+
+        return resultMap;
+    }
+
 }

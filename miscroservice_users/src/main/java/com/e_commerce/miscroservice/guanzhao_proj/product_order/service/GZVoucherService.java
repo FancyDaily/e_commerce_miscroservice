@@ -8,4 +8,6 @@ import java.util.List;
 public interface GZVoucherService {
 
     List<MyVoucherVo> myVoucherList(TUser user, Integer... option);
+
+    void addVoucher(double price, long userId, int count);
 }

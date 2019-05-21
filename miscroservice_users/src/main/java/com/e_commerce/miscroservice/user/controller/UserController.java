@@ -3215,6 +3215,31 @@ public class UserController extends BaseController {
     }
 
     /**
+     * 重置密码（观照）
+     *
+     * @param telephone 手机号
+     * @param validCode 验证码
+     * @param password  密码
+     * @return
+     */
+    @PostMapping("modifyPwd/gz")
+    public Object modifyPwdGZ(String telephone, String validCode, String password) {
+        AjaxResult result = new AjaxResult();
+        try {
+            userService.modifyPwd(telephone, validCode, password, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("重置密码异常" + e.getMessage());
+            result.setSuccess(false);
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            log.error("重置密码异常", e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
+    /**
      * 申请加入组织
      *
      * @param token     登录凭证

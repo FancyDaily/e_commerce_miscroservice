@@ -2375,15 +2375,7 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public void modifyPwd(String telephone, String validCode, String password) {
-        // 处理前端返回的密码(AES密码)
-        password = AESCommonUtil.encript(password);
-
-        // 校验
-        checkSMS(telephone, validCode);
-
-        TUser user = getCompanyAccountByTelephone(telephone);
-        user.setPassword(password);
-        userDao.updateByPrimaryKey(user);
+        modifyPwd(telephone, validCode, password, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
     }
 
     /**
@@ -4230,6 +4222,26 @@ public class UserServiceImpl extends BaseService implements UserService {
         checkSMS(userTel, validCode);
 
         gzRigester(user);
+    }
+
+    @Override
+    public void modifyPwd(String telephone, String validCode, String password, int toCode) {
+        // 处理前端返回的密码(AES密码)
+        password = AESCommonUtil.encript(password);
+
+        // 校验
+        checkSMS(telephone, validCode);
+
+        TUser user = null;
+        if(ApplicationEnum.XIAOSHI_APPLICATION.toCode() == toCode) {
+            user = getCompanyAccountByTelephone(telephone);
+        } else {
+            user = getUserByTelephone(telephone, toCode);
+        }
+        if(user!=null) {
+            user.setPassword(password);
+            userDao.updateByPrimaryKey(user);
+        }
     }
 
     /**

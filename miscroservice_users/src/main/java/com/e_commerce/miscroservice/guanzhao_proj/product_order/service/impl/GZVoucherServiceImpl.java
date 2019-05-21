@@ -64,4 +64,17 @@ public class GZVoucherServiceImpl implements GZVoucherService {
         return resultList;
     }
 
+    @Override
+    public void addVoucher(double price, long userId, int count) {
+        ArrayList<TGzVoucher> addList = new ArrayList<>();
+        for(int i=0; i<count; i++) {
+            TGzVoucher voucher1 = gzVoucherDao.selectByPrimaryKey(111L);
+            voucher1.setPrice(price);
+            voucher1.setUserId(userId);
+            voucher1.setId(null);
+            addList.add(voucher1);
+        }
+        gzVoucherDao.multiInsert(addList);
+    }
+
 }

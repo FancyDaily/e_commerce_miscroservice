@@ -4,10 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.GZLessonEnum;
-import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
-import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
-import com.e_commerce.miscroservice.commons.enums.application.GZUserSubjectEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
@@ -49,6 +46,9 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
     @Autowired
     private GZOrderDao gzOrderDao;
+
+    @Autowired
+    private GZVoucherDao gzVoucherDao;
 
     @Override
     public QueryResult subjectList(Integer pageNum, Integer pageSize) {
@@ -93,6 +93,17 @@ public class GZSubjectServiceImpl implements GZSubjectService {
                 subject.setForSaleSurplusNum(forSaleSurplusNum + 1);    //优惠数目返还
                 subject.setForSaleStatus(GZSubjectEnum.FORSALE_STATUS_YES.getCode());   //设置为优惠中
                 gzSubjectDao.updateByPrimaryKey(subject);
+                //使用的优惠券返还(校验有效性
+                Long voucherId = gzOrder.getVoucherId();
+                if(voucherId!=null) {
+                    TGzVoucher voucher = gzVoucherDao.selectByPrimaryKey(voucherId);
+                    boolean expired = voucher.getActivationTime()+voucher.getEffectiveTime() < System.currentTimeMillis();
+                    voucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());    //恢复
+                    if(expired) {
+                        voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());  //可用
+                    }
+                    gzVoucherDao.update(voucher);
+                }
             }
         }
 

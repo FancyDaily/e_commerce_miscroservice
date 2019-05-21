@@ -204,6 +204,7 @@ public class UserDaoImpl implements UserDao {
         return MybatisPlus.getInstance().finAll(new TUser(),new MybatisPlusBuild(TUser.class)
                 .eq(TUser::getUserTel,telephone)
                 .eq(TUser::getJurisdiction,jurisdictionNormal)
+                .eq(TUser::getApplication, application)
                 .eq(TUser::getIsValid,AppConstant.IS_VALID_YES));
     }
 

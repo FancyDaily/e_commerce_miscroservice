@@ -62,26 +62,6 @@ public class TestDo {
     }
 
     /**
-     * 根据订单金额去支付订单
-     * @return
-     */
-    @GetMapping("deal/price")
-    @ResponseBody
-    public Object dealWithPrice(double price) {
-        log.info("根据订单金额去支付订单={}", price);
-        AjaxResult result = new AjaxResult();
-        try {
-            gzPayService.dealWithPrice(price);
-            result.setSuccess(true);
-        } catch (Exception e) {
-            log.error("支付成功错误={}", e);
-            result.setMsg(e.getMessage());
-            result.setSuccess(false);
-        }
-        return result;
-    }
-
-    /**
      * 推送
      * @param subjectId
      * @param fileName
