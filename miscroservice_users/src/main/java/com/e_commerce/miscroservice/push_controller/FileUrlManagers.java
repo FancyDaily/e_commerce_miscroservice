@@ -43,6 +43,7 @@ public class FileUrlManagers {
             pushSuccessFlag=Boolean.TRUE;
 
         } catch (QiniuException e) {
+            e.printStackTrace();
 
         } catch (Exception e) {
             e.printStackTrace();
