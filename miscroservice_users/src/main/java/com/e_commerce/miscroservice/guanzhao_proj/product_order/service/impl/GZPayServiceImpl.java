@@ -145,6 +145,13 @@ public class GZPayServiceImpl implements GZPayService {
         }
 
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);//TODO
+        if(resultMap==null) {
+            String img = (String) redisUtil.get("QR" + orderNum);
+            if(img!=null) {
+                fail.put("img", img);
+            }
+            return fail;    //TODO
+        }
         Double couponMoney = (Double) resultMap.get("couponMoney");
         String orderNo = (String) resultMap.get("orderNo");
 
@@ -197,6 +204,7 @@ public class GZPayServiceImpl implements GZPayService {
                     ImageIO.write(bufferedImage, "png", os);
                     InputStream is = new ByteArrayInputStream(os.toByteArray());
                     String img = AliOSSUtil.uploadQrImg(is,orderNo);
+                    redisUtil.set("QR" + orderNo, img,INTEVAL);
 //            ajaxResult.setSuccess(true);
 //            ajaxResult.setData();
 //            return ajaxResult;
@@ -221,10 +229,19 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        //若查待支付订单
+        if (orderNum!=null){
+            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
+            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
+                log.info("已存在待支付订单={}",order);
+                return null;
+            }
+        }
+
         Double money = 0d;
         TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
         if (tGzSubject==null){
-            return new HashMap<>();
+            return null;
         }
 
         boolean isSalePrice = false;
@@ -244,16 +261,6 @@ public class GZPayServiceImpl implements GZPayService {
         String subjectName = tGzSubject.getName();
         String orderNo = UUIdUtil.generateOrderNo();
 
-        //若查待支付订单
-        if (orderNum!=null){
-            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
-            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
-                log.info("已存在待支付订单={}",order);
-                orderNo = orderNum;
-                tGzOrder = order;
-            }
-        }
-
         Double couponMoney = money;
         if(couponId!=null){
             TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
@@ -267,26 +274,26 @@ public class GZPayServiceImpl implements GZPayService {
                     gzVoucherDao.update(tGzVoucher);
                 }
             }
-
         }
 
         if(isRandomDisCount) {
+            currentTimeMillis = System.currentTimeMillis();
             //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
 //            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
-            Object exist = redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
+            Long exist = (Long) redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
             double perTime = 0.01;
             Integer num = 1;
-            if(exist==null) {
+            if(exist==null || currentTimeMillis > exist) { //过期
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, 1, INTEVAL);
 //              redisUtil.set(GZ_PAY_TIMESTAMP_DESCRIBE, currentTimeMillis, INTEVAL);
-                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), 1, INTEVAL);
-                redisUtil.hset(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString(), currentTimeMillis, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), num, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString(), currentTimeMillis + INTEVAL * 1000, INTEVAL);
             } else {
 //              num = (Integer) redisUtil.get(GZ_PAY_NUM_DESCRIBE);
                 num = (int) redisUtil.hget(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString());
                 num = num==null? 1:num;
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, ++num);
-                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), ++num);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), ++num, INTEVAL);
             }
             couponMoney = couponMoney - perTime * num;
             log.info("立减后的金额couponMoney={}", couponMoney);

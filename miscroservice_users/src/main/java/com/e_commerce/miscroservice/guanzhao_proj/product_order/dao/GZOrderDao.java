@@ -56,4 +56,18 @@ public interface GZOrderDao {
      * @return
      */
     List<TGzOrder> selectByPrice(double price, Integer Status);
+
+    /**
+     * 查找某个用户过期的订单
+     * @param userId
+     * @return
+     */
+    List<TGzOrder> selectByUserIdExpired(Long userId);
+
+    /**
+     * 查找某个用户过期并且使用了优惠券的订单
+     * @param userId
+     * @return
+     */
+    List<TGzOrder> selectByUserIdExpiredUsedVoucher(Long userId);
 }

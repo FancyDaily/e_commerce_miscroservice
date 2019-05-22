@@ -229,7 +229,7 @@ public class LoginController extends BaseController {
      * @param iv
      * @return
      */
-    @PostMapping("gz/wx/login")
+//    @PostMapping("gz/wx/login")
     public Object gzWxLogin(String openid, String encryptedData, String iv, String session_key, String uuid) {
         AjaxResult result = new AjaxResult();
         try {
@@ -250,5 +250,35 @@ public class LoginController extends BaseController {
         }
         return result;
     }
+
+    /**
+     * 观照微信公众号登录
+     * @param openid
+     * @param telephone
+     * @param uuid
+     * @return
+     */
+    @PostMapping("gz/wx/login")
+    public Object gzWxLogin(String openid, String telephone, String uuid) {
+        AjaxResult result = new AjaxResult();
+        try {
+            Map<String, Object> map = loginService.gzWxLogin(openid, telephone, uuid);
+            result.setData(map);
+            result.setSuccess(true);
+        } catch (MessageException e) {
+            log.warn("观照微信公众号登录异常: " + e.getMessage());
+            result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
+            result.setMsg(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("观照微信公众号登录异常", e);
+            result.setSuccess(false);
+            result.setErrorCode(AppErrorConstant.AppError.SysError.getErrorCode());
+            result.setMsg(AppErrorConstant.AppError.SysError.getErrorMsg());
+        }
+        return result;
+    }
+
 
 }
