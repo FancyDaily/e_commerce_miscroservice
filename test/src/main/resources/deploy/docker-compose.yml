@@ -17,6 +17,7 @@ services:
     volumes:
     - /opt/logs:/opt/logs
     - /logs:/logs
+    - /mnt/ftp/:/mnt/ftp/
     - /tmp:/tmp
     - /root:/root
     #绑定端口
