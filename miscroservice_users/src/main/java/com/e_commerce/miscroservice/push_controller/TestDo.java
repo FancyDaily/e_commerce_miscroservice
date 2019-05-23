@@ -75,6 +75,7 @@ public class TestDo {
      * @return
      */
     @GetMapping("push/pre")
+    @ResponseBody
     public Boolean pushSuccess(String fileName) {
         return fileUrlManagers.push(fileName);
     }
