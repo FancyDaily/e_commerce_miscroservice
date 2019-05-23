@@ -4238,10 +4238,11 @@ public class UserServiceImpl extends BaseService implements UserService {
         } else {
             user = getUserByTelephone(telephone, toCode);
         }
-        if(user!=null) {
-            user.setPassword(password);
-            userDao.updateByPrimaryKey(user);
+        if(user == null) {
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号未注册！");
         }
+        user.setPassword(password);
+        userDao.updateByPrimaryKey(user);
     }
 
     /**

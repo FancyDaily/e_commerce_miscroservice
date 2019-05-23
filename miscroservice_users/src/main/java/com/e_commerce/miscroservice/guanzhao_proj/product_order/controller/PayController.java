@@ -55,7 +55,8 @@ public class PayController {
     public Object pay(Double money){
         logger.info("根据订单金额去支付订单={}", money);
         AjaxResult result = new AjaxResult();
-        String telephone = "13867655157";
+        String telephone = "17767079179";
+//        String telephone = "13867655157";
         int application = ApplicationEnum.GUANZHAO_APPLICATION.toCode();
         Date date = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -95,7 +96,8 @@ public class PayController {
         logger.info("支付宝-预生成订单orderNo={},coupon_id={},subjectId={}",orderNo,coupon_id,subjectId);
         AjaxResult result = new AjaxResult();
         try {
-            gzPayService.preOrder(orderNo, coupon_id, subjectId, user.getId());
+            Map<String, Object> resultMap = gzPayService.preOrder(orderNo, coupon_id, subjectId, user.getId());
+            result.setData(resultMap);
             result.setSuccess(true);
         } catch (Exception e) {
             logger.error("支付成功错误={}", e);

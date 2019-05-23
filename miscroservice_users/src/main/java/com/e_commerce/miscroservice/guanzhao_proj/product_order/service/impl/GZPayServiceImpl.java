@@ -229,12 +229,15 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        HashMap<String, Object> resultMap = new HashMap<>();
         //若查待支付订单
         if (orderNum!=null){
             TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
             if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
                 log.info("已存在待支付订单={}",order);
-                return null;
+                resultMap.put("orderNo", orderNum);
+                resultMap.put("couponMoney", order.getPrice());
+                return resultMap;
             }
         }
 
@@ -318,7 +321,6 @@ public class GZPayServiceImpl implements GZPayService {
                 gzSubjectDao.updateByPrimaryKey(tGzSubject);
             }
         }
-        HashMap<String, Object> resultMap = new HashMap<>();
         resultMap.put("orderNo", orderNo);
         resultMap.put("couponMoney", couponMoney);
         return resultMap;
@@ -436,7 +438,7 @@ public class GZPayServiceImpl implements GZPayService {
                 gzUserLessonDao.insertList(lessonList);
             } else {    //再次购买 -> 续费
 //                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
-                tGzUserSubject.setExpireTime(tGzUserSubject.getExpireTime() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
+                tGzUserSubject.setExpireTime(System.currentTimeMillis() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
                 gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
             }
 
@@ -476,8 +478,8 @@ public class GZPayServiceImpl implements GZPayService {
     @Override
     public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
-
-        String img = "";
+        //根据金额去获取二维码
+        String img = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/pay/121558577476.jpg";
         resultMap.put("img", img);
 
         return resultMap;

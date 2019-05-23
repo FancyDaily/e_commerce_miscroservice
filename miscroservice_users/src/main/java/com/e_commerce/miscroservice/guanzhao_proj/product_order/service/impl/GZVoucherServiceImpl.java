@@ -107,6 +107,8 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             voucher1.setPrice(price);
             voucher1.setUserId(userId);
             voucher1.setId(null);
+            voucher1.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());
+            voucher1.setActivationTime(System.currentTimeMillis());
             addList.add(voucher1);
         }
         gzVoucherDao.multiInsert(addList);
