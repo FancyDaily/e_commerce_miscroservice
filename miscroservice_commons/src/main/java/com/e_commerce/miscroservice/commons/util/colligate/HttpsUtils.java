@@ -48,11 +48,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 public class HttpsUtils {
-    private static PoolingHttpClientConnectionManager	connMgr;
-    private static RequestConfig				requestConfig;
-    private static final int				MAX_TIMEOUT	= 7000;
+    private static PoolingHttpClientConnectionManager connMgr;
+    private static RequestConfig requestConfig;
+    private static final int MAX_TIMEOUT = 7000;
 
-    private static final Logger				logger		= LoggerFactory.getLogger(HttpsUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpsUtils.class);
 
     static {
         // 设置连接池
@@ -138,10 +138,8 @@ public class HttpsUtils {
     /**
      * 发送 POST 请求，K-V形式
      *
-     * @param apiUrl
-     *            API接口URL
-     * @param params
-     *            参数map
+     * @param apiUrl API接口URL
+     * @param params 参数map
      * @return
      */
     public static JSONObject doPost(String apiUrl, Map<String, Object> params) {
@@ -185,8 +183,7 @@ public class HttpsUtils {
      * 发送 POST 请求，JSON形式
      *
      * @param apiUrl
-     * @param json
-     *            json对象
+     * @param json   json对象
      * @return
      */
     public static JSONObject doPost(String apiUrl, Object json) {
