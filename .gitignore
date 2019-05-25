@@ -4,11 +4,10 @@
 logs
 */out
 */build
-test
+**/test/*
 */src/main/resources/static
 */src/test
-*lombok.config
-bin/.gitignore
+.DS_Store
 bin/.classpath
 .project
 .classpath
