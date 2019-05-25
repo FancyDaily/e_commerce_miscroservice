@@ -29,7 +29,7 @@ public class TGzLesson implements Serializable {
     @Column(commit = "章节视频装载状态", length = 11, defaultVal = "0")
     private Integer videoOnLoadStatus;
 
-    @Column(commit = "可用状态", length = 11, defaultVal = "0")
+    @Column(commit = "可用状态", length = 11, defaultVal = "1")
     private Integer avaliableStatus;
 
     @Column(commit = "可用日期")

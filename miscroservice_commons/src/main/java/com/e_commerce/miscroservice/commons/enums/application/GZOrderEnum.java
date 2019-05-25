@@ -17,6 +17,7 @@ public enum  GZOrderEnum {
     TIMEOUT_PAY(3,"交易超时关闭"),
     CANCEL_PAY(4,"交易取消"),;
 
+    public static final long INTERVAL = 30L * 60 * 1000;
     private Integer code;
     private String value;
 

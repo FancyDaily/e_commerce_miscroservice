@@ -68,8 +68,8 @@ public class GZLessonServiceImpl implements GZLessonService {
         List<Long> toUpdaterIds = new ArrayList<>();
         List<TGzKeyValue> keyValueToInserter = new ArrayList<>();
         //user-lesson关系
-//        List<TGzUserLesson> userLessons = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
-        List<TGzUserLesson> userLessons = gzUserLessonDao.selectBySubjectId(subjectId);
+//        List<TGzUserLesson> userLessons = gzUserLessonDao.selectBySubjectId(subjectId);
+        List<TGzUserLesson> userLessons = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
         for (TGzUserLesson userLesson : userLessons) {
             if(!StringUtil.isEmpty(userLesson.getSign())) { //若已有签名
                 continue;
@@ -80,7 +80,8 @@ public class GZLessonServiceImpl implements GZLessonService {
                 continue;
             }
             //生成sign，插入key-gzvalue
-            String sourceStr = userId.toString() + lessonId.toString() + subjectId.toString();
+//            String sourceStr = userId.toString() + lessonId.toString() + subjectId.toString();
+            String sourceStr = userId + lessonId.toString() + subjectId.toString();
             String sign = Md5Util.md5(sourceStr);
             TGzKeyValue keyValue = new TGzKeyValue();
             keyValue.setType(KeyValueEnum.TYPE_SIGN.toCode());
@@ -211,6 +212,15 @@ public class GZLessonServiceImpl implements GZLessonService {
 
     }
 
+    public static void main(String[] args) {
+        long userId = 1153;
+        long lessonId = 1;
+        long subjectId = 1;
+        String sourceStr = userId + "" + lessonId + "" + subjectId;
+        String expectedSign = Md5Util.md5(sourceStr);
+        System.out.println(expectedSign);
+    }
+
     @Override
     public void sendUnlockTask(Long subjectId, String fileName) {
         unlockLesson(subjectId, fileName);
@@ -244,14 +254,14 @@ public class GZLessonServiceImpl implements GZLessonService {
         List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
 
         List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
-        Map<Long, Object> lessonIdAvailableStatusMap = new HashMap<>();
+        Map<Long, Object> lessonIdUserLessonMap = new HashMap<>();
         for (TGzUserLesson gzUserLesson : gzUserLessonList) {
-            lessonIdAvailableStatusMap.put(gzUserLesson.getLessonId(), gzUserLesson);
+            lessonIdUserLessonMap.put(gzUserLesson.getLessonId(), gzUserLesson);
         }
 
         for (TGzLesson tGzLesson : tGzLessons) {
             MyLessonVO myLessonVO = tGzLesson.copyMyLessonVO();
-            Object existObject = lessonIdAvailableStatusMap.get(tGzLesson.getId());
+            Object existObject = lessonIdUserLessonMap.get(tGzLesson.getId());
             Integer videoOnLoadStatus = tGzLesson.getVideoOnLoadStatus();
             Integer videoCompletion = 0;
             Integer lessonCompletionStatus = GZUserLessonEnum.LESSON_COMPLETION_STATUS_NO.getCode();
@@ -268,7 +278,7 @@ public class GZLessonServiceImpl implements GZLessonService {
             String availableTime = tGzLesson.getAvailableTime();
             String wholeDateTime = availableDate + availableTime;
             Long dateTimeMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parse(wholeDateTime);
-            Integer lessonAvailableStatus = System.currentTimeMillis() > dateTimeMills ? GZLessonEnum.AVAILABLE_STATUS_YES.getCode() : GZLessonEnum.AVAILABLE_STATUS_NO.getCode();
+            Integer lessonAvailableStatus = System.currentTimeMillis() > dateTimeMills ? GZLessonEnum.AVAILABLE_STATUS_YES.getCode() : GZLessonEnum.AVAILABLE_STATUS_NO.getCode();  //只计算值，不维护available_status字段
             myLessonVO.setAvaliableStatus(lessonAvailableStatus);
             myLessonVO.setAvailableDate(availableDate);
             myLessonVO.setAvailableTime(availableTime);

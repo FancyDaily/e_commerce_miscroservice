@@ -1,25 +1,27 @@
 package com.e_commerce.miscroservice.push_controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.HttpsUtils;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZOrderService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Controller
@@ -62,6 +64,17 @@ public class TestDo {
     }
 
     /**
+     * 仅推送文件
+     * @param fileName
+     * @return
+     */
+    @GetMapping("push/pre")
+    @ResponseBody
+    public Boolean pushSuccess(String fileName) {
+        return fileUrlManagers.push(fileName);
+    }
+
+    /**
      * 推送
      * @param subjectId
      * @param fileName
@@ -72,7 +85,25 @@ public class TestDo {
         log.info("开始推送文件={}",fileName);
         AjaxResult result = new AjaxResult();
         try {
-            Boolean isPushSuccess = fileUrlManagers.push(fileName);
+            //判断是测试环境还是正式环境
+            //发送http请求，请求测试线的"仅推送文件请求"
+            Boolean isPushSuccess = false;
+            if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
+                isPushSuccess = fileUrlManagers.push(fileName);
+            } else {    //当前环境为生产
+                String url = "https://test.xiaoshitimebank.com/user/push/pre";
+                Map<String, Object> params = new HashMap<>();
+                params.put("fileName", fileName);
+                JSONObject jsonObject = HttpsUtils.doGet(url, params);
+                if(jsonObject!=null) {
+                    Object data = jsonObject.get("data");
+                    if(data!=null && data != "" && data != "{}") {
+                        isPushSuccess = (Boolean) data;
+                    }
+                }
+                String s = jsonObject.toJSONString();
+                System.out.println(s);
+            }
             if(isPushSuccess) {
                 gzLessonService.sendUnlockTask(subjectId, fileName);
             }
@@ -82,6 +113,26 @@ public class TestDo {
         }
         return result;
 
+    }
+
+    public static void main(String[] args) {
+        String fileName = "Ivy的第一堂课01.mp4";
+        try {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String url = "https://test.xiaoshitimebank.com/user/push/pre";
+        Map<String, Object> params = new HashMap<>();
+        params.put("fileName", fileName);
+        JSONObject jsonObject = HttpsUtils.doGet(url, params);
+        System.out.println(jsonObject);
+        if(jsonObject!=null) {
+            Object data = jsonObject.get("data");
+            System.out.println(data);
+            if(data!=null && data != "" && data != "{}") {
+                System.out.println(data);
+            }
+        }
     }
 
 
@@ -112,7 +163,6 @@ public class TestDo {
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
         try {
-            request.setAttribute(fileName, Md5Util.md5(fileName));
             gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
             request.setAttribute(fileName, Md5Util.md5(fileName));
         } catch (MessageException e) {
@@ -141,17 +191,17 @@ public class TestDo {
     public Object doPlay(String fileName) {
         AjaxResult result = new AjaxResult();
 
-        Object hash = request.getAttribute(fileName==null?EMPTY:fileName);
-        if (hash == null ||
-                !Md5Util.md5(fileName).equals(hash)) {
-            result.setData(EMPTY);
+        String errorMsg = (String) request.getAttribute("errorMsg");
+        if(errorMsg != null) {
+            result.setMsg(errorMsg);
             result.setSuccess(false);
             return result;
         }
 
-        String errorMsg = (String) request.getAttribute("errorMsg");
-        if(errorMsg != null) {
-            result.setMsg(errorMsg);
+        Object hash = request.getAttribute(fileName==null?EMPTY:fileName);
+        if (hash == null ||
+                !Md5Util.md5(fileName).equals(hash)) {
+            result.setData(EMPTY);
             result.setSuccess(false);
             return result;
         }

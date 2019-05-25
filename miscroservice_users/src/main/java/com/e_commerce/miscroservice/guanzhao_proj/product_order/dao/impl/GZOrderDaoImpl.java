@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.GZOrderDao;
@@ -52,7 +53,8 @@ public class GZOrderDaoImpl implements GZOrderDao {
     public List<TGzOrder> selectBySubjectIdAndStatus(Long id, Integer payStatus) {
         return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getSubjectId, id)
-                .eq(TGzOrder::getStatus, payStatus));
+                .eq(TGzOrder::getStatus, payStatus)
+        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
     }
 
     @Override
@@ -61,6 +63,25 @@ public class GZOrderDaoImpl implements GZOrderDao {
         .eq(TGzOrder::getPrice, price)
         .eq(TGzOrder::getStatus, Status)
         .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TGzOrder> selectByUserIdExpired(Long userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        .eq(TGzOrder::getUserId, userId)
+        .lt(TGzOrder::getOrderTime, currentTimeMillis - GZOrderEnum.INTERVAL)
+        .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
+    }
+
+    @Override
+    public List<TGzOrder> selectByUserIdExpiredUsedVoucher(Long userId) {
+        long currentTimeMillis = System.currentTimeMillis();
+        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+                .isNotNull(TGzOrder::getVoucherId)
+                .eq(TGzOrder::getUserId, userId)
+                .lt(TGzOrder::getOrderTime, currentTimeMillis - GZOrderEnum.INTERVAL)
+                .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override

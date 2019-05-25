@@ -406,4 +406,36 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         return resultMap;
     }
 
+    @Override
+    public Map<String, Object> gzWxLogin(String openid, String telephone, String uuid) {
+        logger.info("观照公众号登录openid={},telephone={},iv={},uuid={}", openid, telephone, uuid);
+        Map<String, Object> resultMap = new HashMap<>();
+        TUser user = null;
+        String token = null;
+        if(StringUtil.isEmpty(openid) && StringUtil.isAnyEmpty(telephone, uuid)) {
+            throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必要参数为空!");
+        }
+
+        if(!StringUtil.isEmpty(openid)) {   //校验用户，去注册
+            user = getUser(openid, ApplicationEnum.GUANZHAO_APPLICATION.toCode());//通过openid获取用户
+        }
+
+        if(user==null) {    //openid不存在
+            user = userService.getUserByTelephone(telephone, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+            if(user==null) { //注册gz
+                user = new TUser();
+                user.setUserTel(telephone);
+                user.setVxOpenId(openid);
+                user.setPassword("e10adc3949ba59abbe56e057f20f883e");   //默认密码: 加密后的
+                user = userService.registerGZWithOutValidCode(user);
+            }
+        }
+
+        token = checkLogin(uuid, user, false, ApplicationEnum.GUANZHAO_APPLICATION.toCode());//从认证中心获取
+
+        resultMap.put("token", token);
+        resultMap.put("user", user);
+        return resultMap;
+    }
+
 }

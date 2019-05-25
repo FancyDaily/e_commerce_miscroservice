@@ -145,6 +145,13 @@ public class GZPayServiceImpl implements GZPayService {
         }
 
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);//TODO
+        if(resultMap==null) {
+            String img = (String) redisUtil.get("QR" + orderNum);
+            if(img!=null) {
+                fail.put("img", img);
+            }
+            return fail;    //TODO
+        }
         Double couponMoney = (Double) resultMap.get("couponMoney");
         String orderNo = (String) resultMap.get("orderNo");
 
@@ -197,6 +204,7 @@ public class GZPayServiceImpl implements GZPayService {
                     ImageIO.write(bufferedImage, "png", os);
                     InputStream is = new ByteArrayInputStream(os.toByteArray());
                     String img = AliOSSUtil.uploadQrImg(is,orderNo);
+                    redisUtil.set("QR" + orderNo, img,INTEVAL);
 //            ajaxResult.setSuccess(true);
 //            ajaxResult.setData();
 //            return ajaxResult;
@@ -221,10 +229,22 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        HashMap<String, Object> resultMap = new HashMap<>();
+        //若查待支付订单
+        if (orderNum!=null){
+            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
+            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
+                log.info("已存在待支付订单={}",order);
+                resultMap.put("orderNo", orderNum);
+                resultMap.put("couponMoney", order.getPrice());
+                return resultMap;
+            }
+        }
+
         Double money = 0d;
         TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
         if (tGzSubject==null){
-            return new HashMap<>();
+            return null;
         }
 
         boolean isSalePrice = false;
@@ -244,16 +264,6 @@ public class GZPayServiceImpl implements GZPayService {
         String subjectName = tGzSubject.getName();
         String orderNo = UUIdUtil.generateOrderNo();
 
-        //若查待支付订单
-        if (orderNum!=null){
-            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
-            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
-                log.info("已存在待支付订单={}",order);
-                orderNo = orderNum;
-                tGzOrder = order;
-            }
-        }
-
         Double couponMoney = money;
         if(couponId!=null){
             TGzVoucher tGzVoucher = gzVoucherDao.findByUserIdCouponId(userId,couponId);
@@ -267,26 +277,26 @@ public class GZPayServiceImpl implements GZPayService {
                     gzVoucherDao.update(tGzVoucher);
                 }
             }
-
         }
 
         if(isRandomDisCount) {
+            currentTimeMillis = System.currentTimeMillis();
             //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
 //            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
-            Object exist = redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
+            Long exist = (Long) redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
             double perTime = 0.01;
             Integer num = 1;
-            if(exist==null) {
+            if(exist==null || currentTimeMillis > exist) { //过期
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, 1, INTEVAL);
 //              redisUtil.set(GZ_PAY_TIMESTAMP_DESCRIBE, currentTimeMillis, INTEVAL);
-                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), 1, INTEVAL);
-                redisUtil.hset(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString(), currentTimeMillis, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), num, INTEVAL);
+                redisUtil.hset(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString(), currentTimeMillis + INTEVAL * 1000, INTEVAL);
             } else {
 //              num = (Integer) redisUtil.get(GZ_PAY_NUM_DESCRIBE);
                 num = (int) redisUtil.hget(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString());
                 num = num==null? 1:num;
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, ++num);
-                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), ++num);
+                redisUtil.hset(String.format(GZ_PAY_NUM_DESCRIBE, subjectId), subjectId.toString(), ++num, INTEVAL);
             }
             couponMoney = couponMoney - perTime * num;
             log.info("立减后的金额couponMoney={}", couponMoney);
@@ -311,7 +321,6 @@ public class GZPayServiceImpl implements GZPayService {
                 gzSubjectDao.updateByPrimaryKey(tGzSubject);
             }
         }
-        HashMap<String, Object> resultMap = new HashMap<>();
         resultMap.put("orderNo", orderNo);
         resultMap.put("couponMoney", couponMoney);
         return resultMap;
@@ -429,7 +438,7 @@ public class GZPayServiceImpl implements GZPayService {
                 gzUserLessonDao.insertList(lessonList);
             } else {    //再次购买 -> 续费
 //                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
-                tGzUserSubject.setExpireTime(tGzUserSubject.getExpireTime() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
+                tGzUserSubject.setExpireTime(System.currentTimeMillis() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
                 gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
             }
 
@@ -469,8 +478,8 @@ public class GZPayServiceImpl implements GZPayService {
     @Override
     public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
-
-        String img = "";
+        //根据金额去获取二维码
+        String img = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/pay/121558577476.jpg";
         resultMap.put("img", img);
 
         return resultMap;
