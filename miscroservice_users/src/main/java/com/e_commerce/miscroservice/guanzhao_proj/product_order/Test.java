@@ -77,7 +77,7 @@ public class Test {
 //        System.out.println(fruit);
 //        List aList = new ArrayList();
         //不使用stream API
-        Property p1 = new Property("叫了个鸡", 1000, 500, 2);
+        /*Property p1 = new Property("叫了个鸡", 1000, 500, 2);
         Property p2 = new Property("张三丰饺子馆", 2300, 1500, 3);
         Property p3 = new Property("永和大王", 580, 3000, 1);
         Property p4 = new Property("肯德基", 6000, 200, 4);
@@ -96,7 +96,7 @@ public class Test {
         long count = properties.stream()
                 .filter(p -> p.sales > 1000)
                 .count();
-        System.out.println(count);
+        System.out.println(count);*/
 
         String path = "/Users/xufangyi/Downloads";
         File[] files = new File(path).listFiles(new FileFilter() {
