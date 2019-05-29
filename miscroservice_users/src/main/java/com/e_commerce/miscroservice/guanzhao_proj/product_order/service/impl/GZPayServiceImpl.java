@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.enums.application.GZOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.GZSubjectEnum;
@@ -9,6 +10,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.AliOSSUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.AliPayUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.MD5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.pay.QRCodeUtil;
@@ -71,6 +73,8 @@ public class GZPayServiceImpl implements GZPayService {
     public static String GZ_PAY_TIMESTAMP_DESCRIBE = "gz_pay:timestamp:%s"; //上次递减的时间
 
     public static String GZ_PAY_NUM_DESCRIBE = "gz_pay:num:%s";   //递减次数
+
+    public static String GZ_PAY_SUBJECT = "gz_pay:subject:%s";  //用户-课程支付
 
     public static Integer INTEVAL = 60 * 30;    //单位s
 
@@ -229,6 +233,14 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        long currentTimeMillis = System.currentTimeMillis();
+        boolean isContinuePay = !StringUtil.isEmpty(orderNum);
+        //一段时间内对于同一课程只能下一次单(或者对于同一课程直接判定有无待支付订单)
+        Long payRecord = (Long) redisUtil.hget(String.format(GZ_PAY_SUBJECT, subjectId), userId.toString());
+        if(payRecord!=null && currentTimeMillis < payRecord && !isContinuePay) {  //过期并且不是继续支付
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "对于同一个课程，半个小时内只能生成一个订单!");
+        }
+
         HashMap<String, Object> resultMap = new HashMap<>();
         //若查待支付订单
         if (orderNum!=null){
@@ -258,8 +270,6 @@ public class GZPayServiceImpl implements GZPayService {
         }
 
         //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
-        long currentTimeMillis = System.currentTimeMillis();
-
         TGzOrder tGzOrder = new TGzOrder();
         String subjectName = tGzSubject.getName();
         String orderNo = UUIdUtil.generateOrderNo();
@@ -281,7 +291,7 @@ public class GZPayServiceImpl implements GZPayService {
 
         if(isRandomDisCount) {
             currentTimeMillis = System.currentTimeMillis();
-            //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过抓包获得的金额去找到唯一订单"可行
+            //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过获得的金额去找到唯一订单"可行
 //            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
             Long exist = (Long) redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
             double perTime = 0.01;
@@ -321,11 +331,11 @@ public class GZPayServiceImpl implements GZPayService {
                 gzSubjectDao.updateByPrimaryKey(tGzSubject);
             }
         }
+        redisUtil.hset(String.format(GZ_PAY_SUBJECT, subjectId), userId.toString(), currentTimeMillis + INTEVAL * 1000, INTEVAL);
         resultMap.put("orderNo", orderNo);
         resultMap.put("couponMoney", couponMoney);
         return resultMap;
     }
-
 
     /**
      * 支付结果通知
@@ -438,7 +448,11 @@ public class GZPayServiceImpl implements GZPayService {
                 gzUserLessonDao.insertList(lessonList);
             } else {    //再次购买 -> 续费
 //                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
-                tGzUserSubject.setExpireTime(System.currentTimeMillis() + 6l * 30 * 24 * 3600 * 1000);   //续费半年
+                Long expireTime = tGzUserSubject.getExpireTime();
+                expireTime = expireTime==null?0:expireTime;
+                long currentTimeMillis = System.currentTimeMillis();
+                long timeStamp = currentTimeMillis > expireTime? currentTimeMillis: expireTime;
+                tGzUserSubject.setExpireTime(timeStamp + 6l * 30 * 24 * 3600 * 1000);   //续费半年
                 gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
             }
 
@@ -478,8 +492,16 @@ public class GZPayServiceImpl implements GZPayService {
     @Override
     public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
+        Double couponMoney = (Double) resultMap.get("couponMoney");
+        String nameSuffix = "";
+        if(couponMoney!=null) {
+            nameSuffix = "" + couponMoney;
+            nameSuffix += ".jpg";
+        }
+        nameSuffix = "121558577476.jpg";
         //根据金额去获取二维码
-        String img = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/pay/121558577476.jpg";
+        String img = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/pay/";
+        img += nameSuffix;
         resultMap.put("img", img);
 
         return resultMap;

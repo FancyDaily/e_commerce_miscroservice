@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
@@ -13,14 +14,21 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
+import com.e_commerce.miscroservice.push_controller.FileUrlManagers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import sun.plugin.util.UserProfile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: FangyiXu
@@ -55,6 +63,9 @@ public class GZLessonServiceImpl implements GZLessonService {
 
     @Autowired
     private HttpServletRequest request;
+
+    @Autowired
+    private FileUrlManagers fileUrlManagers;
 
     @Override
     public void updateLearningCompletion(Long lessonId) {
@@ -271,6 +282,15 @@ public class GZLessonServiceImpl implements GZLessonService {
                 videoCompletion = userLesson.getVideoCompletion();
                 lessonCompletionStatus = userLesson.getLessonCompletionStatus();
                 sign = userLesson.getSign();
+                if(!StringUtil.isEmpty(sign)) { //有权限播放 TODO 测试
+                    String suffix = ".mp4";
+                    String fileName = tGzLesson.getName();
+                    fileName += suffix;
+                    LoadingCache loadingCache = ApplicationEnum.loadingCache;
+                    String url = fileUrlManagers.getUrl(fileName);
+                    loadingCache.put(fileName, url);    //放入缓存
+//                    myLessonVO.setUrl(url);
+                }
             }
             myLessonVO.setSign(sign);
             myLessonVO.setLessonIndex(tGzLesson.getLessonIndex());
@@ -297,6 +317,9 @@ public class GZLessonServiceImpl implements GZLessonService {
         return result;
     }
 
+
+
+
     @Override
     public void updateVideoCompletion(Long userId, Long lessonId, Integer currentSeconds, Integer totalSeconds) {
         log.info("视频进度更新userId={}, lessonId={}, currentSeconds={}, totalSeconds={}", userId, lessonId, currentSeconds, totalSeconds);
@@ -316,16 +339,16 @@ public class GZLessonServiceImpl implements GZLessonService {
         request.getSession().setAttribute(key, completion);
 
         //校验
-        currentSeconds = currentSeconds > 100 ? 100 : currentSeconds;
+        completion = completion > 100 ? 100 : completion;
         //更新
         TGzUserLesson tGzUserLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
         if (tGzUserLesson == null) {
             return;
         }
         Integer comletionStatus = tGzUserLesson.getLessonCompletionStatus();
-        int expectedCompletionStatus = currentSeconds > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+        int expectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
         comletionStatus = Objects.equals(comletionStatus, GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode()) ? comletionStatus : expectedCompletionStatus;
-        tGzUserLesson.setVideoCompletion(currentSeconds);
+        tGzUserLesson.setVideoCompletion(completion);
         tGzUserLesson.setVideoCompletionStatus(comletionStatus);
         tGzUserLesson.setLessonCompletionStatus(comletionStatus);
         gzUserLessonDao.update(tGzUserLesson);
@@ -341,7 +364,9 @@ public class GZLessonServiceImpl implements GZLessonService {
                 completeCnt++;
             }
         }
-        Integer subjectCompletion = (totalCnt == 0 ? 0 : completeCnt / totalCnt) * 100;
+        double i = (double)completeCnt / totalCnt;
+        int currentComp = (int) (i * 100);
+        Integer subjectCompletion = totalCnt == 0 ? 0 : currentComp;
 
         TGzUserSubject tGzUserSubject = gzUserSubjectDao.selectByUserIdAndSubjectId(userId, subjectId);
         tGzUserSubject.setCompletion(subjectCompletion);

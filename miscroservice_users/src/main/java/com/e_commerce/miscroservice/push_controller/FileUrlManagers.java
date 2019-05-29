@@ -1,16 +1,25 @@
 package com.e_commerce.miscroservice.push_controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.IAcsClient;
 import com.aliyuncs.alidns.model.v20150109.*;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.profile.IClientProfile;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
+import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.impl.GZLessonServiceImpl;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.LoadingCache;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.Auth;
+import javafx.application.Application;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -23,6 +32,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class FileUrlManagers {
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     private Upload upload = new Upload();
     private Dns dns = new Dns();
@@ -62,11 +74,18 @@ public class FileUrlManagers {
             return url;
         }
         try {
-            String dnsName = System.currentTimeMillis() + "";
-            if (dns.addDnsByName(dnsName)) {
-                url = dns.getUrlByName(dnsName, fileName);
+            String key = "url" + fileName;
+            Long exist = (Long) redisUtil.get(key);
+            boolean expired = exist==null? true:System.currentTimeMillis() > exist;
+            //从LoadingCache获取
+            url = (String) ApplicationEnum.loadingCache.getUnchecked(fileName);
+            if(expired || "".equals(url)) {
+                String dnsName = System.currentTimeMillis() + "";
+                if (dns.addDnsByName(dnsName)) {
+                    url = dns.getUrlByName(dnsName, fileName);
+                    redisUtil.set(key, System.currentTimeMillis() + 1000 * 60 * 8, 1000 * 60 * 8);
+                }
             }
-
         } catch (ClientException e) {
 
         }
@@ -247,8 +266,8 @@ public class FileUrlManagers {
     private class Upload {
 
 
-//        private final String FILE_TOTAL_PATH = "/mnt/ftp/";
-        private final String FILE_TOTAL_PATH = "/Users/xufangyi/Downloads/";
+        private final String FILE_TOTAL_PATH = "/mnt/ftp/";
+//        private final String FILE_TOTAL_PATH = "/Users/xufangyi/Downloads/";
         private final String accessKey = "OJ5ePYgOmXHSdi7Wb8cebmB0OwDUDlGzeTeWORdH";
         private final String secretKey = "ldPnyGLV5NeIwtzVLPTX-W-BXut7vMKtVXLglLao";
         private final String bucket = "ness";

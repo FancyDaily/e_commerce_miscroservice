@@ -343,10 +343,6 @@ public class GZSubjectController {
     public Object mySubjectLessonList(@RequestParam(required = true) Long subjectId, Integer pageNum, Integer pageSize) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
-        if (user == null) {
-            user = new TUser();
-            user.setId(42l);
-        }
         try {
             QueryResult myLessonVOS = gzLessonService.mySubjectLessonList(user.getId(), subjectId, pageNum, pageSize);
             result.setData(myLessonVOS);
@@ -380,10 +376,6 @@ public class GZSubjectController {
     public Object subjectLessonEvaluateSend(@RequestParam(required = true) Long subjectId, @RequestParam(required = true) Long lessonId, Integer level, String comment) {
         TGzEvaluate evaluate = (TGzEvaluate) ConsumeHelper.getObj();
         TUser user = UserUtil.getUser();
-        if (user == null) {
-            user = new TUser();
-            user.setId(42l);
-        }
         AjaxResult result = new AjaxResult();
         try {
             gzSubjectService.evaluateLesson(user, evaluate);
@@ -429,10 +421,6 @@ public class GZSubjectController {
     @RequestMapping("lesson/evaluate/list/" + TokenUtil.AUTH_SUFFIX)
     public Object subjectLessonEvaluateList(@RequestParam(required = true) Long subjectId, @RequestParam(required = true) Long lessonId, Integer pageNum, Integer pageSize) {
         TUser user = UserUtil.getUser();
-        if (user == null) {
-            user = new TUser();
-            user.setId(42l);
-        }
         AjaxResult result = new AjaxResult();
         try {
             QueryResult<TGzEvaluate> queryResult = gzLessonService.lessonEvaluateList(subjectId, lessonId, pageNum, pageSize);
@@ -460,10 +448,6 @@ public class GZSubjectController {
     @RequestMapping("lesson/completion/update/" + TokenUtil.AUTH_SUFFIX)
     public Object lessonCompletionUpdate(@RequestParam(required = true) Integer currentSeconds, @RequestParam(required = true)  Integer totalSeconds, @RequestParam(required = true) Long lessonId) {
         TUser user = UserUtil.getUser();
-        if (user == null) {
-            user = new TUser();
-            user.setId(42l);
-        }
         AjaxResult result = new AjaxResult();
         try {
             gzLessonService.updateVideoCompletion(user.getId(), lessonId, currentSeconds, totalSeconds);

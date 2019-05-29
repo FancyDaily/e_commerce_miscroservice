@@ -70,8 +70,14 @@ public class TestDo {
      */
     @GetMapping("push/pre")
     @ResponseBody
-    public Boolean pushSuccess(String fileName) {
-        return fileUrlManagers.push(fileName);
+    public Object pushSuccess(String fileName) {
+        AjaxResult result = new AjaxResult();
+        Boolean push = fileUrlManagers.push(fileName);
+        result.setData(push);
+        if(push) {
+            result.setSuccess(true);
+        }
+        return result;
     }
 
     /**
@@ -101,13 +107,13 @@ public class TestDo {
                         isPushSuccess = (Boolean) data;
                     }
                 }
-                String s = jsonObject.toJSONString();
-                System.out.println(s);
             }
             if(isPushSuccess) {
                 gzLessonService.sendUnlockTask(subjectId, fileName);
+                result.setSuccess(true);
+            } else {
+                result.setMsg("推送结果->False, 请检查文件名");
             }
-            result.setSuccess(true);
         } catch (Exception e) {
             log.error("推送error{}", e);
         }

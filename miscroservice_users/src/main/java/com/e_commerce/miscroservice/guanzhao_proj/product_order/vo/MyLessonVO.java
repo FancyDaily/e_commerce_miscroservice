@@ -62,4 +62,6 @@ public class MyLessonVO {
 
     @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
+
+    private String url; //播放地址
 }

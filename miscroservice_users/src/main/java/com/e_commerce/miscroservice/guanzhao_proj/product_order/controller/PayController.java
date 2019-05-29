@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AliPayPo;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
+import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Iptools;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
@@ -65,12 +66,16 @@ public class PayController {
             gzPayService.dealWithPrice(money);
             result.setSuccess(true);
         } catch (MessageException e) {
-            smsUtil.sendSms(telephone, "提示:" + e.getMessage() + "，当前金额:" + money +  ", 时间:" + format, application);
+            if (ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为非调试
+                smsUtil.sendSms(telephone, "提示:" + e.getMessage() + "，当前金额:" + money +  ", 时间:" + format, application);
+            }
             logger.error("根据订单金额去支付订单错误={}", e);
             result.setMsg(e.getMessage());
             result.setSuccess(false);
         } catch (Exception e) {
-            smsUtil.sendSms(telephone, "服务器错误，订单支付有误。目标金额" + money + ", 时间:" + format, application);
+            if (ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为非调试
+                smsUtil.sendSms(telephone, "服务器错误，订单支付有误。目标金额" + money + ", 时间:" + format, application);
+            }
             logger.error("根据订单金额去支付订单错误={}", e);
             result.setMsg(e.getMessage());
             result.setSuccess(false);
@@ -89,10 +94,6 @@ public class PayController {
                            @RequestParam(required = false) boolean isSalePrice,
                            HttpServletRequest req, HttpServletResponse response) {
         TUser user = UserUtil.getUser();
-        if(user==null) {
-            user = new TUser();
-            user.setId(1153l);
-        }
         logger.info("支付宝-预生成订单orderNo={},coupon_id={},subjectId={}",orderNo,coupon_id,subjectId);
         AjaxResult result = new AjaxResult();
         try {

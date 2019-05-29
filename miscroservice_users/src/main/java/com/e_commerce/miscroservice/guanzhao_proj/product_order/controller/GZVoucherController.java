@@ -38,11 +38,6 @@ public class GZVoucherController {
     public Object myVoucherList( Integer pageNum, Integer pageSize, Integer... option) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
-        if(user==null) {
-            user = new TUser();
-            user.setId(42l);
-            user.setName("三胖");
-        }
         try {
             List<MyVoucherVo> vouchers = gzVoucherService.myVoucherList(user,option);
             result.setData(vouchers);
