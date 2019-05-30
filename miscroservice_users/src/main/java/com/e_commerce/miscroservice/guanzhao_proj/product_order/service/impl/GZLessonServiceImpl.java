@@ -453,6 +453,7 @@ public class GZLessonServiceImpl implements GZLessonService {
         gzUserSubjectDao.updateByPrimaryKey(tGzUserSubject);
     }
 
+
     @Override
     public QueryResult<TGzEvaluate> lessonEvaluateList(Long subjectId, Long lessonId, Integer pageNum, Integer
             pageSize) {
