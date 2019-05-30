@@ -13,7 +13,7 @@ public enum ApplicationEnum {
 
     public static LoadingCache loadingCache = CacheBuilder.newBuilder()
             .maximumSize(10000) //设置缓存上线
-			.expireAfterWrite(8, TimeUnit.MINUTES)  //写入时刷新缓存
+			.expireAfterWrite(1, TimeUnit.MINUTES)  //写入时刷新缓存
             .build(new CacheLoader<String, Object>() {
                 @Override
                 public Object load(String key) {

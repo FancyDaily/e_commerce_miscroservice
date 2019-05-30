@@ -132,14 +132,18 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
 
         //创建视频实体
-		//TODO back
 		String displayName = fileName;
 		if (fileName.contains(".")) {
 			displayName = fileName.substring(0, fileName.lastIndexOf("."));	//去掉扩展名
 		}
 		List<TGzVideo> videoList = gzVideoDao.selectBySubjectIdAndLessonIdAndFileName(subjectId, lessonId, fileName);
 		if(videoList.isEmpty()) {
-			TGzVideo gzVideo = TGzVideo.builder().subjectId(subjectId).lessonId(lessonId).fileName(fileName).name(displayName).build();
+			//确定当前序号
+			TGzVideo gzVideo1 = gzVideoDao.selectOneBySubjectIdAndLessonIdIndexDesc(subjectId, lessonId);
+			Integer index = gzVideo1.getVideoIndex();
+			index = index==null? -1:index;
+			Integer indexNow = ++index;
+			TGzVideo gzVideo = TGzVideo.builder().subjectId(subjectId).lessonId(lessonId).fileName(fileName).name(displayName).videoIndex(indexNow).build();
 			gzVideoDao.insert(gzVideo);
 		}
 
@@ -241,15 +245,6 @@ public class GZLessonServiceImpl implements GZLessonService {
         }
 
 
-    }
-
-    public static void main(String[] args) {
-        long userId = 1153;
-        long lessonId = 1;
-        long subjectId = 1;
-        String sourceStr = userId + "" + lessonId + "" + subjectId;
-        String expectedSign = Md5Util.md5(sourceStr);
-        System.out.println(expectedSign);
     }
 
     @Override

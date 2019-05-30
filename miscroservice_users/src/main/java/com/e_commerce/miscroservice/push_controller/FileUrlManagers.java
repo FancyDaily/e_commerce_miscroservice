@@ -268,8 +268,8 @@ public class FileUrlManagers {
 	private class Upload {
 
 
-		//        private final String FILE_TOTAL_PATH = "/mnt/ftp/";
-		private final String FILE_TOTAL_PATH = "/Users/xufangyi/Downloads/";
+		private final String FILE_TOTAL_PATH = "/mnt/ftp/";
+//		private final String FILE_TOTAL_PATH = "/Users/xufangyi/Downloads/";
 		private final String accessKey = "OJ5ePYgOmXHSdi7Wb8cebmB0OwDUDlGzeTeWORdH";
 		private final String secretKey = "ldPnyGLV5NeIwtzVLPTX-W-BXut7vMKtVXLglLao";
 		private final String bucket = "ness";

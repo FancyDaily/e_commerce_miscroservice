@@ -21,4 +21,6 @@ public interface GZVideoDao {
 	int update(TGzVideo gzVideo);
 
 	List<TGzVideo> selectByLessonId(Long lessonId);
+
+	TGzVideo selectOneBySubjectIdAndLessonIdIndexDesc(Long subjectId, Long lessonId);
 }

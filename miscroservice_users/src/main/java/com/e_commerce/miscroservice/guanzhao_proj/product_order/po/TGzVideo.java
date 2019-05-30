@@ -26,6 +26,9 @@ public class TGzVideo {
 
 	private Long lessonId;
 
+	@Column(commit = "序号", length = 11, defaultVal = "0")
+	private Integer videoIndex;
+
 	@Transient
 	private String sign;
 

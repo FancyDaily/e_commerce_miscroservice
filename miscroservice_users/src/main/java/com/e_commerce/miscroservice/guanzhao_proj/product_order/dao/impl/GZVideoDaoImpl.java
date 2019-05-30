@@ -55,4 +55,12 @@ public class GZVideoDaoImpl implements GZVideoDao {
 		.eq(TGzVideo::getLessonId, lessonId)
 		.eq(TGzVideo::getIsValid, AppConstant.IS_VALID_YES));
 	}
+
+	@Override
+	public TGzVideo selectOneBySubjectIdAndLessonIdIndexDesc(Long subjectId, Long lessonId) {
+		return MybatisPlus.getInstance().findOne(new TGzVideo(), new MybatisPlusBuild(TGzVideo.class)
+		.eq(TGzVideo::getSubjectId, subjectId)
+		.eq(TGzVideo::getLessonId, lessonId)
+		.eq(TGzVideo::getIsValid, AppConstant.IS_VALID_YES));
+	}
 }
