@@ -32,4 +32,11 @@ public class GZKeyValueDaoImpl implements GZKeyValueDao {
     public int batchInsert(List<TGzKeyValue> keyValueToInsertList) {
         return MybatisPlus.getInstance().save(keyValueToInsertList);
     }
+
+	@Override
+	public List<TGzKeyValue> selectAll(Integer toCode) {
+		return MybatisPlus.getInstance().finAll(new TGzKeyValue(), new MybatisPlusBuild(TGzKeyValue.class)
+		.eq(TGzKeyValue::getType, toCode)
+		.eq(TGzKeyValue::getIsValid, AppConstant.IS_VALID_YES));
+	}
 }

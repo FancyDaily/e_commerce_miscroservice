@@ -294,7 +294,7 @@ public class GZPayServiceImpl implements GZPayService {
             //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过获得的金额去找到唯一订单"可行
 //            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
             Long exist = (Long) redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
-            double perTime = 0.01;
+            double perTime = 0.1;
             Integer num = 1;
             if(exist==null || currentTimeMillis > exist) { //过期
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, 1, INTEVAL);
@@ -498,7 +498,7 @@ public class GZPayServiceImpl implements GZPayService {
             nameSuffix = "" + couponMoney;
             nameSuffix += ".jpg";
         }
-        nameSuffix = "121558577476.jpg";
+//        nameSuffix = "121558577476.jpg";
         //根据金额去获取二维码
         String img = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/pay/";
         img += nameSuffix;

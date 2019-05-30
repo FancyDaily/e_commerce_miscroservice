@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
-import org.apache.http.HttpRequest;
 
 /**
  * @Author: FangyiXu
@@ -13,15 +12,15 @@ public interface GZLessonService {
 
     void unlockMyLesson(Long userId, Long subjectId);
 
-    void unlockLesson(Long subjectId, String fileName);
+    void unlockLesson(Long subjectId, Long lessonId, String fileName);
 
-    void authCheck(String sign, Long id, String name, Long productId, Long fileName);
+    void authCheck(String sign, Long id, Long productId, Long fileName);
 
-    void sendUnlockTask(Long subjectId, String fileName);
+    void sendUnlockTask(Long subjectId, Long lessonId, String fileName);
 
     QueryResult mySubjectLessonList(Long userId, Long subjectId, Integer pageNum, Integer pageSize);
 
-    void updateVideoCompletion(Long userId, Long lessonId, Integer currentSeconds, Integer totalSeconds);
+    void updateVideoCompletion(Long userId, Long lessonId, Long videoId, Integer currentSeconds, Integer totalSeconds);
 
     QueryResult<TGzEvaluate> lessonEvaluateList(Long subjectId, Long lessonId, Integer pageNum, Integer pageSize);
 }

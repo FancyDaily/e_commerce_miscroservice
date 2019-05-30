@@ -10,10 +10,7 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.Tok
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzUserSubject;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
@@ -26,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 观照商品模块
@@ -268,6 +266,32 @@ public class GZSubjectController {
         return result;
     }
 
+	/**
+	 * 视频列表
+	 *
+	 * @param lessonId 课程编号
+	 * @return
+	 */
+	@RequestMapping("video/list/" + TokenUtil.AUTH_SUFFIX)
+	public Object lessonVideoList(@RequestParam(required = true) Long lessonId) {
+		TUser user = UserUtil.getUser();
+		AjaxResult result = new AjaxResult();
+		try {
+			Map<String, Object> map = gzSubjectService.videoList(user.getId(), lessonId);
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "视频列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("视频列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
     /**
      * 该课程下我的章节列表(正在播放页)
      *
@@ -446,11 +470,14 @@ public class GZSubjectController {
      * @return
      */
     @RequestMapping("lesson/completion/update/" + TokenUtil.AUTH_SUFFIX)
-    public Object lessonCompletionUpdate(@RequestParam(required = true) Integer currentSeconds, @RequestParam(required = true)  Integer totalSeconds, @RequestParam(required = true) Long lessonId) {
+    public Object lessonCompletionUpdate(@RequestParam(required = true) Integer currentSeconds,
+										 @RequestParam(required = true)  Integer totalSeconds,
+										 @RequestParam(required = true) Long lessonId,
+										 @RequestParam(required = true) Long videoId) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
         try {
-            gzLessonService.updateVideoCompletion(user.getId(), lessonId, currentSeconds, totalSeconds);
+            gzLessonService.updateVideoCompletion(user.getId(), lessonId, videoId, currentSeconds, totalSeconds);
             result.setSuccess(true);
         } catch (MessageException e) {
             log.warn("====方法描述: {}, Message: {}====", "视频进度更新", e.getMessage());
