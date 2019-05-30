@@ -24,7 +24,6 @@ import com.google.common.cache.RemovalListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import sun.plugin.util.UserProfile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
