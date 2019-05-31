@@ -30,6 +30,9 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     Log log = Log.getInstance(GZSubjectServiceImpl.class);
 
     @Autowired
+	private GZVideoDao gzVideoDao;
+
+    @Autowired
     private GZSubjectDao gzSubjectDao;
 
     @Autowired
@@ -343,6 +346,19 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 
         return result;
     }
+
+	@Override
+	public Map<String, Object> videoList(Long userId, Long lessonId) {
+    	TGzUserLesson userLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
+    	if(userLesson == null) {
+    		throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "对不起,您没有权限查看该章节!");
+		}
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("userLesson", userLesson);
+		List<TGzVideo> videos =  gzVideoDao.selectByLessonId(lessonId);
+		resultMap.put("videos", videos);
+		return resultMap;
+	}
 
 
 }

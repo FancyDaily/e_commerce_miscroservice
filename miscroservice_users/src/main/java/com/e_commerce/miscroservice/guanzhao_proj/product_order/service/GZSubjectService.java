@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GZSubjectService {
 
@@ -68,4 +69,13 @@ public interface GZSubjectService {
      * @return
      */
     QueryResult<MyLearningSubjectVO> findEndingSubject(Integer id, Integer pageNum, Integer pageSize);
+
+	/**
+	 * 视频列表
+	 *
+	 * @param userId
+	 * @param lessonId
+	 * @return
+	 */
+	Map<String, Object> videoList(Long userId, Long lessonId);
 }

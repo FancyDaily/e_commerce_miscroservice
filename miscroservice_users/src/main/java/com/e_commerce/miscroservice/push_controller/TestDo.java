@@ -87,7 +87,7 @@ public class TestDo {
      */
     @GetMapping("push")
     @ResponseBody
-    public Object push(Long subjectId, String fileName) {
+    public Object push(Long subjectId, Long lessonId, String fileName) {
         log.info("开始推送文件={}",fileName);
         AjaxResult result = new AjaxResult();
         try {
@@ -109,7 +109,7 @@ public class TestDo {
                 }
             }
             if(isPushSuccess) {
-                gzLessonService.sendUnlockTask(subjectId, fileName);
+                gzLessonService.sendUnlockTask(subjectId, lessonId, fileName);
                 result.setSuccess(true);
             } else {
                 result.setMsg("推送结果->False, 请检查文件名");
@@ -154,11 +154,6 @@ public class TestDo {
     @GetMapping("play/" + TokenUtil.AUTH_SUFFIX)
     public Object play(String fileName, String sign, Long subjectId, Long lessonId) {
         TUser user = UserUtil.getUser();
-        if(user==null) {
-            user = new TUser();
-            user.setId(42l);
-            user.setName("三胖");
-        }
         if(StringUtil.isEmpty(fileName)||
                 !filePattern.matcher(fileName).matches()){
 
@@ -169,17 +164,11 @@ public class TestDo {
         log.info("开始获取播放文件={}地址",fileName);
         //权限校验
         try {
-            gzLessonService.authCheck(sign, user.getId(), fileName, subjectId, lessonId);
+            gzLessonService.authCheck(sign, user.getId(), subjectId, lessonId);
             request.setAttribute(fileName, Md5Util.md5(fileName));
         } catch (MessageException e) {
-//            AjaxResult result = new AjaxResult();
-//            result.setSuccess(false);
-//            result.setErrorCode(e.getErrorCode());
-//            result.setMsg(e.getMessage());
-//            return result;
             request.setAttribute("errorMsg", e.getMessage());
         } catch (Exception e) {
-//            return new AjaxResult();
             request.setAttribute("errorMsg", e.getMessage());
         }
         return "forward:/doPlay";

@@ -98,7 +98,7 @@ public class Test {
                 .count();
         System.out.println(count);*/
 
-        String path = "/Users/xufangyi/Downloads";
+       /* String path = "/Users/xufangyi/Downloads";
         File[] files = new File(path).listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
@@ -119,10 +119,19 @@ public class Test {
             }
         }
         System.out.println("--------------");
-        Arrays.stream(listFiles).forEach(a->System.out.println(a.getName()));
+        Arrays.stream(listFiles).forEach(a->System.out.println(a.getName()));*/
+
+		boolean odd = isOdd(2);
+		boolean odd1 = isOdd(1);
+		System.out.println(odd);
+		System.out.println(odd1);
 
 
-    }
+	}
+
+    public static boolean isOdd(int i) {
+    	return (i & 1) == 1;
+	}
 
    /* public static void main(String[] args) {
         *//*Test test = new Test();

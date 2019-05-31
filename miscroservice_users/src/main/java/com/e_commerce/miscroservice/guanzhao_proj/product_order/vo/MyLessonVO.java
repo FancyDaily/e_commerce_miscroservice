@@ -2,9 +2,11 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVideo;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @Author: FangyiXu
@@ -20,6 +22,8 @@ public class MyLessonVO {
     private Long lessonId;
 
     private Integer videoOnloadStatus;  //视频装载状态
+
+	private List<TGzVideo> gzVideoList;
 
     @Column(commit = "章节序号", length = 11)
     private Integer lessonIndex;

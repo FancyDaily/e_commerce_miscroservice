@@ -15,4 +15,6 @@ public interface GZKeyValueDao {
     TGzKeyValue selectByTypeAndValue(Integer toCode, String sign);
 
     int batchInsert(List<TGzKeyValue> keyValueToInsertList);
+
+	List<TGzKeyValue> selectAll(Integer toCode);
 }
