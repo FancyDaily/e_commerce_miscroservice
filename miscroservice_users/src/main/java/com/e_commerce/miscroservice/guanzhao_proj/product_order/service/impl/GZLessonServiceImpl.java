@@ -315,7 +315,11 @@ public class GZLessonServiceImpl implements GZLessonService {
                     String suffix = ".mp4";
                     String fileName = tGzLesson.getName();
                     fileName += suffix;
-                    String url = fileUrlManagers.getUrl(fileName);
+					List<TGzVideo> videoList = gzVideoDao.selectByLessonId(lessonId);
+					for(TGzVideo video:videoList) {
+						fileName = video.getFileName();
+						String url = fileUrlManagers.getUrl(fileName);
+					}
 
 					/*Object o = redisUtil.get(key);
 					if (o==null || System.currentTimeMillis() > (long)o) {
