@@ -106,7 +106,7 @@ public class FileUrlManagers {
 		private final String DNS_DOMAIN_NAME = "xiaoshitimebank.com";
 		private volatile Boolean IS_START = Boolean.FALSE;
 		private final String ACCESS_URL_PREFIX = "http://%s." + DNS_DOMAIN_NAME + "/%s";
-		private final String DNS_VAL_PARSE_DOMAIN_NAME = "xiaoshitimebank.com.www.qiniudns.com";
+		private final String DNS_VAL_PARSE_DOMAIN_NAME = "qiniu.xiaoshitimebank.com";
 
 		private static Map<String, Long> CDN_ID_CACHE = new ConcurrentHashMap<>();
 
