@@ -1,6 +1,5 @@
-package com.e_commerce.miscroservice.commons.util.colligate.pay;
+package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat.WeChatPay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +14,8 @@ public class WxPayAppController {
 
 	@Autowired
 	WeChatPay weChatPay;
+
+
 
     /**
      * 回调函数

@@ -26,8 +26,8 @@ public class WeChatPay {
     public static void main(String[] args) throws Exception {
         String orderNo = "sss";
         Double payMoney = 0.01;
-        Map<String, Object> appParam = new WeChatPay().createWebParam(orderNo, payMoney);
-
+		String openid = "";
+        Map<String, Object> appParam = new WeChatPay().createWebParam(orderNo, payMoney, openid);
         System.out.println(appParam);
     }
 
@@ -133,7 +133,7 @@ public class WeChatPay {
      * @return
      * @throws Exception
      */
-    public Map<String, Object> createWebParam(String orderNo, Double payCount) throws Exception {
+    public Map<String, Object> createWebParam(String orderNo, Double payCount, String openid) throws Exception {
         SortedMap<String, Object> param = new TreeMap<>();
         param.put("appid", ConstantUtil.APP_ID);
         param.put("partnerid", ConstantUtil.APP_ID);
@@ -142,6 +142,7 @@ public class WeChatPay {
         param.put("noncestr", System.currentTimeMillis());
         String ten_time = String.valueOf(System.currentTimeMillis());
         param.put("timestamp", ten_time.substring(0, 10));
+        param.put("openid", openid);
         setSign(param);
         return param;
 
@@ -227,5 +228,17 @@ public class WeChatPay {
         param.put("sign", MD5.crypt(sb.toString()));
     }
 
+    public String getOpenid(String code) throws Exception {
+		String requestUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
+		SortedMap<String, Object> requestParam = new TreeMap<>();
+		requestParam.put("grant_type", "authorization_code");
+		requestParam.put("appid", ConstantUtil.APP_ID);
+		requestParam.put("secret", ConstantUtil.APP_KEY);
+		requestParam.put("code", code);
+		String requestXml = getRequestXml(requestParam);
 
+		String xmlStr = httpsRequest(requestUrl, "GET", requestXml);
+		Map resultMap = xmlToMap(xmlStr);
+		return (String) resultMap.get("openid");
+	}
 }
