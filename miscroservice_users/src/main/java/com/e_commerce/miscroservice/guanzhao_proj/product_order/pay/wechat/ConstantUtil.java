@@ -4,7 +4,7 @@ public class ConstantUtil {
     /**
      * 微信开发平台应用ID
      */
-    public static final String APP_ID = "wxd19384cf3643922a";
+    public static final String APP_ID = "wxb8edf6df645eb4e5";
     /**
      * 应用对应的密钥
      */

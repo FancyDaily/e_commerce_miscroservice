@@ -26,7 +26,9 @@ public class WeChatPay {
     public static void main(String[] args) throws Exception {
         String orderNo = "sss";
         Double payMoney = 0.01;
-        Map<String, Object> appParam = new WeChatPay().createWebParam(orderNo, payMoney);
+        String openId="426494352";
+        Map<String, Object> appParam = new WeChatPay().
+			createWebParam(orderNo, payMoney,openId);
 
         System.out.println(appParam);
     }
@@ -130,14 +132,16 @@ public class WeChatPay {
      *
      * @param orderNo  订单号
      * @param payCount 支付金额
+     * @param openId 用户的Id
      * @return
      * @throws Exception
      */
-    public Map<String, Object> createWebParam(String orderNo, Double payCount) throws Exception {
+    public Map<String, Object> createWebParam(String orderNo, Double payCount,String openId) throws Exception {
+		System.out.println(createPay(orderNo, payCount,openId).get("prepay_id"));
         SortedMap<String, Object> param = new TreeMap<>();
         param.put("appid", ConstantUtil.APP_ID);
         param.put("partnerid", ConstantUtil.APP_ID);
-        param.put("prepayid", createPay(orderNo, payCount).get("prepay_id"));
+        param.put("prepayid", createPay(orderNo, payCount,openId).get("prepay_id"));
         param.put("package", "Sign=WXPay");
         param.put("noncestr", System.currentTimeMillis());
         String ten_time = String.valueOf(System.currentTimeMillis());
@@ -166,10 +170,11 @@ public class WeChatPay {
     }
 
 
-    private Map createPay(String orderNo, Double payCount) throws Exception {
-        String output = getOrderRequestXml(orderNo, payCount);
+    private Map createPay(String orderNo, Double payCount,String openId) throws Exception {
+        String output = getOrderRequestXml(orderNo, payCount,openId);
         String json = httpsRequest(ConstantUtil.GATEURL, "POST", output);
         Map resultMap = xmlToMap(json);
+		System.out.println(resultMap);
         return resultMap;
     }
 
@@ -192,7 +197,7 @@ public class WeChatPay {
         return sb.toString();
     }
 
-    private String getOrderRequestXml(String orderNo, Double payCount) {
+    private String getOrderRequestXml(String orderNo, Double payCount,String openId) {
         SortedMap<String, Object> param = new TreeMap();
         param.put("appid", ConstantUtil.APP_ID);
         param.put("body", "商店支付");
@@ -202,6 +207,7 @@ public class WeChatPay {
         param.put("notify_url", ConstantUtil.NOTIFY_URL);
         param.put("out_trade_no", orderNo);
         param.put("spbill_create_ip", "127.0.0.1");
+        param.put("openId", openId);
         param.put("total_fee", decimalFormat.format(payCount * 100));
         param.put("trade_type", "JSAPI");
         setSign(param);
