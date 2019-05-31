@@ -92,9 +92,7 @@ public class FileUrlManagers {
         return url;
     }
 
-	public static void main(String[] args) {
-		new Dns();
-	}
+	
 
     /**
      * dns
