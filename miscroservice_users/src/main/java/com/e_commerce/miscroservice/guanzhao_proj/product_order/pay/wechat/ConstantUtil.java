@@ -13,6 +13,7 @@ public class ConstantUtil {
      * 应用对应的密钥
      */
     public static final String APP_KEY = "5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM";
+
     /**
      * 微信支付商户号
      */
