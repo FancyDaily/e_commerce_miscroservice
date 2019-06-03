@@ -1,7 +1,13 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.MD5;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -20,6 +26,8 @@ import java.util.*;
 @Component
 public class WeChatPay {
 
+	@Autowired
+	private GZPayService gzPayService;
 
     private DecimalFormat decimalFormat = new DecimalFormat("0");
 
@@ -238,5 +246,52 @@ public class WeChatPay {
 		String xmlStr = httpsRequest(requestUrl, "GET", requestXml);
 		Map resultMap = xmlToMap(xmlStr);
 		return (String) resultMap.get("openid");
+	}
+
+	@Transactional(rollbackFor = Throwable.class)
+	public String preOrder(String orderNo, Long subjectId, Long voucherId, Long userId) {
+		try {
+			Map<String, Object> map = dounifiedOrder(subjectId, voucherId, userId);
+			String orderNo1 = (String) map.get("orderNo");
+			String prepayId = (String) map.get("prepay_id");
+			if(prepayId!=null) {
+//				createWebParam(...)
+			}
+		} catch (Exception e) {
+
+		}
+		return null;
+	}
+
+	private Map<String, Object> dounifiedOrder(Long subjectId, Long voucherId, Long userId) throws Exception {
+		Map<String, Object> map = gzPayService.produceOrder(subjectId, null, voucherId, userId, true);
+		if(map == null) {
+			throw new MessageException("课程不存在!");
+		}
+		String orderNo = (String) map.get("orderNo");
+		String couponMoney = (String) map.get("couponMoney");
+		Double doubleMoney = Double.valueOf(couponMoney);
+
+		Map pay = createPay(orderNo, doubleMoney);
+		String return_code = (String) pay.get("return_code");
+		String return_msg = (String) pay.get("return_msg");
+		String prepayId = null;
+		if("success".toUpperCase().equals(return_code)) {	//通信成功
+			String result_code = (String) pay.get("result_code");
+			if(StringUtil.isEmpty(return_msg)) {
+				//TODO
+				if("success".toUpperCase().equals(result_code)) {
+					prepayId = (String) pay.get("prepay_id");
+				} else {
+					String errCodeDes = (String) pay.get("err_code_des");
+				}
+			} else {	//存在错误信息
+
+			}
+		} else {	//通信错误
+
+		}
+		map.put("prepayId", prepayId);
+		return map;
 	}
 }

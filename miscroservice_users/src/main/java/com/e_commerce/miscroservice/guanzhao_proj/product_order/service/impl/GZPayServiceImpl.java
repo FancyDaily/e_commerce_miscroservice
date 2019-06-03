@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -145,6 +146,7 @@ public class GZPayServiceImpl implements GZPayService {
         gzOrderDao.saveOrder(tGzOrder);
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public Map<String, String> dounifiedOrder(String orderNum, Long userId, Long couponId, String spbill_create_ip, int type, Long subjectId) {
         Map<String, String> fail = new HashMap<>();
@@ -239,7 +241,12 @@ public class GZPayServiceImpl implements GZPayService {
         return fail;
     }
 
-    private Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+	@Override
+    public Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount) {
+        TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
+        if (tGzSubject==null){
+            return null;
+        }
         long currentTimeMillis = System.currentTimeMillis();
         boolean isContinuePay = !StringUtil.isEmpty(orderNum);
         //一段时间内对于同一课程只能下一次单(或者对于同一课程直接判定有无待支付订单)
@@ -261,10 +268,6 @@ public class GZPayServiceImpl implements GZPayService {
         }
 
         Double money = 0d;
-        TGzSubject tGzSubject = gzSubjectDao.findSubjectById(subjectId);
-        if (tGzSubject==null){
-            return null;
-        }
 
         boolean isSalePrice = false;
         Integer forSaleSurplusNum = tGzSubject.getForSaleSurplusNum();

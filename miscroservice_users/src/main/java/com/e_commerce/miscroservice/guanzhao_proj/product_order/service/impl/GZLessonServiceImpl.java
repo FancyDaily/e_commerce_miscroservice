@@ -273,6 +273,9 @@ public class GZLessonServiceImpl implements GZLessonService {
         log.info("我的课程章节学习(正在播放)userId={}, subjectId={}, pageNum={}, pageSize={}", userId, subjectId, pageNum, pageSize);
         //校验开课
         TGzSubject gzSubject = gzSubjectDao.selectByPrimaryKey(subjectId);
+        if(gzSubject == null) {
+        	throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "课程不存在！");
+		}
 
         Integer avaliableStatus = gzSubject.getAvaliableStatus();
         String dateTime = gzSubject.getAvailableDate() + gzSubject.getAvailableTime();

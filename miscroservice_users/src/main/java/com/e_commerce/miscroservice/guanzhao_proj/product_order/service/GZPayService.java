@@ -38,7 +38,9 @@ public interface GZPayService {
      */
     Map<String, String> dounifiedOrder(String orderNo, Long userId, Long coupon_id, String spbill_create_ip, int i, Long subjectId);
 
-    /**
+	Map<String, Object> produceOrder(Long subjectId, String orderNum, Long couponId, Long userId, boolean isRandomDisCount);
+
+	/**
      * 微信支付回调
      * @param resXml
      * @return

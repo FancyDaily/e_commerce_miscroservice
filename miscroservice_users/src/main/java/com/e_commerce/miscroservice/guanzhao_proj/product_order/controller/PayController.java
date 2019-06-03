@@ -100,7 +100,11 @@ public class PayController {
             Map<String, Object> resultMap = gzPayService.preOrder(orderNo, coupon_id, subjectId, user.getId());
             result.setData(resultMap);
             result.setSuccess(true);
-        } catch (Exception e) {
+        } catch (MessageException e) {
+			logger.warn("支付成功错误={}", e);
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
             logger.error("支付成功错误={}", e);
             result.setMsg(e.getMessage());
             result.setSuccess(false);

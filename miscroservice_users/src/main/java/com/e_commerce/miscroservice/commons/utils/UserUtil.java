@@ -82,4 +82,7 @@ public class UserUtil {
         return user;
     }
 
+	public static Long getId() {
+    	return Long.valueOf(IdUtil.getId());
+	}
 }
