@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/wxPay")
@@ -45,8 +47,6 @@ public class WxPayAppController {
 			String total_fee = (String) param.get("total_fee");
 			// 查询订单 根据订单号查询订单
 			System.out.println("商户号" + mch_id + "out_trade_no" + out_trade_no + "total_fee" + total_fee);
-
-			//TODO 验证签名
 
 			//支付成功业务流程
 			gzPayService.dealWithOrderNo(out_trade_no);

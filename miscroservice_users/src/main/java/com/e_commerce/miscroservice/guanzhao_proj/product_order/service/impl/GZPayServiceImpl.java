@@ -419,7 +419,7 @@ public class GZPayServiceImpl implements GZPayService {
         if(tGzOrder==null) {
             tGzOrder = gzOrderDao.findByOrderNo(out_trade_no);
         }
-        if (tGzOrder != null || tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {
+        if (tGzOrder != null || tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {	//仅处理待支付的订单
             TGzOrder order = new TGzOrder();
             order.setTgzOrderNo(out_trade_no);
             order.setStatus(GZOrderEnum.PAYED.getCode());
