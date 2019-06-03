@@ -13,7 +13,8 @@ import java.util.Map;
 public class WxPayAppController {
 
 	@Autowired
-	WeChatPay weChatPay;
+	private  WeChatPay weChatPay;
+
 
 
 	/**

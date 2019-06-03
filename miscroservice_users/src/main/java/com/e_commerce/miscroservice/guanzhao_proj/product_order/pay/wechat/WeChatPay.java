@@ -215,6 +215,7 @@ public class WeChatPay {
 		return resultMap;
 	}
 
+
 	private String getRequestXml(SortedMap<String, String> params) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<xml>");
