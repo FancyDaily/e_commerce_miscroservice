@@ -48,4 +48,12 @@ public class GZLessonDaoImpl implements GZLessonDao {
     public int insert(List<TGzLesson> toInsert) {
         return MybatisPlus.getInstance().save(toInsert);
     }
+
+	@Override
+	public TGzLesson selectBySubjectIdAndLessonId(Long subjectId, Long lessonId) {
+		return MybatisPlus.getInstance().findOne(new TGzLesson(), new MybatisPlusBuild(TGzLesson.class)
+		.eq(TGzLesson::getSubjectId, subjectId)
+		.eq(TGzLesson::getId, lessonId)
+		.eq(TGzLesson::getIsValid, AppConstant.IS_VALID_YES));
+	}
 }

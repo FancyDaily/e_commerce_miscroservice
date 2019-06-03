@@ -61,6 +61,14 @@ public class GZVideoDaoImpl implements GZVideoDao {
 		return MybatisPlus.getInstance().findOne(new TGzVideo(), new MybatisPlusBuild(TGzVideo.class)
 		.eq(TGzVideo::getSubjectId, subjectId)
 		.eq(TGzVideo::getLessonId, lessonId)
+		.eq(TGzVideo::getIsValid, AppConstant.IS_VALID_YES)
+		.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzVideo::getVideoIndex)));
+	}
+
+	@Override
+	public List<TGzVideo> selectInLessonIds(List<Long> lessonIds) {
+		return MybatisPlus.getInstance().finAll(new TGzVideo(), new MybatisPlusBuild(TGzVideo.class)
+		.in(TGzVideo::getLessonId, lessonIds)
 		.eq(TGzVideo::getIsValid, AppConstant.IS_VALID_YES));
 	}
 }

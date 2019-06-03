@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZLessonService;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
 import lombok.Data;
@@ -251,7 +252,7 @@ public class GZSubjectController {
     public Object subjectLessonList(@RequestParam(required = true) Long subjectId) {
         AjaxResult result = new AjaxResult();
         try {
-            List<TGzLesson> resultList = gzSubjectService.lessonList(subjectId);
+            List<MyLessonVO> resultList = gzSubjectService.lessonList(subjectId);
             result.setData(resultList);
             result.setSuccess(true);
         } catch (MessageException e) {

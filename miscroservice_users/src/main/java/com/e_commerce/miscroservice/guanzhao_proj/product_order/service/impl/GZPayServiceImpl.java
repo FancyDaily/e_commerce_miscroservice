@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -48,6 +49,12 @@ import java.util.Map;
 @Log
 @Service
 public class GZPayServiceImpl implements GZPayService {
+
+	@Autowired
+	private GzUserVideoDao gzUserVideoDao;
+
+	@Autowired
+	private GZVideoDao gzVideoDao;
 
     @Autowired
     private GZOrderDao gzOrderDao;
@@ -446,6 +453,17 @@ public class GZPayServiceImpl implements GZPayService {
                 });
 
                 gzUserLessonDao.insertList(lessonList);
+
+                List<TGzUserVideo> userVideolist = new ArrayList<>();
+				List<Long> lessonIds = list.stream().map(TGzLesson::getId).collect(Collectors.toList());
+				List<TGzVideo> videoList = gzVideoDao.selectInLessonIds(lessonIds);
+				videoList.forEach(
+					a -> {
+						TGzUserVideo build = TGzUserVideo.builder().userId(userId).subjectId(subjectId).lessonId(a.getLessonId()).videoId(a.getId()).build();
+						userVideolist.add(build);
+					}
+				);
+				gzUserVideoDao.multiInsert(userVideolist);
             } else {    //再次购买 -> 续费
 //                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
                 Long expireTime = tGzUserSubject.getExpireTime();

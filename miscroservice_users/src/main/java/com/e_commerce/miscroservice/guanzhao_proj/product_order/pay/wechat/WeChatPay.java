@@ -145,8 +145,6 @@ public class WeChatPay {
         param.put("openid", openid);
         setSign(param);
         return param;
-
-
     }
 
 

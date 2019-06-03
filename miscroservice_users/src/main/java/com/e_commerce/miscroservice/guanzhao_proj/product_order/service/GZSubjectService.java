@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.service;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzEvaluate;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzLesson;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzSubject;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLearningSubjectVO;
@@ -35,7 +35,7 @@ public interface GZSubjectService {
      * @param subjectId
      * @return
      */
-    List<TGzLesson> lessonList(Long subjectId);
+    List<MyLessonVO> lessonList(Long subjectId);
 
     /**
      * 评价章节

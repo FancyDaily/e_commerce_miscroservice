@@ -1,0 +1,13 @@
+<xml>
+    <appid>wxd19384cf3643922a</appid>
+    <body><![CDATA[商店支付]]></body>
+    <device_info>WEB</device_info>
+    <mch_id>1536688811</mch_id>
+    <nonce_str>1559287309816</nonce_str>
+    <notify_url>https://test.xiaoshitimebank.com/wxNotify</notify_url>
+    <out_trade_no>sss</out_trade_no>
+    <sign>83c02d03322757d1505dda6b38771bf6</sign>
+    <spbill_create_ip>127.0.0.1</spbill_create_ip>
+    <total_fee>1</total_fee>
+    <trade_type>JSAPI</trade_type>
+</xml>

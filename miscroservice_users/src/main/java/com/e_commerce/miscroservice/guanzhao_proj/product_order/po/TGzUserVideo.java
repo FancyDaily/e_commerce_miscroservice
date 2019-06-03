@@ -3,7 +3,6 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
@@ -12,37 +11,29 @@ import java.sql.Timestamp;
 
 /**
  * @Author: FangyiXu
- * @Date: 2019-05-30 11:31
+ * @Date: 2019-05-31 15:32
  */
-@Table(commit = "观照-视频表")
+@Table(commit = "观照-用户视频关联表")
 @Data
 @Builder
-public class TGzVideo {
+public class TGzUserVideo {
 
 	@Id
 	private Long id;
+
+	private Long userId;
 
 	private Long subjectId;
 
 	private Long lessonId;
 
-	@Column(commit = "序号", length = 11, defaultVal = "0")
-	private Integer videoIndex;
+	private Long videoId;
 
-	@Transient
+	@Column(commit = "视频进度", length = 11, defaultVal = "0")
 	private Integer videoCompletion;
 
-	@Transient
+	@Column(commit = "视频完成状态", length = 11, defaultVal = "0")
 	private Integer videoCompletionStatus;
-
-	@Transient
-	private String sign;
-
-	@Column(commit = "展示名字")
-	private String name;
-
-	@Column(commit = "文件名")
-	private String fileName;
 
 	@Column(commit = "扩展字段")
 	private String extend;
@@ -61,5 +52,4 @@ public class TGzVideo {
 
 	@Column(commit = "有效性", defaultVal = "1")
 	private String isValid;
-
 }

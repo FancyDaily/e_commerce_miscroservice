@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
-import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
@@ -18,7 +17,6 @@ import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.e_commerce.miscroservice.push_controller.FileUrlManagers;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.google.common.cache.LoadingCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -35,6 +34,9 @@ import java.util.*;
 public class GZLessonServiceImpl implements GZLessonService {
 
     private Log log = Log.getInstance(GZOrderServiceImpl.class);
+
+	@Autowired
+	private GzUserVideoDao gzUserVideoDao;
 
     @Autowired
     private GZLessonDao gzLessonDao;
@@ -126,10 +128,17 @@ public class GZLessonServiceImpl implements GZLessonService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "找不到该课程！请确认课程编号");
 		}
 
+		//检测章节是否存在
         TGzLesson tGzLesson = gzLessonDao.selectByPrimaryKey(lessonId);
         if (Objects.isNull(tGzLesson)) {
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程下没有该章节！请确认您的文件名称!");
+            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "找不到该章节！请确认章节编号");
         }
+
+		//检测lessonId是否为subjectId下
+		TGzLesson tGzLesson1 = gzLessonDao.selectBySubjectIdAndLessonId(subjectId, lessonId);
+		if(tGzLesson1==null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该课程下没有该章节!");
+		}
 
         //创建视频实体
 		String displayName = fileName;
@@ -137,14 +146,17 @@ public class GZLessonServiceImpl implements GZLessonService {
 			displayName = fileName.substring(0, fileName.lastIndexOf("."));	//去掉扩展名
 		}
 		List<TGzVideo> videoList = gzVideoDao.selectBySubjectIdAndLessonIdAndFileName(subjectId, lessonId, fileName);
+		Long videoId = null;
 		if(videoList.isEmpty()) {
 			//确定当前序号
 			TGzVideo gzVideo1 = gzVideoDao.selectOneBySubjectIdAndLessonIdIndexDesc(subjectId, lessonId);
+			gzVideo1 = gzVideo1==null? new TGzVideo():gzVideo1;
 			Integer index = gzVideo1.getVideoIndex();
 			index = index==null? -1:index;
 			Integer indexNow = ++index;
 			TGzVideo gzVideo = TGzVideo.builder().subjectId(subjectId).lessonId(lessonId).fileName(fileName).name(displayName).videoIndex(indexNow).build();
 			gzVideoDao.insert(gzVideo);
+			videoId = gzVideo.getId();
 		}
 
       /*  //解锁开始立即解锁
@@ -170,7 +182,7 @@ public class GZLessonServiceImpl implements GZLessonService {
 
 		//找到所有购买此课程的用户 -> 写入sign
         List<TGzUserSubject> tGzUserSubjects = gzUserSubjectDao.selectBySubjectId(subjectId);
-        List<TGzUserLesson> toUpdater = new ArrayList<>();
+		List<TGzUserLesson> toUpdater = new ArrayList<>();
         List<Long> toUpdaterIds = new ArrayList<>();
 		for (TGzUserSubject tGzUserSubject : tGzUserSubjects) {
 			Long userId = tGzUserSubject.getUserId();
@@ -191,6 +203,10 @@ public class GZLessonServiceImpl implements GZLessonService {
                 toUpdaterIds.add(userLesson.getId());
                 toUpdater.add(userLesson);
             }
+
+			//插入userVideo记录
+			TGzUserVideo userVideo = TGzUserVideo.builder().subjectId(subjectId).lessonId(lessonId).userId(userId).videoId(videoId).build();
+			gzUserVideoDao.insert(userVideo);
         }
 
         try {
@@ -298,6 +314,11 @@ public class GZLessonServiceImpl implements GZLessonService {
 			lessonVideoMap.put(lessonId, videos);
 		});
 
+		List<TGzUserVideo> gzUserVideos = gzUserVideoDao.selectByUserIdAndSubjectId(userId, subjectId);
+		Map<Long, TGzUserVideo> userVideoMap = new HashMap<>();
+		gzUserVideos.forEach(
+			a -> userVideoMap.put(a.getVideoId(), a)
+		);
 		for (TGzLesson tGzLesson : tGzLessons) {
 			Long lessonId = tGzLesson.getId();
 			MyLessonVO myLessonVO = tGzLesson.copyMyLessonVO();
@@ -351,6 +372,15 @@ public class GZLessonServiceImpl implements GZLessonService {
 				videoList = new ArrayList<>();
 			}
 			videoList.stream().forEach(a -> {
+				TGzUserVideo tGzUserVideo = userVideoMap.get(a.getId());
+				int completeStatus = GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+				int completion = 0;
+				if(tGzUserVideo!=null) {
+					completion = tGzUserVideo.getVideoCompletion();
+				}
+				completeStatus = completion==100?GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode():completeStatus;
+				a.setVideoCompletion(completion);
+				a.setVideoCompletionStatus(completeStatus);
 				a.setSign(signValue);
 				resultVideoList.add(a);
 			});
@@ -375,8 +405,8 @@ public class GZLessonServiceImpl implements GZLessonService {
 		if (tGzUserLesson == null) {
 			return;
 		}
-		TGzVideo gzVideo = gzVideoDao.selectByPrimaryKey(videoId);
-		if(gzVideo == null) {
+		TGzUserVideo gzUserVideo = gzUserVideoDao.selectByVideoIdAndUserId(videoId, userId);
+		if(gzUserVideo == null || gzUserVideo.getVideoCompletion() == 100) {
 			return;
 		}
 		currentSeconds = currentSeconds == null ? 0 : currentSeconds;
@@ -397,20 +427,21 @@ public class GZLessonServiceImpl implements GZLessonService {
         //校验
         completion = completion > 100 ? 100 : completion;
         //视频完成进度更新
-        Integer videoCompletionStatus = gzVideo.getVideoCompletionStatus();
+        Integer videoCompletionStatus = gzUserVideo.getVideoCompletionStatus();
         int videoExpectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
 		videoCompletionStatus = Objects.equals(videoCompletionStatus, GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode()) ? videoCompletionStatus : videoExpectedCompletionStatus;
 
-		gzVideo.setVideoCompletion(completion);
-		gzVideo.setVideoCompletionStatus(videoCompletionStatus);
-		gzVideoDao.update(gzVideo);
+		gzUserVideo.setVideoCompletion(completion);
+		gzUserVideo.setVideoCompletionStatus(videoCompletionStatus);
+		gzUserVideoDao.update(gzUserVideo);
 		//统计视频进度，更新章节学习进度
 		completion = tGzUserLesson.getVideoCompletion();
 		int cnt = 0;
 		if(completion != 100) {
 			List<TGzVideo> gzVideos = gzVideoDao.selectByLessonId(lessonId);
 			int total = gzVideos.size();
-			Long count = gzVideos.stream().filter(a -> a.getVideoCompletion() == 100)
+			List<TGzUserVideo> gzUserVideos = gzUserVideoDao.selectByUserIdAndLessonId(userId, lessonId);
+			Long count = gzUserVideos.stream().filter(a -> a.getVideoCompletion() == 100)
 				.count();
 			cnt = count.intValue();
 			/*for (TGzVideo video : gzVideos) {
@@ -424,7 +455,7 @@ public class GZLessonServiceImpl implements GZLessonService {
 			int result = (int)(i * 100);
 
 			Integer comletionStatus = tGzUserLesson.getLessonCompletionStatus();
-			int expectedCompletionStatus = completion > 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
+			int expectedCompletionStatus = completion == 90 ? GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode() : GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_NO.getCode();
 			comletionStatus = Objects.equals(comletionStatus, GZUserLessonEnum.VEDIO_COMPLETION_STATUS_DONE_YES.getCode()) ? comletionStatus : expectedCompletionStatus;
 			tGzUserLesson.setVideoCompletion(result);
 			tGzUserLesson.setVideoCompletionStatus(comletionStatus);
@@ -439,7 +470,8 @@ public class GZLessonServiceImpl implements GZLessonService {
         totalCnt = tGzLessons.size();
         List<TGzUserLesson> gzUserLessonList = gzUserLessonDao.selectByUserIdAndSubjectId(userId, subjectId);
         for (TGzUserLesson gzUserLesson : gzUserLessonList) {
-            if (Objects.equals(gzUserLesson.getLessonCompletionStatus(), GZUserLessonEnum.LESSON_COMPLETION_STATUS_DONE_YES.getCode())) {
+            if (Objects.equals(gzUserLesson.getLessonCompletionStatus(), GZUserLessonEnum.LESSON_COMPLETION_STATUS_DONE_YES.getCode())
+				|| gzUserLesson.getVideoCompletion() == 100) {
                 completeCnt++;
             }
         }

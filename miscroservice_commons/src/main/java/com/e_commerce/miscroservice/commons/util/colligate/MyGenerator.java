@@ -1,5 +1,5 @@
-/*
 package com.e_commerce.miscroservice.commons.util.colligate;
+/*
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.tools.ant.taskdefs.Java;
+import org.json.XML;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.GeneratedXmlFile;
 import org.mybatis.generator.api.ProgressCallback;
@@ -47,40 +49,47 @@ import org.mybatis.generator.internal.util.messages.Messages;
  * 修改内容:
  * 1.
  * 2.
- *//*
+	 *//*
+
 
 public class MyGenerator {
-	 */
+*/
 /** The configuration. *//*
+
 
     private Configuration configuration;
 
-    */
+*/
 /** The shell callback. *//*
+
 
     private ShellCallback shellCallback;
 
-    */
+*/
 /** The generated java files. *//*
+
 
     private List<GeneratedJavaFile> generatedJavaFiles;
 
-    */
+*/
 /** The generated xml files. *//*
+
 
     private List<GeneratedXmlFile> generatedXmlFiles;
 
-    */
+*/
 /** The warnings. *//*
+
 
     private List<String> warnings;
 
-    */
+*/
 /** The projects. *//*
+
 
     private Set<String> projects;
 
-    */
+*/
 /**
      * Constructs a MyBatisGenerator object.
      * 
@@ -97,9 +106,10 @@ public class MyGenerator {
      *            data type. In that case, the column will be ignored and
      *            generation will continue. You may specify <code>null</code> if
      *            you do not want warnings returned.
-     * @throws InvalidConfigurationException
+     * @throws org.eclipse.jgit.api.errors.InvalidConfigurationException
      *             if the specified configuration is invalid
      *//*
+
 
     public MyGenerator(Configuration configuration, ShellCallback shellCallback,
             List<String> warnings) throws InvalidConfigurationException {
@@ -128,14 +138,14 @@ public class MyGenerator {
         this.configuration.validate();
     }
 
-    */
+*/
 /**
      * This is the main method for generating code. This method is long running, but progress can be provided and the
      * method can be canceled through the ProgressCallback interface. This version of the method runs all configured
      * contexts.
      *
      * @param callback
-     *            an instance of the ProgressCallback interface, or <code>null</code> if you do not require progress
+     *            an instance of the ProgressCallback interface, or <code>null</*code> if you do not require progress
      *            information
      * @throws SQLException
      *             the SQL exception
@@ -145,12 +155,13 @@ public class MyGenerator {
      *             if the method is canceled through the ProgressCallback
      *//*
 
+
     public void generate(ProgressCallback callback) throws SQLException,
             IOException, InterruptedException {
         generate(callback, null, null, true);
     }
 
-    */
+*/
 /**
      * This is the main method for generating code. This method is long running, but progress can be provided and the
      * method can be canceled through the ProgressCallback interface.
@@ -169,12 +180,13 @@ public class MyGenerator {
      *             if the method is canceled through the ProgressCallback
      *//*
 
+
     public void generate(ProgressCallback callback, Set<String> contextIds)
             throws SQLException, IOException, InterruptedException {
         generate(callback, contextIds, null, true);
     }
 
-    */
+*/
 /**
      * This is the main method for generating code. This method is long running, but progress can be provided and the
      * method can be cancelled through the ProgressCallback interface.
@@ -198,13 +210,14 @@ public class MyGenerator {
      *             if the method is canceled through the ProgressCallback
      *//*
 
+
     public void generate(ProgressCallback callback, Set<String> contextIds,
             Set<String> fullyQualifiedTableNames) throws SQLException,
             IOException, InterruptedException {
         generate(callback, contextIds, fullyQualifiedTableNames, true);
     }
 
-    */
+*/
 /**
      * This is the main method for generating code. This method is long running, but progress can be provided and the
      * method can be cancelled through the ProgressCallback interface.
@@ -230,6 +243,7 @@ public class MyGenerator {
      * @throws InterruptedException
      *             if the method is canceled through the ProgressCallback
      *//*
+
 
     public void generate(ProgressCallback callback, Set<String> contextIds,
             Set<String> fullyQualifiedTableNames, boolean writeFiles) throws SQLException,
@@ -383,7 +397,7 @@ public class MyGenerator {
         }
     }
     
-    */
+*/
 /**
      * Writes, or overwrites, the contents of the specified file.
      *
@@ -394,8 +408,9 @@ public class MyGenerator {
      * @param fileEncoding
      *            the file encoding
      * @throws IOException
-     *             Signals that an I/O exception has occurred.
-     *//*
+     *             Signals that an I/O exception has occurred.*//*
+
+
 
     private void writeFile(File file, String content, String fileEncoding) throws IOException {
         FileOutputStream fos = new FileOutputStream(file, false);
@@ -411,7 +426,7 @@ public class MyGenerator {
         bw.close();
     }
 
-    */
+*/
 /**
      * Gets the unique file name.
      *
@@ -421,6 +436,7 @@ public class MyGenerator {
      *            the file name
      * @return the unique file name
      *//*
+
 
     private File getUniqueFileName(File directory, String fileName) {
         File answer = null;
@@ -448,27 +464,29 @@ public class MyGenerator {
         return answer;
     }
 
-    */
+*/
 /**
      * Returns the list of generated Java files after a call to one of the generate methods.
      * This is useful if you prefer to process the generated files yourself and do not want
      * the generator to write them to disk.
      *  
-     * @return the list of generated Java files
-     *//*
+     * @return the list of generated org.apache.tools.ant.taskdefs.Java files
+ *//*
+
 
     public List<GeneratedJavaFile> getGeneratedJavaFiles() {
         return generatedJavaFiles;
     }
 
-    */
+*/
 /**
      * Returns the list of generated XML files after a call to one of the generate methods.
      * This is useful if you prefer to process the generated files yourself and do not want
      * the generator to write them to disk.
      *  
-     * @return the list of generated XML files
-     *//*
+     * @return the list of generated org.json.XML files*//*
+
+
 
     public List<GeneratedXmlFile> getGeneratedXmlFiles() {
         return generatedXmlFiles;
