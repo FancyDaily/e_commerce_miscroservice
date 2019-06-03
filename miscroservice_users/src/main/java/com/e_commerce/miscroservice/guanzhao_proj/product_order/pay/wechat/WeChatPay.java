@@ -172,7 +172,7 @@ public class WeChatPay {
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appid", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
-		param.put("timeStamp", ten_time.substring(0, 10));
+		param.put("timestamp", ten_time.substring(0, 10));
 		param.put("package", "prepay_id="+createPay(orderNo, payCount, request).get("prepay_id"));
 		param.put("nonceStr", ten_time);
 		param.put("signType", "MD5");
