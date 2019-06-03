@@ -26,5 +26,6 @@ public class ConstantUtil {
     /**
      * 微信服务器回调通知url
      */
-    public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/wxAppPay/wxNotify";
+    public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/wxAppPay/wxNotify";	//TODO 区分生产和测试
+
 }

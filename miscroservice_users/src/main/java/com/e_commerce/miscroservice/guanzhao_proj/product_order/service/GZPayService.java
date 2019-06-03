@@ -51,7 +51,9 @@ public interface GZPayService {
 
     void dealWithPrice(double price);
 
-    /**
+	void dealWithOrderNo(String orderNo);
+
+	/**
      * 支付宝预生成(个人二维码生成)
      * @param orderNo
      * @param coupon_id

@@ -70,4 +70,11 @@ public interface GZOrderDao {
      * @return
      */
     List<TGzOrder> selectByUserIdExpiredUsedVoucher(Long userId);
+
+	/**
+	 * 根据订单号查找订单
+	 * @param orderNo
+	 * @return
+	 */
+	TGzOrder selectByOrderNo(String orderNo);
 }

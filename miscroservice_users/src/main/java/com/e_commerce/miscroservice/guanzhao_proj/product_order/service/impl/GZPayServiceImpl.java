@@ -511,6 +511,17 @@ public class GZPayServiceImpl implements GZPayService {
     }
 
     @Override
+    public void dealWithOrderNo(String orderNo) {
+		TGzOrder gzOrder = gzOrderDao.selectByOrderNo(orderNo);
+		if(gzOrder == null) {
+			MessageException messageException = new MessageException("orderNo对应订单不存在!");
+			log.warn("微信支付回调【根据订单号支付】,orderNo={},msg={}", orderNo, messageException.getMessage());
+			throw messageException;
+		}
+		afterPaySuccess(gzOrder, gzOrder.getTgzOrderNo());
+	}
+
+    @Override
     public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
         Double couponMoney = (Double) resultMap.get("couponMoney");

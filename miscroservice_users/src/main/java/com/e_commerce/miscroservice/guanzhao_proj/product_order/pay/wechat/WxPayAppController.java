@@ -1,7 +1,14 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,11 +17,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/wxPay")
+@Log
 public class WxPayAppController {
 
 	@Autowired
 	private  WeChatPay weChatPay;
 
+	@Autowired
+	private GZPayService gzPayService;
 
 
 	/**
@@ -36,17 +46,45 @@ public class WxPayAppController {
 			// 查询订单 根据订单号查询订单
 			System.out.println("商户号" + mch_id + "out_trade_no" + out_trade_no + "total_fee" + total_fee);
 
+			//TODO 验证签名
+
+			//支付成功业务流程
+			gzPayService.dealWithOrderNo(out_trade_no);
 		}
 	}
 
 
 	@RequestMapping("/pay")
-	public Map<String, String> getPaySign(HttpServletRequest request) throws Exception {
-
-
+	public Map<String, String> getPaySign(@RequestParam(required = false) Long subjectId,
+										  @RequestParam(required = false) Long voucherId,
+										  HttpServletRequest request) throws Exception {
 		return weChatPay.createWebParam(System.currentTimeMillis() + "", 0.01, request);
 
 
+	}
+
+	@RequestMapping("pay/" + TokenUtil.AUTH_SUFFIX)
+	public AjaxResult getPaySignAuth(@RequestParam(required = false) String orderNo,
+									 @RequestParam(required = true) Long subjectId,
+									 @RequestParam(required = true) Long voucherId,
+									 HttpServletRequest request) throws Exception {
+		Long id = UserUtil.getId();
+		log.info("微信公共号支付,orderNo={}, subjectId={}, voucherId={}", orderNo, subjectId, voucherId);
+		AjaxResult result = new AjaxResult();
+		try {
+			Map<String, Object> map = gzPayService.produceOrder(subjectId, orderNo, voucherId, id, Boolean.TRUE);
+			orderNo = (String) map.get("orderNo");
+			double payMoney = (double) map.get("couponMoney");
+			Map<String, String> webParam = weChatPay.createWebParam(orderNo, payMoney, request);
+			result.setData(webParam);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("微信支付{}", e);
+			result.setMsg(e.getMessage());
+		} catch (Exception e) {
+			log.error("微信支付{}", e);
+		}
+		return result;
 	}
 
 
