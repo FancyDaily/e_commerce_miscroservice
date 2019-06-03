@@ -19,4 +19,6 @@ public interface GZLessonDao {
     int updateByPrimaryKey(TGzLesson tGzLesson);
 
     int insert(List<TGzLesson> toInsert);
+
+	TGzLesson selectBySubjectIdAndLessonId(Long subjectId, Long lessonId);
 }

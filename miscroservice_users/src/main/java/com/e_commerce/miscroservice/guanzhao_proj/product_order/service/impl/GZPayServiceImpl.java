@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -48,6 +49,12 @@ import java.util.Map;
 @Log
 @Service
 public class GZPayServiceImpl implements GZPayService {
+
+	@Autowired
+	private GzUserVideoDao gzUserVideoDao;
+
+	@Autowired
+	private GZVideoDao gzVideoDao;
 
     @Autowired
     private GZOrderDao gzOrderDao;
@@ -294,7 +301,7 @@ public class GZPayServiceImpl implements GZPayService {
             //对一段时间内每笔订单随机（或依次）减少不等金额，以确保"通过获得的金额去找到唯一订单"可行
 //            Object exist = redisUtil.get(GZ_PAY_TIMESTAMP_DESCRIBE);
             Long exist = (Long) redisUtil.hget(String.format(GZ_PAY_TIMESTAMP_DESCRIBE, subjectId), subjectId.toString());
-            double perTime = 0.1;
+            double perTime = 0.10;
             Integer num = 1;
             if(exist==null || currentTimeMillis > exist) { //过期
 //              redisUtil.set(GZ_PAY_NUM_DESCRIBE, 1, INTEVAL);
@@ -446,6 +453,17 @@ public class GZPayServiceImpl implements GZPayService {
                 });
 
                 gzUserLessonDao.insertList(lessonList);
+
+                List<TGzUserVideo> userVideolist = new ArrayList<>();
+				List<Long> lessonIds = list.stream().map(TGzLesson::getId).collect(Collectors.toList());
+				List<TGzVideo> videoList = gzVideoDao.selectInLessonIds(lessonIds);
+				videoList.forEach(
+					a -> {
+						TGzUserVideo build = TGzUserVideo.builder().userId(userId).subjectId(subjectId).lessonId(a.getLessonId()).videoId(a.getId()).build();
+						userVideolist.add(build);
+					}
+				);
+				gzUserVideoDao.multiInsert(userVideolist);
             } else {    //再次购买 -> 续费
 //                boolean expired = tGzUserSubject.getExpireTime() < System.currentTimeMillis();
                 Long expireTime = tGzUserSubject.getExpireTime();
@@ -493,9 +511,10 @@ public class GZPayServiceImpl implements GZPayService {
     public Map<String, Object> preOrder(String orderNum, Long couponId, Long subjectId, Long userId) {
         Map<String, Object> resultMap = produceOrder(subjectId, orderNum, couponId, userId, true);
         Double couponMoney = (Double) resultMap.get("couponMoney");
+        String moneyStr = String.format("%.2f", couponMoney);
         String nameSuffix = "";
         if(couponMoney!=null) {
-            nameSuffix = "" + couponMoney;
+            nameSuffix = "" + moneyStr;
             nameSuffix += ".jpg";
         }
 //        nameSuffix = "121558577476.jpg";

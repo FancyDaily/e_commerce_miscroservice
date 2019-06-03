@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.dao.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.*;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.service.GZSubjectService;
+import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -164,10 +165,39 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     }
 
     @Override
-    public List<TGzLesson> lessonList(Long subjectId) {
+    public List<MyLessonVO> lessonList(Long subjectId) {
         log.info("章节列表subjectId={}",subjectId);
-        return gzLessonDao.selectBySubjectId(subjectId);
-    }
+		List<TGzLesson> tGzLessons = gzLessonDao.selectBySubjectId(subjectId);
+		List<MyLessonVO> myLessonVOs = new ArrayList<>();
+		List<Long> lessonIds = new ArrayList<>();
+		tGzLessons.forEach(
+			lesson -> lessonIds.add(lesson.getId())
+		);
+		List<TGzVideo> videoList = gzVideoDao.selectInLessonIds(lessonIds);
+		Map<Long, List<TGzVideo>> videoMap = new HashMap<>();
+		videoList.forEach(
+			video -> {
+				Long lessonId = video.getLessonId();
+				List<TGzVideo> tVideoList = videoMap.get(lessonId);
+				if(tVideoList==null) {
+					tVideoList = new ArrayList<>();
+				}
+				tVideoList.add(video);
+				videoMap.put(lessonId, tVideoList);
+			}
+		);
+		tGzLessons.forEach(
+			lesson ->  {
+				Long lessonId = lesson.getId();
+				MyLessonVO myLessonVO = lesson.copyMyLessonVO();
+				List<TGzVideo> aVideoList = videoMap.get(lessonId);
+				aVideoList = aVideoList==null?new ArrayList<>():aVideoList;
+				myLessonVO.setGzVideoList(aVideoList);
+				myLessonVOs.add(myLessonVO);
+			}
+		);
+		return myLessonVOs;
+	}
 
     @Override
     public void evaluateLesson(TUser user, TGzEvaluate evaluate) {

@@ -23,4 +23,6 @@ public interface GZVideoDao {
 	List<TGzVideo> selectByLessonId(Long lessonId);
 
 	TGzVideo selectOneBySubjectIdAndLessonIdIndexDesc(Long subjectId, Long lessonId);
+
+	List<TGzVideo> selectInLessonIds(List<Long> lessonIds);
 }
