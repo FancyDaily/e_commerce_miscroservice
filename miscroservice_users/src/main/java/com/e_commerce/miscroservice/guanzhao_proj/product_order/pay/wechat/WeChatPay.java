@@ -36,9 +36,11 @@ public class WeChatPay {
 		params.append("&grant_type=authorization_code");
 		params.append("&code=");
 		params.append(code);
+
 		String result = httpsRequest(
 			"https://api.weixin.qq.com/sns/oauth2/access_token", "GET", params.toString());
-		System.out.println(result);
+
+
 		JSONObject jsonObject = JSONObject.parseObject(result);
 		if (!jsonObject.containsKey("openid")) {
 			return "";
@@ -170,9 +172,9 @@ public class WeChatPay {
 	 */
 	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
 		SortedMap<String, String> param = new TreeMap<>();
-		param.put("appid", ConstantUtil.APP_ID);
+		param.put("appId", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
-		param.put("timestamp", ten_time.substring(0, 10));
+		param.put("timeStamp", ten_time.substring(0, 10));
 		param.put("package", "prepay_id="+createPay(orderNo, payCount, request).get("prepay_id"));
 		param.put("nonceStr", ten_time);
 		param.put("signType", "MD5");
@@ -180,7 +182,8 @@ public class WeChatPay {
 
 
 		setSign(param,true);
-
+		System.out.println(param);
+		System.out.println(getRequestXml(param));
 		return param;
 
 
@@ -286,6 +289,7 @@ public class WeChatPay {
 
 
 	private String md5(String sourceStr) {
+		System.out.println(sourceStr);
 		String result = "";
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -313,4 +317,9 @@ public class WeChatPay {
 	}
 
 
+	public static void main(String[] args) {
+		System.out.println( new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));;
+		System.out.println( new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&paySign=AE08151C25626DAB24D1051D20DC4E1B&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));;
+
+	}
 }
