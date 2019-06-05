@@ -66,7 +66,7 @@ public class WxPayAppController {
 	@RequestMapping("pay/" + TokenUtil.AUTH_SUFFIX)
 	public AjaxResult getPaySignAuth(@RequestParam(required = false) String orderNo,
 									 @RequestParam(required = true) Long subjectId,
-									 @RequestParam(required = true) Long voucherId,
+									 @RequestParam(required = false) Long voucherId,
 									 HttpServletRequest request) throws Exception {
 		Long id = UserUtil.getId();
 		log.info("微信公共号支付,orderNo={}, subjectId={}, voucherId={}", orderNo, subjectId, voucherId);
@@ -87,5 +87,25 @@ public class WxPayAppController {
 		return result;
 	}
 
+	@RequestMapping("test")
+	public void test(String orderNo, Long subjectId, Long voucherId) {
+		Long id = 1150l;
+		log.info("微信公共号支付,orderNo={}, subjectId={}, voucherId={}", orderNo, subjectId, voucherId);
+//		AjaxResult result = new AjaxResult();
+		try {
+			Map<String, Object> map = gzPayService.produceOrder(subjectId, orderNo, voucherId, id, Boolean.TRUE);
+			orderNo = (String) map.get("orderNo");
+			double payMoney = (double) map.get("couponMoney");
+//			Map<String, String> webParam = weChatPay.createWebParam(orderNo, payMoney, request);
+//			result.setData(webParam);
+//			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("微信支付{}", e);
+//			result.setMsg(e.getMessage());
+		} catch (Exception e) {
+			log.error("微信支付{}", e);
+		}
+//		return result;
+	}
 
 }

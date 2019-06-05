@@ -24,8 +24,6 @@ import com.github.wxpay.sdk.WXPay;
 import com.github.wxpay.sdk.WXPayUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -248,24 +246,39 @@ public class GZPayServiceImpl implements GZPayService {
             return null;
         }
         long currentTimeMillis = System.currentTimeMillis();
-        boolean isContinuePay = !StringUtil.isEmpty(orderNum);
-        //一段时间内对于同一课程只能下一次单(或者对于同一课程直接判定有无待支付订单)
-        Long payRecord = (Long) redisUtil.hget(String.format(GZ_PAY_SUBJECT, subjectId), userId.toString());
-        if(payRecord!=null && currentTimeMillis < payRecord && !isContinuePay) {  //过期并且不是继续支付
-            throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "对于同一个课程，半个小时内只能生成一个订单!");
-        }
+        boolean isContinuePay = !StringUtil.isEmpty(orderNum);	//是否从待支付列表入口进来
 
-        HashMap<String, Object> resultMap = new HashMap<>();
-        //若查待支付订单
-        if (orderNum!=null){
-            TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
-            if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
-                log.info("已存在待支付订单={}",order);
-                resultMap.put("orderNo", orderNum);
-                resultMap.put("couponMoney", order.getPrice());
-                return resultMap;
-            }
-        }
+		HashMap<String, Object> resultMap = new HashMap<>();
+        if(!isContinuePay) {	//入口为商品详情购买 -> 首先尝试获取最近的一条待支付订单
+        	TGzOrder tGzOrder = null;
+			List<TGzOrder> gzOrders = gzOrderDao.selectBySubjectIdAndUserIdUnpayDesc(subjectId, userId);
+			if(!gzOrders.isEmpty()) {
+				tGzOrder = gzOrders.get(0);
+			}
+			if(tGzOrder!=null) {
+				log.info("已找到最近的一条待支付订单,订单号={}",tGzOrder.getId());
+				resultMap.put("orderNo", orderNum);
+				resultMap.put("couponMoney", tGzOrder.getPrice());
+				return resultMap;
+			}
+		}
+
+		//入口为购买记录-待支付
+		if (isContinuePay){
+			TGzOrder order = gzOrderDao.findByOrderNo(orderNum);
+			if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
+				log.info("已存在待支付订单,订单号={}",order.getId());
+				resultMap.put("orderNo", orderNum);
+				resultMap.put("couponMoney", order.getPrice());
+				return resultMap;
+			}
+		}
+
+		//一段时间内对于同一课程只能下一次单(或者对于同一课程直接判定有无待支付订单)
+		Long payRecord = (Long) redisUtil.hget(String.format(GZ_PAY_SUBJECT, subjectId), userId.toString());
+		if(payRecord!=null && currentTimeMillis < payRecord && !isContinuePay) {  //过期并且不是继续支付
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "对于同一个课程，半个小时内只能生成一个订单!");
+		}
 
         Double money = 0d;
 

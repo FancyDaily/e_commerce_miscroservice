@@ -75,7 +75,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
 
-    @Override
+	@Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
         return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzSubject::getName, name)

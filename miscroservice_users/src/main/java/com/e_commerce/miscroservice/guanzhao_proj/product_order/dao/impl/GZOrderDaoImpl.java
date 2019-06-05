@@ -92,6 +92,16 @@ public class GZOrderDaoImpl implements GZOrderDao {
 	}
 
 	@Override
+	public List<TGzOrder> selectBySubjectIdAndUserIdUnpayDesc(Long subjectId, Long userId) {
+		return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+		.eq(TGzOrder::getSubjectId, subjectId)
+		.eq(TGzOrder::getUserId, userId)
+		.eq(TGzOrder::getStatus, GZOrderEnum.UN_PAY.getCode())
+		.eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES)
+		.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
+	}
+
+	@Override
     public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int status) {
        return  MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getUserId, userId)

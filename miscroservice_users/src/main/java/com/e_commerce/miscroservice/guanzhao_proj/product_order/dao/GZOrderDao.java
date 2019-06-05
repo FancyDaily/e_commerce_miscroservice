@@ -77,4 +77,12 @@ public interface GZOrderDao {
 	 * @return
 	 */
 	TGzOrder selectByOrderNo(String orderNo);
+
+	/**
+	 * 根据课程号和用户编号查找
+	 * @param subjectId
+	 * @param userId
+	 * @return
+	 */
+	List<TGzOrder> selectBySubjectIdAndUserIdUnpayDesc(Long subjectId, Long userId);
 }

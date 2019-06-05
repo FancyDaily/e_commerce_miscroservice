@@ -46,4 +46,5 @@ public interface GZSubjectDao {
     List<TGzSubject> selectAll();
 
     List<TGzSubject> selectInPrimaryKeys(List<Long> subjectIds);
+
 }
