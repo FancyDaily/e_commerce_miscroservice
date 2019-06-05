@@ -17,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
@@ -25,9 +26,18 @@ public class WeChatPay {
 
 	private DecimalFormat decimalFormat = new DecimalFormat("0");
 
+	private static final  int MAX_CAP=1_000;
+	private static Map<String, String> openIdCache = new ConcurrentHashMap<>(MAX_CAP);
 
 	private String getOpenId(HttpServletRequest request) {
+
 		String code = request.getParameter("code");
+
+		String openid = openIdCache.get(code);
+
+		if (openid != null) {
+			return openid;
+		}
 		StringBuilder params = new StringBuilder();
 		params.append("secret=");
 		params.append(ConstantUtil.APP_SECRET);
@@ -45,7 +55,12 @@ public class WeChatPay {
 		if (!jsonObject.containsKey("openid")) {
 			return "";
 		}
-		String openid = jsonObject.get("openid").toString();
+		openid = jsonObject.get("openid").toString();
+
+		if(openIdCache.size()>=MAX_CAP){
+			openIdCache.clear();
+		}
+		openIdCache.put(code,openid);
 
 		return openid;
 
@@ -155,7 +170,7 @@ public class WeChatPay {
 		String ten_time = String.valueOf(System.currentTimeMillis());
 		param.put("noncestr", ten_time);
 		param.put("timestamp", ten_time.substring(0, 10));
-		setSign(param,false);
+		setSign(param, false);
 		return param;
 
 
@@ -175,15 +190,13 @@ public class WeChatPay {
 		param.put("appId", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
 		param.put("timeStamp", ten_time.substring(0, 10));
-		param.put("package", "prepay_id="+createPay(orderNo, payCount, request).get("prepay_id"));
+		param.put("package", "prepay_id=" + createPay(orderNo, payCount, request).get("prepay_id"));
 		param.put("nonceStr", ten_time);
 		param.put("signType", "MD5");
 
 
+		setSign(param, true);
 
-		setSign(param,true);
-		System.out.println(param);
-		System.out.println(getRequestXml(param));
 		return param;
 
 
@@ -259,14 +272,14 @@ public class WeChatPay {
 		param.put("total_fee", decimalFormat.format(payCount * 100));
 
 
-		setSign(param,false);
+		setSign(param, false);
 
 
 		return getRequestXml(param);
 	}
 
 
-	private void setSign(SortedMap<String, String> param,boolean isWeb) {
+	private void setSign(SortedMap<String, String> param, boolean isWeb) {
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String> entries : param.entrySet()) {
 			sb.append(entries.getKey());
@@ -279,9 +292,9 @@ public class WeChatPay {
 		sb.append(ConstantUtil.APP_KEY);
 
 
-		if(isWeb){
+		if (isWeb) {
 			param.put("paySign", md5(sb.toString()));
-		}else{
+		} else {
 			param.put("sign", md5(sb.toString()));
 		}
 
@@ -318,8 +331,10 @@ public class WeChatPay {
 
 
 	public static void main(String[] args) {
-		System.out.println( new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));;
-		System.out.println( new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&paySign=AE08151C25626DAB24D1051D20DC4E1B&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));;
+		System.out.println(new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
+		;
+		System.out.println(new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&paySign=AE08151C25626DAB24D1051D20DC4E1B&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
+		;
 
 	}
 }
