@@ -228,6 +228,7 @@ public class WeChatPay {
 		String output = getOrderRequestXml(orderNo, payCount, openId);
 		String json = httpsRequest(ConstantUtil.GATEURL, "POST", output);
 		Map resultMap = xmlToMap(json);
+		System.out.println(resultMap);
 		return resultMap;
 	}
 
