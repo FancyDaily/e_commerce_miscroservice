@@ -87,17 +87,5 @@ public class WxPayAppController {
 		return result;
 	}
 
-	@RequestMapping("test")
-	public void test(String orderNo, Long subjectId, Long voucherId) {
-		Long id = 1150l;
-		log.info("微信公共号支付,orderNo={}, subjectId={}, voucherId={}", orderNo, subjectId, voucherId);
-		try {
-			Map<String, Object> map = gzPayService.produceOrder(subjectId, orderNo, voucherId, id, Boolean.TRUE);
-		} catch (MessageException e) {
-			log.warn("微信支付{}", e);
-		} catch (Exception e) {
-			log.error("微信支付{}", e);
-		}
-	}
 
 }
