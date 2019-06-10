@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import lombok.Builder;
 import lombok.Data;
 
 /**

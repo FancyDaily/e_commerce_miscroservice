@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -76,6 +77,8 @@ public class WxPayAppController {
 			orderNo = (String) map.get("orderNo");
 			double payMoney = (double) map.get("couponMoney");
 			Map<String, String> webParam = weChatPay.createWebParam(orderNo, payMoney, request);
+			//TODO 打印map
+			log.info("微信公共号支付返回,webParam={}",map);
 			result.setData(webParam);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -86,6 +89,5 @@ public class WxPayAppController {
 		}
 		return result;
 	}
-
 
 }

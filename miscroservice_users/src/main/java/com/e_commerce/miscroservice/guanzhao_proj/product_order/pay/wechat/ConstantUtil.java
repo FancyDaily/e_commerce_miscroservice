@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class ConstantUtil {
     /**
      * 微信开发平台应用ID
@@ -26,6 +28,11 @@ public class ConstantUtil {
     /**
      * 微信服务器回调通知url
      */
-    public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/wxAppPay/wxNotify";	//TODO 区分生产和测试
+    public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/wxAppPay/wxNotify";
+
+	@Value("{notify.url}")
+	private void setNotifyUrl(String value) {
+		NOTIFY_URL = value;
+	}
 
 }
