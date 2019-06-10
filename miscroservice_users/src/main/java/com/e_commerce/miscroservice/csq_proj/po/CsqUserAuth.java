@@ -24,6 +24,9 @@ public class CsqUserAuth {
 
 	private Long userId;
 
+	@Column(commit = "类型")
+	private Integer type;
+
 	@Column(commit = "身份证号")
 	private String cardId;
 
@@ -33,6 +36,7 @@ public class CsqUserAuth {
 	@Column(commit = "营业执照图片")
 	private String licensePic;
 
+	@Column(commit = "营业执照编号")
 	private String licenseId;
 
 	@Column(commit = "扩展字段")

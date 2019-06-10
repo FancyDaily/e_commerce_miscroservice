@@ -258,7 +258,7 @@ public class GZPayServiceImpl implements GZPayService {
 			if(tGzOrder!=null) {
 				Long orderId = tGzOrder.getId();
 				log.info("已找到最近的一条待支付订单,订单号={}", orderId);
-				resultMap.put("orderNo", orderId.toString());
+				resultMap.put("orderNo", tGzOrder.getTgzOrderNo());
 				resultMap.put("couponMoney", tGzOrder.getPrice());
 				return resultMap;
 			}
@@ -270,7 +270,7 @@ public class GZPayServiceImpl implements GZPayService {
 			if (order!=null&&order.getStatus().equals(GZOrderEnum.UN_PAY.getCode())){
 				Long orderId = order.getId();
 				log.info("已存在待支付订单,订单号={}", orderId.toString());
-				resultMap.put("orderNo", orderId);
+				resultMap.put("orderNo", order.getTgzOrderNo());
 				resultMap.put("couponMoney", order.getPrice());
 				return resultMap;
 			}
