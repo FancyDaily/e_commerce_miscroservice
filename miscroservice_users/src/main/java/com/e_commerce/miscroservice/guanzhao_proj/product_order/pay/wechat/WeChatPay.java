@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
+@Log
 public class WeChatPay {
 
 
@@ -185,7 +187,8 @@ public class WeChatPay {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
@@ -228,7 +231,7 @@ public class WeChatPay {
 		String output = getOrderRequestXml(orderNo, payCount, openId);
 		String json = httpsRequest(ConstantUtil.GATEURL, "POST", output);
 		Map resultMap = xmlToMap(json);
-		System.out.println(resultMap);
+		log.info("sing_info",resultMap);
 		return resultMap;
 	}
 
@@ -250,7 +253,7 @@ public class WeChatPay {
 		}
 		sb.append("</xml>");
 
-		System.out.println(sb.toString());
+
 		return sb.toString();
 	}
 
@@ -284,7 +287,7 @@ public class WeChatPay {
 	}
 
 
-	private void setSign(SortedMap<String, String> param, boolean isWeb) {
+	private void  setSign(SortedMap<String, String> param, boolean isWeb) {
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String> entries : param.entrySet()) {
 			sb.append(entries.getKey());
@@ -307,7 +310,7 @@ public class WeChatPay {
 
 
 	private String md5(String sourceStr) {
-		System.out.println(sourceStr);
+
 		String result = "";
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
