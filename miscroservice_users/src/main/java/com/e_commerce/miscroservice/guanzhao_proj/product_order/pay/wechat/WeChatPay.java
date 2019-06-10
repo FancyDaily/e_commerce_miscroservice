@@ -188,6 +188,7 @@ public class WeChatPay {
 	 * @throws Exception
 	 */
 	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
