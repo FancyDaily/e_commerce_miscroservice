@@ -77,8 +77,7 @@ public class WxPayAppController {
 			orderNo = (String) map.get("orderNo");
 			double payMoney = (double) map.get("couponMoney");
 			Map<String, String> webParam = weChatPay.createWebParam(orderNo, payMoney, request);
-			//TODO 打印map
-			log.info("微信公共号支付返回,webParam={}",map);
+			log.info("微信公共号支付返回,webParam={}",webParam);
 			result.setData(webParam);
 			result.setSuccess(true);
 		} catch (MessageException e) {
