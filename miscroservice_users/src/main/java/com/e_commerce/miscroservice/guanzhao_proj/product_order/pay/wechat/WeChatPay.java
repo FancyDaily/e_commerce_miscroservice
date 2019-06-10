@@ -250,6 +250,7 @@ public class WeChatPay {
 		}
 		sb.append("</xml>");
 
+		System.out.println(sb.toString());
 		return sb.toString();
 	}
 
@@ -267,6 +268,9 @@ public class WeChatPay {
 		if (openId != null) {
 			param.put("openid", openId);
 			param.put("trade_type", "JSAPI");
+
+		}else{
+			param.put("trade_type", "APP");
 
 		}
 
@@ -331,10 +335,9 @@ public class WeChatPay {
 	}
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		System.out.println(new WeChatPay().createAppParam(System.currentTimeMillis()+"",12D));
 		System.out.println(new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
-		;
-		System.out.println(new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&paySign=AE08151C25626DAB24D1051D20DC4E1B&signType=MD5&timeStamp=1559657319&key=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
 		;
 
 	}
