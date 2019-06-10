@@ -22,11 +22,22 @@ public class CsqUserPaymentRecord {
 	@Id
 	private Long id;
 
+	private Long userId;
+
+	private Long fundId;
+
 	private Long serviceId;
 
 	@Column(commit = "描述")
 	private String desc;
 
+	@Column(commit = "类型(爱心账户、基金、项目)")
+	private Integer type;
+
+	@Column(commit = "收入0/支出1")
+	private Integer inOut;
+
+	@Column(commit = "金额")
 	private Long money;
 
 	@Column(commit = "扩展字段")

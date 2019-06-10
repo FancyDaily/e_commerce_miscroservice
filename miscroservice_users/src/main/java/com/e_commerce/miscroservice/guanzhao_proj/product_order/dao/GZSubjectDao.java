@@ -47,4 +47,5 @@ public interface GZSubjectDao {
 
     List<TGzSubject> selectInPrimaryKeys(List<Long> subjectIds);
 
+	TGzSubject selectBySeriesIndex(Integer integer);
 }

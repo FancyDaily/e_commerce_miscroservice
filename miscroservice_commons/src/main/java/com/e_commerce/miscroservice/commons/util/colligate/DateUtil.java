@@ -53,6 +53,16 @@ public class DateUtil {
         return sdf.format(new Date(Long.valueOf(seconds + "000")));
     }
 
+	public static String timeStamp2Date(Long timeStamp, String format) {
+    	if(timeStamp==null) {
+    		return "";
+		}
+		if (format == null || format.isEmpty())
+			format = "yyyy-MM-dd HH:mm:ss";
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.format(new Date(Long.valueOf(timeStamp)));
+	}
+
     /*
      * 时间戳转换成日期格式字符串
      * @param seconds 精确到秒的字符串
@@ -522,5 +532,7 @@ public class DateUtil {
 
     public static void main(String[] args) {
         System.out.println(yyyymmddToTime("20190801"));
+		String yyMMdd = timeStamp2Date(System.currentTimeMillis(), "yyyyMMdd HHmm");
+		System.out.println(yyMMdd);
     }
 }

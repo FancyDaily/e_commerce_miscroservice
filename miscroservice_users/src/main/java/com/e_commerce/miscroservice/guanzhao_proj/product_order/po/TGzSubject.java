@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.SubjectInfosVO;
 import lombok.Builder;
@@ -17,6 +18,9 @@ import java.sql.Timestamp;
 public class TGzSubject implements Serializable {
     @Id
     private Long id;
+
+	@Transient
+    private boolean enrollable;	//可报名状态
 
     @Column(commit = "课程")
     private String name;

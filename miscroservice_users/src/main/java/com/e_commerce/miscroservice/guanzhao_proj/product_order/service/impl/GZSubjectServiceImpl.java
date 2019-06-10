@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class GZSubjectServiceImpl implements GZSubjectService {
@@ -59,12 +60,37 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         log.info("在售课程列表pageNum={}, pageSize={}", pageNum, pageSize);
 //        Integer availableStatus = 1;
 //        gzSubjectDao.selectByAvailableStatus(availableStatus);
-        Page<Object> startPage = PageHelper.startPage(pageNum == null ? 1 : pageNum, pageSize == null ? 0 : pageSize);
-        gzSubjectDao.selectAll();
+		Page<Object> startPage = PageHelper.startPage(pageNum == null ? 1 : pageNum, pageSize == null ? 0 : pageSize);
+		List<TGzSubject> tGzSubjects = gzSubjectDao.selectAll();
 
-        QueryResult result = new QueryResult();
+		List<TGzSubject> collector = new ArrayList<>();
+		if(!tGzSubjects.isEmpty()) {
+			for(TGzSubject subject:tGzSubjects) {
+				Integer seriesIndex = subject.getSeriesIndex();
+				String availableDate = subject.getAvailableDate();
+				String availableTime = subject.getAvailableTime();
+				availableTime = availableTime==null? "0000" : availableTime;
+				Long laterMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parseDate(availableDate + availableTime);
+				TGzSubject lastSubject = gzSubjectDao.selectBySeriesIndex(--seriesIndex);
+				boolean flag =  System.currentTimeMillis() < laterMills;
+				if(lastSubject==null && flag) {	//如果上一期不存在并且当前时间在当前开课时间前
+					subject.setEnrollable(Boolean.TRUE);
+					continue;
+				}
+				String availableDate1 = lastSubject.getAvailableDate();
+				String availableTime1 = lastSubject.getAvailableTime();
+				availableTime1 = availableTime1==null?"0000" : availableTime1;
+				Long formerMills = com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil.parseDate(availableDate1 + availableTime1);
+				if(System.currentTimeMillis() > formerMills && flag) {	//时间在上一期课程开课后并且当前课程开课前
+					subject.setEnrollable(Boolean.TRUE);
+				}
+				collector.add(subject);
+			}
+		}
+
+		QueryResult result = new QueryResult();
         result.setTotalCount(startPage.getTotal());
-        result.setResultList(startPage.getResult());
+        result.setResultList(tGzSubjects);
 
         return result;
     }

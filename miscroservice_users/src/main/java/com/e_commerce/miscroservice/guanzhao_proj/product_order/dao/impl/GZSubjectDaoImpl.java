@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.List;
 
+import static com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date;
+
 @Component
 public class GZSubjectDaoImpl implements GZSubjectDao {
 
@@ -63,9 +65,15 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
     @Override
     public List<TGzSubject> selectAll() {
-        return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+		String now = timeStamp2Date(System.currentTimeMillis(), "yyyyMMdd HHmm");
+		String[] nowArray = now.split(" ");
+		String ymd = nowArray[0];
+		String hm = nowArray[1];
+		return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES)
-        .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzSubject::getAvailableDate)));
+			.gte(TGzSubject::getAvailableDate, ymd)
+			.gt(TGzSubject::getAvailableTime, hm)
+        .orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TGzSubject::getAvailableDate)));
     }
 
     @Override
@@ -74,6 +82,13 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
         .in(TGzSubject::getId, subjectIds)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
+
+	@Override
+	public TGzSubject selectBySeriesIndex(Integer integer) {
+		return MybatisPlus.getInstance().findOne(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+		.eq(TGzSubject::getSeriesIndex, integer)
+		.eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
+	}
 
 	@Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
