@@ -106,10 +106,10 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping("validSmsCode")
-    public Object validSmsCode(String openid, String validCode, @RequestParam(required = false) String uuid) {
+    public Object validSmsCode(String openid, String validCode, @RequestParam(required = false) String uuid, Integer application) {
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid);
+            Map<String, Object> resultMap = loginService.validSmsCode(openid, validCode, uuid, application);
             String loginStatus = (String) resultMap.get(LOGIN_STATUS);
             String token = (String) resultMap.get(AppConstant.USER_TOKEN);
             TUser user = (TUser) resultMap.get(AppConstant.USER);
@@ -145,10 +145,10 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping("checkLogin")
-    public Object checkLogin(WechatLoginVIew view) {
+    public Object checkLogin(WechatLoginVIew view, Integer application) {
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, String> resMap = loginService.checkLogin(view);
+            Map<String, String> resMap = loginService.checkLogin(view, application);
             result.setData(resMap);
             result.setSuccess(true);
         } catch (MessageException e) {
@@ -200,11 +200,11 @@ public class LoginController extends BaseController {
      * @return
      */
     @PostMapping("reLogin")
-    public Object reLogin(String openid, String uuid) {
+    public Object reLogin(String openid, String uuid, Integer application) {
         //TODO uid
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = loginService.loginByOpenid(openid, uuid);
+            Map<String, Object> resultMap = loginService.loginByOpenid(openid, uuid, application);
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {

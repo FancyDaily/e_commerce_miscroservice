@@ -2,44 +2,37 @@ package com.e_commerce.miscroservice.csq_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import lombok.Builder;
-import lombok.Data;
-import org.springframework.context.annotation.DependsOn;
 
 import java.sql.Timestamp;
 
 /**
- * 发票
+ * 涉及应用外支付的订单表
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:45
+ * @Date: 2019-06-11 17:57
  */
-@Table
-@Data
-@Builder
-public class CsqUserInvoice {
+public class TCsqOrder {
 
 	@Id
 	private Long id;
 
-	@Column(commit = "类型(0个人、1企业)")
-	private Integer type;
+	private Long userId;
 
-	@Column(commit = "抬头")
-	private String name;
+	private Long fundId;
 
-	@Column(commit = "税号")
-	private Integer taxNo;
+	private Long serviceId;
 
-	@Column(commit = "地址")
-	private String addr;
+	@Column(commit = "订单编号")
+	private String orderNo;
 
-	@Column(commit = "收件人")
-	private String person;
+	@Column(commit = "订单金额", precision = 2, isNUll = false)
+	private Double price;
 
-	@Column(commit = "联系方式")
-	private String telephone;
+	@Column(commit = "订单状态", length = 11, defaultVal = "1", isNUll = false)
+	private Integer status;
+
+	@Column(commit = "订单创建时间戳")
+	private Long orderTime;
 
 	@Column(commit = "扩展字段")
 	private String extend;
@@ -58,4 +51,5 @@ public class CsqUserInvoice {
 
 	@Column(commit = "有效性", defaultVal = "1")
 	private String isValid;
+
 }

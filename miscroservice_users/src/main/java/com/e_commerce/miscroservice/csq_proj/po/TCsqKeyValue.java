@@ -10,53 +10,29 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 /**
- * 项目
+ * Key-Value
  * @Author: FangyiXu
- * @Date: 2019-06-10 10:01
+ * @Date: 2019-06-10 09:56
  */
-@Table
 @Data
+@Table(commit = "从善桥key-value表")
 @Builder
-public class CsqService {
+public class TCsqKeyValue {
 
 	@Id
 	private Long id;
 
-	@Column(commit = "项目名称")
-	private String name;
+	@Column(commit = "键值")
+	private Long key;
 
-	@Column(commit = "备案编号")
-	private Long recordId;
+	@Column(commit = "副键值", defaultVal = "0")
+	private Long subKey;
 
-	@Column(commit = "剩余金额")
-	private Long surplusAmount;
+	@Column(commit = "值")
+	private String value;
 
-	@Column(commit = "目的描述")
-	private String purpose;
-
-	@Column(commit = "期望金额")
-	private Long expectedAmount;
-
-	@Column(commit = "开始日期")
-	private Long startDate;
-
-	@Column(commit = "结束日期")
-	private Long endDate;
-
-	@Column(commit = "封面图")
-	private Long coverPic;
-
-	@Column(commit = "描述")
-	private Long desc;
-
-	@Column(commit = "描述图")
-	private Long detailPic;
-
-	@Column(commit = "受益人/机构")
-	private String beneficiary;
-
-	@Column(commit = "银行卡号")
-	private Long creditCard;
+	@Column(commit = "类型", length = 11, isNUll = false)
+	private Integer type;
 
 	@Column(commit = "扩展字段")
 	private String extend;
@@ -75,5 +51,5 @@ public class CsqService {
 
 	@Column(commit = "有效性", defaultVal = "1")
 	private String isValid;
-
 }
+

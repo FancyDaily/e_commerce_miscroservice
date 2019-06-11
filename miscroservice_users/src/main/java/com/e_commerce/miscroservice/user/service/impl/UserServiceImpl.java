@@ -27,6 +27,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.controller.GZProductOrderCommonController;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
+import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.service.impl.BaseService;
@@ -2770,12 +2771,13 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public Map<String, Object> loginUserBySMS(String telephone, String validCode, String uuid, Integer application) {
+    	application = UserUtil.getApplication(application);
         Map<String, Object> resultMap = new HashMap<>();
         boolean isRegister = false;
         checkSMS(telephone, validCode);
         TUser user = new TUser();
         TUser tmpUser = null;
-        if (!isUser(telephone)) { // 注册并登录
+        if (!isUser(telephone, application)) { // 注册并登录
             user.setUserTel(telephone);
             // 注册
             user.setDeviceId(uuid);
@@ -2839,9 +2841,10 @@ public class UserServiceImpl extends BaseService implements UserService {
      */
     @Override
     public TUser rigester(TUser user, Integer application) {
-        boolean isGZApp = ApplicationEnum.GUANZHAO_APPLICATION.toCode() == application.intValue();  //认为当前只有两个app
+		ApplicationEnum applicaitonEnum = UserUtil.getApplicationEnum(application);	//默认为XIAOSHI
+		application = applicaitonEnum.toCode();
 
-        // 默认昵称
+		// 默认昵称
         String defaultName = RandomUtil.getDefaultName();
         // 默认账号
         String defaultAccount = defaultName.substring(2);
@@ -2915,7 +2918,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         user.setIsValid(AppConstant.IS_VALID_YES);
 
         // 插入一条用户记录
-        userDao.insert(user, isGZApp? ApplicationEnum.GUANZHAO_APPLICATION.toCode(): ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        userDao.insert(user, application);
         user.setCreateUser(user.getId());
         user.setUpdateUser(user.getId());
 
@@ -2926,7 +2929,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_REGISTER);
 
         //注册用户中心数据
-        String namePrefix = isGZApp? GUANZHAO_USER_NAME_PREFIX: DEFAULT_USER_NAME_PREFIX;
+        String namePrefix = applicaitonEnum.getNamePrefix();
         Token token = authorizeRpcService.reg(namePrefix + user.getId(), DEFAULT_PASS, user.getId().toString(), user.getDeviceId(), Boolean.FALSE);
 
         if (token != null&&token.getToken()!=null) {
@@ -2946,11 +2949,12 @@ public class UserServiceImpl extends BaseService implements UserService {
      * 是否为已注册用户(不区分个人还是组织账号)
      *
      * @param telephone
-     * @return
+     * @param application
+	 * @return
      */
-    private boolean isUser(String telephone) {
+    private boolean isUser(String telephone, Integer application) {
         boolean result = false;
-        List<TUser> userList = userDao.selectByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        List<TUser> userList = userDao.selectByTelephone(telephone, application);
         if (userList != null && !userList.isEmpty()) {
             result = true;
         }
@@ -3046,18 +3050,13 @@ public class UserServiceImpl extends BaseService implements UserService {
                     counts--; //消耗掉一次插入机会
                 }
                 superFlag = true;
-                //TODO dailyMaxIn是否要减少(首天是否可以获得6次奖励) 可能借助于redis
-
-                //TODO 插入一条任务完成的流水。superGrowthValueEnum对应的任务类型
                 insertTaskRecords(user, superGrowthValueEnum.getTaskCode());
             }
             if (!superFlag && flag) { //次数不被消耗的前提下(已完成首次任务)能够完成任务
-                //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
                 insertTaskRecords(user, growthValueEnum.getTaskCode());
             }
         } else {
             if (flag) {
-                //TODO 插入一条任务完成的流水。growthValueEnum对应的任务类型
                 insertTaskRecords(user, growthValueEnum.getTaskCode());
             }
         }
@@ -4014,7 +4013,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         } else {
             if (param.matches(regex_num)) {
                 if (param.matches(regex_tel)) { // 手机号
-                    TUser user = getUserByTelephone(param, ApplicationEnum.GUANZHAO_APPLICATION.toCode());
+                    TUser user = getUserByTelephone(param, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
                     if(user!=null) {
                         userList.add(user);
                     }
@@ -4336,7 +4335,6 @@ public class UserServiceImpl extends BaseService implements UserService {
         Integer COOKIE_INTERVAL = 60 * 60 * 24 * 15;
 
         Map<String, Object> resultMap = new HashMap<>();
-        //TODO 对密码加密
         password = AESCommonUtil.encript(password);
         TUser user = userDao.selectByUserAccountAndPassword(telephone, password, application);
 

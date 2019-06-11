@@ -5,12 +5,12 @@ import java.util.*;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
-import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
 @Service
 public class LoginServiceImpl extends BaseService implements LoginService {
@@ -124,13 +122,16 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      *
      * @param openid
      * @param validCode
-     * @return
+     * @param opt
+	 * @return
      */
     @Transactional(rollbackFor = Throwable.class)
-    public Map<String, Object> validSmsCode(String openid, String validCode, String uuid) {
+    public Map<String, Object> validSmsCode(String openid, String validCode, String uuid, Integer opt) {
         if (!StringUtil.isNotEmpty(validCode)) {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "验证码不能为空！");
         }
+
+		Integer application = UserUtil.getApplication(opt);
 
         Map<String, Object> map = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
         String telephone = (String) map.get(TELEPHONE);
@@ -153,7 +154,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         // 注册新用户，并返回登录态
         WechatSession session = (WechatSession) map.get(WECHAT_SESSION);
         WechatLoginVIew view = (WechatLoginVIew) map.get(VIEW);
-        TUser user = rigester(view, session);
+        TUser user = rigester(view, session, application);
         user.setUserTel(telephone);
         userDao.updateByPrimaryKey(user);
         // token
@@ -167,7 +168,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         Map<String, Object> resultMap = (HashMap<String, Object>) redisUtil.hget(REDIS_USER, openid);
 
-        token = checkLogin(uuid, user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        token = checkLogin(uuid, user, token, Boolean.FALSE, application);
         resultMap.put(AppConstant.USER_TOKEN, token);
         resultMap.put(AppConstant.USER, user);
 
@@ -176,6 +177,9 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
     @Autowired
     private AuthorizeRpcService authorizeRpcService;
+
+
+
 
     /**
      * 登陆校验 step1
@@ -191,8 +195,8 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         // 解析手机号(仅用作判定账户唯一性，并不收集用户数据)
         String telephone = wechatService.getPhoneNumber(view.getEncryptedData(), view.getIv(), session);
         TUser user = null;
-        TUser openUser = getUser(openid, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); // 根据微信openid判定账户是否存在 TODO
-        TUser telephoneUser = userService.getUserAccountByTelephone(telephone, ApplicationEnum.XIAOSHI_APPLICATION.toCode()); // 根据手机号判定账户是否存在 TODO
+        TUser openUser = getUser(openid, application); // 根据微信openid判定账户是否存在 TODO
+        TUser telephoneUser = userService.getUserAccountByTelephone(telephone, application); // 根据手机号判定账户是否存在 TODO
         Map<String, String> resultMap = new HashMap<>();
         Map<String, Object> redisMap = new HashMap<>();
         // 存储微信session
@@ -235,7 +239,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
         redisUtil.hset(REDIS_USER, key, user, HASH_INTERVAL);
         resultMap.put("userId", userId);
 
-        token = checkLogin(view.getUuid(), user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        token = checkLogin(view.getUuid(), user, token, Boolean.FALSE, application);
         resultMap.put(AppConstant.USER_TOKEN, token);
 
         // 返回map，包含自定义状态
@@ -245,17 +249,21 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
     /**
      * 注册
-     *
-     * @param view
+     *  @param view
      * @param session
-     */
-    private TUser rigester(WechatLoginVIew view, WechatSession session) {
+	 * @param application
+	 */
+    private TUser rigester(WechatLoginVIew view, WechatSession session, Integer application) {
         // 向数据库插入一个新的用户
         TUser user = new TUser();
         LOG.info("/n-------------------数据库新建一个用户---------------------");
         user = getWechatUser(view);
         user.setVxOpenId(session.getOpenid()); // 往微信账户字段中记录openid
-        return userService.rigester(user, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+		Integer finalApplicaion = ApplicationEnum.XIAOSHI_APPLICATION.toCode();	//默认值
+		if(application!=null) {
+			finalApplicaion = application;
+		}
+        return userService.rigester(user, finalApplicaion);
     }
 
     /**
@@ -264,12 +272,11 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      * @param openId
      * @return
      */
-    private TUser getUser(String openId, Integer applicaiton) {
-
+    private TUser getUser(String openId, Integer option) {
         if (StringUtil.isEmpty(openId)) {
             throw new MessageException(AppErrorConstant.Field_Error, "微信账号字段为空");
         }
-        List<TUser> list = userDao.selectByVxOpenId(openId, applicaiton);
+        List<TUser> list = userDao.selectByVxOpenId(openId, option);
         TUser user = null;
         if (list != null && !list.isEmpty()) {
             for (TUser thisUser : list) {
@@ -312,19 +319,21 @@ public class LoginServiceImpl extends BaseService implements LoginService {
     }
 
     /**
-     * 功能描述: 根据openid更新
+     * 功能描述: 根据openid登录
      * 作者: 许方毅
      * 创建时间: 2018年11月27日 下午6:55:07
      *
      * @param openid
-     * @return
+     * @param opt
+	 * @return
      */
     @Override
-    public Map<String, Object> loginByOpenid(String openid, String uuid) {//TODO 用户封禁
-        if (openid == null) {
+    public Map<String, Object> loginByOpenid(String openid, String uuid, Integer opt) {
+		Integer application = UserUtil.getApplication(opt);
+		if (openid == null) {
             return new HashMap<String, Object>();
         }
-        TUser user = getUser(openid, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        TUser user = getUser(openid, application);
         if (user == null) {
             return new HashMap<String, Object>();
         }
@@ -335,7 +344,7 @@ public class LoginServiceImpl extends BaseService implements LoginService {
 
         String userId = StringUtil.numberToString(user.getId());
         String token = TokenUtil.genToken(userId);
-        token = checkLogin(uuid, user, token, Boolean.FALSE, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+        token = checkLogin(uuid, user, token, Boolean.FALSE, application);
 
         String key = "str" + userId;
 

@@ -10,23 +10,29 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 /**
- * 基金账户
- *
+ * 系统消息
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:47
+ * @Date: 2019-06-10 09:58
  */
-@Table
+@Table(commit = "从善桥系统消息表")
 @Data
 @Builder
-public class CsqFund {
+public class TCsqSysMsg {
 
 	@Id
 	private Long id;
 
-	private Long userId;
+	@Column(commit = "标题")
+	private String title;
 
-	@Column(commit = "余额")
-	private Double balance;
+	@Column(commit = "内容")
+	private String content;
+
+	@Column(commit = "项目编号")
+	private Long serviceId;
+
+	@Column(commit = "类别", length = 11, isNUll = false)
+	private Integer type;
 
 	@Column(commit = "扩展字段")
 	private String extend;

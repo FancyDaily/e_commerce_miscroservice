@@ -10,26 +10,34 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 /**
- * 项目汇报
+ * 实名认证(个人、机构)
  * @Author: FangyiXu
- * @Date: 2019-06-10 10:02
+ * @Date: 2019-06-10 09:42
  */
-@Table
+@Table(commit = "从善桥认证表")
 @Data
 @Builder
-public class CsqServiceReport {
+public class TCsqUserAuth {
 
 	@Id
 	private Long id;
 
-	@Column(commit = "标题")
-	private String title;
+	private Long userId;
 
-	@Column(commit = "描述")
-	private String desc;
+	@Column(commit = "类型", isNUll = false)
+	private Integer type;
 
-	@Column(commit = "图片")
-	private String pic;
+	@Column(commit = "身份证号")
+	private String cardId;
+
+	@Column(commit = "姓名")
+	private String name;
+
+	@Column(commit = "营业执照图片")
+	private String licensePic;
+
+	@Column(commit = "营业执照编号")
+	private String licenseId;
 
 	@Column(commit = "扩展字段")
 	private String extend;

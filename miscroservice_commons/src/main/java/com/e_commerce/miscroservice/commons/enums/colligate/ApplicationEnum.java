@@ -8,8 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 public enum ApplicationEnum {
 
-    XIAOSHI_APPLICATION(1,"晓时互助"),
-    GUANZHAO_APPLICATION(2,"观照律师训练营");
+    XIAOSHI_APPLICATION(1,"晓时互助", "XIOASHI_AUTHORIZE_"),
+    GUANZHAO_APPLICATION(2,"观照律师训练营", "GUANZHAO_AUTHORIZE_"),
+	CONGSHANQIAO_APPLICATION(3, "丛善桥", "CONGSHANQIAO_AUTHORIZE_");
 
     public static LoadingCache loadingCache = CacheBuilder.newBuilder()
             .maximumSize(10000) //设置缓存上线
@@ -23,11 +24,7 @@ public enum ApplicationEnum {
 
     int code;
     String desc;
-
-    ApplicationEnum(int code,String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
+    String namePrefix;
 
     public int toCode() {
         return code;
@@ -36,4 +33,15 @@ public enum ApplicationEnum {
     public String getDesc() {
         return desc;
     }
+
+	public String getNamePrefix() {
+		return namePrefix;
+	}
+
+	ApplicationEnum(int code, String desc, String namePrefix) {
+		this.code = code;
+		this.desc = desc;
+		this.namePrefix = namePrefix;
+	}
+
 }

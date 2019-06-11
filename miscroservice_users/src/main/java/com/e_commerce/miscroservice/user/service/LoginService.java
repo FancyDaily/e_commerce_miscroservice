@@ -37,22 +37,24 @@ public interface LoginService {
 	 * 校验短信验证码
 	 * @param validCode
 	 * @param uuid 设备号
+	 * @param application
 	 */
-	Map<String, Object> validSmsCode(String openid, String validCode,String uuid);
+	Map<String, Object> validSmsCode(String openid, String validCode, String uuid, Integer application);
 
 	/**
 	 * 登陆校验
 	 * @return
 	 */
-	Map<String, String> checkLogin(WechatLoginVIew view);
+	Map<String, String> checkLogin(WechatLoginVIew view, Integer application);
 
 	/**
 	 * 功能描述:  使用openid获取token
 	 * 作者: 许方毅
 	 * 创建时间: 2018年11月27日 下午6:29:37
 	 * @param openid
+	 * @param application
 	 */
-	Map<String, Object> loginByOpenid(String openid,String uuid);
+	Map<String, Object> loginByOpenid(String openid, String uuid, Integer application);
 
 	/**
 	 * 观照微信公众号登录

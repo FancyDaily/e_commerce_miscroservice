@@ -21,6 +21,8 @@ public interface AuthorizeRpcService {
 
     String GUANZHAO_USER_NAME_PREFIX = "GUANZHAO_AUTHORIZE_";
 
+    String CONGSHANQIAO_USER_NAME_PREFIX = "CONGSHANQIAO_AUTHORIZE_";
+
     /**
      * 校验
      *

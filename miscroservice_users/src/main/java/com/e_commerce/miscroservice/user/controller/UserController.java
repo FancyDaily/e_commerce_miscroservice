@@ -139,10 +139,10 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("loginBySMS")
-    public Object loginUserBySMS(String telephone, String validCode, @RequestParam(required = false) String uuid) {
+    public Object loginUserBySMS(String telephone, String validCode, @RequestParam(required = false) String uuid, Integer application) {
         AjaxResult result = new AjaxResult();
         try {
-            Map<String, Object> resultMap = userService.loginUserBySMS(telephone, validCode, uuid, ApplicationEnum.XIAOSHI_APPLICATION.toCode());
+            Map<String, Object> resultMap = userService.loginUserBySMS(telephone, validCode, uuid, application);
             result.setSuccess(true);
             result.setData(resultMap);
         } catch (MessageException e) {

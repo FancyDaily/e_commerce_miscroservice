@@ -10,29 +10,19 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 /**
- * Key-Value
+ * 收藏
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:56
+ * @Date: 2019-06-10 09:39
  */
+@Table(commit = "从善桥收藏表")
 @Data
-@Table
 @Builder
-public class CsqKeyValue {
+public class TCsqUserCollection {
 
 	@Id
 	private Long id;
 
-	@Column(commit = "键值")
-	private Long key;
-
-	@Column(commit = "副键值", defaultVal = "0")
-	private Long subKey;
-
-	@Column(commit = "值")
-	private String value;
-
-	@Column(commit = "类型")
-	private Integer type;
+	private Long serviceId;
 
 	@Column(commit = "扩展字段")
 	private String extend;
@@ -51,5 +41,5 @@ public class CsqKeyValue {
 
 	@Column(commit = "有效性", defaultVal = "1")
 	private String isValid;
-}
 
+}

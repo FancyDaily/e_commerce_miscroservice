@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.dao.OrderDao;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.dao.ProductDao;
@@ -356,7 +357,7 @@ public class BaseService {
 			}
 		}*/
 
-		String userNamePrefix = ApplicationEnum.GUANZHAO_APPLICATION.toCode() == applicaiton.intValue()? GUANZHAO_USER_NAME_PREFIX: DEFAULT_USER_NAME_PREFIX;
+		String userNamePrefix = UserUtil.getApplicationNamePrefix(applicaiton);
 		Token reg = authorizeRpcService.reg(userNamePrefix + user.getId(), DEFAULT_PASS, user.getId().toString(), uuid, opt);  //注册到认证中心
 		System.out.println("reg ============>" + DEFAULT_PASS);
 		if(reg.getToken() != null && !"".equals(reg.getToken())) {

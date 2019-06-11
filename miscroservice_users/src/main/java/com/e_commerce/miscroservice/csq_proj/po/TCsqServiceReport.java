@@ -10,14 +10,14 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 /**
- * 系统消息
+ * 项目汇报
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:58
+ * @Date: 2019-06-10 10:02
  */
-@Table
+@Table(commit = "从善桥项目汇报表")
 @Data
 @Builder
-public class CsqSysMsg {
+public class TCsqServiceReport {
 
 	@Id
 	private Long id;
@@ -25,14 +25,11 @@ public class CsqSysMsg {
 	@Column(commit = "标题")
 	private String title;
 
-	@Column(commit = "内容")
-	private String content;
+	@Column(commit = "描述")
+	private String desc;
 
-	@Column(commit = "项目编号")
-	private Long serviceId;
-
-	@Column(commit = "类别")
-	private Integer type;
+	@Column(commit = "图片")
+	private String pic;
 
 	@Column(commit = "扩展字段")
 	private String extend;

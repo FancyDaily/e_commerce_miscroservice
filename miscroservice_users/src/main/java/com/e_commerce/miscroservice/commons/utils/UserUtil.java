@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
+import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
@@ -82,7 +83,81 @@ public class UserUtil {
         return user;
     }
 
+    public static TUser getTestUser(Long userId) {
+		TUser user = getUser();
+		if(user == null) {
+			user = new TUser();
+			userId = userId == null? 1292:userId;
+			user.setId(userId);
+			user.setName("测试用户-三胖");
+		}
+		return user;
+	}
+
+	public static TUser getTestUser() {
+    	return getTestUser(null);
+	}
+
+	public static Long getTestId() {
+		Long id = getId();
+		return id == null? 1292: id;
+	}
+
 	public static Long getId() {
     	return Long.valueOf(IdUtil.getId());
+	}
+
+	public static Integer getApplication(Integer option) {
+		Integer application = ApplicationEnum.XIAOSHI_APPLICATION.toCode();	//默认值
+		if(option!=null) {
+			boolean flag = false;
+			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
+				if(tEnum.toCode() == option) {
+					flag = true;
+					application = option;
+					break;
+				}
+			}
+			if(!flag) {
+				throw new MessageException("application参数不合法!");
+			}
+		}
+		return application;
+	}
+
+	public static ApplicationEnum getApplicationEnum(Integer option) {
+		ApplicationEnum applicationEnum = ApplicationEnum.XIAOSHI_APPLICATION;	//默认值
+		if(option!=null) {
+			boolean flag = false;
+			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
+				if(tEnum.toCode() == option) {
+					flag = true;
+					applicationEnum = tEnum;
+					break;
+				}
+			}
+			if(!flag) {
+				throw new MessageException("application参数不合法!");
+			}
+		}
+		return applicationEnum;
+	}
+
+	public static String getApplicationNamePrefix(Integer option) {
+		String namePrefix = ApplicationEnum.XIAOSHI_APPLICATION.getNamePrefix();	//默认值
+		if(option!=null) {
+			boolean flag = false;
+			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
+				if(tEnum.toCode() == option) {
+					flag = true;
+					namePrefix = tEnum.getNamePrefix();
+					break;
+				}
+			}
+			if(!flag) {
+				throw new MessageException("application参数不合法!");
+			}
+		}
+		return namePrefix;
 	}
 }
