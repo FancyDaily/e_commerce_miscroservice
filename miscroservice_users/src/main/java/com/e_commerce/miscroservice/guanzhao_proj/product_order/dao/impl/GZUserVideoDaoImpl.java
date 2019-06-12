@@ -51,6 +51,9 @@ public class GZUserVideoDaoImpl implements GzUserVideoDao {
 
 	@Override
 	public int multiInsert(List<TGzUserVideo> userVideos) {
+		if(userVideos.isEmpty()) {
+			return 0;
+		}
 		return MybatisPlus.getInstance().save(userVideos);
 	}
 

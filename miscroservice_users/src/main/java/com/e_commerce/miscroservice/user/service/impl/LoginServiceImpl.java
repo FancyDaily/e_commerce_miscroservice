@@ -186,7 +186,8 @@ public class LoginServiceImpl extends BaseService implements LoginService {
      *
      * @return
      */
-    public Map<String, String> checkLogin(WechatLoginVIew view) {
+    public Map<String, String> checkLogin(WechatLoginVIew view, Integer option) {
+    	Integer application = UserUtil.getApplication(option);
 //		WechatSession session = wechatService.checkAuthCode(view.getCode());
         WechatSession session = new WechatSession();
         session.setOpenid(view.getOpenid());

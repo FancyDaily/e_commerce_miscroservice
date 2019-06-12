@@ -265,6 +265,7 @@ public class WeChatPay {
 		param.put("mch_id", ConstantUtil.MCH_ID);
 		param.put("nonce_str", System.currentTimeMillis() + "");
 		param.put("notify_url", ConstantUtil.NOTIFY_URL);
+		log.info(ConstantUtil.NOTIFY_URL);
 		param.put("out_trade_no", orderNo);
 		param.put("spbill_create_ip", "127.0.0.1");
 

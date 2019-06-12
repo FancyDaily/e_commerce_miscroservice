@@ -199,6 +199,9 @@ public class GZSubjectServiceImpl implements GZSubjectService {
 		tGzLessons.forEach(
 			lesson -> lessonIds.add(lesson.getId())
 		);
+		if(lessonIds.isEmpty()) {
+			return new ArrayList<>();
+		}
 		List<TGzVideo> videoList = gzVideoDao.selectInLessonIds(lessonIds);
 		Map<Long, List<TGzVideo>> videoMap = new HashMap<>();
 		videoList.forEach(

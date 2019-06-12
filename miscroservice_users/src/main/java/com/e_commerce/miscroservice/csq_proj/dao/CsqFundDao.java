@@ -8,8 +8,10 @@ import java.util.List;
  * @Author: FangyiXu
  * @Date: 2019-06-11 16:50
  */
-public interface FundDao {
+public interface CsqFundDao {
 	int insert(TCsqFund... csqFund);
 
 	List<TCsqFund> selectByUserId(Long userId);
+
+	List<TCsqFund> selectByUserIdAndStatus(Long userId, int val);
 }

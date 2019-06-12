@@ -7,7 +7,8 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
-import com.e_commerce.miscroservice.csq_proj.service.FundService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FundController {
 
 	@Autowired
-	private FundService fundService;
+	private CsqFundService fundService;
 
 	/**
 	 * 申请前检查
@@ -36,9 +37,13 @@ public class FundController {
 		try {
 			fundService.checkBeforeApplyForAFund(userId);
 		} catch (MessageException e) {
-
+			log.warn("====方法描述: {}, Message: {}====", "申请前检查", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
 		} catch (Exception e) {
-
+			e.printStackTrace();
+			log.error("申请前检查", e);
+			result.setSuccess(false);
 		}
 		return result;
 	}
@@ -52,16 +57,21 @@ public class FundController {
 	 */
 	@RequestMapping("fund/apply")
 	public Object applyForAFund(Long amount,
+								@RequestParam(required = false) Long fundId,
 								@RequestParam(required = false) String orderNo,
 								@RequestParam(required = false) Long publishId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
-			fundService.applyForAFund(userId, amount, publishId, orderNo);
+			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
 		} catch (MessageException e) {
-
+			log.warn("====方法描述: {}, Message: {}====", "申请基金", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
 		} catch (Exception e) {
-
+			e.printStackTrace();
+			log.error("申请基金", e);
+			result.setSuccess(false);
 		}
 		return result;
 	}
@@ -80,9 +90,13 @@ public class FundController {
 		try {
 			fundService.modifyFund(fund);
 		} catch (MessageException e) {
-
+			log.warn("====方法描述: {}, Message: {}====", "修改基金", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
 		} catch (Exception e) {
-
+			e.printStackTrace();
+			log.error("修改基金", e);
+			result.setSuccess(false);
 		}
 		return result;
 	}

@@ -75,7 +75,9 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
 
     @Override
     public void insertList(List<TGzUserLesson> list) {
-        MybatisPlus.getInstance().save(list.toArray());
+    	if(!list.isEmpty()) {
+        	MybatisPlus.getInstance().save(list.toArray());
+		}
     }
     @Override
     public List<TGzUserLesson> selectBySubjectId(Long subjectId) {

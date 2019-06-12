@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
-import com.e_commerce.miscroservice.csq_proj.dao.FundDao;
+import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * @Date: 2019-06-11 16:50
  */
 @Component
-public class FunDaoImpl implements FundDao {
+public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public int insert(TCsqFund... csqFund) {
@@ -25,6 +25,14 @@ public class FunDaoImpl implements FundDao {
 	public List<TCsqFund> selectByUserId(Long userId) {
 		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 		.eq(TCsqFund::getUserId, userId)
+		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqFund> selectByUserIdAndStatus(Long userId, int val) {
+		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		.eq(TCsqFund::getUserId, userId)
+		.eq(TCsqFund::getStatus, val)
 		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
 	}
 }

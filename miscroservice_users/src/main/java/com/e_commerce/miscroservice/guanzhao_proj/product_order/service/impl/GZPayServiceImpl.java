@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.jvm.hotspot.utilities.Interval;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -83,6 +84,8 @@ public class GZPayServiceImpl implements GZPayService {
     public static String GZ_PAY_SUBJECT = "gz_pay:subject:%s";  //用户-课程支付
 
     public static Integer INTEVAL = 60 * 30;    //单位s
+
+	public static Long INTEVALMILLS = INTEVAL * 1000l;
 
     @Override
     public AliPayPo qrCodeTradePre(AliPayPo payPo) {
@@ -256,11 +259,17 @@ public class GZPayServiceImpl implements GZPayService {
 				tGzOrder = gzOrders.get(0);
 			}
 			if(tGzOrder!=null) {
-				Long orderId = tGzOrder.getId();
-				log.info("已找到最近的一条待支付订单,订单号={}", orderId);
-				resultMap.put("orderNo", tGzOrder.getTgzOrderNo());
-				resultMap.put("couponMoney", tGzOrder.getPrice());
-				return resultMap;
+				Long orderTime = tGzOrder.getOrderTime();
+				if(System.currentTimeMillis() - orderTime > INTEVALMILLS) {	//超时
+					tGzOrder.setStatus(GZOrderEnum.TIMEOUT_PAY.getCode());
+					gzOrderDao.updateByPrimaryKey(tGzOrder);
+				} else {
+					Long orderId = tGzOrder.getId();
+					log.info("已找到最近的一条待支付订单,订单号={}", orderId);
+					resultMap.put("orderNo", tGzOrder.getTgzOrderNo());
+					resultMap.put("couponMoney", tGzOrder.getPrice());
+					return resultMap;
+				}
 			}
 		}
 
@@ -434,11 +443,7 @@ public class GZPayServiceImpl implements GZPayService {
         if(tGzOrder==null) {
             tGzOrder = gzOrderDao.findByOrderNo(out_trade_no);
         }
-        if (tGzOrder != null || tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {	//仅处理待支付的订单
-            TGzOrder order = new TGzOrder();
-            order.setTgzOrderNo(out_trade_no);
-            order.setStatus(GZOrderEnum.PAYED.getCode());
-            gzOrderDao.updateOrder(order);
+        if (tGzOrder != null && tGzOrder.getStatus().equals(GZOrderEnum.UN_PAY.getCode())) {	//仅处理待支付的订单
             final TGzOrder finalOrder = tGzOrder;
             Long userId = finalOrder.getUserId();
             Long subjectId = finalOrder.getSubjectId();
@@ -494,6 +499,10 @@ public class GZPayServiceImpl implements GZPayService {
 
 
             gzLessonService.unlockMyLesson(userId, subjectId);
+			TGzOrder order = new TGzOrder();
+			order.setTgzOrderNo(out_trade_no);
+			order.setStatus(GZOrderEnum.PAYED.getCode());
+			gzOrderDao.updateOrder(order);
            /* TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
                 @Override
                 public void afterCommit() {
@@ -525,6 +534,7 @@ public class GZPayServiceImpl implements GZPayService {
         afterPaySuccess(gzOrder, gzOrder.getTgzOrderNo());
     }
 
+    @Transactional(rollbackFor = Throwable.class)
     @Override
     public void dealWithOrderNo(String orderNo) {
 		TGzOrder gzOrder = gzOrderDao.selectByOrderNo(orderNo);
