@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 @Table(commit = "应用外支付的订单表")
 @Data
 @Builder
-public class TCsqOrder {
+public class TCsqOrder extends BaseEntity {
 
 	@Id
 	private Long id;
@@ -40,22 +40,5 @@ public class TCsqOrder {
 	@Column(commit = "订单创建时间戳")
 	private Long orderTime;
 
-	@Column(commit = "扩展字段")
-	private String extend;
-
-	@Column(commit = "创建者编号", isNUll = false)
-	private Long createUser;
-
-	@Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
-	private Timestamp createTime;
-
-	@Column(commit = "更新者编号", isNUll = false)
-	private Long updateUser;
-
-	@Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
-	private Timestamp updateTime;
-
-	@Column(commit = "有效性", defaultVal = "1")
-	private String isValid;
 
 }

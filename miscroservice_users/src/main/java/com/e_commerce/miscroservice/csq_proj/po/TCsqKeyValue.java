@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 @Data
 @Table(commit = "从善桥key-value表")
 @Builder
-public class TCsqKeyValue {
+public class TCsqKeyValue extends BaseEntity {
 
 	@Id
 	private Long id;
@@ -34,22 +34,5 @@ public class TCsqKeyValue {
 	@Column(commit = "类型", length = 11, isNUll = false)
 	private Integer type;
 
-	@Column(commit = "扩展字段")
-	private String extend;
-
-	@Column(commit = "创建者编号", isNUll = false)
-	private Long createUser;
-
-	@Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
-	private Timestamp createTime;
-
-	@Column(commit = "更新者编号", isNUll = false)
-	private Long updateUser;
-
-	@Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
-	private Timestamp updateTime;
-
-	@Column(commit = "有效性", defaultVal = "1")
-	private String isValid;
 }
 
