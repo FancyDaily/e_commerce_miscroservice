@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 @Table(commit = "从善桥用户表")
 @Data
 @Builder
-public class TCsqUser {
+public class TCsqUser  extends BaseEntity{
 	@Id
 	private Long id;
 
