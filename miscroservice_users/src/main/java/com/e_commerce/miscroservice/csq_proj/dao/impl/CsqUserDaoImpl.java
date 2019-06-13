@@ -48,4 +48,27 @@ public class CsqUserDaoImpl implements CsqUserDao {
 			.eq(TCsqUser::getIsValid,AppConstant.IS_VALID_YES));
 	}
 
+	@Override
+	public TCsqUser selectByVxOpenIdAndAccountType(String openid, Integer accountType) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getVxOpenId, openid)
+			.eq(TCsqUser::getAccountType, accountType)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public TCsqUser selectByUserTel(String telephone) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getUserTel, telephone)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public TCsqUser selectByUserTelAndAccountType(String telephone, Integer accountType) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getUserTel, telephone)
+			.eq(TCsqUser::getAccountType, accountType)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
 }

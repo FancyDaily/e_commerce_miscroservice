@@ -17,12 +17,12 @@ import java.sql.Timestamp;
 @Table(commit = "从善桥用户表")
 @Data
 @Builder
-public class TCsqUser {
+public class TCsqUser  extends BaseEntity{
 	@Id
 	private Long id;
 
 	@Transient
-	private String deviceId;
+	private String uuid;
 
 	@Transient
 	private String token;
@@ -118,28 +118,11 @@ public class TCsqUser {
 	@Column(commit = "可用状态")
 	private String avaliableStatus;
 
-	@Column(commit = "是否为组织账号", length = 11, defaultVal = "0")
-	private Integer isCompanyAccount;
+	@Column(commit = "账号类型(个人，组织 etc.)", length = 11, defaultVal = "1")
+	private Integer accountType;
 
 	@Column(commit = "是否为预注册账号", length = 11, defaultVal = "0")
 	private Integer isFake;
 
 
-	@Column(commit = "扩展字段")
-	private String extend;
-
-	@Column(commit = "创建者编号", isNUll = false)
-	private Long createUser;
-
-	@Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
-	private Timestamp createTime;
-
-	@Column(commit = "更新者编号", isNUll = false)
-	private Long updateUser;
-
-	@Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
-	private Timestamp updateTime;
-
-	@Column(commit = "有效性", defaultVal = "1")
-	private String isValid;
 }

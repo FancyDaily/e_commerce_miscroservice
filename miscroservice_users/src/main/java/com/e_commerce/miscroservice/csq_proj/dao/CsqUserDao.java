@@ -20,4 +20,9 @@ public interface CsqUserDao {
 
 	List<TCsqUser> selectByVxOpenId(String openId);
 
+	TCsqUser selectByVxOpenIdAndAccountType(String openid, Integer accountType);
+
+	TCsqUser selectByUserTel(String telephone);
+
+	TCsqUser selectByUserTelAndAccountType(String telephone, Integer accountType);
 }

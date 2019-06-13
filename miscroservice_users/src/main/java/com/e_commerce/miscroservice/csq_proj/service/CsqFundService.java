@@ -17,9 +17,10 @@ public interface CsqFundService {
 
 	/**
 	 * 修改基金基本信息
+	 * @param userId
 	 * @param fund
 	 */
-	void modifyFund(TCsqFund fund);
+	void modifyFund(Long userId, TCsqFund fund);
 
 	/**
 	 * 申请基金前的校验(在付款之前,避免支付之后无谓的退款)

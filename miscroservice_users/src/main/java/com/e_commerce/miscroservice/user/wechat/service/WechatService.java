@@ -29,6 +29,8 @@ public interface WechatService {
 	 */
 	public WechatSession checkAuthCode(String code);
 
+	WechatSession checkAuthCode(String code, String appid, String appSecret);
+
 	/**
 	 * 获取微信后台token
 	 */

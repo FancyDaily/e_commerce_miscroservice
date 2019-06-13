@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 

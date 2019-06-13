@@ -67,7 +67,7 @@ public class SendSmsService implements APIService {
 		params.put("password", password);
 		params.put("tkey",tkey);
 		String template = StringUtil.decodeStr2Unicode(smsTemplate);
-		if(Objects.equals(applicationEnum.toCode(), ApplicationEnum.GUANZHAO_APPLICATION.toCode())) {
+		if(!Objects.equals(applicationEnum.toCode(), ApplicationEnum.XIAOSHI_APPLICATION.toCode())) {
 			template = template.replace(ApplicationEnum.XIAOSHI_APPLICATION.getDesc(), applicationEnum.getDesc());
 		}
 		params.put("content", String.format(template,params.get(AppConstant.VALID_CODE)));

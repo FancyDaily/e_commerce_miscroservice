@@ -1,9 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
 import com.e_commerce.miscroservice.commons.enums.application.UserEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -41,7 +39,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Override
 	public void applyForAFund(Long userId, String orderNo) {
-		//这其实是一系列支付成功后的操作
+		//这其实是一系列支付成功后的操作,应当在notifyUrl指向的接口中被调用
 		//基金生命周期：在用户请求微信支付(举例)时，产生待激活状态的实体，在用户支付成功后被激活.
 		//check实名状态
 		// 6.11 把对实名的check放到编辑名字时
@@ -67,13 +65,28 @@ public class CsqFundServiceImpl implements CsqFundService {
 	}
 
 	@Override
-	public void modifyFund(TCsqFund fund) {
-		//包含申请公开基金业务
-		Integer status = fund.getStatus();
-		if(CsqFundEnum.STATUS_PUBLIC.getVal() == status) {
-
+	public void modifyFund(Long userId, TCsqFund fund) {
+		if(fund == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "所有必要参数为空");
 		}
-
+		//check实名
+		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
+		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
+		}
+		Long fundId = fund.getId();
+		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		Integer currentStatus = csqFund.getStatus();
+		//包含[申请公开]基金业务
+		Integer status = fund.getStatus();
+		if(CsqFundEnum.STATUS_UNDER_CERT.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
+			Double totalIn = csqFund.getTotalIn();
+			if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
+			}
+		}
+		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
+		fundDao.update(fund);
 	}
 
 	@Override
@@ -91,4 +104,5 @@ public class CsqFundServiceImpl implements CsqFundService {
 		checkResult = true;
 		return checkResult;
 	}
+
 }

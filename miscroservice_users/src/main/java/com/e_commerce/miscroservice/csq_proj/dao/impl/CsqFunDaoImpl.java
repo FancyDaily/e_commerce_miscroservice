@@ -45,6 +45,7 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public int update(TCsqFund csqFund) {
-		return MybatisPlus.getInstance().update(csqFund);
+		return MybatisPlus.getInstance().update(csqFund, new MybatisPlusBuild(TCsqFund.class)
+		.eq(TCsqFund::getId, csqFund.getId()));
 	}
 }

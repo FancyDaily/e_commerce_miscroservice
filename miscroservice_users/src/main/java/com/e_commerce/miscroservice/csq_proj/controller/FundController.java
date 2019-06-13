@@ -62,6 +62,7 @@ public class FundController {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
+			log.info("申请基金, amount={},fundId={},orderNo={},publishId={}");
 //			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
 			fundService.applyForAFund(userId, orderNo);
 		} catch (MessageException e) {
@@ -88,7 +89,8 @@ public class FundController {
 		Long userId = UserUtil.getTestId();
 		TCsqFund fund = (TCsqFund) ConsumeHelper.getObj();
 		try {
-			fundService.modifyFund(fund);
+			log.info("修改基金, publishId={}", publishId);
+			fundService.modifyFund(userId ,fund);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "修改基金", e.getMessage());
 			result.setMsg(e.getMessage());
@@ -100,6 +102,5 @@ public class FundController {
 		}
 		return result;
 	}
-
 
 }

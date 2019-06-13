@@ -49,6 +49,9 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "余额", precision = 2, defaultVal = "0")
 	private Double balance;
 
+	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
+	private Double totalIn;
+
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
 	private Integer agentModeStatus;
 
@@ -59,22 +62,5 @@ public class TCsqFund extends BaseEntity{
 	private Integer helpCnt;
 
 
-	@Column(commit = "扩展字段")
-	private String extend;
-
-	@Column(commit = "创建者编号", isNUll = false)
-	private Long createUser;
-
-	@Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
-	private Timestamp createTime;
-
-	@Column(commit = "更新者编号", isNUll = false)
-	private Long updateUser;
-
-	@Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)
-	private Timestamp updateTime;
-
-	@Column(commit = "有效性", defaultVal = "1")
-	private String isValid;
 
 }

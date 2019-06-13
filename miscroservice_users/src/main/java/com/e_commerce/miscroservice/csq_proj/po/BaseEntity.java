@@ -2,9 +2,10 @@ package com.e_commerce.miscroservice.csq_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import lombok.Data;
 
 import java.sql.Timestamp;
-
+@Data
 public class BaseEntity {
 
 	@Column(commit = "扩展字段")
