@@ -8,7 +8,6 @@ import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
-import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,7 +62,8 @@ public class FundController {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
-			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
+//			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
+			fundService.applyForAFund(userId, orderNo);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "申请基金", e.getMessage());
 			result.setMsg(e.getMessage());

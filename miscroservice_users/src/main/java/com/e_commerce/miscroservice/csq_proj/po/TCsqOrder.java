@@ -29,7 +29,7 @@ public class TCsqOrder extends BaseEntity {
 	private Long serviceId;
 
 	@Column(commit = "业务类型(爱心账户充值、申请基金支付、基金充值、项目捐赠 .etc)")
-	private Long type;
+	private Integer type;
 
 	@Column(commit = "订单编号")
 	private String orderNo;
@@ -42,7 +42,6 @@ public class TCsqOrder extends BaseEntity {
 
 	@Column(commit = "订单创建时间戳")
 	private Long orderTime;
-
 
 	@Column(commit = "扩展字段")
 	private String extend;

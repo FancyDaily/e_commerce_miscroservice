@@ -11,12 +11,9 @@ public interface CsqFundService {
 	/**
 	 * 申请专项基金
 	 * @param userId
-	 * @param FundId
-	 * @param amount
-	 * @param publishId
 	 * @param orderNo
 	 */
-	void applyForAFund(Long userId, Long FundId, Long amount, Long publishId, String orderNo);
+	void applyForAFund(Long userId, String orderNo);
 
 	/**
 	 * 修改基金基本信息

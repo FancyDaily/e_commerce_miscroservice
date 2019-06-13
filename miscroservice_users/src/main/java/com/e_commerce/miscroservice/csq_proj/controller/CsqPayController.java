@@ -4,13 +4,19 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 项目Controller
- *
+ * 支付Controller
  * @Author: FangyiXu
- * @Date: 2019-06-11 15:37
+ * @Date: 2019-06-12 11:40
  */
-//@RestController
-//@Log
-public class ServiceController {
+@RestController
+@Log
+public class CsqPayController {
 
+	/**
+	 * 这是一个demo
+	 * @return
+	 */
+	public Object demo() {
+		return null;
+	}
 }

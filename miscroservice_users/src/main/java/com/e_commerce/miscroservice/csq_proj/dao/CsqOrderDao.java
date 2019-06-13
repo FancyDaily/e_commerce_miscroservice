@@ -10,4 +10,8 @@ import com.e_commerce.miscroservice.user.po.TUser;
 public interface CsqOrderDao {
 	
 	TCsqOrder selectByUserIdAndFundId(Long userId, Long fundId);
+
+	TCsqOrder selectByOrderNo(String orderNo);
+
+	TCsqOrder selectByUserIdAndTypeAndAmountValid(Long userId, int code, Double amount);
 }

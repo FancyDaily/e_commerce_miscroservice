@@ -35,4 +35,16 @@ public class CsqFunDaoImpl implements CsqFundDao {
 		.eq(TCsqFund::getStatus, val)
 		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
 	}
+
+	@Override
+	public TCsqFund selectByPrimaryKey(Long fundId) {
+		return MybatisPlus.getInstance().findOne(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		.eq(TCsqFund::getId, fundId)
+		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public int update(TCsqFund csqFund) {
+		return MybatisPlus.getInstance().update(csqFund);
+	}
 }
