@@ -11,18 +11,16 @@ public interface CsqFundService {
 	/**
 	 * 申请专项基金
 	 * @param userId
-	 * @param FundId
-	 * @param amount
-	 * @param publishId
 	 * @param orderNo
 	 */
-	void applyForAFund(Long userId, Long FundId, Long amount, Long publishId, String orderNo);
+	void applyForAFund(Long userId, String orderNo);
 
 	/**
 	 * 修改基金基本信息
+	 * @param userId
 	 * @param fund
 	 */
-	void modifyFund(TCsqFund fund);
+	void modifyFund(Long userId, TCsqFund fund);
 
 	/**
 	 * 申请基金前的校验(在付款之前,避免支付之后无谓的退款)

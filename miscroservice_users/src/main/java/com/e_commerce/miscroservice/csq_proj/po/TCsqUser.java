@@ -22,7 +22,7 @@ public class TCsqUser  extends BaseEntity{
 	private Long id;
 
 	@Transient
-	private String deviceId;
+	private String uuid;
 
 	@Transient
 	private String token;
@@ -118,8 +118,8 @@ public class TCsqUser  extends BaseEntity{
 	@Column(commit = "可用状态")
 	private String avaliableStatus;
 
-	@Column(commit = "是否为组织账号", length = 11, defaultVal = "0")
-	private Integer isCompanyAccount;
+	@Column(commit = "账号类型(个人，组织 etc.)", length = 11, defaultVal = "1")
+	private Integer accountType;
 
 	@Column(commit = "是否为预注册账号", length = 11, defaultVal = "0")
 	private Integer isFake;

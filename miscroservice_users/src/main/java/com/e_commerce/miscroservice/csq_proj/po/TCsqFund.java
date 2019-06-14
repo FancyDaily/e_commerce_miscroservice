@@ -49,6 +49,9 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "余额", precision = 2, defaultVal = "0")
 	private Double balance;
 
+	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
+	private Double totalIn;
+
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
 	private Integer agentModeStatus;
 

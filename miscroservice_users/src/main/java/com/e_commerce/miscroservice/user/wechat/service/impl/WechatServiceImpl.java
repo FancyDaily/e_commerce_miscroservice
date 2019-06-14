@@ -65,12 +65,20 @@ public class WechatServiceImpl implements WechatService {
 	/**
 	 * 微信授权
 	 */
+	@Override
 	public WechatSession checkAuthCode(String code) {
+		return checkAuthCode(code, null, null);
+	}
+
+	@Override
+	public WechatSession checkAuthCode(String code, String appid, String appSecret) {
+		appid = appid==null? APP_ID:appid;
+		appSecret = appSecret==null? APP_SECRET:appSecret;
 		// 对请求参数进行封装
 		Map<String, Object> params = new HashMap<>();
 		params.put("js_code", code);
-		params.put("appid", APP_ID);
-		params.put("secret", APP_SECRET);
+		params.put("appid", appid);
+		params.put("secret", appSecret);
 		params.put(WechatConst.GRANT_TYPE, "authorization_code");
 
 		LOG.info("---------------------开始请求微信服务器进行登录凭证校验---------------------");

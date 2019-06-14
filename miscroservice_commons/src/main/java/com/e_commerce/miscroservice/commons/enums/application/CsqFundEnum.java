@@ -14,6 +14,8 @@ public enum CsqFundEnum {
 	STATUS_PUBLIC(2, "已公开"),
 	STATUS_CERT_FAIL(3, "审核失败");
 
+	public static final Double PUBLIC_MINIMUM = 10000d;	//申请公开基金的最低标准
+
 	int val;
 	String desc;
 
