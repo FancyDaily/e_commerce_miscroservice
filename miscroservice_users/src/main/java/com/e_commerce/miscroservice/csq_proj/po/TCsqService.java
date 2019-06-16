@@ -31,17 +31,17 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "状态", length = 11, defaultVal = "0")
 	private Integer status;
 
-	@Column(commit = "累积收到金额(已筹金额)", precision = 2, defaultVal = "0")
+	@Column(commit = "累积收到金额(已筹金额)", precision = 2, defaultVal = "0.00")
 	private Double sumTotalIn;
 
-	@Column(commit = "剩余金额", precision = 2, defaultVal = "0")
+	@Column(commit = "剩余金额", precision = 2, defaultVal = "0.00")
 	private Double surplusAmount;
 
 	@Column(commit = "目的描述")
 	private String purpose;
 
-	@Column(commit = "期望金额", precision = 2, defaultVal = "0")
-	private Long expectedAmount;
+	@Column(commit = "期望金额", precision = 2, defaultVal = "0.00")
+	private Double expectedAmount;
 
 	@Column(commit = "开始日期")
 	private Long startDate;
@@ -53,16 +53,16 @@ public class TCsqService extends BaseEntity {
 	private Long coverPic;
 
 	@Column(commit = "描述")
-	private Long desc;
+	private String desc;
 
 	@Column(commit = "描述图")
-	private Long detailPic;
+	private String detailPic;
 
 	@Column(commit = "受益人/机构")
 	private String beneficiary;
 
 	@Column(commit = "银行卡号")
-	private Long creditCard;
+	private String creditCard;
 
 
 }

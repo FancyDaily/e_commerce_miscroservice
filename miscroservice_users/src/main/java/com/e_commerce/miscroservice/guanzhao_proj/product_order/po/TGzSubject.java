@@ -91,7 +91,7 @@ public class TGzSubject implements Serializable {
     @Column(commit = "有效性", defaultVal = "1")
     private String isValid;
 
-    private static final long serialVersionUID = 1L;
+//    private static final long serialVersionUID = 1L;
 
     public SubjectInfosVO copySubjectInfosVO() {
         return null;
