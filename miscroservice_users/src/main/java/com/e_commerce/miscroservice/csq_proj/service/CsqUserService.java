@@ -44,4 +44,10 @@ public interface CsqUserService {
 	 * @param smsCode
 	 */
 	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode);
+
+	/**
+	 * 提交sheng
+	 * @param csqUserAuth
+	 */
+	void sendCorpAuth(TCsqUserAuth csqUserAuth);
 }

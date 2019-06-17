@@ -1,6 +1,10 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
+
+import java.util.Map;
 
 /**
  * @Author: FangyiXu
@@ -28,4 +32,37 @@ public interface CsqFundService {
 	 * @return
 	 */
 	boolean checkBeforeApplyForAFund(Long userId);
+
+	/**
+	 * 审核 - 基金公开
+	 * @param userId
+	 * @param fundId
+	 * @param option
+	 */
+	void certFund(Long userId, Long fundId, Integer option);
+
+	/**
+	 * 基金详情
+	 * @param fundId
+	 * @return
+	 */
+	CsqFundVo fundDetail(Long fundId);
+
+	/**
+	 * 基金分享
+	 * @param userId
+	 * @param fundId
+	 * @return
+	 */
+	Map<String, Object> share(Long userId, Long fundId);
+
+	/**
+	 * 列表
+	 *
+	 * @param userId
+	 * @param option
+	 * @return
+	 */
+	QueryResult<TCsqFund> list(Long userId, Integer pageNum, Integer pageSize, Integer... option);
+
 }

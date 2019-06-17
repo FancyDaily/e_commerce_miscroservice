@@ -3,7 +3,10 @@ package com.e_commerce.miscroservice.csq_proj.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
+import jdk.nashorn.internal.objects.annotations.Constructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -24,6 +27,9 @@ public class TCsqFund extends BaseEntity{
 	private Long id;
 
 	private Long userId;
+
+	@Transient
+	private Integer totalToItemCnt;	//累积资助项目(去重)
 
 	@Column(commit = "关注方向(publish表对于id")
 	private Integer trendPubKey;
@@ -61,6 +67,8 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "累积资助项目次数", defaultVal = "0")
 	private Integer helpCnt;
 
-
+	public CsqFundVo copyCsqFundVo() {
+		return null;
+	}
 
 }

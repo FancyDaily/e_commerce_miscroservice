@@ -16,6 +16,11 @@ import java.util.List;
 @Component
 public class CsqFunDaoImpl implements CsqFundDao {
 
+	private MybatisPlusBuild baseWhereBuild() {
+		return new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
 	@Override
 	public int insert(TCsqFund... csqFund) {
 		return MybatisPlus.getInstance().save(csqFund);
@@ -48,4 +53,13 @@ public class CsqFunDaoImpl implements CsqFundDao {
 		return MybatisPlus.getInstance().update(csqFund, new MybatisPlusBuild(TCsqFund.class)
 		.eq(TCsqFund::getId, csqFund.getId()));
 	}
+
+	@Override
+	public List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option) {
+		return MybatisPlus.getInstance().finAll(new TCsqFund(), baseWhereBuild()
+			.eq(TCsqFund::getUserId, userId)
+			.in(TCsqFund::getStatus, option)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime)));
+	}
+
 }

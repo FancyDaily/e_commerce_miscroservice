@@ -1,0 +1,26 @@
+package com.e_commerce.miscroservice.commons.enums.application;
+
+/**
+ * @Author: FangyiXu
+ * @Date: 2019-06-14 11:31
+ */
+public enum CsqPublishEnum {
+	MAIN_KEY_TREND(1, "关注方向");
+
+	int code;
+	String  msg;
+
+	CsqPublishEnum(int code, String msg) {
+		this.code = code;
+		this.msg = msg;
+	}
+
+	public int toCode() {
+		return code;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+}

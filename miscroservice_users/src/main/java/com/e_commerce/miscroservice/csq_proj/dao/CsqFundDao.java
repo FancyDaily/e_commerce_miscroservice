@@ -18,4 +18,6 @@ public interface CsqFundDao {
 	TCsqFund selectByPrimaryKey(Long fundId);
 
 	int update(TCsqFund csqFund);
+
+	List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option);
 }

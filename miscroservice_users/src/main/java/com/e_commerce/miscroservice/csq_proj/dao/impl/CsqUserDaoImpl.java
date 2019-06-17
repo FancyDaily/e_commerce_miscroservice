@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.user.po.TUser;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -69,6 +70,17 @@ public class CsqUserDaoImpl implements CsqUserDao {
 			.eq(TCsqUser::getUserTel, telephone)
 			.eq(TCsqUser::getAccountType, accountType)
 			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqUser> selectInIds(List<Long> userIds) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), baseWhereBuild()
+		.in(TUser::getId, userIds));
+	}
+
+	private MybatisPlusBuild baseWhereBuild() {
+		return new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
 }

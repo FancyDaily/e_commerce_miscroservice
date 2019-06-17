@@ -1,22 +1,26 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
-import com.e_commerce.miscroservice.commons.enums.application.UserEnum;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.csq_proj.dao.*;
+import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqOrderService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -36,6 +40,18 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Autowired
 	private CsqOrderService csqOrderService;
+
+	@Autowired
+	private CsqUserPaymentDao paymentDao;
+
+	@Autowired
+	private CsqPublishDao csqPublishDao;
+
+	@Autowired
+	private CsqPublishService csqpublishService;
+
+	@Autowired
+	private CsqServiceDao csqServiceDao;
 
 	@Override
 	public void applyForAFund(Long userId, String orderNo) {
@@ -105,4 +121,113 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return checkResult;
 	}
 
+	@Override
+	public void certFund(Long userId, Long fundId, Integer option) {
+		if(Objects.isNull(fundId) || Objects.isNull(option)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数fundId、option都不能为空");
+		}
+		final int CERT_SUCESS = 1;
+		final int CERT_FAIL = 2;
+		if(false) {
+			userDao.selectByPrimaryKey(userId);
+			//check用户审核权限
+		}
+		//审核过程
+		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		if(CERT_SUCESS == option) {
+			csqFund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+			//TODO sysMsg
+		} else if(CERT_FAIL == option) {
+			csqFund.setStatus(CsqFundEnum.STATUS_CERT_FAIL.getVal());
+			//TODO sysMsg
+		} else {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "option参数不正确!");
+		}
+		fundDao.update(csqFund);
+	}
+
+	@Override
+	public CsqFundVo fundDetail(Long fundId) {
+		if(fundId == null) {
+			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "参数基金编号为空!");
+		}
+		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		if(csqFund == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "");
+		}
+		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
+		//统计捐款人数
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToType(CsqPaymentEnum.TYPE_FUND.toCode());
+		int count = tCsqUserPaymentRecords.size();
+		csqFundVo.setContributeInCnt(count);
+		//把基金方向的publish_id转换成名字
+		String publishName = csqpublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), csqFundVo.getTrendPubKey());
+		csqFundVo.setTrendPubName(publishName);
+		//基金资助项目记录 列表 TODO 可能需要分页
+		List<TCsqUserPaymentRecord> csqUserPaymentRecords = paymentDao.selectByFromTypeAndToTypeDesc(CsqPaymentEnum.TYPE_FUND.toCode(), CsqPaymentEnum.TYPE_SERVICE.toCode());
+		List<Long> csqServiceIds = csqUserPaymentRecords.stream().map(TCsqUserPaymentRecord::getServiceId).collect(Collectors.toList());
+		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
+		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getId));
+		List<TCsqUserPaymentRecord> donateList = csqUserPaymentRecords.stream()
+			.map(a -> {
+				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
+				List<TCsqService> tempList = collect.get(a.getId());
+				if (tempList != null && !tempList.isEmpty()) {
+					TCsqService tempService = tempList.get(0);
+					a.setServiceName(tempService.getName());
+				}
+				return a;
+			}).collect(Collectors.toList());
+		csqFundVo.setGoTOList(donateList);
+		return csqFundVo;
+	}
+
+	@Override
+	public Map<String, Object> share(Long userId, Long fundId) {
+		Map<String, Object> map = new HashMap<>();
+		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		//查询捐入列表
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeDesc(CsqPaymentEnum.TYPE_FUND.toCode());	//分页标记
+		List<Long> userIds = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getUserId).collect(Collectors.toList());
+		List<TCsqUser> tUsers = userDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> collect = tUsers.stream()
+			.collect(Collectors.groupingBy(TCsqUser::getId));
+		List<TCsqUserPaymentRecord> donateInList = tCsqUserPaymentRecords.stream()
+			.map(a -> {
+				//几分钟前
+				long interval = System.currentTimeMillis() - a.getCreateTime().getTime();
+				int minute = (int) (interval / 1000 / 60);
+				a.setDate(minute + "分钟前");
+				List<TCsqUser> tUsers1 = collect.get(a.getUserId());
+				if (tUsers1 != null && !tUsers1.isEmpty()) {
+					TCsqUser user = tUsers1.get(0);
+					TCsqUser build = TCsqUser.builder().name(user.getName())
+						.userHeadPortraitPath(user.getUserHeadPortraitPath()).build();	//可更换为copyInsensitiveUserVo
+					a.setUser(build);
+				}
+				return a;
+			}).collect(Collectors.toList());
+		map.put("donateList", donateInList);
+		String qrCode = "";	//TODO 二维码(根据具体的分享后逻辑完善)
+		map.put("qrCode", qrCode);
+		return map;
+	}
+
+	@Override
+	public QueryResult<TCsqFund> list(Long userId, Integer pageNum, Integer pageSize, Integer[] option) {
+		Page<Object> startPage = startPage(pageNum, pageSize);
+		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDesc(userId, option);
+		QueryResult<TCsqFund> tCsqFundQueryResult = new QueryResult<>();
+		tCsqFundQueryResult.setResultList(tCsqFunds);
+		tCsqFundQueryResult.setTotalCount(startPage.getTotal());
+		return tCsqFundQueryResult;
+	}
+
+	private Page<Object> startPage(Integer pageNum, Integer pageSize) {
+		pageNum = pageNum == null? 1:pageNum;
+		pageSize = pageSize == null? 0:pageSize;
+		return PageHelper.startPage(pageNum, pageSize);
+	}
 }

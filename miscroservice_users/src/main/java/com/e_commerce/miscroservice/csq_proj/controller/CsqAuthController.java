@@ -55,8 +55,23 @@ public class CsqAuthController {
 		return result;
 	}
 
+	@Consume(TCsqUserAuth.class)
 	@RequestMapping("send/corp")
-	public Object corpAuth() {
-		return null;
+	public Object corpAuth(String licensePic, String licenseId) {
+		AjaxResult result = new AjaxResult();
+		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
+		try {
+			csqUserService.sendCorpAuth(csqUserAuth);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "实名认证 - 个人", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("实名认证 - 个人", e);
+			result.setSuccess(false);
+		}
+		return result;
 	}
+
 }
