@@ -124,6 +124,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//TODO 若提交即实名，此处将用户实名状态改变
 	}
 
+	@Override
+	public TCsqUser findCsqUserById(Long userId) {
+
+		return csqUserDao.selectByPrimaryKey(userId);
+	}
+
 	private TCsqUser register(TCsqUser csqUser) {
 		//默认头像等...
 		csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);

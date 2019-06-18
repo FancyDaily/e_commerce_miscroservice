@@ -44,4 +44,11 @@ public interface CsqUserService {
 	 * @param smsCode
 	 */
 	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode);
+
+	/**
+	 * 根据id查找
+	 * @param userId
+	 * @return
+	 */
+	TCsqUser findCsqUserById(Long userId);
 }
