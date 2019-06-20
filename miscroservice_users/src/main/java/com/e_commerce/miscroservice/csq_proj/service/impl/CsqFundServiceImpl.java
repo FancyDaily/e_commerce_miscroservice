@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -15,6 +16,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:58
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqFundServiceImpl implements CsqFundService {
 
@@ -65,11 +68,15 @@ public class CsqFundServiceImpl implements CsqFundService {
 	//开始基金创建流程:
 		Long fundId = tCsqOrder.getToId();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		if(CsqFundEnum.STATUS_ACTIVATED.getVal() == csqFund.getStatus()) {
+			return;
+		}
 		csqFund.setStatus(CsqFundEnum.STATUS_ACTIVATED.getVal());	//激活
 		fundDao.update(csqFund);
 
 		TCsqService csqService = csqFund.copyCsqService();
 		csqService.setId(null);
+		csqService.setFundId(fundId);
 		csqService.setStatus(CsqServiceEnum.STATUS_INITIAL.getCode());
 		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
 		csqService.setFundStatus(csqFund.getStatus());
@@ -98,14 +105,19 @@ public class CsqFundServiceImpl implements CsqFundService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
 		}
 		Long fundId = fund.getId();
+		if(fundId == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "fundId不能为空!");
+		}
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		Integer currentStatus = csqFund.getStatus();
 		//包含[申请公开]基金业务
 		Integer status = fund.getStatus();
-		if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
-			Double totalIn = csqFund.getSumTotalIn();
-			if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
-				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
+		if(status != null) {
+			if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
+				Double totalIn = csqFund.getSumTotalIn();
+				if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
+					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
+				}
 			}
 		}
 		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
@@ -128,6 +140,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return checkResult;
 	}
 
+	@Transactional(rollbackFor = Throwable.class)
 	@Override
 	public void certFund(Long userId, Long fundId, Integer option) {
 		if(Objects.isNull(fundId) || Objects.isNull(option)) {
@@ -141,8 +154,16 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		//审核过程
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		if(CsqFundEnum.STATUS_PRIVATE.getVal() != csqFund.getStatus()) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的审核前状态!当前基金无法审核!");
+		}
+
 		if(CERT_SUCESS == option) {
 			csqFund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+			//更新对应项目状态
+			TCsqService build = TCsqService.builder().fundId(fundId)
+				.fundStatus(CsqFundEnum.STATUS_PUBLIC.getVal()).build();
+			csqServiceDao.updateByFundId(build);
 			//TODO sysMsg
 		} else if(CERT_FAIL == option) {
 			csqFund.setStatus(CsqFundEnum.STATUS_CERT_FAIL.getVal());
@@ -151,6 +172,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "option参数不正确!");
 		}
 		fundDao.update(csqFund);
+		//找到基金对应的项目，更新状态
+//		TCsqService csqService = csqServiceDao.selectByFundId(fundId);
 	}
 
 	@Override
@@ -233,6 +256,14 @@ public class CsqFundServiceImpl implements CsqFundService {
 		tCsqFundQueryResult.setResultList(tCsqFunds);
 		tCsqFundQueryResult.setTotalCount(startPage.getTotal());
 		return tCsqFundQueryResult;
+	}
+
+	@Override
+	public void insertForSomeOne(Long userId) {
+		TCsqFund build = TCsqFund.builder()
+			.userId(userId).build();
+		int save = MybatisPlus.getInstance().save(build);
+		System.out.println(save);
 	}
 
 	private Page<Object> startPage(Integer pageNum, Integer pageSize) {

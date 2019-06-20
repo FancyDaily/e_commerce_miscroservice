@@ -51,4 +51,8 @@ public interface CsqServiceDao {
 	TCsqService selectByPrimaryKey(Long serviceId);
 
 	int update(TCsqService csqService);
+
+	TCsqService selectByFundId(Long fundId);
+
+	int updateByFundId(TCsqService build);
 }

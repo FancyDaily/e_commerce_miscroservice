@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -87,18 +88,30 @@ public class FundController {
 
 	/**
 	 * 修改基金
-	 * @param fundId
-	 * @param publishId
+	 * @param id
+	 * @param trendPubKeys
+	 * @param name
+	 * @param description
+	 * @param coverPic
+	 * @param orgName
+	 * @param orgAddr
+	 * @param contact
+	 * @param personInCharge
+	 * @param creditCardName
+	 * @param creditCardId
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(TCsqFund.class)
-	public Object modifyMyFund(@RequestParam Long fundId, Long publishId) {
+	public Object modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
+							   String description, String coverPic, String orgName, String orgAddr,
+							   String contact, String personInCharge,String creditCardName,String creditCardId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqFund fund = (TCsqFund) ConsumeHelper.getObj();
 		try {
-			log.info("修改基金, publishId={}", publishId);
+			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}",
+				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId);
 			fundService.modifyFund(userId ,fund);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -209,6 +222,30 @@ public class FundController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("分享基金", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 测试用插入
+	 * @return
+	 */
+	@RequestMapping("testInsert")
+	public Object testInsert() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("测试用插入, userId={}", userId);
+			fundService.insertForSomeOne(userId);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "测试用插入", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("测试用插入", e);
 			result.setSuccess(false);
 		}
 		return result;

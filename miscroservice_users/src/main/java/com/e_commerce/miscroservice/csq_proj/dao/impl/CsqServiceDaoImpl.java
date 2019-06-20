@@ -87,4 +87,16 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return MybatisPlus.getInstance().update(csqService, IdWhereBuild(csqService.getId()));
 	}
 
+	@Override
+	public TCsqService selectByFundId(Long fundId) {
+		return MybatisPlus.getInstance().findOne(new TCsqService(), baseWhereBuild()
+			.eq(TCsqService::getFundId, fundId));
+	}
+
+	@Override
+	public int updateByFundId(TCsqService build) {
+		return MybatisPlus.getInstance().update(build, baseWhereBuild()
+			.eq(TCsqService::getFundId, build.getFundId()));
+	}
+
 }

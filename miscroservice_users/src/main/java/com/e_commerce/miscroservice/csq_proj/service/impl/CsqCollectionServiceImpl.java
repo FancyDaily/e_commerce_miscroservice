@@ -8,7 +8,6 @@ import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserCollection;
 import com.e_commerce.miscroservice.csq_proj.service.CsqCollectionService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;

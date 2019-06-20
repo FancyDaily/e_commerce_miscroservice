@@ -42,10 +42,10 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	private String date;
 
 	@Column(commit = "描述")
-	private String desc;
+	private String description;
 
 	@Column(commit = "收入0/支出1", length = 11, isNUll = false)
-	private Integer inOut;
+	private Integer inOrOut;
 
 	@Column(commit = "金额", precision = 2, isNUll = false)
 	private Double money;
