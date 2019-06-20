@@ -194,6 +194,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<String> publishName = csqpublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), csqFundVo.getTrendPubKeys());
 		csqFundVo.setTrendPubNames(publishName);
 		//基金资助项目记录 列表 TODO 可能需要分页
+		if(tCsqUserPaymentRecords.isEmpty()) {
+			return csqFundVo;
+		}
 		List<Long> tOrderIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.collect(Collectors.toList());
@@ -219,9 +222,13 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public Map<String, Object> share(Long userId, Long fundId) {
 		Map<String, Object> map = new HashMap<>();
-		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		String qrCode = "";	//TODO 二维码(根据具体的分享后逻辑完善)
+		map.put("qrCode", qrCode);
 		//查询捐入列表
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());	//分页标记
+		if(tCsqUserPaymentRecords.isEmpty()) {
+			return map;
+		}
 		List<Long> userIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getUserId).collect(Collectors.toList());
 		List<TCsqUser> tUsers = userDao.selectInIds(userIds);
@@ -243,8 +250,6 @@ public class CsqFundServiceImpl implements CsqFundService {
 				return a;
 			}).collect(Collectors.toList());
 		map.put("donateList", donateInList);
-		String qrCode = "";	//TODO 二维码(根据具体的分享后逻辑完善)
-		map.put("qrCode", qrCode);
 		return map;
 	}
 
