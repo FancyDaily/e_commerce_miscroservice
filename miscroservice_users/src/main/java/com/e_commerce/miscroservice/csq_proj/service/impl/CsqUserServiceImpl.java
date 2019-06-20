@@ -55,6 +55,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Autowired
 	private CsqUserPaymentDao csqUserPaymentDao;
 
+	@Autowired
+	private CsqOrderDao csqOrderDao;
+
 	@Override
 	public void checkAuth(TCsqUser user) {
 		if (user == null) {
@@ -248,11 +251,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 			//找到fundId
 			toId = csqService.getFundId();
 		}
-		List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectByToTypeAndToIdAndCreateTimeBetween(CSqUserPaymentEnum.TYPE_FUND.toCode(), toId);
-		dailyIncome = userPaymentRecords.stream()
-			.map(TCsqUserPaymentRecord::getMoney)
+		long startStamp = DateUtil.getStartStamp(System.currentTimeMillis());
+		long endStamp = DateUtil.getEndStamp(System.currentTimeMillis());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, CSqUserPaymentEnum.TYPE_FUND.toCode(), startStamp, endStamp);
+		dailyIncome = tCsqOrders.stream()
+			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
-		donateCnt = userPaymentRecords.size();
+		donateCnt = tCsqOrders.size();
 		csqDailyDonateVo.setDailyIncome(dailyIncome);
 		csqDailyDonateVo.setDonateCnt(donateCnt);
 

@@ -99,11 +99,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			startPage = PageHelper.startPage(pageNum, pageSize);
 			tCsqServices = csqServiceDao.selectAll();
 		} else if(OPTION_DONATED.equals(option)){
-			//查询流水，找到我捐助过的项目记录
-			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeAndUserId(userId, CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CSqUserPaymentEnum.TYPE_FUND.toCode());
+			//找到我捐助过的项目记录
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CSqUserPaymentEnum.TYPE_SERVICE.toCode());
 			//处理（去重等
-			List<Long> uniqueServiceIds = tCsqUserPaymentRecords.stream()
-				.map(TCsqUserPaymentRecord::getServiceId)
+			List<Long> uniqueServiceIds = tCsqOrders.stream()
+				.map(TCsqOrder::getToId)
 				.distinct()
 				.collect(Collectors.toList());
 			startPage = PageHelper.startPage(pageNum, pageSize);
@@ -165,7 +165,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Double surplusAmount = tCsqService.getSurplusAmount();
 			tCsqService.setSumTotalOut(sumTotalIn - surplusAmount);	//剩余金额
 			//捐入流水
-			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeDesc(CSqUserPaymentEnum.TYPE_SERVICE.toCode());	//TODO 分页
+			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());	//TODO 分页
 			//统计捐款数，获取top10
 			Map<Long, List<TCsqUserPaymentRecord>> collect1 = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
@@ -246,11 +246,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	@Override
 	public QueryResult<TCsqUserPaymentRecord> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize) {
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByFromTypeAndServiceIdDesc(CSqUserPaymentEnum.TYPE_SERVICE.toCode(), serviceId);
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CSqUserPaymentEnum.INOUT_OUT.toCode());
 		Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
 		List<TCsqUserPaymentRecord> userPaymentRecords = tCsqUserPaymentRecords.stream()
 			.map(a -> {
-				List<TCsqService> tCsqServices = serviceMap.get(a.getServiceId());
+				List<TCsqService> tCsqServices = serviceMap.get(a.getEntityId());
 				TCsqService tCsqService = tCsqServices.get(0);
 				a.setDate(com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
 				a.setServiceName(tCsqService.getName());
@@ -264,7 +264,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	private Map<Long, List<TCsqService>> getServiceMap(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		List<Long> serviceIds = tCsqUserPaymentRecords.stream()
-			.map(TCsqUserPaymentRecord::getServiceId)
+			.filter(a -> a.getEntityType()==CSqUserPaymentEnum.TYPE_SERVICE.toCode())
+			.map(TCsqUserPaymentRecord::getEntityId)
 			.collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
@@ -292,15 +293,21 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		//插入流水
 		//防止重复插入
 		Double price = tCsqOrder.getPrice();
-		TCsqUserPaymentRecord build = TCsqUserPaymentRecord.builder()
-			.toType(CSqUserPaymentEnum.TYPE_SERVICE.toCode())
-			.fromType(tCsqOrder.getFromType())
-			.money(price)
+		TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
+			.userId(tCsqOrder.getUserId())
 			.orderId(tCsqOrder.getId())
-			.fundId(tCsqOrder.getFundId())
-			.toId(tCsqOrder.getServiceId())
-			.userId((tCsqOrder.getUserId())).build();
-		csqUserPaymentDao.insert(build);
+			.money(price)
+			.entityId(tCsqOrder.getFromId())	//来源
+			.entityType(tCsqOrder.getFromType())
+			.inOut(CSqUserPaymentEnum.INOUT_OUT.toCode()).build();
+
+		TCsqUserPaymentRecord build2 = build1;
+		Long serviceId = tCsqOrder.getToId();
+		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
+		build2.setUserId(csqService.getUserId());
+		build2.setEntityId(serviceId);
+		build2.setEntityType(tCsqOrder.getToType());
+		csqUserPaymentDao.insert(build1, build2);
 		//TODO 捐助人的个人捐助次数、基金捐助次数（如果来源为基金）、项目受助次数等增加
 
 		tCsqOrder.setStatus(CsqOrderEnum.STATUS_ALREADY_PAY.getCode());

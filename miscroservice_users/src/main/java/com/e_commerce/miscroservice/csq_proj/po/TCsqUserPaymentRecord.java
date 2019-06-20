@@ -24,15 +24,13 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	@Id
 	private Long id;
 
-	private Long orderId;	//from
+	private Long orderId;
 
-	private Long userId;	//from
+	private Long userId;
 
-	private Long fundId;	//from
+	private Long entityId;	//支出或收入的实体Id
 
-	private Long serviceId;	//from
-
-	private Long toId;	//to
+	private Integer entityType;	//支出或收入的实体类型
 
 	@Transient
 	private TCsqUser user;
@@ -46,14 +44,8 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	@Column(commit = "描述")
 	private String desc;
 
-	@Column(commit = "类型(人、爱心账户、基金、项目 etc.)", length = 11, isNUll = false)
-	private Integer fromType;
-
-	@Column(commit = "副类型(人、爱心账户、基金、项目 etc.)", length = 11, isNUll = false)
-	private Integer toType;
-/*
 	@Column(commit = "收入0/支出1", length = 11, isNUll = false)
-	private Integer inOut;*/
+	private Integer inOut;
 
 	@Column(commit = "金额", precision = 2, isNUll = false)
 	private Double money;

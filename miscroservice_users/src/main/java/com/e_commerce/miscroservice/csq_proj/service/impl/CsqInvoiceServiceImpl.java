@@ -88,9 +88,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	public QueryResult<CsqInvoiceVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有代开票的订单,找到serivce汇总
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndInvoiceStatusDesc(userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusDesc(userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode());
 		List<Long> serviceIds = tCsqOrders.stream()
-			.map(TCsqOrder::getServiceId)
+			.map(TCsqOrder::getToId)
 			.collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
@@ -100,7 +100,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			.map(a -> {
 					String orderNo = a.getOrderNo();
 					Double myAmount = a.getPrice();
-					Long serviceId = a.getServiceId();
+					Long serviceId = a.getToId();
 					List<TCsqService> tCsqServices1 = collect.get(serviceId);
 					CsqInvoiceVo csqInvoiceVo = null;
 					if (tCsqServices1 != null) {
@@ -158,7 +158,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		List<TCsqOrder> tCsqOrders = csqOrderDao.selectInOrderNos(split);
 
 		List<Long> serviceIds = tCsqOrders.stream()
-			.map(TCsqOrder::getServiceId).collect(Collectors.toList());
+			.map(TCsqOrder::getToId).collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
@@ -166,7 +166,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		ArrayList<CsqInvoiceVo> csqInvoiceList = new ArrayList<>();
 		tCsqOrders.stream()
 			.forEach(a -> {
-				List<TCsqService> csqServices = serviceMap.get(a.getServiceId());
+				List<TCsqService> csqServices = serviceMap.get(a.getToId());
 				TCsqService csqService = csqServices.get(0);
 				CsqInvoiceVo vo = new CsqInvoiceVo();
 				vo.setOrderNo(a.getOrderNo());

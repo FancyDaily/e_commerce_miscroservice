@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.enums.application.CSqUserPaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
@@ -43,16 +44,20 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			csqFund = tCsqFunds.get(0);
 		}
 		//2.查看是否可以复用未支付的相同金额有效订单
-		TCsqOrder csqOrder = orderDao.selectByUserIdAndTypeAndAmountValid(userId, CsqOrderEnum.TYPE_FUND_APPLY.getCode(), amount);	//已对超时作判断
+		Long fundId = csqFund.getId();
+		TCsqOrder csqOrder = orderDao.selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(userId, userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), amount, CsqOrderEnum.STATUS_UNPAY.getCode());
 		//TODO 对失活订单置成无效状态(不使用Mq时)
 		if(csqOrder==null) {	//创建一个订单
 			String orderNo = UUIdUtil.generateOrderNo();
 			csqOrder = TCsqOrder.builder().status(CsqOrderEnum.STATUS_UNPAY.getCode())
-				.type(CsqOrderEnum.TYPE_FUND_APPLY.getCode())
+				.userId(userId)
+				.fromId(userId)
+				.fromType(CSqUserPaymentEnum.TYPE_HUMAN.toCode())
+				.toId(fundId)
+				.toType(CSqUserPaymentEnum.TYPE_FUND.toCode())
 				.orderTime(currentTimeMillis)
 				.orderNo(orderNo)
 				.price(amount)
-				.fundId(csqFund.getId())
 				.userId(userId).build();
 		}
 		// 把一些参数返回给前端或者上一级方法

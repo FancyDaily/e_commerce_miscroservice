@@ -63,7 +63,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);	//check订单支付状态
 //		csqOrderService.checkPaid(tCsqOrder);	//TODO 为了测试拿掉了check
 	//开始基金创建流程:
-		Long fundId = tCsqOrder.getFundId();
+		Long fundId = tCsqOrder.getToId();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		csqFund.setStatus(CsqFundEnum.STATUS_ACTIVATED.getVal());	//激活
 		fundDao.update(csqFund);
@@ -164,21 +164,24 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
 		//统计捐款人数
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToType(CSqUserPaymentEnum.TYPE_FUND.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());
 		int count = tCsqUserPaymentRecords.size();
 		csqFundVo.setContributeInCnt(count);
 		//把基金方向的publish_id转换成名字
 		List<String> publishName = csqpublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), csqFundVo.getTrendPubKeys());
 		csqFundVo.setTrendPubNames(publishName);
 		//基金资助项目记录 列表 TODO 可能需要分页
-		List<TCsqUserPaymentRecord> csqUserPaymentRecords = paymentDao.selectByFromTypeAndToTypeDesc(CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode());
-		List<Long> csqServiceIds = csqUserPaymentRecords.stream().map(TCsqUserPaymentRecord::getServiceId).collect(Collectors.toList());
+		List<Long> tOrderIds = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getOrderId)
+			.collect(Collectors.toList());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
-		List<TCsqUserPaymentRecord> donateList = csqUserPaymentRecords.stream()
+		List<TCsqOrder> resultList = tCsqOrders.stream()
 			.map(a -> {
-				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
+				a.setDate(DateUtil.timeStamp2Date(a.getUpdateTime().getTime(), "yyyy/MM/dd"));
 				List<TCsqService> tempList = collect.get(a.getId());
 				if (tempList != null && !tempList.isEmpty()) {
 					TCsqService tempService = tempList.get(0);
@@ -186,7 +189,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 				}
 				return a;
 			}).collect(Collectors.toList());
-		csqFundVo.setGoTOList(donateList);
+		csqFundVo.setGoToList(resultList);
 		return csqFundVo;
 	}
 
@@ -195,7 +198,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		Map<String, Object> map = new HashMap<>();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		//查询捐入列表
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeDesc(CSqUserPaymentEnum.TYPE_FUND.toCode());	//分页标记
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());	//分页标记
 		List<Long> userIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getUserId).collect(Collectors.toList());
 		List<TCsqUser> tUsers = userDao.selectInIds(userIds);

@@ -5,11 +5,11 @@ package com.e_commerce.miscroservice.commons.enums.application;
  * @Date: 2019-06-12 15:32
  */
 public enum CsqOrderEnum {
-	TYPE_UNKNOWN(-1,"未知"),
+	/*TYPE_UNKNOWN(-1,"未知"),
 	TYPE_ACCOUNT_CHARGE(0, "爱心账户充值"),
 	TYPE_FUND_APPLY(1, "申请基金前付款"),
 	TYPE_FUND_CHARGE(2, "基金充值"),
-	TYPE_ITEM_CHARGE(3,"项目捐入"),
+	TYPE_ITEM_CHARGE(3,"项目捐入"),*/
 
 	STATUS_UNPAY(1, "待支付"),
 	STATUS_ALREADY_PAY(2, "已支付"),

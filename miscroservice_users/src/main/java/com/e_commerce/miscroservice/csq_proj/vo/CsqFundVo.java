@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import lombok.Data;
 
@@ -17,5 +18,5 @@ public class CsqFundVo extends TCsqFund {
 
 	List<String> trendPubNames;	//关注方向(名)
 
-	List<TCsqUserPaymentRecord> goTOList;	//去向(捐助项目记录)
+	List<TCsqOrder> goToList;	//去向(捐助项目记录)
 }

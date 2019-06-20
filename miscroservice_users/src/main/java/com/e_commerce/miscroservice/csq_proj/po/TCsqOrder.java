@@ -26,15 +26,24 @@ public class TCsqOrder extends BaseEntity {
 
 	private Long userId;
 
-	private Long fundId;
+	private Long fromId;
 
-	private Long serviceId;
+	private Long toId;
 
-	@Column(commit = "业务类型(爱心账户充值、申请基金支付、基金充值、项目捐赠 .etc)")
-	private Integer type;
+	@Transient
+	private String date;
+
+	@Transient
+	private String serviceName;
+
+	/*@Column(commit = "业务类型(爱心账户充值、申请基金支付、基金充值、项目捐赠 .etc)")
+	private Integer type;*/
 
 	@Column(commit = "支付来源")
 	private Integer fromType;
+
+	@Column(commit = "钱款去向")
+	private Integer toType;
 
 	@Column(commit = "订单编号")
 	private String orderNo;

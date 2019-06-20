@@ -1,8 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
-import com.e_commerce.miscroservice.user.po.TUser;
 
 import java.util.List;
 
@@ -12,11 +10,7 @@ import java.util.List;
  */
 public interface CsqOrderDao {
 	
-	TCsqOrder selectByUserIdAndFundId(Long userId, Long fundId);
-
 	TCsqOrder selectByOrderNo(String orderNo);
-
-	TCsqOrder selectByUserIdAndTypeAndAmountValid(Long userId, int code, Double amount);
 
 	int update(TCsqOrder tCsqOrder);
 
@@ -27,4 +21,16 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectInOrderNos(String... orderNo);
 
 	int update(List<TCsqOrder> toUpdateList);
+
+	List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIds(Long fundId, int fromType, int toType, List<Long> orderIds);
+
+	List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(Long fundId, int toCode, int toCode1, List<Long> tOrderIds, int code);
+
+	List<TCsqOrder> selectByUserIdAndToTypeDesc(Long userId, int toCode);
+
+	List<TCsqOrder> selectByToIdAndToTypeAndUpdateTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp);
+
+	TCsqOrder selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(Long userId, Long userId1, int toCode, Long fundId, int toCode1, Double amount, Integer status);
+
+	List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusDesc(Long userId, int toCode, int toCode1, int code);
 }
