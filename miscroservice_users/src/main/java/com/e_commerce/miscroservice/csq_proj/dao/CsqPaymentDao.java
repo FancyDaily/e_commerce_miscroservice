@@ -11,4 +11,21 @@ public interface CsqPaymentDao {
 	 * @return
 	 */
 	List<TCsqUserPaymentRecord> findWaters(Long userId);
+
+	/**
+	 * 根据id查询流水
+	 * @param recordId
+	 * @return
+	 */
+	TCsqUserPaymentRecord findWaterById(Long recordId);
+
+
+
+	/**
+	 * 收入支出统计
+	 * @param userId
+	 * @param inOut
+	 * @return
+	 */
+	Double countMoney(Long userId, Integer inOut);
 }

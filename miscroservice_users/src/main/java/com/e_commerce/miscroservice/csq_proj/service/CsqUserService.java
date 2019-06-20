@@ -51,7 +51,7 @@ public interface CsqUserService {
 	 * @param userId
 	 * @return
 	 */
-	TCsqUser findCsqUserById(Long userId);
+	Map<String,Object> findCsqUserById(Long userId);
 
 	Map<String, Object> loginByTelephone(String telephone, String password, Integer option, String uuid);
 

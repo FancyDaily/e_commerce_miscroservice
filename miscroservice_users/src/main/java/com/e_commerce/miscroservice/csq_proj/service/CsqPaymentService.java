@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.service;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 
-import java.util.List;
+import java.util.Map;
 
 public interface CsqPaymentService {
 	/**
@@ -14,4 +14,20 @@ public interface CsqPaymentService {
 	 * @return
 	 */
 	QueryResult<TCsqUserPaymentRecord > findWaters(Integer pageNum, Integer pageSize, Long userId);
+
+	/**
+	 * 查询我的证书
+	 * @param recordId
+	 * @param userId
+	 * @return
+	 */
+	Map<String,Object> findMyCertificate(Long recordId, Long userId);
+
+	/**
+	 * 收入支出 统计
+	 * @param userId
+	 * @param inOut
+	 * @return
+	 */
+	Double countMoney(Long userId, Integer inOut);
 }

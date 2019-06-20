@@ -57,6 +57,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private CsqOrderDao csqOrderDao;
+	@Autowired
+	private CsqFundDao csqFundDao;
+
 
 	@Override
 	public void checkAuth(TCsqUser user) {
@@ -135,9 +138,25 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public TCsqUser findCsqUserById(Long userId) {
-
-		return csqUserDao.selectByPrimaryKey(userId);
+	public Map<String,Object> findCsqUserById(Long userId) {
+		TCsqUser tCsqUser = csqUserDao.selectByPrimaryKey(userId);
+		List<TCsqFund>  list = csqFundDao.selectByUserId(userId);
+		Map<String,Object> map = new HashMap<>();
+		Integer status = 0;
+		Double balance = 0D;
+		if (list!=null&&list.size()>0){
+			status = list.get(0).getStatus();
+			balance = list.get(0).getBalance();
+		}
+		map.put("balance",balance);
+		map.put("status",status);
+		map.put("name",tCsqUser.getName());
+		map.put("userHeadPortraitPath",tCsqUser.getUserHeadPortraitPath());
+		map.put("remarks",tCsqUser.getRemarks());
+		map.put("surplusAmount",tCsqUser.getSurplusAmount());
+		// TODO: 2019-06-20 捐款总额
+		map.put("accountMoney",tCsqUser.getSurplusAmount());
+		return map;
 	}
 
 	@Override

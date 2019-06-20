@@ -49,11 +49,39 @@ public class PaymentController {
 		log.info("流水查询num={},size={},userId={}",pageNum,pageSize,userId);
 		try {
 			QueryResult<TCsqUserPaymentRecord > records = csqPaymentService.findWaters(pageNum, pageSize, userId);
+			Double inMoney = csqPaymentService.countMoney(userId,0);
+			Double outMoney = csqPaymentService.countMoney(userId,1);
 			Map<String,Object> map  = new HashMap<>();
-			TCsqUser tCsqUser = csqUserService.findCsqUserById(userId);
 			map.put("list",records);
-			map.put("payNum",tCsqUser.getPayNum());
-			map.put("surplusAmount",tCsqUser.getSurplusAmount());
+			map.put("inMoney",inMoney);
+			map.put("outMoney",outMoney);
+			result.setData(map);
+			result.setSuccess(true);
+		}catch (MessageException e){
+			log.warn(e.getMessage());
+
+			result.setSuccess(false);
+			result.setMsg(e.getMessage());
+		}catch (Exception e){
+
+		}
+		return result;
+	}
+
+	/**
+	 * 查询我的证书
+	 * @param recordId
+	 * @return
+	 */
+	@RequestMapping("/my/certificate")
+	public Object findMyCertificate(Long recordId){
+		AjaxResult result = new AjaxResult();
+
+		Long userId = Long.valueOf(IdUtil.getId());
+		log.info("查询我的证书 userId={}",userId);
+
+		try{
+			Map<String,Object>  map =  csqPaymentService.findMyCertificate(recordId,userId);
 			result.setData(map);
 			result.setSuccess(true);
 		}catch (MessageException e){

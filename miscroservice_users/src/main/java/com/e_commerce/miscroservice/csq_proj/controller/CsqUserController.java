@@ -258,7 +258,7 @@ public class CsqUserController {
 	}
 
 	/**
-	 * 我的信息
+	 * 爱心账户我的信息
 	 * @return
 	 */
 	@RequestMapping("information")
@@ -266,11 +266,10 @@ public class CsqUserController {
 		Long userId = Long.valueOf(IdUtil.getId());
 		log.info("访问我的基本信息 ={}",userId);
 		AjaxResult ajaxResult = new AjaxResult();
-		TCsqUser csqUser = null;
 		try {
-			csqUser = csqUserService.findCsqUserById(userId);
+			Map<String,Object> map = csqUserService.findCsqUserById(userId);
 			ajaxResult.setSuccess(true);
-			ajaxResult.setData(csqUser);
+			ajaxResult.setData(map);
 
 		}catch (MessageException e){
 			log.warn(e.getMessage());

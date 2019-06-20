@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.e_commerce.miscroservice.csq_proj.mapper.CsqPaymentMapper">
+
+
+    <!--收入支出 统计-->
+    <select id="countMoney" resultType="java.lang.Double">
+         select  sum(money)
+        from t_csq_user_payment_record
+        where user_id = #{userId} and is_valid = '1' and in_out = #{inOut}
+    </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
