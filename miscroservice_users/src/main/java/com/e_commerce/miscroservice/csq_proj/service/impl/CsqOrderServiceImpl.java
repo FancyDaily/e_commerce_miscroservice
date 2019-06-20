@@ -8,11 +8,13 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.service.CsqOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-13 11:20
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqOrderServiceImpl implements CsqOrderService {
 

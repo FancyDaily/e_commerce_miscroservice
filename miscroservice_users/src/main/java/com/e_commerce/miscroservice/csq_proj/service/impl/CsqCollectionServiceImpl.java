@@ -25,6 +25,7 @@ import java.util.List;
  * @Date 2019-06-16 10:54
  * @Version 1.0
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqCollectionServiceImpl implements CsqCollectionService {
 	@Autowired

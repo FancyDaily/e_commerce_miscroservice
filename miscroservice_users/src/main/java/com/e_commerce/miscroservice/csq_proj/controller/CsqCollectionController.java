@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @Log
-@RequestMapping("collection")
+@RequestMapping("csq/collection")
 public class CsqCollectionController {
 
 	@Autowired

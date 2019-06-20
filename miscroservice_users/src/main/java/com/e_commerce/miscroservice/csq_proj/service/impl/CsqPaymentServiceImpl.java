@@ -10,6 +10,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Map;
  * @Date 2019-06-17 15:15
  * @Version 1.0
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqPaymentServiceImpl implements CsqPaymentService {
 	@Autowired

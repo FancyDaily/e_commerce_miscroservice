@@ -23,6 +23,7 @@ import java.util.Map;
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:37
  */
+@RequestMapping("csq/service")
 @RestController
 @Log
 public class CsqServiceController {

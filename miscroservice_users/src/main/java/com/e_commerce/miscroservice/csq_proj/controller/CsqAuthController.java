@@ -20,6 +20,7 @@ import java.util.Map;
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:33
  */
+@RequestMapping("csq/auth")
 @RestController
 @Log
 public class CsqAuthController {

@@ -22,6 +22,7 @@ import java.util.Map;
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:37
  */
+@RequestMapping("csq/payment")
 @RestController
 @Log
 public class PaymentController {

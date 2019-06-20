@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+
 /**
  * publishController
  * @Author: FangyiXu

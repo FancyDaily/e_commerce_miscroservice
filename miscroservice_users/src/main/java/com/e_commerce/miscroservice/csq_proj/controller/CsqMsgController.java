@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:38
  */
-@RequestMapping("msg")
+@RequestMapping("csq/msg")
 @RestController
 @Log
 public class CsqMsgController {

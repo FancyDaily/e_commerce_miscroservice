@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Map;
  * @Author: FangyiXu
  * @Date: 2019-06-12 11:41
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqPaySerrviceImpl implements CsqPayService {
 

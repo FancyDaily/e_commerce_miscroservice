@@ -20,6 +20,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * @Author: FangyiXu
  * @Date: 2019-06-18 14:42
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 

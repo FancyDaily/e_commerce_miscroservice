@@ -15,6 +15,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * @Author: FangyiXu
  * @Date: 2019-06-14 14:02
  */
+@Transactional(rollbackFor = Throwable.class)
 @Component
 public class CsqServiceServiceImpl implements CsqServiceService {
 

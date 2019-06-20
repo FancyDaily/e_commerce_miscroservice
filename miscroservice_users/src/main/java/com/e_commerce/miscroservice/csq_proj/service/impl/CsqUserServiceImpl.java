@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -28,6 +29,7 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
  * @Author: FangyiXu
  * @Date: 2019-06-12 10:45
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqUserServiceImpl implements CsqUserService {
 

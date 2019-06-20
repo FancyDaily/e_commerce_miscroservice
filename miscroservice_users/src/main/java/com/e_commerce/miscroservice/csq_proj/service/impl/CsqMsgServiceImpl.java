@@ -12,6 +12,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * @Author: FangyiXu
  * @Date: 2019-06-19 15:09
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqMsgServiceImpl implements CsqMsgService {
 

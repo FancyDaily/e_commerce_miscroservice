@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import jodd.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -15,6 +16,7 @@ import java.util.*;
  * @Author: FangyiXu
  * @Date: 2019-06-14 11:29
  */
+@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqpublishServiceImpl implements CsqPublishService {
 

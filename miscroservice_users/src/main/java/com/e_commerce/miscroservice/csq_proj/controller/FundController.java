@@ -24,7 +24,7 @@ import java.util.Map;
  * @Date: 2019-06-11 15:33
  */
 @RestController
-@RequestMapping("fund")
+@RequestMapping("csq/fund")
 @Log
 public class FundController {
 
