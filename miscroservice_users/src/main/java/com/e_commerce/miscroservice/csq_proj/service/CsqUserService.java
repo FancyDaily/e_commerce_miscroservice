@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 
 import java.util.Map;
 
@@ -45,9 +46,36 @@ public interface CsqUserService {
 	 */
 	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode);
 
+	Map<String, Object> loginByTelephone(String telephone, String password, Integer option, String uuid);
+
 	/**
-	 * 提交sheng
+	 * 注册组织账号与提交组织账号认证申请
+	 * @param telephone
+	 * @param password
+	 * @param validCode
 	 * @param csqUserAuth
 	 */
-	void sendCorpAuth(TCsqUserAuth csqUserAuth);
+	void registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth);
+
+	/**
+	 * 组织实名认证审核
+	 * @param userAuthId
+	 * @param option
+	 */
+	void certCorp(Long userAuthId, Integer option);
+
+	/**
+	 * 日行一善
+	 * @param userId
+	 */
+	CsqDailyDonateVo dailyDonateDetail(Long userId);
+
+	/**
+	 * 定制日推
+	 * @param weekDayCnt
+	 * @param serviceIds
+	 */
+	void customizeDailyDonateList(Integer weekDayCnt, Long... serviceIds);
+
+	void register(String telephone, String password, String uuid);
 }

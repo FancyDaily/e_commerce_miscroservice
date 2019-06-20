@@ -62,4 +62,10 @@ public class CsqFunDaoImpl implements CsqFundDao {
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime)));
 	}
 
+	@Override
+	public List<TCsqFund> selectInIds(List<Long> fundIds) {
+		return MybatisPlus.getInstance().finAll(new TCsqFund(), baseWhereBuild()
+			.in(TCsqFund::getId, fundIds));
+	}
+
 }

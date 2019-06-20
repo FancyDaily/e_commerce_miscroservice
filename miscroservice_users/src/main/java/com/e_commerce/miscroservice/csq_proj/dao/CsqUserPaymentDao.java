@@ -10,9 +10,21 @@ import java.util.List;
  */
 public interface CsqUserPaymentDao {
 
-	List<TCsqUserPaymentRecord> selectByToType(int type);
+	List<TCsqUserPaymentRecord> selectByToType(int... type);
 
 	List<TCsqUserPaymentRecord> selectByFromTypeAndToTypeDesc(int type, int subType);
 
 	List<TCsqUserPaymentRecord> selectByToTypeDesc(int type);
+
+	List<TCsqUserPaymentRecord> selectByToTypeAndUserId(long userId, int... type);
+
+	List<TCsqUserPaymentRecord> selectByFromTypeAndServiceId(int toCode, Long serviceId);
+
+	int insert(TCsqUserPaymentRecord build);
+
+	List<TCsqUserPaymentRecord> selectByFromTypeAndServiceIdDesc(int toCode, Long serviceId);
+
+	List<TCsqUserPaymentRecord> selectByToTypeAndToId(int toCode, Long fundId);
+
+	List<TCsqUserPaymentRecord> selectByToTypeAndToIdAndCreateTimeBetween(int toCode, Long fundId);
 }

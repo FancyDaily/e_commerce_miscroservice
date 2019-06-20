@@ -16,14 +16,23 @@ import java.util.List;
 @Component
 public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
-	private MybatisPlusBuild whereBuildByToType(int type) {
+	private MybatisPlusBuild baseWhereBuild() {
 		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
-			.eq(TCsqUserPaymentRecord::getToType, type)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
+	private MybatisPlusBuild whereBuildByToType(int... type) {
+		return baseWhereBuild()
+			.in(TCsqUserPaymentRecord::getToType, type);
+	}
+
+	private MybatisPlusBuild whereBuildByFromType(int... type) {
+		return baseWhereBuild()
+			.in(TCsqUserPaymentRecord::getToType, type);
+	}
+
 	@Override
-	public List<TCsqUserPaymentRecord> selectByToType(int type) {
+	public List<TCsqUserPaymentRecord> selectByToType(int... type) {
 		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByToType(type));
 	}
 
@@ -39,6 +48,43 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 	@Override
 	public List<TCsqUserPaymentRecord> selectByToTypeDesc(int type) {
 		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByToType(type)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByToTypeAndUserId(long userId, int... type) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByToType(type)
+			.eq(TCsqUserPaymentRecord::getUserId, userId));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByFromTypeAndServiceId(int toCode, Long serviceId) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByFromType(toCode)
+			.eq(TCsqUserPaymentRecord::getServiceId, serviceId));
+	}
+
+	@Override
+	public int insert(TCsqUserPaymentRecord build) {
+		return MybatisPlus.getInstance().save(build);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByFromTypeAndServiceIdDesc(int toCode, Long serviceId) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByFromType(toCode)
+			.eq(TCsqUserPaymentRecord::getServiceId, serviceId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByToTypeAndToId(int toCode, Long fundId) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByToType(toCode)
+			.eq(TCsqUserPaymentRecord::getFundId, fundId));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByToTypeAndToIdAndCreateTimeBetween(int toCode, Long fundId) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), whereBuildByToType(toCode)
+			.eq(TCsqUserPaymentRecord::getFundId, fundId)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
 	}
 }

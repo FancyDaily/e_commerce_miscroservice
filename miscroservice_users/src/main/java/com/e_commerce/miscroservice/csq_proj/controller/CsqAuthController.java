@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 从善桥实名认证Controller
  * @Author: FangyiXu
@@ -55,23 +57,59 @@ public class CsqAuthController {
 		return result;
 	}
 
+	/**
+	 * 组织注册与实名提交
+	 * @param telephone
+	 * @param password
+	 * @param validCode
+	 * @param name
+	 * @param licenseId
+	 * @param licensePic
+	 * @return
+	 */
 	@Consume(TCsqUserAuth.class)
-	@RequestMapping("send/corp")
-	public Object corpAuth(String licensePic, String licenseId) {
+	@RequestMapping("corp/submit")
+	public Object certCorpSubmit(String telephone, String password, String validCode, String name, String licenseId, String licensePic) {
 		AjaxResult result = new AjaxResult();
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
 		try {
-			csqUserService.sendCorpAuth(csqUserAuth);
+			csqUserService.registerAndSubmitCert(telephone, password, validCode, csqUserAuth);
+			result.setSuccess(true);
 		} catch (MessageException e) {
-			log.warn("====方法描述: {}, Message: {}====", "实名认证 - 个人", e.getMessage());
+			log.warn("====方法描述: {}, Message: {}====", "组织注册与实名提交", e.getMessage());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
 			e.printStackTrace();
-			log.error("实名认证 - 个人", e);
+			log.error("组织注册与实名提交", e);
 			result.setSuccess(false);
 		}
 		return result;
 	}
+
+	/**
+	 * 组织实名认证审核
+	 * @param userAuthId
+	 * @param option
+	 * @return
+	 */
+	@RequestMapping("cert/corp/do")
+	public Object certCorpDo(Long userAuthId, Integer option) {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqUserService.certCorp(userAuthId, option);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名认证审核", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名认证审核", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
 
 }

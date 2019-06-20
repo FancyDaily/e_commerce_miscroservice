@@ -4,7 +4,7 @@ package com.e_commerce.miscroservice.commons.enums.application;
  * @Author: FangyiXu
  * @Date: 2019-06-14 10:37
  */
-public enum CsqPaymentEnum {
+public enum CSqUserPaymentEnum {
 
 	TYPE_HUMAN(1, "平台外账户"),
 	TYPE_ACCOUNT(2, "爱心账户"),
@@ -24,7 +24,7 @@ public enum CsqPaymentEnum {
 		return msg;
 	}
 
-	CsqPaymentEnum(int code, String msg) {
+	CSqUserPaymentEnum(int code, String msg) {
 		this.code = code;
 		this.msg = msg;
 	}

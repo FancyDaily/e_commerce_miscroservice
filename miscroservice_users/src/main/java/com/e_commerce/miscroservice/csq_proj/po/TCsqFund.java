@@ -4,13 +4,9 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
-import jdk.nashorn.internal.objects.annotations.Constructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.sql.Timestamp;
 
 /**
  * 基金账户
@@ -29,12 +25,21 @@ public class TCsqFund extends BaseEntity{
 	private Long userId;
 
 	@Transient
-	private Integer totalToItemCnt;	//累积资助项目(去重)
+	private Integer totalToItemCnt;	//累积资助项目
 
 	@Column(commit = "关注方向(publish表对于id")
-	private Integer trendPubKey;
+	private String trendPubKeys;
 
-	@Column(commit = "名称")
+	@Column(commit = "基金名")
+	private String name;
+
+	@Column(commit = "描述")
+	private String description;
+
+	@Column(commit = "封面图")
+	private String coverPic;
+
+	@Column(commit = "机构名称")
 	private String orgName;
 
 	@Column(commit = "地址")
@@ -56,7 +61,10 @@ public class TCsqFund extends BaseEntity{
 	private Double balance;
 
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
-	private Double totalIn;
+	private Double sumTotalIn;
+
+	@Column(commit = "资金累积流入次数", precision = 11, defaultVal = "0")
+	private Integer totalInCnt;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
 	private Integer agentModeStatus;
@@ -71,4 +79,7 @@ public class TCsqFund extends BaseEntity{
 		return null;
 	}
 
+	public TCsqService copyCsqService() {
+		return null;
+	}
 }

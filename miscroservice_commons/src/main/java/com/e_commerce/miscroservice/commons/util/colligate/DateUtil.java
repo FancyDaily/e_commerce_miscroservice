@@ -458,6 +458,12 @@ public class DateUtil {
         return resultList;
     }
 
+    public static Integer getWeekDayInt(long mills) {
+		String date = timeStamp2Date(mills);
+		int weekDayIndex = getWeekDayIndex(date);
+		return ++weekDayIndex;
+	}
+
     /*
      * 功能描述:	将日期转换成周几
      * 作者: 许方毅
@@ -465,34 +471,40 @@ public class DateUtil {
      * @param date
      * @return
      */
-
     public static String getWeekDay(String date) {
-        if (date == null) {
-            return null;    //TODO
-        }
-        if (date.length() > 10) {
-            date = date.substring(0, 11);
-        }
-        String[] split = date.split("-");
-        String yearStr = split[0];
-        String monthStr = split[1];
-        String dayStr = split[2];
-        int year = Integer.valueOf(yearStr);
-        int month = Integer.valueOf(monthStr);
-        int day = Integer.valueOf(dayStr);
-        //根据基姆拉尔森公式计算
-        String[] weekDayStrs = AppConstant.WEEK_DAY_STRS;
-        if (month == 1) {
-            month = 13;
-            year--;
-        }
-        if (month == 2) {
-            month = 14;
-            year--;
-        }
-        int week = (day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
-        return weekDayStrs[week];
+		if(date == null) {
+			return null;
+		}
+		int weekDayIndex = getWeekDayIndex(date);
+		String[] weekDayStrs = AppConstant.WEEK_DAY_STRS;
+        return weekDayStrs[weekDayIndex];
     }
+
+    private static int getWeekDayIndex(String date) {
+		if (date == null) {
+			return 0;    //TODO
+		}
+		if (date.length() > 10) {
+			date = date.substring(0, 11);
+		}
+		String[] split = date.split("-");
+		String yearStr = split[0];
+		String monthStr = split[1];
+		String dayStr = split[2];
+		int year = Integer.valueOf(yearStr);
+		int month = Integer.valueOf(monthStr);
+		int day = Integer.valueOf(dayStr);
+		//根据基姆拉尔森公式计算
+		if (month == 1) {
+			month = 13;
+			year--;
+		}
+		if (month == 2) {
+			month = 14;
+			year--;
+		}
+		return (day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
+	}
 
     public static Map<String, Object> mills2DHms(Long availableMills) {
         long hourInterval = 60 * 60 * 1000;
@@ -535,4 +547,18 @@ public class DateUtil {
 		String yyMMdd = timeStamp2Date(System.currentTimeMillis(), "yyyyMMdd HHmm");
 		System.out.println(yyMMdd);
     }
+
+	public static int getContinueDayCnt(List<Long> createTimeList) {
+    	//要求参数createTimeList为倒序
+		int count = 0;
+		long lastTimeStamp = System.currentTimeMillis();
+		for(Long creatTime:createTimeList) {
+			if(lastTimeStamp - creatTime > interval) {	//如果当前时间比上轮时间超过24小时连续中断
+				break;
+			}
+			lastTimeStamp = creatTime;
+			count ++;
+		}
+		return count;
+	}
 }

@@ -1,5 +1,8 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-14 11:29
@@ -7,4 +10,10 @@ package com.e_commerce.miscroservice.csq_proj.service;
 public interface CsqPublishService {
 
 	String getPublishName(int toCode, Integer trendPubKey);
+
+	List<String> getPublishName(int mainKey, String trendPubKey);
+
+	Map getPublishName(int mainKey);
+
+	void setPublishName(int mainKey, Map<Long, Long> dailyDonateMap);
 }

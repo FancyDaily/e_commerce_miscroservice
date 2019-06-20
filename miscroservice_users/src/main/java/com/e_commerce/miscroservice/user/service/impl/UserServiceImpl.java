@@ -4244,7 +4244,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         userDao.updateByPrimaryKey(user);
     }
 
-    /**
+	/**
      * 非验证码注册观照app
      * @param user
      */

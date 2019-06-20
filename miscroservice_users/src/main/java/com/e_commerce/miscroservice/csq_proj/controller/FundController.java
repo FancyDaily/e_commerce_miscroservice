@@ -23,6 +23,7 @@ import java.util.Map;
  * @Date: 2019-06-11 15:33
  */
 @RestController
+@RequestMapping("fund")
 @Log
 public class FundController {
 
@@ -33,7 +34,7 @@ public class FundController {
 	 * 申请前检查
 	 * @return
 	 */
-	@RequestMapping("fund/apply/check")
+	@RequestMapping("apply/check")
 	public Object beforeApplyForFund() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -60,7 +61,7 @@ public class FundController {
 	 * @param publishId
 	 * @return
 	 */
-	@RequestMapping("fund/apply")
+	@RequestMapping("apply/do")
 	public Object applyForAFund(Long amount,
 								@RequestParam(required = false) Long fundId,
 								@RequestParam(required = false) String orderNo,
@@ -90,7 +91,7 @@ public class FundController {
 	 * @param publishId
 	 * @return
 	 */
-	@RequestMapping("fund/modify")
+	@RequestMapping("modify")
 	@Consume(TCsqFund.class)
 	public Object modifyMyFund(@RequestParam Long fundId, Long publishId) {
 		AjaxResult result = new AjaxResult();
@@ -117,7 +118,7 @@ public class FundController {
 	 * @param fundId
 	 * @return
 	 */
-	@RequestMapping("fund/cert")
+	@RequestMapping("cert")
 	public Object certFund(Long fundId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -142,7 +143,7 @@ public class FundController {
 	 * @param fundId
 	 * @return
 	 */
-	@RequestMapping("fund/detail")
+	@RequestMapping("detail")
 	public Object FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -168,7 +169,7 @@ public class FundController {
 	 * @param fundId
 	 * @return
 	 */
-	@RequestMapping("fund/share")
+	@RequestMapping("share")
 	public Object shareFund(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -195,7 +196,7 @@ public class FundController {
 	 * @param option
 	 * @return
 	 */
-	@RequestMapping("fund/list")
+	@RequestMapping("list")
 	public Object fundList(Integer pageNum, Integer pageSize,Integer... option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

@@ -3,7 +3,9 @@ package com.e_commerce.miscroservice.csq_proj.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
 import lombok.Builder;
 import lombok.Data;
 
@@ -31,6 +33,9 @@ public class TCsqOrder extends BaseEntity {
 	@Column(commit = "业务类型(爱心账户充值、申请基金支付、基金充值、项目捐赠 .etc)")
 	private Integer type;
 
+	@Column(commit = "支付来源")
+	private Integer fromType;
+
 	@Column(commit = "订单编号")
 	private String orderNo;
 
@@ -39,6 +44,9 @@ public class TCsqOrder extends BaseEntity {
 
 	@Column(commit = "订单状态", length = 11, defaultVal = "1", isNUll = false)
 	private Integer status;
+
+	@Column(commit = "开票状态", length = 11, defaultVal = "0", isNUll = false)
+	private Integer inVoiceStatus;
 
 	@Column(commit = "订单创建时间戳")
 	private Long orderTime;

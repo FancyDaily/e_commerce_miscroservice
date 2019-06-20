@@ -82,7 +82,7 @@ public class BaseService {
 	 * @param desc
 	 */
 	protected void setCommonServcieDescField(TUser user, TServiceDescribe desc) {
-//		desc.setId(snowflakeIdWorker.nextId());
+//		description.setId(snowflakeIdWorker.nextId());
 		long currentTime = System.currentTimeMillis();
 		desc.setCreateUser(user.getId());
 		desc.setCreateUserName(user.getName());

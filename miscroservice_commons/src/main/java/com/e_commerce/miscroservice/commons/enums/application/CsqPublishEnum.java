@@ -5,17 +5,18 @@ package com.e_commerce.miscroservice.commons.enums.application;
  * @Date: 2019-06-14 11:31
  */
 public enum CsqPublishEnum {
-	MAIN_KEY_TREND(1, "关注方向");
+	MAIN_KEY_TREND(1, "关注方向"),
+	MAIN_KEY_DAILY_DONATE(2, "日推");
 
-	int code;
+	Integer code;
 	String  msg;
 
-	CsqPublishEnum(int code, String msg) {
+	CsqPublishEnum(Integer code, String msg) {
 		this.code = code;
 		this.msg = msg;
 	}
 
-	public int toCode() {
+	public Integer toCode() {
 		return code;
 	}
 

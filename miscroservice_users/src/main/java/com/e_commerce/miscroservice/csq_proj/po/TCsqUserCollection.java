@@ -24,5 +24,7 @@ public class TCsqUserCollection extends BaseEntity {
 
 	private Long serviceId;
 
+	private Long userId;
+
 
 }

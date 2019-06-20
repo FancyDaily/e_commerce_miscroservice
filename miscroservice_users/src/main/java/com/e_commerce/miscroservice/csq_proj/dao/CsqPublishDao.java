@@ -8,4 +8,8 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqPublish;
  */
 public interface CsqPublishDao {
 	TCsqPublish selectByMainKey(int mainKey);
+
+	int update(TCsqPublish... tCsqPublish);
+
+	int insert(TCsqPublish... tCsqPublishes);
 }

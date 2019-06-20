@@ -15,7 +15,10 @@ public enum CsqOrderEnum {
 	STATUS_ALREADY_PAY(2, "已支付"),
 	STATUS_TIME_OUT(3, "支付超时"),
 	STATUS_REFUND_UNDERWAY(5, "退款中"),
-	STATUS_ALREADY_REFUND(6, "已退款")
+	STATUS_ALREADY_REFUND(6, "已退款"),
+
+	INVOICE_STATUS_NO(0, "未开票"),
+	INVOICE_STATUS_YES(1, "已开票")
 	;
 
 	public static final long INTERVAL = 30l * 60 * 1000;

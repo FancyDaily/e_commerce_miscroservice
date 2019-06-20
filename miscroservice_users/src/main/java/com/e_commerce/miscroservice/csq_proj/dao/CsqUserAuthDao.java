@@ -9,4 +9,10 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 public interface CsqUserAuthDao {
 
 	int insert(TCsqUserAuth... csqUserAuth);
+
+	TCsqUserAuth selectByUserId(Long corpUserId);
+
+	TCsqUserAuth selectByPrimaryKey(Long userAuthId);
+
+	int update(TCsqUserAuth userAuth);
 }

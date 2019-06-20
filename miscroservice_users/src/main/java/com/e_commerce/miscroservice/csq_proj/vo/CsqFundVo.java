@@ -15,7 +15,7 @@ public class CsqFundVo extends TCsqFund {
 
 	Integer contributeInCnt;	//贡献人次
 
-	String trendPubName;	//关注方向(名)
+	List<String> trendPubNames;	//关注方向(名)
 
 	List<TCsqUserPaymentRecord> goTOList;	//去向(捐助项目记录)
 }

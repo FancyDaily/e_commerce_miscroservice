@@ -24,14 +24,18 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	@Id
 	private Long id;
 
-	private Long userId;
+	private Long orderId;	//from
+
+	private Long userId;	//from
+
+	private Long fundId;	//from
+
+	private Long serviceId;	//from
+
+	private Long toId;	//to
 
 	@Transient
 	private TCsqUser user;
-
-	private Long fundId;
-
-	private Long serviceId;
 
 	@Transient
 	private String serviceName;

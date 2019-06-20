@@ -26,6 +26,7 @@ import java.util.Map;
  */
 @RestController
 @Log
+@RequestMapping("csq/user")
 public class CsqUserController {
 
 	@Autowired
@@ -160,6 +161,7 @@ public class CsqUserController {
 	 * @param smsCode
 	 * @return
 	 */
+	@RequestMapping("checkSMS")
 	public Object checkSMS(String telephone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		try {
@@ -173,6 +175,81 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("校验短信验证码", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 手机号密码登录
+	 * @param telephone
+	 * @param password
+	 * @param option 选择个人或组织登录
+	 * @return
+	 */
+	@RequestMapping("login/telephone/pwd")
+	public Object loginByTelephone(String telephone, String password, Integer option, String uuid) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("手机号密码登录, telephone={}, password={}, option={}", telephone, password, option);
+			csqUserService.loginByTelephone(telephone, password, option, uuid);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "手机号密码登录", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("手机号密码登录", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 注册
+	 * @param telephone
+	 * @param password
+	 * @param uuid
+	 * @return
+	 */
+	@RequestMapping("register")
+	public Object rigesterByTelephone(String telephone, String password, String uuid) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("注册, telephone={}, password={}", telephone, password);
+			csqUserService.register(telephone, password, uuid);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "注册", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("注册", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 每日一善
+	 * @return
+	 */
+	public Object dailyDonateDetail() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("每日一善, userId={}, telephone={}, password={}, option={}", userId);
+			csqUserService.dailyDonateDetail(userId);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "每日一善", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("每日一善", e);
 			result.setSuccess(false);
 		}
 		return result;

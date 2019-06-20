@@ -559,7 +559,7 @@ public class ProductServiceImpl extends BaseService implements ProductService {
 			String depict = desc.getDepict();
 			if(depict!=null && depict.contains("\n")) {
 				/*depict = depict.replaceAll("\n", "\t");
-				desc.setDepict(depict);*/
+				description.setDepict(depict);*/
 				batchFlag = false;
 			}
 		}

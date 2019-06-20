@@ -23,7 +23,10 @@ public class TCsqPublish extends BaseEntity {
 	private Long id;
 
 	@Column(commit = "业务类型名")
-	private String main_key;
+	private Integer main_key;
+
+	@Column(commit = "业务类型描述", defaultVal = "未知")
+	private String key_desc;
 
 	@Column(commit = "值(json)")
 	private String value;

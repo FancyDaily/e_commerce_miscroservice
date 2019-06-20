@@ -74,8 +74,16 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectInIds(List<Long> userIds) {
-		return MybatisPlus.getInstance().findOne(new TCsqUser(), baseWhereBuild()
+		return MybatisPlus.getInstance().finAll(new TCsqUser(), baseWhereBuild()
 		.in(TUser::getId, userIds));
+	}
+
+	@Override
+	public TCsqUser selectByUserTelAndPasswordAndAccountType(String telephone, String password, Integer accountType) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), baseWhereBuild()
+		.eq(TCsqUser::getUserTel, telephone)
+		.eq(TCsqUser::getPassword, password)
+		.eq(TCsqUser::getAccountType, accountType));
 	}
 
 	private MybatisPlusBuild baseWhereBuild() {

@@ -6,7 +6,9 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum CsqUserAuthEnum {
 
-	STATUS_UNDER_CERT(0, "待审核");
+	STATUS_UNDER_CERT(0, "待审核"),
+	STATUS_CERT_PASS(1, "审核通过"),
+	STATUS_CERT_REFUSE(2, "审核拒绝");
 
 	private int code;
 	private String desc;

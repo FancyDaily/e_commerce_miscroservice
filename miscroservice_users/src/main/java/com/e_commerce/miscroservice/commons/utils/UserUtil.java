@@ -1,8 +1,7 @@
 package com.e_commerce.miscroservice.commons.utils;
 
-import com.alibaba.fastjson.JSONObject;
-import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
+import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -10,19 +9,13 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.Map;
+import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
 /**
  * @Description 获取用户
@@ -99,7 +92,8 @@ public class UserUtil {
 	}
 
 	public static Long getTestId() {
-		Long id = getId();
+//		Long id = getId();
+		Long id = null;
 		return id == null? 1292: id;
 	}
 
@@ -159,5 +153,15 @@ public class UserUtil {
 			}
 		}
 		return namePrefix;
+	}
+
+	public static TCsqUser login(TCsqUser tCsqUser, Integer application, AuthorizeRpcService authorizeRpcService) {
+		String namePrefix = UserUtil.getApplicationNamePrefix(application);
+		Token load = authorizeRpcService.load(namePrefix + tCsqUser.getId(),
+			DEFAULT_PASS, tCsqUser.getUuid());
+		if (load != null && load.getToken() != null) {
+			tCsqUser.setToken(load.getToken());
+		}
+		return tCsqUser;
 	}
 }

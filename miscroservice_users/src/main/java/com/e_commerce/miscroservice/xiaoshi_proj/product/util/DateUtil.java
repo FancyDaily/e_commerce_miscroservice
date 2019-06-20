@@ -380,4 +380,8 @@ public class DateUtil {
 		String stringDateTime = format(timestamp);
 		return genCron(stringDateTime);
 	}
+
+	public static int millsToMinutes(long interval) {
+		return (int) (interval / 1000 / 60);
+	}
 }

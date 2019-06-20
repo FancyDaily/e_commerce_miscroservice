@@ -197,7 +197,7 @@ public class SeekHelpController extends BaseController {
      *                  "collectTime": 收取时长,
      *                  "nameAudioUrl": "音频地址",
      *                  },
-     *                  "desc": [
+     *                  "description": [
      *                  {
      *                  "sort": 排序序号,
      *                  "depict": "详情",
@@ -263,7 +263,7 @@ public class SeekHelpController extends BaseController {
      *                  "collectTime": 收取时长,
      *                  "nameAudioUrl": "音频地址",
      *                  },
-     *                  "desc": [
+     *                  "description": [
      *                  {
      *                  "sort": 排序序号,
      *                  "depict": "详情",

@@ -422,4 +422,5 @@ public interface UserService {
     void registerGZ(TUser user, String validCode);
 
     void modifyPwd(String telephone, String validCode, String password, int toCode);
+
 }

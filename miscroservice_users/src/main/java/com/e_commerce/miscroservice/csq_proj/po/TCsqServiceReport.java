@@ -22,6 +22,8 @@ public class TCsqServiceReport extends BaseEntity {
 	@Id
 	private Long id;
 
+	private Long serviceId;
+
 	@Column(commit = "标题")
 	private String title;
 

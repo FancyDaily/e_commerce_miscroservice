@@ -61,12 +61,19 @@ public class CsqFundServiceImpl implements CsqFundService {
 		// 6.11 把对实名的check放到编辑名字时
 		//6.11	基金申请即通过(付款后激活变为可用)，状态为未公开，达到标准线（eg.10000）时可以申请公开，此间状态为待审核
 		TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);	//check订单支付状态
-		csqOrderService.checkPaid(tCsqOrder);
-	//开始激活基金流程:
+//		csqOrderService.checkPaid(tCsqOrder);	//TODO 为了测试拿掉了check
+	//开始基金创建流程:
 		Long fundId = tCsqOrder.getFundId();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
-		csqFund.setStatus(CsqFundEnum.STATUS_UNDER_CERT.getVal());	//激活
+		csqFund.setStatus(CsqFundEnum.STATUS_ACTIVATED.getVal());	//激活
 		fundDao.update(csqFund);
+
+		TCsqService csqService = csqFund.copyCsqService();
+		csqService.setId(null);
+		csqService.setStatus(CsqServiceEnum.STATUS_INITIAL.getCode());
+		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
+		csqService.setFundStatus(csqFund.getStatus());
+		csqServiceDao.insert(csqService);
 	}
 
 	private void checkSingletonForPerson(TCsqUser user) {
@@ -95,8 +102,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 		Integer currentStatus = csqFund.getStatus();
 		//包含[申请公开]基金业务
 		Integer status = fund.getStatus();
-		if(CsqFundEnum.STATUS_UNDER_CERT.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
-			Double totalIn = csqFund.getTotalIn();
+		if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
+			Double totalIn = csqFund.getSumTotalIn();
 			if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
 			}
@@ -157,14 +164,14 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
 		//统计捐款人数
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToType(CsqPaymentEnum.TYPE_FUND.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToType(CSqUserPaymentEnum.TYPE_FUND.toCode());
 		int count = tCsqUserPaymentRecords.size();
 		csqFundVo.setContributeInCnt(count);
 		//把基金方向的publish_id转换成名字
-		String publishName = csqpublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), csqFundVo.getTrendPubKey());
-		csqFundVo.setTrendPubName(publishName);
+		List<String> publishName = csqpublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), csqFundVo.getTrendPubKeys());
+		csqFundVo.setTrendPubNames(publishName);
 		//基金资助项目记录 列表 TODO 可能需要分页
-		List<TCsqUserPaymentRecord> csqUserPaymentRecords = paymentDao.selectByFromTypeAndToTypeDesc(CsqPaymentEnum.TYPE_FUND.toCode(), CsqPaymentEnum.TYPE_SERVICE.toCode());
+		List<TCsqUserPaymentRecord> csqUserPaymentRecords = paymentDao.selectByFromTypeAndToTypeDesc(CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode());
 		List<Long> csqServiceIds = csqUserPaymentRecords.stream().map(TCsqUserPaymentRecord::getServiceId).collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
@@ -188,7 +195,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		Map<String, Object> map = new HashMap<>();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		//查询捐入列表
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeDesc(CsqPaymentEnum.TYPE_FUND.toCode());	//分页标记
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByToTypeDesc(CSqUserPaymentEnum.TYPE_FUND.toCode());	//分页标记
 		List<Long> userIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getUserId).collect(Collectors.toList());
 		List<TCsqUser> tUsers = userDao.selectInIds(userIds);
@@ -230,4 +237,5 @@ public class CsqFundServiceImpl implements CsqFundService {
 		pageSize = pageSize == null? 0:pageSize;
 		return PageHelper.startPage(pageNum, pageSize);
 	}
+
 }
