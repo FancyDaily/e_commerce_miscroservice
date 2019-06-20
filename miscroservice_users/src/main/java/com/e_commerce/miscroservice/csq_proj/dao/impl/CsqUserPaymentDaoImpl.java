@@ -36,7 +36,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), baseWhereBuild()
 			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
 			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
-			.eq(TCsqUserPaymentRecord::getInOut, inOut));
+			.eq(TCsqUserPaymentRecord::getInOrOut, inOut));
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), baseWhereBuild()
 			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
 			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
-			.eq(TCsqUserPaymentRecord::getInOut, inOut)
+			.eq(TCsqUserPaymentRecord::getInOrOut, inOut)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
 	}
 }

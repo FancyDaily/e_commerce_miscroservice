@@ -299,7 +299,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.money(price)
 			.entityId(tCsqOrder.getFromId())	//来源
 			.entityType(tCsqOrder.getFromType())
-			.inOut(CSqUserPaymentEnum.INOUT_OUT.toCode()).build();
+			.inOrOut(CSqUserPaymentEnum.INOUT_OUT.toCode()).build();
 
 		TCsqUserPaymentRecord build2 = build1;
 		Long serviceId = tCsqOrder.getToId();
