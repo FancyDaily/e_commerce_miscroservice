@@ -46,6 +46,13 @@ public interface CsqUserService {
 	 */
 	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode);
 
+	/**
+	 * 根据id查找
+	 * @param userId
+	 * @return
+	 */
+	TCsqUser findCsqUserById(Long userId);
+
 	Map<String, Object> loginByTelephone(String telephone, String password, Integer option, String uuid);
 
 	/**

@@ -62,9 +62,10 @@ public class CsqCollectionController {
 		AjaxResult result = new AjaxResult();
 		Integer userId = IdUtil.getId();
 		log.info("收藏列表id={},Num={},size={}",userId,pageNum,pageSize);
-		QueryResult<CsqCollectionVo> list = null;
 		try {
-			list = csqCollectionService.collectionList(pageNum,pageSize,userId);
+			QueryResult<CsqCollectionVo> list = csqCollectionService.collectionList(pageNum,pageSize,userId);
+			result.setData(list);
+			result.setSuccess(true);
 		}catch (MessageException e){
 			log.warn(e.getMessage());
 
@@ -74,8 +75,7 @@ public class CsqCollectionController {
 
 		}
 
-		result.setData(list);
-		result.setSuccess(true);
+
 		return result;
 	}
 

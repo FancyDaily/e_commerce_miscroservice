@@ -7,7 +7,9 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -253,6 +255,33 @@ public class CsqUserController {
 			result.setSuccess(false);
 		}
 		return result;
+	}
+
+	/**
+	 * 我的信息
+	 * @return
+	 */
+	@RequestMapping("information")
+	public Object myInformation(){
+		Long userId = Long.valueOf(IdUtil.getId());
+		log.info("访问我的基本信息 ={}",userId);
+		AjaxResult ajaxResult = new AjaxResult();
+		TCsqUser csqUser = null;
+		try {
+			csqUser = csqUserService.findCsqUserById(userId);
+			ajaxResult.setSuccess(true);
+			ajaxResult.setData(csqUser);
+
+		}catch (MessageException e){
+			log.warn(e.getMessage());
+			ajaxResult.setSuccess(false);
+			ajaxResult.setMsg(e.getMessage());
+		}catch (Exception e){
+			ajaxResult.setSuccess(false);
+			log.error("查看我的信息出错id={}",userId);
+		}
+		return ajaxResult;
+
 	}
 
 }

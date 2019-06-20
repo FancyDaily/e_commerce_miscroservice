@@ -132,6 +132,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
+	public TCsqUser findCsqUserById(Long userId) {
+
+		return csqUserDao.selectByPrimaryKey(userId);
+	}
+
+	@Override
 	public Map<String, Object> loginByTelephone(String telephone, String password, Integer option, String uuid) {
 		Map<String, Object> map = new HashMap<>();
 		Integer OPTION_PERSON = CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode();
