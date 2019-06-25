@@ -16,4 +16,6 @@ public interface CsqPublishService {
 	Map getPublishName(int mainKey);
 
 	void setPublishName(int mainKey, Map<Long, Long> dailyDonateMap);
+
+	void setPublishName(Integer mainKey, Integer[] keys, String[] names);
 }

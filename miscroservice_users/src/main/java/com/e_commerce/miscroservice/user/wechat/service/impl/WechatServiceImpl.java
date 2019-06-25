@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.user.wechat.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
+import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.user.wechat.common.MyX509TrustManager;
@@ -132,7 +133,13 @@ public class WechatServiceImpl implements WechatService {
 	/**
 	 * 获取二维码
 	 */
+	@Override
 	public String genQRCode(String scene, String page) {
+		return genQRCode(scene, page, UploadPathEnum.innerEnum.PERSON);
+	}
+
+	@Override
+	public String genQRCode(String scene, String page, UploadPathEnum.innerEnum uploadEnum) {
 		OutputStream os = null;
 		String imgUrl = "";
 		try {
@@ -174,8 +181,8 @@ public class WechatServiceImpl implements WechatService {
 			BufferedInputStream bis = new BufferedInputStream(inputStream);
 
 			// 上传到阿里云
-			imgUrl = AliOSSUtil.uploadQrImg(bis, scene);
-
+//			imgUrl = AliOSSUtil.uploadQrImg(bis, scene);
+			imgUrl = AliOSSUtil.uploadQrImg(bis, scene, uploadEnum);
 			/*
 			 * os = new FileOutputStream(new File(filePath)); int len; byte[] arr = new
 			 * byte[1024]; while ((len = bis.read(arr)) != -1) { os.write(arr, 0, len);

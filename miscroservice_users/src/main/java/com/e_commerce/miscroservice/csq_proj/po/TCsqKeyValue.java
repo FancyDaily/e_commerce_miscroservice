@@ -23,13 +23,13 @@ public class TCsqKeyValue extends BaseEntity {
 	private Long id;
 
 	@Column(commit = "键值")
-	private Long key;
+	private Long mainKey;
 
 	@Column(commit = "副键值", defaultVal = "0")
 	private Long subKey;
 
 	@Column(commit = "值")
-	private String value;
+	private String theValue;
 
 	@Column(commit = "类型", length = 11, isNUll = false)
 	private Integer type;

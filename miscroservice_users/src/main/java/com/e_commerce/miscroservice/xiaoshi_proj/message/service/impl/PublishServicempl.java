@@ -47,7 +47,7 @@ public class PublishServicempl implements PublishService {
 
 
     /**
-     * 插入key-value
+     * 插入key-theValue
      * @param id
      * @param key
      * @param value
@@ -74,7 +74,7 @@ public class PublishServicempl implements PublishService {
     }
     /**
      *
-     * 功能描述:获取key—value
+     * 功能描述:获取key—theValue
      * 作者:姜修弘
      * 创建时间:2018年11月12日 下午3:36:43
      * @param key

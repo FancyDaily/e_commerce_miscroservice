@@ -32,7 +32,8 @@ public class GZVoucherServiceImpl implements GZVoucherService {
 
     @Override
     public List<MyVoucherVo> myVoucherList(TUser user, Integer... option) {
-        Long userId = user.getId();
+//        Long userId = user.getId();
+		Long userId = 1150L;
         log.info("我的代金券列表userId={}, option={}", userId, option);
         if(userId == null) {
             return new ArrayList<>();

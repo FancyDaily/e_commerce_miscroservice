@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -57,6 +58,7 @@ public class CsqMsgController {
 	 * 未读消息数目
 	 * @return
 	 */
+	@RequestMapping("unreadCnt")
 	public Object unreadCnt() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -81,6 +83,7 @@ public class CsqMsgController {
 	 * 全部标为已读
 	 * @return
 	 */
+	@RequestMapping("readAll")
 	public Object readAll() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -99,4 +102,37 @@ public class CsqMsgController {
 		}
 		return result;
 	}
+
+	/**
+	 * 手动推送系统消息
+	 * @param userId
+	 * @param title
+	 * @param content
+	 * @param serviceId
+	 * @param type
+	 * @return
+	 */
+	@Consume(TCsqSysMsg.class)
+	@RequestMapping("insert")
+	public Object insert(Long userId, String title, String content, Long serviceId, Integer type) {
+		AjaxResult result = new AjaxResult();
+		Long operatorId = UserUtil.getTestId();
+		TCsqSysMsg csqSysMsg = (TCsqSysMsg) ConsumeHelper.getObj();
+		try {
+			log.info("手动推送系统消息, userId={}, title={}. content={}, serviceId={}, type={}", userId, title, content, serviceId, type);
+			csqMsgService.insert(userId, csqSysMsg);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "手动推送系统消息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("手动推送系统消息", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+
 }

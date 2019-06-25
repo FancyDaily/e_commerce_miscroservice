@@ -47,7 +47,7 @@ public class ProductCommonController extends BaseController {
 	 * 获取商品封面图
 	 *
 	 * @param serviceIds 需要获取封面图的商品ID
-	 * @return key:商品ID  value:封面图
+	 * @return mainKey:商品ID  theValue:封面图
 	 */
 	public Map<Long, String> getProductCoverPic(List<Long> serviceIds) {
 		Map<Long, String> coverPic = new HashMap<>();

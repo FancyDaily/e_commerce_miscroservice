@@ -49,7 +49,7 @@ public class StoreWxa {
 	 * <p>老系统查询兼容</p>
 	 *//*
 
-	@Column(value = "in_shop_store_id", commit = "店中店的storeId", defaultVal = "0", length = 20)
+	@Column(theValue = "in_shop_store_id", commit = "店中店的storeId", defaultVal = "0", length = 20)
 	private Long inShopStoreId;
 
 
@@ -144,7 +144,7 @@ public class StoreWxa {
 	private Long createTime;
 
 
-	@Column(value = "update_time",dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE,commit = "更新时间")
+	@Column(theValue = "update_time",dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE,commit = "更新时间")
 	private Timestamp updateTime;
 
 }

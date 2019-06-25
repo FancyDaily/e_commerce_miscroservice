@@ -74,8 +74,8 @@ public class FileUrlManagers {
 			return url;
 		}
 		try {
-           /* String key = "url" + fileName;
-            Long exist = (Long) redisUtil.get(key);
+           /* String mainKey = "url" + fileName;
+            Long exist = (Long) redisUtil.get(mainKey);
             boolean expired = exist==null? true:System.currentTimeMillis() > exist;*/
 			//从LoadingCache获取
 			LoadingCache loadingCache = ApplicationEnum.loadingCache;

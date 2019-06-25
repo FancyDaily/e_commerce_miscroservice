@@ -48,17 +48,17 @@ public class PropUtil {
 			}
 		}
 	}
-	public static String get(String key){
+	public static String get(String mainKey){
 		try {			
-			return properties.getProperty(key,null);
+			return properties.getProperty(mainKey,null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public static void set(String key,String value){
-		properties.setProperty(key, value);		
+	public static void set(String mainKey,String theValue){
+		properties.setProperty(mainKey, theValue);
 	}
 }
 */

@@ -53,4 +53,9 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 		}).collect(Collectors.toList());
 		return MybatisPlus.getInstance().save(csqSysMsgs);
 	}
+
+	@Override
+	public int insert(List<TCsqSysMsg> toInserter) {
+		return MybatisPlus.getInstance().save(toInserter);
+	}
 }

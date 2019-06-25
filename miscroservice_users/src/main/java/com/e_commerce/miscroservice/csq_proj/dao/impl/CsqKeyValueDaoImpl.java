@@ -24,14 +24,14 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndType(Long userId, int code) {
 		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), baseWhereBuild()
-			.eq(TCsqKeyValue::getKey, userId)
+			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code));
 	}
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code) {
 		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), baseWhereBuild()
-			.eq(TCsqKeyValue::getKey, userId)
+			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqKeyValue::getCreateTime)));
 	}

@@ -69,4 +69,6 @@ public interface CsqServiceService {
 	 * @param orderNo
 	 */
 	void donate(String orderNo);
+
+	void checkPubAuth(Long userId);
 }

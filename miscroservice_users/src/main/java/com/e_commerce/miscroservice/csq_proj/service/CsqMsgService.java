@@ -16,4 +16,6 @@ public interface CsqMsgService {
 	void readAll(Long userId);
 
 	void saveMsg(TCsqSysMsg csqSysMsg);
+
+	void insert(Long userId, TCsqSysMsg csqSysMsg);
 }

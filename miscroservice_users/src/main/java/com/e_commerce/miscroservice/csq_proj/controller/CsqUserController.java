@@ -9,8 +9,8 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -194,7 +194,9 @@ public class CsqUserController {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("手机号密码登录, telephone={}, password={}, option={}", telephone, password, option);
-			csqUserService.loginByTelephone(telephone, password, option, uuid);
+			Map<String, Object> map = csqUserService.loginByTelephone(telephone, password, option, uuid);
+			result.setData(map);
+			result.setSuccess(true);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "手机号密码登录", e.getMessage());
@@ -238,12 +240,14 @@ public class CsqUserController {
 	 * 每日一善
 	 * @return
 	 */
+	@RequestMapping("dailydonate/detail")
 	public Object dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("每日一善, userId={}, telephone={}, password={}, option={}", userId);
-			csqUserService.dailyDonateDetail(userId);
+			CsqDailyDonateVo csqDailyDonateVo = csqUserService.dailyDonateDetail(userId);
+			result.setData(csqDailyDonateVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "每日一善", e.getMessage());
@@ -281,6 +285,60 @@ public class CsqUserController {
 		}
 		return ajaxResult;
 
+	}
+
+	/**
+	 * 分享
+	 * @param entityId
+	 * @param option
+	 * @return
+	 */
+	@RequestMapping("share")
+	public Object share(Long entityId, Integer option) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("分享, userId={}, entityId={}, option={}", userId, entityId, option);
+			Map<String, Object> share = csqUserService.share(userId, entityId, option);
+			result.setData(share);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "分享", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("分享", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 平台托管消费行为的记录
+	 * @param fromId
+	 * @param fromType
+	 * @param amount
+	 * @param wholeDescription
+	 * @return
+	 */
+	public Object recordForConsumption(Long fromId,  Integer fromType, Double amount, String wholeDescription) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("平台托管消费行为的记录, userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}", userId, fromId, fromType, amount, wholeDescription);
+			csqUserService.recordForConsumption(userId, fromId, fromType, amount, wholeDescription);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "平台托管消费行为的记录", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("平台托管消费行为的记录", e);
+			result.setSuccess(false);
+		}
+		return result;
 	}
 
 }

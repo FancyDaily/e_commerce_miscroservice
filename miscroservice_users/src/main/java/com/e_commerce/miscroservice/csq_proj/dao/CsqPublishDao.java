@@ -11,5 +11,7 @@ public interface CsqPublishDao {
 
 	int update(TCsqPublish... tCsqPublish);
 
+	int update(TCsqPublish tCsqPublish);
+
 	int insert(TCsqPublish... tCsqPublishes);
 }

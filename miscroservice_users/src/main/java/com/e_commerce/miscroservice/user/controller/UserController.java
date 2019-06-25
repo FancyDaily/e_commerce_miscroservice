@@ -2642,7 +2642,7 @@ public class UserController extends BaseController {
      *                 "entityId": "",
      *                 "type": 3,
      *                 "subType": "",
-     *                 "value": "",
+     *                 "theValue": "",
      *                 "targetId": "",
      *                 "targetNum": "",
      *                 "createUser": 68813260748488704,
@@ -2714,7 +2714,7 @@ public class UserController extends BaseController {
      * 用户反馈
      *
      * @param token      登录凭证
-     * @param labelsId   key-value表中的对应id
+     * @param labelsId   mainKey-value表中的对应id
      * @param message    回馈内容
      * @param voucherUrl 图片信息(多张使用逗号分隔)
      *                   <p>

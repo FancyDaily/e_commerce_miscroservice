@@ -29,4 +29,6 @@ public interface CsqUserDao {
 	List<TCsqUser> selectInIds(List<Long> userIds);
 
 	TCsqUser selectByUserTelAndPasswordAndAccountType(String telephone, String password, Integer accountType);
+
+	List<TCsqUser> selectAll();
 }

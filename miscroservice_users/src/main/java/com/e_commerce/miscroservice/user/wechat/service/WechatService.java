@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.wechat.service;
 
+import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 
 /**
@@ -43,6 +44,8 @@ public interface WechatService {
 	 * @return
 	 */
 	public String genQRCode(String scene, String page);
+
+	String genQRCode(String scene, String page, UploadPathEnum.innerEnum uploadEnum);
 
 	/**
 	 * 获取个人手机号码信息

@@ -78,10 +78,10 @@ public class DESedeUtil {
 	public static byte[] encrypt(String message, String sKey) throws Exception {
 		final byte[] keyBytes = getKeyBytes(sKey);
 
-		final SecretKey key = new SecretKeySpec(keyBytes, ALGORITHM_DESEDE);
+		final SecretKey mainKey = new SecretKeySpec(keyBytes, ALGORITHM_DESEDE);
 		final IvParameterSpec iv = new IvParameterSpec(new byte[8]);
 		final Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
-		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+		cipher.init(Cipher.ENCRYPT_MODE, mainKey, iv);
 
 		final byte[] plainTextBytes = message.getBytes(CHARSET_UTF_8);
 		final byte[] cipherText = cipher.doFinal(plainTextBytes);
@@ -104,10 +104,10 @@ public class DESedeUtil {
 	public static String decrypt(byte[] message, String sKey) throws Exception {
 		final byte[] keyBytes = getKeyBytes(sKey);
 
-		final SecretKey key = new SecretKeySpec(keyBytes, ALGORITHM_DESEDE);
+		final SecretKey mainKey = new SecretKeySpec(keyBytes, ALGORITHM_DESEDE);
 		final IvParameterSpec iv = new IvParameterSpec(new byte[8]);
 		final Cipher decipher = Cipher.getInstance(CIPHER_TRANSFORMATION);
-		decipher.init(Cipher.DECRYPT_MODE, key, iv);
+		decipher.init(Cipher.DECRYPT_MODE, mainKey, iv);
 
 		final byte[] plainText = decipher.doFinal(message);
 		return new String(plainText, CHARSET_UTF_8);

@@ -85,4 +85,30 @@ public interface CsqUserService {
 	void customizeDailyDonateList(Integer weekDayCnt, Long... serviceIds);
 
 	void register(String telephone, String password, String uuid);
+
+	/**
+	 * 分享
+	 * @param userId
+	 * @param entityId
+	 * @param option
+	 * @return
+	 */
+	Map<String, Object> share(Long userId, Long entityId, Integer option);
+
+	/**
+	 * 平台托管产生的记录
+	 * @param userId
+	 * @param fromId
+	 * @param fromType
+	 * @param amount
+	 * @param wholeDescription
+	 */
+	void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription);
+
+	/**
+	 * 个人实名认证审核
+	 * @param userAuthId
+	 * @param option
+	 */
+	void certPerson(Long userAuthId, Integer option);
 }

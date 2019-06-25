@@ -49,6 +49,4 @@ public class MessageException extends RuntimeException{
 		this.errorCode = errorCode;
 	}
 	
-	
-
 }

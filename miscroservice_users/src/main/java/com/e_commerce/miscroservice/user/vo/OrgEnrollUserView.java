@@ -3,7 +3,7 @@ package com.e_commerce.miscroservice.user.vo;
 import java.util.List;
 
 /**
- * 功能描述:key-value 权益view
+ * 功能描述:mainKey-theValue 权益view
  * 模块:
  * 项目:
  * 版本号:

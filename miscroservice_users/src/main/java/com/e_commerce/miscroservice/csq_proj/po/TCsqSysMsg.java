@@ -46,4 +46,8 @@ public class TCsqSysMsg extends BaseEntity {
 	@Column(commit = "已读状态", length = 11, defaultVal = "0")
 	private Integer isRead;
 
+	public TCsqSysMsg copyTCsqSysMsg() {
+		return null;
+	}
+
 }

@@ -86,6 +86,11 @@ public class CsqUserDaoImpl implements CsqUserDao {
 		.eq(TCsqUser::getAccountType, accountType));
 	}
 
+	@Override
+	public List<TCsqUser> selectAll() {
+		return MybatisPlus.getInstance().finAll(new TCsqUser(), baseWhereBuild());
+	}
+
 	private MybatisPlusBuild baseWhereBuild() {
 		return new MybatisPlusBuild(TCsqUser.class)
 			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES);

@@ -32,18 +32,42 @@ public class CsqServiceController {
 	private CsqServiceService csqServiceService;
 
 	/**
+	 * 检查发布权限
+	 * @return
+	 */
+	@RequestMapping("checkAuth")
+	public Object checkAuth() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("检查发布权限, userId={}", userId);
+			csqServiceService.checkPubAuth(userId);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "检查发布权限", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("检查发布权限", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * 发布项目
 	 * @param description
 	 * @return
 	 */
 	@RequestMapping("publish")
 	@Consume(TCsqService.class)
-	public Object publishService(String description) {
+	public Object publishService(String description, String name) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqService service = (TCsqService) ConsumeHelper.getObj();
 		try {
-			log.info("发布项目, description={}", description);
+			log.info("发布项目, description={}, name={}", description, name);
 			csqServiceService.publish(userId, service);
 			result.setSuccess(true);
 		} catch (MessageException e) {

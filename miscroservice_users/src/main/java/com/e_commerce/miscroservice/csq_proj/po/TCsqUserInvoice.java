@@ -48,7 +48,7 @@ public class TCsqUserInvoice extends BaseEntity {
 	private String name;
 
 	@Column(commit = "税号", length = 11, isNUll = false)
-	private Integer taxNo;
+	private String taxNo;
 
 	@Column(commit = "地址")
 	private String addr;

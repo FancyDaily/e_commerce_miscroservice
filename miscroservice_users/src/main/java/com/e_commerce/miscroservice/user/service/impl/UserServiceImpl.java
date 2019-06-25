@@ -1974,7 +1974,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public TPublish getPublishValue(String key) {
         String value = messageService.getValue(key);
         TPublish publish = new TPublish();
-//        publish.setValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
+//        publish.setTheValue("[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]");
         publish.setValue(value);
         return publish;
     }
@@ -2160,7 +2160,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         // TODO 刷新缓存
         String key = "str" + inviterId;
         if (redisUtil.hasKey(key)) {
-//            String inviterToken = (String) redisUtil.get(key);
+//            String inviterToken = (String) redisUtil.get(mainKey);
 //            flushRedisUser(inviterToken, inviter);
         }
     }

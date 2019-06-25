@@ -63,7 +63,13 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	public int update(List<TCsqOrder> toUpdateList) {
 		List<Long> toUpdateIds = toUpdateList.stream()
 			.map(TCsqOrder::getId).collect(Collectors.toList());
-		return MybatisPlus.getInstance().update(toUpdateList, baseWhereBuild()
+		return MybatisPlus.getInstance().update(toUpdateList, new MybatisPlusBuild(TCsqOrder.class)
+			.in(TCsqOrder::getId, toUpdateIds));
+	}
+
+	@Override
+	public int update(List<TCsqOrder> toUpdateList, List<Long> toUpdateIds) {
+		return MybatisPlus.getInstance().update(toUpdateList, new MybatisPlusBuild(TCsqOrder.class)
 			.in(TCsqOrder::getId, toUpdateIds));
 	}
 
@@ -116,11 +122,31 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	}
 
 	@Override
-	public List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusDesc(Long userId, int fromType, int toType, int status) {
+	public List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int status) {
 		return MybatisPlus.getInstance().finAll(new TCsqOrder(), baseWhereBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromType, fromType)
 			.eq(TCsqOrder::getToType, toType)
+			.eq(TCsqOrder::getInVoiceStatus, status)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getUpdateTime)));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int invoiceStatus, int status) {
+		return MybatisPlus.getInstance().finAll(new TCsqOrder(), baseWhereBuild()
+			.eq(TCsqOrder::getUserId, userId)
+			.eq(TCsqOrder::getFromType, fromType)
+			.eq(TCsqOrder::getToType, toType)
+			.eq(TCsqOrder::getInVoiceStatus, invoiceStatus)
+			.eq(TCsqOrder::getStatus, status)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getUpdateTime)));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByToIdAndToTypeAndStatusDesc(Long entityId, int toCode, int status) {
+		return MybatisPlus.getInstance().finAll(new TCsqOrder(), baseWhereBuild()
+			.eq(TCsqOrder::getToId, entityId)
+			.eq(TCsqOrder::getToType, toCode)
 			.eq(TCsqOrder::getStatus, status)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getUpdateTime)));
 	}

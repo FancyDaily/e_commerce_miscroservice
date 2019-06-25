@@ -78,7 +78,7 @@ public class DetailServiceReturnView {
 	 */
 	private List<TServiceDescribe> listServiceDescribe;
 	/**
-	 * 服务求助类型（key-value 中的value）
+	 * 服务求助类型（mainKey-theValue 中的value）
 	 */
 	private String serviceType;
 	/**

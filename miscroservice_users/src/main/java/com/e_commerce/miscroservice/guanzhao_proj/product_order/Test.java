@@ -70,7 +70,7 @@ public class Test {
 //        donate(10, money -> System.out.println("他捐赠了" + money + "$"));
 //        List<Integer> list = supply(10, () -> (int)(Math.random()*1000));   //装载十个伪随机数
 //        list.forEach(System.out::println);
-//        Integer value = convert("29", x -> Integer.parseInt(x));
+//        Integer theValue = convert("29", x -> Integer.parseInt(x));
 //
 //        List<String> fruit = Arrays.asList("香蕉", "哈密瓜", "榴莲", "火龙果", "水蜜桃");
 //        fruit = filter(fruit, (f) -> f.length() == 2);

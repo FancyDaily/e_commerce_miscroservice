@@ -17,4 +17,6 @@ public interface CsqMsgDao {
 	int update(List<TCsqSysMsg> toUpdater);
 
 	int insert(TCsqSysMsg... csqSysMsg);
+
+	int insert(List<TCsqSysMsg> toInserter);
 }

@@ -42,7 +42,7 @@ public class MD5Util {
 	}
 
 	/**
-	 * Calculates the MD5 digest and returns the value as a 16 element
+	 * Calculates the MD5 digest and returns the theValue as a 16 element
 	 * <code>byte[]</code>.
 	 * 
 	 * @param data
@@ -54,7 +54,7 @@ public class MD5Util {
 	}
 
 	/**
-	 * Calculates the MD5 digest and returns the value as a 16 element
+	 * Calculates the MD5 digest and returns the theValue as a 16 element
 	 * <code>byte[]</code>.
 	 * 
 	 * @param data
@@ -66,7 +66,7 @@ public class MD5Util {
 	}
 
 	/**
-	 * Calculates the MD5 digest and returns the value as a 32 character hex
+	 * Calculates the MD5 digest and returns the theValue as a 32 character hex
 	 * string.
 	 * 
 	 * @param data
@@ -78,7 +78,7 @@ public class MD5Util {
 	}
 
 	/**
-	 * Calculates the MD5 digest and returns the value as a 32 character hex
+	 * Calculates the MD5 digest and returns the theValue as a 32 character hex
 	 * string.
 	 * 
 	 * @param data
@@ -165,7 +165,7 @@ public class MD5Util {
 			if (data.get(k)!=null && data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
 				sb.append(k).append("=").append(data.get(k).trim()).append("&");
 		}
-		sb.append("key=").append(config.getKey());
+		sb.append("mainKey=").append(config.getKey());
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");

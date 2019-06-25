@@ -161,7 +161,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			TOrder order = listOrder.get(i);
 			//判断订单对应商品是否下架
             Integer serviceStatus = order.getServiceStatus();
-//            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getValue())) {
+//            if(Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_MANUAL.getTheValue()) || Objects.equals(serviceStatus,ProductEnum.STATUS_LOWER_FRAME_TIME_OUT.getTheValue())) {
 //				totalCnt--;
 //                continue;
 //            }
@@ -377,7 +377,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			orderIds.add(orderRelationship.getOrderId());
 			serviceIds.add(orderRelationship.getServiceId());
 		}
-		//订单列表的map  key：orderid  value: order
+		//订单列表的map  mainKey：orderid  theValue: order
 		Map<Long, TOrder> orderMap = new HashMap<>();
 		//订单列表
 		List<TOrder> listOrder = orderDao.selectOrderByOrderIds(orderIds);
@@ -438,7 +438,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 		Map<Long, String> productCoverPic = productService.getProductCoverPic(productIds);
 		//查询报名关系表关联的所有订单
 		List<TOrder> listOrder = orderDao.selectOrderByOrderIds(orderIds);
-		//获取order的map  key-> orderId  value-> order
+		//获取order的map  mainKey-> orderId  theValue-> order
 		Map<Long, TOrder> orderMap = new HashMap<>();
 		listOrder.stream().forEach(order -> orderMap.put(order.getId(), order));
 		for (TOrderRelationship relationship : listOrderRelationship) {
@@ -824,7 +824,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			orderIds.add(orderRelationship.getOrderId());
 			serviceIds.add(orderRelationship.getServiceId());
 		}
-		//订单列表的map  key：orderid  value: order
+		//订单列表的map  mainKey：orderid  theValue: order
 		Map<Long, TOrder> orderMap = new HashMap<>();
 		//订单列表
 		List<TOrder> listOrder = orderDao.selectOrderByOrderIds(orderIds);
@@ -1293,7 +1293,7 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 			//报名人满后派生
 			return produceOrderByEnough(service, date, order);
 		}
-//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getTheValue();
 	}
 
 	/**
@@ -1439,15 +1439,15 @@ public class OrderServiceImpl extends BaseService implements OrderService {
 //			// 查看数据库防止有这一条
 //			Long count = orderDao.countProductOrder(service.getId(), orderStartTime, orderEndTime);
 //			if (count != 0) {
-//				return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getValue();
+//				return OrderEnum.PRODUCE_RESULT_CODE_EXISTENCE.getTheValue();
 //			}
 //			// 查看是否到结束时间，如果到结束时间，返回超时下架处理的错误码
 //			String endDateTime = service.getEndDateS() + service.getEndTimeS();
 //			if (DateUtil.parse(endDateTime) < orderEndTime) {
-//				return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getValue();
+//				return OrderEnum.PRODUCE_RESULT_CODE_LOWER_FRAME.getTheValue();
 //			}
 //		}
-//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getValue();
+//		return OrderEnum.PRODUCE_RESULT_CODE_SUCCESS.getTheValue();
 	}
 
 	/**

@@ -37,7 +37,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@Consume(TCsqUserAuth.class)
-	@RequestMapping("send/person")
+	@RequestMapping("person/submit")
 	public Object personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -46,6 +46,7 @@ public class CsqAuthController {
 		try {
 			log.info("实名认证 - 个人, name={}, cardId={}, phone={}, smsCode={}", name, cardId, phone, smsCode);
 			csqUserService.sendPersonAuth(csqUserAuth, smsCode);
+			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "实名认证 - 个人", e.getMessage());
 			result.setMsg(e.getMessage());
@@ -94,10 +95,11 @@ public class CsqAuthController {
 	 * @param option
 	 * @return
 	 */
-	@RequestMapping("cert/corp/do")
+	@RequestMapping("corp/do")
 	public Object certCorpDo(Long userAuthId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		try {
+			log.info("组织实名认证审核, ");
 			csqUserService.certCorp(userAuthId, option);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -107,6 +109,30 @@ public class CsqAuthController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("组织实名认证审核", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 个人实名认证审核
+	 * @param userAuthId
+	 * @param option
+	 * @return
+	 */
+	@RequestMapping("person/do")
+	public Object certPersonDo(Long userAuthId, Integer option) {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqUserService.certPerson(userAuthId, option);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "个人实名认证审核", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("个人实名认证审核", e);
 			result.setSuccess(false);
 		}
 		return result;

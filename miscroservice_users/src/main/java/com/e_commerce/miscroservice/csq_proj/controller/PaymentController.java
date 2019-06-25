@@ -27,9 +27,6 @@ import java.util.Map;
 @Log
 public class PaymentController {
 
-
-
-
 	@Autowired
 	private CsqPaymentService csqPaymentService;
 

@@ -1,15 +1,15 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.service.CsqInvoiceService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,7 +40,7 @@ public class InvoiceController {
 	 */
 	@Consume(TCsqUserInvoice.class)
 	@RequestMapping("submit")
-	public Object invoiceSubmit(Integer type, String name, Integer taxNo, String addr, String person, String telephone, String... orderNo) {
+	public Object invoiceSubmit(Integer type, String name, String taxNo, String addr, String person, String telephone, String... orderNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
@@ -73,7 +73,8 @@ public class InvoiceController {
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
 		try {
 			log.info("待开票列表, userId={}", userId);
-			invoiceService.waitToList(userId, pageNum, pageSize);
+			QueryResult<CsqInvoiceVo> queryResult = invoiceService.waitToList(userId, pageNum, pageSize);
+			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "待开票列表", e.getMessage());
@@ -100,7 +101,8 @@ public class InvoiceController {
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
 		try {
 			log.info("已开票列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
-			invoiceService.doneList(userId, pageNum, pageSize);
+			QueryResult<TCsqUserInvoice> queryResult = invoiceService.doneList(userId, pageNum, pageSize);
+			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "已开票列表", e.getMessage());
@@ -125,7 +127,8 @@ public class InvoiceController {
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("发票详情, userId={}, invoiceId={}", userId, invoiceId);
-			invoiceService.invoiceDetail(userId, invoiceId);
+			TCsqUserInvoice tCsqUserInvoice = invoiceService.invoiceDetail(userId, invoiceId);
+			result.setData(tCsqUserInvoice);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票详情", e.getMessage());
@@ -144,6 +147,7 @@ public class InvoiceController {
 	 * @param invoiceId
 	 * @return
 	 */
+	@RequestMapping("recordList")
 	public Object invoiceRecordList(Long invoiceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
@@ -60,7 +61,12 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	@Override
 	public List<TCsqService> selectAll() {
 		return MybatisPlus.getInstance().finAll(new TCsqService(), baseWhereBuild()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
+			.or()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())	//若为基金唯一对应项目
 			.eq(TCsqService::getFundStatus, CsqFundEnum.STATUS_PUBLIC.getVal())	//已公开的基金对应的项目
+			.groupAfter()
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),	//按发布时间倒序
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),	//按类型倒序(把项目排在上边
 				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount)	//按还需筹多少金额正序
@@ -97,6 +103,14 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	public int updateByFundId(TCsqService build) {
 		return MybatisPlus.getInstance().update(build, baseWhereBuild()
 			.eq(TCsqService::getFundId, build.getFundId()));
+	}
+
+	@Override
+	public List<TCsqService> selectByNameAndUserId(String name, Long userId) {
+		return MybatisPlus.getInstance().finAll(new TCsqService(), baseWhereBuild()
+			.eq(TCsqService::getUserId, userId)
+			.eq(TCsqService::getName, name)
+		);
 	}
 
 }

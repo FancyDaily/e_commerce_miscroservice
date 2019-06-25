@@ -665,7 +665,7 @@ public interface AppConstant {
 
 
     /**
-     * publish表-main_key
+     * publish表-mainKey
      */
     public String MAIN_KEY_CATEGORY = "category";
 

@@ -44,13 +44,21 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 	@Override
 	public void submit(Long userId, TCsqUserInvoice userInvoice, String... orderNo) {
+		MessageException messageException = new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单编号不能为空!");
+		if(orderNo == null || StringUtil.isAnyEmpty(orderNo)) {
+			throw messageException;
+		}
 		//检查订单状态
 		List<TCsqOrder> tCsqOrders = csqOrderDao.selectInOrderNos(orderNo);
 		tCsqOrders.stream()
 			.forEach((a) -> {
 				Integer status = a.getStatus();
+				Integer invoiceStatus = a.getInVoiceStatus();
 				if (CsqOrderEnum.STATUS_ALREADY_PAY.getCode() != status) {    //如果不是已支付
-					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该订单未成功支付，无法开票!");
+					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在未成功支付订单，无法开票!");
+				}
+				if (CsqOrderEnum.INVOICE_STATUS_YES.getCode() == invoiceStatus) {
+					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在已开过票的订单，无法再开票!");
 				}
 			});
 		Double totalFee = tCsqOrders.stream()
@@ -62,39 +70,51 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		//开票
 		Integer type = userInvoice.getType();
 		String name = userInvoice.getName();
-		Integer taxNo = userInvoice.getTaxNo();
+		String taxNo = userInvoice.getTaxNo();
 		String addr = userInvoice.getAddr();
 		String person = userInvoice.getPerson();
 		String telephone = userInvoice.getTelephone();
-		if (StringUtil.isAnyEmpty(name, addr, person, telephone) || Objects.isNull(type) || Objects.isNull(taxNo)) {
+		if (StringUtil.isAnyEmpty(name, addr, person, telephone, taxNo) || Objects.isNull(type)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必要参数为空!");
 		}
 
 		String orderNos = Arrays.stream(orderNo)
 			.reduce("", (a, b) -> a + "," + b);
 		orderNos = orderNos.startsWith(",")? orderNos.substring(1):orderNos;
+		userInvoice.setUserId(userId);
 		userInvoice.setOrderNos(orderNos);
 		userInvoice.setAmount(totalFee);
 		csqUserInvoiceDao.insert(userInvoice);
 
 		//修改订单的开票状态
 		List<TCsqOrder> toUpdateList = tCsqOrders.stream().map(a -> {
-			a.setStatus(CsqOrderEnum.INVOICE_STATUS_YES.getCode());
+			a.setInVoiceStatus(CsqOrderEnum.INVOICE_STATUS_YES.getCode());
 			return a;
 		}).collect(Collectors.toList());
 
-		csqOrderDao.update(toUpdateList);
+//		csqOrderDao.update(toUpdateList);
+		List<Long> toUpdateIds = new ArrayList<>();
+		for(TCsqOrder tCsqOrder:toUpdateList) {
+			toUpdateIds.add(tCsqOrder.getId());
+		}
+		toUpdateList = toUpdateList.stream()
+			.map(a -> {
+				return a;
+			}).collect(Collectors.toList());
+		csqOrderDao.update(toUpdateList, toUpdateIds);
 	}
 	
 	@Override
 	public QueryResult<CsqInvoiceVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
+		pageNum = pageNum==null? 1: pageNum;
+		pageSize = pageSize==null? 0: pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有代开票的订单,找到serivce汇总
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusDesc(userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> serviceIds = tCsqOrders.stream()
 			.map(TCsqOrder::getToId)
 			.collect(Collectors.toList());
-		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
+		List<TCsqService> tCsqServices = tCsqOrders.isEmpty()? new ArrayList<>() : csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 

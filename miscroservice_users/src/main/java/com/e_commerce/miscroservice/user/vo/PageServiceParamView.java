@@ -42,7 +42,7 @@ public class PageServiceParamView implements Serializable {
 	private Integer type;
 	
 	/**
-	 * 类型id  key-value数据库中的值 直接id值进行查询
+	 * 类型id  mainKey-value数据库中的值 直接id值进行查询
 	 */
 	private Integer serviceTypeId;
 	

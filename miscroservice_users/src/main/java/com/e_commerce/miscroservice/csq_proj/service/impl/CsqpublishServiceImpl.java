@@ -1,16 +1,20 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.enums.application.CsqPublishEnum;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPublishDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqPublish;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
-import jodd.json.JsonObject;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -18,6 +22,7 @@ import java.util.*;
  */
 @Transactional(rollbackFor = Throwable.class)
 @Service
+@Log
 public class CsqpublishServiceImpl implements CsqPublishService {
 
 	@Autowired
@@ -54,6 +59,41 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 		setPublishName(mainKey, JSONObject.toJSONString(dailyDonateMap));
 	}
 
+	@Override
+	public void setPublishName(Integer mainKey, Integer[] keys, String[] names) {
+		//check
+		if(keys == null || names == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数keys、names不能为空！");
+		}
+		if(keys.length != names.length) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数keys、names长度不一致！");
+		}
+		if(Arrays.stream(keys).distinct().count() < keys.length) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数keys中存在重复编号!");
+		}
+		//构建map
+		Map<Integer, String> keyValueMap = new HashMap<> ();
+		for(int i=0; i<names.length; i++) {
+			keyValueMap.put(keys[i], names[i]);
+		}
+		String value = JSONObject.toJSONString(keyValueMap);
+		//获取描述
+		List<String> existList = Arrays.stream(CsqPublishEnum.values()).filter(a -> a.toCode().equals(mainKey)).map(CsqPublishEnum::getMsg).collect(Collectors.toList());
+		String keyDesc = existList.isEmpty()? null:existList.get(0);
+		TCsqPublish build;
+		if((build = csqPublishDao.selectByMainKey(mainKey))!= null) {
+			log.info("更新了 MainKey={},theValue={}的publish记录", mainKey, value);
+			build.setValue(value);
+			csqPublishDao.update(build);
+		} else {
+			log.info("插入了 MainKey={},theValue={}的publish记录", mainKey, value);
+			build = TCsqPublish.builder().mainKey(mainKey)
+				.keyDesc(keyDesc)
+				.value(value).build();
+			csqPublishDao.insert(build);
+		}
+	}
+
 	private void setPublishName(int mainKey, String jsonValue) {
 		String desc = null;
 		for(CsqPublishEnum csqPublishEnum:CsqPublishEnum.values()) {
@@ -67,9 +107,9 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 			return;
 		}
 		//插入
-		tCsqPublish = TCsqPublish.builder().main_key(mainKey)
+		tCsqPublish = TCsqPublish.builder().mainKey(mainKey)
 			.value(jsonValue)
-			.key_desc(desc)
+			.keyDesc(desc)
 			.build();
 		csqPublishDao.insert(tCsqPublish);
 	}

@@ -194,7 +194,7 @@ public class AESUtil {
 
 	public static void main(String[] args) throws Exception {
 		byte[] key = initSecretKey();
-		System.out.println("key：" + showByteArray(key));
+		System.out.println("mainKey：" + showByteArray(key));
 		Key k = toKey(key); // 生成秘钥
 		String data = "AES数据";
 		System.out.println("加密前数据: string:" + data);

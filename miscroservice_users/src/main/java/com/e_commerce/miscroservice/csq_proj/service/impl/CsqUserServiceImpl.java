@@ -13,9 +13,14 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import io.netty.handler.codec.MessageAggregationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,9 +64,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private CsqOrderDao csqOrderDao;
+
 	@Autowired
 	private CsqFundDao csqFundDao;
 
+	@Autowired
+	private WechatService wechatService;
+
+	@Value("${page.fund}")
+	private String FUND_PAGE;
+
+	@Value("${page.person}")
+	private String PERSON_PAGE;
 
 	@Override
 	public void checkAuth(TCsqUser user) {
@@ -134,9 +148,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if (CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(authenticationStatus)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已经实名过，无需重复实名!");    //或改为return
 		}
+
+		//重复提交判断
+		List<TCsqUserAuth> existList = csqUserAuthDao.selectByUserIdAndStatus(userId, CsqUserAuthEnum.STATUS_UNDER_CERT.getCode());
+		if(!existList.isEmpty()) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已存在待审核的实名认证记录!");
+		}
 		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode());    //待审核(默认)
+		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_CERT_PASS.getCode());	//审核通过
 		csqUserAuthDao.insert(csqUserAuth);
 		//TODO 若提交即实名，此处将用户实名状态改变
+		tCsqUser.setAuthenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode());
+		csqUserDao.updateByPrimaryKey(tCsqUser);
 	}
 
 	@Override
@@ -171,6 +194,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if (!Arrays.asList(OPTION_PERSON, OPTION_CORP).contains(option)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option不正确!");
 		}
+		//encrypt password
 		TCsqUser tCsqUser = csqUserDao.selectByUserTelAndPasswordAndAccountType(telephone, password, accountType);
 		if (tCsqUser == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "手机号或密码错误!");
@@ -250,7 +274,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		long currentTimeMillis = System.currentTimeMillis();
 		Integer weekDayInt = DateUtil.getWeekDayInt(currentTimeMillis);
 		Long key = Long.valueOf(weekDayInt);
-		serviceId = Long.valueOf((String) publishName.get(key));    //获取到Id
+		serviceId = Long.valueOf((String) publishName.get(key.toString()));    //获取到Id
 		//查keyValue表，获取连续积善天数
 		List<TCsqKeyValue> dailyDonateList = csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
 		List<Long> createTimeList = dailyDonateList.stream()
@@ -321,6 +345,144 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser build = TCsqUser.builder().userTel(telephone).password(password).uuid(uuid).build();
 		TCsqUser register = register(build);
 		csqUserDao.insert(register);
+	}
+
+	@Override
+	public Map<String, Object> share(Long userId, Long entityId, Integer option) {
+		final int OPTION_PERSON = 0;
+		final int OPTION_FUND = 1;
+		if(option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND).contains(option)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
+		}
+		Map<String, Object> map = new HashMap<>();
+		String scene = userId + entityId + UUID.randomUUID().toString();	//随机数
+		String page = "";		//从配置文件读取
+		CsqShareVo vo = null;
+		UploadPathEnum.innerEnum uploadEnum = null;
+		//VO initialize
+		switch (option) {
+			case OPTION_FUND:
+				page = this.PERSON_PAGE;
+				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
+				String fundName = csqFund.getName();
+				vo = csqFund.copyCsqShareVo();
+				vo.setTitle("我创建了一个" + fundName + "专项基金");
+				vo.setCurrentAmont(csqFund.getSumTotalIn());
+				vo.setExpectedAmount(CsqFundEnum.PUBLIC_MINIMUM);
+				Integer status = csqFund.getStatus();
+				if(CsqFundEnum.STATUS_PUBLIC.getVal() != status) {	//未公开
+					// 获取捐献记录列表
+					List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+					List<Long> userIds = tCsqOrders.stream()
+						.map(TCsqOrder::getUserId).collect(Collectors.toList());
+					List<TCsqUser> tCsqUsers = userIds==null? new ArrayList<>() : csqUserDao.selectInIds(userIds);
+					Map<Long, List<TCsqUser>> userMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
+					List<CsqDonateRecordVo> donateRecordVos = tCsqOrders.stream()
+						.map(a -> {
+							long mills = System.currentTimeMillis() - a.getUpdateTime().getTime();
+							Long minutesLong = mills / 1000 / 60;
+							Integer minutesAgo = minutesLong.intValue();
+							Long theUserId = a.getUserId();
+							List<TCsqUser> csqUsers = userMap.get(theUserId);
+							TCsqUser csqUser = csqUsers.get(0);
+							CsqDonateRecordVo donateRecordVo = CsqDonateRecordVo.builder().userHeadPortraitPath(csqUser.getUserHeadPortraitPath())
+								.name(csqUser.getName())
+								.donateAmount(a.getPrice())
+								.minutesAgo(minutesAgo).build();
+							return donateRecordVo;
+						}).collect(Collectors.toList());
+					vo.setDonateRecordVos(donateRecordVos);
+				}
+				uploadEnum = UploadPathEnum.innerEnum.CSQ_FUND;
+				break;
+			case OPTION_PERSON:
+				page = this.FUND_PAGE;
+				//累积捐赠、捐赠项目数
+				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(entityId);
+				Long tUserId = csqUser.getId();
+				Double totalDonate = csqUser.getTotalDonate();
+				//统计不重复的项目数
+				List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(tUserId, CSqUserPaymentEnum.TYPE_SERVICE.toCode());
+				//统计数量
+				long serviceCnt = tCsqOrders.stream()
+					.map(TCsqOrder::getId)
+					.distinct()    //去重
+					.count();
+				vo.setDonateSum(totalDonate);
+				vo.setDonateCnt((int)serviceCnt);
+				uploadEnum = UploadPathEnum.innerEnum.CSQ_PERSON;
+				break;
+		}
+
+		String qrCode = wechatService.genQRCode(scene, page, uploadEnum);
+		map.put("qrCode", qrCode);
+		map.put("vo", vo);
+		return map;
+	}
+
+	@Override
+	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription) {
+		//check入餐
+		if(fromId==null || fromType==null || amount==null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数为空!");
+		}
+		Map<Integer, List<CSqUserPaymentEnum>> enumMap = Arrays.stream(CSqUserPaymentEnum.values())
+			.filter(a -> a.name().startsWith("TYPE_"))
+			.collect(Collectors.groupingBy(CSqUserPaymentEnum::toCode));
+		List<CSqUserPaymentEnum> cSqUserPaymentEnums = enumMap.get(fromType);
+		if(cSqUserPaymentEnums == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的类型!");
+		}
+
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		//check用户权限
+
+		//如果为基金，确认基金已经设置为托管(维持一段时间？)
+		if(CSqUserPaymentEnum.TYPE_FUND.toCode() == fromType) {
+			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
+			if(csqFund == null) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
+			}
+			Integer agentModeStatus = csqFund.getAgentModeStatus();
+			if(CsqFundEnum.AGENT_MODE_STATUS_ON.getVal() != agentModeStatus) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前基金未设置托管!");
+			}
+		}
+
+		//若有完整描述，则不去找寻fromId对应实体名称
+		String description = wholeDescription;
+		if(StringUtil.isEmpty(wholeDescription)) {
+			//构建描述
+			CSqUserPaymentEnum cSqUserPaymentEnum = cSqUserPaymentEnums.get(0);
+			String name = cSqUserPaymentEnum.getMsg();
+			//TODO
+			boolean fund = CSqUserPaymentEnum.TYPE_FUND.toCode() == cSqUserPaymentEnum.toCode();
+			if(fund) {
+				//TODO
+			}
+			description = "向" + name + "捐款";
+		}
+
+		TCsqUserPaymentRecord.builder()
+			.userId(null);
+	}
+
+	@Override
+	public void certPerson(Long userAuthId, Integer option) {
+		Integer OPTION_PASS = CsqUserAuthEnum.STATUS_CERT_PASS.getCode();
+		Integer OPTION_REFUSE = CsqUserAuthEnum.STATUS_CERT_REFUSE.getCode();
+		if (option == null || !Arrays.asList(OPTION_PASS, OPTION_REFUSE).contains(option)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option不正确!");
+		}
+		//审核记录状态修改
+		TCsqUserAuth userAuth = csqUserAuthDao.selectByPrimaryKey(userAuthId);
+		userAuth.setStatus(option);
+		csqUserAuthDao.update(userAuth);
+		//用户实名状态修改
+		Long userId = userAuth.getUserId();
+		TCsqUser build = TCsqUser.builder().id(userId)
+			.authenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode()).build();
+		csqUserDao.updateByPrimaryKey(build);
 	}
 
 	private TCsqUser register(TCsqUser csqUser) {

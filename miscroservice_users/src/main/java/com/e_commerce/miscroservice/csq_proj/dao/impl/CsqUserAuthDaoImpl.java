@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-13 17:34
@@ -42,5 +44,12 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 	public int update(TCsqUserAuth userAuth) {
 		return MybatisPlus.getInstance().update(userAuth, baseWhereBuild()
 		.eq(TCsqUser::getId, userAuth.getId()));
+	}
+
+	@Override
+	public List<TCsqUserAuth> selectByUserIdAndStatus(Long userId, int code) {
+		return MybatisPlus.getInstance().finAll(new TCsqUserAuth(), baseWhereBuild()
+			.eq(TCsqUserAuth::getUserId, userId)
+			.eq(TCsqUserAuth::getStatus, code));
 	}
 }

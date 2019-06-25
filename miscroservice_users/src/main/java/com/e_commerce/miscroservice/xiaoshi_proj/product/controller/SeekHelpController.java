@@ -625,7 +625,7 @@ public class SeekHelpController extends BaseController {
         }
         TUser user = UserUtil.getUser();
         //这一层可判断出是求助，手动设置type参数
-//		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
+//		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getTheValue());
         try {
             if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
                 Long orderId = productService.submitSeekHelp(user, param, token);
@@ -682,7 +682,7 @@ public class SeekHelpController extends BaseController {
         }
         TUser user = UserUtil.getUser(token);
         //这一层可判断出是求助，手动设置type参数
-//		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getValue());
+//		param.getService().setType(ProductEnum.TYPE_SEEK_HELP.getTheValue());
         try {
             if (Objects.equals(param.getService().getType(), ProductEnum.TYPE_SEEK_HELP.getValue())) {
                 Long orderId = productService.submitSeekHelp(user, param, token);

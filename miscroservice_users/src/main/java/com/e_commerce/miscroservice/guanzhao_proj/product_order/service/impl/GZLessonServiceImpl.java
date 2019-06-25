@@ -345,9 +345,9 @@ public class GZLessonServiceImpl implements GZLessonService {
 						String url = fileUrlManagers.getUrl(fileName);
 					}
 
-					/*Object o = redisUtil.get(key);
+					/*Object o = redisUtil.get(mainKey);
 					if (o==null || System.currentTimeMillis() > (long)o) {
-						redisUtil.set(key, System.currentTimeMillis() + 1000 * 60 * 8, 1000 * 60 * 8);
+						redisUtil.set(mainKey, System.currentTimeMillis() + 1000 * 60 * 8, 1000 * 60 * 8);
 					}*/
 //                    myLessonVO.setUrl(url);
                 }

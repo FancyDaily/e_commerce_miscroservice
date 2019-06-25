@@ -4,7 +4,9 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
 import lombok.Builder;
 import lombok.Data;
 
@@ -80,6 +82,10 @@ public class TCsqFund extends BaseEntity{
 	}
 
 	public TCsqService copyCsqService() {
+		return null;
+	}
+
+	public CsqShareVo copyCsqShareVo() {
 		return null;
 	}
 }

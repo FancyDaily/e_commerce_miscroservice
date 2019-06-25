@@ -67,7 +67,7 @@ public class AESCommonUtil {
 			e.printStackTrace();
 		}
 		//2、对工具类对象进行初始化
-		//mode:加密/解密模式    key：对原始密钥处理后的密钥
+		//mode:加密/解密模式    mainKey：对原始密钥处理后的密钥
 		SecretKey key = getKey(originKey);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key);

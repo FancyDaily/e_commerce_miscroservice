@@ -16,7 +16,7 @@ public enum RedisKeyEnum {
     //用户登陆状态的枚举
     USER_LOAD_STATUS_KEY("eTongJin:hash:user_load_status:complete"),
     //公告中心
-    NOTICE_KEY ( "message:center:notice:key"),
+    NOTICE_KEY ( "message:center:notice:mainKey"),
     //公众号登录验证码
     PUBLIC_ACCOUNT_LOGIN_AUTH_CODE("publicAccount:login:authCode"),
     //公众号注册代理商
@@ -38,7 +38,7 @@ public enum RedisKeyEnum {
     STORE_ORDER_PRE_PAY("store:order:prePay"),
 
     //官方通知
-    OFFICIAL_KEY("message:center:official:key");
+    OFFICIAL_KEY("message:center:official:mainKey");
 
 
 

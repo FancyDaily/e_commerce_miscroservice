@@ -55,4 +55,6 @@ public interface CsqServiceDao {
 	TCsqService selectByFundId(Long fundId);
 
 	int updateByFundId(TCsqService build);
+
+	List<TCsqService> selectByNameAndUserId(String name, Long userId);
 }

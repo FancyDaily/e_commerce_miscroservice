@@ -22,6 +22,8 @@ public interface CsqOrderDao {
 
 	int update(List<TCsqOrder> toUpdateList);
 
+	int update(List<TCsqOrder> toUpdateList, List<Long> toUpdateIds);
+
 	List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIds(Long fundId, int fromType, int toType, List<Long> orderIds);
 
 	List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(Long fundId, int toCode, int toCode1, List<Long> tOrderIds, int code);
@@ -32,5 +34,9 @@ public interface CsqOrderDao {
 
 	TCsqOrder selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(Long userId, Long userId1, int toCode, Long fundId, int toCode1, Double amount, Integer status);
 
-	List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusDesc(Long userId, int toCode, int toCode1, int code);
+	List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int toCode, int toCode1, int code);
+
+	List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int invoiceStatus, int status);
+
+	List<TCsqOrder> selectByToIdAndToTypeAndStatusDesc(Long entityId, int toCode, int status);
 }

@@ -34,7 +34,7 @@ public class PublishController extends BaseController {
      * 存入key—value值
      *
      * @param id     编号
-     * @param key    key
+     * @param key    mainKey
      * @param value  值
      * @param extend "success": true,
      *               "errorCode": "",
@@ -71,7 +71,7 @@ public class PublishController extends BaseController {
      * @param key key值
      *            <p>
      *            "id": 63645917454908320, //自增编号
-     *            "mainKey": "feedback", //key
+     *            "mainKey": "feedback", //mainKey
      *            "extend": "",
      *            "createUser": 9527,
      *            "createUserName": "姜帅哥",
@@ -80,7 +80,7 @@ public class PublishController extends BaseController {
      *            "updateUserName": "姜帅哥",
      *            "updateTime": 1542956769205,
      *            "isValid": "1",
-     *            "value": "[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]"//对其进行json解析
+     *            "theValue": "[{\"id\":\"2100001\",\"name\":\"bug\"},{\"id\":\"2100002\",\"name\":\"建议\"},{\"id\":\"2100003\",\"name\":\"五星好评\"}]"//对其进行json解析
      * @return
      */
     @PostMapping({"/publishGet", "publishGet/" + TokenUtil.AUTH_SUFFIX})

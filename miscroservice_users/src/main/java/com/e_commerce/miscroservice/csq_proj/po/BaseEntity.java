@@ -17,7 +17,7 @@ public class BaseEntity {
 	@Column(commit = "创建时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.CREATE)
 	protected Timestamp createTime;
 
-	@Column(commit = "更新者编号", isNUll = false)
+	@Column(commit = "更新者编号")
 	protected Long updateUser;
 
 	@Column(commit = "更新时间戳", dateGeneStrategy = DbHandler.DateGeneStrategy.UPDATE)

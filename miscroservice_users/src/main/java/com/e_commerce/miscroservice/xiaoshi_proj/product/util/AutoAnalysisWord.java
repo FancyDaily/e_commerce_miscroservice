@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 public class AutoAnalysisWord {
     private static final String ADDRESS_NAME = "address.txt";
     //            private final String ADDRESS_URL = "http://api.map.baidu.com/geocoder/v2/?address=%s%s&output=json&ak=a8gm7W3L5GRt58CFFXOlNOsrBjnfMHmy&callback=showLocatioN";
-    private static final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&key=44bb35ddcd6fece8876ddb39499c9389";
+    private static final String ADDRESS_URL = "https://restapi.amap.com/v3/geocode/geo?address=%s%s&output=json&mainKey=44bb35ddcd6fece8876ddb39499c9389";
     private Logger logger = LoggerFactory.getLogger(AutoAnalysisWord.class);
 
     /****省:<市:区>**/

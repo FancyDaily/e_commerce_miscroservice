@@ -89,7 +89,7 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 		List<TCsqService> serviceList = csqServiceDao.findAll(serviceIdList);
 		serviceList.forEach(csqService->{
 			CsqCollectionVo csqCollectionVo = new CsqCollectionVo();
-			csqCollectionVo.setDesc(csqService.getDesc());
+			csqCollectionVo.setDesc(csqService.getDescription());
 			csqCollectionVo.setDetailPic(csqService.getDetailPic());
 			csqCollectionVo.setName(csqService.getName());
 			csqCollectionVo.setPurpose(csqService.getPurpose());

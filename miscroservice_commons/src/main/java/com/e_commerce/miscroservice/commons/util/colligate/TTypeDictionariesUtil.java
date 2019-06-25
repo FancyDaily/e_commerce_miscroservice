@@ -32,45 +32,45 @@ public class TTypeDictionariesUtil {
 
 	//time秒单位
     public static String getValueByTypeDictionaries(Long entityId, Integer type, Integer subType, Long time) {
-        String key = "t_type_dictionaries_value_" + entityId + type + subType;
+        String mainKey = "t_type_dictionaries_value_" + entityId + type + subType;
         //获取缓存
         try {
-            Object redis = redisService.get(key);
+            Object redis = redisService.get(mainKey);
             if (redis != null) {
                 return (String) redis;
             }
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         TTypeDictionariesExample example = new TTypeDictionariesExample();
         example.createCriteria().andEntityIdEqualTo(entityId).andTypeEqualTo(type).andSubTypeEqualTo(subType).andIsValidEqualTo("1");
         List<TTypeDictionaries> tTypeDictionariesList = tTypeDictionariesMapper.selectByExample(example);
 
-        String value = "";
+        String theValue = "";
         if (tTypeDictionariesList != null && tTypeDictionariesList.size() > 0) {
-            value = tTypeDictionariesList.get(0).getValue();
+            theValue = tTypeDictionariesList.get(0).getValue();
         }
         //设置缓存
         try {
-            Object redis = redisService.set(key, value, time);
+            Object redis = redisService.set(mainKey, theValue, time);
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
-        return value;
+        return theValue;
     }
 
     //time秒单位
     //返回-1为没有数据
     public static Long getTargetIdByTypeDictionaries(Long entityId, Integer type, Integer subType, Long time) {
-        String key = "t_type_dictionaries_target_id_" + entityId + type + subType;
+        String mainKey = "t_type_dictionaries_target_id_" + entityId + type + subType;
         //获取缓存
         try {
-            Object redis = redisService.get(key);
+            Object redis = redisService.get(mainKey);
             if (redis != null) {
                 return (Long) redis;
             }
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         TTypeDictionariesExample example = new TTypeDictionariesExample();
         example.createCriteria().andEntityIdEqualTo(entityId).andTypeEqualTo(type).andSubTypeEqualTo(subType).andIsValidEqualTo("1");
@@ -82,9 +82,9 @@ public class TTypeDictionariesUtil {
         }
         //设置缓存
         try {
-            Object redis = redisService.set(key, targetId, time);
+            Object redis = redisService.set(mainKey, targetId, time);
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         return targetId;
     }
@@ -92,15 +92,15 @@ public class TTypeDictionariesUtil {
     //time秒单位
     //返回-1为没有数据
     public static Long getTargetNumByTypeDictionaries(Long entityId, Integer type, Integer subType, Long time) {
-        String key = "t_type_dictionaries_target_num_" + entityId + type + subType;
+        String mainKey = "t_type_dictionaries_target_num_" + entityId + type + subType;
         //获取缓存
         try {
-            Object redis = redisService.get(key);
+            Object redis = redisService.get(mainKey);
             if (redis != null) {
                 return (Long) redis;
             }
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         TTypeDictionariesExample example = new TTypeDictionariesExample();
         example.createCriteria().andEntityIdEqualTo(entityId).andTypeEqualTo(type).andSubTypeEqualTo(subType).andIsValidEqualTo("1");
@@ -112,9 +112,9 @@ public class TTypeDictionariesUtil {
         }
         //设置缓存
         try {
-            Object redis = redisService.set(key, targetNum, time);
+            Object redis = redisService.set(mainKey, targetNum, time);
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         return targetNum;
     }
@@ -122,15 +122,15 @@ public class TTypeDictionariesUtil {
     //time秒单位
     //返回-1为没有数据
     public static TTypeDictionaries getTypeDictionaries(Long entityId, Integer type, Integer subType, Long time) {
-        String key = "t_type_dictionaries_" + entityId + type + subType;
+        String mainKey = "t_type_dictionaries_" + entityId + type + subType;
         //获取缓存
         try {
-            Object redis = redisService.get(key);
+            Object redis = redisService.get(mainKey);
             if (redis != null) {
                 return (TTypeDictionaries) redis;
             }
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         TTypeDictionariesExample example = new TTypeDictionariesExample();
         example.createCriteria().andEntityIdEqualTo(entityId).andTypeEqualTo(type).andSubTypeEqualTo(subType).andIsValidEqualTo("1");
@@ -142,9 +142,9 @@ public class TTypeDictionariesUtil {
         }
         //设置缓存
         try {
-            Object redis = redisService.set(key, tTypeDictionaries, time);
+            Object redis = redisService.set(mainKey, tTypeDictionaries, time);
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         return tTypeDictionaries;
     }
@@ -163,21 +163,21 @@ public class TTypeDictionariesUtil {
      *//*
 
     public static List<TTypeDictionaries> getListTypeDictionaries(Long entityId, Integer type, Integer subType, Long time, String orderCause) {
-    	String key;
+    	String mainKey;
     	if (StringUtil.isNotEmpty(orderCause)) {
-    		key = "t_type_dictionaries_list_ordercreatetime_" + entityId + type + subType;
+    		mainKey = "t_type_dictionaries_list_ordercreatetime_" + entityId + type + subType;
     	} else {
-    		key = "t_type_listdictionaries_" + entityId + type + subType;
+    		mainKey = "t_type_listdictionaries_" + entityId + type + subType;
     	}
         //获取缓存
         try {
-            Object redis = redisService.get(key);
+            Object redis = redisService.get(mainKey);
             List<TTypeDictionaries> list = (List<TTypeDictionaries>) redis;
             if (list != null && list.size() > 0) {
                 return (List<TTypeDictionaries>) redis;
             }
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         TTypeDictionariesExample example = new TTypeDictionariesExample();
         example.createCriteria().andEntityIdEqualTo(entityId).andTypeEqualTo(type).andSubTypeEqualTo(subType).andIsValidEqualTo("1");
@@ -187,9 +187,9 @@ public class TTypeDictionariesUtil {
         List<TTypeDictionaries> tTypeDictionariesList = tTypeDictionariesMapper.selectByExample(example);
         //设置缓存
         try {
-            Object redis = redisService.set(key, tTypeDictionariesList, time);
+            Object redis = redisService.set(mainKey, tTypeDictionariesList, time);
         } catch (Exception e) {
-            redisService.del(key);
+            redisService.del(mainKey);
         }
         return tTypeDictionariesList;
     }

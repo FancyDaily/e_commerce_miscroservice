@@ -46,6 +46,9 @@ public class TCsqService extends BaseEntity {
 	@Transient
 	private List<TCsqUserPaymentRecord> csqUserPaymentRecords;
 
+	@Transient
+	private List<TCsqServiceReport> reports;
+
 	@Column(commit = "基金状态")
 	private Integer fundStatus;
 
@@ -92,7 +95,7 @@ public class TCsqService extends BaseEntity {
 	private String coverPic;
 
 	@Column(commit = "描述")
-	private String desc;
+	private String description;
 
 	@Column(commit = "描述图")
 	private String detailPic;

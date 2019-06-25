@@ -8,6 +8,7 @@ import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
 import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
+import javafx.scene.Scene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,9 +104,17 @@ public class AliOSSUtil {
 	}
 
 	public static String uploadQrImg(InputStream in, String secen) throws Exception {
+		return uploadQrImg(in, secen, UploadPathEnum.innerEnum.PERSON);
+	}
+
+	public static String uploadQrImg(InputStream in, String secen, UploadPathEnum.innerEnum uploadEnum) throws Exception {
 		// 判空
 		String savePath = UploadPathEnum.innerEnum.PERSON.getPath();
-		
+		for(UploadPathEnum.innerEnum theEnum:UploadPathEnum.innerEnum.values()) {
+			if(theEnum.getCode() == uploadEnum.getCode()) {
+				savePath = theEnum.getPath();
+			}
+		}
 		// 获取图片后缀名
 		String fileName = savePath + "/" + "QR" + secen+".jpg";
 		try {
