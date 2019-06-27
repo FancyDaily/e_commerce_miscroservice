@@ -322,6 +322,7 @@ public class CsqUserController {
 	 * @param wholeDescription
 	 * @return
 	 */
+	@RequestMapping("recordConsumption")
 	public Object recordForConsumption(Long fromId,  Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

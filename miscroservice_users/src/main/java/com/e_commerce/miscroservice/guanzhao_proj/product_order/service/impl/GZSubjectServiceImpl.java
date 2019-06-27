@@ -265,6 +265,9 @@ public class GZSubjectServiceImpl implements GZSubjectService {
         for(TGzUserSubject gzUserSubject:tGzUserSubjects) {
             userSubjectIds.add(gzUserSubject.getId());
             //课程生效
+			Long originId = gzUserSubject.getId();
+			gzUserSubject = new TGzUserSubject();
+			gzUserSubject.setId(originId);
             gzUserSubject.setStatus(GZUserSubjectEnum.STATUS_LEARNING.toCode());
             gzUserSubject.setExpireTime(currentTimeMillis + DateUtil.interval * period);
             updaters.add(gzUserSubject);

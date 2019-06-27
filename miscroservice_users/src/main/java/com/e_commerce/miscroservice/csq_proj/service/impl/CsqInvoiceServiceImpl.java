@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CSqUserPaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqInvoiceEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -88,20 +88,14 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 		//修改订单的开票状态
 		List<TCsqOrder> toUpdateList = tCsqOrders.stream().map(a -> {
+			Long originId = a.getId();
+			a = new TCsqOrder();
+			a.setId(originId);
 			a.setInVoiceStatus(CsqOrderEnum.INVOICE_STATUS_YES.getCode());
 			return a;
 		}).collect(Collectors.toList());
 
-//		csqOrderDao.update(toUpdateList);
-		List<Long> toUpdateIds = new ArrayList<>();
-		for(TCsqOrder tCsqOrder:toUpdateList) {
-			toUpdateIds.add(tCsqOrder.getId());
-		}
-		toUpdateList = toUpdateList.stream()
-			.map(a -> {
-				return a;
-			}).collect(Collectors.toList());
-		csqOrderDao.update(toUpdateList, toUpdateIds);
+		csqOrderDao.update(toUpdateList);
 	}
 	
 	@Override
@@ -110,7 +104,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		pageSize = pageSize==null? 0: pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有代开票的订单,找到serivce汇总
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CSqUserPaymentEnum.TYPE_HUMAN.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> serviceIds = tCsqOrders.stream()
 			.map(TCsqOrder::getToId)
 			.collect(Collectors.toList());

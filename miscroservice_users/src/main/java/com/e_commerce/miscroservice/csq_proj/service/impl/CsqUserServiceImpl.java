@@ -18,7 +18,6 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import io.netty.handler.codec.MessageAggregationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -274,7 +273,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 		long currentTimeMillis = System.currentTimeMillis();
 		Integer weekDayInt = DateUtil.getWeekDayInt(currentTimeMillis);
 		Long key = Long.valueOf(weekDayInt);
-		serviceId = Long.valueOf((String) publishName.get(key.toString()));    //获取到Id
+		String serviceIdStr = (String) publishName.get(key.toString());    //获取到Id
+		if (serviceIdStr != null) {
+			serviceId = Long.valueOf(serviceIdStr);
+		}
 		//查keyValue表，获取连续积善天数
 		List<TCsqKeyValue> dailyDonateList = csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
 		List<Long> createTimeList = dailyDonateList.stream()
@@ -298,7 +300,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		long startStamp = DateUtil.getStartStamp(System.currentTimeMillis());
 		long endStamp = DateUtil.getEndStamp(System.currentTimeMillis());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, CSqUserPaymentEnum.TYPE_FUND.toCode(), startStamp, endStamp);
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, CsqEntityTypeEnum.TYPE_FUND.toCode(), startStamp, endStamp);
 		dailyIncome = tCsqOrders.stream()
 			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
@@ -372,10 +374,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 				Integer status = csqFund.getStatus();
 				if(CsqFundEnum.STATUS_PUBLIC.getVal() != status) {	//未公开
 					// 获取捐献记录列表
-					List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+					List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 					List<Long> userIds = tCsqOrders.stream()
 						.map(TCsqOrder::getUserId).collect(Collectors.toList());
-					List<TCsqUser> tCsqUsers = userIds==null? new ArrayList<>() : csqUserDao.selectInIds(userIds);
+					List<TCsqUser> tCsqUsers = userIds.isEmpty()? new ArrayList<>() : csqUserDao.selectInIds(userIds);
 					Map<Long, List<TCsqUser>> userMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
 					List<CsqDonateRecordVo> donateRecordVos = tCsqOrders.stream()
 						.map(a -> {
@@ -402,7 +404,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 				Long tUserId = csqUser.getId();
 				Double totalDonate = csqUser.getTotalDonate();
 				//统计不重复的项目数
-				List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(tUserId, CSqUserPaymentEnum.TYPE_SERVICE.toCode());
+				List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(tUserId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
 				//统计数量
 				long serviceCnt = tCsqOrders.stream()
 					.map(TCsqOrder::getId)
@@ -426,10 +428,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if(fromId==null || fromType==null || amount==null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数为空!");
 		}
-		Map<Integer, List<CSqUserPaymentEnum>> enumMap = Arrays.stream(CSqUserPaymentEnum.values())
+		Map<Integer, List<CsqEntityTypeEnum>> enumMap = Arrays.stream(CsqEntityTypeEnum.values())
 			.filter(a -> a.name().startsWith("TYPE_"))
-			.collect(Collectors.groupingBy(CSqUserPaymentEnum::toCode));
-		List<CSqUserPaymentEnum> cSqUserPaymentEnums = enumMap.get(fromType);
+			.collect(Collectors.groupingBy(CsqEntityTypeEnum::toCode));
+		List<CsqEntityTypeEnum> cSqUserPaymentEnums = enumMap.get(fromType);
 		if(cSqUserPaymentEnums == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的类型!");
 		}
@@ -438,7 +440,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//check用户权限
 
 		//如果为基金，确认基金已经设置为托管(维持一段时间？)
-		if(CSqUserPaymentEnum.TYPE_FUND.toCode() == fromType) {
+		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
 			if(csqFund == null) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
@@ -449,22 +451,41 @@ public class CsqUserServiceImpl implements CsqUserService {
 			}
 		}
 
+		Long ownerId = null;
 		//若有完整描述，则不去找寻fromId对应实体名称
 		String description = wholeDescription;
-		if(StringUtil.isEmpty(wholeDescription)) {
-			//构建描述
-			CSqUserPaymentEnum cSqUserPaymentEnum = cSqUserPaymentEnums.get(0);
-			String name = cSqUserPaymentEnum.getMsg();
-			//TODO
-			boolean fund = CSqUserPaymentEnum.TYPE_FUND.toCode() == cSqUserPaymentEnum.toCode();
-			if(fund) {
-				//TODO
-			}
-			description = "向" + name + "捐款";
+
+		//构建描述
+		CsqEntityTypeEnum cSqUserPaymentEnum = cSqUserPaymentEnums.get(0);
+		String name = cSqUserPaymentEnum.getMsg();
+		boolean fund = CsqEntityTypeEnum.TYPE_FUND.toCode() == cSqUserPaymentEnum.toCode();
+		boolean service = CsqEntityTypeEnum.TYPE_SERVICE.toCode() == cSqUserPaymentEnum.toCode();
+		String suffix = "";
+		if(fund) {
+			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
+			ownerId = csqFund.getUserId();
+			name = csqFund.getName();
+			suffix = "基金";
 		}
 
-		TCsqUserPaymentRecord.builder()
-			.userId(null);
+		if(service) {
+			TCsqService csqService = csqServiceDao.selectByPrimaryKey(fromId);
+			ownerId = csqService.getUserId();
+			name = csqService.getName();
+			suffix = "项目";
+		}
+		if(StringUtil.isEmpty(wholeDescription)) {
+			description = "从" + name + suffix + "拨款";
+		}
+		TCsqUserPaymentRecord build = TCsqUserPaymentRecord.builder()
+			.userId(ownerId)
+			.entityId(fromId)
+			.entityType(fromType)
+			.description(description)
+			.inOrOut(CsqPaymenEnum.INOUT_OUT.toCode())
+			.money(amount).build();
+		build.setCreateUser(userId);
+		csqUserPaymentDao.insert(build);
 	}
 
 	@Override

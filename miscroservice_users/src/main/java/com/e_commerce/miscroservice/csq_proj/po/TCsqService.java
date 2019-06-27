@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
 import lombok.Builder;
@@ -35,7 +36,7 @@ public class TCsqService extends BaseEntity {
 	private Integer donaterCnt;	//捐助人数
 
 	@Transient
-	private List<TCsqUser> donaters;	//捐助人列表
+	private List<CsqBasicUserVo> donaters;	//捐助人列表
 
 	@Transient
 	private Double sumTotalOut;

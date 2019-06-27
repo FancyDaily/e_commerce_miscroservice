@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,11 +16,6 @@ import java.util.List;
  */
 @Component
 public class CsqFunDaoImpl implements CsqFundDao {
-
-	private MybatisPlusBuild baseWhereBuild() {
-		return new MybatisPlusBuild(TCsqFund.class)
-			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES);
-	}
 
 	@Override
 	public int insert(TCsqFund... csqFund) {
@@ -56,7 +52,8 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), baseWhereBuild()
+		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqFund::getUserId, userId)
 			.in(TCsqFund::getStatus, option)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime)));
@@ -64,7 +61,8 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectInIds(List<Long> fundIds) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), baseWhereBuild()
+		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqFund::getId, fundIds));
 	}
 

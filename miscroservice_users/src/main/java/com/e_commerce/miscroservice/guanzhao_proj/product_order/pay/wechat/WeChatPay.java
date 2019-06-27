@@ -188,21 +188,22 @@ public class WeChatPay {
 	 * @throws Exception
 	 */
 	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+		return createWebParam(orderNo, payCount, request, null);
+	}
+
+	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
 		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", ConstantUtil.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
 		param.put("timeStamp", ten_time.substring(0, 10));
-		param.put("package", "prepay_id=" + createPay(orderNo, payCount, request).get("prepay_id"));
+		param.put("package", "prepay_id=" + createPay(orderNo, payCount, request, attach).get("prepay_id"));
 		param.put("nonceStr", ten_time);
 		param.put("signType", "MD5");
-
 
 		setSign(param, true);
 
 		return param;
-
-
 	}
 
 
@@ -223,12 +224,16 @@ public class WeChatPay {
 
 
 	private Map<String, String> createPay(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+		return createPay(orderNo, payCount, request, null);
+	}
+
+	private Map<String, String> createPay(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
 		String openId = null;
 		if (request != null) {
 			openId = getOpenId(request);
 
 		}
-		String output = getOrderRequestXml(orderNo, payCount, openId);
+		String output = getOrderRequestXml(orderNo, payCount, openId, attach);
 		String json = httpsRequest(ConstantUtil.GATEURL, "POST", output);
 		Map resultMap = xmlToMap(json);
 		log.info("sing_info",resultMap);
@@ -258,7 +263,14 @@ public class WeChatPay {
 	}
 
 	private String getOrderRequestXml(String orderNo, Double payCount, String openId) {
+		return getOrderRequestXml(orderNo, payCount, openId, null);
+	}
+
+	private String getOrderRequestXml(String orderNo, Double payCount, String openId, String attach) {
 		SortedMap<String, String> param = new TreeMap();
+		if(attach != null) {
+			param.put("attach", attach);
+		}
 		param.put("appid", ConstantUtil.APP_ID);
 		param.put("body", "商店支付");
 		param.put("device_info", "WEB");

@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqKeyValueDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqKeyValue;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,21 +17,18 @@ import java.util.List;
 @Component
 public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
-	private MybatisPlusBuild baseWhereBuild() {
-		return new MybatisPlusBuild(TCsqKeyValue.class)
-			.eq(TCsqKeyValue::getIsValid, AppConstant.IS_VALID_YES);
-	}
-
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndType(Long userId, int code) {
-		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), baseWhereBuild()
+		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code));
 	}
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code) {
-		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), baseWhereBuild()
+		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqKeyValue::getCreateTime)));

@@ -61,7 +61,6 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
 
     @Override
     public int batchUpdate(List<TGzUserLesson> toUpdater, List<Long> toUpdaterIds) {
-
         int update = MybatisPlus.getInstance().update(toUpdater, new MybatisPlusBuild(TGzUserLesson.class)
                 .in(TGzUserLesson::getId, toUpdaterIds)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));

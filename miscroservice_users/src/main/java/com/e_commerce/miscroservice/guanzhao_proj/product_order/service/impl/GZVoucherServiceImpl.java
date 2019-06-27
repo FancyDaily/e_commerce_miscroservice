@@ -61,7 +61,10 @@ public class GZVoucherServiceImpl implements GZVoucherService {
                     if(System.currentTimeMillis() > effectiveTime + activationTime) {   //过期优惠券
                         continue;
                     }
-                    voucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());    //恢复为可用
+					Long originId = voucher.getId();
+                    voucher = new TGzVoucher();
+                    voucher.setId(originId);
+					voucher.setAvailableStatus(GZVoucherEnum.STATUS_AVAILABLE.toCode());    //恢复为可用
                     toUpdaterIds.add(voucherId);
                     toUpdaters.add(voucher);
                 }
@@ -78,7 +81,10 @@ public class GZVoucherServiceImpl implements GZVoucherService {
             long intervel = System.currentTimeMillis() - voucher.getActivationTime();
             boolean expired = intervel > voucher.getEffectiveTime();
             if(expired && voucher.getAvailableStatus().intValue() == GZVoucherEnum.STATUS_AVAILABLE.toCode().intValue()) {  //修正
-                voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
+				Long originId = voucher.getId();
+				voucher = new TGzVoucher();
+				voucher.setId(originId);
+				voucher.setAvailableStatus(GZVoucherEnum.STATUS_EXPIRED.toCode());
                 voucher.setUpdateUser(userId);
 //                gzVoucherDao.update(voucher);
                 toUpdater.add(voucher);

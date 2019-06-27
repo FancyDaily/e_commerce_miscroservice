@@ -23,6 +23,10 @@ public class LimitQueue<E> implements Queue<E> {
 		this.limit = limit;
 	}
 
+	public LimitQueue() {
+		this.limit = 20;
+	}
+
 	/**
 	 * 入队
 	 */

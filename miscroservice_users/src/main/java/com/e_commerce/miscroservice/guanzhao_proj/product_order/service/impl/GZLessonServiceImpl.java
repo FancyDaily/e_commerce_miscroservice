@@ -104,6 +104,10 @@ public class GZLessonServiceImpl implements GZLessonService {
             keyValue.setGzkey(userId.toString());
             keyValue.setGzvalue(sign);
             keyValueToInserter.add(keyValue);
+            //初始化
+			Long originId = userLesson.getId();
+			userLesson = new TGzUserLesson();
+			userLesson.setId(originId);
             userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
             userLesson.setSign(sign);
             toUpdaterIds.add(userLesson.getId());
@@ -198,6 +202,9 @@ public class GZLessonServiceImpl implements GZLessonService {
             //user-lesson关系
             TGzUserLesson userLesson = gzUserLessonDao.selectByUserIdAndLessonId(userId, lessonId);
             if (userLesson != null) {
+				Long originId = userLesson.getId();
+				userLesson = new TGzUserLesson();
+				userLesson.setId(originId);
                 userLesson.setStatus(GZUserLessonEnum.STATUS_AVAILABLE.getCode());
                 userLesson.setSign(sign);
                 toUpdaterIds.add(userLesson.getId());

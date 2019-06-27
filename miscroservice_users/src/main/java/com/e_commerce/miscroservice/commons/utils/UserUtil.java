@@ -97,6 +97,14 @@ public class UserUtil {
 		return id == null? 1292: id;
 	}
 
+	public static Long getTestId(Long userId) {
+		if(userId == null) {
+			return getTestId();
+		}
+		userId = 2000L;
+		return userId;
+	}
+
 	public static Long getId() {
     	return Long.valueOf(IdUtil.getId());
 	}

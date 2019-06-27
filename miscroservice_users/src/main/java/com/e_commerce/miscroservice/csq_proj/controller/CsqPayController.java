@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 支付Controller
@@ -43,7 +44,8 @@ public class CsqPayController {
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}", orderNo, entityId, entityType, fee);
-			csqPayService.preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest);
+			Map<String, String> stringStringMap = csqPayService.preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest);
+			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "微信支付(发起)", e.getMessage());

@@ -220,10 +220,10 @@ public class CsqServiceController {
 	 * @param orderNo
 	 * @return
 	 */
+	@RequestMapping("donate")
 	public Object donate(String orderNo) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
-		TCsqServiceReport serviceReport = (TCsqServiceReport) ConsumeHelper.getObj();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			log.info("捐助成功, orderNo={}", orderNo);
 			csqServiceService.donate(orderNo);

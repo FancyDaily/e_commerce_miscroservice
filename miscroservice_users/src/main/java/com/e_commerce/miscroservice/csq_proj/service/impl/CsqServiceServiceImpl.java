@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -12,6 +11,7 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
@@ -66,8 +66,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	private CsqOrderDao csqOrderDao;
 
 	@Autowired
-	@Qualifier("userRedisTemplate")
-	HashOperations<String, String, String> userRedisTemplate;
+	@Qualifier("csqRedisTemplate")
+	HashOperations<String, String, Object> userRedisTemplate;
 
 	public static String CSQ_GLOBAL_DONATE_BROADCAST = "csq:global:doante:broadcast";
 
@@ -127,7 +127,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			tCsqServices = csqServiceDao.selectAll();
 		} else if (OPTION_DONATED.equals(option)) {
 			//找到我捐助过的项目记录
-			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CSqUserPaymentEnum.TYPE_SERVICE.toCode());
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
 			//处理（去重等
 			List<Long> uniqueServiceIds = tCsqOrders.stream()
 				.map(TCsqOrder::getToId)
@@ -196,11 +196,52 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Double surplusAmount = tCsqService.getSurplusAmount();
 			tCsqService.setSumTotalOut(sumTotalIn - surplusAmount);    //剩余金额
 			//捐入流水
-			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
+			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqPaymenEnum.INOUT_IN.toCode());    //TODO 分页
+			List<Long> orderIds = tCsqUserPaymentRecords.stream()
+				.map(TCsqUserPaymentRecord::getOrderId)
+				.distinct().collect(Collectors.toList());
+			tCsqUserPaymentRecords = paymentDao.selectInOrderIdsAndInOut(orderIds, CsqPaymenEnum.INOUT_OUT.toCode());
 			//统计捐款数，获取top10
-			Map<Long, List<TCsqUserPaymentRecord>> collect1 = tCsqUserPaymentRecords.stream()
+			Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
-			Map<String, Object> functionMap = new HashMap<>();
+			/*Map<Long, Double> reducedMap = new HashMap<>();
+			unsortedMap.entrySet().stream()
+				.forEach(a -> {
+					List<TCsqUserPaymentRecord> value = a.getValue();
+					Double reduce = value.stream().map(TCsqUserPaymentRecord::getMoney)
+						.reduce(0d, Double::sum);
+					reducedMap.put(a.getKey(), reduce);
+				});
+			Map<Long, Double> sortedMap = new LinkedHashMap<>();
+			reducedMap.entrySet().stream()
+				.sorted(Comparator.comparing(Map.Entry::getValue)).forEachOrdered(e -> sortedMap.put(e.getKey(), e.getValue()));
+			sortedMap.entrySet().stream()
+				.forEachOrdered(a -> a.getValue());*/
+
+			Map<Long, Double> donaterMoneyMap = new HashMap<>();
+			List<Long> donaterIds = new ArrayList<>();
+			List<TCsqUser> donaters;
+			unsortedMap.entrySet().stream()
+				.sorted(Collections.reverseOrder(Comparator.comparing(a -> {	//排序
+					List<TCsqUserPaymentRecord> value = a.getValue();
+					Double totalDonate = value.stream()
+						.map(TCsqUserPaymentRecord::getMoney)
+						.reduce(0d, Double::sum);
+					donaterMoneyMap.put(a.getKey(), totalDonate);
+					return totalDonate;
+				}))).forEachOrdered(a -> {
+					donaterIds.add(a.getKey());
+				}
+			);
+			donaters = userDao.selectInIds(donaterIds);
+			//纠正排序
+			Map<Long, TCsqUser> donaterMap = new HashMap<>();
+			donaters.stream()
+				.forEach(donater -> donaterMap.put(donater.getId(), donater));
+			donaters = donaterIds.stream()
+				.map(a -> donaterMap.get(a)).collect(Collectors.toList());
+
+			/*Map<String, Object> functionMap = new HashMap<>();
 			for (Map.Entry entry : collect1.entrySet()) {
 				Long theUserId = (Long) entry.getKey();
 				List<TCsqUserPaymentRecord> value = (List<TCsqUserPaymentRecord>) entry.getValue();
@@ -209,6 +250,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					.reduce(0d, (a, b) -> a + b);
 				functionMap.put(theUserId.toString(), totalMoney);
 				Double max = (Double) functionMap.get("max");
+				max = max == null? 0: max;
 				if (totalMoney >= max) {
 					functionMap.put("max", totalMoney);
 					List<Long> maxer = (List<Long>) functionMap.get(totalMoney.toString());
@@ -224,20 +266,26 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Double max = (Double) functionMap.get("max");
 			List<TCsqUser> donaters = new ArrayList<>();
 			if (max != null) {
-				List<Long> maxer = (List<Long>) functionMap.get(max);
+				List<Long> maxer = (List<Long>) functionMap.get(max.toString());
 				if (maxer != null) {
 					donaters = userDao.selectInIds(maxer);
 				}
-			}
+			}*/
 			donaters = donaters.stream()
 				.map(a -> {
-					Double totalDonate = (Double) functionMap.get(a.getId());
+					Double totalDonate = donaterMoneyMap.get(a.getId());
 					if (totalDonate != null) {
 						a.setTotalDonate(totalDonate);
 					}
 					return a;
 				}).collect(Collectors.toList());
-			tCsqService.setDonaters(donaters);
+			//去敏感化
+			List<CsqBasicUserVo> donaterList = donaters.stream()
+				.map(a -> {
+					CsqBasicUserVo csqBasicUserVo = a.copyCsqBasicUserVo();
+					return csqBasicUserVo;
+				}).collect(Collectors.toList());
+			tCsqService.setDonaters(donaterList);
 			//捐助列表
 			List<Long> userIds = tCsqUserPaymentRecords.stream()
 				.map(TCsqUserPaymentRecord::getUserId)
@@ -264,12 +312,12 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			// 若为已捐款，则还需要项目汇报信息（PC端开发时再添加）
 			resultMap.put("csqService", tCsqService);
 
-			String donateJsonString = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
+			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
 			Queue<CsqDonateRecordVo> voList;
-			if(donateJsonString == null) {
+			if(exist == null) {
 				voList = new LimitQueue<>(1);	//创建带上限的队列
 			} else {
-				voList = JSONObject.parseObject(donateJsonString, LimitQueue.class);
+				voList = (LimitQueue<CsqDonateRecordVo>) exist;
 			}
 			//处理得到list
 			List<CsqDonateRecordVo> resultList = new ArrayList<>();
@@ -283,6 +331,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				iterator.remove();
 				resultList.add(csqDonateRecordVo);
 			}
+			//排序
+			resultList = resultList.stream()
+				.sorted(Comparator.comparing(CsqDonateRecordVo::getCreateTime).reversed()).collect(Collectors.toList());
 			//装载结果
 			resultMap.put("broadCast", resultList);
 		}
@@ -304,8 +355,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		pageNum = pageNum == null? 1:pageNum;
 		pageSize = pageSize == null? 0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CSqUserPaymentEnum.TYPE_SERVICE.toCode(), CSqUserPaymentEnum.INOUT_OUT.toCode());
-		Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqPaymenEnum.INOUT_OUT.toCode());
+		/*Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
 		List<TCsqUserPaymentRecord> userPaymentRecords = tCsqUserPaymentRecords.stream()
 			.map(a -> {
 				List<TCsqService> tCsqServices = serviceMap.get(a.getEntityId());
@@ -313,16 +364,17 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				a.setDate(com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
 				a.setServiceName(tCsqService.getName());
 				return a;
-			}).collect(Collectors.toList());
+			}).collect(Collectors.toList());*/
 		QueryResult<TCsqUserPaymentRecord> queryResult = new QueryResult<>();
-		queryResult.setResultList(userPaymentRecords);
+//		queryResult.setResultList(userPaymentRecords);
+		queryResult.setResultList(tCsqUserPaymentRecords);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;
 	}
 
 	private Map<Long, List<TCsqService>> getServiceMap(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		List<Long> serviceIds = tCsqUserPaymentRecords.stream()
-			.filter(a -> a.getEntityType() == CSqUserPaymentEnum.TYPE_SERVICE.toCode())
+			.filter(a -> a.getEntityType() == CsqEntityTypeEnum.TYPE_SERVICE.toCode())
 			.map(TCsqUserPaymentRecord::getEntityId)
 			.collect(Collectors.toList());
 		List<TCsqService> tCsqServices = serviceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(serviceIds);
@@ -348,6 +400,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		if (tCsqOrder.getStatus() == CsqOrderEnum.STATUS_ALREADY_PAY.getCode()) {
 			return;
 		}
+		Integer toType = tCsqOrder.getToType();
+		if(CsqEntityTypeEnum.TYPE_SERVICE.toCode() != toType) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的订单类型!");
+		}
 		//插入流水
 		//防止重复插入
 		Double price = tCsqOrder.getPrice();
@@ -358,14 +414,17 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.money(price)
 			.entityId(tCsqOrder.getFromId())    //来源
 			.entityType(tCsqOrder.getFromType())
-			.inOrOut(CSqUserPaymentEnum.INOUT_OUT.toCode()).build();
+			.inOrOut(CsqPaymenEnum.INOUT_OUT.toCode()).build();
 
-		TCsqUserPaymentRecord build2 = build1;
 		Long serviceId = tCsqOrder.getToId();
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
-		build2.setUserId(csqService.getUserId());
-		build2.setEntityId(serviceId);
-		build2.setEntityType(tCsqOrder.getToType());
+		TCsqUserPaymentRecord build2 = TCsqUserPaymentRecord.builder()
+			.userId(csqService.getUserId())
+			.orderId(tCsqOrder.getId())
+			.money(price)
+			.entityId(serviceId)    //来源
+			.entityType(toType)
+			.inOrOut(CsqPaymenEnum.INOUT_IN.toCode()).build();
 		csqUserPaymentDao.insert(build1, build2);
 		//TODO 捐助人的个人捐助次数、基金捐助次数（如果来源为基金）、项目受助次数等增加
 
@@ -378,15 +437,15 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.name(csqUser.getName())
 			.createTime(System.currentTimeMillis()).build();
 
-		String donateJsonString = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
-		LimitQueue<CsqDonateRecordVo> voList;
-		if(donateJsonString == null) {
-			voList = new LimitQueue<>(maximum);	//创建带上限的队列
+		Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
+		LimitQueue<CsqDonateRecordVo> donateQueue = new LimitQueue<>(maximum);
+		if(exist == null) {
+			donateQueue = new LimitQueue<>(maximum);	//创建带上限的队列
 		} else {
-			voList = JSONObject.parseObject(donateJsonString, LimitQueue.class);
+			donateQueue = (LimitQueue<CsqDonateRecordVo>) exist;
 		}
-		voList.offer(vo);
-		userRedisTemplate.put(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString(), JSONObject.toJSONString(voList));
+		donateQueue.offer(vo);
+		userRedisTemplate.put(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString(), donateQueue);
 
 		tCsqOrder.setStatus(CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		csqOrderDao.update(tCsqOrder);

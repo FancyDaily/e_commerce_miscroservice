@@ -14,5 +14,9 @@ public interface CsqUserPaymentDao {
 
 	int insert(TCsqUserPaymentRecord... build);
 
+	int multiInsert(List<TCsqUserPaymentRecord> builds);
+
 	List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDesc(Long serviceId, int toCode, int toCode1);
+
+	List<TCsqUserPaymentRecord> selectInOrderIdsAndInOut(List<Long> orderIds, int toCode);
 }

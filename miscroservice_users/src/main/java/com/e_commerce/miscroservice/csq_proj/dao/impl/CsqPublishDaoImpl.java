@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPublishDao;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqPublish;
 import org.springframework.stereotype.Component;
 
@@ -18,14 +19,10 @@ import java.util.stream.Collectors;
 @Component
 public class CsqPublishDaoImpl implements CsqPublishDao {
 
-	private MybatisPlusBuild baseWhereBuild() {
-		return new MybatisPlusBuild(TCsqPublish.class)
-			.eq(TCsqPublish::getIsValid, AppConstant.IS_VALID_YES);
-	}
-
 	@Override
 	public TCsqPublish selectByMainKey(int mainKey) {
-		return MybatisPlus.getInstance().findOne(new TCsqPublish(), baseWhereBuild()
+		return MybatisPlus.getInstance().findOne(new TCsqPublish(), new MybatisPlusBuild(TCsqPublish.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqPublish::getMainKey, mainKey));
 	}
 
@@ -37,13 +34,15 @@ public class CsqPublishDaoImpl implements CsqPublishDao {
 		if(updaterIds.size() == 1) {
 			return update(tCsqPublish);
 		}
-		return MybatisPlus.getInstance().update(tCsqPublish, baseWhereBuild()
+		return MybatisPlus.getInstance().update(tCsqPublish, new MybatisPlusBuild(TCsqPublish.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqPublish::getId, updaterIds));
 	}
 
 	@Override
 	public int update(TCsqPublish tCsqPublish) {
-		return MybatisPlus.getInstance().update(tCsqPublish, baseWhereBuild()
+		return MybatisPlus.getInstance().update(tCsqPublish, new MybatisPlusBuild(TCsqPublish.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqPublish::getId, tCsqPublish.getId()));
 	}
 

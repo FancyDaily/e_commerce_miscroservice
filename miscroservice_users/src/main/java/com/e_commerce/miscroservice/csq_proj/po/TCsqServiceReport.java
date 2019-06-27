@@ -3,11 +3,8 @@ package com.e_commerce.miscroservice.csq_proj.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
-
-import java.sql.Timestamp;
 
 /**
  * 项目汇报
@@ -28,7 +25,7 @@ public class TCsqServiceReport extends BaseEntity {
 	private String title;
 
 	@Column(commit = "描述")
-	private String desc;
+	private String description;
 
 	@Column(commit = "图片")
 	private String pic;

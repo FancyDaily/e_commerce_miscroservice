@@ -38,7 +38,7 @@ public class FundController {
 	@RequestMapping("apply/check")
 	public Object beforeApplyForFund() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			boolean b = fundService.checkBeforeApplyForAFund(userId);
 			result.setData(b);
@@ -68,7 +68,7 @@ public class FundController {
 								@RequestParam(required = false) String orderNo,
 								@RequestParam(required = false) Long publishId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			log.info("申请基金, amount={},fundId={},orderNo={},publishId={}");
 //			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
@@ -105,9 +105,10 @@ public class FundController {
 	@Consume(TCsqFund.class)
 	public Object modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 							   String description, String coverPic, String orgName, String orgAddr,
-							   String contact, String personInCharge,String creditCardName,String creditCardId) {
+							   String contact, String personInCharge,String creditCardName,String creditCardId,
+							   @RequestParam(required = false) Integer status) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		TCsqFund fund = (TCsqFund) ConsumeHelper.getObj();
 		try {
 			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}",
@@ -134,7 +135,7 @@ public class FundController {
 	@RequestMapping("cert")
 	public Object certFund(Long fundId, Integer option) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			log.info("审核 - 基金公开, fundId={}, option={}", fundId, option);
 			fundService.certFund(userId, fundId, option);
@@ -159,7 +160,7 @@ public class FundController {
 	@RequestMapping("detail")
 	public Object FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			log.info("基金详情, fundId={}", fundId);
 			CsqFundVo csqFundVo = fundService.fundDetail(fundId);
@@ -185,7 +186,7 @@ public class FundController {
 	@RequestMapping("share")
 	public Object shareFund(Long fundId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			Map<String, Object> shareMap = fundService.share(userId, fundId);
 			result.setData(shareMap);
@@ -212,7 +213,7 @@ public class FundController {
 	@RequestMapping("list")
 	public Object fundList(Integer pageNum, Integer pageSize,Integer... option) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			QueryResult<TCsqFund> list = fundService.list(userId, pageNum, pageSize, option);
 			result.setData(list);
@@ -236,7 +237,7 @@ public class FundController {
 	@RequestMapping("testInsert")
 	public Object testInsert() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		try {
 			log.info("测试用插入, userId={}", userId);
 			fundService.insertForSomeOne(userId);

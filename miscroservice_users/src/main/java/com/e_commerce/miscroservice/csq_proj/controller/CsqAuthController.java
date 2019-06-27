@@ -40,7 +40,7 @@ public class CsqAuthController {
 	@RequestMapping("person/submit")
 	public Object personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = UserUtil.getTestId(2000L);
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
 		csqUserAuth.setUserId(userId);
 		try {
@@ -138,5 +138,27 @@ public class CsqAuthController {
 		return result;
 	}
 
+	/**
+	 * 实名状态校验
+	 * @return
+	 */
+	@RequestMapping("check")
+	public Object authCheck() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId(2000L);
+		try {
+			csqUserService.checkAuth(userId);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "实名状态校验", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("实名状态校验", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
 
 }

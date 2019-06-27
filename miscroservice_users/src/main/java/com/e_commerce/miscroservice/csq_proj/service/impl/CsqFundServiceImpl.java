@@ -120,6 +120,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 				}
 			}
 		}
+		//若 status =2 直接处理成【公开】
 		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
 		fundDao.update(fund);
 	}
@@ -187,7 +188,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
 		//统计捐款人数
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqPaymenEnum.INOUT_IN.toCode());
 		int count = tCsqUserPaymentRecords.size();
 		csqFundVo.setContributeInCnt(count);
 		//把基金方向的publish_id转换成名字
@@ -200,7 +201,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<Long> tOrderIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.collect(Collectors.toList());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
@@ -225,7 +226,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		String qrCode = "";	//TODO 二维码(根据具体的分享后逻辑完善)
 		map.put("qrCode", qrCode);
 		//查询捐入列表
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CSqUserPaymentEnum.TYPE_FUND.toCode(), CSqUserPaymentEnum.INOUT_IN.toCode());	//分页标记
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqPaymenEnum.INOUT_IN.toCode());	//分页标记
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return map;
 		}

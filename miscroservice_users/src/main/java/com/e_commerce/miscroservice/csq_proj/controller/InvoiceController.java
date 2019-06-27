@@ -147,13 +147,14 @@ public class InvoiceController {
 	 * @param invoiceId
 	 * @return
 	 */
-	@RequestMapping("recordList")
+	@RequestMapping("record/list")
 	public Object invoiceRecordList(Long invoiceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("发票对应项目列表, userId={}, invoiceId={}", userId, invoiceId);
-			invoiceService.recordList(userId, invoiceId, pageNum, pageSize);
+			QueryResult<CsqInvoiceVo> queryResult = invoiceService.recordList(userId, invoiceId, pageNum, pageSize);
+			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票对应项目列表", e.getMessage());

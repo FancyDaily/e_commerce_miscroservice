@@ -17,9 +17,14 @@ public class RedisConfig extends RedisTemplateConfig {
 		return createTemplateCache(OperateEnum.STR);
 	}
 
-	    @Bean(name = "userRedisTemplate")
+	@Bean(name = "userRedisTemplate")
     public HashOperations<String, String, String> createUserRedisTemplate() {
         return createTemplateCache(OperateEnum.HASH).opsForHash();
-
     }
+
+	@Bean(name = "csqRedisTemplate")
+	public HashOperations<String, String, Object> createCsqRedisTemplate() {
+		return createTemplateCache(OperateEnum.HASH).opsForHash();
+	}
+
 }
