@@ -14,7 +14,7 @@ import java.util.List;
 public class TypeDictionariesDaoImpl implements TypeDictionariesDao {
     @Override
     public List<TTypeDictionaries> selectInviteRecords(Long mineId, Long inviterId) {
-        return MybatisPlus.getInstance().finAll(new TTypeDictionaries(),new MybatisPlusBuild(TTypeDictionaries.class)
+        return MybatisPlus.getInstance().findAll(new TTypeDictionaries(),new MybatisPlusBuild(TTypeDictionaries.class)
                 .eq(TTypeDictionaries::getEntityId,mineId)
                 .eq(TTypeDictionaries::getTargetId,inviterId)
         .eq(TTypeDictionaries::getType, DictionaryEnum.INVITER.getType())
@@ -29,7 +29,7 @@ public class TypeDictionariesDaoImpl implements TypeDictionariesDao {
 
     @Override
     public List<TTypeDictionaries> selectByIdAndIsValid(Long scene, String isValid) {
-        return MybatisPlus.getInstance().finAll(new TTypeDictionaries(),new MybatisPlusBuild(TTypeDictionaries.class)
+        return MybatisPlus.getInstance().findAll(new TTypeDictionaries(),new MybatisPlusBuild(TTypeDictionaries.class)
         .eq(TTypeDictionaries::getId,scene)
         .eq(TTypeDictionaries::getIsValid,AppConstant.IS_VALID_YES));
     }

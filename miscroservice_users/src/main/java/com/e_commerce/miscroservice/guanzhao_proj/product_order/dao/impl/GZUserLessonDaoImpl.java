@@ -38,7 +38,7 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
 
     @Override
     public List<TGzUserLesson> selectByUserIdAndSubjectId(Long userId, Long subjectId) {
-        return MybatisPlus.getInstance().finAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
                 .eq(TGzUserLesson::getUserId, userId)
                 .eq(TGzUserLesson::getSubjectId, subjectId)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
@@ -46,7 +46,7 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
 
     @Override
     public List<TGzUserLesson> selectBySubjectIdInUserIds(Long subjectId, List<Long> userIds) {
-        return MybatisPlus.getInstance().finAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
                 .eq(TGzUserLesson::getSubjectId, subjectId)
                 .in(TGzUserLesson::getUserId, userIds)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
@@ -54,7 +54,7 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
 
     @Override
     public List<TGzUserLesson> selectByLessonId(Long id) {
-        return MybatisPlus.getInstance().finAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
                 .eq(TGzUserLesson::getLessonId, id)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -80,7 +80,7 @@ public class GZUserLessonDaoImpl implements GZUserLessonDao {
     }
     @Override
     public List<TGzUserLesson> selectBySubjectId(Long subjectId) {
-        return MybatisPlus.getInstance().finAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserLesson(), new MybatisPlusBuild(TGzUserLesson.class)
                 .eq(TGzUserLesson::getSubjectId, subjectId)
                 .eq(TGzUserLesson::getIsValid, AppConstant.IS_VALID_YES));
     }

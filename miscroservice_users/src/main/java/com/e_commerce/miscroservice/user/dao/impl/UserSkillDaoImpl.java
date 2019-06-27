@@ -19,7 +19,7 @@ public class UserSkillDaoImpl implements UserSkillDao {
      */
     @Override
     public List<TUserSkill> queryOnesSkills(Long userId) {
-        return MybatisPlus.getInstance().finAll(new TUserSkill(),new MybatisPlusBuild(TUserSkill.class)
+        return MybatisPlus.getInstance().findAll(new TUserSkill(),new MybatisPlusBuild(TUserSkill.class)
                 .eq(TUserSkill::getUserId,userId)
                 .eq(TUserSkill::getIsValid, AppConstant.IS_VALID_YES).
                         orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserSkill::getCreateTime)));
@@ -33,7 +33,7 @@ public class UserSkillDaoImpl implements UserSkillDao {
      */
     @Override
     public boolean isExist(String name, Long userId) {
-        return !MybatisPlus.getInstance().finAll(new TUserSkill(),new MybatisPlusBuild(TUserSkill.class)
+        return !MybatisPlus.getInstance().findAll(new TUserSkill(),new MybatisPlusBuild(TUserSkill.class)
                 .eq(TUserSkill::getName,name)
                 .eq(TUserSkill::getUserId,userId)
                 .eq(TUserSkill::getIsValid,AppConstant.IS_VALID_YES)).isEmpty();

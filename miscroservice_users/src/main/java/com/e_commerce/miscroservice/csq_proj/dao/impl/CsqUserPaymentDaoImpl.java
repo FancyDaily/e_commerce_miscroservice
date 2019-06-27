@@ -31,7 +31,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOut(Long entityId, int entityType, int inOut) {
-		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
 			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
@@ -50,7 +50,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDesc(Long entityId, int entityType, int inOut) {
-		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
 			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
@@ -60,7 +60,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectInOrderIdsAndInOut(List<Long> orderIds, int toCode) {
-		return MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
 			.in(TCsqUserPaymentRecord::getOrderId, orderIds));

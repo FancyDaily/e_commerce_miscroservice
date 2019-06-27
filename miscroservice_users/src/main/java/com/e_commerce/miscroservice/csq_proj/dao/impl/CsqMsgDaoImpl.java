@@ -21,14 +21,14 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 
 	@Override
 	public List<TCsqSysMsg> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().finAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqSysMsg::getUserId, userId));
 	}
 
 	@Override
 	public List<TCsqSysMsg> selectByUserIdAndIsRead(Long userId, int isRead) {
-		return MybatisPlus.getInstance().finAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqSysMsg::getUserId, userId)
 			.eq(TCsqSysMsg::getIsRead, isRead));

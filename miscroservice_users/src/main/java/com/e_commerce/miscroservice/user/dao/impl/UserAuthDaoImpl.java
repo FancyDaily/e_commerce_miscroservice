@@ -13,7 +13,7 @@ import java.util.List;
 public class UserAuthDaoImpl implements UserAuthDao {
     @Override
     public List<TUserAuth> findAllByCardId(String cardId) {
-        return MybatisPlus.getInstance().finAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
+        return MybatisPlus.getInstance().findAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
         .eq(TUserAuth::getCardId,cardId)
         .eq(TUserAuth::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -25,14 +25,14 @@ public class UserAuthDaoImpl implements UserAuthDao {
 
     @Override
     public List<TUserAuth> selectByUserId(Long id) {
-        return MybatisPlus.getInstance().finAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
+        return MybatisPlus.getInstance().findAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
         .eq(TUserAuth::getUserId,id)
         .eq(TUserAuth::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TUserAuth> selectAll() {
-        return MybatisPlus.getInstance().finAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
+        return MybatisPlus.getInstance().findAll(new TUserAuth(),new MybatisPlusBuild(TUserAuth.class)
         .eq(TUserAuth::getIsValid,AppConstant.IS_VALID_YES));
     }
 }

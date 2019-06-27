@@ -26,7 +26,7 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
 
     @Override
     public List<TGzUserSubject> selectBySubjectId(Long subjectId) {
-        return MybatisPlus.getInstance().finAll(new TGzUserSubject(), new MybatisPlusBuild(TGzUserSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserSubject(), new MybatisPlusBuild(TGzUserSubject.class)
         .eq(TGzUserSubject::getSubjectId, subjectId)
         .eq(TGzUserSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -38,7 +38,7 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
 
     @Override
     public List<TGzUserSubject> selectByUserId(Integer id) {
-        return MybatisPlus.getInstance().finAll(new TGzUserSubject(), new MybatisPlusBuild(TGzSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzUserSubject::getUserId, id)
         .eq(TGzUserSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -52,7 +52,7 @@ public class GZUserSubjectDaoImpl implements GZUserSubjectDao {
 
     @Override
     public List<TGzUserSubject> selectByPrimaryKey(Long id) {
-        return MybatisPlus.getInstance().finAll(new TGzUserSubject(), new MybatisPlusBuild(TGzUserSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzUserSubject(), new MybatisPlusBuild(TGzUserSubject.class)
         .eq(TGzUserSubject::getId, id)
         .eq(TGzUserSubject::getIsValid, AppConstant.IS_VALID_YES));
     }

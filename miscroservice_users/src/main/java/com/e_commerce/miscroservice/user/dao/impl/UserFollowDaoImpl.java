@@ -22,7 +22,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public boolean isAtten(Long userId, Long userFollowId) {
-        return !MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
+        return !MybatisPlus.getInstance().findAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId, userId)
                 .eq(TUserFollow::getUserFollowId, userFollowId)
                 .eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)).isEmpty();
@@ -37,7 +37,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
     @Override
     public Map<String, Object> findRecords(Long userId, Long userFollowId) {
         Map<String, Object> resultMap = new HashMap<>();
-        List<TUserFollow> userFollows = MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
+        List<TUserFollow> userFollows = MybatisPlus.getInstance().findAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .groupBefore().
                         eq(TUserFollow::getUserId, userId)
                 .eq(TUserFollow::getUserFollowId, userFollowId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)
@@ -93,7 +93,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public List<TUserFollow> findUserIdRecords(Long userId, Long lastTime) {
-        return MybatisPlus.getInstance().finAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
+        return MybatisPlus.getInstance().findAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
@@ -108,7 +108,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public List<TUserFollow> findUserFollowIdRecords(Long userId, Long lastTime) {
-        return MybatisPlus.getInstance().finAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
+        return MybatisPlus.getInstance().findAll(new TUserFollow(),new MybatisPlusBuild(TUserFollow.class)
                 .eq(TUserFollow::getUserFollowId,userId)
                 .lt(TUserFollow::getCreateTime,lastTime)
                 .eq(TUserFollow::getIsValid,AppConstant.IS_VALID_YES)
@@ -123,7 +123,7 @@ public class UserFollowDaoImpl implements UserFollowDao {
      */
     @Override
     public Integer queryAttenStatus(Long id, Long userId) {
-        List<TUserFollow> userFollows = MybatisPlus.getInstance().finAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
+        List<TUserFollow> userFollows = MybatisPlus.getInstance().findAll(new TUserFollow(), new MybatisPlusBuild(TUserFollow.class)
                 .groupBefore().
                         eq(TUserFollow::getUserId, id)
                 .eq(TUserFollow::getUserFollowId, userId).eq(TUserFollow::getIsValid, AppConstant.IS_VALID_YES)

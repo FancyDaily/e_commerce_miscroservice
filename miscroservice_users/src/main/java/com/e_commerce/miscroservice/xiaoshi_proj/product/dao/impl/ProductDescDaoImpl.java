@@ -24,7 +24,7 @@ public class ProductDescDaoImpl implements ProductDescDao {
 
 	@Override
 	public List<TServiceDescribe> selectDescByServiceId(Long id) {
-		return MybatisPlus.getInstance().finAll(new TServiceDescribe()
+		return MybatisPlus.getInstance().findAll(new TServiceDescribe()
 				, new MybatisPlusBuild(TServiceDescribe.class).eq(TServiceDescribe::getServiceId, id));
 	}
 

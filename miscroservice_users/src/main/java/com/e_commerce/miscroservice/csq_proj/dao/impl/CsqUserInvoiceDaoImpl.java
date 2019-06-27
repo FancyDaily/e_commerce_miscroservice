@@ -24,7 +24,7 @@ public class CsqUserInvoiceDaoImpl implements CsqUserInvoiceDao {
 
 	@Override
 	public List<TCsqUserInvoice> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().finAll(new TCsqUserInvoice(), new MybatisPlusBuild(TCsqUserInvoice.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), new MybatisPlusBuild(TCsqUserInvoice.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserInvoice::getUserId, userId));
 	}

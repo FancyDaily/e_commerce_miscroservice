@@ -19,7 +19,7 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndType(Long userId, int code) {
-		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code));
@@ -27,7 +27,7 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code) {
-		return MybatisPlus.getInstance().finAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)

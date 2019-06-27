@@ -18,7 +18,7 @@ public class GZLessonDaoImpl implements GZLessonDao {
 
     @Override
     public List<TGzLesson> selectBySubjectId(Long subjectId) {
-        return MybatisPlus.getInstance().finAll(new TGzLesson(), new MybatisPlusBuild(TGzLesson.class)
+        return MybatisPlus.getInstance().findAll(new TGzLesson(), new MybatisPlusBuild(TGzLesson.class)
                 .eq(TGzLesson::getSubjectId, subjectId)
                 .eq(TGzLesson::getIsValid, AppConstant.IS_VALID_YES));
     }

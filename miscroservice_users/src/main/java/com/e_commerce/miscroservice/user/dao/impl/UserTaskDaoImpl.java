@@ -21,7 +21,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> queryOnesSignUpBetweenTime(Long id, Long beginTimeStamp, Long endTimeStamp) {
-        return MybatisPlus.getInstance().finAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, beginTimeStamp, endTimeStamp)
                 .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
@@ -37,7 +37,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> queryOnessignUpBetweenTimeDesc(Long id, Long thisBeginStamp, Long thisEndStamp) {
-        return MybatisPlus.getInstance().finAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(new TUserTask(), new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId, id)
                 .between(TUserTask::getCreateTime, thisBeginStamp, thisEndStamp)
                 .eq(TUserTask::getType,TaskEnum.TASK_SIGN_UP.getType())
@@ -52,7 +52,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> findlatestSignUps(Long id) {
-        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getType, TaskEnum.TASK_SIGN_UP.getType())
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES)
@@ -67,7 +67,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
     @Override
     public List<TUserTask> findOnesTasks(Long id) {
         TUserTask userTask = new TUserTask();
-        return MybatisPlus.getInstance().finAll(userTask ,new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(userTask ,new MybatisPlusBuild(TUserTask.class)
                 .eq(TUserTask::getUserId,id)
                 .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
     }
@@ -80,7 +80,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
      */
     @Override
     public List<TUserTask> findTasksByTypeAndUserId(Integer type, Long id) {
-        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getType,type)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));
@@ -88,7 +88,7 @@ public class UserTaskDaoImpl implements UserTaskDao {
 
     @Override
     public List<TUserTask> findOnesTasksByType(Long id, int taskCode) {
-        return MybatisPlus.getInstance().finAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
+        return MybatisPlus.getInstance().findAll(new TUserTask(),new MybatisPlusBuild(TUserTask.class)
         .eq(TUserTask::getUserId,id)
         .eq(TUserTask::getType,taskCode)
         .eq(TUserTask::getIsValid,AppConstant.IS_VALID_YES));

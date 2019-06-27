@@ -16,7 +16,7 @@ import java.sql.Timestamp;
  * @Date: 2019-06-10 09:58
  */
 @Table(commit = "从善桥系统消息表")
-@Data
+@Data(matchSuffix = true)
 @Builder
 public class TCsqSysMsg extends BaseEntity {
 

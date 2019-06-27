@@ -13,7 +13,7 @@ import java.util.List;
 public class GroupDaoImpl implements GroupDao {
     @Override
     public List<TGroup> selectByCompanyIdAndAuth(Long companyId, Integer groupAuthDefault) {
-        return MybatisPlus.getInstance().finAll(new TGroup(),new MybatisPlusBuild(TGroup.class)
+        return MybatisPlus.getInstance().findAll(new TGroup(),new MybatisPlusBuild(TGroup.class)
         .eq(TGroup::getCompanyId,companyId)
         .eq(TGroup::getAuth,groupAuthDefault)
         .eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
@@ -21,14 +21,14 @@ public class GroupDaoImpl implements GroupDao {
 
     @Override
     public List<TGroup> selectByCompanyId(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TGroup(),new MybatisPlusBuild(TGroup.class)
+        return MybatisPlus.getInstance().findAll(new TGroup(),new MybatisPlusBuild(TGroup.class)
         .eq(TGroup::getCompanyId,companyId)
         .eq(TGroup::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TGroup> listGroup(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TGroup(), new MybatisPlusBuild(TGroup.class)
+        return MybatisPlus.getInstance().findAll(new TGroup(), new MybatisPlusBuild(TGroup.class)
                 .eq(TGroup::getCompanyId, companyId).eq(TGroup::getIsValid, AppConstant.IS_VALID_YES));
     }
 

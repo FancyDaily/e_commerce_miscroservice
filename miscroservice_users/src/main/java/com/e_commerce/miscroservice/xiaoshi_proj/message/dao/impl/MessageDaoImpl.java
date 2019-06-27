@@ -102,7 +102,7 @@ public class MessageDaoImpl implements MessageDao {
      * @return
      */
     public List<TMessage> selectAllMessageByTwoUserId(Long fromUserId , Long toUserId , Long lastTime){
-        List<TMessage> messageList = MybatisPlus.getInstance().finAll(new TMessage(),
+        List<TMessage> messageList = MybatisPlus.getInstance().findAll(new TMessage(),
                 new MybatisPlusBuild(TMessage.class)
                         .groupBefore()
                         .eq(TMessage::getUserId ,toUserId)

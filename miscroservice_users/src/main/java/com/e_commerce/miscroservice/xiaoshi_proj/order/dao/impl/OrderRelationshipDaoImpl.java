@@ -128,7 +128,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectByOrderIdAndEnrollUserIdList(Long orderId, List<Long> userIdList) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.in(TOrderRelationship::getReceiptUserId, userIdList));
@@ -142,7 +142,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectByUserId(Long userId) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).or()
 						.groupBefore()
@@ -162,7 +162,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrderRelationship> selectEndByUserId(Long userId) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).or()
 						.groupBefore()
@@ -196,7 +196,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrderRelationship> selectOrderRelationshipByReceiptUserId(Long userId) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.eq(TOrderRelationship::getReceiptUserId, userId)
 				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
 
@@ -210,7 +210,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrderRelationship> selectOrderRelationshipByReceiptUserIdNotEqStatus(Long userId, Integer status) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.eq(TOrderRelationship::getReceiptUserId, userId)
 				.neq(TOrderRelationship::getStatus,status)
 				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES));
@@ -225,7 +225,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrderRelationship> selectCollectList(Long id) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.groupBefore().eq(TOrderRelationship::getReceiptUserId, id).or()
 				.groupBefore()
 				.eq(TOrderRelationship::getFromUserId, id)
@@ -247,7 +247,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray) {
-		return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+		return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
 				.in(TOrder::getId, idList)
 				.in(TOrder::getStatus, collectionAvailableStatusArray)
 				.eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
@@ -278,7 +278,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectListByStatusListByEnroll(Long orderId, List<Integer> statusList) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.in(TOrderRelationship::getStatus, statusList)
@@ -297,7 +297,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectListByStatusForNotSignByEnroll(Long orderId, int status) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.eq(TOrderRelationship::getStatus, status)
@@ -317,7 +317,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectListByStatusByEnroll(Long orderId, int status) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.eq(TOrderRelationship::getStatus, status)
@@ -408,7 +408,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	@Override
 	public List<TOrderRelationship> pageChooseList(Long userId) {
 		return relationshipMapper.getChooseList(userId);
-//        return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+//        return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 //                .eq(TOrderRelationship::getFromUserId, userId).isNull(TOrderRelationship::getReceiptUserId));
 	}
 
@@ -421,7 +421,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 
 	@Override
 	public List<TOrderRelationship> selectWaitPay(Long orderId) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.eq(TOrderRelationship::getOrderId, orderId)
 				.eq(TOrderRelationship::getIsValid, AppConstant.IS_VALID_YES)
 				.isNotNull(TOrderRelationship::getReceiptUserId)
@@ -443,7 +443,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 //		List<Integer> noOrderStatus = new ArrayList<>();
 //		noOrderStatus.add(OrderRelationshipEnum.STATUS_NO_STATE.getType());
 //		noOrderStatus.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_REMOVE_ENROLL.getType())
@@ -465,7 +465,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 */
 	@Override
 	public List<TOrderRelationship> getReceiver(Long orderId) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())
@@ -484,7 +484,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectCanRemoveEnrollUser(Long orderId) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.isNotNull(TOrderRelationship::getReceiptUserId)
 				.eq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType())
 				.eq(TOrderRelationship::getOrderReportType, OrderRelationshipEnum.ORDER_REPORT_IS_NO.getType())
@@ -499,7 +499,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectOrderRelaByStatusByEnrollNoReport(Long orderId) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.isNotNull(TOrderRelationship::getReceiptUserId)
@@ -533,7 +533,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	 * @return
 	 */
 	public List<TOrderRelationship> selectListByStatusListByEnrollInUserList(Long orderId, List<Integer> statusList, List<Long> userIdList) {
-		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().finAll(new TOrderRelationship(),
+		List<TOrderRelationship> orderRelationshipList = MybatisPlus.getInstance().findAll(new TOrderRelationship(),
 				new MybatisPlusBuild(TOrderRelationship.class)
 						.eq(TOrderRelationship::getOrderId, orderId)
 						.in(TOrderRelationship::getStatus, statusList)
@@ -592,7 +592,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 
     @Override
     public List<TOrderRelationship> selectOrderRelationshipByFromUserIdAndReceiptUserIdAndServiceId(Long productId, Long fromUserId, Long receiptUserId) {
-        return MybatisPlus.getInstance().finAll(new TOrderRelationship(),new MybatisPlusBuild(TOrderRelationship.class)
+        return MybatisPlus.getInstance().findAll(new TOrderRelationship(),new MybatisPlusBuild(TOrderRelationship.class)
 		.eq(TOrderRelationship::getServiceId, receiptUserId)
 		.eq(TOrderRelationship::getFromUserId, fromUserId)
 		.eq(TOrderRelationship::getReceiptUserId, receiptUserId)
@@ -649,7 +649,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 
     @Override
     public List<TOrderRelationship> selectOrderRelationshipByOrderIdAndReceiptIdInStatus(Long orderId, Long id, Integer[] relationshipAlreadyEnrollStatus) {
-        return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+        return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 		.eq(TOrderRelationship::getOrderId,orderId)
 		.eq(TOrderRelationship::getReceiptUserId,id)
 				.in(TOrderRelationship::getStatus,relationshipAlreadyEnrollStatus)
@@ -658,7 +658,7 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 
     @Override
     public List<TOrderRelationship> selectOrderRelationshipBInOrderIdsAndReceiptIdInStatus(List<Long> orderIds, Long id, Integer[] relationshipAlreadyEnrollStatus) {
-		return MybatisPlus.getInstance().finAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
+		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.in(TOrderRelationship::getOrderId,orderIds)
 				.eq(TOrderRelationship::getReceiptUserId,id)
 				.in(TOrderRelationship::getStatus,relationshipAlreadyEnrollStatus)

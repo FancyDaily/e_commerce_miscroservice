@@ -28,7 +28,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> queryByIds(List<Long> idList) {
-		return MybatisPlus.getInstance().finAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
 			.in(TCsqUser::getId, idList)
 			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES));
 	}
@@ -46,7 +46,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectByVxOpenId(String openId) {
-		return MybatisPlus.getInstance().finAll(new TCsqUser(),new MybatisPlusBuild(TCsqUser.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(),new MybatisPlusBuild(TCsqUser.class)
 			.eq(TCsqUser::getVxOpenId,openId)
 			.eq(TCsqUser::getIsValid,AppConstant.IS_VALID_YES));
 	}
@@ -76,7 +76,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectInIds(List<Long> userIds) {
-		return MybatisPlus.getInstance().finAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 		.in(TUser::getId, userIds));
 	}
@@ -92,7 +92,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectAll() {
-		return MybatisPlus.getInstance().finAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 

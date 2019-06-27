@@ -15,7 +15,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
 
     @Override
     public List<TGzOrder> findMyOrderList(Integer id) {
-        List<TGzOrder> list = MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        List<TGzOrder> list = MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
                 .eq(TGzOrder::getUserId,id)
                 .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
         return list;
@@ -51,7 +51,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
 
     @Override
     public List<TGzOrder> selectBySubjectIdAndStatus(Long id, Integer payStatus) {
-        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        return MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getSubjectId, id)
                 .eq(TGzOrder::getStatus, payStatus)
         .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));
@@ -59,7 +59,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
 
     @Override
     public List<TGzOrder> selectByPrice(double price, Integer Status) {
-        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        return MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getPrice, price)
         .eq(TGzOrder::getStatus, Status)
         .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
@@ -68,7 +68,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
     @Override
     public List<TGzOrder> selectByUserIdExpired(Long userId) {
         long currentTimeMillis = System.currentTimeMillis();
-        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        return MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getUserId, userId)
         .lt(TGzOrder::getOrderTime, currentTimeMillis - GZOrderEnum.INTERVAL)
         .eq(TGzOrder::getIsValid, AppConstant.IS_VALID_YES));
@@ -77,7 +77,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
     @Override
     public List<TGzOrder> selectByUserIdExpiredUsedVoucher(Long userId) {
         long currentTimeMillis = System.currentTimeMillis();
-        return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+        return MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
                 .isNotNull(TGzOrder::getVoucherId)
                 .eq(TGzOrder::getUserId, userId)
                 .lt(TGzOrder::getOrderTime, currentTimeMillis - GZOrderEnum.INTERVAL)
@@ -93,7 +93,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
 
 	@Override
 	public List<TGzOrder> selectBySubjectIdAndUserIdUnpayDesc(Long subjectId, Long userId) {
-		return MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+		return MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
 		.eq(TGzOrder::getSubjectId, subjectId)
 		.eq(TGzOrder::getUserId, userId)
 		.eq(TGzOrder::getStatus, GZOrderEnum.UN_PAY.getCode())
@@ -103,7 +103,7 @@ public class GZOrderDaoImpl implements GZOrderDao {
 
 	@Override
     public List<TGzOrder> selectByUserIdAndSubjectIdAndStatusCreateTimeDesc(Long userId, Long subjectId, int status) {
-       return  MybatisPlus.getInstance().finAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
+       return  MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
         .eq(TGzOrder::getUserId, userId)
         .eq(TGzOrder::getSubjectId, subjectId)
         .eq(TGzOrder::getStatus, status)

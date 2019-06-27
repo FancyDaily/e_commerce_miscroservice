@@ -47,7 +47,7 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 
 	@Override
 	public List<TCsqUserAuth> selectByUserIdAndStatus(Long userId, int code) {
-		return MybatisPlus.getInstance().finAll(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserAuth::getUserId, userId)
 			.eq(TCsqUserAuth::getStatus, code))

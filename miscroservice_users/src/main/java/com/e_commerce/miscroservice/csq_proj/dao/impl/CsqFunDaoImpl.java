@@ -24,14 +24,14 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 		.eq(TCsqFund::getUserId, userId)
 		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
 	public List<TCsqFund> selectByUserIdAndStatus(Long userId, int val) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 		.eq(TCsqFund::getUserId, userId)
 		.eq(TCsqFund::getStatus, val)
 		.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
@@ -52,7 +52,7 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqFund::getUserId, userId)
 			.in(TCsqFund::getStatus, option)
@@ -61,7 +61,7 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectInIds(List<Long> fundIds) {
-		return MybatisPlus.getInstance().finAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqFund::getId, fundIds));
 	}

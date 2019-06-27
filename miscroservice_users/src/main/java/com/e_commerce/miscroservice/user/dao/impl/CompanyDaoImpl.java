@@ -13,7 +13,7 @@ import java.util.List;
 public class CompanyDaoImpl implements CompanyDao {
     @Override
     public List<TCompany> selectExistUserCompany(String name, Long id, Integer corpCertStatusYes) {
-        return MybatisPlus.getInstance().finAll(new TCompany(),new MybatisPlusBuild(TCompany.class)
+        return MybatisPlus.getInstance().findAll(new TCompany(),new MybatisPlusBuild(TCompany.class)
         .eq(TCompany::getName,name)
         .neq(TCompany::getUserId,id)
         .eq(TCompany::getStatus,corpCertStatusYes)
@@ -30,7 +30,7 @@ public class CompanyDaoImpl implements CompanyDao {
 
     @Override
     public List<TCompany> selectAllByUserId(Long id) {
-        return MybatisPlus.getInstance().finAll(new TCompany(),new MybatisPlusBuild(TCompany.class)
+        return MybatisPlus.getInstance().findAll(new TCompany(),new MybatisPlusBuild(TCompany.class)
                 .eq(TCompany::getUserId,id)
                 .eq(TCompany::getIsValid,AppConstant.IS_VALID_YES));
     }

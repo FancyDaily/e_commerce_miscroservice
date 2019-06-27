@@ -17,7 +17,7 @@ import java.util.List;
 public class GZUserVideoDaoImpl implements GzUserVideoDao {
 	@Override
 	public List<TGzUserVideo> selectByVideoId(Long videoId) {
-		return MybatisPlus.getInstance().finAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
+		return MybatisPlus.getInstance().findAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
 		.eq(TGzUserVideo::getId, videoId)
 		.eq(TGzUserVideo::getIsValid, AppConstant.IS_VALID_YES));
 	}
@@ -30,7 +30,7 @@ public class GZUserVideoDaoImpl implements GzUserVideoDao {
 
 	@Override
 	public List<TGzUserVideo> selectByUserIdAndLessonId(Long userId, Long lessonId) {
-		return MybatisPlus.getInstance().finAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
+		return MybatisPlus.getInstance().findAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
 		.eq(TGzUserVideo::getUserId, userId)
 		.eq(TGzUserVideo::getLessonId, lessonId)
 		.eq(TGzUserVideo::getIsValid, AppConstant.IS_VALID_YES));
@@ -38,7 +38,7 @@ public class GZUserVideoDaoImpl implements GzUserVideoDao {
 
 	@Override
 	public List<TGzUserVideo> selectByUserIdAndSubjectId(Long userId, Long subjectId) {
-		return MybatisPlus.getInstance().finAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
+		return MybatisPlus.getInstance().findAll(new TGzUserVideo(), new MybatisPlusBuild(TGzUserVideo.class)
 		.eq(TGzUserVideo::getUserId, userId)
 		.eq(TGzUserVideo::getSubjectId, subjectId)
 		.eq(TGzUserVideo::getIsValid, AppConstant.IS_VALID_YES));

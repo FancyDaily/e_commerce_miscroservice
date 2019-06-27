@@ -15,7 +15,7 @@ import java.util.List;
 public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     @Override
     public List<TUserTimeRecord> selectMonthlyTimeRecord(Long userId, Long begin, Long end) {
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(), new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(), new MybatisPlusBuild(TUserTimeRecord.class)
                 .groupBefore()
                 .eq(TUserTimeRecord::getUserId, userId)
                 .or()
@@ -44,7 +44,7 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
      * @return
      */
     public List<TUserTimeRecord> selectGetTimeByOrder(Long orderId){
-       return MybatisPlus.getInstance().finAll(new TUserTimeRecord() ,
+       return MybatisPlus.getInstance().findAll(new TUserTimeRecord() ,
                 new MybatisPlusBuild(TUserTimeRecord.class)
                         .eq(TUserTimeRecord::getTargetId , orderId)
                         .eq(TUserTimeRecord::getType , PaymentEnum.PAYMENT_TYPE_ACEPT_SERV.getCode())
@@ -58,7 +58,7 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
      */
     @Override
     public List<TUserTimeRecord> selectTimeRecordByUserIdBetweenASC(Long userId,Long begin,Long end) {
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
                 .groupBefore()
         .eq(TUserTimeRecord::getUserId,userId)
                 .or()
@@ -78,7 +78,7 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
      */
     @Override
     public List<TUserTimeRecord> selectByUserIdInOrderIds(Long userId, List<Long> orderIds) {
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
                 .groupBefore()
                 .eq(TUserTimeRecord::getUserId,userId)
                 .or()
@@ -97,7 +97,7 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
     @Override
     public List<TUserTimeRecord> selectDailyByUserIdInOrderIds(Long userId,List<Long> orderIds) {
         long currentTimeMillis = System.currentTimeMillis();
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
                 .groupBefore()
                 .eq(TUserTimeRecord::getUserId,userId)
                 .or()
@@ -110,14 +110,14 @@ public class UserTimeRecordDaoImpl implements UserTimeRecordDao {
 
     @Override
     public List<TUserTimeRecord> selectByUserId(Long id) {
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
         .eq(TUserTimeRecord::getUserId,id)
         .eq(TUserTimeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TUserTimeRecord> selectByUserIdOrFromUserIdAndTypeBetween(Long userId, int paymentType, long betLeft, long betRight) {
-        return MybatisPlus.getInstance().finAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TUserTimeRecord(),new MybatisPlusBuild(TUserTimeRecord.class)
                 .groupBefore()
                 .eq(TUserTimeRecord::getUserId,userId)
                 .or()

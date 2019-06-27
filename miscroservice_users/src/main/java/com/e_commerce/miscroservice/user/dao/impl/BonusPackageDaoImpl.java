@@ -35,7 +35,7 @@ public class BonusPackageDaoImpl implements BonusPackageDao {
 
     @Override
     public boolean isMine(Long id, Long bonusPackageId) {
-        return !MybatisPlus.getInstance().finAll(new TBonusPackage(),new MybatisPlusBuild(TBonusPackage.class)
+        return !MybatisPlus.getInstance().findAll(new TBonusPackage(),new MybatisPlusBuild(TBonusPackage.class)
         .eq(TBonusPackage::getUserId,id)
         .eq(TBonusPackage::getId,bonusPackageId)
                 .eq(TBonusPackage::getIsValid,AppConstant.IS_VALID_YES)).isEmpty();

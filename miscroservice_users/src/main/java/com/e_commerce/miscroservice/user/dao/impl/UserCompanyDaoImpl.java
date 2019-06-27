@@ -19,7 +19,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> queryByUserIdDESC(Long userId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getUserId,userId)
         .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
         .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserCompany::getCreateTime)));
@@ -32,7 +32,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectByCompanyId(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
     }
@@ -44,7 +44,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> findRecordOfCompanyAccount(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_CREATER)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -63,7 +63,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
                 userIds.add(id);
             }
         }
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
                 .in(TUserCompany::getUserId,userIds)
                 .eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserCompany::getCreateTime)));
@@ -77,7 +77,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectByUserIdAndCompanyjob(Long id, Integer role) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getUserId,id)
         .eq(TUserCompany::getCompanyJob,role)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -91,7 +91,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectByUserIdAndCompanyId(Long id, Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getUserId, id)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -126,7 +126,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectByUserIdAndCompanyJob(Long id, Integer jobCompanyCreater) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getUserId,id)
         .eq(TUserCompany::getCompanyJob,jobCompanyCreater)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -139,7 +139,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectJoinMembersByCompanyId(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .neq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_CREATER)
         .eq(TUserCompany::getState,AppConstant.JOIN_STATE_COMPANY_PASS)
@@ -155,7 +155,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectJoinMembersByCompanyIdBetween(Long companyId, Long begin, Long end) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
                 .eq(TUserCompany::getCompanyId,companyId)
                 .neq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_CREATER)
                 .eq(TUserCompany::getState,AppConstant.JOIN_STATE_COMPANY_PASS)
@@ -174,7 +174,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      */
     @Override
     public List<TUserCompany> selectBycompanyIdAndCompanyJobAndStateBetween(Long companyId, Integer jobCompanyCreater, Integer joinStateCompanyPass, long betLeft, long betRight) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getCompanyJob,jobCompanyCreater)
         .eq(TUserCompany::getState,joinStateCompanyPass)
@@ -197,12 +197,12 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
             build.eq(TUserCompany::getGroupId,groupId);
         }
 
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),build);
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),build);
     }
 
     @Override
     public List<TUserCompany> selectByCompanyIdAndUserId(Long companyId, Long userId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getUserId,userId)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -245,7 +245,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
 
     @Override
     public List<TUserCompany> listCompanyUser(Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(), new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(), new MybatisPlusBuild(TUserCompany.class)
                 .eq(TUserCompany::getState, 2).eq(TUserCompany::getIsValid, AppConstant.IS_VALID_YES)
                 .eq(TUserCompany::getCompanyJob,AppConstant.JOB_COMPANY_MEMBER)
                 .eq(TUserCompany::getCompanyId, companyId).isNotNull(TUserCompany::getGroupId));
@@ -260,7 +260,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
 
     @Override
     public List<TUserCompany> selectByCompanyIdAndState(Long companyId, Integer joinStateCompanyNotYet) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
         .eq(TUserCompany::getCompanyId,companyId)
         .eq(TUserCompany::getState,joinStateCompanyNotYet)
         .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -272,7 +272,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      * @return
      */
     public List<TUserCompany> selectUserCompanyByName(String name){
-        return MybatisPlus.getInstance().finAll(new TUserCompany() ,
+        return MybatisPlus.getInstance().findAll(new TUserCompany() ,
                 new MybatisPlusBuild(TUserCompany.class).eq(TUserCompany::getTeamName , name)
                         .eq(TUserCompany::getIsValid , AppConstant.IS_VALID_YES));
     }
@@ -284,14 +284,14 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      * @return
      */
     public List<TUserCompany> selectUserCompanyByIdAndUserIdList(List<Long> userIdList , Long companyId){
-        return MybatisPlus.getInstance().finAll(new TUserCompany() ,
+        return MybatisPlus.getInstance().findAll(new TUserCompany() ,
                 new MybatisPlusBuild(TUserCompany.class).eq(TUserCompany::getCompanyId , companyId)
                         .in(TUserCompany::getUserId , userIdList)
                         .eq(TUserCompany::getIsValid , AppConstant.IS_VALID_YES));
     }
     @Override
     public List<TUserCompany> selectInUserIdAndCompanyJob(ArrayList<Long> idList, Integer jobCompanyMember) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),new MybatisPlusBuild(TUserCompany.class)
                 .in(TUserCompany::getUserId,idList)
                 .eq(TUserCompany::getCompanyJob,jobCompanyMember)
                 .eq(TUserCompany::getIsValid,AppConstant.IS_VALID_YES));
@@ -311,7 +311,7 @@ public class UserCompanyDaoImpl implements UserCompanyDao {
      * @return
      */
     public List<TUserCompany> selectUserConpanysByUserIdsAndCompayId(List<Long> userIdList , Long companyId) {
-        return MybatisPlus.getInstance().finAll(new TUserCompany(),
+        return MybatisPlus.getInstance().findAll(new TUserCompany(),
                 new MybatisPlusBuild(TUserCompany.class)
                         .eq(TUserCompany::getCompanyId, companyId)
                         .in(TUserCompany::getUserId, userIdList)

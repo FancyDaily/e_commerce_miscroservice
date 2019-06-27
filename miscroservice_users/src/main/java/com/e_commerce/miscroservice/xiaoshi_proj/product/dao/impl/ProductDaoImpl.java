@@ -46,19 +46,19 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public List<TService> selectListByIds(List<Long> productIds) {
-		return MybatisPlus.getInstance().finAll(new TService(), new MybatisPlusBuild(TService.class).
+		return MybatisPlus.getInstance().findAll(new TService(), new MybatisPlusBuild(TService.class).
 				in(TService::getId, productIds));
 	}
 
 	@Override
 	public List<TServiceDescribe> getListProductDesc(List<Long> productIds) {
-		return MybatisPlus.getInstance().finAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
+		return MybatisPlus.getInstance().findAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
 				.in(TServiceDescribe::getServiceId, productIds));
 	}
 
 	@Override
 	public List<TServiceDescribe> getProductDesc(Long serviceId) {
-		return MybatisPlus.getInstance().finAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
+		return MybatisPlus.getInstance().findAll(new TServiceDescribe(), new MybatisPlusBuild(TServiceDescribe.class)
 				.eq(TServiceDescribe::getServiceId, serviceId));
 	}
 
@@ -68,7 +68,7 @@ public class ProductDaoImpl implements ProductDao {
 		if (StringUtil.isNotEmpty(keyName)) {
 			sqlWhere.like(TService::getServiceName,"%" + keyName + "%");
 		}
-        List<TService> listServie = MybatisPlus.getInstance().finAll(new TService(), sqlWhere
+        List<TService> listServie = MybatisPlus.getInstance().findAll(new TService(), sqlWhere
                 .eq(TService::getIsValid, AppConstant.IS_VALID_YES)
                 .eq(TService::getUserId, userId).eq(TService::getType, type)
                 .neq(TService::getStatus, ProductEnum.STATUS_DELETE.getValue()).orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TService::getCreateTime)));
@@ -77,7 +77,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<TService> selectByCompanyAccountInStatusBetween(Long userId, Integer[] companyPublishedStatusArray, Long begin, Long end) {
-        return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
+        return MybatisPlus.getInstance().findAll(new TService(),new MybatisPlusBuild(TService.class)
 		.eq(TService::getUserId,userId)
 		.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
 				.in(TService::getStatus,companyPublishedStatusArray)
@@ -87,7 +87,7 @@ public class ProductDaoImpl implements ProductDao {
 
 	@Override
 	public List<TService> selectByCompanyAccountInStatus(Long userId, Integer[] companyPublishedStatusArray) {
-		return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
+		return MybatisPlus.getInstance().findAll(new TService(),new MybatisPlusBuild(TService.class)
 				.eq(TService::getUserId,userId)
 				.eq(TService::getSource, AppConstant.SERV_SOURCE_COMPANY)
 				.in(TService::getStatus,companyPublishedStatusArray)
@@ -101,7 +101,7 @@ public class ProductDaoImpl implements ProductDao {
 	 * @return
 	 */
 	public List<TService> selectUserServ(Long userId){
-		return MybatisPlus.getInstance().finAll(new TService() , new MybatisPlusBuild(TService.class)
+		return MybatisPlus.getInstance().findAll(new TService() , new MybatisPlusBuild(TService.class)
 				.eq(TService::getCreateUser , userId)
 				.eq(TService::getIsValid , AppConstant.IS_VALID_YES)
 				.eq(TService::getType , ProductEnum.TYPE_SERVICE.getValue()));
@@ -122,7 +122,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<TService> selectByUserId(Long userId) {
-        return MybatisPlus.getInstance().finAll(new TService(),new MybatisPlusBuild(TService.class)
+        return MybatisPlus.getInstance().findAll(new TService(),new MybatisPlusBuild(TService.class)
 		.eq(TService::getCreateUser,userId)
 		.eq(TService::getIsValid,AppConstant.IS_VALID_YES));
     }

@@ -37,7 +37,7 @@ public class MessageNoticeDaoImpl implements MessageNoticeDao {
      * @return
      */
     public List<TMessageNotice> selectMessageNoticeByLastTime(Long lastTIme , Long userId){
-        List<TMessageNotice> messageNoticeList = MybatisPlus.getInstance().finAll(new TMessageNotice(),
+        List<TMessageNotice> messageNoticeList = MybatisPlus.getInstance().findAll(new TMessageNotice(),
                 new MybatisPlusBuild(TMessageNotice.class)
                         .eq(TMessageNotice::getNoticeUserId , userId)
                         .lt(TMessageNotice::getCreateTime , lastTIme)

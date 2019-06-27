@@ -13,14 +13,14 @@ import java.util.List;
 public class EvaluateDaoImpl implements EvaluateDao {
     @Override
     public List<TEvaluate> selectEvaluateInOrderIds(List orderIds) {
-        return MybatisPlus.getInstance().finAll(new TEvaluate(),new MybatisPlusBuild(TEvaluate.class)
+        return MybatisPlus.getInstance().findAll(new TEvaluate(),new MybatisPlusBuild(TEvaluate.class)
         .in(TEvaluate::getOrderId,orderIds)
         .eq(TEvaluate::getIsValid, AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TEvaluate> selectEvaluateInOrderIdsAndByUserId(List orderIds, Long userId) {
-        return MybatisPlus.getInstance().finAll(new TEvaluate(),new MybatisPlusBuild(TEvaluate.class)
+        return MybatisPlus.getInstance().findAll(new TEvaluate(),new MybatisPlusBuild(TEvaluate.class)
                 .in(TEvaluate::getOrderId,orderIds)
                 .eq(TEvaluate::getUserId,userId)
                 .eq(TEvaluate::getIsValid, AppConstant.IS_VALID_YES));

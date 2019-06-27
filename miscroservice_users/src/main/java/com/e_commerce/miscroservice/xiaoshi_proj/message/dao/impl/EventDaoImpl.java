@@ -74,7 +74,7 @@ public class EventDaoImpl implements EventDao {
      * @return
      */
     public List<TEvent> selectByUserIdAndTiggetId(Long userId , String tiggerId){
-        List<TEvent> events = MybatisPlus.getInstance().finAll(new TEvent() ,
+        List<TEvent> events = MybatisPlus.getInstance().findAll(new TEvent() ,
                 new MybatisPlusBuild(TEvent.class)
                         .eq(TEvent::getUserId , userId)
                         .eq(TEvent::getTiggerId , tiggerId)

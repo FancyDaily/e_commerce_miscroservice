@@ -15,7 +15,7 @@ import java.util.Map;
 public class TypeRecordDaoImpl implements TypeRecordDao {
     @Override
     public List<TTypeRecord> selectByUserIdBetween(Long id, Long begin, Long end) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
         .eq(TTypeRecord::getUserId,id)
         .between(TTypeRecord::getCreateTime,begin,end)
         .eq(TTypeRecord::getIsValid, AppConstant.IS_VALID_YES));
@@ -23,7 +23,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
 
     @Override
     public List<TTypeRecord> selectIncomeByUserIdBetween(Long id, Long beginStamp, Long endStamp) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
         .eq(TTypeRecord::getUserId,id)
                 .between(TTypeRecord::getCreateTime,beginStamp,endStamp)
                 .gt(TTypeRecord::getNum,0l)
@@ -37,7 +37,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
 
     @Override
     public List<TTypeRecord> selectByType(int code) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
         .eq(TTypeRecord::getType,code)
         .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }
@@ -50,7 +50,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
      */
     @Override
     public List<TTypeRecord> selectByTypeAndUserId(int code, Long userId) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
                 .eq(TTypeRecord::getType,code)
                 .eq(TTypeRecord::getUserId,userId)
                 .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
@@ -58,7 +58,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
 
     @Override
     public List<TTypeRecord> selectByTypeAndUserId(int code, int code1, Long id) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(),new MybatisPlusBuild(TTypeRecord.class)
                 .groupBefore()
         .eq(TTypeRecord::getType,code)
         .or().eq(TTypeRecord::getType,code1)
@@ -74,7 +74,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
         Long beginStamp = Long.valueOf((String) ym2BetweenStamp.get("begin"));
         Long endStamp = Long.valueOf((String) ym2BetweenStamp.get("end"));
 
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(), new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(), new MybatisPlusBuild(TTypeRecord.class)
         .eq(TTypeRecord::getUserId,id)
                 .between(TTypeRecord::getCreateTime,beginStamp,endStamp)
         .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
@@ -82,7 +82,7 @@ public class TypeRecordDaoImpl implements TypeRecordDao {
 
     @Override
     public List<TTypeRecord> selectGrowthRecords(Long id) {
-        return MybatisPlus.getInstance().finAll(new TTypeRecord(), new MybatisPlusBuild(TTypeRecord.class)
+        return MybatisPlus.getInstance().findAll(new TTypeRecord(), new MybatisPlusBuild(TTypeRecord.class)
                 .eq(TTypeRecord::getUserId,id)
                 .eq(TTypeRecord::getIsValid,AppConstant.IS_VALID_YES));
     }

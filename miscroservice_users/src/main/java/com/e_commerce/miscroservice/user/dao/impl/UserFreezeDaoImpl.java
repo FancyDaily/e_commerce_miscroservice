@@ -22,7 +22,7 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
      */
     @Override
     public List<TUserFreeze> queryUserFreezeDESC(Long userId, Long lastTime) {
-        return MybatisPlus.getInstance().finAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
+        return MybatisPlus.getInstance().findAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class).eq(TUserFreeze::getUserId, userId)
                 .lt(TUserFreeze::getCreateTime, lastTime)
                 .eq(TUserFreeze::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TUserFreeze::getCreateTime)));
@@ -72,7 +72,7 @@ public class UserFreezeDaoImpl implements UserFreezeDao {
 
     @Override
     public List<TUserFreeze> selectByUserIdBetween(Long userId, Long beginStamp, Long endStamp) {
-        return MybatisPlus.getInstance().finAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class)
+        return MybatisPlus.getInstance().findAll(new TUserFreeze(), new MybatisPlusBuild(TUserFreeze.class)
         .eq(TUserFreeze::getUserId,userId)
                 .between(TUserFreeze::getCreateTime,beginStamp,endStamp)
                 .eq(TUserFreeze::getIsValid,AppConstant.IS_VALID_YES));

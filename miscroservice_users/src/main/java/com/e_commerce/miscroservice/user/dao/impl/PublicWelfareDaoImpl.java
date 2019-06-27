@@ -22,7 +22,7 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
 
     @Override
     public Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisPlusBuild.ORDER desc) {
-        List<TPublicWelfare> publicWelfares = MybatisPlus.getInstance().finAll(new TPublicWelfare(), new MybatisPlusBuild(TPublicWelfare.class)
+        List<TPublicWelfare> publicWelfares = MybatisPlus.getInstance().findAll(new TPublicWelfare(), new MybatisPlusBuild(TPublicWelfare.class)
                 .lt(TPublicWelfare::getCreateTime, lastTime)
                 .between(TPublicWelfare::getCreateTime, betLeft, betRight)
                 .eq(TPublicWelfare::getUserId, id)

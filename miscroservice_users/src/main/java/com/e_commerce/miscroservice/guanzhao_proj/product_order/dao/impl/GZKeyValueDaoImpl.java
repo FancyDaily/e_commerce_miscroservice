@@ -35,7 +35,7 @@ public class GZKeyValueDaoImpl implements GZKeyValueDao {
 
 	@Override
 	public List<TGzKeyValue> selectAll(Integer toCode) {
-		return MybatisPlus.getInstance().finAll(new TGzKeyValue(), new MybatisPlusBuild(TGzKeyValue.class)
+		return MybatisPlus.getInstance().findAll(new TGzKeyValue(), new MybatisPlusBuild(TGzKeyValue.class)
 		.eq(TGzKeyValue::getType, toCode)
 		.eq(TGzKeyValue::getIsValid, AppConstant.IS_VALID_YES));
 	}

@@ -55,7 +55,7 @@ public class OrderDaoImpl implements OrderDao {
     public List<TOrder> selectPublishedByUserId(Long userId, boolean isService) {
         List<TOrder> result = null;
         if (isService) {
-            result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -71,7 +71,7 @@ public class OrderDaoImpl implements OrderDao {
                     .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TOrder::getCreateTime).buildAsc(TOrder::getStatus))  //TODO status ASC
             );
         } else {
-            result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .groupBefore()
                     .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -116,7 +116,7 @@ public class OrderDaoImpl implements OrderDao {
         }
         if (isService) {    //TODO 权限
             if (!companyIds.isEmpty()) {
-                result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+                result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                         .groupBefore()
                         .groupBefore()
                         .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -142,7 +142,7 @@ public class OrderDaoImpl implements OrderDao {
                         .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisPlusBuild.OrderBuild.buildAsc(TOrder::getStatus))  //TODO status ASC
                 );
             } else {
-                result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+                result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                         .groupBefore()
                         .groupBefore()
                         .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -168,7 +168,7 @@ public class OrderDaoImpl implements OrderDao {
             }
         } else {
             if (!companyIds.isEmpty()) {
-                result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+                result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                         .groupBefore()
                         .groupBefore()
                         .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -194,7 +194,7 @@ public class OrderDaoImpl implements OrderDao {
                         .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TOrder::getStartTime), MybatisPlusBuild.OrderBuild.buildAsc(TOrder::getStatus))
                 );
             } else {    //TODO sql拼接有点问题
-                result = MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+                result = MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                         .groupBefore()
                         .groupBefore()
                         .eq(TOrder::getTimeType, OrderEnum.TIME_TYPE_REPEAT.getValue())
@@ -231,7 +231,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public List<TOrder> selectOrderByOrderIds(List<Long> orderIds) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .in(TOrder::getId, orderIds));
     }
 
@@ -256,7 +256,7 @@ public class OrderDaoImpl implements OrderDao {
             }
         }
         if (!companyIds.isEmpty()) {
-            return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .in(TOrder::getCompanyId, companyIds)
                     .or()
@@ -268,7 +268,7 @@ public class OrderDaoImpl implements OrderDao {
                     .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         } else {
-            return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .isNull(TOrder::getCompanyId)
                     .or()
@@ -288,7 +288,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectPastByUserId(Long userId) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getCreateUser, userId)
                 .eq(TOrder::getStatus, OrderEnum.STATUS_END.getValue())
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
@@ -302,7 +302,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectOrdersInOrderIds(List orderIds) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .in(TOrder::getId, orderIds)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -317,7 +317,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectBySourceAndUserIdAndStatuses(Integer sourceType, Long userId, Integer[] availableStatusArray) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getSource, sourceType)
                 .eq(TOrder::getCreateUser, userId)
                 .in(TOrder::getStatus, availableStatusArray)
@@ -356,7 +356,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectBySourceAndUserIdAndStatusesInIds(Integer source, Long userId, Integer[] availableStatusArray, List<Long> idList) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getSource, source)
                 .eq(TOrder::getCreateUser, userId)
                 .in(TOrder::getStatus, availableStatusArray)
@@ -424,7 +424,7 @@ public class OrderDaoImpl implements OrderDao {
             }
         }
         if (!companyIds.isEmpty()) {
-            return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .in(TOrder::getCompanyId, companyIds)
                     .or()
@@ -435,7 +435,7 @@ public class OrderDaoImpl implements OrderDao {
                     .in(TOrder::getId, orderIds)
                     .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
         } else {
-            return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+            return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                     .groupBefore()
                     .isNull(TOrder::getCompanyId)
                     .or()
@@ -457,7 +457,7 @@ public class OrderDaoImpl implements OrderDao {
         long currentTimeMillis = System.currentTimeMillis();
         long startStamp = DateUtil.getStartStamp(currentTimeMillis);
         long endStamp = DateUtil.getEndStamp(currentTimeMillis);
-        return MybatisPlus.getInstance().finAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
         .eq(TOrder::getCreateUser,userId)
                 .lte(TOrder::getStartTime,endStamp)
                 .gte(TOrder::getEndTime,startStamp)
@@ -476,7 +476,7 @@ public class OrderDaoImpl implements OrderDao {
         long currentTimeMillis = System.currentTimeMillis();
         long startStamp = DateUtil.getStartStamp(currentTimeMillis);
         long endStamp = DateUtil.getEndStamp(currentTimeMillis);
-        return MybatisPlus.getInstance().finAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getCreateUser,userId)
                 .between(TOrder::getCreateTime,startStamp,endStamp)
                 .neq(TOrder::getStatus,OrderEnum.STATUS_CANCEL.getValue())
@@ -491,7 +491,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectPublishedByUserId(Long userId) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getCreateUser, userId)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES)
                 .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TOrder::getCreateTime))
@@ -504,7 +504,7 @@ public class OrderDaoImpl implements OrderDao {
      * @return
      */
     public List<TOrder> selectUserServ(Long userId){
-        return MybatisPlus.getInstance().finAll(new TOrder() , new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder() , new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getCreateUser , userId)
                 .eq(TOrder::getIsValid , AppConstant.IS_VALID_YES)
                 .eq(TOrder::getType , ProductEnum.TYPE_SERVICE.getValue()));
@@ -532,7 +532,7 @@ public class OrderDaoImpl implements OrderDao {
      */
     @Override
     public List<TOrder> selectOrdersInOrderIdsInStatus(List<Long> idList, Integer... collectionAvailableStatusArray) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .in(TOrder::getId, idList)
                 .in(TOrder::getStatus, collectionAvailableStatusArray)
                 .eq(TOrder::getIsValid, AppConstant.IS_VALID_YES));
@@ -540,14 +540,14 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public List<TOrder> selectOrdersByProductId(Long productId) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
         .eq(TOrder::getServiceId,productId)
         .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }
 
     @Override
     public List<TOrder> selectGroupHelpEnrollList(Long id) {
-        return MybatisPlus.getInstance().finAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(), new MybatisPlusBuild(TOrder.class)
                 .eq(TOrder::getStatus, OrderEnum.STATUS_NORMAL.getValue())
                 .eq(TOrder::getServiceStatus, ProductEnum.STATUS_UPPER_FRAME.getValue())
                 .neq(TOrder::getServicePersonnel, TOrder::getConfirmNum)
@@ -558,7 +558,7 @@ public class OrderDaoImpl implements OrderDao {
 
     @Override
     public List<TOrder> selectByServiceId(Long serviceId) {
-        return MybatisPlus.getInstance().finAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
+        return MybatisPlus.getInstance().findAll(new TOrder(),new MybatisPlusBuild(TOrder.class)
         .eq(TOrder::getServiceId,serviceId)
         .eq(TOrder::getIsValid,AppConstant.IS_VALID_YES));
     }

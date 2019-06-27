@@ -24,7 +24,7 @@ public class CsqUserServiceReportDaoImpl implements CsqUserServiceReportDao {
 
 	@Override
 	public List<TCsqServiceReport> selectByServiceIdDesc(Long serviceId) {
-		return MybatisPlus.getInstance().finAll(new TCsqServiceReport(), new MybatisPlusBuild(TCsqServiceReport.class)
+		return MybatisPlus.getInstance().findAll(new TCsqServiceReport(), new MybatisPlusBuild(TCsqServiceReport.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqServiceReport::getServiceId, serviceId)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqServiceReport::getCreateTime)));

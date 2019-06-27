@@ -44,7 +44,7 @@ public class CsqCollectionDaoImpl implements CsqCollectionDao {
 
 	@Override
 	public List<TCsqUserCollection> findAll(Long userId) {
-		List<TCsqUserCollection> list = MybatisPlus.getInstance().finAll(new TCsqUserCollection(),new MybatisPlusBuild(TCsqUserCollection.class)
+		List<TCsqUserCollection> list = MybatisPlus.getInstance().findAll(new TCsqUserCollection(),new MybatisPlusBuild(TCsqUserCollection.class)
 			.eq(TCsqUserCollection::getUserId,userId)
 			.eq(TCsqUserCollection::getIsValid, AppConstant.IS_VALID_YES)
 		);

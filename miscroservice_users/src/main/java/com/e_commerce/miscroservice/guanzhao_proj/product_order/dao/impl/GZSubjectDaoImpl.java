@@ -22,7 +22,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
     @Override
     public List<TGzSubject> selectByAvailableStatus(Integer availableStatus) {
-        return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzSubject::getAvaliableStatus, availableStatus)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -46,7 +46,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     @Override
     public List<MyLearningSubjectVO> findMyLearningSubject(Integer id, long currentTimeMillis) {
         return gzSubjectMapper.findMyLearningSubject(id,currentTimeMillis);
-//        return MybatisPlus.getInstance().finAll(new MyLearningSubjectVO(),new MybatisPlusBuild(TGzUserSubject.class)
+//        return MybatisPlus.getInstance().findAll(new MyLearningSubjectVO(),new MybatisPlusBuild(TGzUserSubject.class)
 //                .eq(TGzUserSubject::getUserId,id));
     }
 
@@ -54,7 +54,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     public List<MyLearningSubjectVO> findEndingSubject(Integer id) {
         return gzSubjectMapper.findEndingSubject(id,System.currentTimeMillis());
 
-//        return MybatisPlus.getInstance().finAll(new TGzUserSubject(),new MybatisPlusBuild(TGzUserSubject.class)
+//        return MybatisPlus.getInstance().findAll(new TGzUserSubject(),new MybatisPlusBuild(TGzUserSubject.class)
 //                .eq(TGzUserSubject::getUserId,id).lt(TGzUserSubject::getExpireTime,System.currentTimeMillis()));
     }
 
@@ -69,7 +69,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 		String[] nowArray = now.split(" ");
 		String ymd = nowArray[0];
 		String hm = nowArray[1];
-		return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+		return MybatisPlus.getInstance().findAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES)
 			.gte(TGzSubject::getAvailableDate, ymd)
 			.gt(TGzSubject::getAvailableTime, hm)
@@ -78,7 +78,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
     @Override
     public List<TGzSubject> selectInPrimaryKeys(List<Long> subjectIds) {
-        return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .in(TGzSubject::getId, subjectIds)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));
     }
@@ -92,7 +92,7 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
 
 	@Override
     public List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex) {
-        return MybatisPlus.getInstance().finAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
+        return MybatisPlus.getInstance().findAll(new TGzSubject(), new MybatisPlusBuild(TGzSubject.class)
         .eq(TGzSubject::getName, name)
         .eq(TGzSubject::getSeriesIndex, seriesIndex)
         .eq(TGzSubject::getIsValid, AppConstant.IS_VALID_YES));

@@ -24,7 +24,7 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	private CsqPaymentMapper csqPaymentMapper;
 	@Override
 	public List<TCsqUserPaymentRecord> findWaters(Long userId) {
-		List<TCsqUserPaymentRecord> list = MybatisPlus.getInstance().finAll(new TCsqUserPaymentRecord(),new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		List<TCsqUserPaymentRecord> list = MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(),new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getUserId,userId)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 		);

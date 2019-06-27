@@ -44,7 +44,7 @@ public class RecordDbTest {
         //
         //查询所有
 //         List<TestTmpDTO> testTmpDTOS =
-//         MybatisPlus.getInstance().finAll(new TestTmpDTO(),
+//         MybatisPlus.getInstance().findAll(new TestTmpDTO(),
 //         new MybatisPlusBuild(TestTmpDTO.class).page(1, 10));
         //
         // System.out.println(testTmpDTOS);

@@ -37,7 +37,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> findAll(List<Long> serviceIdList) {
-		List<TCsqService> list = MybatisPlus.getInstance().finAll(new TCsqService(),new MybatisPlusBuild(TCsqService.class)
+		List<TCsqService> list = MybatisPlus.getInstance().findAll(new TCsqService(),new MybatisPlusBuild(TCsqService.class)
 			.in(TCsqService::getId,serviceIdList)
 		);
 		return list;
@@ -45,7 +45,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectInIds(List<Long> csqServiceIds) {
-		return MybatisPlus.getInstance().finAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.in(TCsqService::getId, csqServiceIds)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES));
 	}
@@ -57,7 +57,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectAll() {
-		return MybatisPlus.getInstance().finAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
 			.or()
@@ -73,7 +73,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectMine(Long userId) {
-		return MybatisPlus.getInstance().finAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getUserId, userId)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),	//按发布时间倒序
@@ -110,7 +110,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectByNameAndUserId(String name, Long userId) {
-		return MybatisPlus.getInstance().finAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqService::getUserId, userId)
 			.eq(TCsqService::getName, name)

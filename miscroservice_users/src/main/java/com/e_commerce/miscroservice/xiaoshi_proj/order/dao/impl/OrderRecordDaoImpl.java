@@ -51,7 +51,7 @@ public class OrderRecordDaoImpl implements OrderRecordDao {
 
     @Override
     public List<TOrderRecord> selectRecordByOrderId(Long orderId) {
-        return MybatisPlus.getInstance().finAll(new TOrderRecord(), new MybatisPlusBuild(TOrderRecord.class)
+        return MybatisPlus.getInstance().findAll(new TOrderRecord(), new MybatisPlusBuild(TOrderRecord.class)
                 .eq(TOrderRecord::getOrderId, orderId).eq(TOrderRecord::getIsValid, AppConstant.IS_VALID_YES));
     }
 
