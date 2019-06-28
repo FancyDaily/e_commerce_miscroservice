@@ -47,7 +47,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
-	public Object checkAuth(String code) {
+	public AjaxResult checkAuth(String code) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("与微信校验授权，code={}");
@@ -73,7 +73,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("login/openid")
-	public Object openidLogin(String openid,
+	public AjaxResult openidLogin(String openid,
 							  @RequestParam(required = true) String uuid,
 							  @RequestParam(required = true) String specialGuest) {
 		AjaxResult result = new AjaxResult();
@@ -100,7 +100,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("phone/bind")
-	public Object bindCellphone(String telephone, String smsCode) {
+	public AjaxResult bindCellphone(String telephone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -133,7 +133,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@PostMapping({"generateSMS", "generateSMS/" + TokenUtil.AUTH_SUFFIX})
-	public Object generateSMS(String telephone) {
+	public AjaxResult generateSMS(String telephone) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("发送短信验证码, telephone={}", telephone);
@@ -164,7 +164,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("checkSMS")
-	public Object checkSMS(String telephone, String smsCode) {
+	public AjaxResult checkSMS(String telephone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("校验短信验证码, telephone={}, smsCode={}", telephone, smsCode);
@@ -190,7 +190,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("login/telephone/pwd")
-	public Object loginByTelephone(String telephone, String password, Integer option, String uuid) {
+	public AjaxResult loginByTelephone(String telephone, String password, Integer option, String uuid) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("手机号密码登录, telephone={}, password={}, option={}", telephone, password, option);
@@ -218,7 +218,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("register")
-	public Object rigesterByTelephone(String telephone, String password, String uuid) {
+	public AjaxResult rigesterByTelephone(String telephone, String password, String uuid) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("注册, telephone={}, password={}", telephone, password);
@@ -241,7 +241,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("dailydonate/detail")
-	public Object dailyDonateDetail() {
+	public AjaxResult dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -266,7 +266,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("information")
-	public Object myInformation(){
+	public AjaxResult myInformation(){
 		Long userId = Long.valueOf(IdUtil.getId());
 		log.info("访问我的基本信息 ={}",userId);
 		AjaxResult ajaxResult = new AjaxResult();
@@ -294,7 +294,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("share")
-	public Object share(Long entityId, Integer option) {
+	public AjaxResult share(Long entityId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -323,7 +323,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("recordConsumption")
-	public Object recordForConsumption(Long fromId,  Integer fromType, Double amount, String wholeDescription) {
+	public AjaxResult recordForConsumption(Long fromId,  Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {

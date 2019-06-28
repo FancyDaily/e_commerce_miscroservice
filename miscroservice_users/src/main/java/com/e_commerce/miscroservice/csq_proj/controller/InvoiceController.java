@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.service.CsqInvoiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
@@ -40,7 +41,7 @@ public class InvoiceController {
 	 */
 	@Consume(TCsqUserInvoice.class)
 	@RequestMapping("submit")
-	public Object invoiceSubmit(Integer type, String name, String taxNo, String addr, String person, String telephone, String... orderNo) {
+	public AjaxResult invoiceSubmit(Integer type, String name, String taxNo, String addr, String person, String telephone, String... orderNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
@@ -67,7 +68,7 @@ public class InvoiceController {
 	 * @return
 	 */
 	@RequestMapping("list/waitTo")
-	public Object invoiceWaitToList(Integer pageNum, Integer pageSize) {
+	public AjaxResult invoiceWaitToList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
@@ -95,13 +96,13 @@ public class InvoiceController {
 	 * @return
 	 */
 	@RequestMapping("list/done")
-	public Object invoiceDoneList(Integer pageNum, Integer pageSize) {
+	public AjaxResult invoiceDoneList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqUserInvoice userInvoice = (TCsqUserInvoice) ConsumeHelper.getObj();
 		try {
 			log.info("已开票列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
-			QueryResult<TCsqUserInvoice> queryResult = invoiceService.doneList(userId, pageNum, pageSize);
+			QueryResult<CsqUserInvoiceVo> queryResult = invoiceService.doneList(userId, pageNum, pageSize);
 			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -122,13 +123,13 @@ public class InvoiceController {
 	 * @return
 	 */
 	@RequestMapping("detail")
-	public Object invoiceDetail(Long invoiceId) {
+	public AjaxResult invoiceDetail(Long invoiceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("发票详情, userId={}, invoiceId={}", userId, invoiceId);
-			TCsqUserInvoice tCsqUserInvoice = invoiceService.invoiceDetail(userId, invoiceId);
-			result.setData(tCsqUserInvoice);
+			CsqUserInvoiceVo csqUserInvoiceVo = invoiceService.invoiceDetail(userId, invoiceId);
+			result.setData(csqUserInvoiceVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票详情", e.getMessage());
@@ -148,7 +149,7 @@ public class InvoiceController {
 	 * @return
 	 */
 	@RequestMapping("record/list")
-	public Object invoiceRecordList(Long invoiceId, Integer pageNum, Integer pageSize) {
+	public AjaxResult invoiceRecordList(Long invoiceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {

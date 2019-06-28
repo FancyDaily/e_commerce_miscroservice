@@ -1,28 +1,21 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
-import lombok.Builder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import lombok.Data;
 
 import java.util.List;
 
 /**
- * 项目
  * @Author: FangyiXu
- * @Date: 2019-06-10 10:01
+ * @Date: 2019-06-27 17:24
  */
-@Table(commit = "从善桥项目表")
-@Data
-@Builder
-public class TCsqService extends BaseEntity {
-
+@Data(matchSuffix = true)
+public class CsqServiceVo {
 	@Id
 	private Long id;
 
@@ -105,15 +98,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "银行卡号")
 	private String creditCard;
 
-	public CsqInvoiceVo copyCsqInvoiceVo() {
-		return null;
-	}
-
-	public CsqDailyDonateVo copyCsqDailyDonateVo() {
-		return null;
-	}
-
-	public CsqServiceVo copyCsqServiceVo() {
+	public TCsqService copyTCsqService() {
 		return null;
 	}
 }

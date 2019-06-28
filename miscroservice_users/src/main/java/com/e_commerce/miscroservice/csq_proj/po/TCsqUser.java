@@ -15,7 +15,7 @@ import lombok.Data;
 @Table(commit = "从善桥用户表")
 @Data
 @Builder
-public class TCsqUser  extends BaseEntity{
+public class TCsqUser extends BaseEntity{
 	@Id
 	private Long id;
 
@@ -96,7 +96,10 @@ public class TCsqUser  extends BaseEntity{
 	private Integer payNum;
 
 	@Column(commit = "爱心账户余额")
-	private Long surplusAmount;
+	private Double surplusAmount;
+
+	@Column(commit = "爱心账户状态")
+	private Integer balanceStatus;
 
 	@Column(commit = "实名认证状态", length = 11, defaultVal = "0")
 	private Integer authenticationStatus;

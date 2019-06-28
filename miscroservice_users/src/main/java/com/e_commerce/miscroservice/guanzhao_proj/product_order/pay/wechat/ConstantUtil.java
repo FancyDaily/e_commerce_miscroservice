@@ -23,14 +23,24 @@ public class ConstantUtil {
      */
     public static final String MCH_ID = "1536688811";
 
-    /**
+	/**
      * 获取预支付id的接口url
      */
     public static String GATEURL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+
+	/**
+	 * 向微信发起退款的接口url
+	 */
+    public static String REFUND_URL = "https://api.mch.weixin.qq.com/secapi/pay/refund";
     /**
-     * 微信服务器回调通知url
+     * 微信服务器支付回调通知url
      */
     public static String NOTIFY_URL;
+
+	/**
+	 * 退款回调通知url
+	 */
+	public static String NOTIFY_URL_REFUD;
 
 	@Value("${notify.url}")
 	private void setNotifyUrl(String value) {

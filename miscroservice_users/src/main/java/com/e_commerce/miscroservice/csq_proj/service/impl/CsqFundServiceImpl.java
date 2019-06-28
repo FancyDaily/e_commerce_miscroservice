@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
@@ -235,7 +236,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<TCsqUser> tUsers = userDao.selectInIds(userIds);
 		Map<Long, List<TCsqUser>> collect = tUsers.stream()
 			.collect(Collectors.groupingBy(TCsqUser::getId));
-		List<TCsqUserPaymentRecord> donateInList = tCsqUserPaymentRecords.stream()
+		List<CsqUserPaymentRecordVo> donateInList = tCsqUserPaymentRecords.stream()
 			.map(a -> {
 				//几分钟前
 				long interval = System.currentTimeMillis() - a.getCreateTime().getTime();
@@ -248,18 +249,20 @@ public class CsqFundServiceImpl implements CsqFundService {
 						.userHeadPortraitPath(user.getUserHeadPortraitPath()).build();	//可更换为copyInsensitiveUserVo
 					a.setUser(build);
 				}
-				return a;
+				return a.copyUserPaymentRecordVo();
 			}).collect(Collectors.toList());
 		map.put("donateList", donateInList);
 		return map;
 	}
 
 	@Override
-	public QueryResult<TCsqFund> list(Long userId, Integer pageNum, Integer pageSize, Integer[] option) {
+	public QueryResult<CsqFundVo> list(Long userId, Integer pageNum, Integer pageSize, Integer[] option) {
 		Page<Object> startPage = startPage(pageNum, pageSize);
 		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDesc(userId, option);
-		QueryResult<TCsqFund> tCsqFundQueryResult = new QueryResult<>();
-		tCsqFundQueryResult.setResultList(tCsqFunds);
+		List<CsqFundVo> copyList = tCsqFunds.stream()
+			.map(a -> a.copyCsqFundVo()).collect(Collectors.toList());
+		QueryResult<CsqFundVo> tCsqFundQueryResult = new QueryResult<>();
+		tCsqFundQueryResult.setResultList(copyList);
 		tCsqFundQueryResult.setTotalCount(startPage.getTotal());
 		return tCsqFundQueryResult;
 	}

@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
@@ -12,5 +14,9 @@ public interface CsqPayService {
 
 	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest) throws Exception;
 
-	void wxNotify(HttpServletRequest request) throws Exception;
+	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund) throws Exception;
+
+	void wxNotify(HttpServletRequest request, boolean b) throws Exception;
+
+	void preRefund(Long userId, String orderNo, HttpServletRequest request) throws Exception;
 }

@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqMsgDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
@@ -12,10 +13,8 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
-import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,11 +42,11 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	private CsqUserDao csqUserDao;
 
 	@Override
-	public QueryResult<TCsqSysMsg> list(Long userId, Integer pageNum, Integer pageSize) {
+	public QueryResult<CsqSysMsgVo> list(Long userId, Integer pageNum, Integer pageSize) {
 		return list(userId, pageNum, pageSize, Boolean.FALSE);
 	}
 
-	private QueryResult<TCsqSysMsg> list(Long userId, Integer pageNum, Integer pageSize, boolean isUnread) {
+	private QueryResult<CsqSysMsgVo> list(Long userId, Integer pageNum, Integer pageSize, boolean isUnread) {
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
@@ -64,20 +63,20 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		List<TCsqService> tCsqServices = serviceIds.isEmpty() ? new ArrayList<>() : csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
-		List<TCsqSysMsg> resultList = tCsqSysMsgs.stream()
+		List<CsqSysMsgVo> resultList = tCsqSysMsgs.stream()
 			.map(a -> {
 				String dateString = DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd");
 				a.setDateString(dateString);
 				List<TCsqService> csqServiceList = serviceMap.get(a.getServiceId());
 				if(csqServiceList == null) {
-					return a;
+					return a.copyCsqSysMsgVo();
 				}
 				TCsqService tCsqService = csqServiceList.get(0);
 				a.setCsqService(tCsqService);
-				return a;
+				return a.copyCsqSysMsgVo();
 			}).collect(Collectors.toList());
 
-		QueryResult<TCsqSysMsg> queryResult = new QueryResult<>();
+		QueryResult<CsqSysMsgVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(resultList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;

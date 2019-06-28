@@ -1,23 +1,16 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
-import lombok.Builder;
 import lombok.Data;
 
 /**
- * 发票
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:45
+ * @Date: 2019-06-27 18:04
  */
-@Table(commit = "从善桥发票表")
 @Data
-@Builder
-public class TCsqUserInvoice extends BaseEntity {
-
+public class CsqUserInvoiceVo {
 	@Id
 	private Long id;
 
@@ -55,8 +48,4 @@ public class TCsqUserInvoice extends BaseEntity {
 
 	@Column(commit = "联系方式")
 	private String telephone;
-
-	public CsqUserInvoiceVo copyCsqUserInvoice() {
-		return null;
-	}
 }

@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -25,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Log
 public class WeChatPay {
 
+	@Autowired
+	private CsqOrderDao csqOrderDao;
 
 	private DecimalFormat decimalFormat = new DecimalFormat("0");
 
@@ -154,6 +158,10 @@ public class WeChatPay {
 		}
 	}
 
+	public Map parseXmlStr(String strXML) throws Exception {
+		return xmlToMap(strXML);
+	}
+
 
 	/**
 	 * 获取请求参数
@@ -206,6 +214,24 @@ public class WeChatPay {
 		return param;
 	}
 
+	public Map<String, String> createRefundWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
+		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
+		createRefund(orderNo, payCount, request, attach);
+
+		//一些返还给前端的参数(如果需要
+		SortedMap<String, String> param = new TreeMap<>();
+		/*param.put("appId", ConstantUtil.APP_ID);
+		String ten_time = String.valueOf(System.currentTimeMillis());
+		param.put("timeStamp", ten_time.substring(0, 10));
+		param.put("package", "prepay_id=" + createRefund(orderNo, payCount, request, attach).get("prepay_id"));
+		param.put("nonceStr", ten_time);
+		param.put("signType", "MD5");
+
+		setSign(param, true);*/
+
+		return param;
+	}
+
 
 	public Map doParseRquest(HttpServletRequest request) throws Exception {
 		InputStream inputStream;
@@ -240,6 +266,19 @@ public class WeChatPay {
 		return resultMap;
 	}
 
+	private Map<String, String> createRefund(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
+		String openId = null;
+		if (request != null) {
+			openId = getOpenId(request);
+
+		}
+		String output = getRefundRequestXml(orderNo, payCount, payCount, attach);
+		String json = httpsRequest(ConstantUtil.REFUND_URL, "POST", output);
+		Map resultMap = xmlToMap(json);
+		log.info("sing_info",resultMap);
+		return resultMap;
+	}
+
 
 	private String getRequestXml(SortedMap<String, String> params) {
 		StringBuffer sb = new StringBuffer();
@@ -264,6 +303,24 @@ public class WeChatPay {
 
 	private String getOrderRequestXml(String orderNo, Double payCount, String openId) {
 		return getOrderRequestXml(orderNo, payCount, openId, null);
+	}
+
+	private String getRefundRequestXml(String orderNo, Double payCount, Double refundFee, String reFundDesc) {
+		//构建请求参数Map
+		SortedMap<String, String> param = new TreeMap<>();
+		param.put("appid", ConstantUtil.APP_ID);
+		param.put("mch_id", ConstantUtil.MCH_ID);
+		param.put("nonce_str", System.currentTimeMillis() + "");
+		param.put("notify_url", ConstantUtil.NOTIFY_URL_REFUD);
+		param.put("out_trade_no", orderNo);
+		String refundOrderNo = "RF" + orderNo;
+		param.put("out_refund_no", refundOrderNo);
+		param.put("total_fee", decimalFormat.format(payCount * 100));
+		param.put("refund_fee", decimalFormat.format(refundFee * 100));
+
+		setSign(param, false);
+
+		return getRequestXml(param);
 	}
 
 	private String getOrderRequestXml(String orderNo, Double payCount, String openId, String attach) {

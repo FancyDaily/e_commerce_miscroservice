@@ -7,9 +7,10 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
-	public Object checkAuth() {
+	public AjaxResult checkAuth() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -62,7 +63,7 @@ public class CsqServiceController {
 	 */
 	@RequestMapping("publish")
 	@Consume(TCsqService.class)
-	public Object publishService(String description, String name) {
+	public AjaxResult publishService(String description, String name) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqService service = (TCsqService) ConsumeHelper.getObj();
@@ -88,12 +89,12 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object listService(Integer option, Integer pageNum, Integer pageSize) {
+	public AjaxResult listService(Integer option, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("项目列表, option={}, pageNum={}, pageSize={}", option, pageNum, pageSize);
-			QueryResult<TCsqService> list = csqServiceService.list(userId, option, pageNum, pageSize);
+			QueryResult<CsqServiceVo> list = csqServiceService.list(userId, option, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -114,7 +115,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("detail")
-	public Object serviceDetail(Long serviceId) {
+	public AjaxResult serviceDetail(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -140,7 +141,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("cert")
-	public Object serviceCert(Long serviceId) {
+	public AjaxResult serviceCert(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -165,12 +166,12 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("bill/out")
-	public Object billOut(Long serviceId, Integer pageNum, Integer pageSize) {
+	public AjaxResult billOut(Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("项目支出明细, serviceId={}", serviceId);
-			QueryResult<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqServiceService.billOut(userId, serviceId, pageNum, pageSize);
+			QueryResult<CsqUserPaymentRecordVo> tCsqUserPaymentRecords = csqServiceService.billOut(userId, serviceId, pageNum, pageSize);
 			result.setData(tCsqUserPaymentRecords);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -195,7 +196,7 @@ public class CsqServiceController {
 	 */
 	@Consume(TCsqServiceReport.class)
 	@RequestMapping("report/submit")
-	public Object reportSubmit(Long serviceId, String title, String content, String pic) {
+	public AjaxResult reportSubmit(Long serviceId, String title, String content, String pic) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		TCsqServiceReport serviceReport = (TCsqServiceReport) ConsumeHelper.getObj();
@@ -221,7 +222,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("donate")
-	public Object donate(String orderNo) {
+	public AjaxResult donate(String orderNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {

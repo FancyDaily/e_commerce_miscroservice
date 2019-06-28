@@ -63,7 +63,7 @@ public interface CsqFundService {
 	 * @param option
 	 * @return
 	 */
-	QueryResult<TCsqFund> list(Long userId, Integer pageNum, Integer pageSize, Integer... option);
+	QueryResult<CsqFundVo> list(Long userId, Integer pageNum, Integer pageSize, Integer... option);
 
 	void insertForSomeOne(Long userId);
 }

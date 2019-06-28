@@ -10,7 +10,10 @@ public enum CsqUserEnum {
 	AUTHENTICATION_TYPE_PERSON(1, "实名类型-个人"),
 	AUTHENTICATION_TYPE_ORG_OR_CORP(2, "实名类型-机构"),
 	ACCOUNT_TYPE_PERSON(1, "个人用户"),
-	ACCOUNT_TYPE_COMPANY(2, "机构用户")
+	ACCOUNT_TYPE_COMPANY(2, "机构用户"),
+	BALANCE_STATUS_WAIT_ACTIVATE(0, "待激活"),
+	BALANCE_STATUS_AVAILABLE(1, "可用"),
+	BALANCE_STATUS_BANED(-1, "被禁止")
 	;
 
 	public static final String DEFAULT_HEADPORTRAITURE_PATH = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png";	//默认头像

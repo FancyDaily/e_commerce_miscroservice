@@ -1,11 +1,11 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +28,7 @@ public interface CsqServiceService {
 	 * @param pageSizez
 	 * @return
 	 */
-	QueryResult<TCsqService> list(Long userId, Integer option, Integer pageNum, Integer pageSizez);
+	QueryResult<CsqServiceVo> list(Long userId, Integer option, Integer pageNum, Integer pageSizez);
 
 	/**
 	 * 项目详情
@@ -54,7 +54,7 @@ public interface CsqServiceService {
 	 * @param pageSize
 	 * @return
 	 */
-	QueryResult<TCsqUserPaymentRecord> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize);
+	QueryResult<CsqUserPaymentRecordVo> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize);
 
 	/**
 	 * 发布项目汇报

@@ -29,7 +29,7 @@ public class CsqPublishController {
 	 * @return
 	 */
 	@RequestMapping("upload")
-	public Object upload(Integer mainKey, Integer[] keys, String[] names) {
+	public AjaxResult upload(Integer mainKey, Integer[] keys, String[] names) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("插入一条publish记录, mainKey={}, mainKey={}, names={}", mainKey, keys, names);

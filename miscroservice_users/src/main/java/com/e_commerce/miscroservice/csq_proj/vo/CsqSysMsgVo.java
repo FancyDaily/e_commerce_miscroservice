@@ -1,22 +1,18 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
-import lombok.Builder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 import lombok.Data;
 
 /**
- * 系统消息
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:58
+ * @Date: 2019-06-27 17:21
  */
-@Table(commit = "从善桥系统消息表")
-@Data(matchSuffix = true)
-@Builder
-public class TCsqSysMsg extends BaseEntity {
+@Data
+public class CsqSysMsgVo {
 
 	@Id
 	private Long id;
@@ -45,10 +41,6 @@ public class TCsqSysMsg extends BaseEntity {
 	private Integer isRead;
 
 	public TCsqSysMsg copyTCsqSysMsg() {
-		return null;
-	}
-
-	public CsqSysMsgVo copyCsqSysMsgVo() {
 		return null;
 	}
 }

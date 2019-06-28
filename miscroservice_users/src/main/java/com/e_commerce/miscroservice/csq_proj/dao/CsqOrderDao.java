@@ -39,4 +39,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int invoiceStatus, int status);
 
 	List<TCsqOrder> selectByToIdAndToTypeAndStatusDesc(Long entityId, int toCode, int status);
+
+	int insert(TCsqOrder csqOrder);
 }

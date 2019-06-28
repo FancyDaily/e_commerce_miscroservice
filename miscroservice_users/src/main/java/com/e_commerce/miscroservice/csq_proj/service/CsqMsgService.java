@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 
 /**
@@ -9,7 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
  */
 public interface CsqMsgService {
 
-	QueryResult<TCsqSysMsg> list(Long userId, Integer pageNum, Integer pageSize);
+	QueryResult<CsqSysMsgVo> list(Long userId, Integer pageNum, Integer pageSize);
 
 	int unreadCnt(Long userId);
 

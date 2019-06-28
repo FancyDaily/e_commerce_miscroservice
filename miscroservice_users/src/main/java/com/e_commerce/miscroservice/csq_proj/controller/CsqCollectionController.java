@@ -33,7 +33,7 @@ public class CsqCollectionController {
 	 * @return
 	 */
 	@RequestMapping("click/auth")
-	public Object clickCollection(Long serviceId){
+	public AjaxResult clickCollection(Long serviceId){
 		AjaxResult result = new AjaxResult();
 		Integer userId = IdUtil.getId();
 		log.info("收藏={},userId={}",serviceId,userId);
@@ -58,7 +58,7 @@ public class CsqCollectionController {
 	 * @return
 	 */
 	@RequestMapping("list/auth")
-	public Object collectionList(Integer pageNum, Integer pageSize){
+	public AjaxResult collectionList(Integer pageNum, Integer pageSize){
 		AjaxResult result = new AjaxResult();
 		Integer userId = IdUtil.getId();
 		log.info("收藏列表id={},Num={},size={}",userId,pageNum,pageSize);

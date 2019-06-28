@@ -7,7 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +34,12 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object msgList(Integer pageNum, Integer pageSize) {
+	public AjaxResult msgList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("消息列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
-			QueryResult<TCsqSysMsg> list = csqMsgService.list(userId, pageNum, pageSize);
+			QueryResult<CsqSysMsgVo> list = csqMsgService.list(userId, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -59,7 +59,7 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("unreadCnt")
-	public Object unreadCnt() {
+	public AjaxResult unreadCnt() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -84,7 +84,7 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("readAll")
-	public Object readAll() {
+	public AjaxResult readAll() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -114,7 +114,7 @@ public class CsqMsgController {
 	 */
 	@Consume(TCsqSysMsg.class)
 	@RequestMapping("insert")
-	public Object insert(Long userId, String title, String content, Long serviceId, Integer type) {
+	public AjaxResult insert(Long userId, String title, String content, Long serviceId, Integer type) {
 		AjaxResult result = new AjaxResult();
 		Long operatorId = UserUtil.getTestId();
 		TCsqSysMsg csqSysMsg = (TCsqSysMsg) ConsumeHelper.getObj();

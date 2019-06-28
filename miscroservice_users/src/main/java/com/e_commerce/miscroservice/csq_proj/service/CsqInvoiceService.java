@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
 
@@ -14,9 +15,9 @@ public interface CsqInvoiceService {
 
 	QueryResult<CsqInvoiceVo> waitToList(Long userId, Integer pageNum, Integer pageSize);
 
-	QueryResult<TCsqUserInvoice> doneList(Long userId, Integer pageNum, Integer pageSize);
+	QueryResult<CsqUserInvoiceVo> doneList(Long userId, Integer pageNum, Integer pageSize);
 
-	TCsqUserInvoice invoiceDetail(Long userId, Long invoiceId);
+	CsqUserInvoiceVo invoiceDetail(Long userId, Long invoiceId);
 
 	QueryResult<CsqInvoiceVo> recordList(Long userId, Long invoiceId, Integer pageNum, Integer pageSize);
 }

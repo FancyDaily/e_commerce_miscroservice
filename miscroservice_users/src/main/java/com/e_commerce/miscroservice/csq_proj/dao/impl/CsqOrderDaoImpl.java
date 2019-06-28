@@ -157,4 +157,9 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getUpdateTime)));
 	}
 
+	@Override
+	public int insert(TCsqOrder csqOrder) {
+		return MybatisPlus.getInstance().save(csqOrder);
+	}
+
 }

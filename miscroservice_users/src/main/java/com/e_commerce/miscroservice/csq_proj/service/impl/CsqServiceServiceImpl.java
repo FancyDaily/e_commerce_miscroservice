@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
@@ -101,8 +103,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	}
 
 	@Override
-	public QueryResult<TCsqService> list(Long userId, Integer option, Integer pageNum, Integer pageSize) {
-		QueryResult<TCsqService> result = new QueryResult<>();
+	public QueryResult<CsqServiceVo> list(Long userId, Integer option, Integer pageNum, Integer pageSize) {
+		QueryResult<CsqServiceVo> result = new QueryResult<>();
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
 		Integer OPTION_ALL = 0;
@@ -115,7 +117,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<TCsqService> tCsqServices;
 		if (OPTION_MINE.equals(option)) {
 			if (userId == null) {
-				QueryResult<TCsqService> objectQueryResult = new QueryResult<>();
+				QueryResult<CsqServiceVo> objectQueryResult = new QueryResult<>();
 				objectQueryResult.setResultList(new ArrayList<>());
 				//或抛出登录信号
 				return objectQueryResult;
@@ -151,7 +153,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<TCsqFund> csqFunds = fundIds.isEmpty()? new ArrayList<>(): csqFundDao.selectInIds(fundIds);    //得到目标基金信息
 		Map<Long, List<TCsqFund>> fundMap = csqFunds.stream()
 			.collect(Collectors.groupingBy(TCsqFund::getId));
-		List<TCsqService> csqServices = tCsqServices.stream()
+		List<CsqServiceVo> csqServices = tCsqServices.stream()
 			.map(a -> {
 				Integer type = a.getType();
 				if (CsqServiceEnum.TYPE_FUND.getCode() == type) {
@@ -163,7 +165,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 						a = transferAttrs(a, csqFund);
 					}
 				}
-				return a;
+				return a.copyCsqServiceVo();
 			})
 			.collect(Collectors.toList());
 		result.setTotalCount(startPage.getTotal());
@@ -310,7 +312,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDesc(serviceId);
 			tCsqService.setReports(csqServiceReports);
 			// 若为已捐款，则还需要项目汇报信息（PC端开发时再添加）
-			resultMap.put("csqService", tCsqService);
+			resultMap.put("csqService", tCsqService.copyCsqServiceVo());
 
 			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
 			Queue<CsqDonateRecordVo> voList;
@@ -351,7 +353,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	}
 
 	@Override
-	public QueryResult<TCsqUserPaymentRecord> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize) {
+	public QueryResult<CsqUserPaymentRecordVo> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum == null? 1:pageNum;
 		pageSize = pageSize == null? 0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
@@ -365,9 +367,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				a.setServiceName(tCsqService.getName());
 				return a;
 			}).collect(Collectors.toList());*/
-		QueryResult<TCsqUserPaymentRecord> queryResult = new QueryResult<>();
+		List<CsqUserPaymentRecordVo> copyList = tCsqUserPaymentRecords.stream()
+			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
 //		queryResult.setResultList(userPaymentRecords);
-		queryResult.setResultList(tCsqUserPaymentRecords);
+		queryResult.setResultList(copyList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;
 	}

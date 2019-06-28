@@ -15,6 +15,7 @@ public enum CsqFundEnum {
 	STATUS_CERT_FAIL(3, "审核失败");
 
 	public static final Double PUBLIC_MINIMUM = 10000d;	//申请公开基金的最低标准
+	public static final String DEFAULT_COVER_PIC = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png";	//默认封面图
 
 	int val;
 	String desc;

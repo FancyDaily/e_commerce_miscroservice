@@ -36,7 +36,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("apply/check")
-	public Object beforeApplyForFund() {
+	public AjaxResult beforeApplyForFund() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {
@@ -63,7 +63,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("apply/do")
-	public Object applyForAFund(Long amount,
+	public AjaxResult applyForAFund(Long amount,
 								@RequestParam(required = false) Long fundId,
 								@RequestParam(required = false) String orderNo,
 								@RequestParam(required = false) Long publishId) {
@@ -103,7 +103,7 @@ public class FundController {
 	 */
 	@RequestMapping("modify")
 	@Consume(TCsqFund.class)
-	public Object modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
+	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 							   String description, String coverPic, String orgName, String orgAddr,
 							   String contact, String personInCharge,String creditCardName,String creditCardId,
 							   @RequestParam(required = false) Integer status) {
@@ -133,7 +133,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("cert")
-	public Object certFund(Long fundId, Integer option) {
+	public AjaxResult certFund(Long fundId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {
@@ -158,7 +158,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("detail")
-	public Object FundDetail(Long fundId) {
+	public AjaxResult FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {
@@ -184,7 +184,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("share")
-	public Object shareFund(Long fundId) {
+	public AjaxResult shareFund(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {
@@ -211,11 +211,11 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object fundList(Integer pageNum, Integer pageSize,Integer... option) {
+	public AjaxResult fundList(Integer pageNum, Integer pageSize,Integer... option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {
-			QueryResult<TCsqFund> list = fundService.list(userId, pageNum, pageSize, option);
+			QueryResult<CsqFundVo> list = fundService.list(userId, pageNum, pageSize, option);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -235,7 +235,7 @@ public class FundController {
 	 * @return
 	 */
 	@RequestMapping("testInsert")
-	public Object testInsert() {
+	public AjaxResult testInsert() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {

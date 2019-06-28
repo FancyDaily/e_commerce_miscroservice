@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserInvoiceDao;
@@ -54,6 +55,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			.forEach((a) -> {
 				Integer status = a.getStatus();
 				Integer invoiceStatus = a.getInVoiceStatus();
+				//TODO 是否需要校验订单发起人与发票发起人身份
 				if (CsqOrderEnum.STATUS_ALREADY_PAY.getCode() != status) {    //如果不是已支付
 					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在未成功支付订单，无法开票!");
 				}
@@ -136,27 +138,27 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	}
 
 	@Override
-	public QueryResult<TCsqUserInvoice> doneList(Long userId, Integer pageNum, Integer pageSize) {
+	public QueryResult<CsqUserInvoiceVo> doneList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1:pageNum;
 		pageSize = pageSize==null? 0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserId(userId);
-		tCsqUserInvoices.stream()
+		List<CsqUserInvoiceVo> copyList = tCsqUserInvoices.stream()
 			.map(a -> {
 				a.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
-				return a;
+				return a.copyCsqUserInvoice();
 			}).collect(Collectors.toList());
-		QueryResult<TCsqUserInvoice> queryResult = new QueryResult<>();
-		queryResult.setResultList(tCsqUserInvoices);
+		QueryResult<CsqUserInvoiceVo> queryResult = new QueryResult<>();
+		queryResult.setResultList(copyList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;
 	}
 
 	@Override
-	public TCsqUserInvoice invoiceDetail(Long userId, Long invoiceId) {
+	public CsqUserInvoiceVo invoiceDetail(Long userId, Long invoiceId) {
 		TCsqUserInvoice tCsqUserInvoice = csqUserInvoiceDao.selectByPrimaryKey(invoiceId);
 		tCsqUserInvoice.setRecordCnt(tCsqUserInvoice.getOrderNos().length());
-		return tCsqUserInvoice;
+		return tCsqUserInvoice.copyCsqUserInvoice();
 	}
 
 	@Override

@@ -1,23 +1,18 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
-import lombok.Builder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import lombok.Data;
 
 /**
- * 充值捐助流水(普通账户、基金、项目)
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:55
+ * @Date: 2019-06-27 17:25
  */
-@Table(commit = "从善桥流水表")
 @Data
-@Builder
-public class TCsqUserPaymentRecord extends BaseEntity {
-
+public class CsqUserPaymentRecordVo {
 	@Id
 	private Long id;
 
@@ -47,7 +42,8 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	@Column(commit = "金额", precision = 2, isNUll = false)
 	private Double money;
 
-	public CsqUserPaymentRecordVo copyUserPaymentRecordVo() {
+	public TCsqUserPaymentRecord copyTCsqUserPaymentRecord() {
 		return null;
 	}
+
 }

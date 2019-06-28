@@ -3,11 +3,10 @@ package com.e_commerce.miscroservice.csq_proj.po;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Key-Value
@@ -18,6 +17,17 @@ import java.sql.Timestamp;
 @Table(commit = "从善桥key-value表")
 @Builder
 public class TCsqKeyValue extends BaseEntity {
+
+	/*public static void main(String[] args) {
+	    TCsqKeyValue tcsqk = new TCsqKeyValue();
+		tcsqk.setId(111L);
+		tcsqk.setTheValue("12");
+
+		List<TCsqKeyValue> all = tcsqk.findAll(tcsqk.eq(TCsqKeyValue::getType, tcsqk.getType()));
+		tcsqk.save();
+		tcsqk.findOne(tcsqk.eq(TCsqKeyValue::getType, tcsqk.getCountColumn()));
+
+	}*/
 
 	@Id
 	private Long id;

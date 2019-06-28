@@ -40,7 +40,7 @@ public class PaymentController {
 	 * @return
 	 */
 	@RequestMapping("find/waters")
-	public Object findWarters(Integer pageNum,Integer pageSize){
+	public AjaxResult findWarters(Integer pageNum,Integer pageSize){
 		AjaxResult result = new AjaxResult();
 
 		Long userId = Long.valueOf(IdUtil.getId());
@@ -72,7 +72,7 @@ public class PaymentController {
 	 * @return
 	 */
 	@RequestMapping("/my/certificate")
-	public Object findMyCertificate(Long recordId){
+	public AjaxResult findMyCertificate(Long recordId){
 		AjaxResult result = new AjaxResult();
 
 		Long userId = Long.valueOf(IdUtil.getId());

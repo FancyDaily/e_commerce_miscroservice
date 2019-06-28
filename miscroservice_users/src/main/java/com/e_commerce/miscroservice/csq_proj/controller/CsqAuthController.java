@@ -38,7 +38,7 @@ public class CsqAuthController {
 	 */
 	@Consume(TCsqUserAuth.class)
 	@RequestMapping("person/submit")
-	public Object personAuth(String name, String cardId, String phone, String smsCode) {
+	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
@@ -71,7 +71,7 @@ public class CsqAuthController {
 	 */
 	@Consume(TCsqUserAuth.class)
 	@RequestMapping("corp/submit")
-	public Object certCorpSubmit(String telephone, String password, String validCode, String name, String licenseId, String licensePic) {
+	public AjaxResult certCorpSubmit(String telephone, String password, String validCode, String name, String licenseId, String licensePic) {
 		AjaxResult result = new AjaxResult();
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
 		try {
@@ -96,7 +96,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@RequestMapping("corp/do")
-	public Object certCorpDo(Long userAuthId, Integer option) {
+	public AjaxResult certCorpDo(Long userAuthId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("组织实名认证审核, ");
@@ -121,7 +121,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@RequestMapping("person/do")
-	public Object certPersonDo(Long userAuthId, Integer option) {
+	public AjaxResult certPersonDo(Long userAuthId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		try {
 			csqUserService.certPerson(userAuthId, option);
@@ -143,7 +143,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@RequestMapping("check")
-	public Object authCheck() {
+	public AjaxResult authCheck() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId(2000L);
 		try {

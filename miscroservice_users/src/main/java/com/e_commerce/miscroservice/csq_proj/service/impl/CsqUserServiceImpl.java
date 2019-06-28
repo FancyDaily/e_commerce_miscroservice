@@ -112,7 +112,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("token", token);
-		resultMap.put("user", tCsqUser);
+		resultMap.put("user", tCsqUser.copyCsqBasicUserVo());
 		return resultMap;
 	}
 
@@ -202,7 +202,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		tCsqUser = UserUtil.login(tCsqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
 		String token = tCsqUser.getToken();
 		map.put("token", token);
-		map.put("user", tCsqUser);
+		map.put("user", tCsqUser.copyCsqBasicUserVo());
 		return map;
 	}
 

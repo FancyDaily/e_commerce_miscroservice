@@ -59,5 +59,4 @@ public class TCsqOrder extends BaseEntity {
 
 	@Column(commit = "订单创建时间戳")
 	private Long orderTime;
-
 }
