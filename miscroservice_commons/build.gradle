@@ -8,7 +8,7 @@ gradle.projectsEvaluated {
 
 
 jar {
-    baseName "miscroservice_commons"
+    archiveBaseName "miscroservice_commons"
 }
 
 ext {
