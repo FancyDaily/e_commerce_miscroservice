@@ -9,7 +9,7 @@ repositories {
 
 
 jar {
-    archiveBaseName "test"
+    archiveBaseName="test"
     archiveVersion = '1.0.0'
 }
 
