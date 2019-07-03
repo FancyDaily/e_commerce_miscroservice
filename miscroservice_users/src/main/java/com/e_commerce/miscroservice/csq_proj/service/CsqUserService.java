@@ -111,4 +111,24 @@ public interface CsqUserService {
 	 * @param option
 	 */
 	void certPerson(Long userAuthId, Integer option);
+
+	/**
+	 * 手机号验证码注册
+	 * @param telephone
+	 * @param validCode
+	 * @param type
+	 * @return
+	 */
+	Map<String, Object> registerBySMS(String telephone, String validCode, Integer type);
+
+	/**
+	 * 手机号验证码登录
+	 *
+	 * @param uuid
+	 * @param telephone
+	 * @param validCode
+	 * @param type
+	 * @return
+	 */
+	Map<String, Object> loginBySMS(String uuid, String telephone, String validCode, Integer type);
 }

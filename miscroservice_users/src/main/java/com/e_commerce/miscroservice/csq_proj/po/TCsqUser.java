@@ -77,9 +77,6 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "性别", length = 11, defaultVal = "0")
 	private Integer sex;
 
-	@Column(commit = "最高学历")
-	private String maxEducation;
-
 	@Column(commit = "关注数", length = 11, defaultVal = "0")
 	private Integer followNum;
 
@@ -92,8 +89,11 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "成长值")
 	private Long growthValue;
 
-	@Column(commit = "捐款数", length = 11, defaultVal = "0")
+	@Column(commit = "捐款次数", length = 11, defaultVal = "0")
 	private Integer payNum;
+
+	@Column(commit = "累积捐款总额", length = 11, defaultVal = "0")
+	private Double sumTotalPay;
 
 	@Column(commit = "爱心账户余额")
 	private Double surplusAmount;
@@ -108,19 +108,19 @@ public class TCsqUser extends BaseEntity{
 	private Integer authenticationType;
 
 	@Column(commit = "技能")
-	private String skill;
+	private String skill;	//unused
 
 	@Column(commit = "完整度", length = 11, defaultVal = "0")
-	private Integer integrity;
+	private Integer integrity;	//unused
 
 	@Column(commit = "大V标记状态", length = 11, defaultVal = "0")
-	private Integer masterStatus;
+	private Integer masterStatus;	//unused
 
 	@Column(commit = "微信基本信息授权状态", length = 11, defaultVal = "0")
 	private Integer authStatus;
 
 	@Column(commit = "邀请码")
-	private String inviteCode;
+	private String inviteCode;	//unused
 
 	@Column(commit = "可用状态")
 	private String avaliableStatus;

@@ -30,4 +30,6 @@ public interface CsqPaymentService {
 	 * @return
 	 */
 	Double countMoney(Long userId, Integer inOut);
+
+	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId);
 }

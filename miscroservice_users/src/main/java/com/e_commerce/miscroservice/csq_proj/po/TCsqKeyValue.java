@@ -23,9 +23,9 @@ public class TCsqKeyValue extends BaseEntity {
 		tcsqk.setId(111L);
 		tcsqk.setTheValue("12");
 
-		List<TCsqKeyValue> all = tcsqk.findAll(tcsqk.eq(TCsqKeyValue::getType, tcsqk.getType()));
+		List<TCsqKeyValue> all = tcsqk.findAll(tcsqk.eq(TCsqKeyValue::getEnum, tcsqk.getEnum()));
 		tcsqk.save();
-		tcsqk.findOne(tcsqk.eq(TCsqKeyValue::getType, tcsqk.getCountColumn()));
+		tcsqk.findOne(tcsqk.eq(TCsqKeyValue::getEnum, tcsqk.getCountColumn()));
 
 	}*/
 

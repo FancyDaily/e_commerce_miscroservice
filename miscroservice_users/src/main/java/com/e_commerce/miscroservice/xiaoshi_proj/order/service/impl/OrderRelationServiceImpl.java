@@ -429,7 +429,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      *//*
     public List<UserInfoView> userListByChoose(Long orderId){
         List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectListByStatus(orderId
-                , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+                , OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getEnum());
         List<Long> userIdList = new ArrayList<>();
         List<UserInfoView> userInfoViewList = new ArrayList<>();
         for (int i = 0 ; i < orderRelationshipList.size() ; i++){
@@ -2290,7 +2290,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
     }
 /*    public List<UserInfoView> startUserList(Long orderId){
         List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectListByStatus(orderId
-            , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+            , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getEnum());
         List<Long> userIdList = new ArrayList<>();
         List<UserInfoView> userInfoViewList = new ArrayList<>();
         for (int i = 0 ; i < orderRelationshipList.size() ; i++){
@@ -2321,7 +2321,7 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
      **//*
     public List<UserInfoView> orderPayUserList(Long orderId){
         List<TOrderRelationship> orderRelationshipList = orderRelationshipDao.selectListByStatus(orderId
-            , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getType());
+            , OrderRelationshipEnum.STATUS_ALREADY_CHOOSE.getEnum());
         List<Long> userIdList = new ArrayList<>();
         List<UserInfoView> userInfoViewList = new ArrayList<>();
         for (int i = 0 ; i < orderRelationshipList.size() ; i++){
@@ -2337,10 +2337,10 @@ public class OrderRelationServiceImpl extends BaseService implements OrderRelati
                     userInfoView.setUserHeadPortraitPath(userlist.get(j).getUserHeadPortraitPath());
                     userInfoView.setName(userlist.get(j).getName());
                     userInfoView.setStatus(1);//默认为已到
-                    if (orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getType()){
+                    if (orderRelationshipList.get(i).getOrderReportType() == OrderRelationshipEnum.ORDER_REPORT_IS_BEREPORT.getEnum()){
                         //如果订单内被举报了，状态置为异常
                         userInfoView.setStatus(2);
-                    } else if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getType()){
+                    } else if (orderRelationshipList.get(i).getSignType() == OrderRelationshipEnum.SIGN_TYPE_NO.getEnum()){
                         //如果是未签到，将状态置为未到
                         userInfoView.setStatus(3);
                     }

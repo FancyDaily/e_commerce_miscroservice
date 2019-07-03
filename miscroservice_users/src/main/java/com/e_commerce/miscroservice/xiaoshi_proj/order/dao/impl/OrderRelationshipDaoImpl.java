@@ -441,8 +441,8 @@ public class OrderRelationshipDaoImpl implements OrderRelationshipDao {
 	public List<TOrderRelationship> listRelationshipByUserId(Long userId) {
 		//非订单的状态
 //		List<Integer> noOrderStatus = new ArrayList<>();
-//		noOrderStatus.add(OrderRelationshipEnum.STATUS_NO_STATE.getType());
-//		noOrderStatus.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType());
+//		noOrderStatus.add(OrderRelationshipEnum.STATUS_NO_STATE.getEnum());
+//		noOrderStatus.add(OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getEnum());
 		return MybatisPlus.getInstance().findAll(new TOrderRelationship(), new MybatisPlusBuild(TOrderRelationship.class)
 				.groupBefore().eq(TOrderRelationship::getReceiptUserId, userId).neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_NO_STATE.getType())
 				.neq(TOrderRelationship::getStatus, OrderRelationshipEnum.STATUS_WAIT_CHOOSE.getType())

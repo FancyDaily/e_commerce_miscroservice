@@ -198,11 +198,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Double surplusAmount = tCsqService.getSurplusAmount();
 			tCsqService.setSumTotalOut(sumTotalIn - surplusAmount);    //剩余金额
 			//捐入流水
-			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqPaymenEnum.INOUT_IN.toCode());    //TODO 分页
+			List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
 			List<Long> orderIds = tCsqUserPaymentRecords.stream()
 				.map(TCsqUserPaymentRecord::getOrderId)
 				.distinct().collect(Collectors.toList());
-			tCsqUserPaymentRecords = paymentDao.selectInOrderIdsAndInOut(orderIds, CsqPaymenEnum.INOUT_OUT.toCode());
+			tCsqUserPaymentRecords = paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
 			//统计捐款数，获取top10
 			Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
@@ -357,7 +357,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		pageNum = pageNum == null? 1:pageNum;
 		pageSize = pageSize == null? 0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqPaymenEnum.INOUT_OUT.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode());
 		/*Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
 		List<TCsqUserPaymentRecord> userPaymentRecords = tCsqUserPaymentRecords.stream()
 			.map(a -> {
@@ -418,7 +418,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.money(price)
 			.entityId(tCsqOrder.getFromId())    //来源
 			.entityType(tCsqOrder.getFromType())
-			.inOrOut(CsqPaymenEnum.INOUT_OUT.toCode()).build();
+			.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode()).build();
 
 		Long serviceId = tCsqOrder.getToId();
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
@@ -428,7 +428,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.money(price)
 			.entityId(serviceId)    //来源
 			.entityType(toType)
-			.inOrOut(CsqPaymenEnum.INOUT_IN.toCode()).build();
+			.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode()).build();
 		csqUserPaymentDao.insert(build1, build2);
 		//TODO 捐助人的个人捐助次数、基金捐助次数（如果来源为基金）、项目受助次数等增加
 
@@ -479,6 +479,33 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	public void checkPubAuth(Long userId) {
 		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
 		checkPubAuth(tCsqUser);
+	}
+
+	@Override
+	public void synchronizeService(Long fundId) {
+		TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fundId);
+		synchronizeService(csqFund);
+	}
+
+	@Override
+	public void synchronizeService(TCsqFund csqFund) {
+		Long fundId = null;
+		if(csqFund == null || (fundId = csqFund.getId()) == null) {
+
+		}
+		//找到对应的service
+		TCsqService csqService = csqServiceDao.selectByFundId(fundId);
+		csqService.setUserId(csqFund.getUserId());
+		csqService.setStatus(csqFund.getStatus());
+		csqService.setTypePubKeys(csqFund.getTrendPubKeys());
+		csqService.setName(csqFund.getName());
+		csqService.setSurplusAmount(csqFund.getBalance());	//余额
+		csqService.setTotalInCnt(csqFund.getTotalInCnt());	//累积被捐助次数
+		csqService.setSumTotalIn(csqFund.getSumTotalIn());
+		csqService.setDescription(csqFund.getDescription());
+		csqService.setCoverPic(csqFund.getCoverPic());
+		csqService.setDescription(csqFund.getDescription());
+		csqServiceDao.update(csqService);
 	}
 
 	private void checkPubAuth(TCsqUser user) {

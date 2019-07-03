@@ -189,7 +189,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
 		//统计捐款人数
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqPaymenEnum.INOUT_IN.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
 		int count = tCsqUserPaymentRecords.size();
 		csqFundVo.setContributeInCnt(count);
 		//把基金方向的publish_id转换成名字
@@ -227,7 +227,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		String qrCode = "";	//TODO 二维码(根据具体的分享后逻辑完善)
 		map.put("qrCode", qrCode);
 		//查询捐入列表
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqPaymenEnum.INOUT_IN.toCode());	//分页标记
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());	//分页标记
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return map;
 		}

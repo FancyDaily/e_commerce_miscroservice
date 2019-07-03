@@ -224,7 +224,7 @@ public class CsqServiceController {
 	@RequestMapping("donate")
 	public AjaxResult donate(String orderNo) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId(2000L);
+		Long userId = UserUtil.getTestId();
 		try {
 			log.info("捐助成功, orderNo={}", orderNo);
 			csqServiceService.donate(orderNo);

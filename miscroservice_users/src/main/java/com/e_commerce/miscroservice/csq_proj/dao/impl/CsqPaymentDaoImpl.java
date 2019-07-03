@@ -47,4 +47,9 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 		Double money = csqPaymentMapper.countMoney(userId,inOut);
 		return money;
 	}
+
+	@Override
+	public int insert(TCsqUserPaymentRecord... build) {
+		return MybatisPlus.getInstance().save(build);
+	}
 }

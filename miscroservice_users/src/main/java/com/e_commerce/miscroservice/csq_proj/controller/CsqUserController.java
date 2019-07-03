@@ -66,6 +66,61 @@ public class CsqUserController {
 	}
 
 	/**
+	 * 手机号验证码注册
+	 * @param telephone
+	 * @param validCode
+	 * @param type 1个人 2组织
+	 * @return
+	 */
+	@RequestMapping("register/sms")
+	public AjaxResult registerBySMS(String telephone, String validCode, Integer type) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("手机号注册，telephone={}, validCode={}, type={}", telephone, validCode, type);
+			Map<String, Object> resultMap = csqUserService.registerBySMS(telephone, validCode, type);
+			result.setData(resultMap);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "手机号注册", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("手机号注册", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 验证码登录
+	 * @param telephone
+	 * @param validCode
+	 * @param type
+	 * @return
+	 */
+	@RequestMapping("login/sms")
+	public AjaxResult loginBySMS(String telephone, String validCode, Integer type,
+								 @RequestParam(required = true) String uuid) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("验证码登录，telephone={}, validCode={}, type={}", telephone, validCode, type);
+			Map<String, Object> resultMap = csqUserService.loginBySMS(uuid, telephone, validCode, type);
+			result.setData(resultMap);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "验证码登录", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("验证码登录", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * openid登录
 	 * @param openid
 	 * @param uuid
@@ -217,7 +272,7 @@ public class CsqUserController {
 	 * @param uuid
 	 * @return
 	 */
-	@RequestMapping("register")
+	@RequestMapping("register/pwd")
 	public AjaxResult rigesterByTelephone(String telephone, String password, String uuid) {
 		AjaxResult result = new AjaxResult();
 		try {

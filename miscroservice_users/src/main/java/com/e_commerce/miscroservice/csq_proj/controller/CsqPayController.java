@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +29,9 @@ public class CsqPayController {
 
 	@Autowired
 	private CsqPayService csqPayService;
+
+	@Autowired
+	private CsqUserService csqUserService;
 
 	/**
 	 * 微信支付(发起)
@@ -126,6 +130,34 @@ public class CsqPayController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("微信回调函数 - 退款", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 平台内充值/捐助
+	 * @param fromType
+	 * @param toType
+	 * @param toId
+	 * @param amount
+	 * @return
+	 */
+	@RequestMapping("pay/inner")
+	public AjaxResult withinPlatformPay(Integer fromType, Long fromId, Integer toType, Long toId, Double amount) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, toType={}, toId={}, amount={}", userId, fromType, fromId, toType, toId, amount);
+			csqPayService.withinPlatFormPay(userId, fromType, fromId, toType, toId, amount);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "平台内充值/捐助", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("平台内充值/捐助", e);
 			result.setSuccess(false);
 		}
 		return result;

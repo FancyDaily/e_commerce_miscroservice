@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
@@ -70,5 +71,17 @@ public interface CsqServiceService {
 	 */
 	void donate(String orderNo);
 
+	/**
+	 * 确认发布权限
+	 * @param userId
+	 */
 	void checkPubAuth(Long userId);
+
+	/**
+	 * 基金向基金类型的项目同步
+	 * @param fundId
+	 */
+	void synchronizeService(Long fundId);
+
+	void synchronizeService(TCsqFund csqFund);
 }

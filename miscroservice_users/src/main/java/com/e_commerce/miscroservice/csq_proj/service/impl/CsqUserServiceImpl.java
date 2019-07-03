@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
+import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
@@ -69,6 +70,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private WechatService wechatService;
+
+	@Autowired
+	private CsqPayService csqPayService;
 
 	@Value("${page.fund}")
 	private String FUND_PAGE;
@@ -214,9 +218,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser tCsqUser = csqUserDao.selectByUserTelAndAccountType(telephone, CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
 		if (tCsqUser == null) {    //进行注册
 			tCsqUser = new TCsqUser();
+			tCsqUser.setUserTel(telephone);
 			tCsqUser.setUuid(uuid);
+			tCsqUser.setAccountType(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
 			tCsqUser = register(tCsqUser);
-			return;
+//			return;
 		}
 		Long corpUserId = tCsqUser.getId();
 		//用户是否已经实名过
@@ -237,6 +243,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必填参数为空!");
 		}
 		TCsqUserAuth userAuth = TCsqUserAuth.builder().status(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode())
+			.userId(corpUserId)
+			.type(CsqUserAuthEnum.TYPE_CORP.getCode())
+			.phone(telephone)
 			.licenseId(licenseId)
 			.licensePic(licensePic)
 			.name(name)
@@ -254,6 +263,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		//审核记录状态修改
 		TCsqUserAuth userAuth = csqUserAuthDao.selectByPrimaryKey(userAuthId);
+		if(userAuth == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该审核记录不存在！");
+		}
+		if(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode() != userAuth.getStatus()) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前审核状态不正确！");
+
+		}
 		userAuth.setStatus(option);
 		csqUserAuthDao.update(userAuth);
 		//用户实名状态修改
@@ -482,7 +498,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.entityId(fromId)
 			.entityType(fromType)
 			.description(description)
-			.inOrOut(CsqPaymenEnum.INOUT_OUT.toCode())
+			.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())
 			.money(amount).build();
 		build.setCreateUser(userId);
 		csqUserPaymentDao.insert(build);
@@ -504,6 +520,50 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser build = TCsqUser.builder().id(userId)
 			.authenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode()).build();
 		csqUserDao.updateByPrimaryKey(build);
+	}
+
+	@Override
+	public Map<String, Object> registerBySMS(String telephone, String validCode, Integer type) {
+		if(!Arrays.stream(CsqUserEnum.values()).filter(a -> a.name().startsWith("ACCOUNT_TYPE_")).map(a -> a.toCode()).collect(Collectors.toList()).contains(type)) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数type不正确!");
+		}
+
+		//check
+		userService.checkSMS(telephone, validCode);
+
+		//check手机号是否已经使用
+		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
+		if(csqUser != null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已经注册!");
+		}
+
+		//注册用户
+		TCsqUser build = TCsqUser.builder()
+			.userTel(telephone).build();
+		TCsqUser register = register(build);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("user",  build);
+		map.put("token", register.getToken());
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> loginBySMS(String uuid, String telephone, String validCode, Integer type) {
+		userService.checkSMS(telephone, validCode);
+		//登录
+		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
+		if(csqUser == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "账号不存在!");
+		}
+		csqUser.setUuid(uuid);
+		csqUser = UserUtil.login(csqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
+
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("token", csqUser.getToken());
+		resultMap.put("user", csqUser);
+
+		return resultMap;
 	}
 
 	private TCsqUser register(TCsqUser csqUser) {

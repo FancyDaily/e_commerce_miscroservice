@@ -10,4 +10,6 @@ public interface CsqOrderService {
 	void checkPaid(String orderNo);
 
 	void checkPaid(TCsqOrder csqOrder);
+
+	String generateOrderNo();
 }

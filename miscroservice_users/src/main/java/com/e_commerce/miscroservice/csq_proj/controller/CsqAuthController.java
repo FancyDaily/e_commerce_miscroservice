@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -40,7 +41,7 @@ public class CsqAuthController {
 	@RequestMapping("person/submit")
 	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId(2000L);
+		Long userId = UserUtil.getTestId();
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
 		csqUserAuth.setUserId(userId);
 		try {
@@ -71,11 +72,17 @@ public class CsqAuthController {
 	 */
 	@Consume(TCsqUserAuth.class)
 	@RequestMapping("corp/submit")
-	public AjaxResult certCorpSubmit(String telephone, String password, String validCode, String name, String licenseId, String licensePic) {
+	public AjaxResult certCorpSubmit(String telephone,
+									 String password,
+									 String validCode,
+									 @RequestParam(required = false) String name,
+									 @RequestParam(required = false) String licenseId,
+									 @RequestParam(required = false) String licensePic,
+									 String uuid) {
 		AjaxResult result = new AjaxResult();
 		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
 		try {
-			csqUserService.registerAndSubmitCert(telephone, password, validCode, csqUserAuth);
+			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, csqUserAuth);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织注册与实名提交", e.getMessage());
@@ -145,7 +152,7 @@ public class CsqAuthController {
 	@RequestMapping("check")
 	public AjaxResult authCheck() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId(2000L);
+		Long userId = UserUtil.getTestId();
 		try {
 			csqUserService.checkAuth(userId);
 			result.setSuccess(true);

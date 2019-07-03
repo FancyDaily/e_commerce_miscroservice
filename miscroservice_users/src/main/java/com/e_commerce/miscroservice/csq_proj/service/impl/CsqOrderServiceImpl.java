@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.service.CsqOrderService;
@@ -36,6 +37,11 @@ public class CsqOrderServiceImpl implements CsqOrderService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数CsqOrder为空！");
 		}
 		checkPaid(csqOrder.getOrderNo());
+	}
+
+	@Override
+	public String generateOrderNo() {
+		return UUIdUtil.generateOrderNo();
 	}
 
 }

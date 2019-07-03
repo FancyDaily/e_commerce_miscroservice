@@ -28,4 +28,10 @@ public interface CsqPaymentDao {
 	 * @return
 	 */
 	Double countMoney(Long userId, Integer inOut);
+
+	/**
+	 * 插入
+	 * @param build
+	 */
+	int insert(TCsqUserPaymentRecord... build);
 }

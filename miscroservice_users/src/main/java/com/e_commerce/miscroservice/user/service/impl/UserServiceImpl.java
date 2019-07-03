@@ -1460,7 +1460,7 @@ public class UserServiceImpl extends BaseService implements UserService {
 //        insertReward(user, PaymentEnum.PAYMENT_TYPE_CERT_BONUS);  //TODO 插入实名认证奖励(插入账单流水记录)
 
         // 实名认证任务完成(插入任务记录)
-//        addMedal(user, DictionaryEnum.TASK_AUTH.getType(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
+//        addMedal(user, DictionaryEnum.TASK_AUTH.getEnum(), DictionaryEnum.TASK_AUTH.getSubType(),   ////TODO 插入实名认证奖励(插入任务记录)
 //                AppConstant.TARGET_ID_TASK_AUTH);
 
         user= taskComplete(user, GrowthValueEnum.GROWTH_TYPE_UNREP_AUTH);

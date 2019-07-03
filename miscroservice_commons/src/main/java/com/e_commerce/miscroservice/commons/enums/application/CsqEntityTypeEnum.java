@@ -16,8 +16,7 @@ public enum CsqEntityTypeEnum {
 	TYPE_HUMAN(1, "平台外账户"),
 	TYPE_ACCOUNT(2, "爱心账户"),
 	TYPE_FUND(3, "基金账户"),
-	TYPE_SERVICE(4, "项目"),
-	SUBTYPE_OTHER(999999, "补充类型");
+	TYPE_SERVICE(4, "项目");
 
 	int code;
 	String msg;
@@ -35,7 +34,7 @@ public enum CsqEntityTypeEnum {
 		this.msg = msg;
 	}
 
-	public static CsqEntityTypeEnum getType(int code) {
+	public static CsqEntityTypeEnum getEnum(int code) {
 		List<CsqEntityTypeEnum> collect = Arrays.stream(CsqEntityTypeEnum.values()).filter(a -> a.code == code)
 			.collect(Collectors.toList());
 		if(collect.isEmpty()) {
