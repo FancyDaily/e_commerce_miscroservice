@@ -11,13 +11,13 @@ repositories {
 }
 /**
  * 名称打包规范 name-startTime_endTime.jar
- * name 就是baseName
- * version 就是 开始时间(毫秒)_结束时间(毫秒) (0_0代表用不过期)
+ * name 就是archiveBaseName
+ * archiveVersion 就是 开始时间(毫秒)_结束时间(毫秒) (0_0代表用不过期)
  */
 jar {
     manifest {
-        baseName "module"
-        version = '0_0'
+        archiveBaseName = "modules"
+        archiveVersion = '0_0'
         manifest.attributes 'Main-Class': 'com.miscroservice.module.Main'
     }
     from {

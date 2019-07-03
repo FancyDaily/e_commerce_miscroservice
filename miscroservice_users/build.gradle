@@ -3,7 +3,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'application'
 
 jar {
-    baseName "miscroservice_users"
+    archiveBaseName= "miscroservice_users"
     mainClassName = 'com.e_commerce.miscroservice.UserStartMain'
 }
 
