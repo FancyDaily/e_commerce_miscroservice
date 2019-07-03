@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 从善桥消息
+ *
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:38
  */
@@ -29,8 +30,11 @@ public class CsqMsgController {
 
 	/**
 	 * 消息列表
-	 * @param pageNum
-	 * @param pageSize
+	 *
+	 * @param pageNum  页码
+	 * @param pageSize 大小
+	 *                 <p>
+	 *                 {"success":true,"errorCode":"","msg":"","data":{"resultList":[{"id":5,"userId":2001,"dateString":"2019/07/03","csqService":"","title":"","content":"","serviceId":"","type":0,"isRead":0}],"totalCount":1}}
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -56,6 +60,14 @@ public class CsqMsgController {
 
 	/**
 	 * 未读消息数目
+	 * <p>
+	 * {
+	 * "success": true,
+	 * "errorCode": "",
+	 * "msg": "",
+	 * "data": 1
+	 * }
+	 *
 	 * @return
 	 */
 	@RequestMapping("unreadCnt")
@@ -81,6 +93,14 @@ public class CsqMsgController {
 
 	/**
 	 * 全部标为已读
+	 * <p>
+	 * {
+	 * "success": true,
+	 * "errorCode": "",
+	 * "msg": "",
+	 * "data": ""
+	 * }
+	 *
 	 * @return
 	 */
 	@RequestMapping("readAll")
@@ -105,11 +125,19 @@ public class CsqMsgController {
 
 	/**
 	 * 手动推送系统消息
-	 * @param userId
-	 * @param title
-	 * @param content
-	 * @param serviceId
-	 * @param type
+	 *
+	 * @param userId    用户编号
+	 * @param title     标题
+	 * @param content   内容
+	 * @param serviceId 项目编号
+	 * @param type      类型
+	 *                  <p>
+	 *                  {
+	 *                  "success": true,
+	 *                  "errorCode": "",
+	 *                  "msg": "",
+	 *                  "data": ""
+	 *                  }
 	 * @return
 	 */
 	@Consume(TCsqSysMsg.class)

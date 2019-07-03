@@ -35,8 +35,8 @@ public class PaymentController {
 
 	/**
 	 * 查询流水
-	 * @param pageNum
-	 * @param pageSize
+	 * @param pageNum 页码
+	 * @param pageSize 大小
 	 * @return
 	 */
 	@RequestMapping("find/waters")
@@ -68,7 +68,7 @@ public class PaymentController {
 
 	/**
 	 * 查询我的证书
-	 * @param recordId
+	 * @param recordId 记录编号
 	 * @return
 	 */
 	@RequestMapping("/my/certificate")

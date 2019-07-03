@@ -94,14 +94,13 @@ public class UserUtil {
 	public static Long getTestId() {
 //		Long id = getId();
 		Long id = null;
-		return id == null? 2001: id;
+		return id == null? 2000: id;
 	}
 
 	public static Long getTestId(Long userId) {
 		if(userId == null) {
 			return getTestId();
 		}
-		userId = 2000L;
 		return userId;
 	}
 

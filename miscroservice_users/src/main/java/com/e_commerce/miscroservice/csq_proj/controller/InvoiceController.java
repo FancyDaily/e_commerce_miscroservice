@@ -30,13 +30,13 @@ public class InvoiceController {
 
 	/**
 	 * 申请开票
-	 * @param type
-	 * @param name
-	 * @param taxNo
-	 * @param addr
-	 * @param person
-	 * @param telephone
-	 * @param orderNo
+	 * @param type 类型
+	 * @param name 名字
+	 * @param taxNo 税号
+	 * @param addr 地址
+	 * @param person 人
+	 * @param telephone 手机号
+	 * @param orderNo 订单号
 	 * @return
 	 */
 	@Consume(TCsqUserInvoice.class)
@@ -63,8 +63,8 @@ public class InvoiceController {
 
 	/**
 	 * 待开票列表
-	 * @param pageNum
-	 * @param pageSize
+	 * @param pageNum 页码
+	 * @param pageSize 大小
 	 * @return
 	 */
 	@RequestMapping("list/waitTo")
@@ -91,8 +91,8 @@ public class InvoiceController {
 
 	/**
 	 * 已开票列表
-	 * @param pageNum
-	 * @param pageSize
+	 * @param pageNum 页码
+	 * @param pageSize 大小
 	 * @return
 	 */
 	@RequestMapping("list/done")
@@ -119,7 +119,7 @@ public class InvoiceController {
 
 	/**
 	 * 发票详情
-	 * @param invoiceId
+	 * @param invoiceId 发票编号
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -145,7 +145,7 @@ public class InvoiceController {
 
 	/**
 	 * 发票对应项目列表
-	 * @param invoiceId
+	 * @param invoiceId 发票编号
 	 * @return
 	 */
 	@RequestMapping("record/list")

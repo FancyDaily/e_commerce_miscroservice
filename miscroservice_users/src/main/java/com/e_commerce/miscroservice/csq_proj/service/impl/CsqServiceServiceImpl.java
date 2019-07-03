@@ -136,7 +136,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				.distinct()
 				.collect(Collectors.toList());
 			startPage = PageHelper.startPage(pageNum, pageSize);
-			tCsqServices = csqServiceDao.selectInIds(uniqueServiceIds);
+			tCsqServices = uniqueServiceIds.isEmpty()? new ArrayList<>():csqServiceDao.selectInIds(uniqueServiceIds);
 		} else {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option不正确!");
 		}
@@ -202,7 +202,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			List<Long> orderIds = tCsqUserPaymentRecords.stream()
 				.map(TCsqUserPaymentRecord::getOrderId)
 				.distinct().collect(Collectors.toList());
-			tCsqUserPaymentRecords = paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
+			tCsqUserPaymentRecords = orderIds.isEmpty()? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
 			//统计捐款数，获取top10
 			Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
@@ -235,7 +235,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					donaterIds.add(a.getKey());
 				}
 			);
-			donaters = userDao.selectInIds(donaterIds);
+			donaters = donaterIds.isEmpty()?new ArrayList<>():userDao.selectInIds(donaterIds);
 			//纠正排序
 			Map<Long, TCsqUser> donaterMap = new HashMap<>();
 			donaters.stream()

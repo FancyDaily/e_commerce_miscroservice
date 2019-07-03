@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * publishController
+ *
  * @Author: FangyiXu
  * @Date: 2019-06-12 11:12
  */
@@ -23,9 +24,17 @@ public class CsqPublishController {
 
 	/**
 	 * 插入一条publish记录
-	 * @param mainKey
-	 * @param keys
-	 * @param names
+	 *
+	 * @param mainKey 主要类型
+	 * @param keys    键
+	 * @param names   名
+	 *                <p>
+	 *                {
+	 *                "success": true,
+	 *                "errorCode": "",
+	 *                "msg": "",
+	 *                "data": ""
+	 *                }
 	 * @return
 	 */
 	@RequestMapping("upload")

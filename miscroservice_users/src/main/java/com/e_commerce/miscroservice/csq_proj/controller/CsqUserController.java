@@ -23,6 +23,7 @@ import java.util.Map;
 
 /**
  * 从善桥用户Controller
+ *
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:37
  */
@@ -43,7 +44,7 @@ public class CsqUserController {
 	/**
 	 * 与微信校验授权
 	 *
-	 * @param code
+	 * @param code 加密数据
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
@@ -67,9 +68,10 @@ public class CsqUserController {
 
 	/**
 	 * 手机号验证码注册
-	 * @param telephone
-	 * @param validCode
-	 * @param type 1个人 2组织
+	 *
+	 * @param telephone 手机号
+	 * @param validCode 验证码
+	 * @param type      1个人 2组织
 	 * @return
 	 */
 	@RequestMapping("register/sms")
@@ -94,9 +96,10 @@ public class CsqUserController {
 
 	/**
 	 * 验证码登录
-	 * @param telephone
-	 * @param validCode
-	 * @param type
+	 *
+	 * @param telephone 手机号
+	 * @param validCode 验证码
+	 * @param type      类型
 	 * @return
 	 */
 	@RequestMapping("login/sms")
@@ -122,15 +125,15 @@ public class CsqUserController {
 
 	/**
 	 * openid登录
-	 * @param openid
-	 * @param uuid
-	 * @param specialGuest
+	 *
+	 * @param openid 微信openid
+	 * @param uuid   虚拟设备号
 	 * @return
 	 */
 	@RequestMapping("login/openid")
 	public AjaxResult openidLogin(String openid,
-							  @RequestParam(required = true) String uuid,
-							  @RequestParam(required = true) String specialGuest) {
+								  @RequestParam(required = true) String uuid,
+								  @RequestParam(required = false) String specialGuest) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("openid登录, openid={}, uuid={}, specialGuest={}", openid, uuid, specialGuest);
@@ -151,7 +154,11 @@ public class CsqUserController {
 
 	/**
 	 * 换绑手机号(更换新手机号阶段或者第一次绑定手机)
-	 * @param telephone
+	 *
+	 * @param telephone 手机号
+	 * @param smsCode   验证码
+	 *                  <p>
+	 *                  {"success":false,"errorCode":"","msg":"该手机已绑定其他账号，如需解绑，请联系客服!","data":""}
 	 * @return
 	 */
 	@RequestMapping("phone/bind")
@@ -177,14 +184,14 @@ public class CsqUserController {
 	/**
 	 * 发送短信验证码
 	 *
-	 * @param telephone   手机号
-	 *                    <p>
-	 *                    {
-	 *                    "success": true,
-	 *                    "errorCode": "",
-	 *                    "msg": "",
-	 *                    "data": ""
-	 *                    }
+	 * @param telephone 手机号
+	 *                  <p>
+	 *                  {
+	 *                  "success": true,
+	 *                  "errorCode": "",
+	 *                  "msg": "",
+	 *                  "data": ""
+	 *                  }
 	 * @return
 	 */
 	@PostMapping({"generateSMS", "generateSMS/" + TokenUtil.AUTH_SUFFIX})
@@ -214,8 +221,11 @@ public class CsqUserController {
 
 	/**
 	 * 校验短信验证码
-	 * @param telephone
-	 * @param smsCode
+	 *
+	 * @param telephone 手机号
+	 * @param smsCode   验证码
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("checkSMS")
@@ -239,9 +249,13 @@ public class CsqUserController {
 
 	/**
 	 * 手机号密码登录
-	 * @param telephone
-	 * @param password
-	 * @param option 选择个人或组织登录
+	 *
+	 * @param telephone 手机号
+	 * @param password  密码
+	 * @param option    选择个人或组织登录
+	 * @param uuid      虚拟设备号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":{"user":{"id":1292,"totalDonate":"","minutesAgo":"","userAccount":"","name":"9527","userTel":"17826879801","userHeadPortraitPath":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png","sex":0,"remarks":""},"token":"eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOiIxMzIiLCJwYXNzIjoiWElPQVNISV9BVVRIT1JJWkVfLTE0MDg5MDI5ODEiLCJpbmNyZWFzZUlkIjoxNzcsImlkIjoxMjkyLCJleHAiOjE1NjczMjcwODAsImlhdCI6MTU2MjE0MzA4MH0.yTmDc0sE2ec2ttwKODpxgWcAX4Ap1lwBFsWp9LH7uoo"}}
 	 * @return
 	 */
 	@RequestMapping("login/telephone/pwd")
@@ -267,9 +281,12 @@ public class CsqUserController {
 
 	/**
 	 * 注册
-	 * @param telephone
-	 * @param password
-	 * @param uuid
+	 *
+	 * @param telephone 手机号
+	 * @param password  密码
+	 * @param uuid      虚拟设备号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("register/pwd")
@@ -293,9 +310,10 @@ public class CsqUserController {
 
 	/**
 	 * 每日一善
+	 *
 	 * @return
 	 */
-	@RequestMapping("dailydonate/detail")
+	@RequestMapping("AjaxResult")
 	public AjaxResult dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -318,25 +336,26 @@ public class CsqUserController {
 
 	/**
 	 * 爱心账户我的信息
+	 *
 	 * @return
 	 */
 	@RequestMapping("information")
-	public AjaxResult myInformation(){
+	public AjaxResult myInformation() {
 		Long userId = Long.valueOf(IdUtil.getId());
-		log.info("访问我的基本信息 ={}",userId);
+		log.info("访问我的基本信息 ={}", userId);
 		AjaxResult ajaxResult = new AjaxResult();
 		try {
-			Map<String,Object> map = csqUserService.findCsqUserById(userId);
+			Map<String, Object> map = csqUserService.findCsqUserById(userId);
 			ajaxResult.setSuccess(true);
 			ajaxResult.setData(map);
 
-		}catch (MessageException e){
+		} catch (MessageException e) {
 			log.warn(e.getMessage());
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg(e.getMessage());
-		}catch (Exception e){
+		} catch (Exception e) {
 			ajaxResult.setSuccess(false);
-			log.error("查看我的信息出错id={}",userId);
+			log.error("查看我的信息出错id={}", userId);
 		}
 		return ajaxResult;
 
@@ -344,8 +363,9 @@ public class CsqUserController {
 
 	/**
 	 * 分享
-	 * @param entityId
-	 * @param option
+	 *
+	 * @param entityId 实体编号
+	 * @param option   操作
 	 * @return
 	 */
 	@RequestMapping("share")
@@ -371,14 +391,15 @@ public class CsqUserController {
 
 	/**
 	 * 平台托管消费行为的记录
-	 * @param fromId
-	 * @param fromType
-	 * @param amount
-	 * @param wholeDescription
+	 *
+	 * @param fromId           来源编号
+	 * @param fromType         来源类型
+	 * @param amount           金额
+	 * @param wholeDescription 完整描述
 	 * @return
 	 */
 	@RequestMapping("recordConsumption")
-	public AjaxResult recordForConsumption(Long fromId,  Integer fromType, Double amount, String wholeDescription) {
+	public AjaxResult recordForConsumption(Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
@@ -12,8 +13,11 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat.WeChatPay;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +60,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Autowired
 	private CsqMsgDao csqMsgDao;
+
+	@Autowired
+	@Qualifier("csqRedisTemplate")
+	HashOperations<String, String, Object> userRedisTemplate;
 
 	@Override
 	public Object preFundOrder(Long userId, Double amount) {	//发起支付后的业务流程
@@ -113,7 +121,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 					.orderNo(orderNo)
 					.fromId(userId)
 					.fromType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())
-					.toId(entityId == null? csqfund.getId(): entityId)
+					.toId(entityId == null? csqFund.getId(): entityId)
 					.toType(entityType)
 					.price(fee)
 					.status(CsqOrderEnum.STATUS_UNPAY.getCode())
@@ -164,6 +172,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	@Override
 	public void preRefund(Long userId, String orderNo, HttpServletRequest request) throws Exception {
 		TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);
+		if(tCsqOrder == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的订单号!");
+		}
 		log.info("发起退款, tcsqOrder={}", tCsqOrder.toString());
 		checkBeforeRefund(userId, tCsqOrder);
 		//TODO 向微信发起退款请求
@@ -594,6 +605,30 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		csqService.setSumTotalIn(csqService.getSumTotalIn() + amount);	//累积收到金额
 		csqService.setExpectedRemainAmount(remain < 0 ? 0:remain);	//剩余期望金额
 		csqServiceDao.update(csqService);
+
+		//向缓存更新最新的捐助播报信息
+		flushRedisDonate(userId, serviceId, amount);
+	}
+
+	private void flushRedisDonate(Long userId, Long serviceId, Double amount) {
+		//往"捐助播报"的缓存中添加记录,key: csqServiceId, value: TCsqService
+		//构建一个DonateVo
+		int maximum = 20;
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		CsqDonateRecordVo vo = CsqDonateRecordVo.builder().donateAmount(amount)
+			.userHeadPortraitPath(csqUser.getUserHeadPortraitPath())
+			.name(csqUser.getName())
+			.createTime(System.currentTimeMillis()).build();
+
+		Object exist = userRedisTemplate.get(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), serviceId.toString());
+		LimitQueue<CsqDonateRecordVo> donateQueue = new LimitQueue<>(maximum);
+		if(exist == null) {
+			donateQueue = new LimitQueue<>(maximum);	//创建带上限的队列
+		} else {
+			donateQueue = (LimitQueue<CsqDonateRecordVo>) exist;
+		}
+		donateQueue.offer(vo);
+		userRedisTemplate.put(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), serviceId.toString(), donateQueue);
 	}
 
 	@Override

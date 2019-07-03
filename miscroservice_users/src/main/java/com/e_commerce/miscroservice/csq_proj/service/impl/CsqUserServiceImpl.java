@@ -301,6 +301,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.collect(Collectors.toList());
 		int continueDayCnt = DateUtil.getContinueDayCnt(createTimeList);
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
+		if(csqService == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前没有可以推荐的项目");
+		}
 		CsqDailyDonateVo csqDailyDonateVo = csqService.copyCsqDailyDonateVo();
 		csqDailyDonateVo.setDayCnt(continueDayCnt);
 		//今日已筹金额、捐款人数

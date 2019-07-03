@@ -35,6 +35,12 @@ public class CsqPayController {
 
 	/**
 	 * 微信支付(发起)
+	 * @param orderNo 订单号
+	 * @param entityId 被充值对象编号
+	 * @param entityType 被充值对象类型
+	 * @param fee 费用
+	 * @param name 基金名
+	 * @param trendPubKeys 趋向
 	 * @return
 	 */
 	@Consume(TCsqFund.class)
@@ -90,6 +96,7 @@ public class CsqPayController {
 
 	/**
 	 * 微信退款发起
+	 * @param orderNo 订单号
 	 * @return
 	 */
 	@RequestMapping("refund/pre")
@@ -114,7 +121,6 @@ public class CsqPayController {
 
 	/**
 	 * 微信回调函数 - 退款
-	 * @param request
 	 * @return
 	 */
 	@RequestMapping("wxNotify/refund")
@@ -137,10 +143,10 @@ public class CsqPayController {
 
 	/**
 	 * 平台内充值/捐助
-	 * @param fromType
-	 * @param toType
-	 * @param toId
-	 * @param amount
+	 * @param fromType 来源类型
+	 * @param toType 去向类型
+	 * @param toId 去向编号
+	 * @param amount 金额
 	 * @return
 	 */
 	@RequestMapping("pay/inner")

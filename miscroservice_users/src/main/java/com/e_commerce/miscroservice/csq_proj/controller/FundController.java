@@ -57,9 +57,9 @@ public class FundController {
 
 	/**
 	 * 申请基金
-	 * @param amount
-	 * @param orderNo
-	 * @param publishId
+	 * @param amount 金额
+	 * @param orderNo 订单号
+	 * @param publishId 标签对应publishId
 	 * @return
 	 */
 	@RequestMapping("apply/do")
@@ -88,17 +88,17 @@ public class FundController {
 
 	/**
 	 * 修改基金
-	 * @param id
-	 * @param trendPubKeys
-	 * @param name
-	 * @param description
-	 * @param coverPic
-	 * @param orgName
-	 * @param orgAddr
-	 * @param contact
-	 * @param personInCharge
-	 * @param creditCardName
-	 * @param creditCardId
+	 * @param id 基金编号
+	 * @param trendPubKeys 趋势pubKeys
+	 * @param name 名
+	 * @param description 描述
+	 * @param coverPic 封面图
+	 * @param orgName 组织名
+	 * @param orgAddr 组织地址
+	 * @param contact 联系方式
+	 * @param personInCharge 负责人
+	 * @param creditCardName 银行名
+	 * @param creditCardId	银行卡号
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -129,7 +129,8 @@ public class FundController {
 
 	/**
 	 * 审核 - 基金公开
-	 * @param fundId
+	 * @param fundId 基金编号
+	 * @param option 操作
 	 * @return
 	 */
 	@RequestMapping("cert")
@@ -154,7 +155,7 @@ public class FundController {
 
 	/**
 	 * 基金详情
-	 * @param fundId
+	 * @param fundId 基金编号
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -180,7 +181,7 @@ public class FundController {
 
 	/**
 	 * 分享基金
-	 * @param fundId
+	 * @param fundId 基金编号
 	 * @return
 	 */
 	@RequestMapping("share")
@@ -205,9 +206,9 @@ public class FundController {
 
 	/**
 	 * 基金列表
-	 * @param pageNum
-	 * @param pageSize
-	 * @param option
+	 * @param pageNum 页码
+	 * @param pageSize 分页大小
+	 * @param option 操作
 	 * @return
 	 */
 	@RequestMapping("list")

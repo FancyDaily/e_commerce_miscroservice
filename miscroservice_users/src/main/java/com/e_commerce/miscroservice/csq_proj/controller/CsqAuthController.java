@@ -8,7 +8,6 @@ import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
-import com.e_commerce.miscroservice.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +17,7 @@ import java.util.Map;
 
 /**
  * 从善桥实名认证Controller
+ *
  * @Author: FangyiXu
  * @Date: 2019-06-11 15:33
  */
@@ -31,10 +31,13 @@ public class CsqAuthController {
 
 	/**
 	 * 实名认证 - 个人
-	 * @param name
-	 * @param cardId
-	 * @param phone
-	 * @param smsCode
+	 *
+	 * @param name    名字
+	 * @param cardId  身份证
+	 * @param phone   手机号
+	 * @param smsCode 验证码
+	 *                <p>
+	 *                {"success":false,"errorCode":"","msg":"您已经实名过，无需重复实名!","data":""}
 	 * @return
 	 */
 	@Consume(TCsqUserAuth.class)
@@ -62,12 +65,15 @@ public class CsqAuthController {
 
 	/**
 	 * 组织注册与实名提交
-	 * @param telephone
-	 * @param password
-	 * @param validCode
-	 * @param name
-	 * @param licenseId
-	 * @param licensePic
+	 *
+	 * @param telephone  手机号
+	 * @param password   密码
+	 * @param validCode  验证码
+	 * @param name       名字
+	 * @param licenseId  营业执照
+	 * @param licensePic 营业执照图片
+	 *                   <p>
+	 *                   {"success":false,"errorCode":"","msg":"短信验证码已过期！","data":""}
 	 * @return
 	 */
 	@Consume(TCsqUserAuth.class)
@@ -98,8 +104,11 @@ public class CsqAuthController {
 
 	/**
 	 * 组织实名认证审核
-	 * @param userAuthId
-	 * @param option
+	 *
+	 * @param userAuthId 认证记录编号
+	 * @param option     操作
+	 *                   <p>
+	 *                   {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("corp/do")
@@ -123,8 +132,11 @@ public class CsqAuthController {
 
 	/**
 	 * 个人实名认证审核
-	 * @param userAuthId
-	 * @param option
+	 *
+	 * @param userAuthId 认证记录编号
+	 * @param option     操作
+	 *                   <p>
+	 *                   {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("person/do")
@@ -147,6 +159,9 @@ public class CsqAuthController {
 
 	/**
 	 * 实名状态校验
+	 * <p>
+	 * {"success":true,"errorCode":"","msg":"","data":""}
+	 *
 	 * @return
 	 */
 	@RequestMapping("check")

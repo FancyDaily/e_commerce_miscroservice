@@ -34,6 +34,14 @@ public class CsqServiceController {
 
 	/**
 	 * 检查发布权限
+	 * <p>
+	 * {
+	 * "success": false,
+	 * "errorCode": "",
+	 * "msg": "非机构账户不能发布项目",
+	 * "data": ""
+	 * }
+	 *
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
@@ -58,7 +66,11 @@ public class CsqServiceController {
 
 	/**
 	 * 发布项目
-	 * @param description
+	 *
+	 * @param description 描述
+	 * @param name        名字
+	 *                    <p>
+	 *                    {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("publish")
@@ -85,7 +97,11 @@ public class CsqServiceController {
 
 	/**
 	 * 项目列表
+	 *
 	 * @param option 选项
+	 *               <p>
+	 *               <p>
+	 *               {"success":true,"errorCode":"","msg":"","data":{"resultList":[{"id":2,"userId":1292,"fundId":"","donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":"","type":0,"typePubKeys":"","name":"发布一个项目","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"你认真的样子好像天桥底下贴膜的","detailPic":"","beneficiary":"","creditCard":""},{"id":14,"userId":1292,"fundId":"","donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":"","type":0,"typePubKeys":"","name":"测试标题","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"测试发布项目","detailPic":"","beneficiary":"","creditCard":""},{"id":4,"userId":1292,"fundId":1,"donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":0,"type":0,"typePubKeys":"","name":"张三要上树","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"","detailPic":"","beneficiary":"","creditCard":""}],"totalCount":3}}
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -111,7 +127,10 @@ public class CsqServiceController {
 
 	/**
 	 * 项目详情
-	 * @param serviceId
+	 *
+	 * @param serviceId 项目编号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":{"csqService":{"id":2,"userId":1292,"fundId":"","donaterCnt":"","donaters":[],"sumTotalOut":0.0,"trendPubValues":"","csqUserPaymentRecords":[],"reports":[],"fundStatus":"","type":0,"typePubKeys":"","name":"发布一个项目","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"你认真的样子好像天桥底下贴膜的","detailPic":"","beneficiary":"","creditCard":""},"broadCast":[],"isMine":false,"isFund":false}}
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -137,7 +156,10 @@ public class CsqServiceController {
 
 	/**
 	 * 项目审核
-	 * @param serviceId
+	 *
+	 * @param serviceId 项目编号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("cert")
@@ -162,7 +184,10 @@ public class CsqServiceController {
 
 	/**
 	 * 项目支出明细
-	 * @param serviceId
+	 *
+	 * @param serviceId 项目编号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":{"resultList":[],"totalCount":0}}
 	 * @return
 	 */
 	@RequestMapping("bill/out")
@@ -188,10 +213,13 @@ public class CsqServiceController {
 
 	/**
 	 * 发布项目汇报
-	 * @param serviceId
-	 * @param title
-	 * @param content
-	 * @param pic
+	 *
+	 * @param serviceId 项目编号
+	 * @param title     标题
+	 * @param content   内容
+	 * @param pic       图片
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@Consume(TCsqServiceReport.class)
@@ -218,7 +246,8 @@ public class CsqServiceController {
 
 	/**
 	 * 捐助成功(后续支付完成统一加入到回调函数中
-	 * @param orderNo
+	 *
+	 * @param orderNo 订单号
 	 * @return
 	 */
 	@RequestMapping("donate")
