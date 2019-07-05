@@ -1,7 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public interface CsqPaymentService {
 	 * @param userId
 	 * @return
 	 */
-	QueryResult<TCsqUserPaymentRecord > findWaters(Integer pageNum, Integer pageSize, Long userId);
+	QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId);
 
 	/**
 	 * 查询我的证书

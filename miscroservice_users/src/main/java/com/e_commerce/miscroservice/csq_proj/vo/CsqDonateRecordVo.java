@@ -7,7 +7,7 @@ import lombok.Data;
  * @Author: FangyiXu
  * @Date: 2019-06-21 15:28
  */
-@Data
+@Data(matchSuffix = true)
 @Builder
 public class CsqDonateRecordVo {
 

@@ -7,7 +7,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
@@ -74,14 +75,15 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("publish")
-	@Consume(TCsqService.class)
+	@Consume(CsqServiceListVo.class)
 	public AjaxResult publishService(String description, String name) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
-		TCsqService service = (TCsqService) ConsumeHelper.getObj();
+		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
+		TCsqService csqService = vo.copyTCsqService();
 		try {
 			log.info("发布项目, description={}, name={}", description, name);
-			csqServiceService.publish(userId, service);
+			csqServiceService.publish(userId, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目", e.getMessage());
@@ -98,10 +100,46 @@ public class CsqServiceController {
 	/**
 	 * 项目列表
 	 *
-	 * @param option 选项
-	 *               <p>
-	 *               <p>
-	 *               {"success":true,"errorCode":"","msg":"","data":{"resultList":[{"id":2,"userId":1292,"fundId":"","donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":"","type":0,"typePubKeys":"","name":"发布一个项目","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"你认真的样子好像天桥底下贴膜的","detailPic":"","beneficiary":"","creditCard":""},{"id":14,"userId":1292,"fundId":"","donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":"","type":0,"typePubKeys":"","name":"测试标题","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"测试发布项目","detailPic":"","beneficiary":"","creditCard":""},{"id":4,"userId":1292,"fundId":1,"donaterCnt":"","donaters":"","sumTotalOut":"","trendPubValues":"","csqUserPaymentRecords":"","reports":"","fundStatus":0,"type":0,"typePubKeys":"","name":"张三要上树","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"","detailPic":"","beneficiary":"","creditCard":""}],"totalCount":3}}
+	 * @param option   操作
+	 * @param pageNum  页码
+	 * @param pageSize 大小
+	 *                 <p>
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
+	 *                 "id":20,
+	 *                 "userId":2000,
+	 *                 "fundId":"",
+	 *                 "sumTotalPayMine":0,
+	 *                 "donaterCnt":"",
+	 *                 "donaters":"",
+	 *                 "sumTotalOut":"",
+	 *                 "trendPubValues":"",
+	 *                 "csqUserPaymentRecordVos":"",
+	 *                 "csqServiceReportVos":"",
+	 *                 "fundStatus":"",
+	 *                 "type":0,
+	 *                 "typePubKeys":"",
+	 *                 "name":"这是项目的名字",
+	 *                 "recordId":"",
+	 *                 "status":0,
+	 *                 "purpose":"",
+	 *                 "sumTotalIn":0,
+	 *                 "totalInCnt":0,
+	 *                 "surplusAmount":0,
+	 *                 "expectedAmount":0,
+	 *                 "expectedRemainAmount":0,
+	 *                 "startDate":"",
+	 *                 "endDate":"",
+	 *                 "coverPic":"",
+	 *                 "description":"这是一段详细描述",
+	 *                 "detailPic":"",
+	 *                 "beneficiary":"",
+	 *                 "creditCard":""
+	 *                 }
+	 *                 ],
+	 *                 "totalCount":4
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -110,7 +148,7 @@ public class CsqServiceController {
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("项目列表, option={}, pageNum={}, pageSize={}", option, pageNum, pageSize);
-			QueryResult<CsqServiceVo> list = csqServiceService.list(userId, option, pageNum, pageSize);
+			QueryResult<CsqServiceListVo> list = csqServiceService.list(userId, option, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -130,7 +168,50 @@ public class CsqServiceController {
 	 *
 	 * @param serviceId 项目编号
 	 *                  <p>
-	 *                  {"success":true,"errorCode":"","msg":"","data":{"csqService":{"id":2,"userId":1292,"fundId":"","donaterCnt":"","donaters":[],"sumTotalOut":0.0,"trendPubValues":"","csqUserPaymentRecords":[],"reports":[],"fundStatus":"","type":0,"typePubKeys":"","name":"发布一个项目","recordId":"","status":0,"purpose":"","sumTotalIn":0.0,"totalInCnt":0,"surplusAmount":0.0,"expectedAmount":0.0,"expectedRemainAmount":0.0,"startDate":"","endDate":"","coverPic":"","description":"你认真的样子好像天桥底下贴膜的","detailPic":"","beneficiary":"","creditCard":""},"broadCast":[],"isMine":false,"isFund":false}}
+	 * {
+	 *         "csqService":{
+	 *             "id":20,
+	 *             "userId":2000,
+	 *             "fundId":"",
+	 *             "sumTotalPayMine":"",
+	 *             "donaterCnt":"",
+	 *             "trendPubValues":"",
+	 *             "fundStatus":"",
+	 *             "type":0,
+	 *             "typePubKeys":"",
+	 *             "name":"这是项目的名字",
+	 *             "recordId":"",
+	 *             "status":0,
+	 *             "purpose":"",
+	 *             "sumTotalIn":0,
+	 *             "totalInCnt":0,
+	 *             "surplusAmount":0,
+	 *             "expectedAmount":0,
+	 *             "expectedRemainAmount":0,
+	 *             "startDate":"",
+	 *             "endDate":"",
+	 *             "coverPic":"",
+	 *             "description":"这是一段详细描述",
+	 *             "donaters":[
+	 *
+	 *             ],
+	 *             "sumTotalOut":0,
+	 *             "csqUserPaymentRecordVos":[
+	 *
+	 *             ],
+	 *             "csqServiceReportVos":[
+	 *
+	 *             ],
+	 *             "detailPic":"",
+	 *             "beneficiary":"",
+	 *             "creditCard":""
+	 *         },
+	 *         "broadCast":[
+	 *
+	 *         ],
+	 *         "isMine":true,
+	 *         "isFund":false
+	 *     }
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -186,6 +267,8 @@ public class CsqServiceController {
 	 * 项目支出明细
 	 *
 	 * @param serviceId 项目编号
+	 * @param pageNum   页码
+	 * @param pageSize  大小
 	 *                  <p>
 	 *                  {"success":true,"errorCode":"","msg":"","data":{"resultList":[],"totalCount":0}}
 	 * @return
@@ -214,23 +297,24 @@ public class CsqServiceController {
 	/**
 	 * 发布项目汇报
 	 *
-	 * @param serviceId 项目编号
-	 * @param title     标题
-	 * @param content   内容
-	 * @param pic       图片
-	 *                  <p>
-	 *                  {"success":true,"errorCode":"","msg":"","data":""}
+	 * @param serviceId   项目编号
+	 * @param title       标题
+	 * @param description 内容
+	 * @param pic         图片
+	 *                    <p>
+	 *                    {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@Consume(TCsqServiceReport.class)
+	@Consume(CsqServiceReportVo.class)
 	@RequestMapping("report/submit")
-	public AjaxResult reportSubmit(Long serviceId, String title, String content, String pic) {
+	public AjaxResult reportSubmit(Long serviceId, String title, String description, String pic) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
-		TCsqServiceReport serviceReport = (TCsqServiceReport) ConsumeHelper.getObj();
+		CsqServiceReportVo vo = (CsqServiceReportVo) ConsumeHelper.getObj();
+		TCsqServiceReport tCsqServiceReport = vo.copyTCsqServiceReport();
 		try {
-			log.info("发布项目汇报, serviceId={}, title={}, content={}, pic={}", serviceId, title, content, pic);
-			csqServiceService.submitReport(userId, serviceId, serviceReport);
+			log.info("发布项目汇报, serviceId={}, title={}, content={}, pic={}", serviceId, title, description, pic);
+			csqServiceService.submitReport(userId, serviceId, tCsqServiceReport);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目汇报", e.getMessage());

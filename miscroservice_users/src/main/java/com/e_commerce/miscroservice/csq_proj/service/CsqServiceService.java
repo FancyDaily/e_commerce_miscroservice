@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
@@ -29,7 +29,7 @@ public interface CsqServiceService {
 	 * @param pageSizez
 	 * @return
 	 */
-	QueryResult<CsqServiceVo> list(Long userId, Integer option, Integer pageNum, Integer pageSizez);
+	QueryResult<CsqServiceListVo> list(Long userId, Integer option, Integer pageNum, Integer pageSizez);
 
 	/**
 	 * 项目详情

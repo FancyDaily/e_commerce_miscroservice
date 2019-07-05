@@ -1,22 +1,16 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
-import lombok.Builder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 import lombok.Data;
 
 /**
- * 项目汇报
  * @Author: FangyiXu
- * @Date: 2019-06-10 10:02
+ * @Date: 2019-07-05 10:34
  */
-@Table(commit = "从善桥项目汇报表")
-@Data
-@Builder
-public class TCsqServiceReport extends BaseEntity {
-
+@Data(matchSuffix = true)
+public class CsqServiceReportVo {
 	@Id
 	private Long id;
 
@@ -31,8 +25,7 @@ public class TCsqServiceReport extends BaseEntity {
 	@Column(commit = "图片")
 	private String pic;
 
-	public CsqServiceReportVo copyCsqServiceReportVo() {
+	public TCsqServiceReport copyTCsqServiceReport() {
 		return null;
 	}
-
 }

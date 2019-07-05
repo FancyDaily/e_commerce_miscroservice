@@ -13,7 +13,7 @@ import lombok.Data;
  * @Date: 2019-06-12 10:14
  */
 @Table(commit = "从善桥用户表")
-@Data
+@Data(matchSuffix = true)
 @Builder
 public class TCsqUser extends BaseEntity{
 	@Id

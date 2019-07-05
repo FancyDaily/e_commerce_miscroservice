@@ -64,7 +64,21 @@ public class CsqCollectionController {
 	 * @param pageNum  页码
 	 * @param pageSize 大小
 	 *                 <p>
-	 *                 {"success":true,"errorCode":"","msg":"","data":{"resultList":[{"purpose":"","name":"发布一个项目","detailPic":"","desc":"你认真的样子好像天桥底下贴膜的","recordId":"","serviceId":2,"sumTotalIn":0.0,"surplusAmount":0.0}],"totalCount":1}}
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
+	 *                 "purpose":"", //项目内容
+	 *                 "name":"发布一个项目",	//项目名
+	 *                 "detailPic":"",	//描述图
+	 *                 "desc":"你认真的样子好像天桥底下贴膜的",	//项目描述
+	 *                 "recordId":"",	//备案id
+	 *                 "serviceId":2,	//项目id
+	 *                 "sumTotalIn":0,	//累积筹到金额
+	 *                 "surplusAmount":0	//剩余金额
+	 *                 }
+	 *                 ],
+	 *                 "totalCount":1
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("list/auth")

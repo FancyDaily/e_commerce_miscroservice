@@ -11,8 +11,8 @@ import lombok.Data;
  * @Author: FangyiXu
  * @Date: 2019-06-27 17:25
  */
-@Data
-public class CsqUserPaymentRecordVo {
+@Data(matchSuffix = true)
+public class CsqUserPaymentRecordVo extends CsqBasicUserVo {
 	@Id
 	private Long id;
 
@@ -23,9 +23,6 @@ public class CsqUserPaymentRecordVo {
 	private Long entityId;	//支出或收入的实体Id
 
 	private Integer entityType;	//支出或收入的实体类型
-
-	@Transient
-	private TCsqUser user;
 
 	@Transient
 	private String serviceName;

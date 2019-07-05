@@ -1,25 +1,16 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
-import lombok.Builder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import lombok.Data;
 
-import java.sql.Timestamp;
-
 /**
- * 实名认证(个人、机构)
  * @Author: FangyiXu
- * @Date: 2019-06-10 09:42
+ * @Date: 2019-07-05 09:21
  */
-@Table(commit = "从善桥认证表")
-@Data
-@Builder
-public class TCsqUserAuth extends BaseEntity {
-
+@Data(matchSuffix = true)
+public class CsqUserAuthVo {
 	@Id
 	private Long id;
 
@@ -46,7 +37,7 @@ public class TCsqUserAuth extends BaseEntity {
 	@Column(commit = "状态", length = 11, defaultVal = "0")
 	private Integer status;
 
-	public CsqUserAuthVo copyCsqUserAuthVo() {
+	public TCsqUserAuth copyTCsqUserAuth() {
 		return null;
 	}
 

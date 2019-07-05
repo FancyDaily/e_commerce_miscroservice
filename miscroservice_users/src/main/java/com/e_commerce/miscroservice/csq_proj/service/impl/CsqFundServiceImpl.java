@@ -257,6 +257,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Override
 	public QueryResult<CsqFundVo> list(Long userId, Integer pageNum, Integer pageSize, Integer[] option) {
+		pageNum = pageNum==null? 1:pageNum;
+		pageSize = pageSize==null? 0:pageSize;
 		Page<Object> startPage = startPage(pageNum, pageSize);
 		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDesc(userId, option);
 		List<CsqFundVo> copyList = tCsqFunds.stream()

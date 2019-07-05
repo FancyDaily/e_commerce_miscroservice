@@ -6,7 +6,6 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Applicat
 @Start
 public class UserStartMain {
 
-
 	public static void main(String[] args) {
 		ApplicationContextUtil.run(UserStartMain.class, Boolean.TRUE,"com.e_commerce.miscroservice.csq_proj", args);
 	}

@@ -52,11 +52,12 @@ public class CsqFunDaoImpl implements CsqFundDao {
 
 	@Override
 	public List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option) {
-		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqFund.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqFund::getUserId, userId)
-			.in(TCsqFund::getStatus, option)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime)));
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime));
+		mybatisPlusBuild = option.length > 1? mybatisPlusBuild.in(TCsqFund::getStatus, option): mybatisPlusBuild;
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), mybatisPlusBuild);
 	}
 
 	@Override

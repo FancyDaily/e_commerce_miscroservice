@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPaymentDao;
@@ -13,6 +14,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -49,38 +52,56 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 
 	@Override
-	public QueryResult<TCsqUserPaymentRecord >  findWaters(Integer pageNum, Integer pageSize, Long userId) {
-		QueryResult<TCsqUserPaymentRecord> queryResult = new QueryResult<TCsqUserPaymentRecord>();
+	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId) {
+		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
 
-		Page<Object> page = PageHelper.startPage(pageNum,pageSize);
+		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserPaymentRecord> records = csqPaymentDao.findWaters(userId);
+		List<CsqUserPaymentRecordVo> recordVos = records.stream()
+			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
 
-		queryResult.setResultList(records);
+		queryResult.setResultList(recordVos);
 		queryResult.setTotalCount(page.getTotal());
 		return queryResult;
 	}
 
 	@Override
-	public Map<String,Object>  findMyCertificate(Long recordId, Long userId) {
-		Map<String,Object> map = new HashMap<>();
+	public Map<String, Object> findMyCertificate(Long recordId, Long userId) {
+		Map<String, Object> map = new HashMap<>();
 		TCsqUserPaymentRecord record = csqPaymentDao.findWaterById(recordId);
-		Double accountMoney = csqPaymentDao.countMoney(userId,1);
-		if (record!=null){
-			map.put("serviceName",record.getServiceName());
-			map.put("name",record.getUser().getName());
-			map.put("money",record.getMoney());
-			map.put("countMoney",accountMoney);
+		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
+		if (record != null) {
+			Long entityId = record.getEntityId();
+			Integer entityType = record.getEntityType();
+			//获取serviceName
+			TCsqService csqService = null;
+			if (CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
+				csqService = csqServiceDao.selectByFundId(entityId);
+
+			} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {
+				csqService = csqServiceDao.selectByPrimaryKey(entityId);
+			}
+			String serviceName = csqService==null? null:csqService.getName();
+
+			//获取name
+			TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+			map.put("serviceName", serviceName);
+			map.put("name", csqUser.getName());
+			map.put("money", record.getMoney());
+			map.put("countMoney", accountMoney);
 			// TODO: 2019-06-20  二维码生成
-			map.put("code",wechatService.genQRCode(String.valueOf(record.getId()),"跳转连接地址"));
-			map.put("time",DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
-			map.put("date",DateUtil.timeStamp2Date(record.getCreateTime().getTime(),"yyyy-MM-dd"));
+			//page
+			String page = "/index/fxxk";
+			map.put("code", wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE));
+			map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
+			map.put("date", DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd"));
 		}
 		return map;
 	}
 
 	@Override
 	public Double countMoney(Long userId, Integer inOut) {
-		return csqPaymentDao.countMoney(userId,inOut);
+		return csqPaymentDao.countMoney(userId, inOut);
 	}
 
 
@@ -109,7 +130,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	private Long getBeneficiaryId(Integer toType, Long toId) {
 		Long resultId = null;
-		switch (CsqEntityTypeEnum.getEnum(toType)) {	//获取到相应枚举类型
+		switch (CsqEntityTypeEnum.getEnum(toType)) {    //获取到相应枚举类型
 			case TYPE_ACCOUNT:
 				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(toId);
 				resultId = csqUser.getId();

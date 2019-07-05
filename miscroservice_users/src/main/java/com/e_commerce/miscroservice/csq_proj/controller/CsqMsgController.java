@@ -34,7 +34,23 @@ public class CsqMsgController {
 	 * @param pageNum  页码
 	 * @param pageSize 大小
 	 *                 <p>
-	 *                 {"success":true,"errorCode":"","msg":"","data":{"resultList":[{"id":5,"userId":2001,"dateString":"2019/07/03","csqService":"","title":"","content":"","serviceId":"","type":0,"isRead":0}],"totalCount":1}}
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
+	 *                 "id":8,
+	 *                 "userId":2000,
+	 *                 "dateString":"2019/07/03",
+	 *                 "serviceId":14, //项目编号
+	 *                 "name":"测试标题",		//项目名
+	 *                 "description":"测试发布项目",	//项目描述
+	 *                 "coverPic":"",	//封面图
+	 *                 "sumTotalIn":0,	//总计捐入
+	 *                 "title":"您被警方正式通缉",	//消息标题
+	 *                 "content":"您因为太过mean而被警方通报",	//消息内容
+	 *                 "type":2,	//消息类型
+	 *                 "isRead":1	//是否已读
+	 *                 }
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -65,7 +81,7 @@ public class CsqMsgController {
 	 * "success": true,
 	 * "errorCode": "",
 	 * "msg": "",
-	 * "data": 1
+	 * "data": 1	//数量
 	 * }
 	 *
 	 * @return
@@ -140,15 +156,16 @@ public class CsqMsgController {
 	 *                  }
 	 * @return
 	 */
-	@Consume(TCsqSysMsg.class)
+	@Consume(CsqSysMsgVo.class)
 	@RequestMapping("insert")
 	public AjaxResult insert(Long userId, String title, String content, Long serviceId, Integer type) {
 		AjaxResult result = new AjaxResult();
 		Long operatorId = UserUtil.getTestId();
-		TCsqSysMsg csqSysMsg = (TCsqSysMsg) ConsumeHelper.getObj();
+		CsqSysMsgVo vo = (CsqSysMsgVo) ConsumeHelper.getObj();
+		TCsqSysMsg tCsqSysMsg = vo.copyTCsqSysMsg();
 		try {
 			log.info("手动推送系统消息, userId={}, title={}. content={}, serviceId={}, type={}", userId, title, content, serviceId, type);
-			csqMsgService.insert(userId, csqSysMsg);
+			csqMsgService.insert(userId, tCsqSysMsg);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "手动推送系统消息", e.getMessage());

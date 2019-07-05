@@ -692,7 +692,7 @@ public class OrderRelationController extends BaseController {
      *                   ]
      * @return
      */
-    @PostMapping("reports/" + TokenUtil.AUTH_SUFFIX)
+    @PostMapping("csqServiceReportVos/" + TokenUtil.AUTH_SUFFIX)
     public Object reportsAuth(long orderId, long labelsId, String message, String voucherUrl, String token, String userIds) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();

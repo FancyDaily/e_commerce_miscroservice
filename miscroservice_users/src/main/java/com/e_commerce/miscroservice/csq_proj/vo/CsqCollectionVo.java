@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.vo;
 
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserCollection;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.io.Serializable;
  * @Date 2019-06-16 13:15
  * @Version 1.0
  */
-@Data
+@Data(matchSuffix = true)
 public class CsqCollectionVo implements Serializable {
 	/**
 	 * 项目内容
@@ -45,4 +46,6 @@ public class CsqCollectionVo implements Serializable {
 	 * 剩余金额
 	 */
 	private Double surplusAmount;
+
+	public TCsqUserCollection copyTCsqUserCollection() {return null;}
 }

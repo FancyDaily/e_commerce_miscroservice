@@ -28,6 +28,9 @@ public class TCsqFund extends BaseEntity{
 	@Transient
 	private Integer totalToItemCnt;	//累积资助项目
 
+	@Column(commit = "平台认证基金编号")
+	private String fundNo;
+
 	@Column(commit = "关注方向(publish表对于id")
 	private String trendPubKeys;
 

@@ -65,15 +65,22 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			.collect(Collectors.groupingBy(TCsqService::getId));
 		List<CsqSysMsgVo> resultList = tCsqSysMsgs.stream()
 			.map(a -> {
+				CsqSysMsgVo csqSysMsgVo = a.copyCsqSysMsgVo();
 				String dateString = DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd");
-				a.setDateString(dateString);
+				csqSysMsgVo.setDateString(dateString);
 				List<TCsqService> csqServiceList = serviceMap.get(a.getServiceId());
 				if(csqServiceList == null) {
-					return a.copyCsqSysMsgVo();
+					return csqSysMsgVo;
 				}
+				//装载项目信息
 				TCsqService tCsqService = csqServiceList.get(0);
-				a.setCsqService(tCsqService);
-				return a.copyCsqSysMsgVo();
+//				csqSysMsgVo.setCsqService(tCsqService);
+				csqSysMsgVo.setServiceId(tCsqService.getId());
+				csqSysMsgVo.setName(tCsqService.getName());
+				csqSysMsgVo.setDescription(tCsqService.getDescription());
+				csqSysMsgVo.setCoverPic(tCsqService.getCoverPic());
+				csqSysMsgVo.setSumTotalIn(tCsqService.getSumTotalIn());
+				return csqSysMsgVo;
 			}).collect(Collectors.toList());
 
 		QueryResult<CsqSysMsgVo> queryResult = new QueryResult<>();

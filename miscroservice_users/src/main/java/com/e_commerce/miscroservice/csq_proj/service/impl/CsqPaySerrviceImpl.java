@@ -8,11 +8,13 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.AesUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat.WeChatPay;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private CsqUserDao csqUserDao;
 
 	@Autowired
+	private CsqKeyValueDao csqKeyValueDao;
+
+	@Autowired
 	private CsqServiceService csqServiceService;
 
 	@Autowired
@@ -60,6 +65,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Autowired
 	private CsqMsgDao csqMsgDao;
+
+	@Autowired
+	private CsqUserService csqUserService;
 
 	@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -403,6 +411,34 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		afterPayService(userId, fromType, fromId, toType, toId, amount);
 		afterPayFund(userId, fromType, fromId, toType, toId, amount);
 		afterFromFundToService(userId, fromType, fromId, toType, toId);
+
+		insertDailyDonateRecords(tCsqOrder);
+	}
+
+	private void insertDailyDonateRecords(TCsqOrder tCsqOrder) {
+		//判断是否为日推的项目/基金
+		Long userId = tCsqOrder.getUserId();	//注意此时若用于代捐会有问题
+		Long toId = tCsqOrder.getToId();
+		if(!csqUserService.isDailyDonateServiceId(toId)) {
+			return;
+		}
+		Integer toType = tCsqOrder.getToType();
+		int[] codeArray = {CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()};
+		//判断是否为向基金或者项目捐款( TODO 是否要排除自己发布的
+		if(!Arrays.asList(codeArray).contains(toType)) {
+			return;
+		}
+		//TODO 插入相关记录
+		//TODO 判断今天是否已经插入过
+		List<TCsqKeyValue> dailyDonateList = csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());	//最新的一条
+		if(!dailyDonateList.isEmpty() && DateUtil.isToday(dailyDonateList.get(0).getCreateTime().getTime())) {	//今天已经有一条记录
+			return;
+		}
+		TCsqKeyValue build = TCsqKeyValue.builder()
+			.mainKey(userId)
+			.type(CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode())
+			.build();
+		csqKeyValueDao.save(build);
 	}
 
 	@Override
@@ -528,6 +564,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		if(CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal() == status) {	//待激活
 			//基金开户
 			fund.setStatus(CsqFundEnum.STATUS_ACTIVATED.getVal());
+			//生成平台认证基金编号
+			String fundNo = "";	//TODO 生成
+			fund.setFundNo(fundNo);
 			//创建双生项目
 			TCsqService csqService = getFundTypeService(fundId, fund);
 			csqServiceDao.insert(csqService);

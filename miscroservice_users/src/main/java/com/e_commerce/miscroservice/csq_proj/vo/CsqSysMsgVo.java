@@ -11,7 +11,7 @@ import lombok.Data;
  * @Author: FangyiXu
  * @Date: 2019-06-27 17:21
  */
-@Data
+@Data(matchSuffix = true)
 public class CsqSysMsgVo {
 
 	@Id
@@ -22,17 +22,21 @@ public class CsqSysMsgVo {
 	@Transient
 	private String dateString;
 
-	@Transient
-	private TCsqService csqService;
+	private Long serviceId;
+
+	private String name;
+
+	private String description;
+
+	private String coverPic;
+
+	private Double sumTotalIn;
 
 	@Column(commit = "标题")
 	private String title;
 
 	@Column(commit = "内容(可能为项目编号)")
 	private String content;
-
-	@Column(commit = "项目编号")
-	private Long serviceId;
 
 	@Column(commit = "类别", length = 11, isNUll = false)
 	private Integer type;

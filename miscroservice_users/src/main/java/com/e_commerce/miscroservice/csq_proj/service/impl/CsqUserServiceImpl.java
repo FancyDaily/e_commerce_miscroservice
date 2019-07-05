@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
@@ -282,17 +283,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public CsqDailyDonateVo dailyDonateDetail(Long userId) {
-		Long serviceId = 1l;    //默认
-		//查询publish表，获取日推项目信息，没有的话从未达目标值的项目池中抓取，没有的话给默认值
-		Map publishName = csqPublishService.getPublishName(CsqPublishEnum.MAIN_KEY_DAILY_DONATE.toCode());
-		//确认今天是周几
-		long currentTimeMillis = System.currentTimeMillis();
-		Integer weekDayInt = DateUtil.getWeekDayInt(currentTimeMillis);
-		Long key = Long.valueOf(weekDayInt);
-		String serviceIdStr = (String) publishName.get(key.toString());    //获取到Id
-		if (serviceIdStr != null) {
-			serviceId = Long.valueOf(serviceIdStr);
-		}
+		Long serviceId = getDailyDonateServiceId();
 		//查keyValue表，获取连续积善天数
 		List<TCsqKeyValue> dailyDonateList = csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
 		List<Long> createTimeList = dailyDonateList.stream()
@@ -328,6 +319,26 @@ public class CsqUserServiceImpl implements CsqUserService {
 		csqDailyDonateVo.setDonateCnt(donateCnt);
 
 		return csqDailyDonateVo;
+	}
+
+	private Long getDailyDonateServiceId() {
+		Long serviceId = 1l;    //默认
+		//查询publish表，获取日推项目信息，没有的话从未达目标值的项目池中抓取，没有的话给默认值
+		Map publishName = csqPublishService.getPublishName(CsqPublishEnum.MAIN_KEY_DAILY_DONATE.toCode());
+		//确认今天是周几
+		long currentTimeMillis = System.currentTimeMillis();
+		Integer weekDayInt = DateUtil.getWeekDayInt(currentTimeMillis);
+		Long key = Long.valueOf(weekDayInt);
+		String serviceIdStr = (String) publishName.get(key.toString());    //获取到Id
+		if (serviceIdStr != null) {
+			serviceId = Long.valueOf(serviceIdStr);
+		}
+		return serviceId;
+	}
+
+	@Override
+	public boolean isDailyDonateServiceId(Long serviceId) {
+		return getDailyDonateServiceId().equals(serviceId);
 	}
 
 	@Override
@@ -567,6 +578,35 @@ public class CsqUserServiceImpl implements CsqUserService {
 		resultMap.put("user", csqUser);
 
 		return resultMap;
+	}
+
+	@Override
+	public void modify(Long userId, CsqBasicUserVo csqBasicUserVo) {
+		//修改昵称和简介
+		String name = csqBasicUserVo.getName();
+		String remarks = csqBasicUserVo.getRemarks();
+		TCsqUser build = TCsqUser.builder()
+			.id(userId)
+			.name(name)
+			.remarks(remarks)
+			.build();
+		csqUserDao.updateByPrimaryKey(build);
+	}
+
+	@Override
+	public CsqBasicUserVo infos(Long userId) {
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		CsqBasicUserVo csqBasicUserVo = csqUser.copyCsqBasicUserVo();
+		//获取实名认证的一些
+		Integer accountType = csqUser.getAccountType();
+		TCsqUserAuth userAuth = null;
+		if(CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode().equals(accountType)) {	//用户类型确认
+			userAuth = csqUserAuthDao.selectByUserIdAndTypeAndStatus(userId, CsqUserAuthEnum.TYPE_PERSON.getCode(), CsqUserAuthEnum.STATUS_CERT_PASS.getCode());
+		} else if(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
+			userAuth = csqUserAuthDao.selectByUserIdAndTypeAndStatus(userId, CsqUserAuthEnum.TYPE_CORP.getCode(), CsqUserAuthEnum.STATUS_CERT_PASS.getCode());
+		}
+		csqBasicUserVo.setCsqUserAuth(userAuth);
+		return csqBasicUserVo;
 	}
 
 	private TCsqUser register(TCsqUser csqUser) {

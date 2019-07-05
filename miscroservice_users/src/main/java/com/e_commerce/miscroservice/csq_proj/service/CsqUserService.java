@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 
 import java.util.Map;
@@ -77,6 +78,8 @@ public interface CsqUserService {
 	 */
 	CsqDailyDonateVo dailyDonateDetail(Long userId);
 
+	boolean isDailyDonateServiceId(Long serviceId);
+
 	/**
 	 * 定制日推
 	 * @param weekDayCnt
@@ -131,4 +134,18 @@ public interface CsqUserService {
 	 * @return
 	 */
 	Map<String, Object> loginBySMS(String uuid, String telephone, String validCode, Integer type);
+
+	/**
+	 * 修改个人基本信息
+	 * @param userId
+	 * @param csqBasicUserVo
+	 */
+	void modify(Long userId, CsqBasicUserVo csqBasicUserVo);
+
+	/**
+	 * 查看个人基本信息
+	 * @param userId
+	 * @return
+	 */
+	CsqBasicUserVo infos(Long userId);
 }

@@ -6,7 +6,9 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum CsqInvoiceEnum {
 	ISOUT_NOT_YET(0, "待开票"),
-	ISOUT_OUT_ALREADY(1, "已经开票")
+	ISOUT_OUT_ALREADY(1, "已经开票"),
+	TYPE_PRESON(0, "个人"),
+	TYPE_CORP(1, "企业")
 	;
 	public static final double MINIMUM_AMOUNT = 100d;
 

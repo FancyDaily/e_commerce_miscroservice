@@ -6,16 +6,12 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -28,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum.STATUS_ALREADY_PAY;
 
 /**
  * @Author: FangyiXu
@@ -103,8 +101,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	}
 
 	@Override
-	public QueryResult<CsqServiceVo> list(Long userId, Integer option, Integer pageNum, Integer pageSize) {
-		QueryResult<CsqServiceVo> result = new QueryResult<>();
+	public QueryResult<CsqServiceListVo> list(Long userId, Integer option, Integer pageNum, Integer pageSize) {
+		QueryResult<CsqServiceListVo> result = new QueryResult<>();
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
 		Integer OPTION_ALL = 0;
@@ -117,7 +115,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<TCsqService> tCsqServices;
 		if (OPTION_MINE.equals(option)) {
 			if (userId == null) {
-				QueryResult<CsqServiceVo> objectQueryResult = new QueryResult<>();
+				QueryResult<CsqServiceListVo> objectQueryResult = new QueryResult<>();
 				objectQueryResult.setResultList(new ArrayList<>());
 				//或抛出登录信号
 				return objectQueryResult;
@@ -153,7 +151,15 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<TCsqFund> csqFunds = fundIds.isEmpty()? new ArrayList<>(): csqFundDao.selectInIds(fundIds);    //得到目标基金信息
 		Map<Long, List<TCsqFund>> fundMap = csqFunds.stream()
 			.collect(Collectors.groupingBy(TCsqFund::getId));
-		List<CsqServiceVo> csqServices = tCsqServices.stream()
+
+		//获取我已捐款金额
+		List<Long> serviceIds = tCsqServices.stream()
+			.map(a -> a.getId()).collect(Collectors.toList());
+		List<TCsqOrder> csqOrders = csqOrderDao.selectByUserIdInToIdAndStatus(userId, serviceIds, STATUS_ALREADY_PAY.getCode());
+		Map<Long, List<TCsqOrder>> toIdOrderMap = csqOrders.stream()
+                           			.collect(Collectors.groupingBy(TCsqOrder::getToId));
+
+		List<CsqServiceListVo> csqServices = tCsqServices.stream()
 			.map(a -> {
 				Integer type = a.getType();
 				if (CsqServiceEnum.TYPE_FUND.getCode() == type) {
@@ -165,7 +171,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 						a = transferAttrs(a, csqFund);
 					}
 				}
-				return a.copyCsqServiceVo();
+				Long serviceId = a.getId();
+				List<TCsqOrder> tCsqOrders = toIdOrderMap.get(serviceId);
+				Double reduce = 0d;
+				if(tCsqOrders !=  null) {
+					reduce = tCsqOrders.stream()
+						.map(freddie -> freddie.getPrice())
+						.reduce(0d, Double::sum);
+				}
+				a.setSumTotalPayMine(reduce);
+				return a.copyCsqServiceListVo();
 			})
 			.collect(Collectors.toList());
 		result.setTotalCount(startPage.getTotal());
@@ -191,7 +206,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			isFund = true;
 			Long fundId = tCsqService.getFundId();
 			CsqFundVo csqFundVo = csqFundService.fundDetail(fundId);
-			resultMap.put("csqService", csqFundVo);
+			resultMap.put("serviceVo", csqFundVo);
 			//基金没有播报信息
 		} else {
 			Double sumTotalIn = tCsqService.getSumTotalIn();
@@ -206,20 +221,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			//统计捐款数，获取top10
 			Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
-			/*Map<Long, Double> reducedMap = new HashMap<>();
-			unsortedMap.entrySet().stream()
-				.forEach(a -> {
-					List<TCsqUserPaymentRecord> value = a.getValue();
-					Double reduce = value.stream().map(TCsqUserPaymentRecord::getMoney)
-						.reduce(0d, Double::sum);
-					reducedMap.put(a.getKey(), reduce);
-				});
-			Map<Long, Double> sortedMap = new LinkedHashMap<>();
-			reducedMap.entrySet().stream()
-				.sorted(Comparator.comparing(Map.Entry::getValue)).forEachOrdered(e -> sortedMap.put(e.getKey(), e.getValue()));
-			sortedMap.entrySet().stream()
-				.forEachOrdered(a -> a.getValue());*/
-
 			Map<Long, Double> donaterMoneyMap = new HashMap<>();
 			List<Long> donaterIds = new ArrayList<>();
 			List<TCsqUser> donaters;
@@ -243,36 +244,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			donaters = donaterIds.stream()
 				.map(a -> donaterMap.get(a)).collect(Collectors.toList());
 
-			/*Map<String, Object> functionMap = new HashMap<>();
-			for (Map.Entry entry : collect1.entrySet()) {
-				Long theUserId = (Long) entry.getKey();
-				List<TCsqUserPaymentRecord> value = (List<TCsqUserPaymentRecord>) entry.getValue();
-				Double totalMoney = value.stream()
-					.map(TCsqUserPaymentRecord::getMoney)
-					.reduce(0d, (a, b) -> a + b);
-				functionMap.put(theUserId.toString(), totalMoney);
-				Double max = (Double) functionMap.get("max");
-				max = max == null? 0: max;
-				if (totalMoney >= max) {
-					functionMap.put("max", totalMoney);
-					List<Long> maxer = (List<Long>) functionMap.get(totalMoney.toString());
-					if (totalMoney.equals(max)) {
-						maxer.add(theUserId);
-					} else {
-						maxer = new ArrayList<>();
-					}
-					maxer.add(theUserId);
-					functionMap.put(totalMoney.toString(), maxer);
-				}
-			}
-			Double max = (Double) functionMap.get("max");
-			List<TCsqUser> donaters = new ArrayList<>();
-			if (max != null) {
-				List<Long> maxer = (List<Long>) functionMap.get(max.toString());
-				if (maxer != null) {
-					donaters = userDao.selectInIds(maxer);
-				}
-			}*/
 			donaters = donaters.stream()
 				.map(a -> {
 					Double totalDonate = donaterMoneyMap.get(a.getId());
@@ -312,7 +283,15 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDesc(serviceId);
 			tCsqService.setReports(csqServiceReports);
 			// 若为已捐款，则还需要项目汇报信息（PC端开发时再添加）
-			resultMap.put("csqService", tCsqService.copyCsqServiceVo());
+			CsqServiceDetailVo csqServiceDetailVo = tCsqService.copyCsqServiceDetailVo();
+			List<CsqUserPaymentRecordVo> collect1 = csqUserPaymentRecords.stream()
+				.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+			csqServiceDetailVo.setCsqUserPaymentRecordVos(collect1);	//处理userpayemnt => toVo()
+
+			List<CsqServiceReportVo> collect2 = csqServiceReports.stream()
+				.map(a -> a.copyCsqServiceReportVo()).collect(Collectors.toList());
+			csqServiceDetailVo.setCsqServiceReportVos(collect2);
+			resultMap.put("serviceVo", csqServiceDetailVo);
 
 			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
 			Queue<CsqDonateRecordVo> voList;
@@ -401,7 +380,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		if (tCsqOrder == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单号错误!");
 		}
-		if (tCsqOrder.getStatus() == CsqOrderEnum.STATUS_ALREADY_PAY.getCode()) {
+		if (tCsqOrder.getStatus() == STATUS_ALREADY_PAY.getCode()) {
 			return;
 		}
 		Integer toType = tCsqOrder.getToType();
@@ -451,7 +430,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		donateQueue.offer(vo);
 		userRedisTemplate.put(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString(), donateQueue);
 
-		tCsqOrder.setStatus(CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		tCsqOrder.setStatus(STATUS_ALREADY_PAY.getCode());
 		csqOrderDao.update(tCsqOrder);
 	}
 

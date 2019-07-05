@@ -58,4 +58,21 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 		;
 
 	}
+
+	@Override
+	public TCsqUserAuth selectByUserIdAndType(Long userId, int type) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
+			.eq(TCsqUserAuth::getUserId, userId)
+			.eq(TCsqUserAuth::getType, type)
+			.eq(TCsqUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public TCsqUserAuth selectByUserIdAndTypeAndStatus(Long userId, int type, int status) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
+			.eq(TCsqUserAuth::getUserId, userId)
+			.eq(TCsqUserAuth::getType, type)
+			.eq(TCsqUserAuth::getStatus, status)
+			.eq(TCsqUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+	}
 }

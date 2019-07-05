@@ -1,13 +1,10 @@
 package com.e_commerce.miscroservice.csq_proj.po;
 
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
 import lombok.Builder;
 import lombok.Data;
-
-import java.sql.Timestamp;
 
 /**
  * 收藏
@@ -26,5 +23,8 @@ public class TCsqUserCollection extends BaseEntity {
 
 	private Long userId;
 
+	public CsqCollectionVo copyCsqCollectionVo() {
+		return null;
+	}
 
 }

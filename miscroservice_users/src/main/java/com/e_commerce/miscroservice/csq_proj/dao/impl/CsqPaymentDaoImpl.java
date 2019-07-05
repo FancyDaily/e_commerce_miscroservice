@@ -35,7 +35,7 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	public TCsqUserPaymentRecord findWaterById(Long recordId) {
 		TCsqUserPaymentRecord record = MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(),new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 		.eq(TCsqUserPaymentRecord::getId,recordId)
-		.eq(TCsqUserPaymentRecord::getId,AppConstant.IS_VALID_YES)
+		.eq(TCsqUserPaymentRecord::getIsValid,AppConstant.IS_VALID_YES)
 		);
 		return record;
 	}

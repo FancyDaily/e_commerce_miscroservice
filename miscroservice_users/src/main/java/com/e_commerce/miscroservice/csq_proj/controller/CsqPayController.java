@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,7 +44,7 @@ public class CsqPayController {
 	 * @param trendPubKeys 趋向
 	 * @return
 	 */
-	@Consume(TCsqFund.class)
+	@Consume(CsqFundVo.class)
 	@RequestMapping("preOrder")
 	public Object preOrder(String orderNo,
 						   @RequestParam(required = true) Long entityId,
@@ -54,7 +55,8 @@ public class CsqPayController {
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
-		TCsqFund csqFund = (TCsqFund) ConsumeHelper.getObj();
+		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
+		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
 			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}", orderNo, entityId, entityType, fee);
 			Map<String, String> stringStringMap = csqPayService.preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
@@ -144,6 +146,7 @@ public class CsqPayController {
 	/**
 	 * 平台内充值/捐助
 	 * @param fromType 来源类型
+	 * @param fromId 来源编号
 	 * @param toType 去向类型
 	 * @param toId 去向编号
 	 * @param amount 金额

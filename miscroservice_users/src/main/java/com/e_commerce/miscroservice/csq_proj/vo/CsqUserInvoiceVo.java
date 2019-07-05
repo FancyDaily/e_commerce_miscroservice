@@ -3,13 +3,14 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import lombok.Data;
 
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-27 18:04
  */
-@Data
+@Data(matchSuffix = true)
 public class CsqUserInvoiceVo {
 	@Id
 	private Long id;
@@ -48,4 +49,8 @@ public class CsqUserInvoiceVo {
 
 	@Column(commit = "联系方式")
 	private String telephone;
+
+	public TCsqUserInvoice copyTCsqUserInvoice() {
+		return null;
+	}
 }

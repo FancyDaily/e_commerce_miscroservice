@@ -13,7 +13,7 @@ import java.util.List;
  * @Author: FangyiXu
  * @Date: 2019-06-19 18:08
  */
-@Data
+@Data(matchSuffix = true)
 public class CsqDailyDonateVo {
 
 	private Integer dayCnt;

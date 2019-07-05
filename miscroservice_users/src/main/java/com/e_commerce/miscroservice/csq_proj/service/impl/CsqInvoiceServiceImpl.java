@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqWaitToInvoiceOrderVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
@@ -16,7 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.service.CsqInvoiceService;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceRecord;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,11 +102,11 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	}
 	
 	@Override
-	public QueryResult<CsqInvoiceVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
+	public QueryResult<CsqWaitToInvoiceOrderVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1: pageNum;
 		pageSize = pageSize==null? 0: pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		//查询所有代开票的订单,找到serivce汇总
+		//查询所有待开票的订单,找到serivce汇总
 		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> serviceIds = tCsqOrders.stream()
 			.map(TCsqOrder::getToId)
@@ -114,25 +115,21 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 
-		List<CsqInvoiceVo> reusltList = tCsqOrders.stream()
+		List<CsqWaitToInvoiceOrderVo> resultList = tCsqOrders.stream()
 			.map(a -> {
-					String orderNo = a.getOrderNo();
-					Double myAmount = a.getPrice();
+					CsqWaitToInvoiceOrderVo csqOrderVo = a.copyCsqOrderVo();    //包含了金额、orderNo
 					Long serviceId = a.getToId();
 					List<TCsqService> tCsqServices1 = collect.get(serviceId);
-					CsqInvoiceVo csqInvoiceVo = null;
 					if (tCsqServices1 != null) {
 						TCsqService csqService = tCsqServices1.get(0);
-						csqInvoiceVo = csqService.copyCsqInvoiceVo();
-						csqInvoiceVo.setMyAmount(myAmount);
-						csqInvoiceVo.setOrderNo(orderNo);
-						csqInvoiceVo.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
+						csqOrderVo.setServiceName(csqService.getName());    //项目名
+						csqOrderVo.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));    //日期
 					}
-					return csqInvoiceVo;
+					return csqOrderVo;
 				}
 			).collect(Collectors.toList());
-		QueryResult<CsqInvoiceVo> queryResult = new QueryResult<>();
-		queryResult.setResultList(reusltList);
+		QueryResult<CsqWaitToInvoiceOrderVo> queryResult = new QueryResult<>();
+		queryResult.setResultList(resultList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;
 	}
@@ -145,6 +142,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserId(userId);
 		List<CsqUserInvoiceVo> copyList = tCsqUserInvoices.stream()
 			.map(a -> {
+				String orderNos = a.getOrderNos();
+				int recordCnt = orderNos.split(",").length;
+				a.setRecordCnt(recordCnt);
 				a.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
 				return a.copyCsqUserInvoice();
 			}).collect(Collectors.toList());
@@ -162,7 +162,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	}
 
 	@Override
-	public QueryResult<CsqInvoiceVo> recordList(Long userId, Long invoiceId, Integer pageNum, Integer pageSize) {
+	public QueryResult<CsqInvoiceRecord> recordList(Long userId, Long invoiceId, Integer pageNum, Integer pageSize) {
+		pageNum = pageNum==null? 1:pageNum;
+		pageSize = pageSize==null? 0:pageSize;
 		TCsqUserInvoice tCsqUserInvoice;
 		if(invoiceId == null || (tCsqUserInvoice=csqUserInvoiceDao.selectByPrimaryKey(invoiceId)) == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的发票编号！");
@@ -181,19 +183,21 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 
-		ArrayList<CsqInvoiceVo> csqInvoiceList = new ArrayList<>();
+		ArrayList<CsqInvoiceRecord> csqInvoiceList = new ArrayList<>();
 		tCsqOrders.stream()
 			.forEach(a -> {
 				List<TCsqService> csqServices = serviceMap.get(a.getToId());
 				TCsqService csqService = csqServices.get(0);
-				CsqInvoiceVo vo = new CsqInvoiceVo();
+				CsqInvoiceRecord vo = new CsqInvoiceRecord();
+				vo.setItemId(a.getToId());
+				vo.setItemType(a.getToType());
 				vo.setOrderNo(a.getOrderNo());
 				vo.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
 				vo.setMyAmount(a.getPrice());
 				vo.setName(csqService.getName());
 				csqInvoiceList.add(vo);
 			});
-		QueryResult<CsqInvoiceVo> queryResult = new QueryResult<>();
+		QueryResult<CsqInvoiceRecord> queryResult = new QueryResult<>();
 		queryResult.setResultList(csqInvoiceList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;

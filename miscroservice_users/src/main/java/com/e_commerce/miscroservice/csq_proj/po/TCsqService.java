@@ -4,10 +4,10 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceVo;
 import lombok.Builder;
 import lombok.Data;
 
@@ -29,6 +29,9 @@ public class TCsqService extends BaseEntity {
 	private Long userId;
 
 	private Long fundId;
+
+	@Transient
+	private Double sumTotalPayMine;	//此项目我的总计捐款
 
 	@Transient
 	private Integer donaterCnt;	//捐助人数
@@ -105,15 +108,15 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "银行卡号")
 	private String creditCard;
 
-	public CsqInvoiceVo copyCsqInvoiceVo() {
-		return null;
-	}
-
 	public CsqDailyDonateVo copyCsqDailyDonateVo() {
 		return null;
 	}
 
-	public CsqServiceVo copyCsqServiceVo() {
+	public CsqServiceListVo copyCsqServiceListVo() {
+		return null;
+	}
+
+	public CsqServiceDetailVo copyCsqServiceDetailVo() {
 		return null;
 	}
 }

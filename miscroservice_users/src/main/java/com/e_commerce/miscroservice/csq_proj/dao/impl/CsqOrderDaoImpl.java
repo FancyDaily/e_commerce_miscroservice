@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
-import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
@@ -160,6 +159,23 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	@Override
 	public int insert(TCsqOrder csqOrder) {
 		return MybatisPlus.getInstance().save(csqOrder);
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdAndToTypeInToIdAndStatus(Long userId, int toType, int toIds, int Status) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, userId)
+			.eq(TCsqOrder::getToType, toType)
+			.in(TCsqOrder::getToId, toIds)
+			.eq(TCsqOrder::getStatus, Status));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdInToIdAndStatus(Long userId, List<Long> toIds, int Status) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, userId)
+			.in(TCsqOrder::getToId, toIds)
+			.eq(TCsqOrder::getStatus, Status));
 	}
 
 }

@@ -33,4 +33,9 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 			.eq(TCsqKeyValue::getType, code)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqKeyValue::getCreateTime)));
 	}
+
+	@Override
+	public int save(TCsqKeyValue... build) {
+		return MybatisPlus.getInstance().save(build);
+	}
 }

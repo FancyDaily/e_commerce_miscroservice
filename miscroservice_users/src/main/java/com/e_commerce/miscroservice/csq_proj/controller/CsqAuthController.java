@@ -8,12 +8,11 @@ import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 /**
  * 从善桥实名认证Controller
@@ -40,16 +39,17 @@ public class CsqAuthController {
 	 *                {"success":false,"errorCode":"","msg":"您已经实名过，无需重复实名!","data":""}
 	 * @return
 	 */
-	@Consume(TCsqUserAuth.class)
+	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("person/submit")
 	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
-		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
+		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
 		csqUserAuth.setUserId(userId);
+		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
 			log.info("实名认证 - 个人, name={}, cardId={}, phone={}, smsCode={}", name, cardId, phone, smsCode);
-			csqUserService.sendPersonAuth(csqUserAuth, smsCode);
+			csqUserService.sendPersonAuth(userAuth, smsCode);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "实名认证 - 个人", e.getMessage());
@@ -76,7 +76,7 @@ public class CsqAuthController {
 	 *                   {"success":false,"errorCode":"","msg":"短信验证码已过期！","data":""}
 	 * @return
 	 */
-	@Consume(TCsqUserAuth.class)
+	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("corp/submit")
 	public AjaxResult certCorpSubmit(String telephone,
 									 String password,
@@ -86,9 +86,10 @@ public class CsqAuthController {
 									 @RequestParam(required = false) String licensePic,
 									 String uuid) {
 		AjaxResult result = new AjaxResult();
-		TCsqUserAuth csqUserAuth = (TCsqUserAuth) ConsumeHelper.getObj();
+		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
+		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
-			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, csqUserAuth);
+			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织注册与实名提交", e.getMessage());

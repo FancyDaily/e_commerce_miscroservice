@@ -1,15 +1,18 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.constant.CsqWechatConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
+import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -100,6 +103,7 @@ public class CsqUserController {
 	 * @param telephone 手机号
 	 * @param validCode 验证码
 	 * @param type      类型
+	 * @param uuid      类型
 	 * @return
 	 */
 	@RequestMapping("login/sms")
@@ -313,7 +317,7 @@ public class CsqUserController {
 	 *
 	 * @return
 	 */
-	@RequestMapping("AjaxResult")
+	@RequestMapping("daily/donate/detail")
 	public AjaxResult dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -413,6 +417,59 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("平台托管消费行为的记录", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 查看基本信息
+	 * @return
+	 */
+	@RequestMapping("infos")
+	public AjaxResult infos() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("查看基本信息, userId={}, name={}, remarks={}", userId);
+			CsqBasicUserVo infos = csqUserService.infos(userId);
+			result.setData(infos);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "查看基本信息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("查看基本信息", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 修改个人基本信息
+	 * @param name 姓名
+	 * @param remarks 描述
+	 * @return
+	 */
+	@RequestMapping("modify")
+	@Consume(CsqBasicUserVo.class)
+	public AjaxResult modify(String name, String remarks) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
+		try {
+			log.info("修改个人基本信息, userId={}, name={}, remarks={}", userId, name, remarks);
+			csqUserService.modify(userId, csqBasicUserVo);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "修改个人基本信息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("修改个人基本信息", e);
 			result.setSuccess(false);
 		}
 		return result;

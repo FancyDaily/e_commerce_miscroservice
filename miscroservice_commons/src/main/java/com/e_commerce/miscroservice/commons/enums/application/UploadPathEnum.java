@@ -40,6 +40,8 @@ public class UploadPathEnum {
 
 	static private String CSQ_SAVEPATH_PERSON;
 
+	static private String CSQ_SAVEPATH_CERTIFICATE;
+
 	@Value("${savepath.service}")
 	public void setSAVEPATH_SERVICE(String sAVEPATH_SERVICE) {
 		SAVEPATH_SERVICE = sAVEPATH_SERVICE;
@@ -70,10 +72,15 @@ public class UploadPathEnum {
 		CSQ_SAVEPATH_PERSON = value;
 	}
 
+	@Value("${savepath.csq.certificate}")
+	public static void setCsqSavepathCertificate(String csqSavepathCertificate) {
+		CSQ_SAVEPATH_CERTIFICATE = csqSavepathCertificate;
+	}
+
 	public enum innerEnum {
 
 		SERVICE(1, SAVEPATH_SERVICE), IDCARD(2, SAVEPATH_IDCARD), PERSON(3, SAVEPATH_PERSON),
-		CSQ_FUND(0, CSQ_SAVEPATH_FUND), CSQ_SERVICE(1, CSQ_SAVEPATH_SERVICE), CSQ_PERSON(2, CSQ_SAVEPATH_PERSON);
+		CSQ_FUND(0, CSQ_SAVEPATH_FUND), CSQ_SERVICE(1, CSQ_SAVEPATH_SERVICE), CSQ_PERSON(2, CSQ_SAVEPATH_PERSON),CSQ_CERTIFICATE(3, CSQ_SAVEPATH_CERTIFICATE);
 
 		private int code;
 		private String path;

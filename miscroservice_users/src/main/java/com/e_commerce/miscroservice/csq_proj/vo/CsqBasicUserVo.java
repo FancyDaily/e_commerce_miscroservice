@@ -3,43 +3,48 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import lombok.Data;
 
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-26 15:36
  */
-@Data
+@Data(matchSuffix = true)
 public class CsqBasicUserVo {
 
 	@Id
-	private Long id;
+	protected Long id;
 
 	@Transient
-	private Double totalDonate;	//累积捐助(项目详情)
+	TCsqUserAuth csqUserAuth;
 
 	@Transient
-	private Integer minutesAgo;
+	protected Double totalDonate;	//累积捐助(项目详情)
+
+	@Transient
+	protected Integer minutesAgo;
 
 	@Column(commit = "账号")
-	private String userAccount;
+	protected String userAccount;
 
 	@Column(commit = "昵称")
-	private String name;
+	protected String name;
 
 	@Column(commit = "手机号")
-	private String userTel;
+	protected String userTel;
 
 	@Column(commit = "头像")
-	private String userHeadPortraitPath;
+	protected String userHeadPortraitPath;
 
 	@Column(commit = "性别", length = 11, defaultVal = "0")
-	private Integer sex;
+	protected Integer sex;
 
 	@Column(commit = "个人描述")
-	private String remarks;
+	protected String remarks;
 
-
-
-
+	public TCsqUser copyTCsqUser() {
+		return null;
+	}
 }

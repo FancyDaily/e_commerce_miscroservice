@@ -19,4 +19,8 @@ public interface CsqUserAuthDao {
 	int update(TCsqUserAuth userAuth);
 
 	List<TCsqUserAuth> selectByUserIdAndStatus(Long userId, int code);
+
+	TCsqUserAuth selectByUserIdAndType(Long userId, int type);
+
+	TCsqUserAuth selectByUserIdAndTypeAndStatus(Long userId, int code, int code1);
 }

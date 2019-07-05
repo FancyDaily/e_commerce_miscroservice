@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import lombok.Data;
 
@@ -36,28 +37,28 @@ public class CsqFundVo {
 	private Integer totalInCnt;
 
 	@Column(commit = "关注方向(publish表对于id")
-	private String trendPubKeys;
+	private String trendPubKeys;	//MARK
 
 	@Column(commit = "基金名")
-	private String name;
+	private String name;	//MARK
 
 	@Column(commit = "描述")
-	private String description;
+	private String description;	//MARK
 
 	@Column(commit = "封面图")
 	private String pic;		//TODO SIMPLIFIED FROM => coverPic
 
 	@Column(commit = "机构名称")
-	private String orgName;
+	private String orgName;	//MARK
 
 	@Column(commit = "地址")
-	private String orgAddr;
+	private String orgAddr;	//MARK
 
 	@Column(commit = "联系方式")
-	private String contact;
+	private String contact;	//MARK
 
 	@Column(commit = "负责人")
-	private String personInCharge;
+	private String personInCharge;	//MARK
 
 	@Column(commit = "银行名字")
 	private String cardName;	//TODO SIMPLIFIED FROM => creditCardName
@@ -75,6 +76,10 @@ public class CsqFundVo {
 	private Integer agentModeStatus;
 
 	@Column(commit = "状态(未激活、未公开、审核中、已公开、审核未通过)", defaultVal = "-1")
-	private Integer status;
+	private Integer status;	//MARK
+
+	public TCsqFund copyTCsqFund() {
+		return null;
+	}
 
 }
