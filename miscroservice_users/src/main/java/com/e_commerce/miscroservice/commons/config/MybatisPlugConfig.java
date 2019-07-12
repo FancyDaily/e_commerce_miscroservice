@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 public class MybatisPlugConfig {
 
     @Bean
-    public MybatisConfig createMybatisConfig() {
+    public static MybatisConfig createMybatisConfig() {
         MybatisConfig mybatisConfig = new MybatisConfig();
         mybatisConfig.setIsCamel(Boolean.TRUE);
         return mybatisConfig;

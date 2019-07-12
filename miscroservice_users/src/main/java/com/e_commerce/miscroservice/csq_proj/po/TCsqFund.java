@@ -69,7 +69,7 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
 	private Double sumTotalIn;
 
-	@Column(commit = "资金累积流入次数", precision = 11, defaultVal = "0")
+	@Column(commit = "资金累积流入次数",  defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
