@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 收藏
@@ -14,6 +15,7 @@ import lombok.Data;
 @Table(commit = "从善桥收藏表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqUserCollection extends BaseEntity {
 
 	@Id

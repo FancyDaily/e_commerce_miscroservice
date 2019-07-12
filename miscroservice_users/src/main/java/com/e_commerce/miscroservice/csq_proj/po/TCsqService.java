@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
 @Table(commit = "从善桥项目表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqService extends BaseEntity {
 
 	@Id

@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyVoucherVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 @Table(commit = "观照-代金券表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TGzVoucher implements Serializable {
     @Id
     private Long id;

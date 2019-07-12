@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -17,6 +18,7 @@ import java.sql.Timestamp;
 @Table(commit = "观照-视频表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TGzVideo {
 
 	@Id

@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 @Table(commit = "从善桥认证表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqUserAuth extends BaseEntity {
 
 	@Id

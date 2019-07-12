@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 基金账户
@@ -18,6 +19,7 @@ import lombok.Data;
 @Table(commit = "从善桥专项基金表")
 @Data(matchSuffix = true)
 @Builder
+@NoArgsConstructor
 public class TCsqFund extends BaseEntity{
 
 	@Id

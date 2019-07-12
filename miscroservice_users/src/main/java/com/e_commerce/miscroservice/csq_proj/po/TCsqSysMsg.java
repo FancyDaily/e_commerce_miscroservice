@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 系统消息
@@ -16,6 +17,7 @@ import lombok.Data;
 @Table(commit = "从善桥系统消息表")
 @Data(matchSuffix = true)
 @Builder
+@NoArgsConstructor
 public class TCsqSysMsg extends BaseEntity {
 
 	@Id

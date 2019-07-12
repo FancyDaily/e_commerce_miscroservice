@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 充值捐助流水(普通账户、基金、项目)
@@ -16,6 +17,7 @@ import lombok.Data;
 @Table(commit = "从善桥流水表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqUserPaymentRecord extends BaseEntity {
 
 	@Id

@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.vo.MyLessonVO;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
 @Table(commit = "观照-章节表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TGzLesson implements Serializable {
     @Id
     private Long id;
