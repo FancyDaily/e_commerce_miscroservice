@@ -23,7 +23,7 @@ public class GZOrderServiceImpl implements GZOrderService {
     @Autowired
     private GZOrderDao gzOrderDao;
     @Override
-    public QueryResult<TGzOrder> findMyOrderList(Integer id, Integer pageNumber, Integer pageSize) {
+    public QueryResult<TGzOrder> findMyOrderList(Long id, Integer pageNumber, Integer pageSize) {
         logger.info("我的订单列表 id={},pageNum={},pageSize={}",id,pageNumber,pageSize);
         Page<TGzOrder> page = PageHelper.startPage(pageNumber,pageSize);
         List<TGzOrder> list = gzOrderDao.findMyOrderList(id);
@@ -43,7 +43,7 @@ public class GZOrderServiceImpl implements GZOrderService {
     }
 
     @Override
-    public OrderDetailVO findOrderDetailed(String orderNo, Integer userId) {
+    public OrderDetailVO findOrderDetailed(String orderNo, Long userId) {
         logger.info("查询我的订单order={},userId={}",orderNo,userId);
         TGzOrder tGzOrder = gzOrderDao.findByOrderNo(orderNo);
         if(tGzOrder==null) {

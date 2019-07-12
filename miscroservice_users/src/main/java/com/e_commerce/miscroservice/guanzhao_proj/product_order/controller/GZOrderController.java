@@ -37,7 +37,7 @@ public class GZOrderController {
 
         AjaxResult ajaxResult = new AjaxResult();
         try {
-            Integer id = IdUtil.getId();
+            Long id = IdUtil.getId();
             QueryResult<TGzOrder> list = gzOrderService.findMyOrderList(id, pageNum, pageSize);
             ajaxResult.setData(list);
             ajaxResult.setSuccess(true);
@@ -61,7 +61,7 @@ public class GZOrderController {
     public Object findOrderDetailed(String orderNo){
         AjaxResult result = new AjaxResult();
         try {
-            Integer userId  = IdUtil.getId();
+            Long userId  = IdUtil.getId();
             OrderDetailVO tGzOrder = gzOrderService.findOrderDetailed(orderNo,userId);
             result.setData(tGzOrder);
             result.setSuccess(true);

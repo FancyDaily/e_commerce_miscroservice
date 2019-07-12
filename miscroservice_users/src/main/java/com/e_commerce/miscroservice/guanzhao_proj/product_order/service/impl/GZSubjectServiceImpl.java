@@ -276,7 +276,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     }
 
     @Override
-    public QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize) {
+    public QueryResult<MyLearningSubjectVO> findMyLearningSubject(Long id, Integer pageNum, Integer pageSize) {
         log.info("查看我的正在学习id={},pageNum={},pageSize={}",id,pageNum,pageSize);
         Page<MyLearningSubjectVO> page = PageHelper.startPage(pageNum,pageSize);
         List<MyLearningSubjectVO> list = gzSubjectDao.findMyLearningSubject(id,System.currentTimeMillis());
@@ -396,7 +396,7 @@ public class GZSubjectServiceImpl implements GZSubjectService {
     }
 
     @Override
-    public QueryResult<MyLearningSubjectVO> findEndingSubject(Integer id, Integer pageNum, Integer pageSize) {
+    public QueryResult<MyLearningSubjectVO> findEndingSubject(Long id, Integer pageNum, Integer pageSize) {
         log.info("查看我的已结束课程id={},pageNum={},pageSize={}",id,pageNum,pageSize);
 
         Page<MyLearningSubjectVO> page = PageHelper.startPage(pageNum,pageSize);

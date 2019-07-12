@@ -19,7 +19,7 @@ public interface GZSubjectDao {
      * @param currentTimeMillis
      * @return
      */
-    List<MyLearningSubjectVO> findMyLearningSubject(Integer id, long currentTimeMillis);
+    List<MyLearningSubjectVO> findMyLearningSubject(Long id, long currentTimeMillis);
 
     List<TGzSubject> selectByNameAndSeriesIndex(String name, Integer seriesIndex);
 
@@ -30,7 +30,7 @@ public interface GZSubjectDao {
      * @param id
      * @return
      */
-    List<MyLearningSubjectVO> findEndingSubject(Integer id);
+    List<MyLearningSubjectVO> findEndingSubject(Long id);
 
     /**
      * 查询课程

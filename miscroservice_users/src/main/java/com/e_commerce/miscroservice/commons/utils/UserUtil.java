@@ -67,12 +67,12 @@ public class UserUtil {
     }
 
     public static TUser getUser() {
-        Integer currentId = IdUtil.getId();
+        Long currentId = IdUtil.getId();
         TUser user = new TUser();
         if(currentId==null) {
             return null;
         }
-        user.setId(Long.valueOf(currentId));
+        user.setId(currentId);
         return user;
     }
 

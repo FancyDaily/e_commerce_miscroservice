@@ -12,7 +12,7 @@ public interface GZOrderService {
      * @param pageSize
      * @return
      */
-    QueryResult<TGzOrder> findMyOrderList(Integer id, Integer pageNumber, Integer pageSize);
+    QueryResult<TGzOrder> findMyOrderList(Long id, Integer pageNumber, Integer pageSize);
 
     /**
      * 查询我的订单
@@ -20,5 +20,5 @@ public interface GZOrderService {
      * @param userId
      * @return
      */
-    OrderDetailVO findOrderDetailed(String orderId, Integer userId);
+    OrderDetailVO findOrderDetailed(String orderId, Long userId);
 }
