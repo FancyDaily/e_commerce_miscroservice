@@ -2,12 +2,11 @@ package com.e_commerce.miscroservice.csq_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.mapper.BaseMapper;
 import lombok.Data;
 
 import java.sql.Timestamp;
 @Data
-public class BaseEntity/* extends BaseMapper*/ {
+public class BaseEntity extends com.e_commerce.miscroservice.commons.entity.application.BaseEntity {
 
 	@Column(commit = "扩展字段")
 	protected String extend;

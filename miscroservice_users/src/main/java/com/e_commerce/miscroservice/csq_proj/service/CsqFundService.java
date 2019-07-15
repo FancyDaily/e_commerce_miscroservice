@@ -48,6 +48,8 @@ public interface CsqFundService {
 	 */
 	CsqFundVo fundDetail(Long fundId);
 
+	QueryResult getGotoList(Long fundId, Integer pageNum, Integer pageSize);
+
 	/**
 	 * 基金分享
 	 * @param userId
@@ -66,4 +68,13 @@ public interface CsqFundService {
 	QueryResult<CsqFundVo> list(Long userId, Integer pageNum, Integer pageSize, Integer... option);
 
 	void insertForSomeOne(Long userId);
+
+	/**
+	 * 获取基金捐献项目列表
+	 * @param serviceId
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	QueryResult donateServiceList(Long serviceId, Integer pageNum, Integer pageSize);
 }

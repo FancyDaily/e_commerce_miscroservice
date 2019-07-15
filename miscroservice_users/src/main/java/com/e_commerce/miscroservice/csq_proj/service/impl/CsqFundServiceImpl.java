@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -19,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -199,15 +197,59 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return csqFundVo;
 		}
+		List<TCsqOrder> resultList = getGotoListNonePage(fundId, tCsqUserPaymentRecords);
+		csqFundVo.setGoToList(resultList);
+		return csqFundVo;
+	}
+
+	@Override
+	public QueryResult getGotoList(Long fundId, Integer pageNum, Integer pageSize) {
+		QueryResult result = new QueryResult();
+		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqOrder> gotoListNonePage = getGotoListNonePage(fundId, null);
+		result.setTotalCount(startPage.getTotal());
+		List<Long> serviceIds = gotoListNonePage.stream()
+			.map(TCsqOrder::getToId)
+			.distinct().collect(Collectors.toList());
+		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
+		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getId));
+
+		List<CsqFundDonateVo> csqFundDonateVos = gotoListNonePage.stream()
+			.sorted(Comparator.comparing(TCsqOrder::getCreateTime).reversed())
+			.map(a -> {
+				CsqFundDonateVo csqFundDonateVo = a.copyCsqFundDonateVo();
+				Long time = a.getCreateTime().getTime();
+				csqFundDonateVo.setYear(DateUtil.timeStamp2Date(time, "yyyy"));
+				csqFundDonateVo.setDate(DateUtil.timeStamp2Date(time, "MM/dd"));
+				Long serviceId = a.getToId();
+				List<TCsqService> tCsqServices1 = serviceMap.get(serviceId);
+				String serviceName = tCsqServices1.get(0).getName();
+				csqFundDonateVo.setName(serviceName);
+				return csqFundDonateVo;
+			}).collect(Collectors.toList());
+
+		result.setResultList(csqFundDonateVos);
+		return result;
+	}
+
+	private List<TCsqOrder> getGotoListNonePage(Long fundId, List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+		if(tCsqUserPaymentRecords==null) {
+			//根据fundId获取值
+			tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
+		}
 		List<Long> tOrderIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.collect(Collectors.toList());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		if(tCsqUserPaymentRecords.isEmpty()) {
+			return new ArrayList<>();
+		}
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
 		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
-		List<TCsqOrder> resultList = tCsqOrders.stream()
+		return tCsqOrders.stream()
 			.map(a -> {
 				a.setDate(DateUtil.timeStamp2Date(a.getUpdateTime().getTime(), "yyyy/MM/dd"));
 				List<TCsqService> tempList = collect.get(a.getId());
@@ -217,8 +259,6 @@ public class CsqFundServiceImpl implements CsqFundService {
 				}
 				return a;
 			}).collect(Collectors.toList());
-		csqFundVo.setGoToList(resultList);
-		return csqFundVo;
 	}
 
 	@Override
@@ -282,6 +322,27 @@ public class CsqFundServiceImpl implements CsqFundService {
 			.userId(userId).build();
 		int save = MybatisPlus.getInstance().save(build);
 		System.out.println(save);
+	}
+
+	@Override
+	public QueryResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
+		//根据serviceId获取fundId
+//		Long fundId = getFundId(serviceId);
+		return getGotoList(fundId, pageNum, pageSize);
+	}
+
+	private Long getFundId(Long serviceId) {
+		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
+		//check
+		if(csqService == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的项目编号:该项目不存在");
+		}
+
+		Integer type = csqService.getType();
+		if(CsqServiceEnum.TYPE_FUND.getCode() != type) {	//如果不是基金
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的项目有编号:不是基金类型!");
+		}
+		return csqService.getFundId();
 	}
 
 	private Page<Object> startPage(Integer pageNum, Integer pageSize) {

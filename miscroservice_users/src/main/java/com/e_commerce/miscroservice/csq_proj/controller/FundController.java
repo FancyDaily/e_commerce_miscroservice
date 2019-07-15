@@ -103,6 +103,8 @@ public class FundController {
 	 * @param personInCharge 负责人
 	 * @param creditCardName 银行名
 	 * @param creditCardId   银行卡号
+	 * @param status   基金状态(用于发起审核)
+	 * @param agentModeStatus 代理状态
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -110,7 +112,8 @@ public class FundController {
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 								   String description, String coverPic, String orgName, String orgAddr,
 								   String contact, String personInCharge, String creditCardName, String creditCardId,
-								   @RequestParam(required = false) Integer status) {
+								   @RequestParam(required = false) Integer status,
+								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
@@ -318,6 +321,34 @@ public class FundController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("测试用插入", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 基金捐款项目列表
+	 * @param fundId 项目编号
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @return
+	 */
+	@RequestMapping("donate/list")
+	public AjaxResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("基金捐款项目列表, userId={}, funId={}, pageNum={}, pageSize={}", userId, fundId, pageNum, pageSize);
+			QueryResult queryResult = fundService.donateServiceList(fundId, pageNum, pageSize);
+			result.setData(queryResult);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "基金捐款项目列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("基金捐款项目列表", e);
 			result.setSuccess(false);
 		}
 		return result;

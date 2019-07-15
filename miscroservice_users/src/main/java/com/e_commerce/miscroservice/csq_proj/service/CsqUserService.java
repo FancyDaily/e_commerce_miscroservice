@@ -62,8 +62,10 @@ public interface CsqUserService {
 	 * @param password
 	 * @param validCode
 	 * @param csqUserAuth
+	 * @param name
+	 * @param userHeadPortraitPath
 	 */
-	void registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth);
+	void registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath);
 
 	/**
 	 * 组织实名认证审核
@@ -120,9 +122,10 @@ public interface CsqUserService {
 	 * @param telephone
 	 * @param validCode
 	 * @param type
+	 * @param user
 	 * @return
 	 */
-	Map<String, Object> registerBySMS(String telephone, String validCode, Integer type);
+	Map<String, Object> registerBySMS(String telephone, String validCode, Integer type, TCsqUser user);
 
 	/**
 	 * 手机号验证码登录

@@ -21,7 +21,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -194,15 +193,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		return result;
 	}
 	
-	public static void main(String[] args) {
-		double experission = 0.5d / 4.0d;
-		BigDecimal bigDecimal = new BigDecimal(experission);
-		int i = (int) bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
-		System.out.println(i);
-		String format = DecimalFormat.getPercentInstance().format(experission).replaceAll("%", "");
-		System.out.println(format);
-	}
-
 	@Override
 	public Map<String, Object> detail(Long userId, Long serviceId) {
 		Map<String, Object> resultMap = new HashMap<>();
@@ -221,7 +211,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			isFund = true;
 			Long fundId = tCsqService.getFundId();
 			CsqFundVo csqFundVo = csqFundService.fundDetail(fundId);
-			//TODO 筹备状态
 			Integer raiseStatus = 0;	//未公开
 			Integer status = csqFundVo.getStatus();	//五种状态归约成两种
 			if(CsqFundEnum.STATUS_PUBLIC.getVal() == status) {
@@ -240,7 +229,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				.map(TCsqUserPaymentRecord::getOrderId)
 				.distinct().collect(Collectors.toList());
 			tCsqUserPaymentRecords = orderIds.isEmpty()? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
-			//统计捐款数，获取top10
+			//统计捐款数，获取top3
 			Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
 				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
 			Map<Long, Double> donaterMoneyMap = new HashMap<>();
@@ -255,7 +244,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					donaterMoneyMap.put(a.getKey(), totalDonate);
 					return totalDonate;
 				}))).forEachOrdered(a -> {
-					donaterIds.add(a.getKey());
+					donaterIds.add(a.getKey());	//排序后的集合
 				}
 			);
 			donaters = donaterIds.isEmpty()?new ArrayList<>():userDao.selectInIds(donaterIds);
@@ -263,7 +252,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Map<Long, TCsqUser> donaterMap = new HashMap<>();
 			donaters.stream()
 				.forEach(donater -> donaterMap.put(donater.getId(), donater));
-			donaters = donaterIds.stream()
+			donaters = donaterIds.stream()		//通过顺序的ids获取到donaters(按捐款数额排序)
 				.map(a -> donaterMap.get(a)).collect(Collectors.toList());
 
 			donaters = donaters.stream()
@@ -280,6 +269,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					CsqBasicUserVo csqBasicUserVo = a.copyCsqBasicUserVo();
 					return csqBasicUserVo;
 				}).collect(Collectors.toList());
+			//限制为前3条
+			donaterList = donaterList.stream()
+				.limit(3).collect(Collectors.toList());
 			tCsqService.setDonaters(donaterList);
 			//捐助列表
 			List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
@@ -297,7 +289,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			List<CsqServiceReportVo> collect2 = csqServiceReports.stream()
 				.map(a -> a.copyCsqServiceReportVo()).collect(Collectors.toList());
 			csqServiceDetailVo.setCsqServiceReportVos(collect2);
-			//TODO 筹备状态
 			Integer raiseStatus = 0;	//筹备中
 			Double expectedAmount = csqServiceDetailVo.getExpectedAmount();	//目标金额
 			boolean isFull = sumTotalIn >= expectedAmount;
@@ -334,6 +325,21 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		resultMap.put("isMine", isMine);
 		resultMap.put("isFund", isFund);
 		return resultMap;
+	}
+
+	public static void main(String[] args) {
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = new ArrayList<>();
+//		tCsqUserPaymentRecords.add(new TCsqUserPaymentRecord());
+		List<Long> orderIds = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getOrderId)
+			.distinct()
+			.collect(Collectors.toList());
+		if(orderIds.contains(null)) {
+			System.out.println("contains null:" + true);
+			return;
+		}
+		System.out.println("isEmpty:" + orderIds.isEmpty());
+		System.out.println(orderIds);
 	}
 
 	@Override
@@ -497,16 +503,33 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	}
 
 	@Override
-	public List<CsqDonateRecordVo> donateList(Long serviceId, Integer pageNum, Integer pageSize) {
+	public QueryResult donateList(Long serviceId, Integer pageNum, Integer pageSize) {
+		pageNum = pageNum==null?1:pageNum;
+		pageSize = pageSize==null?0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
-
+		List<Long> orderIds = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getOrderId)
+			.distinct().collect(Collectors.toList());
+		tCsqUserPaymentRecords = orderIds.isEmpty()? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
 		List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
+		List<CsqDonateRecordVo> resultList = csqUserPaymentRecords.stream()
+			.map(a -> {
+				TCsqUser user = a.getUser();
+				CsqDonateRecordVo build = CsqDonateRecordVo.builder()
+					.minutesAgo(user.getMinutesAgo())
+					.name(user.getName())
+					.donateAmount(a.getMoney())
+					.createTime(a.getCreateTime().getTime()).build();
+				return build;
+			})
+			.sorted(Comparator.comparing(CsqDonateRecordVo::getMinutesAgo))
+			.collect(Collectors.toList());
 
 		QueryResult result = new QueryResult();
-		result.setResultList(csqUserPaymentRecords);
-		result.setTotalCount(startPage.getTotal());
-		return null;
+		result.setResultList(resultList);
+		result.setTotalCount((long)resultList.size());
+		return result;
 	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
@@ -524,6 +547,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					if (tCsqUsers1 != null) {
 						TCsqUser tCsqUser = tCsqUsers1.get(0);
 						tCsqUser.setMinutesAgo(minutes);
+						a.setUser(tCsqUser);
 					}
 					return a;
 				}

@@ -395,7 +395,8 @@ public class CsqServiceController {
 		Long userId = UserUtil.getTestId();
 		try {
 			log.info("捐助记录列表, userId={}, serviceId={}, pageNum={}, pageSize={}", userId, serviceId, pageNum, pageSize);
-			csqServiceService.donateList(serviceId, pageNum, pageSize);
+			QueryResult queryResult = csqServiceService.donateList(serviceId, pageNum, pageSize);
+			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "捐助记录列表", e.getMessage());

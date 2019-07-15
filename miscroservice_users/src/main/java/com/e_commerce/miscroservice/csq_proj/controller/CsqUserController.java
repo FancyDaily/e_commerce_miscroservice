@@ -10,9 +10,12 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,12 +79,14 @@ public class CsqUserController {
 	 * @param type      1个人 2组织
 	 * @return
 	 */
+	@Consume(TCsqUser.class)
 	@RequestMapping("register/sms")
-	public AjaxResult registerBySMS(String telephone, String validCode, Integer type) {
+	public AjaxResult registerBySMS(String telephone, String validCode, Integer type, String name, String userHeadPortraitPath) {
 		AjaxResult result = new AjaxResult();
+		TCsqUser user = (TCsqUser) ConsumeHelper.getObj();
 		try {
-			log.info("手机号注册，telephone={}, validCode={}, type={}", telephone, validCode, type);
-			Map<String, Object> resultMap = csqUserService.registerBySMS(telephone, validCode, type);
+			log.info("手机号注册，telephone={}, validCode={}, type={}, name={}, userHeadPortraitPath={}", telephone, validCode, type, name, userHeadPortraitPath);
+			Map<String, Object> resultMap = csqUserService.registerBySMS(telephone, validCode, type, user);
 			result.setData(resultMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -543,5 +548,4 @@ public class CsqUserController {
 		}
 		return result;
 	}
-
 }

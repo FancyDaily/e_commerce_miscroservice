@@ -221,7 +221,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth) {
+	public void registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath) {
 		Map<String, Object> map = new HashMap<>();
 		userService.checkSMS(telephone, validCode);
 		//用户是否已经注册，若无注册一个(Corp类型
@@ -231,6 +231,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setUserTel(telephone);
 			tCsqUser.setUuid(uuid);
 			tCsqUser.setAccountType(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
+			tCsqUser.setName(name);
+			tCsqUser.setUserHeadPortraitPath(userHeadPortraitPath);
 			tCsqUser = register(tCsqUser);
 //			return;
 		}
@@ -246,10 +248,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您存在待审核的记录!");
 		}
 		//提交审核
-		String name = csqUserAuth.getName();
+		String authName = csqUserAuth.getName();
+		authName = authName ==null? tCsqUser.getName(): authName;
 		String licenseId = csqUserAuth.getLicenseId();
 		String licensePic = csqUserAuth.getLicensePic();
-		if (StringUtil.isAnyEmpty(name, licenseId, licensePic)) {
+		if (StringUtil.isAnyEmpty(authName, licenseId, licensePic)) {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必填参数为空!");
 		}
 		TCsqUserAuth userAuth = TCsqUserAuth.builder().status(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode())
@@ -258,7 +261,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.phone(telephone)
 			.licenseId(licenseId)
 			.licensePic(licensePic)
-			.name(name)
+			.name(authName)
 			.build();
 		//略去审核流程标记 REMARK
 		csqUserAuthDao.insert(userAuth);
@@ -546,7 +549,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String, Object> registerBySMS(String telephone, String validCode, Integer type) {
+	public Map<String, Object> registerBySMS(String telephone, String validCode, Integer type, TCsqUser user) {
 		if (!Arrays.stream(CsqUserEnum.values()).filter(a -> a.name().startsWith("ACCOUNT_TYPE_")).map(a -> a.toCode()).collect(Collectors.toList()).contains(type)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数type不正确!");
 		}
@@ -561,8 +564,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 
 		//注册用户
+		String name = user.getName();
+		String userHeadPortraitPath = user.getUserHeadPortraitPath();
+
 		TCsqUser build = TCsqUser.builder()
-			.userTel(telephone).build();
+			.userTel(telephone)
+			.name(name)
+			.userHeadPortraitPath(userHeadPortraitPath)
+			.build();
 		TCsqUser register = register(build);
 
 		Map<String, Object> map = new HashMap<>();

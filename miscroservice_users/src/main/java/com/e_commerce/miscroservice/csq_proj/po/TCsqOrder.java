@@ -4,6 +4,8 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqFundDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqWaitToInvoiceOrderVo;
 import lombok.Builder;
 import lombok.Data;
@@ -62,4 +64,17 @@ public class TCsqOrder extends BaseEntity {
 	public CsqWaitToInvoiceOrderVo copyCsqOrderVo() {
 		return null;
 	}
+
+	public CsqFundDonateVo copyCsqFundDonateVo() {
+		CsqFundDonateVo csqFundDonateVo = new CsqFundDonateVo();
+//		Long time = getOrderTime();
+//		csqFundDonateVo.setYear(DateUtil.timeStamp2Date(time, "yyyy"));
+//		csqFundDonateVo.setDate(DateUtil.timeStamp2Date(time, "MM/dd"));
+		csqFundDonateVo.setMoney(getPrice());
+		return csqFundDonateVo;
+	}
+
+	/*public static void main(String[] args) {
+		AutoGenerateCode.generate();
+	}*/
 }

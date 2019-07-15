@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
@@ -78,18 +79,21 @@ public class CsqAuthController {
 	 */
 	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("corp/submit")
-	public AjaxResult certCorpSubmit(String telephone,
-									 String password,
-									 String validCode,
+	public AjaxResult certCorpSubmit(@RequestParam(required = false)String telephone,
+									 @RequestParam(required = false) String password,
+									 @RequestParam(required = false)String validCode,
 									 @RequestParam(required = false) String name,
+									 @RequestParam(required = false) String userHeadPortraitPath,
 									 @RequestParam(required = false) String licenseId,
-									 @RequestParam(required = false) String licensePic,
+									 @RequestParam(required = true) String licensePic,
 									 String uuid) {
 		AjaxResult result = new AjaxResult();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
-			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth);
+			log.info("组织注册与实名提交, telephone={}, password={}, validCode={}, name={}, userHeadPortraitPath={}, licenseId={}, licensePic={}"
+				, telephone, password, validCode, name, userHeadPortraitPath, licenseId, licensePic);
+			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth, name, userHeadPortraitPath);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织注册与实名提交", e.getMessage());

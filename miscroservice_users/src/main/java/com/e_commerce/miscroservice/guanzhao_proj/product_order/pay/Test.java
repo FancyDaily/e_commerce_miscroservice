@@ -31,12 +31,12 @@ public class Test {
 	 */
 	public static AlipayClient getAlipayClient() {
 		if (alipayClient == null) {
-			synchronized (AlipayConfig.class) {
+			/*synchronized (AlipayConfig.class) {
 				if (null == alipayClient) {
 					alipayClient = new DefaultAlipayClient(URL, ALIPAY_APPID, APP_PRIVATE_KEY, FORMAT, CHARSET,
 						ALIPAY_PUBLIC_KEY, SIGNTYPE);
 				}
-			}
+			}*/
 		}
 		return alipayClient;
 	}
