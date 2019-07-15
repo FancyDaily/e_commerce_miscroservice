@@ -9,7 +9,6 @@ import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
@@ -314,6 +313,40 @@ public class CsqUserController {
 
 	/**
 	 * 每日一善
+	 * <p>
+	 * {
+	 * "dayCnt": 0,	连续积善天数
+	 * "dailyIncome": 0,	今日已筹金额
+	 * "donateCnt": 0,	捐款人数
+	 * "id": 1,
+	 * "userId": 1292,
+	 * "fundId": "",
+	 * "donaterCnt": "",
+	 * "donaters": "",
+	 * "sumTotalOut": "",
+	 * "trendPubValues": "",
+	 * "csqUserPaymentRecords": "",
+	 * "reports": "",
+	 * "fundStatus": "",
+	 * "type": 0,
+	 * "typePubKeys": "",
+	 * "name": "发布一个项目",	项目名字
+	 * "recordId": "",
+	 * "status": 0,
+	 * "purpose": "",	简要描述(目的描述
+	 * "sumTotalIn": 0,
+	 * "totalInCnt": 0,
+	 * "surplusAmount": 0,
+	 * "expectedAmount": 0,	目标金额
+	 * "expectedRemainAmount": 0,
+	 * "startDate": "",
+	 * "endDate": "",
+	 * "coverPic": "",	封面图
+	 * "description": "你认真的样子好像天桥底下贴膜的",
+	 * "detailPic": "",
+	 * "beneficiary": "",
+	 * "creditCard": ""
+	 * }
 	 *
 	 * @return
 	 */
@@ -340,12 +373,21 @@ public class CsqUserController {
 
 	/**
 	 * 爱心账户我的信息
+	 * <p>
+	 * {
+	 * "sumTotalIn": 10000,	//基金累积收入
+	 * "expected": 10000,	//基金期望收入
+	 * "surplusAmount": 289,	//爱心账户余额
+	 * "sumDonate": 3094,	//总捐助
+	 * "status": 0	//基金状态0、1、3 未公开(筹备中) 2已公开
+	 * }
 	 *
 	 * @return
 	 */
 	@RequestMapping("information")
 	public AjaxResult myInformation() {
-		Long userId = Long.valueOf(IdUtil.getId());
+//		Long userId = Long.valueOf(IdUtil.getId());
+		Long userId = UserUtil.getTestId();
 		log.info("访问我的基本信息 ={}", userId);
 		AjaxResult ajaxResult = new AjaxResult();
 		try {
@@ -424,6 +466,32 @@ public class CsqUserController {
 
 	/**
 	 * 查看基本信息
+	 * {
+	 * "id":2000,
+	 * "csqUserAuth":{
+	 * "id":13,
+	 * "userId":2000,
+	 * "type":0,	类型
+	 * "cardId":"331021199802140761",	身份证号
+	 * "name":"张三",	姓名
+	 * "phone":"17826879114",
+	 * "licensePic":"",	执照图
+	 * "licenseId":"",	执照号
+	 * "status":1	状态
+	 * },
+	 * "totalDonate":"",
+	 * "minutesAgo":"",
+	 * "userAccount":"",
+	 * "name":"你是什么垃圾",	姓名
+	 * "userTel":"17826879888",	手机号
+	 * "userHeadPortraitPath":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",	头像
+	 * "sex":0,	性别
+	 * "existDayCnt": 123 加入天数
+	 * "balanceStatus":1 爱心账户状态 -1~1, 被禁止、待激活、可用
+	 * "accountType": 1 账号类型 1~2 (个人，组织 etc.)
+	 * "remarks":""	个人简介
+	 * }
+	 *
 	 * @return
 	 */
 	@RequestMapping("infos")
@@ -449,18 +517,19 @@ public class CsqUserController {
 
 	/**
 	 * 修改个人基本信息
-	 * @param name 姓名
+	 *
+	 * @param name    姓名
 	 * @param remarks 描述
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
-	public AjaxResult modify(String name, String remarks) {
+	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("修改个人基本信息, userId={}, name={}, remarks={}", userId, name, remarks);
+			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}", userId, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount);
 			csqUserService.modify(userId, csqBasicUserVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {

@@ -53,18 +53,34 @@ public class CsqFunDaoImpl implements CsqFundDao {
 	@Override
 	public List<TCsqFund> selectByUserIdInStatusDesc(Long userId, Integer... option) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqFund.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-			.eq(TCsqFund::getUserId, userId)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime));
-		mybatisPlusBuild = option.length > 1? mybatisPlusBuild.in(TCsqFund::getStatus, option): mybatisPlusBuild;
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqFund::getUserId, userId);
+		mybatisPlusBuild = option.length >= 1? mybatisPlusBuild.in(TCsqFund::getStatus, option): mybatisPlusBuild;
+		mybatisPlusBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime));
 		return MybatisPlus.getInstance().findAll(new TCsqFund(), mybatisPlusBuild);
 	}
 
 	@Override
 	public List<TCsqFund> selectInIds(List<Long> fundIds) {
 		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqFund::getId, fundIds));
+	}
+
+	@Override
+	public List<TCsqFund> selectByUserIdAndInStatus(Long userId, List<Integer> asList) {
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getUserId, userId)
+			.in(TCsqFund::getStatus, asList)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqFund> selectByUserIdAndNotEqStatus(Long userId, Integer status) {
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getUserId, userId)
+			.neq(TCsqFund::getStatus, status)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 }

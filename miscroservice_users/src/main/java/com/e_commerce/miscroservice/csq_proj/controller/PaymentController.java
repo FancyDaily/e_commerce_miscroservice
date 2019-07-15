@@ -10,9 +10,11 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +39,8 @@ public class PaymentController {
 	 *
 	 * @param pageNum  页码
 	 * @param pageSize 大小
+	 * @param option 收入0/支出1 全部null
+	 * @param isGroupingByYear 是否按年份分组
 	 *                 <p>
 	 *                 {
 	 *                 "list": {
@@ -63,14 +67,14 @@ public class PaymentController {
 	 * @return
 	 */
 	@RequestMapping("find/waters")
-	public AjaxResult findWarters(Integer pageNum, Integer pageSize) {
+	public AjaxResult findWarters(Integer pageNum, Integer pageSize,@RequestParam(required = false) Integer option, boolean isGroupingByYear) {
 		AjaxResult result = new AjaxResult();
 
 //		Long userId = Long.valueOf(IdUtil.getId());
 		Long userId = UserUtil.getTestId();
 		log.info("流水查询num={},size={},userId={}", pageNum, pageSize, userId);
 		try {
-			QueryResult<CsqUserPaymentRecordVo> records = csqPaymentService.findWaters(pageNum, pageSize, userId);
+			Object records = csqPaymentService.findWaters(pageNum, pageSize, userId, option, isGroupingByYear);
 			Double inMoney = csqPaymentService.countMoney(userId, 0);
 			Double outMoney = csqPaymentService.countMoney(userId, 1);
 			Map<String, Object> map = new HashMap<>();

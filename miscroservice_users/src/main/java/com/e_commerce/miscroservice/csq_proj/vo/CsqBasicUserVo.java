@@ -4,7 +4,6 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import lombok.Data;
 
 /**
@@ -17,8 +16,24 @@ public class CsqBasicUserVo {
 	@Id
 	protected Long id;
 
+	private String weiboAccount;	//微博账号
+
+	private String wechatPubAccount;	//微信公众号
+
 	@Transient
-	TCsqUserAuth csqUserAuth;
+	CsqUserAuthVo csqUserAuth;
+
+	private Integer existDayCnt;	//加入天数
+
+	@Column(commit = "爱心账户状态")
+	private Integer balanceStatus;
+
+	private boolean gotFund;	//是否已经有至少一个基金
+
+	private boolean gotCompanyAccount;	//是否已经有注册组织账号
+
+	@Column(commit = "账号类型(个人，组织 etc.)", length = 11, defaultVal = "1")
+	private Integer accountType;
 
 	@Transient
 	protected Double totalDonate;	//累积捐助(项目详情)

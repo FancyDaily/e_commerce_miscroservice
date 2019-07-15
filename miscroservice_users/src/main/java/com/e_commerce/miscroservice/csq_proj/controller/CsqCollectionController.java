@@ -4,16 +4,13 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqCollectionService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * 从善桥收藏Controller
@@ -37,7 +34,7 @@ public class CsqCollectionController {
 	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping("click/auth")
+	@RequestMapping({"click", "click/" + TokenUtil.AUTH_SUFFIX})
 	public AjaxResult clickCollection(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 //		Integer userId = IdUtil.getId();
@@ -52,7 +49,9 @@ public class CsqCollectionController {
 			result.setSuccess(false);
 			result.setMsg(e.getMessage());
 		} catch (Exception e) {
-
+			e.printStackTrace();
+			log.error("点击收藏 取消收藏", e);
+			result.setSuccess(false);
 		}
 		return result;
 	}
@@ -81,7 +80,7 @@ public class CsqCollectionController {
 	 *                 }
 	 * @return
 	 */
-	@RequestMapping("list/auth")
+	@RequestMapping({"list", "list/" + TokenUtil.AUTH_SUFFIX})
 	public AjaxResult collectionList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 //		Integer userId = IdUtil.getId();
@@ -97,10 +96,40 @@ public class CsqCollectionController {
 			result.setSuccess(false);
 			result.setMsg(e.getMessage());
 		} catch (Exception e) {
-
+			e.printStackTrace();
+			log.error("收藏列表", e);
+			result.setSuccess(false);
 		}
+		return result;
+	}
 
-
+	/**
+	 * 是否收藏
+	 *
+	 * @param serviceId 项目编号
+	 *                  <p>
+	 *                  {"success":true,"errorCode":"","msg":"","data":""}
+	 * @return
+	 */
+	@RequestMapping({"isCollection", "isCollection/" + TokenUtil.AUTH_SUFFIX})
+	public AjaxResult isCollection(Long serviceId) {
+		AjaxResult result = new AjaxResult();
+//		Integer userId = IdUtil.getId();
+		Long userId = UserUtil.getTestId();
+		log.info("是否收藏={},userId={},serviceId={}", userId, serviceId);
+		try {
+			boolean isCollection = csqCollectionService.isCollection(userId, serviceId);
+			result.setData(isCollection);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn(e.getMessage());
+			result.setSuccess(false);
+			result.setMsg(e.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("是否收藏", e);
+			result.setSuccess(false);
+		}
 		return result;
 	}
 

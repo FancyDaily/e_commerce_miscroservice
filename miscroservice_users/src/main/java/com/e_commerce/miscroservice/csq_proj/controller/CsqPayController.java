@@ -38,7 +38,7 @@ public class CsqPayController {
 	 * 微信支付(发起)
 	 * @param orderNo 订单号
 	 * @param entityId 被充值对象编号
-	 * @param entityType 被充值对象类型
+	 * @param entityType 被充值对象类型 2爱心账户3基金4项目
 	 * @param fee 费用
 	 * @param name 基金名
 	 * @param trendPubKeys 趋向
@@ -46,11 +46,11 @@ public class CsqPayController {
 	 */
 	@Consume(CsqFundVo.class)
 	@RequestMapping("preOrder")
-	public Object preOrder(String orderNo,
+	public Object preOrder(@RequestParam(required = false) String orderNo,
 						   @RequestParam(required = true) Long entityId,
 						   @RequestParam(required = true) Integer entityType,
 						   @RequestParam(required = true) Double fee,
-						   @RequestParam(required = true) String name,
+						   @RequestParam(required = false) String name,
 						   @RequestParam(required = false) String trendPubKeys,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();

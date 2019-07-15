@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
@@ -8,8 +9,10 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPublishDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqPublish;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
-import lombok.Data;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicPublishVo;
+import org.h2.command.dml.Insert;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +33,7 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 
 	@Override
 	public String getPublishName(int mainKey, Integer trendPubKey) {
-		TCsqPublish tCsqPublish = csqPublishDao.selectByMainKey(mainKey);
-		String jsonString = tCsqPublish.getValue();
+		String jsonString = getValue(mainKey);
 		return getPublishName(jsonString, trendPubKey);
 	}
 
@@ -49,8 +51,7 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 
 	@Override
 	public Map getPublishName(int mainKey) {
-		TCsqPublish tCsqPublish = csqPublishDao.selectByMainKey(mainKey);
-		String jsonString = tCsqPublish.getValue();
+		String jsonString = getValue(mainKey);
 		return toMap(jsonString);
 	}
 
@@ -60,7 +61,7 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 	}
 
 	@Override
-	public void setPublishName(Integer mainKey, Integer[] keys, String[] names) {
+	public void setPublishName(Integer mainKey, Integer[] keys, String[] names, String keyDesc, boolean isObjectArray) {
 		//check
 		if(keys == null || names == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数keys、names不能为空！");
@@ -71,18 +72,24 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 		if(Arrays.stream(keys).distinct().count() < keys.length) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数keys中存在重复编号!");
 		}
+
 		//构建map
-		Map<Integer, String> keyValueMap = new HashMap<> ();
+		Map<Integer, String> keyValueMap  = new HashMap<>();
 		for(int i=0; i<names.length; i++) {
 			keyValueMap.put(keys[i], names[i]);
 		}
-		String value = JSONObject.toJSONString(keyValueMap);
+		String value = isObjectArray? JSONObject.toJSONString(keyValueMap): toObjectArrayJson(keyValueMap);
+
 		//获取描述
-		List<String> existList = Arrays.stream(CsqPublishEnum.values()).filter(a -> a.toCode().equals(mainKey)).map(CsqPublishEnum::getMsg).collect(Collectors.toList());
-		String keyDesc = existList.isEmpty()? null:existList.get(0);
+		if(keyDesc == null) {
+			List<String> existList = Arrays.stream(CsqPublishEnum.values()).filter(a -> a.toCode().equals(mainKey)).map(CsqPublishEnum::getMsg).collect(Collectors.toList());
+			keyDesc = existList.isEmpty()? null:existList.get(0);
+		}
+
 		TCsqPublish build;
-		if((build = csqPublishDao.selectByMainKey(mainKey))!= null) {
+		if((build = csqPublishDao.selectByMainKey(mainKey)) != null) {
 			log.info("更新了 MainKey={},theValue={}的publish记录", mainKey, value);
+			build.setKeyDesc(keyDesc);
 			build.setValue(value);
 			csqPublishDao.update(build);
 		} else {
@@ -92,6 +99,76 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 				.value(value).build();
 			csqPublishDao.insert(build);
 		}
+	}
+
+	private Map<String, Object> parseFromJson(String value) {
+		Map<String, Object> resultMap = new HashMap<>();
+		//尝试解析为map
+		Object object;
+		String description = "isObjectArray";
+		try {
+			Map map = get(value);
+			object = toList(map);
+			resultMap.put(description, false);
+		} catch (Exception e) {	//若解析出错，尝试对象解析
+			object = getObjectList(value);
+			resultMap.put(description, true);
+		}
+		resultMap.put("result", object);
+		return resultMap;
+	}
+
+	private String toObjectArrayJson(Map<Integer, String> keyValueMap) {
+		List<CsqBasicPublishVo> javaObject = keyValueMap.entrySet().stream()
+			.map(a -> CsqBasicPublishVo.builder().key(a.getKey())
+				.value(a.getValue()).build()).collect(Collectors.toList());
+		return JSONObject.toJSONString(javaObject);
+	}
+
+	@Override
+	public Map get(Integer mainKey) {
+		String value = getValue(mainKey);
+		return toMap(value);
+	}
+
+	private Map get(String map) {
+		return toMap(map);
+	}
+
+	private String getValue(Integer mainKey) {
+		TCsqPublish tCsqPublish = csqPublishDao.selectByMainKey(mainKey);
+		return tCsqPublish.getValue();
+	}
+
+	@Override
+	public Object getAsList(Integer mainKey) {
+		/*if(mainKey == CsqPublishEnum.MAIN_KEY_TREND.toCode()) {
+			return getObjectList(mainKey);
+		}*/
+		Object result;
+		try {
+			Map map = get(mainKey);
+			result = toList(map);
+		} catch (Exception e) {	//若解析出错，尝试对象解析
+			result = getObjectList(mainKey);
+		}
+		return result;
+	}
+
+	private List<CsqBasicPublishVo> getObjectList(Integer mainKey) {
+		String value = getValue(mainKey);
+		List<CsqBasicPublishVo> lists = parseToObjectArray(value);
+		return lists;
+	}
+
+	private List<CsqBasicPublishVo> getObjectList(String value) {
+		List<CsqBasicPublishVo> lists = parseToObjectArray(value);
+		return lists;
+	}
+
+	private Object toList(Map map) {
+		return map.values().stream()
+			.collect(Collectors.toList());
 	}
 
 	private void setPublishName(int mainKey, String jsonValue) {
@@ -119,9 +196,23 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 		return jsonObject.toJavaObject(Map.class);
 	}
 
-	private static String getPublishName(String text, Integer key) {
-		Map map = toMap(text);
+	private String getPublishName(String text, Integer key) {
+		Map map = null;
+		try {
+			map = toMap(text);
+		} catch (Exception e) {	//解析出错
+			return findTrueValueFromObjectArray(text, key);
+		}
 		return (String) map.get(key.toString());
+	}
+
+	private String findTrueValueFromObjectArray(String text, Integer key) {
+		//parse
+		List<CsqBasicPublishVo> csqBasicPublishVos = parseToObjectArray(text);
+		return csqBasicPublishVos.stream()
+			.filter(a -> key.equals(a.getKey()))
+			.map(CsqBasicPublishVo::getValue)
+			.reduce(null, (a,b) -> b);
 	}
 
 	public static void main(String[] args) {
@@ -146,5 +237,26 @@ public class CsqpublishServiceImpl implements CsqPublishService {
 		String str = "1";
 		String[] split = str.split(",");
 		Arrays.stream(split).forEach(System.out::println);
+
+		CsqBasicPublishVo basicPublishVo = new CsqBasicPublishVo();
+		basicPublishVo.setKey(1);
+		basicPublishVo.setValue("13");
+
+		CsqBasicPublishVo vo21 = new CsqBasicPublishVo();
+		vo21.setKey(2);
+		vo21.setValue("123");
+
+		String s1 = JSONObject.toJSONString(Arrays.asList(basicPublishVo, vo21));
+
+		System.out.println(s1);
+		List<CsqBasicPublishVo> lists = parseToObjectArray(s1);
+		lists.stream()
+			.forEach(a -> a.getValue());
 	}
+
+	private static List<CsqBasicPublishVo> parseToObjectArray(String s1) {
+		JSONArray objects = JSONObject.parseArray(s1);
+		return objects.toJavaList(CsqBasicPublishVo.class);
+	}
+
 }

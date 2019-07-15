@@ -31,6 +31,9 @@ public class TCsqService extends BaseEntity {
 	private Long fundId;
 
 	@Transient
+	private String donePercent;	//捐献完成进度
+
+	@Transient
 	private Double sumTotalPayMine;	//此项目我的总计捐款
 
 	@Transient
@@ -64,7 +67,7 @@ public class TCsqService extends BaseEntity {
 	private String name;
 
 	@Column(commit = "备案编号")
-	private Long recordId;
+	private String recordNo;
 
 	@Column(commit = "状态", length = 11, defaultVal = "-1")
 	private Integer status;

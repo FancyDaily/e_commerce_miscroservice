@@ -14,6 +14,22 @@ import java.io.Serializable;
  */
 @Data(matchSuffix = true)
 public class CsqCollectionVo implements Serializable {
+
+	/**
+	 * 捐助进度
+	 */
+	private String donatePercent;
+
+	/**
+	 * 捐助人数
+	 */
+	private Integer donateCnt;
+
+	/**
+	 * 类型
+	 */
+	private Integer type;
+
 	/**
 	 * 项目内容
 	 */
@@ -33,7 +49,7 @@ public class CsqCollectionVo implements Serializable {
 	/**
 	 * 备案id
 	 */
-	private Long recordId;
+	private String recordNo;
 	/**
 	 * 项目id
 	 */

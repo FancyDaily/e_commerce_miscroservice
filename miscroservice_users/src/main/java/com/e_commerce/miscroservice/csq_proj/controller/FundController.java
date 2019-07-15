@@ -166,33 +166,32 @@ public class FundController {
 	 *
 	 * @param fundId 基金编号
 	 *               <p>
-	 *               {
-	 *               "contributeInCnt":0,
-	 *               "trendPubNames":[
-	 *               "北京方向",
-	 *               "皇后大道东方向"
-	 *               ],
-	 *               "goToList":"",
-	 *               "id":6,
-	 *               "userId":2000,
-	 *               "totalToItemCnt":"",
-	 *               "helpCnt":0,
-	 *               "totalInCnt":0,
-	 *               "trendPubKeys":"1,6",
-	 *               "name":"发哥爱心事业基金会",
-	 *               "description":"",
-	 *               "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
-	 *               "orgName":"",
-	 *               "orgAddr":"",
-	 *               "contact":"",
-	 *               "personInCharge":"",
-	 *               "cardName":"",
-	 *               "cardId":"",
-	 *               "balance":0,
-	 *               "totalIn":10001,
-	 *               "agentModeStatus":0,
-	 *               "status":0
-	 *               }
+	 * {
+	 *         "contributeInCnt":0,
+	 *         "trendPubNames":[
+	 *
+	 *         ],
+	 *         "goToList":"",
+	 *         "id":1,
+	 *         "userId":1292,
+	 *         "totalToItemCnt":"",
+	 *         "helpCnt":0,
+	 *         "totalInCnt":0,
+	 *         "trendPubKeys":"",
+	 *         "name":"张三爱心事业基金会",
+	 *         "description":"",
+	 *         "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
+	 *         "orgName":"",
+	 *         "orgAddr":"",
+	 *         "contact":"",
+	 *         "personInCharge":"",
+	 *         "cardName":"",
+	 *         "cardId":"",
+	 *         "balance":0,
+	 *         "totalIn":0,
+	 *         "agentModeStatus":0,
+	 *         "status":0
+	 *     }
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -249,35 +248,34 @@ public class FundController {
 	 * @param pageSize 分页大小
 	 * @param option   操作
 	 *                 <p>
-	 *                 {
-	 *                 "resultList":[
-	 *                 {
-	 *                 "contributeInCnt":"",
-	 *                 "trendPubNames":"",
-	 *                 "goToList":"",
+	 * {
+	 *         "resultList":[
+	 *             {
+	 *                 "contributeInCnt":"",	贡献人次
+	 *                 "trendPubNames":"",	捐助方向
+	 *                 "goToList":"",	资助列表
 	 *                 "id":6,
 	 *                 "userId":2000,
-	 *                 "totalToItemCnt":"",
-	 *                 "helpCnt":0,
-	 *                 "totalInCnt":0,
-	 *                 "trendPubKeys":"1,6",
-	 *                 "name":"发哥爱心事业基金会",
-	 *                 "description":"",
-	 *                 "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
-	 *                 "orgName":"",
-	 *                 "orgAddr":"",
-	 *                 "contact":"",
-	 *                 "personInCharge":"",
-	 *                 "cardName":"",
-	 *                 "cardId":"",
-	 *                 "balance":0,
-	 *                 "totalIn":10001,
-	 *                 "agentModeStatus":0,
-	 *                 "status":0
-	 *                 }
-	 *                 ],
-	 *                 "totalCount":1
-	 *                 }
+	 *                 "helpCnt":0,	累积资助项目次数
+	 *                 "totalInCnt":0,	资金累积流入次数
+	 *                 "trendPubKeys":"1,6",	关注方向
+	 *                 "name":"发哥爱心事业基金会",	名
+	 *                 "description":"",	描述
+	 *                 "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",	图片
+	 *                 "orgName":"",	组织名
+	 *                 "orgAddr":"",	组织地址
+	 *                 "contact":"",	联系方式
+	 *                 "personInCharge":"",	负责人
+	 *                 "cardName":"",	银行名字
+	 *                 "cardId":"",	银行卡号
+	 *                 "balance":0,	余额
+	 *                 "totalIn":10001,	总进账
+	 *                 "agentModeStatus":0,	代理状态
+	 *                 "status":0	状态
+	 *             }
+	 *         ],
+	 *         "totalCount":1
+	 *     }
 	 * @return
 	 */
 	@RequestMapping("list")

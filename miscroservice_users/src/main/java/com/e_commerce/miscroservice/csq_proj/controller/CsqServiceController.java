@@ -15,6 +15,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -100,46 +101,39 @@ public class CsqServiceController {
 	/**
 	 * 项目列表
 	 *
-	 * @param option   操作
+	 * @param option   操作 0全部 1已捐助 2我发布
 	 * @param pageNum  页码
 	 * @param pageSize 大小
 	 *                 <p>
-	 *                 {
-	 *                 "resultList":[
-	 *                 {
+	 * {
+	 *         "resultList":[
+	 *             {
 	 *                 "id":20,
 	 *                 "userId":2000,
 	 *                 "fundId":"",
-	 *                 "sumTotalPayMine":0,
-	 *                 "donaterCnt":"",
-	 *                 "donaters":"",
-	 *                 "sumTotalOut":"",
-	 *                 "trendPubValues":"",
-	 *                 "csqUserPaymentRecordVos":"",
-	 *                 "csqServiceReportVos":"",
-	 *                 "fundStatus":"",
-	 *                 "type":0,
-	 *                 "typePubKeys":"",
-	 *                 "name":"这是项目的名字",
-	 *                 "recordId":"",
-	 *                 "status":0,
-	 *                 "purpose":"",
-	 *                 "sumTotalIn":0,
-	 *                 "totalInCnt":0,
-	 *                 "surplusAmount":0,
-	 *                 "expectedAmount":0,
-	 *                 "expectedRemainAmount":0,
-	 *                 "startDate":"",
-	 *                 "endDate":"",
-	 *                 "coverPic":"",
-	 *                 "description":"这是一段详细描述",
-	 *                 "detailPic":"",
-	 *                 "beneficiary":"",
-	 *                 "creditCard":""
-	 *                 }
-	 *                 ],
-	 *                 "totalCount":4
-	 *                 }
+	 *                 "sumTotalPayMine":0,	我捐助了多少
+	 *                 "donaterCnt":"",	贡献者数量
+	 *                 "trendPubValues":"",	趋向值
+	 *                 "fundStatus":"",	基金状态
+	 *                 "type":0,	类型
+	 *                 "typePubKeys":"",	类型值
+	 *                 "name":"这是项目的名字",	名字
+	 *                 "recordId":"",	备案编号
+	 *                 "status":0,	状态
+	 *                 "purpose":"",	目的
+	 *                 "sumTotalIn":0,	总计收入
+	 *                 "totalInCnt":0,	总计捐助次数
+	 *                 "surplusAmount":0,	剩余账户余额
+	 *                 "expectedAmount":0,	期待金额
+	 *                 "expectedRemainAmount":0,	剩余期待金额
+	 *                 "startDate":"",	开始日期
+	 *                 "endDate":"",	结束日期
+	 *                 "coverPic":"",	封面图
+	 *                 "description":"这是一段详细描述"	描述
+	 *             }
+	 *         ],
+	 *         "totalCount":4
+	 *     }
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -167,11 +161,11 @@ public class CsqServiceController {
 	 * 项目详情
 	 *
 	 * @param serviceId 项目编号
-	 *                  <p>
 	 * {
-	 *         "csqService":{
-	 *             "id":20,
-	 *             "userId":2000,
+	 *         "serviceVo":{
+	 *             "raiseStatus":1,
+	 *             "id":2,
+	 *             "userId":1292,
 	 *             "fundId":"",
 	 *             "sumTotalPayMine":"",
 	 *             "donaterCnt":"",
@@ -179,38 +173,44 @@ public class CsqServiceController {
 	 *             "fundStatus":"",
 	 *             "type":0,
 	 *             "typePubKeys":"",
-	 *             "name":"这是项目的名字",
-	 *             "recordId":"",
-	 *             "status":0,
-	 *             "purpose":"",
-	 *             "sumTotalIn":0,
-	 *             "totalInCnt":0,
-	 *             "surplusAmount":0,
-	 *             "expectedAmount":0,
-	 *             "expectedRemainAmount":0,
+	 *             "name":"发布一个项目",	//项目名
+	 *             "recordId":"",	//备案号
+	 *             "status":0,	//状态
+	 *             "purpose":"",	//目的描述
+	 *             "sumTotalIn":0,	//已筹得金额
+	 *             "totalInCnt":0,	//捐款人次
+	 *             "surplusAmount":0,	//项目账户余额
+	 *             "expectedAmount":0,	//期望金额
+	 *             "expectedRemainAmount":0,	//剩余期望金额
 	 *             "startDate":"",
 	 *             "endDate":"",
-	 *             "coverPic":"",
-	 *             "description":"这是一段详细描述",
+	 *             "coverPic":"",	//封面图
+	 *             "description":"你认真的样子好像天桥底下贴膜的",	//描述
 	 *             "donaters":[
 	 *
-	 *             ],
-	 *             "sumTotalOut":0,
+	 *             ],	//捐助人列表
+	 *             "sumTotalOut":0,	//总支出
 	 *             "csqUserPaymentRecordVos":[
 	 *
-	 *             ],
+	 *             ],	//流水列表
 	 *             "csqServiceReportVos":[
-	 *
-	 *             ],
-	 *             "detailPic":"",
-	 *             "beneficiary":"",
-	 *             "creditCard":""
+	 *                 {
+	 *                     "id":4,
+	 *                     "serviceId":2,
+	 *                     "title":"这是项目汇报的标题",
+	 *                     "description":"",
+	 *                     "pic":"1313dada3"
+	 *                 }
+	 *             ],	//项目汇报列表
+	 *             "detailPic":"",	//详情图片
+	 *             "beneficiary":"",	//负责人
+	 *             "creditCard":""	//银行卡
 	 *         },
 	 *         "broadCast":[
 	 *
 	 *         ],
-	 *         "isMine":true,
-	 *         "isFund":false
+	 *         "isMine":false,	//是否是我发布的
+	 *         "isFund":false	//是否为基金
 	 *     }
 	 * @return
 	 */
@@ -274,7 +274,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("bill/out")
-	public AjaxResult billOut(Long serviceId, Integer pageNum, Integer pageSize) {
+	public AjaxResult billOut(@RequestParam Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		try {
@@ -354,4 +354,58 @@ public class CsqServiceController {
 		return result;
 	}
 
+	/**
+	 * 项目汇报列表
+	 * @param serviceId  项目编号
+	 * @param pageNum  页码
+	 * @param pageSize  大小
+	 * @return
+	 */
+	@RequestMapping("reportList")
+	public AjaxResult reportList(Long serviceId, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("项目汇报列表, serviceId={}, pageNum={}, pageSize={}", serviceId, pageNum, pageSize);
+			QueryResult<CsqServiceReportVo> queryResult = csqServiceService.reportList(serviceId, pageNum, pageSize);
+			result.setData(queryResult);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "项目汇报列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("项目汇报列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 捐助记录列表
+	 * @param serviceId
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	@RequestMapping("donate/list")
+	public AjaxResult donateList(Long serviceId, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			log.info("捐助记录列表, userId={}, serviceId={}, pageNum={}, pageSize={}", userId, serviceId, pageNum, pageSize);
+			csqServiceService.donateList(serviceId, pageNum, pageSize);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "捐助记录列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("捐助记录列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
 }

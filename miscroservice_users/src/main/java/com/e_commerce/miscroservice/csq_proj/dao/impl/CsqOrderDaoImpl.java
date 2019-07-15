@@ -178,4 +178,11 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getStatus, Status));
 	}
 
+	@Override
+	public List<TCsqOrder> selectInIds(List<Long> orderIds) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getId, orderIds)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
 }

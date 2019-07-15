@@ -17,6 +17,8 @@ import java.util.List;
 @Data(matchSuffix = true)
 public class CsqServiceDetailVo extends CsqServiceListVo {
 
+	private Integer raiseStatus;	//筹备状态
+
 	@Transient
 	private List<CsqBasicUserVo> donaters;	//捐助人列表
 

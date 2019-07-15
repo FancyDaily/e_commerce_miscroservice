@@ -11,6 +11,7 @@ import java.util.Map;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import org.apache.commons.collections.bag.SynchronizedSortedBag;
 
 
 /**
@@ -543,9 +544,10 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(yyyymmddToTime("20190801"));
-		String yyMMdd = timeStamp2Date(System.currentTimeMillis(), "yyyyMMdd HHmm");
-		System.out.println(yyMMdd);
+		long currentTimeMillis = System.currentTimeMillis();
+		System.out.println(currentTimeMillis);
+		System.out.println(interval);
+		System.out.println(timestamp2Days(currentTimeMillis / interval));
     }
 
 	public static int getContinueDayCnt(List<Long> createTimeList) {
@@ -560,5 +562,10 @@ public class DateUtil {
 			count ++;
 		}
 		return count;
+	}
+
+	public static int timestamp2Days(long time) {
+		Long longVal = time / interval;
+    	return longVal.intValue();
 	}
 }

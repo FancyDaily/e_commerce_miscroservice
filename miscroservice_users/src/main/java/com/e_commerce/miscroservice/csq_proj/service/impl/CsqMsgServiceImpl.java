@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqMsgDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,9 +54,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqSysMsg> tCsqSysMsgs;
 		if (isUnread) {
-			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsRead(userId, CsqSysMsgEnum.IS_READ_FALSE.getCode());
+			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsReadDesc(userId, CsqSysMsgEnum.IS_READ_FALSE.getCode());
 		} else {
-			tCsqSysMsgs = csqMsgDao.selectByUserId(userId);
+			tCsqSysMsgs = csqMsgDao.selectByUserIdDesc(userId);
 		}
 		//如果为"收到一个项目"类型，查询项目
 		List<Long> serviceIds = tCsqSysMsgs.stream()
@@ -64,6 +66,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 		List<CsqSysMsgVo> resultList = tCsqSysMsgs.stream()
+//			.sorted(Comparator.comparing(TCsqSysMsg::getCreateTime))
 			.map(a -> {
 				CsqSysMsgVo csqSysMsgVo = a.copyCsqSysMsgVo();
 				String dateString = DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd");
@@ -113,6 +116,20 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Override
 	public void insert(Long operatorId, TCsqSysMsg csqSysMsg) {
+		//check参数
+		Integer type = csqSysMsg.getType();
+		if(CsqSysMsgEnum.TYPE_SREVICE.getCode() ==  type && csqSysMsg.getServiceId() == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当为项目类型时，serviceId不能为空!");
+		}
+
+		if(CsqSysMsgEnum.TYPE_NORMAL.getCode() == type && StringUtil.isAnyEmpty(csqSysMsg.getTitle(), csqSysMsg.getContent())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当为普通类型时，title，content不能为空!");
+		}
+
+		String title = csqSysMsg.getTitle();
+		title = title == null? "收到一个项目": title;	//默认项目类型消息名称
+		csqSysMsg.setTitle(title);
+
 		List<TCsqSysMsg> toInserter = new ArrayList<>();
 		//check operator
 

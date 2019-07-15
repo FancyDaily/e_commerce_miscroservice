@@ -2,11 +2,14 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -84,4 +87,22 @@ public interface CsqServiceService {
 	void synchronizeService(Long fundId);
 
 	void synchronizeService(TCsqFund csqFund);
+
+	/**
+	 * 项目汇报列表
+	 * @param serviceId
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	QueryResult<CsqServiceReportVo> reportList(Long serviceId, Integer pageNum, Integer pageSize);
+
+	/**
+	 * 捐助记录列表
+	 * @param serviceId
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	List<CsqDonateRecordVo> donateList(Long serviceId, Integer pageNum, Integer pageSize);
 }

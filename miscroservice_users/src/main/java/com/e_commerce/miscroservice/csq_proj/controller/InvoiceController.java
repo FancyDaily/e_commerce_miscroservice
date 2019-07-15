@@ -33,7 +33,7 @@ public class InvoiceController {
 	/**
 	 * 申请开票
 	 *
-	 * @param type      类型
+	 * @param type      类型 0个人 1企业
 	 * @param name      名字
 	 * @param taxNo     税号
 	 * @param addr      地址

@@ -34,4 +34,22 @@ public interface CsqPaymentDao {
 	 * @param build
 	 */
 	int insert(TCsqUserPaymentRecord... build);
+
+	/**
+	 * 获取用户所有收支
+	 * @param userId
+	 * @return
+	 */
+	List<TCsqUserPaymentRecord> selectByUserId(Long userId);
+	List<TCsqUserPaymentRecord> selectByUserIdDesc(Long userId);
+
+	/**
+	 * 获取收入或支出
+	 * @param userId
+	 * @param option
+	 * @return
+	 */
+	List<TCsqUserPaymentRecord> selectByUserIdAndInOrOut(Long userId, Integer option);
+	List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDesc(Long userId, Integer option);
+
 }

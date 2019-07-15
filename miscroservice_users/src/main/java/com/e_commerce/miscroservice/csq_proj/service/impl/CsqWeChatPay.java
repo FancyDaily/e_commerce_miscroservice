@@ -1,7 +1,8 @@
-package com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat;
+package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.CsqWechatConstant;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,13 +26,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @Log
-public class WeChatPay {
+public class CsqWeChatPay {
 
 	@Autowired
 	private CsqOrderDao csqOrderDao;
 
 	private DecimalFormat decimalFormat = new DecimalFormat("0");
-
+	
 	private static final  int MAX_CAP=1_000;
 	private static Map<String, String> openIdCache = new ConcurrentHashMap<>(MAX_CAP);
 
@@ -50,9 +51,9 @@ public class WeChatPay {
 		}
 		StringBuilder params = new StringBuilder();
 		params.append("secret=");
-		params.append(ConstantUtil.APP_SECRET);
+		params.append(CsqWechatConstant.APP_SECRET);
 		params.append("&appid=");
-		params.append(ConstantUtil.APP_ID);
+		params.append(CsqWechatConstant.APP_ID);
 		params.append("&grant_type=authorization_code");
 		params.append("&code=");
 		params.append(code);
@@ -166,7 +167,6 @@ public class WeChatPay {
 		return xmlToMap(strXML);
 	}
 
-
 	/**
 	 * 获取请求参数
 	 *
@@ -177,8 +177,8 @@ public class WeChatPay {
 	 */
 	public Map<String, String> createAppParam(String orderNo, Double payCount) throws Exception {
 		SortedMap<String, String> param = new TreeMap<>();
-		param.put("appid", ConstantUtil.APP_ID);
-		param.put("partnerid", ConstantUtil.APP_ID);
+		param.put("appid", CsqWechatConstant.APP_ID);
+		param.put("partnerid", CsqWechatConstant.APP_ID);
 		param.put("prepayid", createPay(orderNo, payCount, null).get("prepay_id"));
 		param.put("package", "Sign=WXPay");
 		String ten_time = String.valueOf(System.currentTimeMillis());
@@ -206,7 +206,7 @@ public class WeChatPay {
 	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
 		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
 		SortedMap<String, String> param = new TreeMap<>();
-		param.put("appId", ConstantUtil.APP_ID);
+		param.put("appId", CsqWechatConstant.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
 		param.put("timeStamp", ten_time.substring(0, 10));
 		param.put("package", "prepay_id=" + createPay(orderNo, payCount, request, attach).get("prepay_id"));
@@ -224,7 +224,7 @@ public class WeChatPay {
 
 		//一些返还给前端的参数(如果需要
 		SortedMap<String, String> param = new TreeMap<>();
-		/*param.put("appId", ConstantUtil.APP_ID);
+		/*param.put("appId", CsqWechatConstant.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
 		param.put("timeStamp", ten_time.substring(0, 10));
 		param.put("package", "prepay_id=" + createRefund(orderNo, payCount, request, attach).get("prepay_id"));
@@ -263,9 +263,9 @@ public class WeChatPay {
 			openId = getOpenId(request);
 		}
 		String output = getOrderRequestXml(orderNo, payCount, openId, attach);
-		String json = httpsRequest(ConstantUtil.GATEURL, "POST", output);
+		String json = httpsRequest(CsqWechatConstant.GATEURL, "POST", output);
 		Map resultMap = xmlToMap(json);
-		log.info("sing_info",resultMap);
+		log.info("sing_info",resultMap.toString());
 		return resultMap;
 	}
 
@@ -276,7 +276,7 @@ public class WeChatPay {
 
 		}
 		String output = getRefundRequestXml(orderNo, payCount, payCount, attach);
-		String json = httpsRequest(ConstantUtil.REFUND_URL, "POST", output);
+		String json = httpsRequest(CsqWechatConstant.REFUND_URL, "POST", output);
 		Map resultMap = xmlToMap(json);
 		log.info("sing_info",resultMap);
 		return resultMap;
@@ -311,10 +311,10 @@ public class WeChatPay {
 	private String getRefundRequestXml(String orderNo, Double payCount, Double refundFee, String reFundDesc) {
 		//构建请求参数Map
 		SortedMap<String, String> param = new TreeMap<>();
-		param.put("appid", ConstantUtil.APP_ID);
-		param.put("mch_id", ConstantUtil.MCH_ID);
+		param.put("appid", CsqWechatConstant.APP_ID);
+		param.put("mch_id", CsqWechatConstant.MCH_ID);
 		param.put("nonce_str", System.currentTimeMillis() + "");
-		param.put("notify_url", ConstantUtil.NOTIFY_URL_REFUD);
+		param.put("notify_url", CsqWechatConstant.NOTIFY_URL_REFUD);
 		param.put("out_trade_no", orderNo);
 		String refundOrderNo = "RF" + orderNo;
 		param.put("out_refund_no", refundOrderNo);
@@ -331,13 +331,13 @@ public class WeChatPay {
 		if(attach != null) {
 			param.put("attach", attach);
 		}
-		param.put("appid", ConstantUtil.APP_ID);
+		param.put("appid", CsqWechatConstant.APP_ID);
 		param.put("body", "商店支付");
 		param.put("device_info", "WEB");
-		param.put("mch_id", ConstantUtil.MCH_ID);
+		param.put("mch_id", CsqWechatConstant.MCH_ID);
 		param.put("nonce_str", System.currentTimeMillis() + "");
-		param.put("notify_url", ConstantUtil.NOTIFY_URL);
-		log.info(ConstantUtil.NOTIFY_URL);
+		param.put("notify_url", CsqWechatConstant.NOTIFY_URL);
+		log.info(CsqWechatConstant.NOTIFY_URL);
 		param.put("out_trade_no", orderNo);
 		param.put("spbill_create_ip", "127.0.0.1");
 
@@ -370,7 +370,7 @@ public class WeChatPay {
 
 		}
 		sb.append("mainKey=");
-		sb.append(ConstantUtil.APP_KEY);
+		sb.append(CsqWechatConstant.APP_KEY);
 
 
 		if (isWeb) {
@@ -412,8 +412,8 @@ public class WeChatPay {
 
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new WeChatPay().createAppParam(System.currentTimeMillis()+"",12D));
-		System.out.println(new WeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&mainKey=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
+		System.out.println(new CsqWeChatPay().createAppParam(System.currentTimeMillis()+"",12D));
+		System.out.println(new CsqWeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&mainKey=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
 		;
 
 	}

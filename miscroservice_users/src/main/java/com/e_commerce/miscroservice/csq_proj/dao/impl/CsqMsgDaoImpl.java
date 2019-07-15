@@ -57,4 +57,21 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 	public int insert(List<TCsqSysMsg> toInserter) {
 		return MybatisPlus.getInstance().save(toInserter);
 	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdAndIsReadDesc(Long userId, int code) {
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqSysMsg::getUserId, userId)
+			.eq(TCsqSysMsg::getIsRead, code)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime)));
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdDesc(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqSysMsg::getUserId, userId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime)));
+	}
 }

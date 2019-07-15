@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -158,7 +159,11 @@ public class CsqMsgController {
 	 */
 	@Consume(CsqSysMsgVo.class)
 	@RequestMapping("insert")
-	public AjaxResult insert(Long userId, String title, String content, Long serviceId, Integer type) {
+	public AjaxResult insert(Long userId,
+							 String title,
+							 String content,
+							 Long serviceId,
+							 @RequestParam Integer type) {
 		AjaxResult result = new AjaxResult();
 		Long operatorId = UserUtil.getTestId();
 		CsqSysMsgVo vo = (CsqSysMsgVo) ConsumeHelper.getObj();

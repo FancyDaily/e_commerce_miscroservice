@@ -21,7 +21,9 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -180,12 +182,25 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 						.reduce(0d, Double::sum);
 				}
 				a.setSumTotalPayMine(reduce);
+				double doubleVal = a.getExpectedAmount()==0? 0: a.getSumTotalIn() / a.getExpectedAmount();
+				String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
+				a.setDonePercent(donePercent);
+				a.setDonaterCnt(a.getTotalInCnt());
 				return a.copyCsqServiceListVo();
 			})
 			.collect(Collectors.toList());
 		result.setTotalCount(startPage.getTotal());
 		result.setResultList(csqServices);
 		return result;
+	}
+	
+	public static void main(String[] args) {
+		double experission = 0.5d / 4.0d;
+		BigDecimal bigDecimal = new BigDecimal(experission);
+		int i = (int) bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue() * 100;
+		System.out.println(i);
+		String format = DecimalFormat.getPercentInstance().format(experission).replaceAll("%", "");
+		System.out.println(format);
 	}
 
 	@Override
@@ -206,6 +221,13 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			isFund = true;
 			Long fundId = tCsqService.getFundId();
 			CsqFundVo csqFundVo = csqFundService.fundDetail(fundId);
+			//TODO 筹备状态
+			Integer raiseStatus = 0;	//未公开
+			Integer status = csqFundVo.getStatus();	//五种状态归约成两种
+			if(CsqFundEnum.STATUS_PUBLIC.getVal() == status) {
+				raiseStatus = 1;	//已公开
+			}
+			csqFundVo.setRaiseStatus(raiseStatus);
 			resultMap.put("serviceVo", csqFundVo);
 			//基金没有播报信息
 		} else {
@@ -260,24 +282,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				}).collect(Collectors.toList());
 			tCsqService.setDonaters(donaterList);
 			//捐助列表
-			List<Long> userIds = tCsqUserPaymentRecords.stream()
-				.map(TCsqUserPaymentRecord::getUserId)
-				.collect(Collectors.toList());
-			List<TCsqUser> tCsqUsers = userIds.isEmpty()? new ArrayList<>(): userDao.selectInIds(userIds);
-			Map<Long, List<TCsqUser>> collect = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
-			List<TCsqUserPaymentRecord> csqUserPaymentRecords = tCsqUserPaymentRecords.stream()
-				.map(a -> {
-						Timestamp createTime = a.getCreateTime();
-						long interval = System.currentTimeMillis() - createTime.getTime();
-						int minutes = DateUtil.millsToMinutes(interval);
-						List<TCsqUser> tCsqUsers1 = collect.get(a.getUserId());
-						if (tCsqUsers1 != null) {
-							TCsqUser tCsqUser = tCsqUsers1.get(0);
-							tCsqUser.setMinutesAgo(minutes);
-						}
-						return a;
-					}
-				).collect(Collectors.toList());
+			List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
+
 			tCsqService.setCsqUserPaymentRecords(csqUserPaymentRecords);
 			//查询所有项目汇报
 			List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDesc(serviceId);
@@ -291,6 +297,13 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			List<CsqServiceReportVo> collect2 = csqServiceReports.stream()
 				.map(a -> a.copyCsqServiceReportVo()).collect(Collectors.toList());
 			csqServiceDetailVo.setCsqServiceReportVos(collect2);
+			//TODO 筹备状态
+			Integer raiseStatus = 0;	//筹备中
+			Double expectedAmount = csqServiceDetailVo.getExpectedAmount();	//目标金额
+			boolean isFull = sumTotalIn >= expectedAmount;
+//			boolean isDone = isFull && surplusAmount==0;
+			raiseStatus = isFull? 1: raiseStatus;
+			csqServiceDetailVo.setRaiseStatus(raiseStatus);
 			resultMap.put("serviceVo", csqServiceDetailVo);
 
 			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
@@ -434,26 +447,6 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqOrderDao.update(tCsqOrder);
 	}
 
-	public static void main(String[] args) {
-		LimitQueue<TCsqService> ObjectList = new LimitQueue(2);
-		TCsqService sdad = TCsqService.builder().name("sdad").build();
-		TCsqService adada = sdad;
-		adada.setName("adada");
-		TCsqService serv123 = new TCsqService();
-		serv123.setName("serv123");
-		ObjectList.offer(adada);
-		System.out.println("----------------");
-		ObjectList.stream().forEach(a -> System.out.println(a.getName()));
-		ObjectList.offer(serv123);
-		System.out.println("----------------");
-		ObjectList.stream().forEach(a -> System.out.println(a.getName()));
-		TCsqService csqService = new TCsqService();
-		csqService.setName("new TCsqService");
-		ObjectList.offer(csqService);
-		System.out.println("----------------");
-		ObjectList.stream().forEach(a -> System.out.println(a.getName()));
-	}
-
 	@Override
 	public void checkPubAuth(Long userId) {
 		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
@@ -485,6 +478,56 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqService.setCoverPic(csqFund.getCoverPic());
 		csqService.setDescription(csqFund.getDescription());
 		csqServiceDao.update(csqService);
+	}
+
+	@Override
+	public QueryResult<CsqServiceReportVo> reportList(Long serviceId, Integer pageNum, Integer pageSize) {
+		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDesc(serviceId);
+		List<CsqServiceReportVo> voList = csqServiceReports.stream()
+			.map(a -> {
+				CsqServiceReportVo csqServiceReportVo = a.copyCsqServiceReportVo();
+				csqServiceReportVo.setDate(com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(a.getCreateTime().getTime()));
+				return csqServiceReportVo;
+			}).collect(Collectors.toList());
+		QueryResult<CsqServiceReportVo> queryResult = new QueryResult<>();
+		queryResult.setResultList(voList);
+		queryResult.setTotalCount(startPage.getTotal());
+		return queryResult;
+	}
+
+	@Override
+	public List<CsqDonateRecordVo> donateList(Long serviceId, Integer pageNum, Integer pageSize) {
+		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
+
+		List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
+
+		QueryResult result = new QueryResult();
+		result.setResultList(csqUserPaymentRecords);
+		result.setTotalCount(startPage.getTotal());
+		return null;
+	}
+
+	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+		List<Long> userIds = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getUserId)
+			.collect(Collectors.toList());
+		List<TCsqUser> tCsqUsers = userIds.isEmpty() ? new ArrayList<>() : userDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> collect = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
+		return tCsqUserPaymentRecords.stream()
+			.map(a -> {
+					Timestamp createTime = a.getCreateTime();
+					long interval = System.currentTimeMillis() - createTime.getTime();
+					int minutes = DateUtil.millsToMinutes(interval);
+					List<TCsqUser> tCsqUsers1 = collect.get(a.getUserId());
+					if (tCsqUsers1 != null) {
+						TCsqUser tCsqUser = tCsqUsers1.get(0);
+						tCsqUser.setMinutesAgo(minutes);
+					}
+					return a;
+				}
+			).collect(Collectors.toList());
 	}
 
 	private void checkPubAuth(TCsqUser user) {

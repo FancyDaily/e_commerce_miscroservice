@@ -22,13 +22,12 @@ public class CsqFundVo {
 
 	List<TCsqOrder> goToList;	//去向(捐助项目记录)
 
+	private Integer raiseStatus;	//筹备状态
+
 	@Id
 	private Long id;
 
 	private Long userId;
-
-	@Transient
-	private Integer totalToItemCnt;	//累积资助项目
 
 	@Column(commit = "累积资助项目次数", defaultVal = "0")
 	private Integer helpCnt;

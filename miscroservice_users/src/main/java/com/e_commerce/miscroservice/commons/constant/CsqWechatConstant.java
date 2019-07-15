@@ -12,12 +12,12 @@ public class CsqWechatConstant {
 	/**
 	 * 微信开发平台应用ID
 	 */
-	public static String APP_ID = "wxb8edf6df645eb4e5";
+	public static String APP_ID = "wx77a8c12808edf5b9";
 	/**
 	 *
 	 * 微信开发平台应用app_secret
 	 */
-	public static String APP_SECRET = "39f5d00a3fb73d82e817525564f99b25";
+	public static String APP_SECRET = "9e003f827136566c620d94a6817d4b42";
 
 	/**
 	 * 应用对应的密钥
@@ -27,7 +27,7 @@ public class CsqWechatConstant {
 	/**
 	 * 微信支付商户号
 	 */
-	public static final String MCH_ID = "1536688811";
+	public static final String MCH_ID = "1230977302";
 
 	/**
 	 * 获取预支付id的接口url
@@ -35,11 +35,21 @@ public class CsqWechatConstant {
 	public static String GATEURL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 
 	/**
+	 * 向微信发起退款的接口url
+	 */
+	public static String REFUND_URL = "https://api.mch.weixin.qq.com/secapi/pay/refund";
+
+	/**
 	 * 微信服务器回调通知url
 	 */
-	public static String NOTIFY_URL = "";
+	public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/csq/pay/wxNotify/pay";
 
-//	@Value("${csq.notify.url}")
+	/**
+	 * 退款回调通知url
+	 */
+	public static String NOTIFY_URL_REFUD;
+
+	@Value("${csq.notify.url}")
 	private void setNotifyUrl(String value) {
 		NOTIFY_URL = value;
 	}

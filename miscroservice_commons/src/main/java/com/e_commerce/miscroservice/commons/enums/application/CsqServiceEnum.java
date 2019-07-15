@@ -6,8 +6,8 @@ package com.e_commerce.miscroservice.commons.enums.application;
  */
 public enum CsqServiceEnum {
 
-	TYPE_SERIVE(0, "项目-类型"),
-	TYPE_FUND(1, "项目-基金"),
+	TYPE_SERIVE(0, "类型-项目"),
+	TYPE_FUND(1, "类型-基金"),
 	STATUS_UNDER_CERT(-1, "待审核"),
 	STATUS_INITIAL(0, "初始状态");
 

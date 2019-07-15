@@ -157,6 +157,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	@Override
 	public CsqUserInvoiceVo invoiceDetail(Long userId, Long invoiceId) {
 		TCsqUserInvoice tCsqUserInvoice = csqUserInvoiceDao.selectByPrimaryKey(invoiceId);
+		if(tCsqUserInvoice == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的发票编号！");
+		}
 		tCsqUserInvoice.setRecordCnt(tCsqUserInvoice.getOrderNos().length());
 		return tCsqUserInvoice.copyCsqUserInvoice();
 	}

@@ -13,10 +13,7 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
+import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -87,7 +84,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在");
 		}
 		Integer authenticationStatus = user.getAuthenticationStatus();
-		if (!UserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(authenticationStatus)) {
+		if (!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(authenticationStatus)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
 		}
 	}
@@ -155,11 +152,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		//重复提交判断
 		List<TCsqUserAuth> existList = csqUserAuthDao.selectByUserIdAndStatus(userId, CsqUserAuthEnum.STATUS_UNDER_CERT.getCode());
-		if(!existList.isEmpty()) {
+		if (!existList.isEmpty()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已存在待审核的实名认证记录!");
 		}
 		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode());    //待审核(默认)
-		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_CERT_PASS.getCode());	//审核通过
+		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_CERT_PASS.getCode());    //审核通过
 		csqUserAuthDao.insert(csqUserAuth);
 		//TODO 若提交即实名，此处将用户实名状态改变
 		tCsqUser.setAuthenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode());
@@ -167,24 +164,36 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String,Object> findCsqUserById(Long userId) {
+	public Map<String, Object> findCsqUserById(Long userId) {
 		TCsqUser tCsqUser = csqUserDao.selectByPrimaryKey(userId);
-		List<TCsqFund>  list = csqFundDao.selectByUserId(userId);
-		Map<String,Object> map = new HashMap<>();
+		List<TCsqFund> list = csqFundDao.selectByUserIdAndNotEqStatus(userId, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
+		Map<String, Object> map = new HashMap<>();
 		Integer status = 0;
 		Double balance = 0D;
-		if (list!=null&&list.size()>0){
+		TCsqFund tCsqFund = null;
+		if (list != null && list.size() > 0) {
+			tCsqFund = list.get(0);
 			status = list.get(0).getStatus();
 			balance = list.get(0).getBalance();
 		}
-		map.put("balance",balance);
-		map.put("status",status);
-		map.put("name",tCsqUser.getName());
-		map.put("userHeadPortraitPath",tCsqUser.getUserHeadPortraitPath());
-		map.put("remarks",tCsqUser.getRemarks());
-		map.put("surplusAmount",tCsqUser.getSurplusAmount());
-		// TODO: 2019-06-20 捐款总额
-		map.put("accountMoney",tCsqUser.getSurplusAmount());
+//		map.put("name", tCsqUser.getName());	//姓名
+//		map.put("userHeadPortraitPath", tCsqUser.getUserHeadPortraitPath());
+//		map.put("remarks", tCsqUser.getRemarks());
+//		map.put("existDays", null);
+
+		//获取累积捐助总额
+		List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectByUserIdAndInOrOut(userId, CsqUserPaymentEnum.INOUT_OUT.toCode());//我的总支出(平台内捐助	//或修改成到他人的项目或基金
+		Double reduce = userPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getMoney)
+			.reduce(0d,Double::sum);
+
+		map.put("sumDonate", reduce);	//我的累积捐款总额
+		map.put("surplusAmount", tCsqUser.getSurplusAmount());	//账户余额
+		Double sumTotalIn = tCsqFund.getSumTotalIn();
+		Double publicMinimum = CsqFundEnum.PUBLIC_MINIMUM;
+		map.put("sumTotalIn", sumTotalIn > publicMinimum? publicMinimum :sumTotalIn);	//基金账户筹备累积
+		map.put("expected", publicMinimum);	//期望金额
+		map.put("status", status);		//基金账户状态
 		return map;
 	}
 
@@ -264,10 +273,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		//审核记录状态修改
 		TCsqUserAuth userAuth = csqUserAuthDao.selectByPrimaryKey(userAuthId);
-		if(userAuth == null) {
+		if (userAuth == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该审核记录不存在！");
 		}
-		if(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode() != userAuth.getStatus()) {
+		if (CsqUserAuthEnum.STATUS_UNDER_CERT.getCode() != userAuth.getStatus()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前审核状态不正确！");
 
 		}
@@ -292,7 +301,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.collect(Collectors.toList());
 		int continueDayCnt = DateUtil.getContinueDayCnt(createTimeList);
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
-		if(csqService == null) {
+		if (csqService == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前没有可以推荐的项目");
 		}
 		CsqDailyDonateVo csqDailyDonateVo = csqService.copyCsqDailyDonateVo();
@@ -343,7 +352,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public void customizeDailyDonateList(Integer weekDayCnt, Long... serviceIds) {
-		if(weekDayCnt != null && (weekDayCnt < 0 || weekDayCnt > 7)) {
+		if (weekDayCnt != null && (weekDayCnt < 0 || weekDayCnt > 7)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的周号!");
 		}
 
@@ -353,17 +362,17 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		// 获取Map
 		Map<Long, Long> dailyDonateMap = csqPublishService.getPublishName(CsqPublishEnum.MAIN_KEY_DAILY_DONATE.toCode());
-		if(weekDayCnt == null && serviceIds.length == 7) {	//一次定制所有
+		if (weekDayCnt == null && serviceIds.length == 7) {    //一次定制所有
 			//按顺序覆盖元数据
-			for(int i=0; i<serviceIds.length; i++) {
+			for (int i = 0; i < serviceIds.length; i++) {
 				Long key = 1L + i;
-				dailyDonateMap.put(key, serviceIds[i]);	//替换元数据
+				dailyDonateMap.put(key, serviceIds[i]);    //替换元数据
 			}
 			csqPublishService.setPublishName(CsqPublishEnum.MAIN_KEY_DAILY_DONATE.toCode(), dailyDonateMap);
 			return;
 		}
 
-		if(weekDayCnt != null && serviceIds.length == 1) {	//定制某一天
+		if (weekDayCnt != null && serviceIds.length == 1) {    //定制某一天
 			dailyDonateMap.put(Long.valueOf(weekDayCnt), serviceIds[0]);
 			csqPublishService.setPublishName(CsqPublishEnum.MAIN_KEY_DAILY_DONATE.toCode(), dailyDonateMap);
 			return;
@@ -383,12 +392,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public Map<String, Object> share(Long userId, Long entityId, Integer option) {
 		final int OPTION_PERSON = 0;
 		final int OPTION_FUND = 1;
-		if(option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND).contains(option)) {
+		if (option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND).contains(option)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
 		}
 		Map<String, Object> map = new HashMap<>();
-		String scene = userId + entityId + UUID.randomUUID().toString();	//随机数
-		String page = "";		//从配置文件读取
+		String scene = userId + entityId + UUID.randomUUID().toString();    //随机数
+		String page = "";        //从配置文件读取
 		CsqShareVo vo = null;
 		UploadPathEnum.innerEnum uploadEnum = null;
 		//VO initialize
@@ -402,12 +411,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 				vo.setCurrentAmont(csqFund.getSumTotalIn());
 				vo.setExpectedAmount(CsqFundEnum.PUBLIC_MINIMUM);
 				Integer status = csqFund.getStatus();
-				if(CsqFundEnum.STATUS_PUBLIC.getVal() != status) {	//未公开
+				if (CsqFundEnum.STATUS_PUBLIC.getVal() != status) {    //未公开
 					// 获取捐献记录列表
 					List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 					List<Long> userIds = tCsqOrders.stream()
 						.map(TCsqOrder::getUserId).collect(Collectors.toList());
-					List<TCsqUser> tCsqUsers = userIds.isEmpty()? new ArrayList<>() : csqUserDao.selectInIds(userIds);
+					List<TCsqUser> tCsqUsers = userIds.isEmpty() ? new ArrayList<>() : csqUserDao.selectInIds(userIds);
 					Map<Long, List<TCsqUser>> userMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
 					List<CsqDonateRecordVo> donateRecordVos = tCsqOrders.stream()
 						.map(a -> {
@@ -441,7 +450,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 					.distinct()    //去重
 					.count();
 				vo.setDonateSum(totalDonate);
-				vo.setDonateCnt((int)serviceCnt);
+				vo.setDonateCnt((int) serviceCnt);
 				uploadEnum = UploadPathEnum.innerEnum.CSQ_PERSON;
 				break;
 		}
@@ -455,14 +464,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Override
 	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		//check入餐
-		if(fromId==null || fromType==null || amount==null) {
+		if (fromId == null || fromType == null || amount == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数为空!");
 		}
 		Map<Integer, List<CsqEntityTypeEnum>> enumMap = Arrays.stream(CsqEntityTypeEnum.values())
 			.filter(a -> a.name().startsWith("TYPE_"))
 			.collect(Collectors.groupingBy(CsqEntityTypeEnum::toCode));
 		List<CsqEntityTypeEnum> cSqUserPaymentEnums = enumMap.get(fromType);
-		if(cSqUserPaymentEnums == null) {
+		if (cSqUserPaymentEnums == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的类型!");
 		}
 
@@ -470,13 +479,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//check用户权限
 
 		//如果为基金，确认基金已经设置为托管(维持一段时间？)
-		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
+		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
-			if(csqFund == null) {
+			if (csqFund == null) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
 			}
 			Integer agentModeStatus = csqFund.getAgentModeStatus();
-			if(CsqFundEnum.AGENT_MODE_STATUS_ON.getVal() != agentModeStatus) {
+			if (CsqFundEnum.AGENT_MODE_STATUS_ON.getVal() != agentModeStatus) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前基金未设置托管!");
 			}
 		}
@@ -491,20 +500,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 		boolean fund = CsqEntityTypeEnum.TYPE_FUND.toCode() == cSqUserPaymentEnum.toCode();
 		boolean service = CsqEntityTypeEnum.TYPE_SERVICE.toCode() == cSqUserPaymentEnum.toCode();
 		String suffix = "";
-		if(fund) {
+		if (fund) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
 			ownerId = csqFund.getUserId();
 			name = csqFund.getName();
 			suffix = "基金";
 		}
 
-		if(service) {
+		if (service) {
 			TCsqService csqService = csqServiceDao.selectByPrimaryKey(fromId);
 			ownerId = csqService.getUserId();
 			name = csqService.getName();
 			suffix = "项目";
 		}
-		if(StringUtil.isEmpty(wholeDescription)) {
+		if (StringUtil.isEmpty(wholeDescription)) {
 			description = "从" + name + suffix + "拨款";
 		}
 		TCsqUserPaymentRecord build = TCsqUserPaymentRecord.builder()
@@ -538,8 +547,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public Map<String, Object> registerBySMS(String telephone, String validCode, Integer type) {
-		if(!Arrays.stream(CsqUserEnum.values()).filter(a -> a.name().startsWith("ACCOUNT_TYPE_")).map(a -> a.toCode()).collect(Collectors.toList()).contains(type)) {
-				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数type不正确!");
+		if (!Arrays.stream(CsqUserEnum.values()).filter(a -> a.name().startsWith("ACCOUNT_TYPE_")).map(a -> a.toCode()).collect(Collectors.toList()).contains(type)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数type不正确!");
 		}
 
 		//check
@@ -547,7 +556,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		//check手机号是否已经使用
 		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
-		if(csqUser != null) {
+		if (csqUser != null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该手机号已经注册!");
 		}
 
@@ -557,7 +566,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser register = register(build);
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("user",  build);
+		map.put("user", build);
 		map.put("token", register.getToken());
 		return map;
 	}
@@ -567,7 +576,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		userService.checkSMS(telephone, validCode);
 		//登录
 		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
-		if(csqUser == null) {
+		if (csqUser == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "账号不存在!");
 		}
 		csqUser.setUuid(uuid);
@@ -583,14 +592,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Override
 	public void modify(Long userId, CsqBasicUserVo csqBasicUserVo) {
 		//修改昵称和简介
-		String name = csqBasicUserVo.getName();
+		/*String name = csqBasicUserVo.getName();
 		String remarks = csqBasicUserVo.getRemarks();
 		TCsqUser build = TCsqUser.builder()
 			.id(userId)
 			.name(name)
 			.remarks(remarks)
-			.build();
-		csqUserDao.updateByPrimaryKey(build);
+			.build();*/
+		TCsqUser csqUser = csqBasicUserVo.copyTCsqUser();
+		csqUser.setId(userId);
+		csqUserDao.updateByPrimaryKey(csqUser);
 	}
 
 	@Override
@@ -600,13 +611,44 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//获取实名认证的一些
 		Integer accountType = csqUser.getAccountType();
 		TCsqUserAuth userAuth = null;
-		if(CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode().equals(accountType)) {	//用户类型确认
+		boolean isPerson = CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode().equals(accountType);
+		if (isPerson) {    //用户类型确认
 			userAuth = csqUserAuthDao.selectByUserIdAndTypeAndStatus(userId, CsqUserAuthEnum.TYPE_PERSON.getCode(), CsqUserAuthEnum.STATUS_CERT_PASS.getCode());
-		} else if(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
+		} else if (CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
 			userAuth = csqUserAuthDao.selectByUserIdAndTypeAndStatus(userId, CsqUserAuthEnum.TYPE_CORP.getCode(), CsqUserAuthEnum.STATUS_CERT_PASS.getCode());
 		}
-		csqBasicUserVo.setCsqUserAuth(userAuth);
+		csqBasicUserVo.setCsqUserAuth(userAuth == null ? new CsqUserAuthVo() : userAuth.copyCsqUserAuthVo());
+		//加入小程序累积天数
+		long time = System.currentTimeMillis() - csqUser.getCreateTime().getTime();
+		csqBasicUserVo.setExistDayCnt(DateUtil.timestamp2Days(time));
+
+		//获取基金数量
+		boolean hasGotFund = false;
+//		csqFundDao.selectByUserIdAndInStatus(userId, Arrays.asList(CsqFundEnum.STATUS_PUBLIC.getVal(), CsqFundEnum.STATUS_CERT_FAIL.getVal(), CsqFundEnum.STATUS_ACTIVATED.getVal(), CsqFundEnum.STATUS_UNDER_CERT.getVal());	//除了待激活
+		List<TCsqFund> tCsqFunds = csqFundDao.selectByUserIdAndNotEqStatus(userId, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
+		if(!tCsqFunds.isEmpty()) {
+			hasGotFund = true;
+		}
+		//获取对应的组织账号
+		//check
+		boolean hasGotCompanyAccount = false;
+		if(isPerson) {
+			TCsqUser companyUser = getCompanyAccount(csqUser);
+			if(companyUser != null) {
+				hasGotCompanyAccount = true;
+			}
+		}
+		csqBasicUserVo.setGotFund(hasGotFund);
+		csqBasicUserVo.setGotCompanyAccount(hasGotCompanyAccount);
 		return csqBasicUserVo;
+	}
+
+	private TCsqUser getCompanyAccount(TCsqUser csqUser) {
+		String openid = csqUser.getVxOpenId();
+		if(openid == null) {
+			return null;
+		}
+		return csqUserDao.selectByVxOpenIdAndAccountType(openid, CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
 	}
 
 	private TCsqUser register(TCsqUser csqUser) {

@@ -11,6 +11,9 @@ import lombok.Data;
  */
 @Data(matchSuffix = true)
 public class CsqServiceReportVo {
+
+	private String date;	//日期
+
 	@Id
 	private Long id;
 

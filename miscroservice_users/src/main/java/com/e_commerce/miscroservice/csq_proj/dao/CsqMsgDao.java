@@ -19,4 +19,8 @@ public interface CsqMsgDao {
 	int insert(TCsqSysMsg... csqSysMsg);
 
 	int insert(List<TCsqSysMsg> toInserter);
+
+	List<TCsqSysMsg> selectByUserIdAndIsReadDesc(Long userId, int code);
+
+	List<TCsqSysMsg> selectByUserIdDesc(Long userId);
 }

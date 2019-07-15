@@ -13,7 +13,11 @@ public interface CsqPaymentService {
 	 * @param userId
 	 * @return
 	 */
-	QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId);
+	QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option);
+
+	Object findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears);
+
+	QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option);
 
 	/**
 	 * 查询我的证书

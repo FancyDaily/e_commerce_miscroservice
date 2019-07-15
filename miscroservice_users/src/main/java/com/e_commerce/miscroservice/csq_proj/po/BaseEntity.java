@@ -7,7 +7,7 @@ import lombok.Data;
 
 import java.sql.Timestamp;
 @Data
-public class BaseEntity /*extends BaseMapper */{
+public class BaseEntity/* extends BaseMapper*/ {
 
 	@Column(commit = "扩展字段")
 	protected String extend;

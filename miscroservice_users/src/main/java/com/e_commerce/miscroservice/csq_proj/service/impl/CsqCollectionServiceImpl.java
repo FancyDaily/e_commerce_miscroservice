@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 		TCsqUserCollection in = new TCsqUserCollection();
 
 		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId,Long.valueOf(userId));
+		in.setId(csqUserCollection.getId());
 		if (csqUserCollection==null){
 			in.setServiceId(serviceId);
 			in.setUserId(Long.valueOf(userId));
@@ -57,7 +59,6 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			}
 			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_NO)){
 				in.setIsValid(AppConstant.IS_VALID_YES);
-				in.setId(csqUserCollection.getId());
 			}
 			Integer i = csqCollectionDao.update(in);
 			if (i==0){
@@ -93,15 +94,28 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			csqCollectionVo.setDetailPic(csqService.getDetailPic());
 			csqCollectionVo.setName(csqService.getName());
 			csqCollectionVo.setPurpose(csqService.getPurpose());
-			csqCollectionVo.setRecordId(csqService.getRecordId());
+			csqCollectionVo.setRecordNo(csqService.getRecordNo());
 			csqCollectionVo.setServiceId(csqService.getId());
 			csqCollectionVo.setSumTotalIn(csqService.getSumTotalIn());
 			csqCollectionVo.setSurplusAmount(csqService.getSurplusAmount());
+			csqCollectionVo.setType(csqService.getType());
+			csqCollectionVo.setDonateCnt(csqService.getDonaterCnt());	//人数
+			csqCollectionVo.setDonatePercent(NumberFormat.getPercentInstance().format(csqService.getExpectedAmount() == 0? 0 :csqService.getSumTotalIn() / csqService.getExpectedAmount()).replaceAll("%", ""));//进度
 			list.add(csqCollectionVo);
 		});
 
 		queryResult.setTotalCount(page.getTotal());
 		queryResult.setResultList(list);
 		return queryResult;
+	}
+
+	@Override
+	public boolean isCollection(Long userId, Long serviceId) {
+		boolean flag = false;
+		TCsqUserCollection one = csqCollectionDao.findOne(serviceId, userId);
+		if(one!=null) {
+			flag = true;
+		}
+		return flag;
 	}
 }

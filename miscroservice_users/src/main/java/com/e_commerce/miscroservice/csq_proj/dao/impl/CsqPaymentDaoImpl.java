@@ -45,11 +45,45 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	@Override
 	public Double countMoney(Long userId, Integer inOut) {
 		Double money = csqPaymentMapper.countMoney(userId,inOut);
+		money = money == null? 0:money;
 		return money;
 	}
 
 	@Override
 	public int insert(TCsqUserPaymentRecord... build) {
 		return MybatisPlus.getInstance().save(build);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserId(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdDesc(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOut(Long userId, Integer option) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getInOrOut, option)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDesc(Long userId, Integer option) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getInOrOut, option)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
+		);
 	}
 }

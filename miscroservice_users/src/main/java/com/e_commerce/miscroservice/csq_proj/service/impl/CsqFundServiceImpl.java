@@ -156,7 +156,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		//审核过程
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
-		if(CsqFundEnum.STATUS_PRIVATE.getVal() != csqFund.getStatus()) {
+		if(CsqFundEnum.STATUS_UNDER_CERT.getVal() != csqFund.getStatus()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的审核前状态!当前基金无法审核!");
 		}
 
@@ -262,7 +262,14 @@ public class CsqFundServiceImpl implements CsqFundService {
 		Page<Object> startPage = startPage(pageNum, pageSize);
 		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDesc(userId, option);
 		List<CsqFundVo> copyList = tCsqFunds.stream()
-			.map(a -> a.copyCsqFundVo()).collect(Collectors.toList());
+			.map(a -> {
+				Integer status = a.getStatus();
+				Integer raiseStatus = 0;	//筹备中
+				raiseStatus = CsqFundEnum.STATUS_PUBLIC.getVal() == status? CsqFundEnum.STATUS_PUBLIC.getVal(): raiseStatus;
+				CsqFundVo fundVo = a.copyCsqFundVo();
+				fundVo.setRaiseStatus(raiseStatus);
+				return fundVo;
+			}).collect(Collectors.toList());
 		QueryResult<CsqFundVo> tCsqFundQueryResult = new QueryResult<>();
 		tCsqFundQueryResult.setResultList(copyList);
 		tCsqFundQueryResult.setTotalCount(startPage.getTotal());

@@ -5,14 +5,8 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqPaymentDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
+import com.e_commerce.miscroservice.csq_proj.dao.*;
+import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -22,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,20 +44,97 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private CsqServiceDao csqServiceDao;
 	@Autowired
 	private CsqPaymentDao csqUserPaymentDao;
-
+	@Autowired
+	private CsqOrderDao csqOrderDao;
 
 	@Override
-	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId) {
-		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
-
+	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option) {
+		List<TCsqUserPaymentRecord> records;
 		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> records = csqPaymentDao.findWaters(userId);
-		List<CsqUserPaymentRecordVo> recordVos = records.stream()
-			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+		if(option == null) {
+			records = csqPaymentDao.selectByUserIdDesc(userId);
+		} else {
+			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
+		}
 
-		queryResult.setResultList(recordVos);
+		List<CsqUserPaymentRecordVo> collect = records.stream()
+			.map(a -> {
+				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "MM/dd"));
+				return a.copyUserPaymentRecordVo();
+			}).collect(Collectors.toList());
+
+		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
+		queryResult.setResultList(collect);
 		queryResult.setTotalCount(page.getTotal());
 		return queryResult;
+	}
+
+	@Override
+	public Object findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears) {
+		if(isGroupingByYears) {
+			return findWatersGroupingByYear(pageNum, pageSize, userId, option);
+		}
+		return findWaters(pageNum, pageSize, userId, option);
+	}
+
+	@Override
+	public QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option) {
+		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqUserPaymentRecord> records;
+		if(option == null) {
+			records = csqPaymentDao.selectByUserIdDesc(userId);
+		} else {
+			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
+		}
+
+		List<Map<String, Object>> mapList = getMapList(records);
+
+		QueryResult<Map<String, Object>> queryResult = new QueryResult<>();
+		queryResult.setResultList(mapList);
+		queryResult.setTotalCount(page.getTotal());
+		return queryResult;
+	}
+
+	private List<Map<String, Object>> getMapList(List<TCsqUserPaymentRecord> records) {
+		List<Map<String, Object>> mapList = new ArrayList<>();
+		Map<String, List<CsqUserPaymentRecordVo>> currentMap = new HashMap<>();
+
+		records.stream()
+			.forEach(a -> {
+				String year = DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy");
+				List<CsqUserPaymentRecordVo> userPaymentRecords = currentMap.get(year);
+				if (userPaymentRecords == null) {
+					userPaymentRecords = new ArrayList<>();
+				}
+				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "MM/dd"));
+				userPaymentRecords.add(a.copyUserPaymentRecordVo());
+				currentMap.put(year, userPaymentRecords);
+			});
+
+		currentMap.forEach((key, value) -> {
+			Map<String, Object> yearMap = new HashMap<>();
+			yearMap.put("year", key);
+			yearMap.put("payments", value);
+			mapList.add(yearMap);    //向mapList放入一个含有年份信息的map
+		});
+		return mapList;
+	}
+
+	private Map<String, Object> getTotalInOutNum(Long userId) {
+		Map<String, Object> map = new HashMap<>();
+		//所有收支记录
+		List<TCsqUserPaymentRecord> userPaymentRecords = csqPaymentDao.selectByUserId(userId);
+		Double in = userPaymentRecords.stream()
+			.filter(a -> CsqUserPaymentEnum.INOUT_IN.toCode() == a.getInOrOut())
+			.map(TCsqUserPaymentRecord::getMoney)
+			.reduce(0d, Double::sum);
+		Double out = userPaymentRecords.stream()
+			.filter(a -> CsqUserPaymentEnum.INOUT_OUT.toCode() == a.getInOrOut())
+			.map(TCsqUserPaymentRecord::getMoney)
+			.reduce(0d, Double::sum);
+		map.put("in", in);
+		map.put("out", out);
+		return map;
 	}
 
 	@Override

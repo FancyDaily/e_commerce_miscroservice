@@ -52,6 +52,12 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "主页背景图")
 	private String userPicturePath;
 
+	@Column(commit = "微博账号")
+	private String weiboAccount;	//微博账号
+
+	@Column(commit = "微信公众号")
+	private String wechatPubAccount;	//微信账号
+
 	@Column(commit = "微信openid")
 	private String vxOpenId;
 
@@ -95,7 +101,7 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "累积捐款总额", length = 11, defaultVal = "0")
 	private Double sumTotalPay;
 
-	@Column(commit = "爱心账户余额")
+	@Column(commit = "爱心账户余额", defaultVal = "0")
 	private Double surplusAmount;
 
 	@Column(commit = "爱心账户状态")
