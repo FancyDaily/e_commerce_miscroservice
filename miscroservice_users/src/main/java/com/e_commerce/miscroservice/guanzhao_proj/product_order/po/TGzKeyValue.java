@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -16,6 +17,7 @@ import java.sql.Timestamp;
 @Table(commit = "观照key-value表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TGzKeyValue {
 
     @Id

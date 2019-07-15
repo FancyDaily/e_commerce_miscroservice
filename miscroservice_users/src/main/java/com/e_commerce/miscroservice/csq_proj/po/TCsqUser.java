@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Author: FangyiXu
@@ -15,6 +16,7 @@ import lombok.Data;
 @Table(commit = "从善桥用户表")
 @Data(matchSuffix = true)
 @Builder
+@NoArgsConstructor
 public class TCsqUser extends BaseEntity{
 	@Id
 	private Long id;

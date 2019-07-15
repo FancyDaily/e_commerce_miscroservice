@@ -584,7 +584,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = IdUtil.getId();
+            Long id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findMyLearningSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);
@@ -617,7 +617,7 @@ public class GZSubjectController {
             return result;
         }
         try {
-            Integer id = IdUtil.getId();
+            Long id = IdUtil.getId();
             QueryResult<MyLearningSubjectVO> list = gzSubjectService.findEndingSubject(id,pageNum,pageSize);
             result.setSuccess(true);
             result.setData(list);

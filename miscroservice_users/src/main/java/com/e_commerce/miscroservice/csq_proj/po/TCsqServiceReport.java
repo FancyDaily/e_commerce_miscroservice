@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 项目汇报
@@ -15,6 +16,7 @@ import lombok.Data;
 @Table(commit = "从善桥项目汇报表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqServiceReport extends BaseEntity {
 
 	@Id

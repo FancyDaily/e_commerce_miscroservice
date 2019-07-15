@@ -14,7 +14,7 @@ public interface GZSubjectMapper {
      * @param currentTimeMillis
      * @return
      */
-    List<MyLearningSubjectVO> findMyLearningSubject(@Param("id") Integer id, @Param("currentTimeMillis") long currentTimeMillis);
+    List<MyLearningSubjectVO> findMyLearningSubject(@Param("id") Long id, @Param("currentTimeMillis") long currentTimeMillis);
 
     /**
      * 我的结束课程
@@ -22,5 +22,5 @@ public interface GZSubjectMapper {
      * @param currentTimeMillis
      * @return
      */
-    List<MyLearningSubjectVO> findEndingSubject(@Param("id") Integer id, @Param("currentTimeMillis") long currentTimeMillis);
+    List<MyLearningSubjectVO> findEndingSubject(@Param("id") Long id, @Param("currentTimeMillis") long currentTimeMillis);
 }

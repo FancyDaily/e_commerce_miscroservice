@@ -14,7 +14,7 @@ import java.util.List;
 public class GZOrderDaoImpl implements GZOrderDao {
 
     @Override
-    public List<TGzOrder> findMyOrderList(Integer id) {
+    public List<TGzOrder> findMyOrderList(Long id) {
         List<TGzOrder> list = MybatisPlus.getInstance().findAll(new TGzOrder(), new MybatisPlusBuild(TGzOrder.class)
                 .eq(TGzOrder::getUserId,id)
                 .orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TGzOrder::getCreateTime)));

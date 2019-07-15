@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @Table(commit = "从善桥key-value表")
 @Builder
+@NoArgsConstructor
 public class TCsqKeyValue extends BaseEntity {
 
 	/*public static void main(String[] args) {

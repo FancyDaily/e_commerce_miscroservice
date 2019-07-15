@@ -57,7 +57,7 @@ public interface GZSubjectService {
      * @param pageSize
      * @return
      */
-    QueryResult<MyLearningSubjectVO> findMyLearningSubject(Integer id, Integer pageNum, Integer pageSize);
+    QueryResult<MyLearningSubjectVO> findMyLearningSubject(Long id, Integer pageNum, Integer pageSize);
 
     void publish(TGzSubject gzSubject, Integer totalSeriesSize);
 
@@ -68,7 +68,7 @@ public interface GZSubjectService {
      * @param pageSize
      * @return
      */
-    QueryResult<MyLearningSubjectVO> findEndingSubject(Integer id, Integer pageNum, Integer pageSize);
+    QueryResult<MyLearningSubjectVO> findEndingSubject(Long id, Integer pageNum, Integer pageSize);
 
 	/**
 	 * 视频列表

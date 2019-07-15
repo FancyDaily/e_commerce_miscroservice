@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient
 import com.e_commerce.miscroservice.csq_proj.vo.CsqWaitToInvoiceOrderVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 涉及应用外支付的订单表
@@ -16,6 +17,7 @@ import lombok.Data;
 @Table(commit = "应用外支付的订单表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqOrder extends BaseEntity {
 
 	@Id

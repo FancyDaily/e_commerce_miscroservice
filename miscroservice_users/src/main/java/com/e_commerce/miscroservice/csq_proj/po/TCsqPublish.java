@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.handler.DbHandler;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -17,6 +18,7 @@ import java.sql.Timestamp;
 @Table(commit = "从善桥publish表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqPublish extends BaseEntity {
 
 	@Id

@@ -44,14 +44,14 @@ public class GZSubjectDaoImpl implements GZSubjectDao {
     }
 
     @Override
-    public List<MyLearningSubjectVO> findMyLearningSubject(Integer id, long currentTimeMillis) {
+    public List<MyLearningSubjectVO> findMyLearningSubject(Long id, long currentTimeMillis) {
         return gzSubjectMapper.findMyLearningSubject(id,currentTimeMillis);
 //        return MybatisPlus.getInstance().findAll(new MyLearningSubjectVO(),new MybatisPlusBuild(TGzUserSubject.class)
 //                .eq(TGzUserSubject::getUserId,id));
     }
 
     @Override
-    public List<MyLearningSubjectVO> findEndingSubject(Integer id) {
+    public List<MyLearningSubjectVO> findEndingSubject(Long id) {
         return gzSubjectMapper.findEndingSubject(id,System.currentTimeMillis());
 
 //        return MybatisPlus.getInstance().findAll(new TGzUserSubject(),new MybatisPlusBuild(TGzUserSubject.class)

@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
 @Table(commit = "从善桥项目表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TCsqService extends BaseEntity {
 
 	@Id
@@ -78,7 +80,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "累积收到金额(已筹金额)", precision = 2, defaultVal = "0.00")
 	private Double sumTotalIn;
 
-	@Column(commit = "累积被捐助次数", precision = 11, defaultVal = "0")
+	@Column(commit = "累积被捐助次数",  defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "剩余金额", precision = 2, defaultVal = "0.00")

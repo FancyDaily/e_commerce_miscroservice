@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqShareVo;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 基金账户
@@ -18,6 +19,7 @@ import lombok.Data;
 @Table(commit = "从善桥专项基金表")
 @Data(matchSuffix = true)
 @Builder
+@NoArgsConstructor
 public class TCsqFund extends BaseEntity{
 
 	@Id
@@ -67,7 +69,7 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
 	private Double sumTotalIn;
 
-	@Column(commit = "资金累积流入次数", precision = 11, defaultVal = "0")
+	@Column(commit = "资金累积流入次数",  defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
