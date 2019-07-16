@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Log
 @RequestMapping("csq/invoice")
-public class InvoiceController {
+public class CsqInvoiceController {
 
 	@Autowired
 	private CsqInvoiceService invoiceService;

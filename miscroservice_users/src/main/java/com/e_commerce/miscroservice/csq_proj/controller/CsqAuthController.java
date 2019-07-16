@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 从善桥实名认证Controller
  *
@@ -79,9 +81,9 @@ public class CsqAuthController {
 	 */
 	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("corp/submit")
-	public AjaxResult certCorpSubmit(@RequestParam(required = false)String telephone,
+	public AjaxResult certCorpSubmit(@RequestParam(required = false) String telephone,
 									 @RequestParam(required = false) String password,
-									 @RequestParam(required = false)String validCode,
+									 @RequestParam(required = false) String validCode,
 									 @RequestParam(required = false) String name,
 									 @RequestParam(required = false) String userHeadPortraitPath,
 									 @RequestParam(required = false) String licenseId,
@@ -183,6 +185,36 @@ public class CsqAuthController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("实名状态校验", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 实名状态获取
+	 * <p>
+	 * {
+	 * "isCorp": true,  当前是否为组织(影响stauts的含义)
+	 * "status": -1  实名状态:个人0未实名1已实名、组织-1未实名0审核中1通过2拒绝
+	 * }
+	 *
+	 * @return
+	 */
+	@RequestMapping("status")
+	public AjaxResult authStatus() {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		try {
+			Map<String, Object> resultMap = csqUserService.getAuthStatus(userId);
+			result.setData(resultMap);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "实名状态获取", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("实名状态获取", e);
 			result.setSuccess(false);
 		}
 		return result;

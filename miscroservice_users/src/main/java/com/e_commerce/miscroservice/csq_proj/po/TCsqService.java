@@ -113,6 +113,12 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "银行卡号")
 	private String creditCard;
 
+	@Column(commit = "负责人")
+	private String personInCharge;
+
+	@Column(commit = "身份证/机构代码")
+	private String certificatedNo;
+
 	public CsqDailyDonateVo copyCsqDailyDonateVo() {
 		return null;
 	}

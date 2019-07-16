@@ -59,6 +59,12 @@ public class CsqBasicUserVo {
 	@Column(commit = "个人描述")
 	protected String remarks;
 
+	@Column(commit = "联系人", defaultVal = "未设置")
+	protected String contactPerson;
+
+	@Column(commit = "联系方式")
+	protected String contactNo;
+
 	public TCsqUser copyTCsqUser() {
 		return null;
 	}

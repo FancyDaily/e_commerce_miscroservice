@@ -399,7 +399,6 @@ public class CsqUserController {
 			Map<String, Object> map = csqUserService.findCsqUserById(userId);
 			ajaxResult.setSuccess(true);
 			ajaxResult.setData(map);
-
 		} catch (MessageException e) {
 			log.warn(e.getMessage());
 			ajaxResult.setSuccess(false);
@@ -407,6 +406,7 @@ public class CsqUserController {
 		} catch (Exception e) {
 			ajaxResult.setSuccess(false);
 			log.error("查看我的信息出错id={}", userId);
+			e.printStackTrace();
 		}
 		return ajaxResult;
 
@@ -495,6 +495,8 @@ public class CsqUserController {
 	 * "balanceStatus":1 爱心账户状态 -1~1, 被禁止、待激活、可用
 	 * "accountType": 1 账号类型 1~2 (个人，组织 etc.)
 	 * "remarks":""	个人简介
+	 * "contactPerson":"张学友"  联系人
+	 * "contactNo":"11111"  联系方式
 	 * }
 	 *
 	 * @return
@@ -522,19 +524,23 @@ public class CsqUserController {
 
 	/**
 	 * 修改个人基本信息
-	 *
 	 * @param name    姓名
 	 * @param remarks 描述
+	 * @param userHeadPortraitPath 头像
+	 * @param weiboAccount 微博号
+	 * @param wechatPubAccount 微信公众号
+	 * @param contactPerson 联系人
+	 * @param contactNo 联系方式
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
-	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount) {
+	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}", userId, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount);
+			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}", userId, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo);
 			csqUserService.modify(userId, csqBasicUserVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {

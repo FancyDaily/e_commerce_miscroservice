@@ -1,4 +1,4 @@
-package com.e_commerce.miscroservice.guanzhao_proj.product_order.testAuto;
+package com.e_commerce.miscroservice.csq_proj.testAuto;
 
 /**
  * @Author: FangyiXu

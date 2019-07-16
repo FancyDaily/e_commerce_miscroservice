@@ -228,9 +228,33 @@ public class CsqFundServiceImpl implements CsqFundService {
 				csqFundDonateVo.setName(serviceName);
 				return csqFundDonateVo;
 			}).collect(Collectors.toList());
-
-		result.setResultList(csqFundDonateVos);
+		List<Map<String, Object>> mapList = getMapList(csqFundDonateVos);
+		result.setResultList(mapList);
 		return result;
+	}
+
+	private List<Map<String, Object>> getMapList(List<CsqFundDonateVo> records) {
+		List<Map<String, Object>> mapList = new ArrayList<>();
+		Map<String, List<CsqFundDonateVo>> currentMap = new HashMap<>();
+
+		records.stream()
+			.forEach(a -> {
+				String year = a.getYear();
+				List<CsqFundDonateVo> userPaymentRecords = currentMap.get(year);
+				if (userPaymentRecords == null) {
+					userPaymentRecords = new ArrayList<>();
+				}
+				userPaymentRecords.add(a);
+				currentMap.put(year, userPaymentRecords);
+			});
+
+		currentMap.forEach((key, value) -> {
+			Map<String, Object> yearMap = new HashMap<>();
+			yearMap.put("year", key);
+			yearMap.put("records", value);
+			mapList.add(yearMap);    //向mapList放入一个含有年份信息的map
+		});
+		return mapList;
 	}
 
 	private List<TCsqOrder> getGotoListNonePage(Long fundId, List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
@@ -349,6 +373,11 @@ public class CsqFundServiceImpl implements CsqFundService {
 		pageNum = pageNum == null? 1:pageNum;
 		pageSize = pageSize == null? 0:pageSize;
 		return PageHelper.startPage(pageNum, pageSize);
+	}
+
+	@Override
+	public boolean isMine(Long fundId, Long userId) {
+		return fundDao.selectByUserIdAndPrimaryKey(userId, fundId) != null;
 	}
 
 }

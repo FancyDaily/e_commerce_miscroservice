@@ -26,7 +26,7 @@ import java.util.Map;
 @RequestMapping("csq/payment")
 @RestController
 @Log
-public class PaymentController {
+public class CsqPaymentController {
 
 	@Autowired
 	private CsqPaymentService csqPaymentService;
@@ -37,37 +37,37 @@ public class PaymentController {
 	/**
 	 * 查询流水
 	 *
-	 * @param pageNum  页码
-	 * @param pageSize 大小
-	 * @param option 收入0/支出1 全部null
+	 * @param pageNum          页码
+	 * @param pageSize         大小
+	 * @param option           收入0/支出1 全部null
 	 * @param isGroupingByYear 是否按年份分组
-	 *                 <p>
-	 *                 {
-	 *                 "list": {
-	 *                 "resultList": [
-	 *                 {
-	 *                 "id": 31,
-	 *                 "orderId": 8,	//订单id
-	 *                 "userId": 2000,
-	 *                 "entityId": 2000,	//对象id
-	 *                 "entityType": 1,	//对象类型
-	 *                 "user": "",
-	 *                 "serviceName": "",	//项目名称
-	 *                 "date": "",	//日期
-	 *                 "description": "",	//描述
-	 *                 "inOrOut": 1,	//收支标记
-	 *                 "money": 333	//金额
-	 *                 }
-	 *                 ],
-	 *                 "totalCount": 3
-	 *                 },
-	 *                 "outMoney": "",	//支出
-	 *                 "inMoney": 1905	//收入
-	 *                 }
+	 *                         <p>
+	 *                         {
+	 *                         "list": {
+	 *                         "resultList": [
+	 *                         {
+	 *                         "id": 31,
+	 *                         "orderId": 8,	//订单id
+	 *                         "userId": 2000,
+	 *                         "entityId": 2000,	//对象id
+	 *                         "entityType": 1,	//对象类型
+	 *                         "user": "",
+	 *                         "serviceName": "",	//项目名称
+	 *                         "date": "",	//日期
+	 *                         "description": "",	//描述
+	 *                         "inOrOut": 1,	//收支标记
+	 *                         "money": 333	//金额
+	 *                         }
+	 *                         ],
+	 *                         "totalCount": 3
+	 *                         },
+	 *                         "outMoney": "",	//支出
+	 *                         "inMoney": 1905	//收入
+	 *                         }
 	 * @return
 	 */
 	@RequestMapping("find/waters")
-	public AjaxResult findWarters(Integer pageNum, Integer pageSize,@RequestParam(required = false) Integer option, boolean isGroupingByYear) {
+	public AjaxResult findWarters(Integer pageNum, Integer pageSize, @RequestParam(required = false) Integer option, boolean isGroupingByYear) {
 		AjaxResult result = new AjaxResult();
 
 //		Long userId = Long.valueOf(IdUtil.getId());
@@ -100,15 +100,15 @@ public class PaymentController {
 	 *
 	 * @param recordId 记录编号
 	 *                 <p>
-	 * {
-	 *         "date":"2019-06-26",	//日期
-	 *         "code":"https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR31.jpg",	//code
-	 *         "money":333, //金额
-	 *         "name":"007",	//名
-	 *         "time":"2019-06-26",	//日期
-	 *         "serviceName":"",	//项目名
-	 *         "countMoney":""	//做你关机
-	 *     }
+	 *                 {
+	 *                 "date":"2019-06-26",	//日期
+	 *                 "code":"https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR31.jpg",	//code
+	 *                 "money":333, //金额
+	 *                 "name":"007",	//名
+	 *                 "time":"2019-06-26",	//日期
+	 *                 "serviceName":"",	//项目名
+	 *                 "countMoney":""	//做你关机
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("/my/certificate")

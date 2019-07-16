@@ -151,4 +151,11 @@ public interface CsqUserService {
 	 * @return
 	 */
 	CsqBasicUserVo infos(Long userId);
+
+	/**
+	 * 获取实名状态
+	 * @param userId
+	 * @return
+	 */
+	Map<String, Object> getAuthStatus(Long userId);
 }

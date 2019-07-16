@@ -45,7 +45,7 @@ public class CsqServiceListVo {
 	protected String name;	//MARK
 
 	@Column(commit = "备案编号")
-	protected Long recordId;
+	protected String recordNo;
 
 	@Column(commit = "状态", length = 11, defaultVal = "-1")
 	protected Integer status;

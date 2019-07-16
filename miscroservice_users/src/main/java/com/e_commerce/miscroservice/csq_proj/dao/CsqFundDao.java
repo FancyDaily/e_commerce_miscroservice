@@ -26,4 +26,6 @@ public interface CsqFundDao {
 	List<TCsqFund> selectByUserIdAndInStatus(Long userId, List<Integer> asList);
 
 	List<TCsqFund> selectByUserIdAndNotEqStatus(Long userId, Integer status);
+
+	TCsqFund selectByUserIdAndPrimaryKey(Long userId, Long fundId);
 }

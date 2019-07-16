@@ -27,7 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("csq/fund")
 @Log
-public class FundController {
+public class CsqFundController {
 
 	@Autowired
 	private CsqFundService fundService;

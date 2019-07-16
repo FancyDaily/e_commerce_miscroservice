@@ -11,12 +11,8 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Uti
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
-import com.e_commerce.miscroservice.guanzhao_proj.product_order.pay.wechat.WeChatPay;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -68,6 +64,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Autowired
 	private CsqUserService csqUserService;
+
+	@Autowired
+	private CsqFundService csqFundService;
 
 	@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -385,7 +384,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				dealWithAccountAfterPay(tCsqOrder);
 				break;
 		}
-		afterPayUser(tCsqOrder);	//现金支付才有的累积捐赠总额增加
+		afterPayUser(tCsqOrder);	//现金支付才有的累积捐赠总额增加等逻辑
 
 		tCsqOrder.setStatus(CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		csqOrderDao.update(tCsqOrder);
@@ -394,11 +393,32 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	private void afterPayUser(TCsqOrder tCsqOrder) {
-		//累积捐助金额增加
+		if(!checkIsFromUser(tCsqOrder)) {	//现金充值校验
+			return;
+		}
 		Long userId = tCsqOrder.getUserId();
+		//累积捐助金额增加
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
 		csqUser.setSumTotalPay(csqUser.getSumTotalPay() + tCsqOrder.getPrice());
 		csqUserDao.updateByPrimaryKey(csqUser);
+
+		//插入充值流水
+		//TODO 判断去向是否已经为账户、基金
+		Integer toType = tCsqOrder.getToType();
+		Long toId = tCsqOrder.getToId();
+		if(CsqEntityTypeEnum.TYPE_SERVICE.toCode() != toType || (CsqEntityTypeEnum.TYPE_FUND.toCode() == toType && csqFundService.isMine(toId, userId))) {
+			return;
+		}
+		csqPaymentService.savePaymentRecord(userId, tCsqOrder.getFromType(), tCsqOrder.getFromId(), toType, toId, tCsqOrder.getPrice(), tCsqOrder.getId());
+	}
+
+	private boolean checkIsFromUser(TCsqOrder tCsqOrder) {
+		boolean isFromUser = false;
+		Integer fromType = tCsqOrder.getFromType();
+		if(CsqEntityTypeEnum.TYPE_HUMAN.toCode() == fromType) {	//如果为现金充值
+			isFromUser = true;
+		}
+		return isFromUser;
 	}
 
 	@Override
@@ -620,12 +640,14 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			//充值
 			case TYPE_ACCOUNT:
 				name = "爱心账户";
+				break;
 			//捐助
 			case TYPE_SERVICE:
 				TCsqService csqService = csqServiceDao.selectByPrimaryKey(toId);
 				name = csqService.getName();
 				type = "项目";
 				isDonate = true;
+				break;
 			//不确定类型
 			case TYPE_FUND:
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
@@ -651,7 +673,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())
 			.money(amount).build();
 		toInserter.add(toBuild);
-		if(payForSomeOne) {	//TODO 为他人支付(当为自己支付，或只有一条被充值的记录)
+//		if(payForSomeOne) {	//TODO 为他人支付(当为自己支付，或只有一条被充值的记录)
 			TCsqUserPaymentRecord fromBuild = TCsqUserPaymentRecord.builder()
 				.orderId(tCsqOrder.getId())
 				.userId(payerId)
@@ -661,7 +683,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())
 				.money(amount).build();
 			toInserter.add(fromBuild);
-		}
+//		}
 		csqUserPaymentDao.multiInsert(toInserter);
 	}
 

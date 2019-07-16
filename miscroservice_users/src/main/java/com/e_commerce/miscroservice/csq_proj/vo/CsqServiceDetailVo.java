@@ -1,11 +1,8 @@
 package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import lombok.Data;
 
 import java.util.List;
@@ -39,6 +36,12 @@ public class CsqServiceDetailVo extends CsqServiceListVo {
 
 	@Column(commit = "银行卡号")
 	private String creditCard;
+
+	@Column(commit = "负责人")
+	private String personInCharge;
+
+	@Column(commit = "身份证/机构代码")
+	private String certificatedNo;
 
 	public TCsqService copyTCsqService() {
 		return null;

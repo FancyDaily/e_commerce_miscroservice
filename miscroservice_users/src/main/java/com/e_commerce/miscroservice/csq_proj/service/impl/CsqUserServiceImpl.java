@@ -189,7 +189,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		map.put("sumDonate", reduce);	//我的累积捐款总额
 		map.put("surplusAmount", tCsqUser.getSurplusAmount());	//账户余额
-		Double sumTotalIn = tCsqFund.getSumTotalIn();
+		Double sumTotalIn = tCsqFund!=null? tCsqFund.getSumTotalIn(): 0d;
 		Double publicMinimum = CsqFundEnum.PUBLIC_MINIMUM;
 		map.put("sumTotalIn", sumTotalIn > publicMinimum? publicMinimum :sumTotalIn);	//基金账户筹备累积
 		map.put("expected", publicMinimum);	//期望金额
@@ -252,7 +252,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		authName = authName ==null? tCsqUser.getName(): authName;
 		String licenseId = csqUserAuth.getLicenseId();
 		String licensePic = csqUserAuth.getLicensePic();
-		if (StringUtil.isAnyEmpty(authName, licenseId, licensePic)) {
+		if (StringUtil.isAnyEmpty(authName, licensePic)) {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必填参数为空!");
 		}
 		TCsqUserAuth userAuth = TCsqUserAuth.builder().status(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode())
@@ -650,6 +650,27 @@ public class CsqUserServiceImpl implements CsqUserService {
 		csqBasicUserVo.setGotFund(hasGotFund);
 		csqBasicUserVo.setGotCompanyAccount(hasGotCompanyAccount);
 		return csqBasicUserVo;
+	}
+
+	@Override
+	public Map<String, Object> getAuthStatus(Long userId) {
+		Map<String, Object> resultMap = new HashMap<>();
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		Integer accountType = csqUser.getAccountType();
+		boolean isCorp = false;
+		Integer status = csqUser.getAuthenticationStatus();
+		if(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
+			isCorp = true;
+			TCsqUserAuth userAuth = csqUserAuthDao.selectByUserIdAndType(userId, CsqUserAuthEnum.TYPE_CORP.getCode());
+			Integer STATUS_NEVER_CERT = -1;	//未实名
+			status = STATUS_NEVER_CERT;
+			if(userAuth != null) {	//存在有效的认证信息 -> 替换为相应的状态
+				status = userAuth.getStatus();
+			}
+		}
+		resultMap.put("status", status);
+		resultMap.put("isCorp", isCorp);
+		return resultMap;
 	}
 
 	private TCsqUser getCompanyAccount(TCsqUser csqUser) {

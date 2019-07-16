@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import lombok.Data;
@@ -23,6 +22,18 @@ public class CsqFundVo {
 	List<TCsqOrder> goToList;	//去向(捐助项目记录)
 
 	private Integer raiseStatus;	//筹备状态
+
+	private String stationorgName;	//机构名称
+
+	private String stationorgAddr;	//地址
+
+	private String stationcontact;	//联系方式
+
+	private String stationPersonIncharge;	//负责人
+
+	private String stationcreditCardName;	//银行名字
+
+	private String stationcreditCardId;	//银行卡号
 
 	@Id
 	private Long id;

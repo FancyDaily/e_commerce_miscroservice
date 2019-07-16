@@ -139,6 +139,11 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "是否为预注册账号", length = 11, defaultVal = "0")
 	private Integer isFake;
 
+	@Column(commit = "联系人")
+	private String contactPerson;
+
+	@Column(commit = "联系方式")
+	private String contactNo;
 
 	public CsqBasicUserVo copyCsqBasicUserVo() {
 		return null;

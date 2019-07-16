@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
@@ -69,21 +70,45 @@ public class CsqServiceController {
 	/**
 	 * 发布项目
 	 *
-	 * @param description 描述
-	 * @param name        名字
-	 *                    <p>
-	 *                    {"success":true,"errorCode":"","msg":"","data":""}
+	 * @param name           项目名
+	 * @param recordNo       备案编号
+	 * @param typePubKeys    项目类型
+	 * @param purpose        目的描述
+	 * @param expectedAmount 期望金额
+	 * @param coverPic       封面图
+	 * @param description    描述
+	 * @param detailPic      内容图
+	 * @param beneficiary    受益人
+	 * @param certificatedNo 身份证/机构代码
+	 * @param creditCard     银行卡号
+	 * @param personInCharge 负责人
+	 *                       <p>
+	 *                       {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("publish")
-	@Consume(CsqServiceListVo.class)
-	public AjaxResult publishService(String description, String name) {
+	@Consume(CsqServiceDetailVo.class)
+	public AjaxResult publishService(String name,
+									 String recordNo,
+									 String typePubKeys,
+									 String purpose,
+									 Double expectedAmount,
+									 String coverPic,
+									 String description,
+									 String detailPic,
+									 String beneficiary,
+									 String certificatedNo,
+									 String creditCard,
+									 String personInCharge) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
 		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
 		try {
-			log.info("发布项目, description={}, name={}", description, name);
+			log.info("发布项目, name={}, recordNo={}, typePubKeys={}, " +
+				"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
+				"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
+				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
 			csqServiceService.publish(userId, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -105,9 +130,9 @@ public class CsqServiceController {
 	 * @param pageNum  页码
 	 * @param pageSize 大小
 	 *                 <p>
-	 * {
-	 *         "resultList":[
-	 *             {
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
 	 *                 "id":20,
 	 *                 "userId":2000,
 	 *                 "fundId":"",
@@ -130,10 +155,10 @@ public class CsqServiceController {
 	 *                 "endDate":"",	结束日期
 	 *                 "coverPic":"",	封面图
 	 *                 "description":"这是一段详细描述"	描述
-	 *             }
-	 *         ],
-	 *         "totalCount":4
-	 *     }
+	 *                 }
+	 *                 ],
+	 *                 "totalCount":4
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("list")
@@ -161,57 +186,57 @@ public class CsqServiceController {
 	 * 项目详情
 	 *
 	 * @param serviceId 项目编号
-	 * {
-	 *         "serviceVo":{
-	 *             "raiseStatus":1,
-	 *             "id":2,
-	 *             "userId":1292,
-	 *             "fundId":"",
-	 *             "sumTotalPayMine":"",
-	 *             "donaterCnt":"",
-	 *             "trendPubValues":"",
-	 *             "fundStatus":"",
-	 *             "type":0,
-	 *             "typePubKeys":"",
-	 *             "name":"发布一个项目",	//项目名
-	 *             "recordId":"",	//备案号
-	 *             "status":0,	//状态
-	 *             "purpose":"",	//目的描述
-	 *             "sumTotalIn":0,	//已筹得金额
-	 *             "totalInCnt":0,	//捐款人次
-	 *             "surplusAmount":0,	//项目账户余额
-	 *             "expectedAmount":0,	//期望金额
-	 *             "expectedRemainAmount":0,	//剩余期望金额
-	 *             "startDate":"",
-	 *             "endDate":"",
-	 *             "coverPic":"",	//封面图
-	 *             "description":"你认真的样子好像天桥底下贴膜的",	//描述
-	 *             "donaters":[
-	 *
-	 *             ],	//捐助人列表
-	 *             "sumTotalOut":0,	//总支出
-	 *             "csqUserPaymentRecordVos":[
-	 *
-	 *             ],	//流水列表
-	 *             "csqServiceReportVos":[
-	 *                 {
-	 *                     "id":4,
-	 *                     "serviceId":2,
-	 *                     "title":"这是项目汇报的标题",
-	 *                     "description":"",
-	 *                     "pic":"1313dada3"
-	 *                 }
-	 *             ],	//项目汇报列表
-	 *             "detailPic":"",	//详情图片
-	 *             "beneficiary":"",	//负责人
-	 *             "creditCard":""	//银行卡
-	 *         },
-	 *         "broadCast":[
-	 *
-	 *         ],
-	 *         "isMine":false,	//是否是我发布的
-	 *         "isFund":false	//是否为基金
-	 *     }
+	 *                  {
+	 *                  "serviceVo":{
+	 *                  "raiseStatus":1,
+	 *                  "id":2,
+	 *                  "userId":1292,
+	 *                  "fundId":"",
+	 *                  "sumTotalPayMine":"",
+	 *                  "donaterCnt":"",
+	 *                  "trendPubValues":"",
+	 *                  "fundStatus":"",
+	 *                  "type":0,
+	 *                  "typePubKeys":"",
+	 *                  "name":"发布一个项目",	//项目名
+	 *                  "recordId":"",	//备案号
+	 *                  "status":0,	//状态
+	 *                  "purpose":"",	//目的描述
+	 *                  "sumTotalIn":0,	//已筹得金额
+	 *                  "totalInCnt":0,	//捐款人次
+	 *                  "surplusAmount":0,	//项目账户余额
+	 *                  "expectedAmount":0,	//期望金额
+	 *                  "expectedRemainAmount":0,	//剩余期望金额
+	 *                  "startDate":"",
+	 *                  "endDate":"",
+	 *                  "coverPic":"",	//封面图
+	 *                  "description":"你认真的样子好像天桥底下贴膜的",	//描述
+	 *                  "donaters":[
+	 *                  <p>
+	 *                  ],	//捐助人列表
+	 *                  "sumTotalOut":0,	//总支出
+	 *                  "csqUserPaymentRecordVos":[
+	 *                  <p>
+	 *                  ],	//流水列表
+	 *                  "csqServiceReportVos":[
+	 *                  {
+	 *                  "id":4,
+	 *                  "serviceId":2,
+	 *                  "title":"这是项目汇报的标题",
+	 *                  "description":"",
+	 *                  "pic":"1313dada3"
+	 *                  }
+	 *                  ],	//项目汇报列表
+	 *                  "detailPic":"",	//详情图片
+	 *                  "beneficiary":"",	//负责人
+	 *                  "creditCard":""	//银行卡
+	 *                  },
+	 *                  "broadCast":[
+	 *                  <p>
+	 *                  ],
+	 *                  "isMine":false,	//是否是我发布的
+	 *                  "isFund":false	//是否为基金
+	 *                  }
 	 * @return
 	 */
 	@RequestMapping("detail")
@@ -356,8 +381,9 @@ public class CsqServiceController {
 
 	/**
 	 * 项目汇报列表
-	 * @param serviceId  项目编号
-	 * @param pageNum  页码
+	 *
+	 * @param serviceId 项目编号
+	 * @param pageNum   页码
 	 * @param pageSize  大小
 	 * @return
 	 */
@@ -384,6 +410,7 @@ public class CsqServiceController {
 
 	/**
 	 * 捐助记录列表
+	 *
 	 * @param serviceId
 	 * @param pageNum
 	 * @param pageSize

@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Author: FangyiXu
@@ -9,6 +10,7 @@ import lombok.Data;
  */
 @Data
 @Builder
+@NoArgsConstructor
 public class CsqBasicPublishVo {
 	Integer key;
 	String value;
