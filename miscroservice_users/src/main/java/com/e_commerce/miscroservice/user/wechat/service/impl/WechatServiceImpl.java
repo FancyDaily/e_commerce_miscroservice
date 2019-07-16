@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.user.wechat.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.CsqWechatConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.HttpResult;
 import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -11,6 +12,7 @@ import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatToken;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatPhone;
+import org.mvel2.util.Make;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,10 +110,17 @@ public class WechatServiceImpl implements WechatService {
 	 * 获取token
 	 */
 	public String getToken() {
+		return getToken(APP_ID, APP_SECRET);
+	}
+
+	/**
+	 * 获取token
+	 */
+	public String getToken(String appid, String appSecret) {
 		Map<String, Object> params = new HashMap<>();
 		params.put(WechatConst.GRANT_TYPE, "client_credential");
-		params.put("appid", APP_ID);
-		params.put("secret", APP_SECRET);
+		params.put("appid", appid);
+		params.put("secret", appSecret);
 		String res;
 		try {
 			String result = httpService.doGet(WechatConst.TOKEN_URL, params);
@@ -151,7 +160,7 @@ public class WechatServiceImpl implements WechatService {
 			// 获取SSLSocketFactory对象
 			SSLSocketFactory ssf = sslContext.getSocketFactory();
 
-			URL url = new URL(WechatConst.QCODE_URL + "?access_token=" + getToken());
+			URL url = new URL(WechatConst.QCODE_URL + "?access_token=" + getToken(CsqWechatConstant.APP_ID, CsqWechatConstant.APP_SECRET));
 			HttpsURLConnection httpURLConnection = (HttpsURLConnection) url.openConnection();
 			httpURLConnection.setRequestMethod("POST");// 提交模式
 			httpURLConnection.setConnectTimeout(10000);// 连接超时 单位毫秒
@@ -178,6 +187,14 @@ public class WechatServiceImpl implements WechatService {
 			printWriter.flush();
 			// 开始获取数据
 			InputStream inputStream = httpURLConnection.getInputStream();
+
+			byte[] arr = new byte[1024]; //用来存入从read(byte[] b)方法获取的文件内容
+			int len; //用来存储read(byte[] b)方法的返回值，代表每次读入的字节个数；当因为到达文件末尾而没有字节读入时，返回-1
+			while( (len=inputStream.read(arr)) != -1 ) {
+				System.out.println(arr);
+			}
+			String str = new String(arr);
+			logger.info("QRCODE!!!" + str);
 			BufferedInputStream bis = new BufferedInputStream(inputStream);
 
 			// 上传到阿里云

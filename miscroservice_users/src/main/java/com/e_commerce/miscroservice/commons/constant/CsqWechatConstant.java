@@ -22,12 +22,12 @@ public class CsqWechatConstant {
 	/**
 	 * 应用对应的密钥
 	 */
-	public static final String APP_KEY = "5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM";
+	public static String APP_KEY = "5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM";
 
 	/**
 	 * 微信支付商户号
 	 */
-	public static final String MCH_ID = "1230977302";
+	public static final String MCH_ID = "1305322501";
 
 	/**
 	 * 获取预支付id的接口url
@@ -62,5 +62,10 @@ public class CsqWechatConstant {
 	@Value("${csq.app_secret}")
 	private void setAppSecret(String val) {
 		APP_SECRET = val;
+	}
+
+	@Value(("$(csq.app_key"))
+	private void setAppKey(String val) {
+		APP_KEY = val;
 	}
 }
