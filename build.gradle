@@ -13,19 +13,28 @@ allprojects {
 }
 
 
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.sonarqube'
     apply plugin: "net.ltgt.apt"
 
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        archiveClassifier = "sources"
+        from sourceSets.main.allSource
+    }
+    artifacts {
+        archives sourcesJar
+    }
 
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xlint', 'unchecked')
+
+    }
     ext {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
     }
-
 
 
     sonarqube {
@@ -38,7 +47,6 @@ subprojects {
 
 
 }
-
 
 
 buildscript {
@@ -58,7 +66,6 @@ buildscript {
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
         classpath "net.ltgt.gradle:gradle-apt-plugin:0.21"
     }
-
 
 
 }
