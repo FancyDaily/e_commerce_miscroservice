@@ -23,7 +23,6 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.sonarqube'
-    apply plugin: "net.ltgt.apt"
 
     task sourcesJar(type: Jar, dependsOn: classes) {
         archiveClassifier = "sources"
@@ -44,7 +43,6 @@ subprojects {
         properties {
             property "sonar.host.url", "http://192.168.89.134:9000"
             property "sonar.login", "9e723982889a0d46ea2e4ea48e41acd56267712d"
-//            property "sonar.java.binaries", "build/classes"
         }
     }
 
@@ -54,10 +52,11 @@ subprojects {
 
 buildscript {
     repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenLocal()
         mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+        jcenter()
+
 
     }
     ext {
@@ -67,7 +66,6 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5"
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.21"
     }
 
 
