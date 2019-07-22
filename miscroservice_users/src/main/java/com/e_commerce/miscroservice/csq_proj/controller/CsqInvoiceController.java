@@ -51,12 +51,12 @@ public class CsqInvoiceController {
 	@UrlAuth
 	public AjaxResult invoiceSubmit(Integer type, String name, String taxNo, String addr, String person, String telephone, String... orderNo) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqUserInvoiceVo vo = (CsqUserInvoiceVo) ConsumeHelper.getObj();
 		TCsqUserInvoice tCsqUserInvoice = vo.copyTCsqUserInvoice();
 		try {
 			log.info("申请开票, orderNo={}, type={}, name={}, taxNo={}, addr={}, person={}, telephone={}", orderNo, type, name, taxNo, addr, person, telephone);
-			invoiceService.submit(userId, tCsqUserInvoice, orderNo);
+			invoiceService.submit(userIds, tCsqUserInvoice, orderNo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "申请开票", e.getMessage());
