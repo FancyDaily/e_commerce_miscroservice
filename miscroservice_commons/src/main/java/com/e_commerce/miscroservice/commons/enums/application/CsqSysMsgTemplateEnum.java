@@ -1,20 +1,15 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
- * @Date: 2019-06-19 15:23
+ * @Date: 2019-07-22 10:03
  */
-public enum CsqSysMsgEnum {
+public enum CsqSysMsgTemplateEnum {
 
-	TYPE_NORMAL(1, "普通类型"),
-	TYPE_SREVICE(2, "项目推送类型"),
-	IS_READ_FALSE(0, "未读"),
-	IS_READ_TRUE(1, "已读");
+	TEMPLATE_REGISTER(1, "注册模版");
 
 	int code;
 	String msg;
@@ -27,7 +22,7 @@ public enum CsqSysMsgEnum {
 		return msg;
 	}
 
-	CsqSysMsgEnum(int code, String msg) {
+	CsqSysMsgTemplateEnum(int code, String msg) {
 		this.code = code;
 		this.msg = msg;
 	}
@@ -38,5 +33,4 @@ public enum CsqSysMsgEnum {
 			.findFirst();
 		return first.isPresent()? first.get():null;
 	}
-
 }

@@ -2026,7 +2026,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             long expectedTime = AppConstant.SMS_EXPIRED - AppConstant.SMS_INTERVAL_MILLIS / 1000;
             if (expire > expectedTime) {
                 throw new MessageException(AppErrorConstant.NOT_PASS_PARAM,
-                        AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码!");
+                        AppConstant.SMS_INTERVAL_MILLIS / 1000 + "秒内请勿重复发送短信验证码! expire:" + expire);
             }
         }
 
@@ -2105,8 +2105,10 @@ public class UserServiceImpl extends BaseService implements UserService {
             throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "手机号码不能为空！");
         }
         String content = (String) redisUtil.get(telephone);
+		long expire = redisUtil.getExpire(telephone);
+		logger.info("手机号={},expire={}", telephone, expire);
 
-        if (content == null) {
+		if (content == null) {
             throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "短信验证码已过期！");
         }
 

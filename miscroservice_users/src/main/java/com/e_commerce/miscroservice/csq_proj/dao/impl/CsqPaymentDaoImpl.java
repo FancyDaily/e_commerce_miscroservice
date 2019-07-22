@@ -86,4 +86,9 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
 		);
 	}
+
+	@Override
+	public int multiInsert(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+		return MybatisPlus.getInstance().save(tCsqUserPaymentRecords);
+	}
 }

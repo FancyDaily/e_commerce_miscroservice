@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
 import java.util.Map;
@@ -36,4 +37,8 @@ public interface CsqPaymentService {
 	Double countMoney(Long userId, Integer inOut);
 
 	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId);
+
+	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description);
+
+	void savePaymentRecord(TCsqOrder tCsqOrder);
 }

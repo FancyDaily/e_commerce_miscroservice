@@ -56,7 +56,7 @@ public class CsqFundVo {
 	private String description;	//MARK
 
 	@Column(commit = "封面图")
-	private String pic;		//TODO SIMPLIFIED FROM => coverPic
+	private String coverPic;
 
 	@Column(commit = "机构名称")
 	private String orgName;	//MARK
@@ -71,16 +71,16 @@ public class CsqFundVo {
 	private String personInCharge;	//MARK
 
 	@Column(commit = "银行名字")
-	private String cardName;	//TODO SIMPLIFIED FROM => creditCardName
+	private String creditCardName;
 
 	@Column(commit = "银行卡号")
-	private String cardId;	//TODO SIMPLIFIED FROM => creditCardId
+	private String creditCardId;
 
 	@Column(commit = "余额", precision = 2, defaultVal = "0")
 	private Double balance;
 
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
-	private Double totalIn;	//TODO SIMPLIFIED FROM => sumTotalIn
+	private Double sumTotalIn;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
 	private Integer agentModeStatus;

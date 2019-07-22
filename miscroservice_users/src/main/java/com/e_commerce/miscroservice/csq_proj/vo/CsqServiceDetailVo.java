@@ -43,6 +43,8 @@ public class CsqServiceDetailVo extends CsqServiceListVo {
 	@Column(commit = "身份证/机构代码")
 	private String certificatedNo;
 
+	private List<String> trendPubNames;	//方向名
+
 	public TCsqService copyTCsqService() {
 		return null;
 	}

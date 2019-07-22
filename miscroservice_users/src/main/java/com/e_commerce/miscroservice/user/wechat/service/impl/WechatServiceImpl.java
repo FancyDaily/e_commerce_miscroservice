@@ -246,5 +246,4 @@ public class WechatServiceImpl implements WechatService {
 		}
 
 	}
-
 }

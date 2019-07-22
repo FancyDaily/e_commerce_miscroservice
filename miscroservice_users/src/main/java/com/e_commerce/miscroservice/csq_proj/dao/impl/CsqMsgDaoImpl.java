@@ -38,7 +38,7 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 	public int update(List<TCsqSysMsg> toUpdater) {
 		List<Long> toUpdaterIds = toUpdater.stream().map(TCsqSysMsg::getId).collect(Collectors.toList());
 		return MybatisPlus.getInstance().update(toUpdater, new MybatisPlusBuild(TCsqSysMsg.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+//			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqSysMsg::getId, toUpdaterIds));
 	}
 

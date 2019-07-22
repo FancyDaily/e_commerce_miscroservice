@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -46,6 +47,7 @@ public class CsqInvoiceController {
 	 */
 	@Consume(CsqUserInvoiceVo.class)
 	@RequestMapping("submit")
+	@UrlAuth
 	public AjaxResult invoiceSubmit(Integer type, String name, String taxNo, String addr, String person, String telephone, String... orderNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -91,6 +93,7 @@ public class CsqInvoiceController {
 	 * @return
 	 */
 	@RequestMapping("list/waitTo")
+	@UrlAuth
 	public AjaxResult invoiceWaitToList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -141,6 +144,7 @@ public class CsqInvoiceController {
 	 * @return
 	 */
 	@RequestMapping("list/done")
+	@UrlAuth
 	public AjaxResult invoiceDoneList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -186,6 +190,7 @@ public class CsqInvoiceController {
 	 * @return
 	 */
 	@RequestMapping("detail")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult invoiceDetail(Long invoiceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -225,6 +230,7 @@ public class CsqInvoiceController {
 	 * @return
 	 */
 	@RequestMapping("record/list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult invoiceRecordList(Long invoiceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

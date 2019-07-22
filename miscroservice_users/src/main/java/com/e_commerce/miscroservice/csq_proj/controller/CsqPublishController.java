@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
@@ -40,6 +41,7 @@ public class CsqPublishController {
 	 * @return
 	 */
 	@RequestMapping("upload")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult upload(Integer mainKey, Integer[] keys, String[] names, String keyDesc, boolean isObjectArray) {
 		AjaxResult result = new AjaxResult();
 		try {
@@ -75,6 +77,7 @@ public class CsqPublishController {
 	 * @return
 	 */
 	@RequestMapping("gets")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult get(@RequestParam Integer mainKey) {
 		AjaxResult result = new AjaxResult();
 		try {

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -38,6 +39,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("apply/check")
+	@UrlAuth
 	public AjaxResult beforeApplyForFund() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -66,6 +68,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("apply/do")
+	@UrlAuth
 	public AjaxResult applyForAFund(Long amount,
 									@RequestParam(required = false) Long fundId,
 									@RequestParam(required = false) String orderNo,
@@ -109,6 +112,7 @@ public class CsqFundController {
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqFundVo.class)
+	@UrlAuth
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 								   String description, String coverPic, String orgName, String orgAddr,
 								   String contact, String personInCharge, String creditCardName, String creditCardId,
@@ -145,6 +149,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("cert")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certFund(Long fundId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -170,34 +175,70 @@ public class CsqFundController {
 	 * @param fundId 基金编号
 	 *               <p>
 	 * {
-	 *         "contributeInCnt":0,
-	 *         "trendPubNames":[
-	 *
-	 *         ],
-	 *         "goToList":"",
-	 *         "id":1,
-	 *         "userId":1292,
-	 *         "totalToItemCnt":"",
-	 *         "helpCnt":0,
-	 *         "totalInCnt":0,
-	 *         "trendPubKeys":"",
-	 *         "name":"张三爱心事业基金会",
-	 *         "description":"",
-	 *         "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
-	 *         "orgName":"",
-	 *         "orgAddr":"",
-	 *         "contact":"",
-	 *         "personInCharge":"",
-	 *         "cardName":"",
-	 *         "cardId":"",
-	 *         "balance":0,
-	 *         "totalIn":0,
-	 *         "agentModeStatus":0,
-	 *         "status":0
-	 *     }
+	 *     "contributeInCnt": 2,
+	 *     "trendPubNames": [
+	 *       "北京方向",
+	 *       "东京方向",
+	 *       "南京方向",
+	 *       "皇后大道"
+	 *     ],
+	 *     "goToList": [
+	 *       {
+	 *         "id": 18,
+	 *         "createTime": 1561433484000,
+	 *         "updateTime": 1563175155000,
+	 *         "deletedFlag": false,
+	 *         "extend": "",
+	 *         "createUser": 132,
+	 *         "updateUser": 123231,
+	 *         "isValid": "1",
+	 *         "userId": 2000,
+	 *         "fromId": 6,
+	 *         "toId": 20,
+	 *         "date": "2019/07/15",
+	 *         "serviceName": "",
+	 *         "fromType": 3,
+	 *         "toType": 4,
+	 *         "orderNo": "15987",
+	 *         "price": 128,
+	 *         "status": 2,
+	 *         "inVoiceStatus": 1,
+	 *         "orderTime": "",
+	 *         "cached": false,
+	 *         "countColumn": "*",
+	 *         "buildClass": "com.e_commerce.miscroservice.csq_proj.po.TCsqOrder"
+	 *       }
+	 *     ],
+	 *     "raiseStatus": "",
+	 *     "stationorgName": "",
+	 *     "stationorgAddr": "",
+	 *     "stationcontact": "",
+	 *     "stationPersonIncharge": "",
+	 *     "stationcreditCardName": "",
+	 *     "stationcreditCardId": "",
+	 *     "id": 6,
+	 *     "userId": 2000,
+	 *     "helpCnt": 31,
+	 *     "totalInCnt": 0,
+	 *     "trendPubKeys": "1,2,3,6",
+	 *     "name": "小宝绿色基金会所",
+	 *     "description": "11111111111111",
+	 *     "coverPic": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour(v3.0)/otherImg/156335924596846.png",
+	 *     "orgName": "",
+	 *     "orgAddr": "",
+	 *     "contact": "",
+	 *     "personInCharge": "",
+	 *     "creditCardName": "",
+	 *     "creditCardId": "",
+	 *     "balance": 76766,
+	 *     "sumTotalIn": 4444,
+	 *     "agentModeStatus": 1,
+	 *     "status": 0
+	 *   }
 	 * @return
 	 */
 	@RequestMapping("detail")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -225,6 +266,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("share")
+	@UrlAuth
 	public AjaxResult shareFund(Long fundId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -264,13 +306,13 @@ public class CsqFundController {
 	 *                 "trendPubKeys":"1,6",	关注方向
 	 *                 "name":"发哥爱心事业基金会",	名
 	 *                 "description":"",	描述
-	 *                 "pic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",	图片
+	 *                 "coverPic":"https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",	图片
 	 *                 "orgName":"",	组织名
 	 *                 "orgAddr":"",	组织地址
 	 *                 "contact":"",	联系方式
 	 *                 "personInCharge":"",	负责人
-	 *                 "cardName":"",	银行名字
-	 *                 "cardId":"",	银行卡号
+	 *                 "creditCardName":"",	银行名字
+	 *                 "creditCardId":"",	银行卡号
 	 *                 "balance":0,	余额
 	 *                 "totalIn":10001,	总进账
 	 *                 "agentModeStatus":0,	代理状态
@@ -282,6 +324,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public AjaxResult fundList(Integer pageNum, Integer pageSize, Integer... option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -334,6 +377,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("donate/list")
+	@UrlAuth
 	public AjaxResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

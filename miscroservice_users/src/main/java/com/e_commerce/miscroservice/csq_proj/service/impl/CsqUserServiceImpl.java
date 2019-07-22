@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
+import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
@@ -16,6 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,16 +101,29 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String, Object> openidLogin(String openid, String uuid) {
+	public Map<String, Object> openidLogin(String openid, String uuid, WechatPhoneAuthDto wechatPhoneAuthDto) {
+		String phoneNumber = null;
+		String encryptData = wechatPhoneAuthDto.getEncryptedData();
+		String iv = wechatPhoneAuthDto.getIv();
+		String sessionKey = wechatPhoneAuthDto.getSessionKey();
+		if(!StringUtil.isAnyEmpty(encryptData, iv, sessionKey)) {
+			WechatSession wechatSession = new WechatSession();
+			wechatSession.setSession_key(sessionKey);
+			phoneNumber = wechatService.getPhoneNumber(encryptData, iv, wechatSession);
+		}
+
 		TCsqUser tCsqUser = csqUserDao.selectByVxOpenIdAndAccountType(openid, CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode());
 		if (tCsqUser == null) {    //进行注册
 			tCsqUser = new TCsqUser();
 			tCsqUser.setUuid(uuid);
+			tCsqUser.setVxOpenId(openid);
+			tCsqUser.setUserTel(phoneNumber);
 			tCsqUser = register(tCsqUser);
 		}
 		//登录
 		String token = tCsqUser.getToken();
 		if (token == null) {
+			tCsqUser.setUuid(uuid);
 			tCsqUser = UserUtil.login(tCsqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
 			token = tCsqUser.getToken();
 		}
@@ -221,7 +236,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath) {
+	public Map<String, Object> registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath) {
 		Map<String, Object> map = new HashMap<>();
 		userService.checkSMS(telephone, validCode);
 		//用户是否已经注册，若无注册一个(Corp类型
@@ -265,6 +280,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.build();
 		//略去审核流程标记 REMARK
 		csqUserAuthDao.insert(userAuth);
+
+		map.put("user", tCsqUser);
+		map.put("token", tCsqUser.getToken());
+		return map;
 	}
 
 	@Override
@@ -297,7 +316,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public CsqDailyDonateVo dailyDonateDetail(Long userId) {
 		Long serviceId = getDailyDonateServiceId();
 		//查keyValue表，获取连续积善天数
-		List<TCsqKeyValue> dailyDonateList = csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
+		List<TCsqKeyValue> dailyDonateList = userId==null? new ArrayList<>(): csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
 		List<Long> createTimeList = dailyDonateList.stream()
 			.map(TCsqKeyValue::getCreateTime)
 			.map(Timestamp::getTime)
@@ -399,7 +418,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
 		}
 		Map<String, Object> map = new HashMap<>();
-		String scene = userId + entityId + UUID.randomUUID().toString();    //随机数
+		String scene = userId + entityId + UUID.randomUUID().toString();    //随机数 => 7.16 scene长度过长!(40 > 32)
 		String page = "";        //从配置文件读取
 		CsqShareVo vo = null;
 		UploadPathEnum.innerEnum uploadEnum = null;
@@ -462,6 +481,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;
+	}
+
+	public static void main(String[] args) {
+	    System.out.println("20010c149787-c064-4390-95e6-e74166cfae7f".length());
 	}
 
 	@Override
@@ -608,6 +631,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.name(name)
 			.remarks(remarks)
 			.build();*/
+		//未对组织账户修改手机号做限制
 		TCsqUser csqUser = csqBasicUserVo.copyTCsqUser();
 		csqUser.setId(userId);
 		csqUserDao.updateByPrimaryKey(csqUser);
@@ -628,8 +652,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		csqBasicUserVo.setCsqUserAuth(userAuth == null ? new CsqUserAuthVo() : userAuth.copyCsqUserAuthVo());
 		//加入小程序累积天数
+		Integer existDayStart = 1;	//从1开始
 		long time = System.currentTimeMillis() - csqUser.getCreateTime().getTime();
-		csqBasicUserVo.setExistDayCnt(DateUtil.timestamp2Days(time));
+		csqBasicUserVo.setExistDayCnt(existDayStart + DateUtil.timestamp2Days(time));
 
 		//获取基金数量
 		boolean hasGotFund = false;

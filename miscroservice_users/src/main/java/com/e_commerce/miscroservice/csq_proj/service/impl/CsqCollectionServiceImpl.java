@@ -44,7 +44,6 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 		TCsqUserCollection in = new TCsqUserCollection();
 
 		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId,Long.valueOf(userId));
-		in.setId(csqUserCollection.getId());
 		if (csqUserCollection==null){
 			in.setServiceId(serviceId);
 			in.setUserId(Long.valueOf(userId));
@@ -54,6 +53,7 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 				throw new MessageException("收藏失败");
 			}
 		}else {
+			in.setId(csqUserCollection.getId());
 			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_YES)){
 				in.setIsValid(AppConstant.IS_VALID_NO);
 			}

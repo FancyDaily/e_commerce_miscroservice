@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -21,11 +20,13 @@ public interface CsqPayService {
 
 	void preRefund(Long userId, String orderNo, HttpServletRequest request) throws Exception;
 
-	void dealWithRelatedStatistics(TCsqOrder tCsqOrder);
+	void testDealWithOrderNoPay(String orderNo, String attach);
 
-	void afterPayService(Long userId, Integer fromType, Long fromId, Integer toType, Long serviceId, Double amount);
+//	void dealWithRelatedStatistics(TCsqOrder tCsqOrder);
 
-	void afterPayFund(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount);
+//	void afterPayService(Long userId, Integer fromType, Long fromId, Integer toType, Long serviceId, Double amount);
+//
+//	void afterPayFund(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount);
 
 	/**
 	 * 平台内捐助
@@ -35,6 +36,7 @@ public interface CsqPayService {
 	 * @param toType
 	 * @param toId
 	 * @param amount
+	 * @param csqFund
 	 */
-	void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount);
+	void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund);
 }

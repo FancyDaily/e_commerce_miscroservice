@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Configuration
 public class RedisConfig extends RedisTemplateConfig {
 	@Bean(name = "redisTemplate")
-	public RedisTemplate create() {
+	public RedisTemplate<String, Object> create() {
 		return createTemplateCache(OperateEnum.STR);
 	}
 

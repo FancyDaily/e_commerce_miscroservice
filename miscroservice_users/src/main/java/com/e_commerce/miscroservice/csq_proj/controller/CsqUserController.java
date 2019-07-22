@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.constant.CsqWechatConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
@@ -10,13 +11,13 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserAuthVo;
 import com.e_commerce.miscroservice.user.service.UserService;
+import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,8 +58,11 @@ public class CsqUserController {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("与微信校验授权，code={}");
+			WechatSession wechatSession = wechatService.checkAuthCode(code, CsqWechatConstant.APP_ID, CsqWechatConstant.APP_SECRET);
+			log.info("openid={}", wechatSession.getOpenid());
+			log.info("wechatSession={}", wechatSession);
+			result.setData(wechatSession);
 			result.setSuccess(true);
-			result.setData(wechatService.checkAuthCode(code, CsqWechatConstant.APP_ID, CsqWechatConstant.APP_SECRET));
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "与微信校验授权", e.getMessage());
 			result.setMsg(e.getMessage());
@@ -106,7 +110,7 @@ public class CsqUserController {
 	 *
 	 * @param telephone 手机号
 	 * @param validCode 验证码
-	 * @param type      类型
+	 * @param type      类型1个人2组织
 	 * @param uuid      类型
 	 * @return
 	 */
@@ -136,16 +140,24 @@ public class CsqUserController {
 	 *
 	 * @param openid 微信openid
 	 * @param uuid   虚拟设备号
+	 * @param encryptedData 微信加密数据
+	 * @param iv 微信iv
+	 * @param sessionKey 微信sessionKey
 	 * @return
 	 */
+	@Consume(WechatPhoneAuthDto.class)
 	@RequestMapping("login/openid")
 	public AjaxResult openidLogin(String openid,
 								  @RequestParam(required = true) String uuid,
-								  @RequestParam(required = false) String specialGuest) {
+								  @RequestParam(required = false) String specialGuest,
+								  @RequestParam(required = false) String encryptedData,
+								  @RequestParam(required = false) String iv,
+								  @RequestParam(required = false) String sessionKey) {
 		AjaxResult result = new AjaxResult();
 		try {
+			WechatPhoneAuthDto wechatPhoneAuthDto = (WechatPhoneAuthDto) ConsumeHelper.getObj();
 			log.info("openid登录, openid={}, uuid={}, specialGuest={}", openid, uuid, specialGuest);
-			Map<String, Object> resultMap = csqUserService.openidLogin(openid, uuid);
+			Map<String, Object> resultMap = csqUserService.openidLogin(openid, uuid, wechatPhoneAuthDto);
 			result.setData(resultMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -170,6 +182,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("phone/bind")
+	@UrlAuth
 	public AjaxResult bindCellphone(String telephone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -202,7 +215,8 @@ public class CsqUserController {
 	 *                  }
 	 * @return
 	 */
-	@PostMapping({"generateSMS", "generateSMS/" + TokenUtil.AUTH_SUFFIX})
+	@PostMapping("generateSMS")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult generateSMS(String telephone) {
 		AjaxResult result = new AjaxResult();
 		try {
@@ -237,6 +251,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("checkSMS")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult checkSMS(String telephone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		try {
@@ -356,6 +371,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("daily/donate/detail")
+	@UrlAuth
 	public AjaxResult dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -390,6 +406,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("information")
+	@UrlAuth
 	public AjaxResult myInformation() {
 //		Long userId = Long.valueOf(IdUtil.getId());
 		Long userId = UserUtil.getTestId();
@@ -416,10 +433,11 @@ public class CsqUserController {
 	 * 分享
 	 *
 	 * @param entityId 实体编号
-	 * @param option   操作
+	 * @param option   操作0个人1基金
 	 * @return
 	 */
 	@RequestMapping("share")
+	@UrlAuth
 	public AjaxResult share(Long entityId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -502,6 +520,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("infos")
+	@UrlAuth
 	public AjaxResult infos() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -535,6 +554,7 @@ public class CsqUserController {
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
+	@UrlAuth
 	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

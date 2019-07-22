@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -34,7 +35,8 @@ public class CsqCollectionController {
 	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping({"click", "click/" + TokenUtil.AUTH_SUFFIX})
+	@RequestMapping("click")
+	@UrlAuth
 	public AjaxResult clickCollection(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 //		Integer userId = IdUtil.getId();
@@ -80,7 +82,8 @@ public class CsqCollectionController {
 	 *                 }
 	 * @return
 	 */
-	@RequestMapping({"list", "list/" + TokenUtil.AUTH_SUFFIX})
+	@RequestMapping("list")
+	@UrlAuth
 	public AjaxResult collectionList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 //		Integer userId = IdUtil.getId();
@@ -111,7 +114,8 @@ public class CsqCollectionController {
 	 *                  {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping({"isCollection", "isCollection/" + TokenUtil.AUTH_SUFFIX})
+	@RequestMapping("isCollection")
+	@UrlAuth
 	public AjaxResult isCollection(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 //		Integer userId = IdUtil.getId();

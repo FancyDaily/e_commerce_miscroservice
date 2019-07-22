@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -55,6 +56,7 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public AjaxResult msgList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -88,6 +90,7 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("unreadCnt")
+	@UrlAuth
 	public AjaxResult unreadCnt() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -121,6 +124,7 @@ public class CsqMsgController {
 	 * @return
 	 */
 	@RequestMapping("readAll")
+	@UrlAuth
 	public AjaxResult readAll() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -159,6 +163,7 @@ public class CsqMsgController {
 	 */
 	@Consume(CsqSysMsgVo.class)
 	@RequestMapping("insert")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult insert(Long userId,
 							 String title,
 							 String content,
@@ -169,7 +174,7 @@ public class CsqMsgController {
 		CsqSysMsgVo vo = (CsqSysMsgVo) ConsumeHelper.getObj();
 		TCsqSysMsg tCsqSysMsg = vo.copyTCsqSysMsg();
 		try {
-			log.info("手动推送系统消息, userId={}, title={}. content={}, serviceId={}, type={}", userId, title, content, serviceId, type);
+			log.info("手动推送系统消息, operatorId={}, userId={}, title={}. content={}, serviceId={}, type={}", operatorId, userId, title, content, serviceId, type);
 			csqMsgService.insert(userId, tCsqSysMsg);
 			result.setSuccess(true);
 		} catch (MessageException e) {

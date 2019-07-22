@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -44,6 +45,7 @@ public class CsqAuthController {
 	 */
 	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("person/submit")
+	@UrlAuth
 	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -87,15 +89,16 @@ public class CsqAuthController {
 									 @RequestParam(required = false) String name,
 									 @RequestParam(required = false) String userHeadPortraitPath,
 									 @RequestParam(required = false) String licenseId,
-									 @RequestParam(required = true) String licensePic,
-									 String uuid) {
+									 @RequestParam String licensePic,
+									 @RequestParam String uuid) {
 		AjaxResult result = new AjaxResult();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
 			log.info("组织注册与实名提交, telephone={}, password={}, validCode={}, name={}, userHeadPortraitPath={}, licenseId={}, licensePic={}"
 				, telephone, password, validCode, name, userHeadPortraitPath, licenseId, licensePic);
-			csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth, name, userHeadPortraitPath);
+			Map<String, Object> map = csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth, name, userHeadPortraitPath);
+			result.setData(map);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织注册与实名提交", e.getMessage());
@@ -113,7 +116,7 @@ public class CsqAuthController {
 	 * 组织实名认证审核
 	 *
 	 * @param userAuthId 认证记录编号
-	 * @param option     操作
+	 * @param option     操作1通过2拒绝
 	 *                   <p>
 	 *                   {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
@@ -141,7 +144,7 @@ public class CsqAuthController {
 	 * 个人实名认证审核
 	 *
 	 * @param userAuthId 认证记录编号
-	 * @param option     操作
+	 * @param option     操作1通过2拒绝
 	 *                   <p>
 	 *                   {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
@@ -172,6 +175,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@RequestMapping("check")
+	@UrlAuth
 	public AjaxResult authCheck() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -201,6 +205,7 @@ public class CsqAuthController {
 	 * @return
 	 */
 	@RequestMapping("status")
+	@UrlAuth
 	public AjaxResult authStatus() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();

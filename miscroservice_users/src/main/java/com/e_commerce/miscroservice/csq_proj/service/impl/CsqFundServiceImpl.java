@@ -221,7 +221,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 				CsqFundDonateVo csqFundDonateVo = a.copyCsqFundDonateVo();
 				Long time = a.getCreateTime().getTime();
 				csqFundDonateVo.setYear(DateUtil.timeStamp2Date(time, "yyyy"));
-				csqFundDonateVo.setDate(DateUtil.timeStamp2Date(time, "MM/dd"));
+				csqFundDonateVo.setDate(DateUtil.timeStamp2Date(time, "MM-dd"));
 				Long serviceId = a.getToId();
 				List<TCsqService> tCsqServices1 = serviceMap.get(serviceId);
 				String serviceName = tCsqServices1.get(0).getName();
@@ -270,7 +270,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
-		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(csqServiceIds);
+		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 		return tCsqOrders.stream()

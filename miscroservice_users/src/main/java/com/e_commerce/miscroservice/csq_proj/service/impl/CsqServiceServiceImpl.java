@@ -103,6 +103,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Override
 	public QueryResult<CsqServiceListVo> list(Long userId, Integer option, Integer pageNum, Integer pageSize) {
+		//check
 		QueryResult<CsqServiceListVo> result = new QueryResult<>();
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
@@ -110,17 +111,17 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		Integer OPTION_MINE = 2;
 
 		Integer OPTION_DONATED = 1;
+		if(userId == null && !OPTION_ALL.equals(option)) {	//未登录时查看非推荐项目(捐献过、我的项目
+			result.setResultList(new ArrayList<>());
+			//或抛出登录信号
+			return result;
+		}
+
 		option = option == null ? OPTION_ALL : option;
 
 		Page<Object> startPage;
 		List<TCsqService> tCsqServices;
 		if (OPTION_MINE.equals(option)) {
-			if (userId == null) {
-				QueryResult<CsqServiceListVo> objectQueryResult = new QueryResult<>();
-				objectQueryResult.setResultList(new ArrayList<>());
-				//或抛出登录信号
-				return objectQueryResult;
-			}
 			startPage = PageHelper.startPage(pageNum, pageSize);
 			tCsqServices = csqServiceDao.selectMine(userId);
 		} else if (OPTION_ALL.equals(option)) {
@@ -200,7 +201,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		boolean isFund = false;
 		TCsqService tCsqService = csqServiceDao.selectByPrimaryKey(serviceId);
 		// 判断是否为自己
-		if (userId.equals(tCsqService.getUserId())) {
+		if (tCsqService.getUserId().equals(userId)) {
 			isMine = true;
 		}
 		//进入查询过程
@@ -295,6 +296,12 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 //			boolean isDone = isFull && surplusAmount==0;
 			raiseStatus = isFull? 1: raiseStatus;
 			csqServiceDetailVo.setRaiseStatus(raiseStatus);
+			String typePubKeys = csqServiceDetailVo.getTypePubKeys();
+			List<String> publishName = csqPublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), typePubKeys);
+			csqServiceDetailVo.setTrendPubNames(publishName);	//TODO
+			double doubleVal = csqServiceDetailVo.getExpectedAmount()==0? 0: csqServiceDetailVo.getSumTotalIn() / csqServiceDetailVo.getExpectedAmount();
+			String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
+			csqServiceDetailVo.setDonePercent(donePercent);
 			resultMap.put("serviceVo", csqServiceDetailVo);
 
 			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
@@ -467,14 +474,20 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Override
 	public void synchronizeService(TCsqFund csqFund) {
-		Long fundId = null;
+		Long fundId;
 		if(csqFund == null || (fundId = csqFund.getId()) == null) {
-
+			return;
 		}
 		//找到对应的service
+		boolean isInsert = false;
 		TCsqService csqService = csqServiceDao.selectByFundId(fundId);
+		if(csqService == null) {
+			csqService = new TCsqService();
+			isInsert = true;
+		}
+		csqService.setFundId(fundId);
 		csqService.setUserId(csqFund.getUserId());
-		csqService.setStatus(csqFund.getStatus());
+		csqService.setFundStatus(csqFund.getStatus());
 		csqService.setTypePubKeys(csqFund.getTrendPubKeys());
 		csqService.setName(csqFund.getName());
 		csqService.setSurplusAmount(csqFund.getBalance());	//余额
@@ -483,6 +496,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqService.setDescription(csqFund.getDescription());
 		csqService.setCoverPic(csqFund.getCoverPic());
 		csqService.setDescription(csqFund.getDescription());
+		if(isInsert) {
+			csqServiceDao.insert(csqService);
+			return;
+		}
 		csqServiceDao.update(csqService);
 	}
 
@@ -506,11 +523,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	public QueryResult donateList(Long serviceId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null?1:pageNum;
 		pageSize = pageSize==null?0:pageSize;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
 		List<Long> orderIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.distinct().collect(Collectors.toList());
+		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		tCsqUserPaymentRecords = orderIds.isEmpty()? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
 		List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
 		List<CsqDonateRecordVo> resultList = csqUserPaymentRecords.stream()
@@ -528,8 +545,13 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 		QueryResult result = new QueryResult();
 		result.setResultList(resultList);
-		result.setTotalCount((long)resultList.size());
+		result.setTotalCount(startPage.getTotal());
 		return result;
+	}
+
+	@Override
+	public void modify(TCsqService csqService) {
+		csqServiceDao.update(csqService);
 	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {

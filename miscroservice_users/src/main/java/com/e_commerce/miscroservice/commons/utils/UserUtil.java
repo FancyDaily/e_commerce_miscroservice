@@ -92,9 +92,10 @@ public class UserUtil {
 	}
 
 	public static Long getTestId() {
-//		Long id = getId();
-		Long id = null;
-		return id == null? 2000: id;
+		Long id = getId();
+//		Long id = null;
+//		return id == null? 2000: id;
+		return id == null? 2051: id;
 	}
 
 	public static Long getTestId(Long userId) {
@@ -105,7 +106,7 @@ public class UserUtil {
 	}
 
 	public static Long getId() {
-    	return Long.valueOf(IdUtil.getId());
+		return IdUtil.getId();
 	}
 
 	public static Integer getApplication(Integer option) {

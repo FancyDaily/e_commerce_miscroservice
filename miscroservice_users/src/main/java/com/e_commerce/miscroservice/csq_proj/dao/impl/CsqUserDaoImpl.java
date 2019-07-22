@@ -76,23 +76,23 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectInIds(List<Long> userIds) {
-		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-		.in(TUser::getId, userIds));
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.in(TUser::getId, userIds)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
 	public TCsqUser selectByUserTelAndPasswordAndAccountType(String telephone, String password, Integer accountType) {
-		return MybatisPlus.getInstance().findOne(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-		.eq(TCsqUser::getUserTel, telephone)
-		.eq(TCsqUser::getPassword, password)
-		.eq(TCsqUser::getAccountType, accountType));
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getUserTel, telephone)
+			.eq(TCsqUser::getPassword, password)
+			.eq(TCsqUser::getAccountType, accountType)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
 	public List<TCsqUser> selectAll() {
-		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUserAuth.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 

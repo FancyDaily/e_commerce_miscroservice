@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
@@ -28,9 +29,10 @@ public interface CsqUserService {
 	 * 根据openid登录
 	 * @param openid
 	 * @param uid
+	 * @param wechatPhoneAuthDto
 	 * @return
 	 */
-	Map<String, Object> openidLogin(String openid, String uid);
+	Map<String, Object> openidLogin(String openid, String uid, WechatPhoneAuthDto wechatPhoneAuthDto);
 
 	/**
 	 * 绑定手机号码
@@ -65,7 +67,7 @@ public interface CsqUserService {
 	 * @param name
 	 * @param userHeadPortraitPath
 	 */
-	void registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath);
+	Map<String, Object> registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath);
 
 	/**
 	 * 组织实名认证审核

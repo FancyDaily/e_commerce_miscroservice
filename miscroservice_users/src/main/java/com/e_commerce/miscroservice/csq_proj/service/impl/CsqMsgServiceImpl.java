@@ -3,6 +3,8 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgTemplateEnum;
+import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -20,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -157,4 +156,20 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		csqMsgDao.insert(toInserter);
 	}
 
+	public void insertTemplateMsg(Long userId, Integer type) {
+		switch (CsqSysMsgTemplateEnum.getType(type)) {
+//			case
+		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("reading:");
+		Scanner scanner = new Scanner(System.in);
+		try{
+			String next = scanner.next();
+			System.out.println(CsqSysMsgEnum.getType(Integer.valueOf(next)));
+		} catch (Exception e) {
+
+		}
+	}
 }

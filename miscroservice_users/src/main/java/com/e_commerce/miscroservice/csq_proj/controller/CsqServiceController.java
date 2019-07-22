@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -14,6 +15,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +50,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
+	@UrlAuth
 	public AjaxResult checkAuth() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -86,8 +89,9 @@ public class CsqServiceController {
 	 *                       {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping("publish")
 	@Consume(CsqServiceDetailVo.class)
+	@RequestMapping("publish")
+	@UrlAuth
 	public AjaxResult publishService(String name,
 									 String recordNo,
 									 String typePubKeys,
@@ -106,8 +110,8 @@ public class CsqServiceController {
 		TCsqService csqService = vo.copyTCsqService();
 		try {
 			log.info("发布项目, name={}, recordNo={}, typePubKeys={}, " +
-				"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
-				"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
+					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
+					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
 				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
 			csqServiceService.publish(userId, csqService);
 			result.setSuccess(true);
@@ -162,6 +166,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult listService(Integer option, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -240,6 +245,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("detail")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult serviceDetail(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -269,6 +275,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("cert")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult serviceCert(Long serviceId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -299,6 +306,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("bill/out")
+	@UrlAuth
 	public AjaxResult billOut(@RequestParam Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -332,6 +340,7 @@ public class CsqServiceController {
 	 */
 	@Consume(CsqServiceReportVo.class)
 	@RequestMapping("report/submit")
+	@UrlAuth
 	public AjaxResult reportSubmit(Long serviceId, String title, String description, String pic) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -360,6 +369,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("donate")
+	@UrlAuth
 	public AjaxResult donate(String orderNo) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -388,6 +398,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("reportList")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult reportList(Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -411,12 +422,13 @@ public class CsqServiceController {
 	/**
 	 * 捐助记录列表
 	 *
-	 * @param serviceId
-	 * @param pageNum
-	 * @param pageSize
+	 * @param serviceId 服务id
+	 * @param pageNum   页码
+	 * @param pageSize  大小
 	 * @return
 	 */
 	@RequestMapping("donate/list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult donateList(Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
@@ -436,4 +448,62 @@ public class CsqServiceController {
 		}
 		return result;
 	}
+
+	/**
+	 * 项目信息修改
+	 *
+	 * @param id             编号
+	 * @param name           名称
+	 * @param recordNo       备案号
+	 * @param typePubKeys    项目类型
+	 * @param purpose        目的描述
+	 * @param expectedAmount 期望金额
+	 * @param coverPic       封面图
+	 * @param description    描述
+	 * @param detailPic      补充图片
+	 * @param beneficiary    受益人
+	 * @param creditCard     银行卡
+	 * @param personInCharge 负责人
+	 * @param certificatedNo 身份证/机构代码
+	 * @return
+	 */
+	@Consume(CsqServiceDetailVo.class)
+	@RequestMapping("modify")
+	@UrlAuth
+	public AjaxResult modify(@RequestParam Long id,
+							 @RequestParam(required = false) String name,
+							 @RequestParam(required = false) String recordNo,
+							 @RequestParam(required = false) String typePubKeys,
+							 @RequestParam(required = false) String purpose,
+							 @RequestParam(required = false) Double expectedAmount,
+							 @RequestParam(required = false) String coverPic,
+							 @RequestParam(required = false) String description,
+							 @RequestParam(required = false) String detailPic,
+							 @RequestParam(required = false) String beneficiary,
+							 @RequestParam(required = false) String creditCard,
+							 @RequestParam(required = false) String personInCharge,
+							 @RequestParam(required = false) String certificatedNo
+	) {
+		AjaxResult result = new AjaxResult();
+		Long userId = UserUtil.getTestId();
+		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
+		TCsqService csqService = csqServiceVo.copyTCsqService();
+		try {
+			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
+					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}",
+				userId, id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
+			csqServiceService.modify(csqService);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "修改项目信息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("修改项目信息", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
 }

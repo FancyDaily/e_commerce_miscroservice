@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +26,6 @@ import java.util.stream.Collectors;
  * @Date 2019-06-17 15:15
  * @Version 1.0
  */
-@Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqPaymentServiceImpl implements CsqPaymentService {
 	@Autowired
@@ -176,14 +172,42 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		return csqPaymentDao.countMoney(userId, inOut);
 	}
 
-
 	@Override
 	public void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId) {
+		savePaymentRecord(userId, fromType, fromId, toType, toId, amount, orderId, null);
+	}
+
+	@Override
+	public void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description) {
+		boolean isFromHuman = CsqEntityTypeEnum.TYPE_HUMAN.toCode() == fromType;
+		String demoIncomeDesc = "充值";
+		TCsqUserPaymentRecord build3 = null;
+		if(isFromHuman) {	//如果是现金支付，涉及第三条流水
+			build3 = TCsqUserPaymentRecord.builder()
+				.userId(userId)
+				.orderId(orderId)
+				.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
+				.description(demoIncomeDesc)
+				.entityId(userId)
+				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())	//现金充值类型
+				.money(amount)
+				.orderId(orderId).build();
+		}
 		//获取受益人编号
-		Long beneficiaryId = getBeneficiaryId(toType, toId);
+		Map<String, Object> beneficiaryMap = getBeneficiaryMap(toType, toId);
+		Long beneficiaryId = (Long) beneficiaryMap.get("beneficiaryId");
+		String beneficiaryName = (String) beneficiaryMap.get("beneficiaryName");
+		StringBuilder builder = new StringBuilder();
+		if(description == null) {
+			description = builder.append("向").append(beneficiaryName)
+//				.append("捐款")
+				.toString();
+		}
 		TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
 			.userId(userId)
+			.orderId(orderId)
 			.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())    //支出
+			.description(description)
 			.entityId(fromId)
 			.entityType(fromType)
 			.money(amount)
@@ -191,32 +215,53 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 		TCsqUserPaymentRecord build2 = TCsqUserPaymentRecord.builder()
 			.userId(beneficiaryId)
+			.orderId(orderId)
 			.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())
-			.entityId(fromId)
-			.entityType(fromType)
+			.description(demoIncomeDesc)
+			.entityId(toId)
+			.entityType(toType)
 			.money(amount)
 			.orderId(orderId).build();
-
-		csqUserPaymentDao.insert(build1, build2);
+		csqUserPaymentDao.multiInsert(build3==null? Arrays.asList(build1, build2): Arrays.asList(build1, build2, build3));
 	}
 
-	private Long getBeneficiaryId(Integer toType, Long toId) {
+	@Override
+	public void savePaymentRecord(TCsqOrder tCsqOrder) {
+		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(),tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId());
+	}
+
+	private Map<String, Object> getBeneficiaryMap(Integer toType, Long toId) {
+		Map<String, Object> resultMap = new HashMap<>();
 		Long resultId = null;
+		String resultName = "";
+		StringBuilder builder = new StringBuilder();
 		switch (CsqEntityTypeEnum.getEnum(toType)) {    //获取到相应枚举类型
 			case TYPE_ACCOUNT:
 				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(toId);
 				resultId = csqUser.getId();
+				builder.append("爱心账户");
 				break;
 			case TYPE_FUND:
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
 				resultId = csqFund.getId();
+				builder.append("\"");
+				builder.append(csqFund.getName()==null? "我的": csqFund.getName());
+				builder.append("\"");
+				builder.append("基金");
 				break;
 			case TYPE_SERVICE:
 				TCsqService csqService = csqServiceDao.selectByPrimaryKey(toId);
 				resultId = csqService.getId();
+				builder.append("\"");
+				builder.append(csqService.getName());
+				builder.append("\"");
+				builder.append("项目");
 				break;
 		}
-		return resultId;
+		resultName = builder.toString();
+		resultMap.put("beneficiaryId", resultId);
+		resultMap.put("beneficiaryName", resultName);
+		return resultMap;
 	}
 
 }

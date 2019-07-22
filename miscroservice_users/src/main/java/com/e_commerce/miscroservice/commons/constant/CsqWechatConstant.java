@@ -27,7 +27,8 @@ public class CsqWechatConstant {
 	/**
 	 * 微信支付商户号
 	 */
-	public static final String MCH_ID = "1305322501";
+	public static final String MCH_ID = "1230977302";
+//	public static final String MCH_ID = "1305322501";
 
 	/**
 	 * 获取预支付id的接口url
@@ -64,7 +65,7 @@ public class CsqWechatConstant {
 		APP_SECRET = val;
 	}
 
-	@Value(("$(csq.app_key"))
+	@Value("${csq.app_key}")
 	private void setAppKey(String val) {
 		APP_KEY = val;
 	}

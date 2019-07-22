@@ -103,4 +103,10 @@ public interface CsqServiceService {
 	 * @return
 	 */
 	QueryResult donateList(Long serviceId, Integer pageNum, Integer pageSize);
+
+	/**
+	 * 修改项目信息
+	 * @param csqService
+	 */
+	void modify(TCsqService csqService);
 }

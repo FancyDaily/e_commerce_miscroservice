@@ -60,6 +60,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
+			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
 			.or()
 			.groupBefore()
 			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())	//若为基金唯一对应项目
