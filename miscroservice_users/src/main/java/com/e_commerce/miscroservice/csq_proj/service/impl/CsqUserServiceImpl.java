@@ -7,10 +7,12 @@ import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.UUIDGenerator;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.*;
+import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
@@ -73,6 +75,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private CsqPayService csqPayService;
+
+	@Autowired
+	private CsqMsgService csqMsgService;
 
 	@Value("${page.fund}")
 	private String FUND_PAGE;
@@ -483,10 +488,6 @@ public class CsqUserServiceImpl implements CsqUserService {
 		return map;
 	}
 
-	public static void main(String[] args) {
-	    System.out.println("20010c149787-c064-4390-95e6-e74166cfae7f".length());
-	}
-
 	@Override
 	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		//check入餐
@@ -708,16 +709,43 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	private TCsqUser register(TCsqUser csqUser) {
 		//默认头像等...
-		csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
+		csqUser = dealWithDefaultVal(csqUser);
 		csqUserDao.insert(csqUser);
+		Long userId = csqUser.getId();
 		//注册到认证中心
 		String namePrefix = UserUtil.getApplicationNamePrefix(ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode());
-		Token token = authorizeRpcService.reg(namePrefix + csqUser.getId(), DEFAULT_PASS, csqUser.getId().toString(), csqUser.getUuid(), Boolean.FALSE);
+		Token token = authorizeRpcService.reg(namePrefix + userId, DEFAULT_PASS, userId.toString(), csqUser.getUuid(), Boolean.FALSE);
 
 		if (token != null && token.getToken() != null) {
 			csqUser.setToken(token.getToken());
 		}
+		// sysMsg -> 注册
+		csqMsgService.insertTemplateMsg(userId, CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getCode());
+
 		return csqUser;
+	}
+
+	private static TCsqUser dealWithDefaultVal(TCsqUser csqUser) {
+		csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
+		String name = getDefaultName(csqUser);
+		csqUser.setName(name);
+		return csqUser;
+	}
+
+	private static String getDefaultName(TCsqUser csqUser) {
+		String name = csqUser.getName();
+		String prefix = "用户";
+		long currentTimeMillis = System.currentTimeMillis();
+		String nowStringSuffix = String.valueOf(currentTimeMillis).substring(5);
+		StringBuilder builder = new StringBuilder();
+		name = name == null? builder.append(prefix).append(name).append(nowStringSuffix).toString(): name;
+		return name;
+	}
+
+	public static void main(String[] args) {
+	    TCsqUser user = new TCsqUser();
+		dealWithDefaultVal(user);
+		System.out.println(user.getUserHeadPortraitPath());
 	}
 
 }

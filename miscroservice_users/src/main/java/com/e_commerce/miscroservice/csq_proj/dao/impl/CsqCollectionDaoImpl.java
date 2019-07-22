@@ -20,23 +20,24 @@ import java.util.List;
 public class CsqCollectionDaoImpl implements CsqCollectionDao {
 	@Override
 	public TCsqUserCollection findOne(Long serviceId, Long userId) {
-		TCsqUserCollection tCsqUserCollection = MybatisPlus.getInstance().findOne(new TCsqUserCollection(),new MybatisPlusBuild(TCsqUserCollection.class)
-			.eq(TCsqUserCollection::getServiceId,serviceId)
-			.eq(TCsqUserCollection::getUserId,userId)
+		TCsqUserCollection tCsqUserCollection = MybatisPlus.getInstance().findOne(new TCsqUserCollection(), new MybatisPlusBuild(TCsqUserCollection.class)
+			.eq(TCsqUserCollection::getServiceId, serviceId)
+			.eq(TCsqUserCollection::getUserId, userId)
+			.eq(TCsqUserCollection::getIsValid, AppConstant.IS_VALID_YES)
 		);
 		return tCsqUserCollection;
 	}
 
 	@Override
 	public Integer insert(TCsqUserCollection in) {
-		Integer i  = MybatisPlus.getInstance().save(in);
+		Integer i = MybatisPlus.getInstance().save(in);
 		return i;
 	}
 
 	@Override
 	public Integer update(TCsqUserCollection in) {
-		Integer i  = MybatisPlus.getInstance().update(in,new MybatisPlusBuild(TCsqUserCollection.class)
-		.eq(TCsqUserCollection::getId,in.getId())
+		Integer i = MybatisPlus.getInstance().update(in, new MybatisPlusBuild(TCsqUserCollection.class)
+			.eq(TCsqUserCollection::getId, in.getId())
 		);
 
 		return i;
@@ -44,8 +45,8 @@ public class CsqCollectionDaoImpl implements CsqCollectionDao {
 
 	@Override
 	public List<TCsqUserCollection> findAll(Long userId) {
-		List<TCsqUserCollection> list = MybatisPlus.getInstance().findAll(new TCsqUserCollection(),new MybatisPlusBuild(TCsqUserCollection.class)
-			.eq(TCsqUserCollection::getUserId,userId)
+		List<TCsqUserCollection> list = MybatisPlus.getInstance().findAll(new TCsqUserCollection(), new MybatisPlusBuild(TCsqUserCollection.class)
+			.eq(TCsqUserCollection::getUserId, userId)
 			.eq(TCsqUserCollection::getIsValid, AppConstant.IS_VALID_YES)
 		);
 		return list;

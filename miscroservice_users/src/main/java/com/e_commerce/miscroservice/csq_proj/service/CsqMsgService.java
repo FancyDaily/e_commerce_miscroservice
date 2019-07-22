@@ -19,4 +19,6 @@ public interface CsqMsgService {
 	void saveMsg(TCsqSysMsg csqSysMsg);
 
 	void insert(Long userId, TCsqSysMsg csqSysMsg);
+
+	void insertTemplateMsg(Long userId, Integer type);
 }

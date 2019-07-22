@@ -103,10 +103,10 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "累积捐款总额", length = 11, defaultVal = "0", precision = 2)
 	private Double sumTotalPay;
 
-	@Column(commit = "爱心账户余额", defaultVal = "0", precision = 2)
+	@Column(commit = "爱心账户余额", length = 11, defaultVal = "0", precision = 2)
 	private Double surplusAmount;
 
-	@Column(commit = "爱心账户状态", defaultVal = "0")
+	@Column(commit = "爱心账户状态", length = 11, defaultVal = "0")
 	private Integer balanceStatus;
 
 	@Column(commit = "实名认证状态", length = 11, defaultVal = "0")

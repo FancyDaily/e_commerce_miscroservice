@@ -536,6 +536,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				CsqDonateRecordVo build = CsqDonateRecordVo.builder()
 					.minutesAgo(user.getMinutesAgo())
 					.name(user.getName())
+					.userHeadPortraitPath(user.getUserHeadPortraitPath())
 					.donateAmount(a.getMoney())
 					.createTime(a.getCreateTime().getTime()).build();
 				return build;

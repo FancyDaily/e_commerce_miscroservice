@@ -156,20 +156,30 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		csqMsgDao.insert(toInserter);
 	}
 
+	@Override
 	public void insertTemplateMsg(Long userId, Integer type) {
+		TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
 		switch (CsqSysMsgTemplateEnum.getType(type)) {
-//			case
+			case TEMPLATE_REGISTER:
+			//注册模版
+				String title = CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getTitle();
+				String content = CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getContent();
+				builder.type(type)
+					.userId(userId)
+					.title(title)
+					.content(content);
+				break;
 		}
+		TCsqSysMsg build = builder.build();
+		csqMsgDao.insert(build);
+	}
+
+	private TCsqSysMsg getBaseEntity() {
+		return getBaseBuilder().build();
+	}
+
+	private TCsqSysMsg.TCsqSysMsgBuilder getBaseBuilder() {
+		return TCsqSysMsg.builder();
 	}
 	
-	public static void main(String[] args) {
-		System.out.println("reading:");
-		Scanner scanner = new Scanner(System.in);
-		try{
-			String next = scanner.next();
-			System.out.println(CsqSysMsgEnum.getType(Integer.valueOf(next)));
-		} catch (Exception e) {
-
-		}
-	}
 }
