@@ -1,5 +1,5 @@
 rootProject.name = 'e_commerce_miscroservice'
 include 'miscroservice_commons'
-include 'miscroservice_users'
+include 'miscroservice_user'
 include 'miscroservice_module'
 include 'test'
