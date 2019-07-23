@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data(matchSuffix = true)
 @Builder
 @NoArgsConstructor
-public class TCsqFund extends BaseEntity{
+public class TCsqFund extends BaseEntity {
 
 	@Id
 	private Long id;
@@ -28,7 +28,7 @@ public class TCsqFund extends BaseEntity{
 	private Long userId;
 
 	@Transient
-	private Integer totalToItemCnt;	//累积资助项目
+	private Integer totalToItemCnt;    //累积资助项目
 
 	@Column(commit = "平台认证基金编号")
 	private String fundNo;
@@ -69,7 +69,7 @@ public class TCsqFund extends BaseEntity{
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
 	private Double sumTotalIn;
 
-	@Column(commit = "资金累积流入次数",  defaultVal = "0")
+	@Column(commit = "资金累积流入次数", defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
@@ -82,14 +82,24 @@ public class TCsqFund extends BaseEntity{
 	private Integer helpCnt;
 
 	public CsqFundVo copyCsqFundVo() {
+		CsqFundVo vo = new CsqFundVo();
+		vo.setStationcreditCardId("");
+
 		return null;
 	}
 
+
+
 	public TCsqService copyCsqService() {
+
 		return null;
 	}
 
 	public CsqShareVo copyCsqShareVo() {
+		return null;
+	}
+
+	public CsqShareVo copsyCsqShareVo() {
 		return null;
 	}
 }

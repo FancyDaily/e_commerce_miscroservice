@@ -48,9 +48,9 @@ public class CsqAuthController {
 	@UrlAuth
 	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
-		csqUserAuth.setUserId(userId);
+		csqUserAuth.setUserId(userIds);
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
 			log.info("实名认证 - 个人, name={}, cardId={}, phone={}, smsCode={}", name, cardId, phone, smsCode);

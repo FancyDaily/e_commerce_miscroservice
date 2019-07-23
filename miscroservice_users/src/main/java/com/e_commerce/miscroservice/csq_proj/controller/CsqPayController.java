@@ -54,13 +54,13 @@ public class CsqPayController {
 						   @RequestParam(required = false) String trendPubKeys,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", orderNo, entityId, entityType, fee, name, trendPubKeys);
+			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", userIds, orderNo, entityId, entityType, fee, name, trendPubKeys);
 			entityId = entityId == -1? null:entityId;
-			Map<String, String> stringStringMap = csqPayService.preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
+			Map<String, String> stringStringMap = csqPayService.preOrder(userIds, orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
 			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -161,13 +161,13 @@ public class CsqPayController {
 	@UrlAuth
 	public AjaxResult withinPlatformPay(Integer fromType, Long fromId, Integer entityType, Long entityId, Double fee, String name, String trendPubKeys) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}", userId, fromType, fromId, entityType, entityId, fee, name, trendPubKeys);
+			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}", userIds, fromType, fromId, entityType, entityId, fee, name, trendPubKeys);
 			entityId = entityId == -1? null:entityId;
-			csqPayService.withinPlatFormPay(userId, fromType, fromId, entityType, entityId, fee, csqFund);
+			csqPayService.withinPlatFormPay(userIds, fromType, fromId, entityType, entityId, fee, csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "平台内充值/捐助", e.getMessage());

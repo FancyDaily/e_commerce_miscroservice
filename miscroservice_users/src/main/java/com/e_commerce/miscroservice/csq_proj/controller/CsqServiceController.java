@@ -106,7 +106,7 @@ public class CsqServiceController {
 									 String creditCard,
 									 String personInCharge) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 //		Long userId = IdUtil.getId();
 		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
@@ -115,7 +115,7 @@ public class CsqServiceController {
 					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
 					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
 				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
-			csqServiceService.publish(userId, csqService);
+			csqServiceService.publish(userIds, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目", e.getMessage());
@@ -345,12 +345,12 @@ public class CsqServiceController {
 	@UrlAuth
 	public AjaxResult reportSubmit(Long serviceId, String title, String description, String pic) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqServiceReportVo vo = (CsqServiceReportVo) ConsumeHelper.getObj();
 		TCsqServiceReport tCsqServiceReport = vo.copyTCsqServiceReport();
 		try {
 			log.info("发布项目汇报, serviceId={}, title={}, content={}, pic={}", serviceId, title, description, pic);
-			csqServiceService.submitReport(userId, serviceId, tCsqServiceReport);
+			csqServiceService.submitReport(userIds, serviceId, tCsqServiceReport);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目汇报", e.getMessage());
@@ -487,13 +487,13 @@ public class CsqServiceController {
 							 @RequestParam(required = false) String certificatedNo
 	) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = csqServiceVo.copyTCsqService();
 		try {
 			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
 					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}",
-				userId, id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
+				userIds, id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
 			csqServiceService.modify(csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

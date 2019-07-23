@@ -23,4 +23,6 @@ public interface CsqUserAuthDao {
 	TCsqUserAuth selectByUserIdAndType(Long userId, int type);
 
 	TCsqUserAuth selectByUserIdAndTypeAndStatus(Long userId, int code, int code1);
+
+	TCsqUserAuth findByCardId(String cardId);
 }

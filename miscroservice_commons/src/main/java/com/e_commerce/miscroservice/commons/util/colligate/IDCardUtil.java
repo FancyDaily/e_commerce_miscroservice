@@ -1,5 +1,11 @@
 package com.e_commerce.miscroservice.commons.util.colligate;
 
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.entity.colligate.AliyunUserAuthResponse;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -99,7 +105,11 @@ public class IDCardUtil {
 			return true;
 		}
 		return true;
+	}
 
+	public static boolean checkNameAndNo(String idNo, String name) throws Exception {
+//		return isIDCard(idNo) && checkAuth(idNo, name);	//TODO
+		return isIDCard(idNo);
 	}
 
 	/**
@@ -222,6 +232,36 @@ public class IDCardUtil {
 		map.put("age", age);
 		map.put("sexCode", sex);
 		return map;
+	}
+
+	private static boolean checkAuth(String idNo, String name) throws Exception {
+		boolean flag = false;
+		String host = "https://idenauthen.market.alicloudapi.com";
+		String path = "/idenAuthentication";
+		String method = "POST";
+		String appcode = "你自己的AppCode";	//appcode
+		Map<String, String> headers = new HashMap<>();
+		//最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
+		headers.put("Authorization", "APPCODE " + appcode);
+		//根据API的要求，定义相对应的Content-Type
+		headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		Map<String, String> querys = new HashMap<>();
+		Map<String, String> bodys = new HashMap<>();
+		bodys.put("idNo", idNo);
+		bodys.put("name", name);
+
+		HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
+		System.out.println(response.toString());
+		//获取response的body
+		String jsonString = EntityUtils.toString(response.getEntity());
+		AliyunUserAuthResponse aliyunUserAuthResponse = JSONObject.parseObject(jsonString, AliyunUserAuthResponse.class);
+		String respCode = aliyunUserAuthResponse.getRespCode();
+		if("0010".equals(respCode)) {
+			throw new MessageException("认证系统维护中，请稍后再试!");
+		} else if("0000".equals(respCode)) {	//匹配成功
+			flag = true;
+		}
+		return flag;
 	}
 
 }

@@ -119,13 +119,13 @@ public class CsqFundController {
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
 			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}",
 				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId);
-			fundService.modifyFund(userId, csqFund);
+			fundService.modifyFund(userIds, csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "修改基金", e.getMessage());

@@ -40,41 +40,43 @@ public class CsqWeChatPay {
 
 		String openid = request.getParameter("openid");
 
-		String code = request.getParameter("code");
-
-		if(openid == null) {	//若为空，则解析
-			openid = openIdCache.get(code);
-		}
+		String code = "";
 
 		if (openid != null) {
 			return openid;
 		}
-		StringBuilder params = new StringBuilder();
-		params.append("secret=");
-		params.append(CsqWechatConstant.APP_SECRET);
-		params.append("&appid=");
-		params.append(CsqWechatConstant.APP_ID);
-		params.append("&grant_type=authorization_code");
-//		params.append("&code=");
-		params.append("&js_code=");
-		params.append(code);
 
-//		String url = "https://api.weixin.qq.com/sns/oauth2/access_token";
-		String url = "https://api.weixin.qq.com/sns/jscode2session";
-		String result = httpsRequest(
-			url, "GET", params.toString());
+		code = request.getParameter("code");
+		openid = openIdCache.get(code);
+
+		if(openid == null) {
+			StringBuilder params = new StringBuilder();
+			params.append("secret=");
+			params.append(CsqWechatConstant.APP_SECRET);
+			params.append("&appid=");
+			params.append(CsqWechatConstant.APP_ID);
+			params.append("&grant_type=authorization_code");
+	//		params.append("&code=");
+			params.append("&js_code=");
+			params.append(code);
+
+	//		String url = "https://api.weixin.qq.com/sns/oauth2/access_token";
+			String url = "https://api.weixin.qq.com/sns/jscode2session";
+			String result = httpsRequest(
+				url, "GET", params.toString());
 
 
-		JSONObject jsonObject = JSONObject.parseObject(result);
-		if (!jsonObject.containsKey("openid")) {
-			return "";
+			JSONObject jsonObject = JSONObject.parseObject(result);
+			if (!jsonObject.containsKey("openid")) {
+				return "";
+			}
+			openid = jsonObject.get("openid").toString();
+
+			if(openIdCache.size()>=MAX_CAP){
+				openIdCache.clear();
+			}
+			openIdCache.put(code,openid);
 		}
-		openid = jsonObject.get("openid").toString();
-
-		if(openIdCache.size()>=MAX_CAP){
-			openIdCache.clear();
-		}
-		openIdCache.put(code,openid);
 
 		return openid;
 

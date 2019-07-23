@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.IDCardUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.UUIDGenerator;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
@@ -17,6 +18,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
+import com.e_commerce.miscroservice.user.po.TUserAuth;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -158,8 +161,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode) {
-		if (StringUtil.isAnyEmpty(csqUserAuth.getCardId(), csqUserAuth.getName(), csqUserAuth.getPhone())) {
+	public void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode) throws Exception {
+		String cardId;
+		String name;
+		if (StringUtil.isAnyEmpty(cardId = csqUserAuth.getCardId(), name = csqUserAuth.getName(), csqUserAuth.getPhone())) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数不全！");
 		}
 		Long userId = csqUserAuth.getUserId();
@@ -175,6 +180,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if (!existList.isEmpty()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已存在待审核的实名认证记录!");
 		}
+
+		// 判空
+		if (IDCardUtil.checkNameAndNo(cardId, name)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "身份证号不正确或与姓名不匹配");
+		}
+
+		// 判断是否已经有记录
+		TCsqUserAuth auths = csqUserAuthDao.findByCardId(cardId);
+		if (auths != null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该身份证号已被使用！");
+		}
+
 		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode());    //待审核(默认)
 		csqUserAuth.setStatus(CsqUserAuthEnum.STATUS_CERT_PASS.getCode());    //审核通过
 		csqUserAuthDao.insert(csqUserAuth);
@@ -202,12 +219,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 //		map.put("existDays", null);
 
 		//获取累积捐助总额
-		List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectByUserIdAndInOrOut(userId, CsqUserPaymentEnum.INOUT_OUT.toCode());//我的总支出(平台内捐助	//或修改成到他人的项目或基金
+		/*List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectByUserIdAndInOrOut(userId, CsqUserPaymentEnum.INOUT_OUT.toCode());//我的总支出(平台内捐助	//或修改成到他人的项目或基金
 		Double reduce = userPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getMoney)
 			.reduce(0d,Double::sum);
-
-		map.put("sumDonate", reduce);	//我的累积捐款总额
+*/
+		Double sumTotalPay = tCsqUser.getSumTotalPay();
+		map.put("sumDonate", sumTotalPay);	//我的累积捐款总额
 		map.put("surplusAmount", tCsqUser.getSurplusAmount());	//账户余额
 		Double sumTotalIn = tCsqFund!=null? tCsqFund.getSumTotalIn(): 0d;
 		Double publicMinimum = CsqFundEnum.PUBLIC_MINIMUM;

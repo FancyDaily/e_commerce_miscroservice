@@ -485,6 +485,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			csqService = new TCsqService();
 			isInsert = true;
 		}
+		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
 		csqService.setFundId(fundId);
 		csqService.setUserId(csqFund.getUserId());
 		csqService.setFundStatus(csqFund.getStatus());

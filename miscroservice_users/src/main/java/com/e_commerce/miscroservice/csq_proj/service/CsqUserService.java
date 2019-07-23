@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -47,7 +48,7 @@ public interface CsqUserService {
 	 * @param csqUserAuth
 	 * @param smsCode
 	 */
-	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode);
+	void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode) throws Exception;
 
 	/**
 	 * 根据id查找

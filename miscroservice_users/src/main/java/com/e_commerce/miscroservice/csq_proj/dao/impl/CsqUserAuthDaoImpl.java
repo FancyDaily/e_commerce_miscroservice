@@ -75,4 +75,11 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 			.eq(TCsqUserAuth::getStatus, status)
 			.eq(TCsqUserAuth::getIsValid,AppConstant.IS_VALID_YES));
 	}
+
+	@Override
+	public TCsqUserAuth findByCardId(String cardId) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
+			.eq(TCsqUserAuth::getCardId, cardId)
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES));
+	}
 }

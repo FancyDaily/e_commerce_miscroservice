@@ -103,6 +103,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		List<TCsqSysMsg> toUpdater = tCsqSysMsgs.stream()
 			.map(a -> {
 				a.setIsRead(CsqSysMsgEnum.IS_READ_TRUE.getCode());
+				a.setDeletedFlag(null);	//TODO
 				return a;
 			}).collect(Collectors.toList());
 		csqMsgDao.update(toUpdater);
