@@ -24,15 +24,26 @@ public class CsqUserInvoiceDaoImpl implements CsqUserInvoiceDao {
 
 	@Override
 	public List<TCsqUserInvoice> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), new MybatisPlusBuild(TCsqUserInvoice.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild()
 			.eq(TCsqUserInvoice::getUserId, userId));
 	}
 
 	@Override
 	public TCsqUserInvoice selectByPrimaryKey(Long invoiceId) {
-		return MybatisPlus.getInstance().findOne(new TCsqUserInvoice(), new MybatisPlusBuild(TCsqUserInvoice.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findOne(new TCsqUserInvoice(), baseBuild()
 			.eq(TCsqUserInvoice::getId, invoiceId));
+	}
+
+
+	@Override
+	public List<TCsqUserInvoice> selectByUserIdDesc(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild()
+			.eq(TCsqUserInvoice::getUserId, userId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserInvoice::getCreateTime)));
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqUserInvoice.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES);
 	}
 }

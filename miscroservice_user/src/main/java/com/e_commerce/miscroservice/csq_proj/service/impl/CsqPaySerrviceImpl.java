@@ -523,7 +523,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		//针对创建基金业务
 		if(toId == null && CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
-			csqFund = dealwithFundBeforePay(userId, csqFund, true);	//基金的支付前逻辑。若可能，包含[创建已激活(未公开)基金]
+			csqFund = dealwithFundBeforePay(userId, csqFund, false);	//基金的支付前逻辑。若可能，包含[创建已激活(未公开)基金]
 			if(csqFund !=null) {
 				toId = csqFund.getId();
 			}
@@ -559,8 +559,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
 				csqPaymentService.savePaymentRecord(userId, fromType, fromId, toType, finalToId, amount, orderId);	//流水全处理
-				dealWithRelatedStatistics(order);
 				dealWithFundAfterPay(order);
+				dealWithRelatedStatistics(order);
 			}
 
 		});

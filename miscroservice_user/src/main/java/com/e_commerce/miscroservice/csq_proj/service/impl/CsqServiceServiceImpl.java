@@ -485,6 +485,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			csqService = new TCsqService();
 			isInsert = true;
 		}
+		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
 		csqService.setFundId(fundId);
 		csqService.setUserId(csqFund.getUserId());
 		csqService.setFundStatus(csqFund.getStatus());
@@ -534,7 +535,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.map(a -> {
 				TCsqUser user = a.getUser();
 				CsqDonateRecordVo build = CsqDonateRecordVo.builder()
-					.minutesAgo(user.getMinutesAgo())
+//					.minutesAgo(user.getMinutesAgo())
+					.minutesAgo(a.getMinutesAgo())
 					.name(user.getName())
 					.userHeadPortraitPath(user.getUserHeadPortraitPath())
 					.donateAmount(a.getMoney())
@@ -558,6 +560,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		List<Long> userIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getUserId)
+			.distinct()
 			.collect(Collectors.toList());
 		List<TCsqUser> tCsqUsers = userIds.isEmpty() ? new ArrayList<>() : userDao.selectInIds(userIds);
 		Map<Long, List<TCsqUser>> collect = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
@@ -569,9 +572,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					List<TCsqUser> tCsqUsers1 = collect.get(a.getUserId());
 					if (tCsqUsers1 != null) {
 						TCsqUser tCsqUser = tCsqUsers1.get(0);
-						tCsqUser.setMinutesAgo(minutes);
+//						tCsqUser.setMinutesAgo(minutes);
 						a.setUser(tCsqUser);
 					}
+					a.setMinutesAgo(minutes);
 					return a;
 				}
 			).collect(Collectors.toList());

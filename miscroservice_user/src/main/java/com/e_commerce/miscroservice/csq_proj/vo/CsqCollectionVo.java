@@ -16,6 +16,11 @@ import java.io.Serializable;
 public class CsqCollectionVo implements Serializable {
 
 	/**
+	 * 封面图
+	 */
+	private String coverPic;
+
+	/**
 	 * 捐助进度
 	 */
 	private String donatePercent;

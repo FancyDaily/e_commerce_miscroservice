@@ -58,7 +58,7 @@ public class CsqPayController {
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", orderNo, entityId, entityType, fee, name, trendPubKeys);
+			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", userIds, orderNo, entityId, entityType, fee, name, trendPubKeys);
 			entityId = entityId == -1? null:entityId;
 			Map<String, String> stringStringMap = csqPayService.preOrder(userIds, orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
 			result.setData(stringStringMap);

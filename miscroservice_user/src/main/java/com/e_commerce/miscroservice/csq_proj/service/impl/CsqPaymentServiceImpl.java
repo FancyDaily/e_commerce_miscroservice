@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
@@ -182,6 +183,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		boolean isFromHuman = CsqEntityTypeEnum.TYPE_HUMAN.toCode() == fromType;
 		String demoIncomeDesc = "充值";
 		TCsqUserPaymentRecord build3 = null;
+
 		if(isFromHuman) {	//如果是现金支付，涉及第三条流水
 			build3 = TCsqUserPaymentRecord.builder()
 				.userId(userId)
@@ -192,6 +194,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())	//现金充值类型
 				.money(amount)
 				.orderId(orderId).build();
+			if(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == toType) {	//仅向爱心账户充值
+				csqUserPaymentDao.insert(build3);
+				return;
+			}
 		}
 		//获取受益人编号
 		Map<String, Object> beneficiaryMap = getBeneficiaryMap(toType, toId);
@@ -244,9 +250,13 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			case TYPE_FUND:
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
 				resultId = csqFund.getId();
-				builder.append("\"");
-				builder.append(csqFund.getName()==null? "我的": csqFund.getName());
-				builder.append("\"");
+				if(StringUtil.isEmpty(csqFund.getName())) {
+					builder.append("我的");
+				} else {
+					builder.append("\"");
+					builder.append(csqFund.getName());
+					builder.append("\"");
+				}
 				builder.append("基金");
 				break;
 			case TYPE_SERVICE:

@@ -197,7 +197,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return csqFundVo;
 		}
-		List<TCsqOrder> resultList = getGotoListNonePage(fundId, tCsqUserPaymentRecords);
+		List<TCsqOrder> resultList = getGotoList(null, null, fundId, tCsqUserPaymentRecords).getResultList();
 		csqFundVo.setGoToList(resultList);
 		return csqFundVo;
 	}
@@ -205,13 +205,13 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public QueryResult getGotoList(Long fundId, Integer pageNum, Integer pageSize) {
 		QueryResult result = new QueryResult();
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqOrder> gotoListNonePage = getGotoListNonePage(fundId, null);
-		result.setTotalCount(startPage.getTotal());
+		QueryResult gotoList = getGotoList(pageNum, pageSize, fundId, null);
+		List<TCsqOrder> gotoListNonePage = gotoList.getResultList();
+		result.setTotalCount(gotoList.getTotalCount());
 		List<Long> serviceIds = gotoListNonePage.stream()
 			.map(TCsqOrder::getToId)
 			.distinct().collect(Collectors.toList());
-		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
+		List<TCsqService> tCsqServices = serviceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 
@@ -257,7 +257,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return mapList;
 	}
 
-	private List<TCsqOrder> getGotoListNonePage(Long fundId, List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+	private QueryResult getGotoList(Integer pageNum, Integer pageSize, Long fundId, List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+		QueryResult queryResult = new QueryResult();
 		if(tCsqUserPaymentRecords==null) {
 			//根据fundId获取值
 			tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
@@ -266,14 +267,19 @@ public class CsqFundServiceImpl implements CsqFundService {
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.collect(Collectors.toList());
 		if(tCsqUserPaymentRecords.isEmpty()) {
-			return new ArrayList<>();
+			return new QueryResult();
 		}
-			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
+		Long total = 0L;
+		if(pageNum != null && pageSize != null) {
+			Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+			total = startPage.getTotal();
+		}
 		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
-		return tCsqOrders.stream()
+		List<TCsqOrder> resultList = tCsqOrders.stream()
 			.map(a -> {
 				a.setDate(DateUtil.timeStamp2Date(a.getUpdateTime().getTime(), "yyyy/MM/dd"));
 				List<TCsqService> tempList = collect.get(a.getId());
@@ -283,6 +289,10 @@ public class CsqFundServiceImpl implements CsqFundService {
 				}
 				return a;
 			}).collect(Collectors.toList());
+
+		queryResult.setResultList(resultList);
+		queryResult.setTotalCount(total);
+		return queryResult;
 	}
 
 	@Override
