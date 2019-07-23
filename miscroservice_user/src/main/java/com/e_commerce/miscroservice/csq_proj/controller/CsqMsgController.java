@@ -147,7 +147,6 @@ public class CsqMsgController {
 	/**
 	 * 手动推送系统消息
 	 *
-	 * @param userId    用户编号
 	 * @param title     标题
 	 * @param content   内容
 	 * @param serviceId 项目编号
