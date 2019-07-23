@@ -24,7 +24,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.sonarqube'
 
-    task sourcesJar(type: Jar, dependsOn: classes) {
+    task sourcesJar(type: Zip, dependsOn: classes) {
         archiveClassifier = "sources"
         from sourceSets.main.allSource
     }
