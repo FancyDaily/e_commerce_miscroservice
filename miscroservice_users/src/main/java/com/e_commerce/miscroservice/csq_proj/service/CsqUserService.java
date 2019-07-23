@@ -5,8 +5,9 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 
-import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -161,4 +162,10 @@ public interface CsqUserService {
 	 * @return
 	 */
 	Map<String, Object> getAuthStatus(Long userId);
+
+	/**
+	 * 获取全局捐赠播报
+	 * @return
+	 */
+	List<CsqDonateRecordVo> globleDonateRecord();
 }

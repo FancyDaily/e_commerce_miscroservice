@@ -379,6 +379,15 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return csqService.getFundId();
 	}
 
+	@Override
+	public Long getServiceId(Long fundId) {
+		TCsqService csqService = csqServiceDao.selectByFundId(fundId);
+		if(csqService == null) {
+			return null;
+		}
+		return csqService.getId();
+	}
+
 	private Page<Object> startPage(Integer pageNum, Integer pageSize) {
 		pageNum = pageNum == null? 1:pageNum;
 		pageSize = pageSize == null? 0:pageSize;

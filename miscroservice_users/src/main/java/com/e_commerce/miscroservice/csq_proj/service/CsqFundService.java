@@ -78,5 +78,7 @@ public interface CsqFundService {
 	 */
 	QueryResult donateServiceList(Long serviceId, Integer pageNum, Integer pageSize);
 
+	Long getServiceId(Long fundId);
+
 	boolean isMine(Long fundId, Long userId);
 }

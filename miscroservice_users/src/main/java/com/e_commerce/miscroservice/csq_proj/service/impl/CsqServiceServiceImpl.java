@@ -304,34 +304,42 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			csqServiceDetailVo.setDonePercent(donePercent);
 			resultMap.put("serviceVo", csqServiceDetailVo);
 
-			Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, serviceId.toString());
-			Queue<CsqDonateRecordVo> voList;
-			if(exist == null) {
-				voList = new LimitQueue<>(1);	//创建带上限的队列
-			} else {
-				voList = (LimitQueue<CsqDonateRecordVo>) exist;
-			}
-			//处理得到list
-			List<CsqDonateRecordVo> resultList = new ArrayList<>();
-			Iterator<CsqDonateRecordVo> iterator = voList.iterator();
-			while (iterator.hasNext()) {
-				CsqDonateRecordVo csqDonateRecordVo = iterator.next();
-				Long createTime = csqDonateRecordVo.getCreateTime();
-				long interval = System.currentTimeMillis() - createTime;
-				Long minuteAgo = interval /1000 / 60;
-				csqDonateRecordVo.setMinutesAgo(minuteAgo.intValue());
-				iterator.remove();
-				resultList.add(csqDonateRecordVo);
-			}
-			//排序
-			resultList = resultList.stream()
-				.sorted(Comparator.comparing(CsqDonateRecordVo::getCreateTime).reversed()).collect(Collectors.toList());
+			List<CsqDonateRecordVo> resultList = dealWithRedisDonateRecord(serviceId);
 			//装载结果
 			resultMap.put("broadCast", resultList);
 		}
 		resultMap.put("isMine", isMine);
 		resultMap.put("isFund", isFund);
 		return resultMap;
+	}
+
+	@Override
+	public List<CsqDonateRecordVo> dealWithRedisDonateRecord(Long serviceId) {
+		String hashKey = CsqRedisEnum.ALL.getMsg();
+		hashKey = serviceId!=null? serviceId.toString(): hashKey;
+		Object exist = userRedisTemplate.get(CSQ_GLOBAL_DONATE_BROADCAST, hashKey);
+		Queue<CsqDonateRecordVo> voList;
+		if(exist == null) {
+			voList = new LimitQueue<>(1);	//创建带上限的队列
+		} else {
+			voList = (LimitQueue<CsqDonateRecordVo>) exist;
+		}
+		//处理得到list
+		List<CsqDonateRecordVo> resultList = new ArrayList<>();
+		Iterator<CsqDonateRecordVo> iterator = voList.iterator();
+		while (iterator.hasNext()) {
+			CsqDonateRecordVo csqDonateRecordVo = iterator.next();
+			Long createTime = csqDonateRecordVo.getCreateTime();
+			long interval = System.currentTimeMillis() - createTime;
+			Long minuteAgo = interval /1000 / 60;
+			csqDonateRecordVo.setMinutesAgo(minuteAgo.intValue());
+			iterator.remove();
+			resultList.add(csqDonateRecordVo);
+		}
+		//排序
+		resultList = resultList.stream()
+			.sorted(Comparator.comparing(CsqDonateRecordVo::getCreateTime).reversed()).collect(Collectors.toList());
+		return resultList;
 	}
 
 	public static void main(String[] args) {

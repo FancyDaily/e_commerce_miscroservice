@@ -2,12 +2,14 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +42,8 @@ public interface CsqServiceService {
 	 * @return
 	 */
 	Map<String, Object> detail(Long userId, Long serviceId);
+
+	List<CsqDonateRecordVo> dealWithRedisDonateRecord(Long serviceId);
 
 	/**
 	 * 项目审核

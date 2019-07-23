@@ -13,6 +13,7 @@ import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -483,20 +484,22 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	private void insertDailyDonateRecords(TCsqOrder tCsqOrder) {
+		Integer toType = tCsqOrder.getToType();
 		//check
-		if(!Arrays.asList(CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode()).contains(tCsqOrder.getToType())) {
+		//判断是否为向基金或者项目捐款	TODO 是否要排除自己发布的
+		if(!Arrays.asList(CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode()).contains(toType)) {
 			return;
 		}
-		//判断是否为日推的项目/基金
 		Long userId = tCsqOrder.getUserId();	//注意此时若用于代捐会有问题
 		Long toId = tCsqOrder.getToId();
-		if(!csqUserService.isDailyDonateServiceId(toId)) {
-			return;
+
+		//若为基金获取双生项目Id
+		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
+			toId = csqFundService.getServiceId(toId);
 		}
-		Integer toType = tCsqOrder.getToType();
-		int[] codeArray = {CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()};
-		//判断是否为向基金或者项目捐款( TODO 是否要排除自己发布的
-		if(!Arrays.asList(codeArray).contains(toType)) {
+
+		//判断是否为日推的项目/基金
+		if(!csqUserService.isDailyDonateServiceId(toId)) {
 			return;
 		}
 		//插入相关记录
@@ -505,9 +508,11 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		if(!dailyDonateList.isEmpty() && DateUtil.isToday(dailyDonateList.get(0).getCreateTime().getTime())) {	//今天已经有一条记录
 			return;
 		}
+
 		TCsqKeyValue build = TCsqKeyValue.builder()
 			.mainKey(userId)
 			.type(CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode())
+//			.theValue()
 			.build();
 		csqKeyValueDao.save(build);
 	}
@@ -808,6 +813,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	private void flushRedisDonate(Long userId, Long serviceId, Double amount) {
+		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
+		String name = csqService.getName();
 		//往"捐助播报"的缓存中添加记录,key: csqServiceId, value: TCsqService
 		//构建一个DonateVo
 		int maximum = 20;
@@ -815,17 +822,20 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		CsqDonateRecordVo vo = CsqDonateRecordVo.builder().donateAmount(amount)
 			.userHeadPortraitPath(csqUser.getUserHeadPortraitPath())
 			.name(csqUser.getName())
+			.toName(name)
 			.createTime(System.currentTimeMillis()).build();
 
 		Object exist = userRedisTemplate.get(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), serviceId.toString());
-		LimitQueue<CsqDonateRecordVo> donateQueue = new LimitQueue<>(maximum);
+
+		LimitQueue<CsqDonateRecordVo> donateQueue;
 		if(exist == null) {
 			donateQueue = new LimitQueue<>(maximum);	//创建带上限的队列
 		} else {
 			donateQueue = (LimitQueue<CsqDonateRecordVo>) exist;
 		}
 		donateQueue.offer(vo);
-		userRedisTemplate.put(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), serviceId.toString(), donateQueue);
+		userRedisTemplate.put(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), serviceId.toString(), donateQueue);	//服务专项队列
+		userRedisTemplate.put(CsqRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), CsqRedisEnum.ALL.getMsg(), donateQueue);	//全局队列
 	}
 
 //	@Override

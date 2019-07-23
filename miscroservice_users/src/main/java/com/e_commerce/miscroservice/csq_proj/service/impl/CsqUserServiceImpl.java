@@ -8,28 +8,24 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.IDCardUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.UUIDGenerator;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.*;
-import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
+import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
-import com.e_commerce.miscroservice.user.po.TUserAuth;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,6 +77,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private CsqMsgService csqMsgService;
+
+	@Autowired
+	private CsqServiceService csqServiceService;
+
+	@Autowired
+	@Qualifier("csqRedisTemplate")
+	HashOperations<String, String, Object> userRedisTemplate;
 
 	@Value("${page.fund}")
 	private String FUND_PAGE;
@@ -357,14 +360,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 		Double dailyIncome;
 		Integer donateCnt;
 		Long toId = csqService.getId();
+		boolean isFund = false;
 		if (CsqServiceEnum.TYPE_FUND.getCode() == type) {    //基金
 			//toType使用基金类型，使用fundId
 			//找到fundId
 			toId = csqService.getFundId();
+			isFund = true;
 		}
 		long startStamp = DateUtil.getStartStamp(System.currentTimeMillis());
 		long endStamp = DateUtil.getEndStamp(System.currentTimeMillis());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, CsqEntityTypeEnum.TYPE_FUND.toCode(), startStamp, endStamp);
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode(), startStamp, endStamp);
 		dailyIncome = tCsqOrders.stream()
 			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
@@ -715,6 +720,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		resultMap.put("status", status);
 		resultMap.put("isCorp", isCorp);
 		return resultMap;
+	}
+
+	@Override
+	public List<CsqDonateRecordVo> globleDonateRecord() {
+		return csqServiceService.dealWithRedisDonateRecord(null);
 	}
 
 	private TCsqUser getCompanyAccount(TCsqUser csqUser) {

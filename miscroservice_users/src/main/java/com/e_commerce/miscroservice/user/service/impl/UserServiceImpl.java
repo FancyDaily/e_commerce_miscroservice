@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.user.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.config.colligate.MqTemplate;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
@@ -13,6 +14,7 @@ import com.e_commerce.miscroservice.commons.entity.application.TGroup;
 import com.e_commerce.miscroservice.commons.entity.application.TOrder;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.Category;
+import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.TimerScheduler;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
@@ -25,9 +27,9 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.controller.GZProductOrderCommonController;
 import com.e_commerce.miscroservice.guanzhao_proj.product_order.po.TGzVoucher;
-import com.e_commerce.miscroservice.user.service.LoginService;
 import com.e_commerce.miscroservice.xiaoshi_proj.message.controller.MessageCommonController;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.controller.OrderCommonController;
 import com.e_commerce.miscroservice.xiaoshi_proj.order.service.impl.BaseService;
@@ -69,6 +71,7 @@ import java.util.regex.Pattern;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.*;
 
+@Log
 @Service
 public class UserServiceImpl extends BaseService implements UserService {
 
