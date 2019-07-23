@@ -3,9 +3,11 @@ package com.e_commerce.miscroservice.csq_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.annotations.application.RController;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
@@ -27,6 +29,7 @@ import java.util.Map;
 @RequestMapping("csq/auth")
 @RestController
 @Log
+@RController
 public class CsqAuthController {
 
 	@Autowired
@@ -48,9 +51,7 @@ public class CsqAuthController {
 	@UrlAuth
 	public AjaxResult personAuth(String name, String cardId, String phone, String smsCode) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
-		csqUserAuth.setUserId(userIds);
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
 			log.info("实名认证 - 个人, name={}, cardId={}, phone={}, smsCode={}", name, cardId, phone, smsCode);
@@ -178,9 +179,8 @@ public class CsqAuthController {
 	@UrlAuth
 	public AjaxResult authCheck() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
 		try {
-			csqUserService.checkAuth(userId);
+			csqUserService.checkAuth(IdUtil.getId());
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "实名状态校验", e.getMessage());
@@ -208,9 +208,8 @@ public class CsqAuthController {
 	@UrlAuth
 	public AjaxResult authStatus() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
 		try {
-			Map<String, Object> resultMap = csqUserService.getAuthStatus(userId);
+			Map<String, Object> resultMap = csqUserService.getAuthStatus(IdUtil.getId());
 			result.setData(resultMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {

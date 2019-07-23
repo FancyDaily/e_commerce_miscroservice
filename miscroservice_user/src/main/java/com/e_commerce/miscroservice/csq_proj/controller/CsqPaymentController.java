@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAut
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
@@ -72,8 +73,7 @@ public class CsqPaymentController {
 	public AjaxResult findWarters(Integer pageNum, Integer pageSize, @RequestParam(required = false) Integer option, boolean isGroupingByYear) {
 		AjaxResult result = new AjaxResult();
 
-//		Long userId = Long.valueOf(IdUtil.getId());
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		log.info("流水查询num={},size={},userId={}", pageNum, pageSize, userId);
 		try {
 			Object records = csqPaymentService.findWaters(pageNum, pageSize, userId, option, isGroupingByYear);
@@ -118,8 +118,7 @@ public class CsqPaymentController {
 	public AjaxResult findMyCertificate(Long recordId) {
 		AjaxResult result = new AjaxResult();
 
-//		Long userId = Long.valueOf(IdUtil.getId());
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		log.info("查询我的证书 userId={}", userId);
 
 		try {

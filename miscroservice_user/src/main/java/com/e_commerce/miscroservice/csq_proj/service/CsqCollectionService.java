@@ -9,7 +9,7 @@ public interface CsqCollectionService {
 	 * @param serviceId
 	 * @param userId
 	 */
-	Object clickCollection(Long serviceId, Integer userId);
+	Object clickCollection(Long serviceId, Long userId);
 
 	/**
 	 * 收藏列表

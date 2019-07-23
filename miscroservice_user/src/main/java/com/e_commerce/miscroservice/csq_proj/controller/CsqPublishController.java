@@ -82,7 +82,6 @@ public class CsqPublishController {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("获取publish表的映射, mainKey={}", mainKey);
-//			Map map = publishService.get(mainKey);
 			Object asList = publishService.getAsList(mainKey);
 			result.setData(asList);
 			result.setSuccess(true);

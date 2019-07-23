@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqCollectionService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
@@ -39,8 +40,7 @@ public class CsqCollectionController {
 	@UrlAuth
 	public AjaxResult clickCollection(Long serviceId) {
 		AjaxResult result = new AjaxResult();
-//		Integer userId = IdUtil.getId();
-		Integer userId = UserUtil.getTestId().intValue();
+		Long userId = IdUtil.getId();
 		log.info("收藏={},userId={}", serviceId, userId);
 		try {
 			csqCollectionService.clickCollection(serviceId, userId);
@@ -86,8 +86,8 @@ public class CsqCollectionController {
 	@UrlAuth
 	public AjaxResult collectionList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-//		Integer userId = IdUtil.getId();
-		Long userId = UserUtil.getTestId();
+
+		Long userId = IdUtil.getId();
 		log.info("收藏列表id={},Num={},size={}", userId, pageNum, pageSize);
 		try {
 			QueryResult<CsqCollectionVo> list = csqCollectionService.collectionList(pageNum, pageSize, userId.intValue());
@@ -118,8 +118,7 @@ public class CsqCollectionController {
 	@UrlAuth
 	public AjaxResult isCollection(Long serviceId) {
 		AjaxResult result = new AjaxResult();
-//		Integer userId = IdUtil.getId();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		log.info("是否收藏={},userId={},serviceId={}", userId, serviceId);
 		try {
 			boolean isCollection = csqCollectionService.isCollection(userId, serviceId);

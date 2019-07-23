@@ -36,14 +36,14 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 
 	@Transactional(rollbackFor = Exception.class)
 	@Override
-	public Object clickCollection(Long serviceId, Integer userId) {
+	public Object clickCollection(Long serviceId, Long userId) {
 		TCsqService tCsqService = csqServiceDao.findOne(serviceId);
 		if (tCsqService==null){
 			throw new  MessageException("项目不存在");
 		}
 		TCsqUserCollection in = new TCsqUserCollection();
 
-		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId,Long.valueOf(userId));
+		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId,userId);
 		if (csqUserCollection==null){
 			in.setServiceId(serviceId);
 			in.setUserId(Long.valueOf(userId));

@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 /**
  * 支付Controller
+ *
  * @Author: FangyiXu
  * @Date: 2019-06-12 11:40
  */
@@ -35,11 +37,12 @@ public class CsqPayController {
 
 	/**
 	 * 微信支付(发起)
-	 * @param orderNo 订单号
-	 * @param entityId 被充值对象编号
-	 * @param entityType 被充值对象类型2爱心账户3基金4项目
-	 * @param fee 费用
-	 * @param name 基金名
+	 *
+	 * @param orderNo      订单号
+	 * @param entityId     被充值对象编号
+	 * @param entityType   被充值对象类型2爱心账户3基金4项目
+	 * @param fee          费用
+	 * @param name         基金名
 	 * @param trendPubKeys 趋向
 	 * @return
 	 */
@@ -54,13 +57,12 @@ public class CsqPayController {
 						   @RequestParam(required = false) String trendPubKeys,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", userIds, orderNo, entityId, entityType, fee, name, trendPubKeys);
-			entityId = entityId == -1? null:entityId;
-			Map<String, String> stringStringMap = csqPayService.preOrder(userIds, orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
+			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys);
+			entityId = entityId == -1 ? null : entityId;
+			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
 			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -77,6 +79,7 @@ public class CsqPayController {
 
 	/**
 	 * 微信回调函数 - 支付
+	 *
 	 * @return
 	 */
 	@RequestMapping("wxNotify/pay")
@@ -99,15 +102,16 @@ public class CsqPayController {
 
 	/**
 	 * 微信退款发起 -> TODO
+	 *
 	 * @param orderNo 订单号
 	 * @return
 	 */
 	@RequestMapping("refund/pre")
 	@UrlAuth
-	public Object askForRefund(@RequestParam(required = true) String orderNo,
+	public Object askForRefund(String orderNo,
 							   HttpServletRequest request) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			csqPayService.preRefund(userId, orderNo, request);
 			result.setSuccess(true);
@@ -125,6 +129,7 @@ public class CsqPayController {
 
 	/**
 	 * 微信回调函数 - 退款 -> TODO
+	 *
 	 * @return
 	 */
 	@RequestMapping("wxNotify/refund")
@@ -147,12 +152,13 @@ public class CsqPayController {
 
 	/**
 	 * 平台内充值/捐助
-	 * @param fromType 来源类型
-	 * @param fromId 来源编号
-	 * @param entityType 去向类型
-	 * @param entityId 去向编号
-	 * @param fee 金额
-	 * @param name 基金名字
+	 *
+	 * @param fromType     来源类型
+	 * @param fromId       来源编号
+	 * @param entityType   去向类型
+	 * @param entityId     去向编号
+	 * @param fee          金额
+	 * @param name         基金名字
 	 * @param trendPubKeys
 	 * @return
 	 */
@@ -161,13 +167,12 @@ public class CsqPayController {
 	@UrlAuth
 	public AjaxResult withinPlatformPay(Integer fromType, Long fromId, Integer entityType, Long entityId, Double fee, String name, String trendPubKeys) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}", userIds, fromType, fromId, entityType, entityId, fee, name, trendPubKeys);
-			entityId = entityId == -1? null:entityId;
-			csqPayService.withinPlatFormPay(userIds, fromType, fromId, entityType, entityId, fee, csqFund);
+			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys);
+			entityId = entityId == -1 ? null : entityId;
+			csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "平台内充值/捐助", e.getMessage());
@@ -183,8 +188,9 @@ public class CsqPayController {
 
 	/**
 	 * 测试回调
+	 *
 	 * @param orderNo 订单号
-	 * @param attach 附加字段
+	 * @param attach  附加字段
 	 * @return
 	 */
 	@RequestMapping("test/notiffy")
