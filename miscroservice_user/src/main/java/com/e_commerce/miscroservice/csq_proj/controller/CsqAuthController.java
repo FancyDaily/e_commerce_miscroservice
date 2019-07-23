@@ -29,7 +29,6 @@ import java.util.Map;
 @RequestMapping("csq/auth")
 @RestController
 @Log
-@RController
 public class CsqAuthController {
 
 	@Autowired
