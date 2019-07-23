@@ -8,14 +8,10 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.dao.*;
+import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqWaitToInvoiceOrderVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
-import com.e_commerce.miscroservice.csq_proj.dao.CsqUserInvoiceDao;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.service.CsqInvoiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceRecord;
 import com.github.pagehelper.Page;
@@ -43,6 +39,12 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 	@Autowired
 	private CsqServiceDao csqServiceDao;
+
+	@Autowired
+	private CsqFundDao csqFundDao;
+
+	@Autowired
+	private CsqUserDao csqUserDao;
 
 	@Override
 	public void submit(Long userId, TCsqUserInvoice userInvoice, String... orderNo) {
@@ -77,7 +79,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		String addr = userInvoice.getAddr();
 		String person = userInvoice.getPerson();
 		String telephone = userInvoice.getTelephone();
-		if (StringUtil.isAnyEmpty(name, addr, person, telephone, taxNo) || Objects.isNull(type)) {
+		if (StringUtil.isAnyEmpty(name, addr, person, telephone) || Objects.isNull(type) || (CsqInvoiceEnum.TYPE_CORP.getCode() == type && StringUtil.isEmpty(taxNo))) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必要参数为空!");
 		}
 
@@ -107,24 +109,23 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		pageSize = pageSize==null? 0: pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有待开票的订单,找到serivce汇总
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
-		List<Long> serviceIds = tCsqOrders.stream()
-			.map(TCsqOrder::getToId)
-			.collect(Collectors.toList());
-		List<TCsqService> tCsqServices = tCsqOrders.isEmpty()? new ArrayList<>() : csqServiceDao.selectInIds(serviceIds);
-		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
-			.collect(Collectors.groupingBy(TCsqService::getId));
+//		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		//TODO 处理 爱心账户、基金、项目的数据，其中基金和项目要获取到名字
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		//获取名字、以及对时间进行格式化
+		Map<String, Object> typeListMapMap = getTypeListMapMap(userId, tCsqOrders);
+		Map<Long, List<TCsqService>> serviceMap = getServiceListMap(typeListMapMap);
+		Map<Long, List<TCsqFund>> fundMap = getFundListMap(typeListMapMap);
+		Map<Long, List<TCsqUser>> userMap = getUserListMap(typeListMapMap);
 
 		List<CsqWaitToInvoiceOrderVo> resultList = tCsqOrders.stream()
 			.map(a -> {
+					String name = "未知业务";
+					//类型判断
+					name = getItemName(serviceMap, fundMap, userMap, a);
 					CsqWaitToInvoiceOrderVo csqOrderVo = a.copyCsqOrderVo();    //包含了金额、orderNo
-					Long serviceId = a.getToId();
-					List<TCsqService> tCsqServices1 = collect.get(serviceId);
-					if (tCsqServices1 != null) {
-						TCsqService csqService = tCsqServices1.get(0);
-						csqOrderVo.setServiceName(csqService.getName());    //项目名
-						csqOrderVo.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));    //日期
-					}
+					csqOrderVo.setServiceName(name);    //名
+					csqOrderVo.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));    //日期
 					return csqOrderVo;
 				}
 			).collect(Collectors.toList());
@@ -134,12 +135,78 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		return queryResult;
 	}
 
+	private Map<Long, List<TCsqService>> getServiceListMap(Map<String, Object> typeListMapMap) {
+		return (Map<Long, List<TCsqService>>) typeListMapMap.get("serviceMap");
+	}
+
+	private Map<Long, List<TCsqFund>> getFundListMap(Map<String, Object> typeListMapMap) {
+		return (Map<Long, List<TCsqFund>>) typeListMapMap.get("fundMap");
+	}
+
+	private Map<Long, List<TCsqUser>> getUserListMap(Map<String, Object> typeListMapMap) {
+		return (Map<Long, List<TCsqUser>>) typeListMapMap.get("userMap");
+	}
+
+	private Map<String, Object> getTypeListMapMap(Long userId, List<TCsqOrder> tCsqOrders) {
+		Map<String, Object> resultMap = new HashMap<>();
+		//准备三个List
+		Map<String, Object> typeListMap = getTypeListMap(userId, tCsqOrders);
+		List<Long> fundIds = (List<Long>) typeListMap.get("fundIds");
+		List<Long> serviceIds = (List<Long>) typeListMap.get("serviceIds");
+		List<Long> userIds = (List<Long>) typeListMap.get("userIds");
+
+		//构建serivce
+		List<TCsqService> tCsqServices = serviceIds.isEmpty()? new ArrayList<>() : csqServiceDao.selectInIds(serviceIds);
+		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getId));
+		//构建fund
+		List<TCsqFund> tCsqFunds = fundIds.isEmpty()? new ArrayList<>() : csqFundDao.selectInIds(fundIds);
+		Map<Long, List<TCsqFund>> fundMap = tCsqFunds.stream()
+			.collect(Collectors.groupingBy(TCsqFund::getId));
+		//构建user
+		List<TCsqUser> tCsqUsers = userIds.isEmpty() ? new ArrayList<>() : csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> userMap = tCsqUsers.stream()
+			.collect(Collectors.groupingBy(TCsqUser::getId));
+
+		resultMap.put("serviceMap", serviceMap);
+		resultMap.put("fundMap", fundMap);
+		resultMap.put("userMap", userMap);
+
+		return resultMap;
+	}
+
+	private Map<String, Object> getTypeListMap(Long userId, List<TCsqOrder> tCsqOrders) {
+		Map<String, Object> map = new HashMap<>();
+		List<Long> fundIds = new ArrayList<>();
+		List<Long> serviceIds = new ArrayList<>();
+		List<Long> userIds = new ArrayList<>();
+		tCsqOrders.stream()
+			.forEach(a -> {
+				Long toId = a.getToId();
+				switch (CsqEntityTypeEnum.getEnum(a.getToType())) {
+					case TYPE_FUND:
+						fundIds.add(toId);
+						break;
+					case  TYPE_SERVICE:
+						serviceIds.add(toId);
+						break;
+					case TYPE_ACCOUNT:
+						userIds.add(toId==null? userId: toId);
+						break;
+				}
+		});
+		map.put("fundIds", fundIds);
+		map.put("serviceIds", serviceIds);
+		map.put("userIds", userIds);
+		return map;
+	}
+
 	@Override
 	public QueryResult<CsqUserInvoiceVo> doneList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1:pageNum;
 		pageSize = pageSize==null? 0:pageSize;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserId(userId);
+		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserIdDesc(userId);
 		List<CsqUserInvoiceVo> copyList = tCsqUserInvoices.stream()
 			.map(a -> {
 				String orderNos = a.getOrderNos();
@@ -160,8 +227,14 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		if(tCsqUserInvoice == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的发票编号！");
 		}
-		tCsqUserInvoice.setRecordCnt(tCsqUserInvoice.getOrderNos().length());
+		String orderNos = tCsqUserInvoice.getOrderNos();
+		tCsqUserInvoice.setRecordCnt(StringUtil.isEmpty(orderNos)? 0: orderNos.split(",").length);
 		return tCsqUserInvoice.copyCsqUserInvoice();
+	}
+
+	public static void main(String[] args) {
+	    String name = "";
+		System.out.println(name.split(",").length);
 	}
 
 	@Override
@@ -180,30 +253,62 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqOrder> tCsqOrders = csqOrderDao.selectInOrderNos(split);
 
-		List<Long> serviceIds = tCsqOrders.stream()
-			.map(TCsqOrder::getToId).collect(Collectors.toList());
-		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
-		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
-			.collect(Collectors.groupingBy(TCsqService::getId));
+		Map<String, Object> typeListMapMap = getTypeListMapMap(userId, tCsqOrders);
+		Map<Long, List<TCsqService>> serviceMap = getServiceListMap(typeListMapMap);
+		Map<Long, List<TCsqFund>> fundMap = getFundListMap(typeListMapMap);
+		Map<Long, List<TCsqUser>> userMap = getUserListMap(typeListMapMap);
 
 		ArrayList<CsqInvoiceRecord> csqInvoiceList = new ArrayList<>();
 		tCsqOrders.stream()
 			.forEach(a -> {
-				List<TCsqService> csqServices = serviceMap.get(a.getToId());
-				TCsqService csqService = csqServices.get(0);
+				Long toId = a.getToId();
+				String name = getItemName(serviceMap, fundMap, userMap, a);
 				CsqInvoiceRecord vo = new CsqInvoiceRecord();
-				vo.setItemId(a.getToId());
+				vo.setItemId(toId);
 				vo.setItemType(a.getToType());
 				vo.setOrderNo(a.getOrderNo());
 				vo.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
 				vo.setMyAmount(a.getPrice());
-				vo.setName(csqService.getName());
+				vo.setName(name);
 				csqInvoiceList.add(vo);
 			});
 		QueryResult<CsqInvoiceRecord> queryResult = new QueryResult<>();
 		queryResult.setResultList(csqInvoiceList);
 		queryResult.setTotalCount(startPage.getTotal());
 		return queryResult;
+	}
+
+	private String getItemName(Map<Long, List<TCsqService>> serviceMap, Map<Long, List<TCsqFund>> fundMap, Map<Long, List<TCsqUser>> userMap, TCsqOrder a) {
+		Integer toType = a.getToType();
+		Long toId = a.getToId();
+		String name = "";
+		//类型判断
+		switch (CsqEntityTypeEnum.getEnum(toType)) {
+			case TYPE_FUND:
+				List<TCsqFund> fundList = fundMap.get(toId);
+				if (fundList != null) {
+					TCsqFund fund = fundList.get(0);
+					name = fund.getName();
+					name = StringUtil.isEmpty(name)? "我的未命名的基金" : name;
+				}
+				break;
+			case  TYPE_SERVICE:
+				List<TCsqService> tCsqServices1 = serviceMap.get(toId);
+				if (tCsqServices1 != null) {
+					TCsqService csqService = tCsqServices1.get(0);
+					name = csqService.getName();
+				}
+				break;
+			case TYPE_ACCOUNT:
+				List<TCsqUser> csqUsers = userMap.get(toId);
+				if (csqUsers != null) {
+					TCsqUser csqUser = csqUsers.get(0);
+					String myName = csqUser.getName();
+					name = new StringBuilder().append(myName == null? "我": myName).append("的爱心账户").toString();
+				}
+				break;
+		}
+		return name;
 	}
 
 }

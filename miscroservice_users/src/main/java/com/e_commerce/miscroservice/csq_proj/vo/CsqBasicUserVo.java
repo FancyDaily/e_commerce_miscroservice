@@ -66,6 +66,8 @@ public class CsqBasicUserVo {
 	protected String contactNo;
 
 	public TCsqUser copyTCsqUser() {
-		return null;
+		TCsqUser csqUser = new TCsqUser();
+		csqUser.setContactNo(this.contactNo);
+		return csqUser;
 	}
 }

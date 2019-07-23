@@ -8,7 +8,6 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
@@ -16,6 +15,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
+import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -46,6 +46,9 @@ public class CsqUserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private UserDao userDao;
 
 	/**
 	 * 与微信校验授权
@@ -573,5 +576,10 @@ public class CsqUserController {
 			result.setSuccess(false);
 		}
 		return result;
+	}
+
+	@RequestMapping("test/byId")
+	public Object findUserById(Long userId) {
+		return userDao.selectByPrimaryKey(userId);
 	}
 }

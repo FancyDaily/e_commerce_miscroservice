@@ -211,7 +211,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<Long> serviceIds = gotoListNonePage.stream()
 			.map(TCsqOrder::getToId)
 			.distinct().collect(Collectors.toList());
-		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
+		List<TCsqService> tCsqServices = serviceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 

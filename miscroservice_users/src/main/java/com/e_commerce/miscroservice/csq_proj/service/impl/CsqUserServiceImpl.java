@@ -738,7 +738,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		long currentTimeMillis = System.currentTimeMillis();
 		String nowStringSuffix = String.valueOf(currentTimeMillis).substring(5);
 		StringBuilder builder = new StringBuilder();
-		name = name == null? builder.append(prefix).append(name).append(nowStringSuffix).toString(): name;
+		name = name == null? builder.append(prefix).append(nowStringSuffix).toString(): name;
 		return name;
 	}
 
