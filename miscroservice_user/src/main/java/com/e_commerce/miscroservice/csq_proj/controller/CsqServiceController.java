@@ -8,15 +8,13 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
-import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
-import org.hibernate.validator.constraints.URL;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,7 +52,7 @@ public class CsqServiceController {
 	@UrlAuth
 	public AjaxResult checkAuth() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("检查发布权限, userId={}", userId);
 			csqServiceService.checkPubAuth(userId);
@@ -106,8 +104,6 @@ public class CsqServiceController {
 									 String creditCard,
 									 String personInCharge) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
-//		Long userId = IdUtil.getId();
 		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
 		try {
@@ -115,7 +111,7 @@ public class CsqServiceController {
 					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
 					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
 				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
-			csqServiceService.publish(userIds, csqService);
+			csqServiceService.publish(vo.getUserId(), csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目", e.getMessage());
@@ -171,7 +167,7 @@ public class CsqServiceController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult listService(Integer option, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("项目列表, option={}, pageNum={}, pageSize={}", option, pageNum, pageSize);
 			QueryResult<CsqServiceListVo> list = csqServiceService.list(userId, option, pageNum, pageSize);
@@ -250,7 +246,7 @@ public class CsqServiceController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult serviceDetail(Long serviceId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("项目详情, serviceId={}", serviceId);
 			Map<String, Object> detail = csqServiceService.detail(userId, serviceId);
@@ -280,7 +276,7 @@ public class CsqServiceController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult serviceCert(Long serviceId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("项目审核, serviceId={}", serviceId);
 			csqServiceService.cert(userId, serviceId);
@@ -311,7 +307,7 @@ public class CsqServiceController {
 	@UrlAuth
 	public AjaxResult billOut(@RequestParam Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("项目支出明细, serviceId={}", serviceId);
 			QueryResult<CsqUserPaymentRecordVo> tCsqUserPaymentRecords = csqServiceService.billOut(userId, serviceId, pageNum, pageSize);
@@ -345,7 +341,7 @@ public class CsqServiceController {
 	@UrlAuth
 	public AjaxResult reportSubmit(Long serviceId, String title, String description, String pic) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		CsqServiceReportVo vo = (CsqServiceReportVo) ConsumeHelper.getObj();
 		TCsqServiceReport tCsqServiceReport = vo.copyTCsqServiceReport();
 		try {
@@ -374,7 +370,6 @@ public class CsqServiceController {
 	@UrlAuth
 	public AjaxResult donate(String orderNo) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
 		try {
 			log.info("捐助成功, orderNo={}", orderNo);
 			csqServiceService.donate(orderNo);
@@ -403,7 +398,6 @@ public class CsqServiceController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult reportList(Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
 		try {
 			log.info("项目汇报列表, serviceId={}, pageNum={}, pageSize={}", serviceId, pageNum, pageSize);
 			QueryResult<CsqServiceReportVo> queryResult = csqServiceService.reportList(serviceId, pageNum, pageSize);
@@ -433,7 +427,7 @@ public class CsqServiceController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult donateList(Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("捐助记录列表, userId={}, serviceId={}, pageNum={}, pageSize={}", userId, serviceId, pageNum, pageSize);
 			QueryResult queryResult = csqServiceService.donateList(serviceId, pageNum, pageSize);
@@ -487,13 +481,12 @@ public class CsqServiceController {
 							 @RequestParam(required = false) String certificatedNo
 	) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
 		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = csqServiceVo.copyTCsqService();
 		try {
 			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
 					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}",
-				userIds, id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
+				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
 			csqServiceService.modify(csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

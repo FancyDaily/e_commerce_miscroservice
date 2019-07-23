@@ -27,17 +27,17 @@ public class CsqPublishController {
 	/**
 	 * 插入一条publish记录
 	 *
-	 * @param mainKey 主要类型
-	 * @param keys    键
-	 * @param names   名
-	 * @param keyDesc 键描述
+	 * @param mainKey       主要类型
+	 * @param keys          键
+	 * @param names         名
+	 * @param keyDesc       键描述
 	 * @param isObjectArray 是否使用对象数组存储
-	 * {
-	 *   "success": true,
-	 *   "errorCode": "",
-	 *   "msg": "",
-	 *   "data": ""
-	 * }
+	 *                      {
+	 *                      "success": true,
+	 *                      "errorCode": "",
+	 *                      "msg": "",
+	 *                      "data": ""
+	 *                      }
 	 * @return
 	 */
 	@RequestMapping("upload")
@@ -82,7 +82,6 @@ public class CsqPublishController {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("获取publish表的映射, mainKey={}", mainKey);
-//			Map map = publishService.get(mainKey);
 			Object asList = publishService.getAsList(mainKey);
 			result.setData(asList);
 			result.setSuccess(true);

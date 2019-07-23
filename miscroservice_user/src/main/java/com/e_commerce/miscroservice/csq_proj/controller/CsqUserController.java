@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
@@ -144,11 +145,11 @@ public class CsqUserController {
 	/**
 	 * openid登录
 	 *
-	 * @param openid 微信openid
-	 * @param uuid   虚拟设备号
+	 * @param openid        微信openid
+	 * @param uuid          虚拟设备号
 	 * @param encryptedData 微信加密数据
-	 * @param iv 微信iv
-	 * @param sessionKey 微信sessionKey
+	 * @param iv            微信iv
+	 * @param sessionKey    微信sessionKey
 	 * @return
 	 */
 	@Consume(WechatPhoneAuthDto.class)
@@ -414,8 +415,7 @@ public class CsqUserController {
 	@RequestMapping("information")
 	@UrlAuth
 	public AjaxResult myInformation() {
-//		Long userId = Long.valueOf(IdUtil.getId());
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		log.info("访问我的基本信息 ={}", userId);
 		AjaxResult ajaxResult = new AjaxResult();
 		try {
@@ -446,7 +446,7 @@ public class CsqUserController {
 	@UrlAuth
 	public AjaxResult share(Long entityId, Integer option) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("分享, userId={}, entityId={}, option={}", userId, entityId, option);
 			Map<String, Object> share = csqUserService.share(userId, entityId, option);
@@ -476,7 +476,7 @@ public class CsqUserController {
 	@RequestMapping("recordConsumption")
 	public AjaxResult recordForConsumption(Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("平台托管消费行为的记录, userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}", userId, fromId, fromType, amount, wholeDescription);
 			csqUserService.recordForConsumption(userId, fromId, fromType, amount, wholeDescription);
@@ -529,7 +529,7 @@ public class CsqUserController {
 	@UrlAuth
 	public AjaxResult infos() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("查看基本信息, userId={}, name={}, remarks={}", userId);
 			CsqBasicUserVo infos = csqUserService.infos(userId);
@@ -549,13 +549,14 @@ public class CsqUserController {
 
 	/**
 	 * 修改个人基本信息
-	 * @param name    姓名
-	 * @param remarks 描述
+	 *
+	 * @param name                 姓名
+	 * @param remarks              描述
 	 * @param userHeadPortraitPath 头像
-	 * @param weiboAccount 微博号
-	 * @param wechatPubAccount 微信公众号
-	 * @param contactPerson 联系人
-	 * @param contactNo 联系方式
+	 * @param weiboAccount         微博号
+	 * @param wechatPubAccount     微信公众号
+	 * @param contactPerson        联系人
+	 * @param contactNo            联系方式
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -563,7 +564,7 @@ public class CsqUserController {
 	@UrlAuth
 	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
 			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo);

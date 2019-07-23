@@ -7,10 +7,10 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
-import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,7 +59,7 @@ public class CsqMsgController {
 	@UrlAuth
 	public AjaxResult msgList(Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("消息列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
 			QueryResult<CsqSysMsgVo> list = csqMsgService.list(userId, pageNum, pageSize);
@@ -93,7 +93,7 @@ public class CsqMsgController {
 	@UrlAuth
 	public AjaxResult unreadCnt() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("未读消息数目, userId={}", userId);
 			int count = csqMsgService.unreadCnt(userId);
@@ -127,7 +127,7 @@ public class CsqMsgController {
 	@UrlAuth
 	public AjaxResult readAll() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("全部标为已读, userId={}", userId);
 			csqMsgService.readAll(userId);
@@ -147,7 +147,6 @@ public class CsqMsgController {
 	/**
 	 * 手动推送系统消息
 	 *
-	 * @param userId    用户编号
 	 * @param title     标题
 	 * @param content   内容
 	 * @param serviceId 项目编号
@@ -164,18 +163,18 @@ public class CsqMsgController {
 	@Consume(CsqSysMsgVo.class)
 	@RequestMapping("insert")
 	@UrlAuth(withoutPermission = true)
-	public AjaxResult insert(Long userId,
-							 String title,
-							 String content,
-							 Long serviceId,
-							 @RequestParam Integer type) {
+	public AjaxResult insert(
+		String title,
+		String content,
+		Long serviceId,
+		@RequestParam Integer type) {
 		AjaxResult result = new AjaxResult();
-		Long operatorId = UserUtil.getTestId();
+
 		CsqSysMsgVo vo = (CsqSysMsgVo) ConsumeHelper.getObj();
 		TCsqSysMsg tCsqSysMsg = vo.copyTCsqSysMsg();
 		try {
-			log.info("手动推送系统消息, operatorId={}, userId={}, title={}. content={}, serviceId={}, type={}", operatorId, userId, title, content, serviceId, type);
-			csqMsgService.insert(userId, tCsqSysMsg);
+			log.info("手动推送系统消息, operatorId={}, userId={}, title={}. content={}, serviceId={}, type={}", vo.getUserId(), title, content, serviceId, type);
+			csqMsgService.insert(vo.getUserId(), tCsqSysMsg);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "手动推送系统消息", e.getMessage());

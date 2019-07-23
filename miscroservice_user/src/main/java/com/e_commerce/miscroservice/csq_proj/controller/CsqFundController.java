@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
@@ -42,7 +43,7 @@ public class CsqFundController {
 	@UrlAuth
 	public AjaxResult beforeApplyForFund() {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			boolean b = fundService.checkBeforeApplyForAFund(userId);
 			result.setData(b);
@@ -74,10 +75,9 @@ public class CsqFundController {
 									@RequestParam(required = false) String orderNo,
 									@RequestParam(required = false) Long publishId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("申请基金, amount={},fundId={},orderNo={},publishId={}");
-//			fundService.applyForAFund(userId, fundId, amount, publishId, orderNo);
 			fundService.applyForAFund(userId, orderNo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -95,18 +95,18 @@ public class CsqFundController {
 	/**
 	 * 修改基金
 	 *
-	 * @param id             基金编号
-	 * @param trendPubKeys   趋势pubKeys
-	 * @param name           名
-	 * @param description    描述
-	 * @param coverPic       封面图
-	 * @param orgName        组织名
-	 * @param orgAddr        组织地址
-	 * @param contact        联系方式
-	 * @param personInCharge 负责人
-	 * @param creditCardName 银行名
-	 * @param creditCardId   银行卡号
-	 * @param status   基金状态(用于发起审核)
+	 * @param id              基金编号
+	 * @param trendPubKeys    趋势pubKeys
+	 * @param name            名
+	 * @param description     描述
+	 * @param coverPic        封面图
+	 * @param orgName         组织名
+	 * @param orgAddr         组织地址
+	 * @param contact         联系方式
+	 * @param personInCharge  负责人
+	 * @param creditCardName  银行名
+	 * @param creditCardId    银行卡号
+	 * @param status          基金状态(用于发起审核)
 	 * @param agentModeStatus 代理状态
 	 * @return
 	 */
@@ -119,13 +119,12 @@ public class CsqFundController {
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
 			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}",
 				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId);
-			fundService.modifyFund(userIds, csqFund);
+			fundService.modifyFund(vo.getUserId(), csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "修改基金", e.getMessage());
@@ -152,7 +151,7 @@ public class CsqFundController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult certFund(Long fundId, Integer option) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("审核 - 基金公开, fundId={}, option={}", fundId, option);
 			fundService.certFund(userId, fundId, option);
@@ -174,74 +173,74 @@ public class CsqFundController {
 	 *
 	 * @param fundId 基金编号
 	 *               <p>
-	 * {
-	 *     "contributeInCnt": 2,
-	 *     "trendPubNames": [
-	 *       "北京方向",
-	 *       "东京方向",
-	 *       "南京方向",
-	 *       "皇后大道"
-	 *     ],
-	 *     "goToList": [
-	 *       {
-	 *         "id": 18,
-	 *         "createTime": 1561433484000,
-	 *         "updateTime": 1563175155000,
-	 *         "deletedFlag": false,
-	 *         "extend": "",
-	 *         "createUser": 132,
-	 *         "updateUser": 123231,
-	 *         "isValid": "1",
-	 *         "userId": 2000,
-	 *         "fromId": 6,
-	 *         "toId": 20,
-	 *         "date": "2019/07/15",
-	 *         "serviceName": "",
-	 *         "fromType": 3,
-	 *         "toType": 4,
-	 *         "orderNo": "15987",
-	 *         "price": 128,
-	 *         "status": 2,
-	 *         "inVoiceStatus": 1,
-	 *         "orderTime": "",
-	 *         "cached": false,
-	 *         "countColumn": "*",
-	 *         "buildClass": "com.e_commerce.miscroservice.csq_proj.po.TCsqOrder"
-	 *       }
-	 *     ],
-	 *     "raiseStatus": "",
-	 *     "stationorgName": "",
-	 *     "stationorgAddr": "",
-	 *     "stationcontact": "",
-	 *     "stationPersonIncharge": "",
-	 *     "stationcreditCardName": "",
-	 *     "stationcreditCardId": "",
-	 *     "id": 6,
-	 *     "userId": 2000,
-	 *     "helpCnt": 31,
-	 *     "totalInCnt": 0,
-	 *     "trendPubKeys": "1,2,3,6",
-	 *     "name": "小宝绿色基金会所",
-	 *     "description": "11111111111111",
-	 *     "coverPic": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour(v3.0)/otherImg/156335924596846.png",
-	 *     "orgName": "",
-	 *     "orgAddr": "",
-	 *     "contact": "",
-	 *     "personInCharge": "",
-	 *     "creditCardName": "",
-	 *     "creditCardId": "",
-	 *     "balance": 76766,
-	 *     "sumTotalIn": 4444,
-	 *     "agentModeStatus": 1,
-	 *     "status": 0
-	 *   }
+	 *               {
+	 *               "contributeInCnt": 2,
+	 *               "trendPubNames": [
+	 *               "北京方向",
+	 *               "东京方向",
+	 *               "南京方向",
+	 *               "皇后大道"
+	 *               ],
+	 *               "goToList": [
+	 *               {
+	 *               "id": 18,
+	 *               "createTime": 1561433484000,
+	 *               "updateTime": 1563175155000,
+	 *               "deletedFlag": false,
+	 *               "extend": "",
+	 *               "createUser": 132,
+	 *               "updateUser": 123231,
+	 *               "isValid": "1",
+	 *               "userId": 2000,
+	 *               "fromId": 6,
+	 *               "toId": 20,
+	 *               "date": "2019/07/15",
+	 *               "serviceName": "",
+	 *               "fromType": 3,
+	 *               "toType": 4,
+	 *               "orderNo": "15987",
+	 *               "price": 128,
+	 *               "status": 2,
+	 *               "inVoiceStatus": 1,
+	 *               "orderTime": "",
+	 *               "cached": false,
+	 *               "countColumn": "*",
+	 *               "buildClass": "com.e_commerce.miscroservice.csq_proj.po.TCsqOrder"
+	 *               }
+	 *               ],
+	 *               "raiseStatus": "",
+	 *               "stationorgName": "",
+	 *               "stationorgAddr": "",
+	 *               "stationcontact": "",
+	 *               "stationPersonIncharge": "",
+	 *               "stationcreditCardName": "",
+	 *               "stationcreditCardId": "",
+	 *               "id": 6,
+	 *               "userId": 2000,
+	 *               "helpCnt": 31,
+	 *               "totalInCnt": 0,
+	 *               "trendPubKeys": "1,2,3,6",
+	 *               "name": "小宝绿色基金会所",
+	 *               "description": "11111111111111",
+	 *               "coverPic": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour(v3.0)/otherImg/156335924596846.png",
+	 *               "orgName": "",
+	 *               "orgAddr": "",
+	 *               "contact": "",
+	 *               "personInCharge": "",
+	 *               "creditCardName": "",
+	 *               "creditCardId": "",
+	 *               "balance": 76766,
+	 *               "sumTotalIn": 4444,
+	 *               "agentModeStatus": 1,
+	 *               "status": 0
+	 *               }
 	 * @return
 	 */
 	@RequestMapping("detail")
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+
 		try {
 			log.info("基金详情, fundId={}", fundId);
 			CsqFundVo csqFundVo = fundService.fundDetail(fundId);
@@ -269,7 +268,7 @@ public class CsqFundController {
 	@UrlAuth
 	public AjaxResult shareFund(Long fundId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			Map<String, Object> shareMap = fundService.share(userId, fundId);
 			result.setData(shareMap);
@@ -293,9 +292,9 @@ public class CsqFundController {
 	 * @param pageSize 分页大小
 	 * @param option   操作
 	 *                 <p>
-	 * {
-	 *         "resultList":[
-	 *             {
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
 	 *                 "contributeInCnt":"",	贡献人次
 	 *                 "trendPubNames":"",	捐助方向
 	 *                 "goToList":"",	资助列表
@@ -317,17 +316,17 @@ public class CsqFundController {
 	 *                 "totalIn":10001,	总进账
 	 *                 "agentModeStatus":0,	代理状态
 	 *                 "status":0	状态
-	 *             }
-	 *         ],
-	 *         "totalCount":1
-	 *     }
+	 *                 }
+	 *                 ],
+	 *                 "totalCount":1
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("list")
 	@UrlAuth
 	public AjaxResult fundList(Integer pageNum, Integer pageSize, Integer... option) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			QueryResult<CsqFundVo> list = fundService.list(userId, pageNum, pageSize, option);
 			result.setData(list);
@@ -371,8 +370,9 @@ public class CsqFundController {
 
 	/**
 	 * 基金捐款项目列表
-	 * @param fundId 项目编号
-	 * @param pageNum 页码
+	 *
+	 * @param fundId   项目编号
+	 * @param pageNum  页码
 	 * @param pageSize 大小
 	 * @return
 	 */
@@ -380,7 +380,7 @@ public class CsqFundController {
 	@UrlAuth
 	public AjaxResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userId = UserUtil.getTestId();
+		Long userId = IdUtil.getId();
 		try {
 			log.info("基金捐款项目列表, userId={}, funId={}, pageNum={}, pageSize={}", userId, fundId, pageNum, pageSize);
 			QueryResult queryResult = fundService.donateServiceList(fundId, pageNum, pageSize);
