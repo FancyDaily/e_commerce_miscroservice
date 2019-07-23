@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
@@ -13,6 +14,7 @@ import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
 import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -494,7 +496,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		Long toId = tCsqOrder.getToId();
 
 		//若为基金获取双生项目Id
-		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
+		boolean isFund;
+		if(isFund = CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
 			toId = csqFundService.getServiceId(toId);
 		}
 
@@ -509,10 +512,15 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			return;
 		}
 
+		CsqSimpleServiceVo csqSimpleServiceVo = CsqSimpleServiceVo.builder()
+			.id(toId)
+			.type(isFund ? CsqServiceEnum.TYPE_FUND.getCode() : CsqServiceEnum.TYPE_SERIVE.getCode()).build();
+		String jsonString = JSONObject.toJSONString(csqSimpleServiceVo);
+
 		TCsqKeyValue build = TCsqKeyValue.builder()
 			.mainKey(userId)
 			.type(CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode())
-//			.theValue()
+			.theValue(jsonString)
 			.build();
 		csqKeyValueDao.save(build);
 	}

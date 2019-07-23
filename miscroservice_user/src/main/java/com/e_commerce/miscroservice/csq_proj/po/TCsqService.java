@@ -4,10 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
+import com.e_commerce.miscroservice.csq_proj.vo.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -130,4 +127,6 @@ public class TCsqService extends BaseEntity {
 	public CsqServiceDetailVo copyCsqServiceDetailVo() {
 		return null;
 	}
+
+	public CsqSimpleServiceVo copyCsqSimpleServiceVo() {return null;}
 }

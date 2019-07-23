@@ -374,6 +374,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
 		donateCnt = tCsqOrders.size();
+
 		csqDailyDonateVo.setDailyIncome(dailyIncome);
 		csqDailyDonateVo.setDonateCnt(donateCnt);
 
@@ -446,7 +447,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
 		}
 		Map<String, Object> map = new HashMap<>();
-		String scene = userId + entityId + UUID.randomUUID().toString();    //随机数 => 7.16 scene长度过长!(40 > 32)
+		String scene = userId.toString();    //随机数 => 7.16 scene长度过长!(40 > 32)
 		String page = "";        //从配置文件读取
 		CsqShareVo vo = null;
 		UploadPathEnum.innerEnum uploadEnum = null;
