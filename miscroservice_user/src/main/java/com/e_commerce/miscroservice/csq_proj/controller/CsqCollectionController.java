@@ -5,9 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAut
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
-import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqCollectionService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqCollectionVo;
 import org.springframework.beans.factory.annotation.Autowired;
