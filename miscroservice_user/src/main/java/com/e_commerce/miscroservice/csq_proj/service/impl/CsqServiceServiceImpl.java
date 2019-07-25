@@ -212,7 +212,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			//查询基金
 			isFund = true;
 			Long fundId = tCsqService.getFundId();
-			CsqFundVo csqFundVo = csqFundService.fundDetail(fundId);
+			CsqFundVo csqFundVo = csqFundService.fundDetail(userId, fundId);
 			Integer raiseStatus = 0;    //未公开
 			Integer status = csqFundVo.getStatus();    //五种状态归约成两种
 			if (CsqFundEnum.STATUS_PUBLIC.getVal() == status) {

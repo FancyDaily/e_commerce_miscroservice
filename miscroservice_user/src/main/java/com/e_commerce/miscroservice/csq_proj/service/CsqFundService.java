@@ -47,10 +47,12 @@ public interface CsqFundService {
 
 	/**
 	 * 基金详情
+	 *
+	 * @param userId
 	 * @param fundId
 	 * @return
 	 */
-	CsqFundVo fundDetail(Long fundId);
+	CsqFundVo fundDetail(Long userId, Long fundId);
 
 	QueryResult getGotoList(Long fundId, Integer pageNum, Integer pageSize);
 

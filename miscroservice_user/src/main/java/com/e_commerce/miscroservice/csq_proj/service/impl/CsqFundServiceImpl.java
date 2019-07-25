@@ -227,7 +227,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 	}
 
 	@Override
-	public CsqFundVo fundDetail(Long fundId) {
+	public CsqFundVo fundDetail(Long userId, Long fundId) {
 		if(fundId == null) {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "参数基金编号为空!");
 		}
@@ -249,14 +249,24 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		List<TCsqOrder> resultList = getGotoList(null, null, fundId, tCsqUserPaymentRecords).getResultList();
 		csqFundVo.setGoToList(resultList);
+		boolean isMine = csqFund.getUserId().equals(userId);
+//		csqFundVo.setMine(123);
 		return csqFundVo;
+	}
+
+	public static void main(String[] args) {
+		Integer integer = new Integer(1);
+
+		Long userId = null;
+		System.out.println(integer.equals(userId));
+	    System.out.println(integer.equals(null));
 	}
 
 	@Override
 	public QueryResult getGotoList(Long fundId, Integer pageNum, Integer pageSize) {
 		QueryResult result = new QueryResult();
 		QueryResult gotoList = getGotoList(pageNum, pageSize, fundId, null);
-		List<TCsqOrder> gotoListNonePage = gotoList.getResultList();
+		List<TCsqOrder> gotoListNonePage = gotoList.getResultList() == null? new ArrayList<>(): gotoList.getResultList();
 		result.setTotalCount(gotoList.getTotalCount());
 		List<Long> serviceIds = gotoListNonePage.stream()
 			.map(TCsqOrder::getToId)

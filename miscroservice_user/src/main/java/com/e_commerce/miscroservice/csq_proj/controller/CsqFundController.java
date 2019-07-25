@@ -241,10 +241,10 @@ public class CsqFundController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult FundDetail(Long fundId) {
 		AjaxResult result = new AjaxResult();
-
+		Long userId = IdUtil.getId();
 		try {
 			log.info("基金详情, fundId={}", fundId);
-			CsqFundVo csqFundVo = fundService.fundDetail(fundId);
+			CsqFundVo csqFundVo = fundService.fundDetail(userId, fundId);
 			result.setData(csqFundVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
