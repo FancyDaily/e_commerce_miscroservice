@@ -101,12 +101,12 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	}
 
 	@Override
-	public List<TCsqOrder> selectByToIdAndToTypeAndUpdateTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp) {
+	public List<TCsqOrder> selectByToIdAndToTypeAndOrderTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp) {
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqOrder::getToId, toId)
 			.eq(TCsqOrder::getToType, toCode)
-			.between(TCsqOrder::getUpdateTime, startStamp, endStamp)
+			.between(TCsqOrder::getOrderTime, startStamp, endStamp)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getUpdateTime)));
 	}
 
@@ -116,8 +116,9 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromId, fromId)
+			.eq(TCsqOrder::getFromType, fromtype)
 			.eq(TCsqOrder::getToId, toId)
-			.eq(TCsqOrder::getToId, toType)
+			.eq(TCsqOrder::getToType, toType)
 			.eq(TCsqOrder::getPrice, amount)
 			.eq(TCsqOrder::getStatus, status)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
@@ -181,7 +182,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	@Override
 	public List<TCsqOrder> selectInIds(List<Long> orderIds) {
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getId, orderIds)
+			.in(TCsqOrder::getId, orderIds)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
@@ -192,6 +193,16 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getFromType, toCode)
 			.eq(TCsqOrder::getInVoiceStatus, code)
 			.eq(TCsqOrder::getStatus, code1)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(Long toId, int toType, int status, long startStamp, long endStamp) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getToId, toId)
+			.eq(TCsqOrder::getToType, toType)
+			.eq(TCsqOrder::getStatus, status)
+			.between(TCsqOrder::getOrderTime, startStamp, endStamp)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 

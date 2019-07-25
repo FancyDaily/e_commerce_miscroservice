@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.IDCardUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
@@ -262,11 +263,19 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String, Object> registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath) {
+	public Map<String, Object> registerAndSubmitCert(String telephone, String validCode, String uuid, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath, boolean submitOnly) {
 		Map<String, Object> map = new HashMap<>();
 		userService.checkSMS(telephone, validCode);
 		//用户是否已经注册，若无注册一个(Corp类型
 		TCsqUser tCsqUser = csqUserDao.selectByUserTelAndAccountType(telephone, CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
+
+		//表明此时仅提交认证信息
+		if(!submitOnly) {
+			if(tCsqUser != null) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已注册请勿重复注册！");
+			}
+		}
+
 		if (tCsqUser == null) {    //进行注册
 			tCsqUser = new TCsqUser();
 			tCsqUser.setUserTel(telephone);
@@ -275,7 +284,6 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setName(name);
 			tCsqUser.setUserHeadPortraitPath(userHeadPortraitPath);
 			tCsqUser = register(tCsqUser);
-//			return;
 		}
 		Long corpUserId = tCsqUser.getId();
 		//用户是否已经实名过
@@ -336,6 +344,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.authenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode())
 			.authenticationType(CsqUserEnum.AUTHENTICATION_TYPE_ORG_OR_CORP.toCode()).build();
 		csqUserDao.updateByPrimaryKey(build);
+		//插入一条系统消息
+		csqMsgService.insertTemplateMsg(userId, OPTION_PASS.equals(option)? CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_SUCCESS: CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_FAIL);
 	}
 
 	@Override
@@ -369,10 +379,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		long startStamp = DateUtil.getStartStamp(System.currentTimeMillis());
 		long endStamp = DateUtil.getEndStamp(System.currentTimeMillis());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndUpdateTimeBetweenDesc(toId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode(), startStamp, endStamp);
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(toId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode() ,startStamp, endStamp);
 		dailyIncome = tCsqOrders.stream()
 			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
+		dailyIncome = NumberUtil.keep2Places(dailyIncome);
 		donateCnt = tCsqOrders.size();
 
 		csqDailyDonateVo.setDailyIncome(dailyIncome);
@@ -728,6 +739,25 @@ public class CsqUserServiceImpl implements CsqUserService {
 		return csqServiceService.dealWithRedisDonateRecord(null);
 	}
 
+	@Override
+	public void payInviter(Long beInviterId, String scene) {
+		//处理 scene
+		Long inviterId = Long.valueOf(scene);	//邀请人
+		//建立关系
+		//防止重复插入
+		String theVal = beInviterId.toString();
+		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndValue(inviterId, CsqKeyValueEnum.TYPE_INVITE.getCode(), theVal);
+		if(tCsqKeyValue!=null) {
+			return;
+		}
+		TCsqKeyValue build = TCsqKeyValue.builder()
+			.type(CsqKeyValueEnum.TYPE_INVITE.getCode())
+			.mainKey(inviterId)
+			.theValue(theVal)
+			.build();
+		csqKeyValueDao.save(build);
+	}
+
 	private TCsqUser getCompanyAccount(TCsqUser csqUser) {
 		String openid = csqUser.getVxOpenId();
 		if(openid == null) {
@@ -769,12 +799,6 @@ public class CsqUserServiceImpl implements CsqUserService {
 		StringBuilder builder = new StringBuilder();
 		name = name == null? builder.append(prefix).append(nowStringSuffix).toString(): name;
 		return name;
-	}
-
-	public static void main(String[] args) {
-	    TCsqUser user = new TCsqUser();
-		dealWithDefaultVal(user);
-		System.out.println(user.getUserHeadPortraitPath());
 	}
 
 }

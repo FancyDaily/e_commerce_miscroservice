@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
@@ -19,6 +21,8 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +58,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Autowired
 	private CsqServiceDao csqServiceDao;
+
+	@Autowired
+	private CsqServiceService csqServiceService;
 
 	@Override
 	public void applyForAFund(Long userId, String orderNo) {
@@ -121,7 +128,50 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		//若 status =2 直接处理成【公开】
 		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
+
 		fundDao.update(fund);
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+				//计算是否满足开放条件
+				if(checkIsOkForPublic(csqFund)) {
+					TCsqFund build = TCsqFund.builder()
+						.id(csqFund.getId())
+						.status(CsqFundEnum.STATUS_PUBLIC.getVal())
+						.build();
+					fundDao.update(build);
+					csqFund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+				}
+				csqServiceService.synchronizeService(csqFund);
+			}
+		});
+	}
+
+	@Override
+	public boolean checkIsOkForPublic(TCsqFund fund) {
+		Double currentBalance = fund.getBalance();
+		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM < currentBalance;
+		return achieveMinimum && checkFundCompletion(fund);	//满足开放条件
+	}
+
+	@Override
+	public boolean checkFundCompletion(TCsqFund fund) {
+		if(fund == null) {
+			return false;
+		}
+		String trendPubKeys = fund.getTrendPubKeys();
+		String name = fund.getName();
+		String description = fund.getDescription();
+		String coverPic = fund.getCoverPic();
+		String detailPic = fund.getDetailPic();
+		String creditCardId = fund.getCreditCardId();
+		String creditCardName = fund.getCreditCardName();
+		return !StringUtil.isAnyEmpty(trendPubKeys, name, description, coverPic, detailPic
+//			,creditCardId
+//			,creditCardName
+		);
 	}
 
 	@Override

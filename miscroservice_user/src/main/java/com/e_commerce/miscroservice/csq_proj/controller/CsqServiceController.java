@@ -104,6 +104,7 @@ public class CsqServiceController {
 									 String creditCard,
 									 String personInCharge) {
 		AjaxResult result = new AjaxResult();
+		Long id = IdUtil.getId();
 		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
 		try {
@@ -111,7 +112,7 @@ public class CsqServiceController {
 					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
 					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
 				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
-			csqServiceService.publish(vo.getUserId(), csqService);
+			csqServiceService.publish(id, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发布项目", e.getMessage());

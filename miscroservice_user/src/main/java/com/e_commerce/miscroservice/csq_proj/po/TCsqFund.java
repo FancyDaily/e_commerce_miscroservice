@@ -39,6 +39,9 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "基金名")
 	private String name;
 
+	@Column(commit = "详细图")
+	private String detailPic;
+
 	@Column(commit = "描述")
 	private String description;
 

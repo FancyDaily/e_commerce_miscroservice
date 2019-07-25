@@ -108,13 +108,14 @@ public class CsqFundController {
 	 * @param creditCardId    银行卡号
 	 * @param status          基金状态(用于发起审核)
 	 * @param agentModeStatus 代理状态
+	 * @param detailPic	详情图
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqFundVo.class)
 	@UrlAuth
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
-								   String description, String coverPic, String orgName, String orgAddr,
+								   String description, String coverPic, String orgName, String orgAddr, String detailPic,
 								   String contact, String personInCharge, String creditCardName, String creditCardId,
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
@@ -122,8 +123,8 @@ public class CsqFundController {
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}",
-				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId);
+			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}, detailPic={}",
+				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId, detailPic);
 			fundService.modifyFund(vo.getUserId(), csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {

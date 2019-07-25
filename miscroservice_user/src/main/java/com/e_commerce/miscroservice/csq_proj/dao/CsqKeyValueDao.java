@@ -15,4 +15,6 @@ public interface CsqKeyValueDao {
 	List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code);
 
 	int save(TCsqKeyValue... build);
+
+	TCsqKeyValue selectByKeyAndTypeAndValue(Long userId, int code, String toString);
 }

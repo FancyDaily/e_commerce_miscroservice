@@ -24,7 +24,7 @@ public class CsqServiceListVo {
 	protected String donePercent;	//捐献完成百分比
 
 	@Transient
-	protected Double sumTotalPayMine;	//此项目我的总计捐款
+	protected Double sumTotalPayMine;	//此项目我的总计捐款(或项目已筹集多少金额
 
 	@Transient
 	protected Integer donaterCnt;	//捐助人数

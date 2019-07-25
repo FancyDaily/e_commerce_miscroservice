@@ -55,6 +55,9 @@ public class CsqFundVo {
 	@Column(commit = "描述")
 	private String description;	//MARK
 
+	@Column(commit = "详细图")
+	private String detailPic;
+
 	@Column(commit = "封面图")
 	private String coverPic;
 

@@ -17,18 +17,21 @@ import java.util.List;
 @Component
 public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
+	private MybatisPlusBuild baseBUild() {
+		return new MybatisPlusBuild(TCsqKeyValue.class)
+			.eq(TCsqKeyValue::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndType(Long userId, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBUild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code));
 	}
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), new MybatisPlusBuild(TCsqKeyValue.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBUild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqKeyValue::getCreateTime)));
@@ -37,5 +40,14 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 	@Override
 	public int save(TCsqKeyValue... build) {
 		return MybatisPlus.getInstance().save(build);
+	}
+
+	@Override
+	public TCsqKeyValue selectByKeyAndTypeAndValue(Long userId, int code, String toString) {
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+			.eq(TCsqKeyValue::getMainKey, userId)
+			.eq(TCsqKeyValue::getType, code)
+			.eq(TCsqKeyValue::getTheValue, toString)
+		);
 	}
 }

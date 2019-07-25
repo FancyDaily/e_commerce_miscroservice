@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqInvoiceEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -110,7 +111,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有待开票的订单,找到serivce汇总
 //		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
-		//TODO 处理 爱心账户、基金、项目的数据，其中基金和项目要获取到名字
+		//处理 爱心账户、基金、项目的数据，其中基金和项目要获取到名字
 		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		//获取名字、以及对时间进行格式化
 		Map<String, Object> typeListMapMap = getTypeListMapMap(userId, tCsqOrders);
@@ -126,6 +127,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 					CsqWaitToInvoiceOrderVo csqOrderVo = a.copyCsqOrderVo();    //包含了金额、orderNo
 					csqOrderVo.setServiceName(name);    //名
 					csqOrderVo.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));    //日期
+					csqOrderVo.setPrice(NumberUtil.keep2Places(a.getPrice()));
 					return csqOrderVo;
 				}
 			).collect(Collectors.toList());

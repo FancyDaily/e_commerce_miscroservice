@@ -211,7 +211,7 @@ public class CsqWeChatPay {
 	}*/
 
 	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb) throws Exception {
-		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
+		log.info("web params= orderNo={} payCount={} ",orderNo,payCount);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", CsqWechatConstant.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());

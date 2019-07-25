@@ -16,7 +16,19 @@ public enum CsqUserEnum {
 	BALANCE_STATUS_BANED(-1, "被禁止")
 	;
 
+	/**
+	 * 默认头像
+	 */
 	public static final String DEFAULT_HEADPORTRAITURE_PATH = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png";	//默认头像
+	/**
+	 * 匿名者头像
+	 */
+	public static final String DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH = DEFAULT_HEADPORTRAITURE_PATH;
+	/**
+	 * 匿名者名字
+	 */
+	public static final String DEFAULT_ANONYMOUS_NAME = "匿名捐款者";
+
 	Integer code;
 	String desc;
 

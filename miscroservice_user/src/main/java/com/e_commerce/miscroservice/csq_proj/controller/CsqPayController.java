@@ -42,6 +42,7 @@ public class CsqPayController {
 	 * @param fee          费用
 	 * @param name         基金名
 	 * @param trendPubKeys 趋向
+	 * @param isAnonymous 是否匿名
 	 * @return
 	 */
 	@Consume(CsqFundVo.class)
@@ -53,6 +54,7 @@ public class CsqPayController {
 						   @RequestParam(required = true) Double fee,
 						   @RequestParam(required = false) String name,
 						   @RequestParam(required = false) String trendPubKeys,
+						   @RequestParam(required = false) boolean isAnonymous,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
@@ -60,7 +62,7 @@ public class CsqPayController {
 		try {
 			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys);
 			entityId = entityId == -1 ? null : entityId;
-			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund);
+			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund, isAnonymous);
 			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -157,20 +159,28 @@ public class CsqPayController {
 	 * @param entityId     去向编号
 	 * @param fee          金额
 	 * @param name         基金名字
-	 * @param trendPubKeys
+	 * @param trendPubKeys 捐助方向
+	 * @param isAnonymous 是否匿名
 	 * @return
 	 */
 	@Consume(CsqFundVo.class)
 	@RequestMapping("pay/inner")
 	@UrlAuth
-	public AjaxResult withinPlatformPay(Integer fromType, Long fromId, Integer entityType, Long entityId, Double fee, String name, String trendPubKeys) {
+	public AjaxResult withinPlatformPay(Integer fromType,
+										Long fromId,
+										Integer entityType,
+										Long entityId,
+										Double fee,
+										String name,
+										String trendPubKeys,
+										boolean isAnonymous) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys);
+			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}, isAnonymous={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys, isAnonymous);
 			entityId = entityId == -1 ? null : entityId;
-			csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund);
+			csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund, isAnonymous);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "平台内充值/捐助", e.getMessage());

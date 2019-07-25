@@ -68,8 +68,9 @@ public interface CsqUserService {
 	 * @param csqUserAuth
 	 * @param name
 	 * @param userHeadPortraitPath
+	 * @param skipLogin
 	 */
-	Map<String, Object> registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath);
+	Map<String, Object> registerAndSubmitCert(String telephone, String password, String validCode, TCsqUserAuth csqUserAuth, String name, String userHeadPortraitPath, boolean skipLogin);
 
 	/**
 	 * 组织实名认证审核
@@ -168,4 +169,11 @@ public interface CsqUserService {
 	 * @return
 	 */
 	List<CsqDonateRecordVo> globleDonateRecord();
+
+	/**
+	 * 邀请回馈
+	 * @param userIds
+	 * @param scene
+	 */
+	void payInviter(Long userIds, String scene);
 }

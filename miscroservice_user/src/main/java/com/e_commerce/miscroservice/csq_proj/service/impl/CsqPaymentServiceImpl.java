@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
 import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -15,7 +18,6 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,7 +50,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option) {
 		List<TCsqUserPaymentRecord> records;
 		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-		if(option == null) {
+		if (option == null) {
 			records = csqPaymentDao.selectByUserIdDesc(userId);
 		} else {
 			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
@@ -68,7 +70,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public Object findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears) {
-		if(isGroupingByYears) {
+		if (isGroupingByYears) {
 			return findWatersGroupingByYear(pageNum, pageSize, userId, option);
 		}
 		return findWaters(pageNum, pageSize, userId, option);
@@ -78,7 +80,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	public QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option) {
 		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserPaymentRecord> records;
-		if(option == null) {
+		if (option == null) {
 			records = csqPaymentDao.selectByUserIdDesc(userId);
 		} else {
 			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
@@ -138,34 +140,44 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	public Map<String, Object> findMyCertificate(Long recordId, Long userId) {
 		Map<String, Object> map = new HashMap<>();
 		TCsqUserPaymentRecord record = csqPaymentDao.findWaterById(recordId);
-		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
-		if (record != null) {
-			Long entityId = record.getEntityId();
-			Integer entityType = record.getEntityType();
-			//获取serviceName
-			TCsqService csqService = null;
-			if (CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
-				csqService = csqServiceDao.selectByFundId(entityId);
-
-			} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {
-				csqService = csqServiceDao.selectByPrimaryKey(entityId);
-			}
-			String serviceName = csqService==null? null:csqService.getName();
-
-			//获取name
-			TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
-			map.put("serviceName", serviceName);
-			map.put("name", csqUser.getName());
-			map.put("money", record.getMoney());
-			map.put("countMoney", accountMoney);
-			// TODO: 2019-06-20  二维码生成
-			//page
-			String page = "/index/fxxk";
-			map.put("code", wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE));
-			map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
-			map.put("date", DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd"));
+		if (record == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该记录已不存在!");
 		}
+		TCsqUserPaymentRecord theOtherTypeRecord = findTheOtherTypeRecord(record);
+
+		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
+
+		Long entityId = theOtherTypeRecord.getEntityId();
+		Integer entityType = theOtherTypeRecord.getEntityType();
+		//获取serviceName
+		String serviceName = "";
+		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
+			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
+			serviceName = csqFund == null? null: csqFund.getName() + "基金会";
+		} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {
+			TCsqService csqService = csqServiceDao.selectByPrimaryKey(entityId);
+			serviceName = csqService == null ? null : csqService.getName() + "项目";
+		}
+
+		//获取name
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		map.put("serviceName", serviceName);
+		map.put("name", csqUser.getName());
+		map.put("money", record.getMoney());
+		map.put("countMoney", NumberUtil.keep2Places(accountMoney));
+		// TODO: 2019-06-20  二维码生成
+		//page
+		String page = "/index/fxxk";
+		map.put("code", wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE));
+		map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
+		map.put("date", DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd"));
 		return map;
+	}
+
+	private TCsqUserPaymentRecord findTheOtherTypeRecord(TCsqUserPaymentRecord record) {
+		Long recordId = record.getId();
+		Long orderId = record.getOrderId();
+		return csqUserPaymentDao.selectByOrderIdAndNeqId(orderId, recordId);
 	}
 
 	@Override
@@ -184,17 +196,17 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		String demoIncomeDesc = "充值";
 		TCsqUserPaymentRecord build3 = null;
 
-		if(isFromHuman) {	//如果是现金支付，涉及第三条流水
+		if (isFromHuman) {    //如果是现金支付，涉及第三条流水
 			build3 = TCsqUserPaymentRecord.builder()
 				.userId(userId)
 				.orderId(orderId)
 				.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
 				.description(demoIncomeDesc)
 				.entityId(userId)
-				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())	//现金充值类型
+				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //现金充值类型
 				.money(amount)
 				.orderId(orderId).build();
-			if(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == toType) {	//仅向爱心账户充值
+			if (CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == toType) {    //仅向爱心账户充值
 				csqUserPaymentDao.insert(build3);
 				return;
 			}
@@ -204,7 +216,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		Long beneficiaryId = (Long) beneficiaryMap.get("beneficiaryId");
 		String beneficiaryName = (String) beneficiaryMap.get("beneficiaryName");
 		StringBuilder builder = new StringBuilder();
-		if(description == null) {
+		if (description == null) {
 			description = builder.append("向").append(beneficiaryName)
 //				.append("捐款")
 				.toString();
@@ -228,12 +240,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.entityType(toType)
 			.money(amount)
 			.orderId(orderId).build();
-		csqUserPaymentDao.multiInsert(build3==null? Arrays.asList(build1, build2): Arrays.asList(build1, build2, build3));
+		csqUserPaymentDao.multiInsert(build3 == null ? Arrays.asList(build1, build2) : Arrays.asList(build1, build2, build3));
 	}
 
 	@Override
 	public void savePaymentRecord(TCsqOrder tCsqOrder) {
-		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(),tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId());
+		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(), tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId());
 	}
 
 	private Map<String, Object> getBeneficiaryMap(Integer toType, Long toId) {
@@ -250,7 +262,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			case TYPE_FUND:
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
 				resultId = csqFund.getId();
-				if(StringUtil.isEmpty(csqFund.getName())) {
+				if (StringUtil.isEmpty(csqFund.getName())) {
 					builder.append("我的");
 				} else {
 					builder.append("\"");

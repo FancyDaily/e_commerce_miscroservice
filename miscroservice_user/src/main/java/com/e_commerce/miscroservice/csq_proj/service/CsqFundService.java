@@ -26,6 +26,10 @@ public interface CsqFundService {
 	 */
 	void modifyFund(Long userId, TCsqFund fund);
 
+	boolean checkIsOkForPublic(TCsqFund fund);
+
+	boolean checkFundCompletion(TCsqFund fund);
+
 	/**
 	 * 申请基金前的校验(在付款之前,避免支付之后无谓的退款)
 	 * @param userId

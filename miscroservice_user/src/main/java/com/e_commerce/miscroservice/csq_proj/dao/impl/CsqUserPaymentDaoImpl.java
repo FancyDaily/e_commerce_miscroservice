@@ -73,4 +73,14 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
 	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDesc(List<Long> orderIds, int toCode) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.in(TCsqUserPaymentRecord::getOrderId, orderIds)
+			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
+			);
+	}
 }

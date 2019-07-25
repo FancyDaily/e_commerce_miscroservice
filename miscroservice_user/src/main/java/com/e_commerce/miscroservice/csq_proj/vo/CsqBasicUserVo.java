@@ -65,6 +65,9 @@ public class CsqBasicUserVo {
 	@Column(commit = "联系方式")
 	protected String contactNo;
 
+	@Column(commit = "捐款倾向")
+	protected String trendPubKeys;
+
 	public TCsqUser copyTCsqUser() {
 		TCsqUser user = new TCsqUser();
 		user.setVxId("");

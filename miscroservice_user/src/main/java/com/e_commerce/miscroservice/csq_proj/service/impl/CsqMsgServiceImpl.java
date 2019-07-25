@@ -158,21 +158,26 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	}
 
 	@Override
-	public void insertTemplateMsg(Long userId, Integer type) {
+	public void insertTemplateMsg(Long userId, CsqSysMsgTemplateEnum currentEnum) {
 		TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
-		switch (CsqSysMsgTemplateEnum.getType(type)) {
-			case TEMPLATE_REGISTER:
-			//注册模版
-				String title = CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getTitle();
-				String content = CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getContent();
-				builder.type(type)
-					.userId(userId)
-					.title(title)
-					.content(content);
-				break;
-		}
+		String title = currentEnum.getTitle();
+		String content = currentEnum.getContent();
+
+		builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
+			.userId(userId)
+			.title(title)
+			.content(content);
 		TCsqSysMsg build = builder.build();
 		csqMsgDao.insert(build);
+	}
+
+	@Override
+	public void insertTemplateMsg(Long userId, Integer type) {
+		CsqSysMsgTemplateEnum currentEnum = CsqSysMsgTemplateEnum.getType(type);
+		if(currentEnum == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "type参数有误！");
+		}
+		insertTemplateMsg(userId, currentEnum);
 	}
 
 	private TCsqSysMsg getBaseEntity() {

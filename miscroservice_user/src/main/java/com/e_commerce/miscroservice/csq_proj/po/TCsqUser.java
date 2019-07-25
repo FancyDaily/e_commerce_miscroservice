@@ -145,6 +145,9 @@ public class TCsqUser extends BaseEntity{
 	@Column(commit = "联系方式")
 	private String contactNo;
 
+	@Column(commit = "意向编号")
+	private String trendPubkeys;
+
 	public CsqBasicUserVo copyCsqBasicUserVo() {
 		return null;
 	}

@@ -30,7 +30,7 @@ public interface CsqOrderDao {
 
 	List<TCsqOrder> selectByUserIdAndToTypeDesc(Long userId, int toCode);
 
-	List<TCsqOrder> selectByToIdAndToTypeAndUpdateTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp);
+	List<TCsqOrder> selectByToIdAndToTypeAndOrderTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp);
 
 	TCsqOrder selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(Long userId, Long userId1, int toCode, Long fundId, int toCode1, Double amount, Integer status);
 
@@ -49,4 +49,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectInIds(List<Long> orderIds);
 
 	List<TCsqOrder> selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDesc(Long userId, int toCode, int code, int code1);
+
+	List<TCsqOrder> selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(Long toId, int toType, int status, long startStamp, long endStamp);
 }

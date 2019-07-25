@@ -74,6 +74,8 @@ public class CsqAuthController {
 	 * @param name       名字
 	 * @param licenseId  营业执照
 	 * @param licensePic 营业执照图片
+	 * @param uuid	虚拟设备号
+	 * @param submitOnly 仅提交审核(boolean类型
 	 *                   <p>
 	 *                   {"success":false,"errorCode":"","msg":"短信验证码已过期！","data":""}
 	 * @return
@@ -87,14 +89,15 @@ public class CsqAuthController {
 									 @RequestParam(required = false) String userHeadPortraitPath,
 									 @RequestParam(required = false) String licenseId,
 									 @RequestParam String licensePic,
-									 @RequestParam String uuid) {
+									 @RequestParam String uuid,
+									 @RequestParam boolean submitOnly) {
 		AjaxResult result = new AjaxResult();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
 		try {
-			log.info("组织注册与实名提交, telephone={}, password={}, validCode={}, name={}, userHeadPortraitPath={}, licenseId={}, licensePic={}"
-				, telephone, password, validCode, name, userHeadPortraitPath, licenseId, licensePic);
-			Map<String, Object> map = csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth, name, userHeadPortraitPath);
+			log.info("组织注册与实名提交, telephone={}, password={}, validCode={}, name={}, userHeadPortraitPath={}, licenseId={}, licensePic={}, skipLogin={}"
+				, telephone, password, validCode, name, userHeadPortraitPath, licenseId, licensePic, submitOnly);
+			Map<String, Object> map = csqUserService.registerAndSubmitCert(telephone, validCode, uuid, userAuth, name, userHeadPortraitPath, submitOnly);
 			result.setData(map);
 			result.setSuccess(true);
 		} catch (MessageException e) {

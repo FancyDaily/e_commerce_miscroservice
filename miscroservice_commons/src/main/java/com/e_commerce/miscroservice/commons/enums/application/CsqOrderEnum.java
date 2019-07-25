@@ -17,15 +17,18 @@ public enum CsqOrderEnum {
 	STATUS_REFUND_UNDERWAY(5, "退款中"),
 	STATUS_ALREADY_REFUND(6, "已退款"),
 
+	IS_ANONYMOUS_FALSE(0,"非匿名"),
+	IS_ANONYMOUS_TRUE(1, "匿名"),
+
 	INVOICE_STATUS_NO(0, "未开票"),
 	          INVOICE_STATUS_YES(1, "已开票")
 	;
 
 	public static final long INTERVAL = 30l * 60 * 1000;
-	int code;
+	Integer code;
 	String desc;
 
-	public int getCode() {
+	public Integer getCode() {
 		return code;
 	}
 
@@ -33,7 +36,7 @@ public enum CsqOrderEnum {
 		return desc;
 	}
 
-	CsqOrderEnum(int code, String desc) {
+	CsqOrderEnum(Integer code, String desc) {
 		this.code = code;
 		this.desc = desc;
 	}

@@ -14,7 +14,7 @@ public interface CsqPayService {
 
 	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest) throws Exception;
 
-	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund) throws Exception;
+	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous) throws Exception;
 
 	void wxNotify(HttpServletRequest request, boolean b) throws Exception;
 
@@ -37,6 +37,7 @@ public interface CsqPayService {
 	 * @param toId
 	 * @param amount
 	 * @param csqFund
+	 * @param isAnonymous
 	 */
-	void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund);
+	void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous);
 }

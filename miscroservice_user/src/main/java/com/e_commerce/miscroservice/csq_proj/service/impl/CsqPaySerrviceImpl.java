@@ -10,12 +10,12 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUI
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.AesUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -115,51 +115,76 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Override
 	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest) throws Exception {
-		return preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, null);
+		return preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, null, false);
 	}
 
 	@Override
-	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund) throws Exception {
+	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous) throws Exception {
+//		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
 		TCsqFund csqFund = dealwithFundBeforePay(userId, csqfund);	//针对创建基金业务
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
 		}
 		entityId = entityId == null? csqFund.getId(): entityId;
-		orderNo = dealWithPreOrder(userId, entityId, entityType, fee);
+		orderNo = dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous);
 		String attach = entityType.toString();	//支付目标的类型
 		//向微信请求发起支付
 		Map<String, String> webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
 		return webParam;
 	}
 
-	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee) {
+	private void dealwithAccountTrendPubKeys(Long userId, Integer entityType, TCsqFund csqfund) {
+		checkTypeCreateAccount(userId, entityType, csqfund);
+		String trendPubKeys = csqfund.getTrendPubKeys();
+		dealwithAccountTrendPubKeys(userId, trendPubKeys);
+	}
+
+	private void checkTypeCreateAccount(Long userId, Integer entityType, TCsqFund csqfund) {
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		Integer balanceStatus = csqUser.getBalanceStatus();
+		if(!CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode().equals(balanceStatus)) {	//不是开启业务
+			return;
+		}
+		//check
+		if(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == entityType && (csqfund==null || StringUtil.isEmpty(csqfund.getTrendPubKeys()))) {	//表示爱心账户充值
+			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "开通爱心账户时，参数不全！");
+		}
+	}
+
+	private void dealwithAccountTrendPubKeys(Long userId, String trendPubKeys) {
+		TCsqUser build = TCsqUser.builder()
+			.id(userId)
+			.trendPubkeys(trendPubKeys).build();
+		csqUserDao.updateByPrimaryKey(build);	//更新账户倾向
+	}
+
+	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee, boolean isAnonymous) {
+		Integer anonymous = isAnonymous? CsqOrderEnum.IS_ANONYMOUS_TRUE.getCode(): CsqOrderEnum.IS_ANONYMOUS_FALSE.getCode();
 		String orderNo;
 		orderNo = UUIdUtil.generateOrderNo();	//默认生成新的订单号
 		//查看对于同一用户同一业务(entityId、entityType、fee相同)	是否有可复用的订单
-		TCsqOrder csqOrder = csqOrderDao.selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(userId, userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), entityId, entityType, fee, CsqOrderEnum.STATUS_UNPAY.getCode());
+		TCsqOrder csqOrder = csqOrderDao.selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(userId, entityId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), entityId, entityType, fee, CsqOrderEnum.STATUS_UNPAY.getCode());
 		if(csqOrder!=null) {
 			boolean expired = System.currentTimeMillis() - csqOrder.getCreateTime().getTime() > 1000l * 60 * 30;
-			if (expired) {	//不复用
-				csqOrder.setOrderNo(orderNo);
-				csqOrder.setCreateTime(null);
-				csqOrder.setUpdateTime(null);
-				csqOrder.setId(null);
-				csqOrderDao.insert(csqOrder);
+			if (!expired) {	//复用
+				orderNo = csqOrder.getOrderNo();
+				return orderNo;
 			}
-			orderNo = csqOrder.getOrderNo();	//复用或使用新的
-		} else {	//插入一条新订单
-			csqOrder = TCsqOrder.builder().userId(userId)
-					.orderNo(orderNo)	//新的订单号
-					.fromId(userId)
-					.fromType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())
-					.toId(entityId)	//默认当传入entity为null时会获取到一个待激活的基金编号(当前只有申请基金业务这个前提下)
-					.toType(entityType)
-					.price(fee)
-					.status(CsqOrderEnum.STATUS_UNPAY.getCode())
-					.build();
-			csqOrderDao.insert(csqOrder);
 		}
+		//插入一条新订单
+		csqOrder = TCsqOrder.builder().userId(userId)
+				.orderNo(orderNo)	//新的订单号
+				.fromId(userId)
+				.fromType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())
+				.toId(entityId)	//默认当传入entity为null时会获取到一个待激活的基金编号(当前只有申请基金业务这个前提下)
+				.toType(entityType)
+				.price(fee)
+				.status(CsqOrderEnum.STATUS_UNPAY.getCode())
+				.orderTime(System.currentTimeMillis())
+				.isAnonymous(anonymous)
+				.build();
+		csqOrderDao.insert(csqOrder);
 		return orderNo;
 	}
 
@@ -526,13 +551,16 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	@Override
-	public void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund) {
+	public void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous) {
 		//check参数
 		List<Integer> types = Arrays.stream(CsqEntityTypeEnum.values())
 			.map(CsqEntityTypeEnum::toCode).collect(Collectors.toList());
 		if(!types.contains(fromType) || !types.contains(toType)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的实体类型");
 		}
+		//check from账户的资质(比如基金的开放状态，未开放不允许捐助
+		//针对基金充值业务
+		checkBeforeFundCharge(fromType, toId);
 
 		//针对创建基金业务
 		if(toId == null && CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
@@ -560,6 +588,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			.toId(toId)
 			.price(amount)
 			.orderNo(orderNo)
+			.isAnonymous(isAnonymous? CsqOrderEnum.IS_ANONYMOUS_TRUE.getCode(): CsqOrderEnum.IS_ANONYMOUS_FALSE.getCode())	//匿名
 			.status(CsqOrderEnum.STATUS_ALREADY_PAY.getCode())	//状态为已支付
 			.orderTime(System.currentTimeMillis()).build();
 		csqOrderDao.insert(order);
@@ -573,6 +602,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				super.afterCompletion(status);
 				csqPaymentService.savePaymentRecord(userId, fromType, fromId, toType, finalToId, amount, orderId);	//流水全处理
 				dealWithFundAfterPay(order);
+				dealWithServiceAfterPay(order);
 				dealWithRelatedStatistics(order);
 			}
 
@@ -587,6 +617,17 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			}
 
 		});*/
+	}
+
+	private void checkBeforeFundCharge(Integer fromType, Long toId) {
+		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
+			//基金开放状态
+			TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(toId);
+			Integer status = tCsqFund.getStatus();
+			if(CsqFundEnum.STATUS_PUBLIC.getVal() != status) {	//未开放
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前基金未开放，请选择其他支付方式!");
+			}
+		}
 	}
 
 	private void dealWithSurplusAmount(Integer fromType, Long fromId, Double amount) {
@@ -640,6 +681,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	private void dealWithServiceAfterPay(TCsqOrder tCsqOrder) {
+		if(!checkisToService(tCsqOrder)) {
+			return;
+		}
+
 		//充值
 		Long serviceId = tCsqOrder.getToId();
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
@@ -654,6 +699,14 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		/*//处理服务支付后逻辑
 		afterPayService(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(), toType, tCsqOrder.getToId(), tCsqOrder.getPrice());*/
+	}
+
+	private boolean checkisToService(TCsqOrder tCsqOrder) {
+		Integer toType = tCsqOrder.getToType();
+		if(CsqEntityTypeEnum.TYPE_SERVICE.toCode() == toType) {
+			return true;
+		}
+		return false;
 	}
 
 	private void dealWithFundAfterPay(TCsqOrder tCsqOrder) {
@@ -688,7 +741,13 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		Double amount = tCsqOrder.getPrice();
 		//资金流入 -> 余额增加
 		Double formerBalance = fund.getBalance();
-		fund.setBalance(formerBalance + amount);
+		Double currentBalance = formerBalance + amount;
+		fund.setBalance(currentBalance);
+		//计算是否满足开放条件
+		if(csqFundService.checkIsOkForPublic(fund)) {
+			//若满足 -> 提审(略) -> 开放
+			fund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+		}
 		csqFundDao.update(fund);
 		Long payerId = userId;
 		Long ownerId = fund.getUserId();

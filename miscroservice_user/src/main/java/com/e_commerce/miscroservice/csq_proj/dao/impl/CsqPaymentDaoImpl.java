@@ -91,4 +91,12 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	public int multiInsert(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		return MybatisPlus.getInstance().save(tCsqUserPaymentRecords);
 	}
+
+	@Override
+	public TCsqUserPaymentRecord selectByOrderIdAndNeqId(Long orderId, Long paymentId) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getOrderId, orderId)
+			.neq(TCsqUserPaymentRecord::getId, paymentId)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+	}
 }

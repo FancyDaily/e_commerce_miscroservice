@@ -556,17 +556,19 @@ public class CsqUserController {
 	 * @param wechatPubAccount     微信公众号
 	 * @param contactPerson        联系人
 	 * @param contactNo            联系方式
+	 * @param trendPubKeys			倾向
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
 	@UrlAuth
-	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo) {
+	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo,
+							 String trendPubKeys) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo);
+			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}, trendPubKeys={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo, trendPubKeys);
 			csqUserService.modify(userIds, csqBasicUserVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -607,6 +609,30 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("全局捐赠播报", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 邀请回馈
+	 * @return
+	 */
+	@RequestMapping("payInviter")
+	public Object payInviter(String scene) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = UserUtil.getTestId();
+		try {
+			log.info("邀请回馈, userId={}, scene={}", userIds, scene);
+			csqUserService.payInviter(userIds, scene);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "邀请回馈", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("邀请回馈", e);
 			result.setSuccess(false);
 		}
 		return result;
