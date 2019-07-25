@@ -117,7 +117,7 @@ public interface AppConstant {
      */
     public static String SMS_TEMPLATE = "sms_template";
 
-    public static long SMS_EXPIRED = 600;
+    public static long SMS_EXPIRED = 900;
 
     /**
      * 短信发送间隔毫秒数
