@@ -1,6 +1,8 @@
 package com.e_commerce.miscroservice.csq_proj.vo;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -9,6 +11,8 @@ import java.util.List;
  * @Date: 2019-06-21 14:52
  */
 @Data
+@Builder
+@NoArgsConstructor
 public class CsqShareVo {
 
 	private String title;

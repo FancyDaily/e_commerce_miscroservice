@@ -250,16 +250,10 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<TCsqOrder> resultList = getGotoList(null, null, fundId, tCsqUserPaymentRecords).getResultList();
 		csqFundVo.setGoToList(resultList);
 		boolean isMine = csqFund.getUserId().equals(userId);
-//		csqFundVo.setMine(123);
+		csqFundVo.setMine(isMine);
+		csqFundVo.setRaiseStatus(CsqFundEnum.STATUS_PUBLIC.getVal() == csqFundVo.getStatus()? CsqFundEnum.RAISE_STAUTS_DONE.getVal(): CsqFundEnum.RAISE_STATUS_RAISING.getVal());
+
 		return csqFundVo;
-	}
-
-	public static void main(String[] args) {
-		Integer integer = new Integer(1);
-
-		Long userId = null;
-		System.out.println(integer.equals(userId));
-	    System.out.println(integer.equals(null));
 	}
 
 	@Override

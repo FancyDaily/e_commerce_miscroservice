@@ -39,5 +39,5 @@ public interface CsqPayService {
 	 * @param csqFund
 	 * @param isAnonymous
 	 */
-	void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous);
+	String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous);
 }

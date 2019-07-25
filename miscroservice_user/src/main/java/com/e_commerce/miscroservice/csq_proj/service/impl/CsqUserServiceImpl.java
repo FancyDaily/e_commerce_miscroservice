@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -92,6 +93,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Value("${page.person}")
 	private String PERSON_PAGE;
 
+	@Value("${page.service}")
+	private String SERVICE_PAGE;
+
 	@Override
 	public void checkAuth(TCsqUser user) {
 		if (user == null) {
@@ -114,11 +118,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public Map<String, Object> openidLogin(String openid, String uuid, WechatPhoneAuthDto wechatPhoneAuthDto) {
+		boolean isRegister = false;
 		String phoneNumber = null;
 		String encryptData = wechatPhoneAuthDto.getEncryptedData();
 		String iv = wechatPhoneAuthDto.getIv();
 		String sessionKey = wechatPhoneAuthDto.getSessionKey();
-		if(!StringUtil.isAnyEmpty(encryptData, iv, sessionKey)) {
+		if (!StringUtil.isAnyEmpty(encryptData, iv, sessionKey)) {
 			WechatSession wechatSession = new WechatSession();
 			wechatSession.setSession_key(sessionKey);
 			phoneNumber = wechatService.getPhoneNumber(encryptData, iv, wechatSession);
@@ -131,6 +136,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setVxOpenId(openid);
 			tCsqUser.setUserTel(phoneNumber);
 			tCsqUser = register(tCsqUser);
+			isRegister = true;
 		}
 		//登录
 		String token = tCsqUser.getToken();
@@ -142,6 +148,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("token", token);
 		resultMap.put("user", tCsqUser.copyCsqBasicUserVo());
+		resultMap.put("isRegister", isRegister);
 		return resultMap;
 	}
 
@@ -229,13 +236,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.reduce(0d,Double::sum);
 */
 		Double sumTotalPay = tCsqUser.getSumTotalPay();
-		map.put("sumDonate", sumTotalPay);	//我的累积捐款总额
-		map.put("surplusAmount", tCsqUser.getSurplusAmount());	//账户余额
-		Double sumTotalIn = tCsqFund!=null? tCsqFund.getSumTotalIn(): 0d;
+		map.put("sumDonate", sumTotalPay);    //我的累积捐款总额
+		map.put("surplusAmount", tCsqUser.getSurplusAmount());    //账户余额
+		Double sumTotalIn = tCsqFund != null ? tCsqFund.getSumTotalIn() : 0d;
 		Double publicMinimum = CsqFundEnum.PUBLIC_MINIMUM;
-		map.put("sumTotalIn", sumTotalIn > publicMinimum? publicMinimum :sumTotalIn);	//基金账户筹备累积
-		map.put("expected", publicMinimum);	//期望金额
-		map.put("status", status);		//基金账户状态
+		map.put("sumTotalIn", sumTotalIn > publicMinimum ? publicMinimum : sumTotalIn);    //基金账户筹备累积
+		map.put("expected", publicMinimum);    //期望金额
+		map.put("status", status);        //基金账户状态
 		return map;
 	}
 
@@ -270,8 +277,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser tCsqUser = csqUserDao.selectByUserTelAndAccountType(telephone, CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
 
 		//表明此时仅提交认证信息
-		if(!submitOnly) {
-			if(tCsqUser != null) {
+		if (!submitOnly) {
+			if (tCsqUser != null) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您已注册请勿重复注册！");
 			}
 		}
@@ -285,6 +292,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setUserHeadPortraitPath(userHeadPortraitPath);
 			tCsqUser = register(tCsqUser);
 		}
+		insertOrUpdateUserAuth(telephone, csqUserAuth, tCsqUser);
+
+		map.put("user", tCsqUser);
+		map.put("token", tCsqUser.getToken());
+		return map;
+	}
+
+	private void insertOrUpdateUserAuth(String telephone, TCsqUserAuth csqUserAuth, TCsqUser tCsqUser) {
 		Long corpUserId = tCsqUser.getId();
 		//用户是否已经实名过
 		Integer authenticationStatus = tCsqUser.getAuthenticationStatus();
@@ -293,18 +308,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		//用户是否有正在审核的请求，若无插入一个
 		TCsqUserAuth tCsqUserAuth = csqUserAuthDao.selectByUserId(corpUserId);
-		if (tCsqUserAuth != null && tCsqUserAuth.getStatus() != CsqUserAuthEnum.STATUS_CERT_REFUSE.getCode()) {
+		if (tCsqUserAuth != null && tCsqUserAuth.getStatus() != CsqUserAuthEnum.STATUS_CERT_REFUSE.getCode()) {	//除待审核外，其他状态都可以复用
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您存在待审核的记录!");
 		}
 		//提交审核
 		String authName = csqUserAuth.getName();
-		authName = authName ==null? tCsqUser.getName(): authName;
+		authName = authName == null ? tCsqUser.getName() : authName;
 		String licenseId = csqUserAuth.getLicenseId();
 		String licensePic = csqUserAuth.getLicensePic();
 		if (StringUtil.isAnyEmpty(authName, licensePic)) {
 			throw new MessageException(AppErrorConstant.INCOMPLETE_PARAM, "必填参数为空!");
 		}
+		//复用记录
 		TCsqUserAuth userAuth = TCsqUserAuth.builder().status(CsqUserAuthEnum.STATUS_UNDER_CERT.getCode())
+			.id(tCsqUserAuth != null ? tCsqUserAuth.getId() : null)
 			.userId(corpUserId)
 			.type(CsqUserAuthEnum.TYPE_CORP.getCode())
 			.phone(telephone)
@@ -313,17 +330,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.name(authName)
 			.build();
 		//略去审核流程标记 REMARK
-		csqUserAuthDao.insert(userAuth);
-
-		map.put("user", tCsqUser);
-		map.put("token", tCsqUser.getToken());
-		return map;
+		csqUserAuthDao.insertOrUpdate(userAuth);
 	}
 
 	@Override
 	public void certCorp(Long userAuthId, Integer option) {
 		Integer OPTION_PASS = CsqUserAuthEnum.STATUS_CERT_PASS.getCode();
 		Integer OPTION_REFUSE = CsqUserAuthEnum.STATUS_CERT_REFUSE.getCode();
+		boolean isPass = OPTION_PASS.equals(option);
 		if (option == null || !Arrays.asList(OPTION_PASS, OPTION_REFUSE).contains(option)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option不正确!");
 		}
@@ -341,18 +355,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//用户实名状态修改
 		Long userId = userAuth.getUserId();
 		TCsqUser build = TCsqUser.builder().id(userId)
-			.authenticationStatus(CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode())
+			.authenticationStatus(isPass? CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode() : CsqUserEnum.AUTHENTICATION_STATUS_NO.toCode())
 			.authenticationType(CsqUserEnum.AUTHENTICATION_TYPE_ORG_OR_CORP.toCode()).build();
 		csqUserDao.updateByPrimaryKey(build);
 		//插入一条系统消息
-		csqMsgService.insertTemplateMsg(userId, OPTION_PASS.equals(option)? CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_SUCCESS: CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_FAIL);
+		csqMsgService.insertTemplateMsg(userId, isPass? CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_FAIL);
 	}
 
 	@Override
 	public CsqDailyDonateVo dailyDonateDetail(Long userId) {
 		Long serviceId = getDailyDonateServiceId();
 		//查keyValue表，获取连续积善天数
-		List<TCsqKeyValue> dailyDonateList = userId==null? new ArrayList<>(): csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
+		List<TCsqKeyValue> dailyDonateList = userId == null ? new ArrayList<>() : csqKeyValueDao.selectByKeyAndTypeDesc(userId, CsqKeyValueEnum.TYPE_DAILY_DONATE.getCode());
 		List<Long> createTimeList = dailyDonateList.stream()
 			.map(TCsqKeyValue::getCreateTime)
 			.map(Timestamp::getTime)
@@ -379,7 +393,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		long startStamp = DateUtil.getStartStamp(System.currentTimeMillis());
 		long endStamp = DateUtil.getEndStamp(System.currentTimeMillis());
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(toId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode() ,startStamp, endStamp);
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(toId, isFund ? CsqEntityTypeEnum.TYPE_FUND.toCode() : CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode(), startStamp, endStamp);
 		dailyIncome = tCsqOrders.stream()
 			.map(TCsqOrder::getPrice)
 			.reduce(0d, (a, b) -> a + b);
@@ -454,15 +468,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public Map<String, Object> share(Long userId, Long entityId, Integer option) {
 		final int OPTION_PERSON = 0;
 		final int OPTION_FUND = 1;
+		final int OPTION_SERVICE = 2;
 		if (option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND).contains(option)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
 		}
 		Map<String, Object> map = new HashMap<>();
-		String scene = userId.toString();    //随机数 => 7.16 scene长度过长!(40 > 32)
+//		String scene = userId.toString();    //随机数 => 7.16 scene长度过长!(40 > 32)  => 或直接使用json字符串
 		String page = "";        //从配置文件读取
 		CsqShareVo vo = null;
 		UploadPathEnum.innerEnum uploadEnum = null;
 		//VO initialize
+		CsqSceneVo.CsqSceneVoBuilder builder = CsqSceneVo.builder();
+		builder = builder.userId(userId);
 		switch (option) {
 			case OPTION_FUND:
 				page = this.PERSON_PAGE;
@@ -497,6 +514,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 					vo.setDonateRecordVos(donateRecordVos);
 				}
 				uploadEnum = UploadPathEnum.innerEnum.CSQ_FUND;
+				//scene
+				builder = builder.fundId(csqFund.getId())
+							.type(CsqSceneEnum.TYPE_FUND.getCode());
 				break;
 			case OPTION_PERSON:
 				page = this.FUND_PAGE;
@@ -511,12 +531,25 @@ public class CsqUserServiceImpl implements CsqUserService {
 					.map(TCsqOrder::getId)
 					.distinct()    //去重
 					.count();
+				vo = new CsqShareVo();
 				vo.setDonateSum(totalDonate);
 				vo.setDonateCnt((int) serviceCnt);
 				uploadEnum = UploadPathEnum.innerEnum.CSQ_PERSON;
 				break;
+			case OPTION_SERVICE:
+				page = this.SERVICE_PAGE;
+				TCsqService csqService = csqServiceDao.selectByPrimaryKey(entityId);
+				String name = csqService.getName();
+				vo = CsqShareVo.builder()
+					.name(name)
+					.build();
+				vo.setCurrentAmont(csqService.getSumTotalIn());
+				uploadEnum = UploadPathEnum.innerEnum.CSQ_SERVICE;
+				builder = builder.serviceId(csqService.getId())
+						.type(CsqSceneEnum.TYPE_SERVICE.getCode());
+				break;
 		}
-
+		String scene = JSONObject.toJSONString(builder.build());
 		String qrCode = wechatService.genQRCode(scene, page, uploadEnum);
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
@@ -688,7 +721,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		csqBasicUserVo.setCsqUserAuth(userAuth == null ? new CsqUserAuthVo() : userAuth.copyCsqUserAuthVo());
 		//加入小程序累积天数
-		Integer existDayStart = 1;	//从1开始
+		Integer existDayStart = 1;    //从1开始
 		long time = System.currentTimeMillis() - csqUser.getCreateTime().getTime();
 		csqBasicUserVo.setExistDayCnt(existDayStart + DateUtil.timestamp2Days(time));
 
@@ -696,15 +729,15 @@ public class CsqUserServiceImpl implements CsqUserService {
 		boolean hasGotFund = false;
 //		csqFundDao.selectByUserIdAndInStatus(userId, Arrays.asList(CsqFundEnum.STATUS_PUBLIC.getVal(), CsqFundEnum.STATUS_CERT_FAIL.getVal(), CsqFundEnum.STATUS_ACTIVATED.getVal(), CsqFundEnum.STATUS_UNDER_CERT.getVal());	//除了待激活
 		List<TCsqFund> tCsqFunds = csqFundDao.selectByUserIdAndNotEqStatus(userId, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
-		if(!tCsqFunds.isEmpty()) {
+		if (!tCsqFunds.isEmpty()) {
 			hasGotFund = true;
 		}
 		//获取对应的组织账号
 		//check
 		boolean hasGotCompanyAccount = false;
-		if(isPerson) {
+		if (isPerson) {
 			TCsqUser companyUser = getCompanyAccount(csqUser);
-			if(companyUser != null) {
+			if (companyUser != null) {
 				hasGotCompanyAccount = true;
 			}
 		}
@@ -720,12 +753,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 		Integer accountType = csqUser.getAccountType();
 		boolean isCorp = false;
 		Integer status = csqUser.getAuthenticationStatus();
-		if(CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
+		if (CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode().equals(accountType)) {
 			isCorp = true;
 			TCsqUserAuth userAuth = csqUserAuthDao.selectByUserIdAndType(userId, CsqUserAuthEnum.TYPE_CORP.getCode());
-			Integer STATUS_NEVER_CERT = -1;	//未实名
+			Integer STATUS_NEVER_CERT = -1;    //未实名
 			status = STATUS_NEVER_CERT;
-			if(userAuth != null) {	//存在有效的认证信息 -> 替换为相应的状态
+			if (userAuth != null) {    //存在有效的认证信息 -> 替换为相应的状态
 				status = userAuth.getStatus();
 			}
 		}
@@ -742,12 +775,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Override
 	public void payInviter(Long beInviterId, String scene) {
 		//处理 scene
-		Long inviterId = Long.valueOf(scene);	//邀请人
+		CsqSceneVo csqSceneVo = JSONObject.parseObject(scene, CsqSceneVo.class);
+		Long inviterId = csqSceneVo.getUserId();
+//		Long inviterId = Long.valueOf(scene);    //邀请人
 		//建立关系
 		//防止重复插入
 		String theVal = beInviterId.toString();
 		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndValue(inviterId, CsqKeyValueEnum.TYPE_INVITE.getCode(), theVal);
-		if(tCsqKeyValue!=null) {
+		if (tCsqKeyValue != null) {
 			return;
 		}
 		TCsqKeyValue build = TCsqKeyValue.builder()
@@ -758,9 +793,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 		csqKeyValueDao.save(build);
 	}
 
+	@Override
+	public void corpSubmit(Long userId, TCsqUserAuth userAuth) {
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		csqUser.setName(userAuth.getName());
+		csqUserDao.updateByPrimaryKey(csqUser);
+		//check
+		insertOrUpdateUserAuth(csqUser.getUserTel(), userAuth, csqUser);
+	}
+
 	private TCsqUser getCompanyAccount(TCsqUser csqUser) {
 		String openid = csqUser.getVxOpenId();
-		if(openid == null) {
+		if (openid == null) {
 			return null;
 		}
 		return csqUserDao.selectByVxOpenIdAndAccountType(openid, CsqUserEnum.ACCOUNT_TYPE_COMPANY.toCode());
@@ -785,7 +829,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	private static TCsqUser dealWithDefaultVal(TCsqUser csqUser) {
-		csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
+		if(StringUtil.isEmpty(csqUser.getUserHeadPortraitPath())) {
+			csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
+		}
 		String name = getDefaultName(csqUser);
 		csqUser.setName(name);
 		return csqUser;
@@ -797,7 +843,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		long currentTimeMillis = System.currentTimeMillis();
 		String nowStringSuffix = String.valueOf(currentTimeMillis).substring(5);
 		StringBuilder builder = new StringBuilder();
-		name = name == null? builder.append(prefix).append(nowStringSuffix).toString(): name;
+		name = name == null ? builder.append(prefix).append(nowStringSuffix).toString() : name;
 		return name;
 	}
 

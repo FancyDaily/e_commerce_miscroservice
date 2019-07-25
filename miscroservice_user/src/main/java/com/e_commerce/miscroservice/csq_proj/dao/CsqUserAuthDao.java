@@ -25,4 +25,6 @@ public interface CsqUserAuthDao {
 	TCsqUserAuth selectByUserIdAndTypeAndStatus(Long userId, int code, int code1);
 
 	TCsqUserAuth findByCardId(String cardId);
+
+	int insertOrUpdate(TCsqUserAuth userAuth);
 }

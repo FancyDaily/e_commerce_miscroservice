@@ -22,20 +22,24 @@ import java.util.List;
 public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	@Resource
 	private CsqPaymentMapper csqPaymentMapper;
+
+	public MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
 	@Override
 	public List<TCsqUserPaymentRecord> findWaters(Long userId) {
-		List<TCsqUserPaymentRecord> list = MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(),new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		List<TCsqUserPaymentRecord> list = MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(),baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId,userId)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 		);
 		return list;
 	}
 
 	@Override
 	public TCsqUserPaymentRecord findWaterById(Long recordId) {
-		TCsqUserPaymentRecord record = MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(),new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		TCsqUserPaymentRecord record = MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(),baseBuild()
 		.eq(TCsqUserPaymentRecord::getId,recordId)
-		.eq(TCsqUserPaymentRecord::getIsValid,AppConstant.IS_VALID_YES)
 		);
 		return record;
 	}
@@ -56,33 +60,31 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+		);
 	}
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserIdDesc(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
 	}
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOut(Long userId, Integer option) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
 			.eq(TCsqUserPaymentRecord::getInOrOut, option)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+		);
 	}
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDesc(Long userId, Integer option) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
 			.eq(TCsqUserPaymentRecord::getInOrOut, option)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
 		);
 	}
@@ -94,9 +96,18 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 
 	@Override
 	public TCsqUserPaymentRecord selectByOrderIdAndNeqId(Long orderId, Long paymentId) {
-		return MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(),baseBuild()
 			.eq(TCsqUserPaymentRecord::getOrderId, orderId)
 			.neq(TCsqUserPaymentRecord::getId, paymentId)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+			);
+	}
+
+	@Override
+	public TCsqUserPaymentRecord selectByOrderNoAndUserIdAndInOut(Long orderId, Long userId, int toCode) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(), baseBuild()
+			.eq(TCsqUserPaymentRecord::getOrderId, orderId)
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
+		);
 	}
 }

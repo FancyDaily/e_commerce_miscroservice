@@ -295,7 +295,6 @@ public class CsqUserController {
 			Map<String, Object> map = csqUserService.loginByTelephone(telephone, password, option, uuid);
 			result.setData(map);
 			result.setSuccess(true);
-			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "手机号密码登录", e.getMessage());
 			result.setMsg(e.getMessage());
@@ -438,7 +437,7 @@ public class CsqUserController {
 	 * 分享
 	 *
 	 * @param entityId 实体编号
-	 * @param option   操作0个人1基金
+	 * @param option   操作0个人1基金2项目
 	 * @return
 	 */
 	@RequestMapping("share")

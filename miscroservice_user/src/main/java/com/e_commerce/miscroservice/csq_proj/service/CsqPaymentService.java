@@ -22,11 +22,13 @@ public interface CsqPaymentService {
 
 	/**
 	 * 查询我的证书
+	 *
+	 * @param orderNo
 	 * @param recordId
 	 * @param userId
 	 * @return
 	 */
-	Map<String,Object> findMyCertificate(Long recordId, Long userId);
+	Map<String,Object> findMyCertificate(String orderNo, Long recordId, Long userId);
 
 	/**
 	 * 收入支出 统计

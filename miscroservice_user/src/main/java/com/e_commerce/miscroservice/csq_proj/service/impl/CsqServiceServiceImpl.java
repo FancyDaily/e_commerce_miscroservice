@@ -352,6 +352,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			Long createTime = csqDonateRecordVo.getCreateTime();
 			long interval = System.currentTimeMillis() - createTime;
 			Long minuteAgo = interval / 1000 / 60;
+			minuteAgo = minuteAgo > 60? 60: minuteAgo;
 			csqDonateRecordVo.setMinutesAgo(minuteAgo.intValue());
 			iterator.remove();
 			resultList.add(csqDonateRecordVo);
@@ -557,13 +558,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				String name = isAnonymous ? CsqUserEnum.DEFAULT_ANONYMOUS_NAME : user.getName();
 				String userHeadPath = isAnonymous ? CsqUserEnum.DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH : user.getUserHeadPortraitPath();
 
-				CsqDonateRecordVo build = CsqDonateRecordVo.builder()
-					.minutesAgo(a.getMinutesAgo())
+				Integer minutesAgo = a.getMinutesAgo();
+				//处理 minuteAgo
+				minutesAgo = minutesAgo > 60? 60: minutesAgo;
+
+				return CsqDonateRecordVo.builder()
+					.minutesAgo(minutesAgo)
 					.name(name)    //姓名
 					.userHeadPortraitPath(userHeadPath)    //头像
 					.donateAmount(a.getMoney())
 					.createTime(a.getCreateTime().getTime()).build();
-				return build;
 			})
 			.sorted(Comparator.comparing(CsqDonateRecordVo::getCreateTime).reversed())
 			.collect(Collectors.toList());

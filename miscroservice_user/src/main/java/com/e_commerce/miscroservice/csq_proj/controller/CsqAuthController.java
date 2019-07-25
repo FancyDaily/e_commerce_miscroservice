@@ -82,7 +82,7 @@ public class CsqAuthController {
 	 */
 	@Consume(CsqUserAuthVo.class)
 	@RequestMapping("corp/submit")
-	public AjaxResult certCorpSubmit(@RequestParam(required = false) String telephone,
+	public AjaxResult registerAndcertCorpSubmit(@RequestParam(required = false) String telephone,
 									 @RequestParam(required = false) String password,
 									 @RequestParam(required = false) String validCode,
 									 @RequestParam(required = false) String name,
@@ -90,7 +90,7 @@ public class CsqAuthController {
 									 @RequestParam(required = false) String licenseId,
 									 @RequestParam String licensePic,
 									 @RequestParam String uuid,
-									 @RequestParam boolean submitOnly) {
+									 @RequestParam(required = false) boolean submitOnly) {
 		AjaxResult result = new AjaxResult();
 		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
 		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
@@ -107,6 +107,43 @@ public class CsqAuthController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("组织注册与实名提交", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 组织实名提交
+	 *
+	 * @param name 机构名称
+	 * @param licenseId  营业执照
+	 * @param licensePic 营业执照图片
+	 *                   <p>
+	 *                   {"success":false,"errorCode":"","msg":"","data":""}
+	 * @return
+	 */
+	@Consume(CsqUserAuthVo.class)
+	@RequestMapping("corp/submit")
+	@UrlAuth
+	public AjaxResult certCorpSubmit(@RequestParam(required = false) String name,
+									 @RequestParam(required = false) String licenseId,
+									 @RequestParam String licensePic) {
+		AjaxResult result = new AjaxResult();
+		CsqUserAuthVo csqUserAuth = (CsqUserAuthVo) ConsumeHelper.getObj();
+		TCsqUserAuth userAuth = csqUserAuth.copyTCsqUserAuth();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("组织实名提交, name={}, licenseId={}, licensePic={}"
+				, licenseId, licensePic);
+			csqUserService.corpSubmit(userIds, userAuth);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名提交", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名提交", e);
 			result.setSuccess(false);
 		}
 		return result;

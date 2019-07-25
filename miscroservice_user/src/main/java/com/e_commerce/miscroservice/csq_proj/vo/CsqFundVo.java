@@ -21,6 +21,8 @@ public class CsqFundVo {
 
 	List<TCsqOrder> goToList;	//去向(捐助项目记录)
 
+	private boolean mine;
+
 	private Integer raiseStatus;	//筹备状态
 
 	private String stationorgName;	//机构名称

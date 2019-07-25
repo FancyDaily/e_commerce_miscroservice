@@ -137,9 +137,19 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public Map<String, Object> findMyCertificate(Long recordId, Long userId) {
+	public Map<String, Object> findMyCertificate(String orderNo, Long recordId, Long userId) {
 		Map<String, Object> map = new HashMap<>();
-		TCsqUserPaymentRecord record = csqPaymentDao.findWaterById(recordId);
+		//获得orderId
+		Long orderId = null;
+		if (!StringUtil.isEmpty(orderNo)) {
+			TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);
+			if (tCsqOrder == null) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单号有误！");
+			}
+			orderId = tCsqOrder.getId();
+		}
+		TCsqUserPaymentRecord record = orderId == null ? csqPaymentDao.findWaterById(recordId) : csqPaymentDao.selectByOrderNoAndUserIdAndInOut(orderId, userId, CsqUserPaymentEnum.INOUT_OUT.toCode());
+
 		if (record == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该记录已不存在!");
 		}
@@ -153,7 +163,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		String serviceName = "";
 		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
-			serviceName = csqFund == null? null: csqFund.getName() + "基金会";
+			serviceName = csqFund == null ? null : csqFund.getName() + "基金会";
 		} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {
 			TCsqService csqService = csqServiceDao.selectByPrimaryKey(entityId);
 			serviceName = csqService == null ? null : csqService.getName() + "项目";

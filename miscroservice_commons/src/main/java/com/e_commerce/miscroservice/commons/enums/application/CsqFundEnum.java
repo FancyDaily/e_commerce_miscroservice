@@ -12,7 +12,10 @@ public enum CsqFundEnum {
 	STATUS_ACTIVATED(0, "未公开"),		//TODO 6.11 说明: 未公开、审核中、审核失败 -> 实际等同于同一种状态: 未公开
 	STATUS_UNDER_CERT(1, "审核中"),
 	STATUS_PUBLIC(2, "已公开"),
-	STATUS_CERT_FAIL(3, "审核失败");
+	STATUS_CERT_FAIL(3, "审核失败"),
+	RAISE_STATUS_RAISING(0, "筹备中"),
+	RAISE_STAUTS_DONE(1, "已公开")
+	;
 
 	public static final Double PUBLIC_MINIMUM = 100000d;	//申请公开基金的最低标准
 	public static final String DEFAULT_COVER_PIC = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png";	//默认封面图

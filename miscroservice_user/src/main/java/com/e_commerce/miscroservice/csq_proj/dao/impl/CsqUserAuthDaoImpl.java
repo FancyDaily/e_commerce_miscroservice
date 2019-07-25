@@ -26,23 +26,23 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 	@Override
 	public TCsqUserAuth selectByUserId(Long corpUserId) {
 		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-			.eq(TCsqUser::getId, corpUserId)
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUserAuth::getUserId, corpUserId)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserAuth::getCreateTime)));
 	}
 
 	@Override
 	public TCsqUserAuth selectByPrimaryKey(Long userAuthId) {
 		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqUserAuth::getId, userAuthId));
 	}
 
 	@Override
 	public int update(TCsqUserAuth userAuth) {
 		return MybatisPlus.getInstance().update(userAuth, new MybatisPlusBuild(TCsqUserAuth.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-		.eq(TCsqUser::getId, userAuth.getId()));
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUser::getId, userAuth.getId()));
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 			/*new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES).eq(TCsqUserAuth::getUserId, userId)
 				.eq(TCsqUserAuth::getStatus, code))*/
-		;
+			;
 
 	}
 
@@ -64,7 +64,7 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqUserAuth::getUserId, userId)
 			.eq(TCsqUserAuth::getType, type)
-			.eq(TCsqUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
@@ -73,13 +73,24 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 			.eq(TCsqUserAuth::getUserId, userId)
 			.eq(TCsqUserAuth::getType, type)
 			.eq(TCsqUserAuth::getStatus, status)
-			.eq(TCsqUserAuth::getIsValid,AppConstant.IS_VALID_YES));
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	@Override
 	public TCsqUserAuth findByCardId(String cardId) {
-		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), new MybatisPlusBuild(TCsqUserAuth.class)
+		return MybatisPlus.getInstance().findOne(new TCsqUserAuth(), baseBuild()
 			.eq(TCsqUserAuth::getCardId, cardId)
-			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES));
+		);
+	}
+
+	@Override
+	public int insertOrUpdate(TCsqUserAuth userAuth) {
+		MybatisPlus instance = MybatisPlus.getInstance();
+		return userAuth.getId() != null ? instance.update(userAuth, baseBuild().eq(TCsqUserAuth::getId, userAuth.getId())) : instance.save(userAuth);
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqUserAuth.class)
+			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES);
 	}
 }

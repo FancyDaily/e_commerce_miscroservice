@@ -96,6 +96,7 @@ public class CsqPaymentController {
 	 * 查询我的证书
 	 *
 	 * @param recordId 记录编号
+	 * @param orderNo 订单号
 	 *                 <p>
 	 *                 {
 	 *                 "date":"2019-06-26",	//日期
@@ -110,14 +111,15 @@ public class CsqPaymentController {
 	 */
 	@RequestMapping("/my/certificate")
 	@UrlAuth
-	public AjaxResult findMyCertificate(Long recordId) {
+	public AjaxResult findMyCertificate(Long recordId, String orderNo) {
 		AjaxResult result = new AjaxResult();
 
 		Long userId = IdUtil.getId();
 		log.info("查询我的证书 userId={}", userId);
 
 		try {
-			Map<String, Object> map = csqPaymentService.findMyCertificate(recordId, userId);
+			log.info("查询我的证书, userId={}, recordId={}, orderNo={}", userId, recordId, orderNo);
+			Map<String, Object> map = csqPaymentService.findMyCertificate(orderNo, recordId, userId);
 			result.setData(map);
 			result.setSuccess(true);
 		} catch (MessageException e) {
