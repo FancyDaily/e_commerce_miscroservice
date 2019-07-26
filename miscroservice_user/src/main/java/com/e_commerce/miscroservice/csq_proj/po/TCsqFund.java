@@ -102,7 +102,4 @@ public class TCsqFund extends BaseEntity {
 		return null;
 	}
 
-	public CsqShareVo copsyCsqShareVo() {
-		return null;
-	}
 }

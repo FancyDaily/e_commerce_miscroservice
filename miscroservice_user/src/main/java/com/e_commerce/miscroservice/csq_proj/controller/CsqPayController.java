@@ -180,7 +180,8 @@ public class CsqPayController {
 		try {
 			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}, isAnonymous={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys, isAnonymous);
 			entityId = entityId == -1 ? null : entityId;
-			csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund, isAnonymous);
+			String orderNo = csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund, isAnonymous);
+			result.setData(orderNo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "平台内充值/捐助", e.getMessage());

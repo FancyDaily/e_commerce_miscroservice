@@ -175,14 +175,14 @@ public class CsqFundController {
 	 * @param fundId 基金编号
 	 *               <p>
 	 *               {
-	 *               "contributeInCnt": 2,
-	 *               "trendPubNames": [
+	 *               "contributeInCnt": 2,	捐款人数
+	 *               "trendPubNames": [	 方向名
 	 *               "北京方向",
 	 *               "东京方向",
 	 *               "南京方向",
 	 *               "皇后大道"
 	 *               ],
-	 *               "goToList": [
+	 *               "goToList": [	捐献去向列表
 	 *               {
 	 *               "id": 18,
 	 *               "createTime": 1561433484000,
@@ -209,6 +209,7 @@ public class CsqFundController {
 	 *               "buildClass": "com.e_commerce.miscroservice.csq_proj.po.TCsqOrder"
 	 *               }
 	 *               ],
+	 *               "mine": false 是否为我的基金
 	 *               "raiseStatus": "",
 	 *               "stationorgName": "",
 	 *               "stationorgAddr": "",
@@ -220,20 +221,21 @@ public class CsqFundController {
 	 *               "userId": 2000,
 	 *               "helpCnt": 31,
 	 *               "totalInCnt": 0,
-	 *               "trendPubKeys": "1,2,3,6",
-	 *               "name": "小宝绿色基金会所",
-	 *               "description": "11111111111111",
-	 *               "coverPic": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour(v3.0)/otherImg/156335924596846.png",
+	 *               "trendPubKeys": "1,2,3,6",	方向编号
+	 *               "name": "小宝绿色基金会所",  基金名
+	 *               "description": "11111111111111",  描述
+	 *               "coverPic": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/oneHour(v3.0)/otherImg/156335924596846.png",  封面图
+	 *               "detailPic": "123"  详细图
 	 *               "orgName": "",
 	 *               "orgAddr": "",
 	 *               "contact": "",
-	 *               "personInCharge": "",
+	 *               "personInCharge": "",	负责人
 	 *               "creditCardName": "",
 	 *               "creditCardId": "",
-	 *               "balance": 76766,
-	 *               "sumTotalIn": 4444,
+	 *               "balance": 76766,	余额
+	 *               "sumTotalIn": 4444,  总收入
 	 *               "agentModeStatus": 1,
-	 *               "status": 0
+	 *               "status": 0 基金状态0未公开1审核中2已公开3审核失败
 	 *               }
 	 * @return
 	 */

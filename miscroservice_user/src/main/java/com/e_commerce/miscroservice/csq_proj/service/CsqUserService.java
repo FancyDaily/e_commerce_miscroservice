@@ -176,4 +176,11 @@ public interface CsqUserService {
 	 * @param scene
 	 */
 	void payInviter(Long userIds, String scene);
+
+	/**
+	 * 提交组织实名认证
+	 * @param userId
+	 * @param userAuth
+	 */
+	void corpSubmit(Long userId, TCsqUserAuth userAuth);
 }

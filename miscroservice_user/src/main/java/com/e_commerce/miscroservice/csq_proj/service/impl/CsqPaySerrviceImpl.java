@@ -551,7 +551,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	@Override
-	public void withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous) {
+	public String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous) {
 		//check参数
 		List<Integer> types = Arrays.stream(CsqEntityTypeEnum.values())
 			.map(CsqEntityTypeEnum::toCode).collect(Collectors.toList());
@@ -560,7 +560,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		}
 		//check from账户的资质(比如基金的开放状态，未开放不允许捐助
 		//针对基金充值业务
-		checkBeforeFundCharge(fromType, toId);
+		checkBeforeFundCharge(fromType, fromId);
 
 		//针对创建基金业务
 		if(toId == null && CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
@@ -607,8 +607,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			}
 
 		});
-
-
+		return orderNo;
 		/*TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
@@ -619,10 +618,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		});*/
 	}
 
-	private void checkBeforeFundCharge(Integer fromType, Long toId) {
+	private void checkBeforeFundCharge(Integer fromType, Long fromId) {
 		if(CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
 			//基金开放状态
-			TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(toId);
+			TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(fromId);
 			Integer status = tCsqFund.getStatus();
 			if(CsqFundEnum.STATUS_PUBLIC.getVal() != status) {	//未开放
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前基金未开放，请选择其他支付方式!");
@@ -884,7 +883,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		String name = csqService.getName();
 		//往"捐助播报"的缓存中添加记录,key: csqServiceId, value: TCsqService
 		//构建一个DonateVo
-		int maximum = 20;
+		int maximum = 10;
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
 		CsqDonateRecordVo vo = CsqDonateRecordVo.builder().donateAmount(amount)
 			.userHeadPortraitPath(csqUser.getUserHeadPortraitPath())
