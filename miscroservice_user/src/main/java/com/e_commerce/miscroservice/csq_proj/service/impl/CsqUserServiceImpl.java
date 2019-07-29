@@ -243,6 +243,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 		map.put("sumTotalIn", sumTotalIn > publicMinimum ? publicMinimum : sumTotalIn);    //基金账户筹备累积
 		map.put("expected", publicMinimum);    //期望金额
 		map.put("status", status);        //基金账户状态
+
+		//获取我唯一的基金以及他双生项目的编号
+
+		Long fundId = tCsqFund.getId();
+		map.put("fundId", fundId);
+		TCsqService service = csqServiceService.getService(fundId);
+		map.put("serviceId", service.getId()==null? "": service.getId());
+
 		return map;
 	}
 
@@ -813,6 +821,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 	private TCsqUser register(TCsqUser csqUser) {
 		//默认头像等...
 		csqUser = dealWithDefaultVal(csqUser);
+		//TODO
+
 		csqUserDao.insert(csqUser);
 		Long userId = csqUser.getId();
 		//注册到认证中心
@@ -832,8 +842,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if(StringUtil.isEmpty(csqUser.getUserHeadPortraitPath())) {
 			csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
 		}
-		String name = getDefaultName(csqUser);
-		csqUser.setName(name);
+		if(StringUtil.isEmpty(csqUser.getUserHeadPortraitPath())){
+			String name = getDefaultName(csqUser);
+			csqUser.setName(name);
+		}
+
 		return csqUser;
 	}
 

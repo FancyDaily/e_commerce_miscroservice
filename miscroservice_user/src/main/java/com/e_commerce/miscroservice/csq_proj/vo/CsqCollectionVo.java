@@ -60,6 +60,10 @@ public class CsqCollectionVo implements Serializable {
 	 */
 	private Long serviceId;
 	/**
+	 * 项目对应基金类型编号
+	 */
+	private Long fundId;
+	/**
 	 * 累计筹到金额
 	 */
 	private Double sumTotalIn;

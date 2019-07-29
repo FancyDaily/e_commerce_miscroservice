@@ -219,6 +219,7 @@ public class CsqFundController {
 	 *               "stationcreditCardId": "",
 	 *               "id": 6,
 	 *               "userId": 2000,
+	 *               "serviceId": 116,
 	 *               "helpCnt": 31,
 	 *               "totalInCnt": 0,
 	 *               "trendPubKeys": "1,2,3,6",	方向编号

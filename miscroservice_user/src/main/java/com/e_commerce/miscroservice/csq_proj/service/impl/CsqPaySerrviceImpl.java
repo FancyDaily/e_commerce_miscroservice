@@ -123,6 +123,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 //		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
 		TCsqFund csqFund = dealwithFundBeforePay(userId, csqfund);	//针对创建基金业务
+		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
 		}
@@ -131,6 +132,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		String attach = entityType.toString();	//支付目标的类型
 		//向微信请求发起支付
 		Map<String, String> webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
+		webParam.put("orderNo", orderNo);
 		return webParam;
 	}
 
@@ -155,7 +157,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private void dealwithAccountTrendPubKeys(Long userId, String trendPubKeys) {
 		TCsqUser build = TCsqUser.builder()
 			.id(userId)
-			.trendPubkeys(trendPubKeys).build();
+			.trendPubKeys(trendPubKeys).build();
 		csqUserDao.updateByPrimaryKey(build);	//更新账户倾向
 	}
 

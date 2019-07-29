@@ -312,6 +312,13 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			//装载结果
 			resultMap.put("broadCast", resultList);
 		}
+		//是否捐助过该项目
+		boolean isDonated = false;
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeAndToIdDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), serviceId);
+		if(!tCsqOrders.isEmpty()) {
+			isDonated = true;
+		}
+		resultMap.put("donated", isDonated);
 		resultMap.put("isMine", isMine);
 		resultMap.put("isFund", isFund);
 		return resultMap;
@@ -581,6 +588,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	@Override
 	public void modify(TCsqService csqService) {
 		csqServiceDao.update(csqService);
+	}
+
+	@Override
+	public TCsqService getService(Long fundId) {
+		return csqServiceDao.selectByFundId(fundId);
 	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {

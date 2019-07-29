@@ -15,6 +15,10 @@ import java.util.List;
 @Data(matchSuffix = true)
 public class CsqFundVo {
 
+	private boolean isDonated;	//该项目是否已捐助
+
+	private Long serviceId;	//对应项目
+
 	Integer contributeInCnt;	//贡献人次
 
 	List<String> trendPubNames;	//关注方向(名)

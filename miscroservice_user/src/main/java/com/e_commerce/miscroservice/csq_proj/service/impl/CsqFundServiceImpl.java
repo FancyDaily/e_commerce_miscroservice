@@ -253,6 +253,12 @@ public class CsqFundServiceImpl implements CsqFundService {
 		csqFundVo.setMine(isMine);
 		csqFundVo.setRaiseStatus(CsqFundEnum.STATUS_PUBLIC.getVal() == csqFundVo.getStatus()? CsqFundEnum.RAISE_STAUTS_DONE.getVal(): CsqFundEnum.RAISE_STATUS_RAISING.getVal());
 
+		//获取项目编号
+		TCsqService service = csqServiceService.getService(fundId);
+		if(service != null) {
+			csqFundVo.setServiceId(service.getId());
+		}
+
 		return csqFundVo;
 	}
 
