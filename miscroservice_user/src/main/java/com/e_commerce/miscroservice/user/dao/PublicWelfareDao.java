@@ -16,10 +16,9 @@ public interface PublicWelfareDao {
      * @param betLeft 起时间戳
      * @param betRight 止时间戳
      * @param lastTime
-     * @param desc
      * @return
      */
-    Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisPlusBuild.ORDER desc);
+    Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime);
 
     /**
      * 插入公益时流水

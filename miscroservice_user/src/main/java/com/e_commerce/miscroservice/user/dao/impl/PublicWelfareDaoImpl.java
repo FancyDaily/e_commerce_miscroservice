@@ -21,7 +21,7 @@ public class PublicWelfareDaoImpl implements PublicWelfareDao {
     private PublicWelfareMapper mapper;
 
     @Override
-    public Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime, MybatisPlusBuild.ORDER desc) {
+    public Map<String, Object> selectPublicWelfare(WelfareParamView param, Long id, Long betLeft, Long betRight, Long lastTime) {
         List<TPublicWelfare> publicWelfares = MybatisPlus.getInstance().findAll(new TPublicWelfare(), new MybatisPlusBuild(TPublicWelfare.class)
                 .lt(TPublicWelfare::getCreateTime, lastTime)
                 .between(TPublicWelfare::getCreateTime, betLeft, betRight)

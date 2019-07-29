@@ -406,7 +406,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         param.setYear(year);
 
         //查询
-        Map<String, Object> yearAndAllPBMap = publicWelfareDao.selectPublicWelfare(param, id, betLeft, betRight, lastTime, MybatisPlusBuild.ORDER.DESC);
+        Map<String, Object> yearAndAllPBMap = publicWelfareDao.selectPublicWelfare(param, id, betLeft, betRight, lastTime);
 
         // 年度
         Long yearWelfare = (Long) yearAndAllPBMap.get("yearWelfare");
