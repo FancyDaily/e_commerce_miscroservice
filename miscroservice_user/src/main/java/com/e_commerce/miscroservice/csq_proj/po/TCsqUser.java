@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 @Data(matchSuffix = true)
 @Builder
 @NoArgsConstructor
-public class TCsqUser extends BaseEntity{
+public class TCsqUser extends BaseEntity {
 	@Id
 	private Long id;
 
 	@Transient
-	private Double totalDonate;	//累积捐助(项目详情)
+	private Double totalDonate;    //累积捐助(项目详情)
 
 	@Transient
 	private Integer minutesAgo;
@@ -55,10 +55,10 @@ public class TCsqUser extends BaseEntity{
 	private String userPicturePath;
 
 	@Column(commit = "微博账号")
-	private String weiboAccount;	//微博账号
+	private String weiboAccount;    //微博账号
 
 	@Column(commit = "微信公众号")
-	private String wechatPubAccount;	//微信账号
+	private String wechatPubAccount;    //微信账号
 
 	@Column(commit = "微信openid")
 	private String vxOpenId;
@@ -116,19 +116,19 @@ public class TCsqUser extends BaseEntity{
 	private Integer authenticationType;
 
 	@Column(commit = "技能")
-	private String skill;	//unused
+	private String skill;    //unused
 
 	@Column(commit = "完整度", length = 11, defaultVal = "0")
-	private Integer integrity;	//unused
+	private Integer integrity;    //unused
 
 	@Column(commit = "大V标记状态", length = 11, defaultVal = "0")
-	private Integer masterStatus;	//unused
+	private Integer masterStatus;    //unused
 
 	@Column(commit = "微信基本信息授权状态", length = 11, defaultVal = "0")
 	private Integer authStatus;
 
 	@Column(commit = "邀请码")
-	private String inviteCode;	//unused
+	private String inviteCode;    //unused
 
 	@Column(commit = "可用状态")
 	private String avaliableStatus;
@@ -146,7 +146,7 @@ public class TCsqUser extends BaseEntity{
 	private String contactNo;
 
 	@Column(commit = "意向编号")
-	private String trendPubkeys;
+	private String trendPubKeys;
 
 	public CsqBasicUserVo copyCsqBasicUserVo() {
 		return null;

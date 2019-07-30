@@ -219,6 +219,7 @@ public class CsqFundController {
 	 *               "stationcreditCardId": "",
 	 *               "id": 6,
 	 *               "userId": 2000,
+	 *               "serviceId": 116,
 	 *               "helpCnt": 31,
 	 *               "totalInCnt": 0,
 	 *               "trendPubKeys": "1,2,3,6",	方向编号
@@ -293,7 +294,7 @@ public class CsqFundController {
 	 *
 	 * @param pageNum  页码
 	 * @param pageSize 分页大小
-	 * @param option   操作
+	 * @param option   操作(多选)0筹备中2进行中
 	 *                 <p>
 	 *                 {
 	 *                 "resultList":[

@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
@@ -104,7 +105,7 @@ public class CsqServiceController {
 									 String creditCard,
 									 String personInCharge) {
 		AjaxResult result = new AjaxResult();
-		Long id = IdUtil.getId();
+		Long id = UserUtil.getTestId();
 		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
 		try {

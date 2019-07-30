@@ -42,6 +42,9 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
 public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
+	private CsqMsgDao csqMsgDao;
+
+	@Autowired
 	private CsqUserDao csqUserDao;
 
 	@Autowired
@@ -243,6 +246,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 		map.put("sumTotalIn", sumTotalIn > publicMinimum ? publicMinimum : sumTotalIn);    //基金账户筹备累积
 		map.put("expected", publicMinimum);    //期望金额
 		map.put("status", status);        //基金账户状态
+
+		//获取我唯一的基金以及他双生项目的编号
+		if(tCsqFund == null) {
+			map.put("fundId", "");
+			map.put("serviceId", "");
+			return map;
+		}
+		Long fundId = tCsqFund.getId();
+		map.put("fundId", fundId);
+		TCsqService service = csqServiceService.getService(fundId);
+		map.put("serviceId", service.getId()==null? "": service.getId());
+
 		return map;
 	}
 
@@ -359,7 +374,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.authenticationType(CsqUserEnum.AUTHENTICATION_TYPE_ORG_OR_CORP.toCode()).build();
 		csqUserDao.updateByPrimaryKey(build);
 		//插入一条系统消息
-		csqMsgService.insertTemplateMsg(userId, isPass? CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.TEMPLATE_CORP_CERT_FAIL);
+		csqMsgService.insertTemplateMsg(isPass? CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.CORP_CERT_FAIL, userId);
 	}
 
 	@Override
@@ -469,7 +484,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		final int OPTION_PERSON = 0;
 		final int OPTION_FUND = 1;
 		final int OPTION_SERVICE = 2;
-		if (option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND).contains(option)) {
+		if (option == null || !Arrays.asList(OPTION_PERSON, OPTION_FUND, OPTION_SERVICE).contains(option)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option错误!");
 		}
 		Map<String, Object> map = new HashMap<>();
@@ -523,7 +538,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 				//累积捐赠、捐赠项目数
 				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(entityId);
 				Long tUserId = csqUser.getId();
-				Double totalDonate = csqUser.getTotalDonate();
+				Double totalDonate = csqUser.getSumTotalPay();
 				//统计不重复的项目数
 				List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(tUserId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
 				//统计数量
@@ -540,7 +555,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 				page = this.SERVICE_PAGE;
 				TCsqService csqService = csqServiceDao.selectByPrimaryKey(entityId);
 				String name = csqService.getName();
+				String coverPic = csqService.getCoverPic();
+				coverPic = Arrays.asList(coverPic.split(",")).get(0);
 				vo = CsqShareVo.builder()
+					.coverPic(coverPic)
 					.name(name)
 					.build();
 				vo.setCurrentAmont(csqService.getSumTotalIn());
@@ -600,6 +618,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 			ownerId = csqFund.getUserId();
 			name = csqFund.getName();
 			suffix = "基金";
+
+			if(csqFund.getBalance() < amount) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "资金不足，消费失败！");
+			}
 		}
 
 		if (service) {
@@ -607,6 +629,24 @@ public class CsqUserServiceImpl implements CsqUserService {
 			ownerId = csqService.getUserId();
 			name = csqService.getName();
 			suffix = "项目";
+
+			if(csqService.getSurplusAmount() < amount) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "资金不足，消费失败！");
+			}
+
+			Double surplusAmount = csqService.getSurplusAmount();
+			surplusAmount = surplusAmount==null? 0: surplusAmount;
+			TCsqService build = TCsqService.builder()
+				.id(fromId)
+				.surplusAmount(surplusAmount - amount)
+				.build();
+			csqServiceDao.update(build);
+
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(fromId, fromType, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+			List<Long> userIds = tCsqOrders.stream()
+				.map(TCsqOrder::getUserId).collect(Collectors.toList());
+			Long[] userIdArray = userIds.toArray(new Long[userIds.size()]);
+			csqMsgService.insertTemplateMsg(name, CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME, userIdArray);	//TODO
 		}
 		if (StringUtil.isEmpty(wholeDescription)) {
 			description = "从" + name + suffix + "拨款";
@@ -812,7 +852,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	private TCsqUser register(TCsqUser csqUser) {
 		//默认头像等...
-		csqUser = dealWithDefaultVal(csqUser);
+//		csqUser = dealWithDefaultVal(csqUser);	//TODO
+
 		csqUserDao.insert(csqUser);
 		Long userId = csqUser.getId();
 		//注册到认证中心
@@ -823,7 +864,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			csqUser.setToken(token.getToken());
 		}
 		// sysMsg -> 注册
-		csqMsgService.insertTemplateMsg(userId, CsqSysMsgTemplateEnum.TEMPLATE_REGISTER.getCode());
+		csqMsgService.insertTemplateMsg(CsqSysMsgTemplateEnum.REGISTER.getCode(), userId);
 
 		return csqUser;
 	}
@@ -832,8 +873,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if(StringUtil.isEmpty(csqUser.getUserHeadPortraitPath())) {
 			csqUser.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH);
 		}
-		String name = getDefaultName(csqUser);
-		csqUser.setName(name);
+		if(StringUtil.isEmpty(csqUser.getName())){
+			String name = getDefaultName(csqUser);
+			csqUser.setName(name);
+		}
+
 		return csqUser;
 	}
 

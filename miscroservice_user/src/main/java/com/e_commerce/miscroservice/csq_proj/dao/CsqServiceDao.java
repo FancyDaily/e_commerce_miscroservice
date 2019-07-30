@@ -57,4 +57,8 @@ public interface CsqServiceDao {
 	int updateByFundId(TCsqService build);
 
 	List<TCsqService> selectByNameAndUserId(String name, Long userId);
+
+	List<TCsqService> selectLikeByPubKeys(String a);
+
+	List<TCsqService> selectLikeByPubKeysAndUserIdNeq(String a, Long userId);
 }

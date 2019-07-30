@@ -21,7 +21,9 @@ public interface CsqMsgService {
 
 	void insert(Long userId, TCsqSysMsg csqSysMsg);
 
-	void insertTemplateMsg(Long userId, CsqSysMsgTemplateEnum currentEnum);
+	void insertTemplateMsg(CsqSysMsgTemplateEnum currentEnum, Long... userId);
 
-	void insertTemplateMsg(Long userId, Integer type);
+	void insertTemplateMsg(String contentChanger, CsqSysMsgTemplateEnum currentEnum, Long... userId);
+
+	void insertTemplateMsg(Integer type, Long... userId);
 }

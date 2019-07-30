@@ -51,4 +51,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDesc(Long userId, int toCode, int code, int code1);
 
 	List<TCsqOrder> selectByToIdAndToTypeAndStatusAndOrderTimeBetweenDesc(Long toId, int toType, int status, long startStamp, long endStamp);
+
+	List<TCsqOrder> selectByUserIdAndToTypeAndToIdDesc(Long userId, int toCode, Long serviceId);
 }

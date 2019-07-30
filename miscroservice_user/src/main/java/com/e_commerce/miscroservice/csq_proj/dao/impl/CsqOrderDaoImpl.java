@@ -193,7 +193,8 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getFromType, toCode)
 			.eq(TCsqOrder::getInVoiceStatus, code)
 			.eq(TCsqOrder::getStatus, code1)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
 	}
 
 	@Override
@@ -203,6 +204,15 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getToType, toType)
 			.eq(TCsqOrder::getStatus, status)
 			.between(TCsqOrder::getOrderTime, startStamp, endStamp)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdAndToTypeAndToIdDesc(Long userId, int toCode, Long serviceId) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, userId)
+			.eq(TCsqOrder::getToType, toCode)
+			.eq(TCsqOrder::getToId, serviceId)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 

@@ -113,4 +113,11 @@ public interface CsqServiceService {
 	 * @param csqService
 	 */
 	void modify(TCsqService csqService);
+
+	/**
+	 * 获取项目
+	 * @param fundId
+	 * @return
+	 */
+	TCsqService getService(Long fundId);
 }

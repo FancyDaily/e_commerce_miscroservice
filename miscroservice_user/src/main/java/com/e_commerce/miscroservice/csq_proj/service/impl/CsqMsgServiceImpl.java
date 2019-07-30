@@ -158,26 +158,36 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	}
 
 	@Override
-	public void insertTemplateMsg(Long userId, CsqSysMsgTemplateEnum currentEnum) {
-		TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
-		String title = currentEnum.getTitle();
-		String content = currentEnum.getContent();
-
-		builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
-			.userId(userId)
-			.title(title)
-			.content(content);
-		TCsqSysMsg build = builder.build();
-		csqMsgDao.insert(build);
+	public void insertTemplateMsg(CsqSysMsgTemplateEnum currentEnum, Long... userId) {
+		insertTemplateMsg(null, currentEnum, userId);
 	}
 
 	@Override
-	public void insertTemplateMsg(Long userId, Integer type) {
+	public void insertTemplateMsg(String contentChanger, CsqSysMsgTemplateEnum currentEnum, Long... userId) {
+		String title = currentEnum.getTitle();
+		String content = currentEnum.getContent();
+		content = contentChanger != null? String.format(content, contentChanger):content;
+
+		List<TCsqSysMsg> toInserter = new ArrayList<>();
+		for(Long theId:userId) {
+			TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
+			builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
+				.userId(theId)
+				.title(title)
+				.content(content);
+			TCsqSysMsg build = builder.build();
+			toInserter.add(build);
+		}
+		csqMsgDao.insert(toInserter);
+	}
+
+	@Override
+	public void insertTemplateMsg(Integer type, Long... userId) {
 		CsqSysMsgTemplateEnum currentEnum = CsqSysMsgTemplateEnum.getType(type);
 		if(currentEnum == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "type参数有误！");
 		}
-		insertTemplateMsg(userId, currentEnum);
+		insertTemplateMsg(currentEnum, userId);
 	}
 
 	private TCsqSysMsg getBaseEntity() {

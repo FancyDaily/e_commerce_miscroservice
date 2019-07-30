@@ -152,7 +152,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public boolean checkIsOkForPublic(TCsqFund fund) {
 		Double currentBalance = fund.getBalance();
-		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM < currentBalance;
+		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM <= currentBalance;
 		return achieveMinimum && checkFundCompletion(fund);	//满足开放条件
 	}
 
@@ -233,7 +233,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		}
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		if(csqFund == null) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "");
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
 		}
 		CsqFundVo csqFundVo = csqFund.copyCsqFundVo();
 		//统计捐款人数
@@ -252,6 +252,12 @@ public class CsqFundServiceImpl implements CsqFundService {
 		boolean isMine = csqFund.getUserId().equals(userId);
 		csqFundVo.setMine(isMine);
 		csqFundVo.setRaiseStatus(CsqFundEnum.STATUS_PUBLIC.getVal() == csqFundVo.getStatus()? CsqFundEnum.RAISE_STAUTS_DONE.getVal(): CsqFundEnum.RAISE_STATUS_RAISING.getVal());
+
+		//获取项目编号
+		TCsqService service = csqServiceService.getService(fundId);
+		if(service != null) {
+			csqFundVo.setServiceId(service.getId());
+		}
 
 		return csqFundVo;
 	}
@@ -315,7 +321,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		QueryResult queryResult = new QueryResult();
 		if(tCsqUserPaymentRecords==null) {
 			//根据fundId获取值
-			tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
+			tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOut(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode());
 		}
 		List<Long> tOrderIds = tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)

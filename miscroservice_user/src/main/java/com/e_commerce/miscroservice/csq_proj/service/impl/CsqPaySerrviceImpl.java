@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
+import org.bouncycastle.asn1.dvcs.ServiceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
 @Service
 @Log
 public class CsqPaySerrviceImpl implements CsqPayService {
+
+	@Autowired
+	private CsqMsgService csqMsgService;
 
 	@Autowired
 	private CsqOrderDao csqOrderDao;
@@ -72,6 +76,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Autowired
 	private CsqFundService csqFundService;
+
+	@Autowired
+	private CsqPublishService csqPublishService;
 
 	@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -123,6 +130,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 //		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
 		TCsqFund csqFund = dealwithFundBeforePay(userId, csqfund);	//针对创建基金业务
+		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
 		}
@@ -131,6 +139,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		String attach = entityType.toString();	//支付目标的类型
 		//向微信请求发起支付
 		Map<String, String> webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
+		webParam.put("orderNo", orderNo);
 		return webParam;
 	}
 
@@ -155,7 +164,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private void dealwithAccountTrendPubKeys(Long userId, String trendPubKeys) {
 		TCsqUser build = TCsqUser.builder()
 			.id(userId)
-			.trendPubkeys(trendPubKeys).build();
+			.trendPubKeys(trendPubKeys).build();
 		csqUserDao.updateByPrimaryKey(build);	//更新账户倾向
 	}
 
@@ -736,6 +745,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				.content("只属于您的专项基金现已建立，您可以自由充值和捐赠项目。如有需要，可以使用托管服务,具体细则详见xxxxx.")
 				.dateString(DateUtil.timeStamp2Date(System.currentTimeMillis())).build();
 			csqMsgDao.insert(build);
+
+			recommendService(userId, null, fund);	//TODO
 		}
 		Double amount = tCsqOrder.getPrice();
 		//资金流入 -> 余额增加
@@ -920,6 +931,45 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		//同步基金对应的项目
 		csqServiceService.synchronizeService(csqFund);
+	}
+
+	private void recommendService(Long userId, Long fundId, TCsqFund csqFund) {
+		if(csqFund == null) {
+			csqFund = csqFundDao.selectByPrimaryKey(fundId);
+			if(csqFund == null) {
+				return;
+			}
+		}
+
+		String trendPubKeys = csqFund.getTrendPubKeys();
+		trendPubKeys = trendPubKeys == null? "": trendPubKeys;
+		String[] trendKeyArray = trendPubKeys.split(",");
+		TCsqService csqService = null;
+		Long serviceId = null;
+		for(String a:trendKeyArray) {
+			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeq(a, userId);
+			if(!tCsqServices.isEmpty()) {
+				csqService = tCsqServices.get(0);
+				serviceId = csqService.getId();
+				break;
+			}
+		}
+
+		if(serviceId == null) {
+			return;
+		}
+
+		Integer serviceType = csqService.getType();
+		TCsqSysMsg build = TCsqSysMsg.builder()
+			.userId(userId)
+			.title(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getTitle())
+			.content(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getContent())
+			.type(CsqSysMsgEnum.TYPE_SREVICE.getCode())
+			.serviceId(CsqServiceEnum.TYPE_FUND.getCode() == serviceType? csqService.getFundId(): serviceId)
+			.serviceType(serviceType)
+			.build();
+
+		csqMsgDao.insert(build);
 	}
 
 }

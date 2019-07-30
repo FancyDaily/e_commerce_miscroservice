@@ -2,9 +2,13 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqCollectionDao;
+import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserCollection;
 import com.e_commerce.miscroservice.csq_proj.service.CsqCollectionService;
@@ -17,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description 收藏表
@@ -34,34 +40,37 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 	@Autowired
 	private CsqCollectionDao csqCollectionDao;
 
+	@Autowired
+	private CsqFundDao csqFundDao;
+
 	@Transactional(rollbackFor = Exception.class)
 	@Override
 	public Object clickCollection(Long serviceId, Long userId) {
 		TCsqService tCsqService = csqServiceDao.findOne(serviceId);
-		if (tCsqService==null){
-			throw new  MessageException("项目不存在");
+		if (tCsqService == null) {
+			throw new MessageException("项目不存在");
 		}
 		TCsqUserCollection in = new TCsqUserCollection();
 
-		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId,userId);
-		if (csqUserCollection==null){
+		TCsqUserCollection csqUserCollection = csqCollectionDao.findOne(serviceId, userId);
+		if (csqUserCollection == null) {
 			in.setServiceId(serviceId);
 			in.setUserId(Long.valueOf(userId));
 
 			Integer i = csqCollectionDao.insert(in);
-			if (i==0){
+			if (i == 0) {
 				throw new MessageException("收藏失败");
 			}
-		}else {
+		} else {
 			in.setId(csqUserCollection.getId());
-			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_YES)){
+			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_YES)) {
 				in.setIsValid(AppConstant.IS_VALID_NO);
 			}
-			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_NO)){
+			if (csqUserCollection.getIsValid().equals(AppConstant.IS_VALID_NO)) {
 				in.setIsValid(AppConstant.IS_VALID_YES);
 			}
 			Integer i = csqCollectionDao.update(in);
-			if (i==0){
+			if (i == 0) {
 				throw new MessageException("收藏失败");
 			}
 		}
@@ -74,11 +83,11 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 	public QueryResult<CsqCollectionVo> collectionList(Integer pageNum, Integer pageSize, Integer userId) {
 		QueryResult<CsqCollectionVo> queryResult = new QueryResult<>();
 
-		Page<Object> page = PageHelper.startPage(pageNum,pageSize);
+		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserCollection> li = csqCollectionDao.findAll(Long.valueOf(userId));
 
 		List<CsqCollectionVo> list = new ArrayList<>();
-		if (li==null||li.size()==0){
+		if (li == null || li.size() == 0) {
 			queryResult.setTotalCount(page.getTotal());
 			queryResult.setResultList(list);
 			return queryResult;
@@ -88,7 +97,9 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			serviceIdList.add(tCsqUserCollection.getServiceId());
 		});
 		List<TCsqService> serviceList = csqServiceDao.findAll(serviceIdList);
-		serviceList.forEach(csqService->{
+
+		serviceList.forEach(csqService -> {
+			Integer type = csqService.getType();
 			CsqCollectionVo csqCollectionVo = new CsqCollectionVo();
 			csqCollectionVo.setCoverPic(csqService.getCoverPic());
 			csqCollectionVo.setDesc(csqService.getDescription());
@@ -97,11 +108,14 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			csqCollectionVo.setPurpose(csqService.getPurpose());
 			csqCollectionVo.setRecordNo(csqService.getRecordNo());
 			csqCollectionVo.setServiceId(csqService.getId());
+			if (CsqServiceEnum.TYPE_FUND.getCode() == type) {
+				csqCollectionVo.setFundId(csqService.getFundId());
+			}
 			csqCollectionVo.setSumTotalIn(csqService.getSumTotalIn());
 			csqCollectionVo.setSurplusAmount(csqService.getSurplusAmount());
-			csqCollectionVo.setType(csqService.getType());
-			csqCollectionVo.setDonateCnt(csqService.getDonaterCnt());	//人数
-			csqCollectionVo.setDonatePercent(NumberFormat.getPercentInstance().format(csqService.getExpectedAmount() == 0? 0 :csqService.getSumTotalIn() / csqService.getExpectedAmount()).replaceAll("%", ""));//进度
+			csqCollectionVo.setType(type);
+			csqCollectionVo.setDonateCnt(csqService.getDonaterCnt());    //人数
+			csqCollectionVo.setDonatePercent(NumberFormat.getPercentInstance().format(csqService.getExpectedAmount() == 0 ? 0 : csqService.getSumTotalIn() / csqService.getExpectedAmount()).replaceAll("%", ""));//进度
 			list.add(csqCollectionVo);
 		});
 
@@ -114,7 +128,7 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 	public boolean isCollection(Long userId, Long serviceId) {
 		boolean flag = false;
 		TCsqUserCollection one = csqCollectionDao.findOne(serviceId, userId);
-		if(one!=null) {
+		if (one != null) {
 			flag = true;
 		}
 		return flag;
