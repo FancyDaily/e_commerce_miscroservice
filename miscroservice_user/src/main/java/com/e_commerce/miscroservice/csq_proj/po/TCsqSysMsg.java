@@ -31,6 +31,9 @@ public class TCsqSysMsg extends BaseEntity {
 	@Transient
 	private TCsqService csqService;
 
+	@Column(commit = "类别", length = 11, isNUll = false, defaultVal = "1")
+	private Integer type;
+
 	@Column(commit = "标题")
 	private String title;
 
@@ -40,8 +43,8 @@ public class TCsqSysMsg extends BaseEntity {
 	@Column(commit = "项目编号")
 	private Long serviceId;
 
-	@Column(commit = "类别", length = 11, isNUll = false, defaultVal = "1")
-	private Integer type;
+	@Column(commit = "项目类型", defaultVal = "0", length = 11)
+	private Integer serviceType;
 
 	@Column(commit = "已读状态", length = 11, defaultVal = "0")
 	private Integer isRead;

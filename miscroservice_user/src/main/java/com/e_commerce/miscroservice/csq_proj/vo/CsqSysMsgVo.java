@@ -24,6 +24,8 @@ public class CsqSysMsgVo {
 
 	private Long serviceId;
 
+	private Integer serviceType;
+
 	private String name;
 
 	private String description;

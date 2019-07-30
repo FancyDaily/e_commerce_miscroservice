@@ -474,10 +474,11 @@ public class CsqUserController {
 	@RequestMapping("recordConsumption")
 	public AjaxResult recordForConsumption(Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
-		Long userId = IdUtil.getId();
+		Long userIds = IdUtil.getId();
+		userIds = 2114L;
 		try {
-			log.info("平台托管消费行为的记录, userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}", userId, fromId, fromType, amount, wholeDescription);
-			csqUserService.recordForConsumption(userId, fromId, fromType, amount, wholeDescription);
+			log.info("平台托管消费行为的记录, userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}", userIds, fromId, fromType, amount, wholeDescription);
+			csqUserService.recordForConsumption(userIds, fromId, fromType, amount, wholeDescription);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "平台托管消费行为的记录", e.getMessage());

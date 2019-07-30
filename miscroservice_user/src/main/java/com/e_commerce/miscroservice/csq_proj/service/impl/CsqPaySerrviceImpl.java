@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
+import org.bouncycastle.asn1.dvcs.ServiceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
 @Service
 @Log
 public class CsqPaySerrviceImpl implements CsqPayService {
+
+	@Autowired
+	private CsqMsgService csqMsgService;
 
 	@Autowired
 	private CsqOrderDao csqOrderDao;
@@ -72,6 +76,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Autowired
 	private CsqFundService csqFundService;
+
+	@Autowired
+	private CsqPublishService csqPublishService;
 
 	@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -738,6 +745,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				.content("只属于您的专项基金现已建立，您可以自由充值和捐赠项目。如有需要，可以使用托管服务,具体细则详见xxxxx.")
 				.dateString(DateUtil.timeStamp2Date(System.currentTimeMillis())).build();
 			csqMsgDao.insert(build);
+
+			recommendService(userId, null, fund);	//TODO
 		}
 		Double amount = tCsqOrder.getPrice();
 		//资金流入 -> 余额增加
@@ -922,6 +931,45 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		//同步基金对应的项目
 		csqServiceService.synchronizeService(csqFund);
+	}
+
+	private void recommendService(Long userId, Long fundId, TCsqFund csqFund) {
+		if(csqFund == null) {
+			csqFund = csqFundDao.selectByPrimaryKey(fundId);
+			if(csqFund == null) {
+				return;
+			}
+		}
+
+		String trendPubKeys = csqFund.getTrendPubKeys();
+		trendPubKeys = trendPubKeys == null? "": trendPubKeys;
+		String[] trendKeyArray = trendPubKeys.split(",");
+		TCsqService csqService = null;
+		Long serviceId = null;
+		for(String a:trendKeyArray) {
+			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeq(a, userId);
+			if(!tCsqServices.isEmpty()) {
+				csqService = tCsqServices.get(0);
+				serviceId = csqService.getId();
+				break;
+			}
+		}
+
+		if(serviceId == null) {
+			return;
+		}
+
+		Integer serviceType = csqService.getType();
+		TCsqSysMsg build = TCsqSysMsg.builder()
+			.userId(userId)
+			.title(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getTitle())
+			.content(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getContent())
+			.type(CsqSysMsgEnum.TYPE_SREVICE.getCode())
+			.serviceId(CsqServiceEnum.TYPE_FUND.getCode() == serviceType? csqService.getFundId(): serviceId)
+			.serviceType(serviceType)
+			.build();
+
+		csqMsgDao.insert(build);
 	}
 
 }

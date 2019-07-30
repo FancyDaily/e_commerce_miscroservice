@@ -30,6 +30,9 @@ public class TCsqService extends BaseEntity {
 	private Long fundId;
 
 	@Transient
+	private Double sumTotalOut;
+
+	@Transient
 	private String donePercent;	//捐献完成进度
 
 	@Transient
@@ -40,9 +43,6 @@ public class TCsqService extends BaseEntity {
 
 	@Transient
 	private List<CsqBasicUserVo> donaters;	//捐助人列表
-
-	@Transient
-	private Double sumTotalOut;
 
 	@Transient
 	private List<String> trendPubValues;

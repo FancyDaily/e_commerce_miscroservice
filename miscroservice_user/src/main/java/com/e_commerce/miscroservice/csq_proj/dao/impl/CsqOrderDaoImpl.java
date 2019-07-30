@@ -193,7 +193,8 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getFromType, toCode)
 			.eq(TCsqOrder::getInVoiceStatus, code)
 			.eq(TCsqOrder::getStatus, code1)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
 	}
 
 	@Override

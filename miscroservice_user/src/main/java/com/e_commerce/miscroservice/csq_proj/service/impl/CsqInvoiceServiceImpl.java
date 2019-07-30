@@ -306,7 +306,11 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 				if (csqUsers != null) {
 					TCsqUser csqUser = csqUsers.get(0);
 					String myName = csqUser.getName();
-					name = new StringBuilder().append(myName == null? "我": myName).append("的爱心账户").toString();
+					name = new StringBuilder().append(
+//						myName == null?
+							"我"
+//							: myName
+					).append("的爱心账户").toString();
 				}
 				break;
 		}
