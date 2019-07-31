@@ -61,4 +61,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectLikeByPubKeys(String a);
 
 	List<TCsqService> selectLikeByPubKeysAndUserIdNeq(String a, Long userId);
+
+	List<TCsqService> selectInIdsOrInFundIds(List<Long> serviceIds, List<Long> fundIds);
 }

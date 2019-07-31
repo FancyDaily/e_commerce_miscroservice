@@ -6,10 +6,7 @@ import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.IDCardUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
@@ -588,11 +585,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的类型!");
 		}
 
-		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
 		//check用户权限
+//		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
 
 		//如果为基金，确认基金已经设置为托管(维持一段时间？)
-		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType) {
+		boolean isFund = CsqEntityTypeEnum.TYPE_FUND.toCode() == fromType;
+		if (isFund) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(fromId);
 			if (csqFund == null) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
@@ -660,6 +658,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.money(amount).build();
 		build.setCreateUser(userId);
 		csqUserPaymentDao.insert(build);
+
+		/*// 平台托管如果为基金类型，应当留下订单记录(用户会在我已捐赠列表中找到) -> 等待托管细则 后续补充或迁移
+		if(isFund) {
+			TCsqOrder.builder()
+				.userId(userId)
+				.fromId(fromId)
+				.fromType(fromType)
+				.toType()	//缺失
+				.toId()	//缺失
+				.orderNo(UUIdUtil.generateOrderNo())
+				.orderTime(System.currentTimeMillis())
+				.price(amount)
+				.status(CsqOrderEnum.STATUS_UNPAY.getCode()).build();
+		}*/
 	}
 
 	@Override
@@ -731,7 +743,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void modify(Long userId, CsqBasicUserVo csqBasicUserVo) {
+	public void modify(Long userId, CsqBasicUserVo csqBasicUserVo, boolean isWechatAuth) {
 		//修改昵称和简介
 		/*String name = csqBasicUserVo.getName();
 		String remarks = csqBasicUserVo.getRemarks();
@@ -743,6 +755,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//未对组织账户修改手机号做限制
 		TCsqUser csqUser = csqBasicUserVo.copyTCsqUser();
 		csqUser.setId(userId);
+		if(isWechatAuth) {
+			csqUser.setAuthStatus(CsqUserEnum.AUTH_STATUS_TRUE.toCode());
+		}
 		csqUserDao.updateByPrimaryKey(csqUser);
 	}
 
@@ -852,7 +867,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	private TCsqUser register(TCsqUser csqUser) {
 		//默认头像等...
-//		csqUser = dealWithDefaultVal(csqUser);	//TODO
+		csqUser = dealWithDefaultVal(csqUser);
 
 		csqUserDao.insert(csqUser);
 		Long userId = csqUser.getId();
@@ -883,7 +898,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	private static String getDefaultName(TCsqUser csqUser) {
 		String name = csqUser.getName();
-		String prefix = "用户";
+		String prefix = "小善";
 		long currentTimeMillis = System.currentTimeMillis();
 		String nowStringSuffix = String.valueOf(currentTimeMillis).substring(5);
 		StringBuilder builder = new StringBuilder();

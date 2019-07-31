@@ -863,7 +863,7 @@ public class UserController extends BaseController {
      * @return
      */
     @RequestMapping("infos/" + TokenUtil.AUTH_SUFFIX)
-    public Object infos(String token, Long userId) {
+    public Object infos(Long userId) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
         try {

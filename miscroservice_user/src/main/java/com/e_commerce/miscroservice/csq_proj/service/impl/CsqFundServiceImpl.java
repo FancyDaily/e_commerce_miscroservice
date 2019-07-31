@@ -7,14 +7,12 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
-import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
+import com.e_commerce.miscroservice.csq_proj.service.*;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
-import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqOrderService;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -61,6 +59,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Autowired
 	private CsqServiceService csqServiceService;
+
+	@Autowired
+	private CsqPaymentService csqPaymentService;
 
 	@Override
 	public void applyForAFund(Long userId, String orderNo) {
@@ -258,6 +259,11 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(service != null) {
 			csqFundVo.setServiceId(service.getId());
 		}
+
+		List<Long> orderIds = csqPaymentService.getPaymentRelatedOrderIds(fundId);
+		tCsqUserPaymentRecords = orderIds.isEmpty() ? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
+		List<CsqBasicUserVo> donaterList = csqPaymentService.getTopDonaters(tCsqUserPaymentRecords, orderIds);
+		csqFundVo.setDonaterList(donaterList);
 
 		return csqFundVo;
 	}

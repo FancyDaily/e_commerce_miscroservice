@@ -520,6 +520,8 @@ public class CsqUserController {
 	 * "remarks":""	个人简介
 	 * "contactPerson":"张学友"  联系人
 	 * "contactNo":"11111"  联系方式
+	 * "trendPubKeys": "",	趋向
+	 * "authStatus": 0	微信基本信息授权状态0未1已
 	 * }
 	 *
 	 * @return
@@ -557,19 +559,21 @@ public class CsqUserController {
 	 * @param contactPerson        联系人
 	 * @param contactNo            联系方式
 	 * @param trendPubKeys			倾向
+	 * @param isWechatAuth		是否微信基本授权信息
 	 * @return
 	 */
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
 	@UrlAuth
 	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo,
-							 String trendPubKeys) {
+							 String trendPubKeys,
+							 boolean isWechatAuth) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
 			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}, trendPubKeys={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo, trendPubKeys);
-			csqUserService.modify(userIds, csqBasicUserVo);
+			csqUserService.modify(userIds, csqBasicUserVo, isWechatAuth);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "修改个人基本信息", e.getMessage());

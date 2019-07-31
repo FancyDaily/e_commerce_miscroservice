@@ -13,7 +13,9 @@ public enum CsqUserEnum {
 	ACCOUNT_TYPE_COMPANY(2, "机构用户"),
 	BALANCE_STATUS_WAIT_ACTIVATE(0, "待激活"),
 	BALANCE_STATUS_AVAILABLE(1, "可用"),
-	BALANCE_STATUS_BANED(-1, "被禁止")
+	BALANCE_STATUS_BANED(-1, "被禁止"),
+	AUTH_STATUS_FALSE(0, "未进行过微信基本信息授权"),
+	AUTH_STATUS_TRUE(1, "已完成微信基本信息授权")
 	;
 
 	/**

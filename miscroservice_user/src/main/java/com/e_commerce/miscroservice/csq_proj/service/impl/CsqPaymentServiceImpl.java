@@ -2,9 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
-import com.e_commerce.miscroservice.commons.enums.application.UploadPathEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
@@ -12,6 +10,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.github.pagehelper.Page;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Description TODO
@@ -42,7 +42,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	@Autowired
 	private CsqServiceDao csqServiceDao;
 	@Autowired
-	private CsqPaymentDao csqUserPaymentDao;
+	private CsqUserPaymentDao csqUserPaymentDao;
 	@Autowired
 	private CsqOrderDao csqOrderDao;
 
@@ -187,7 +187,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private TCsqUserPaymentRecord findTheOtherTypeRecord(TCsqUserPaymentRecord record) {
 		Long recordId = record.getId();
 		Long orderId = record.getOrderId();
-		return csqUserPaymentDao.selectByOrderIdAndNeqId(orderId, recordId);
+		return csqPaymentDao.selectByOrderIdAndNeqId(orderId, recordId);
 	}
 
 	@Override
@@ -294,6 +294,91 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		resultMap.put("beneficiaryId", resultId);
 		resultMap.put("beneficiaryName", resultName);
 		return resultMap;
+	}
+
+	@Override
+	public List<Long> getPaymentRelatedOrderIds(Long entityId) {
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(entityId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
+		return tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getOrderId)
+			.distinct().collect(Collectors.toList());
+	}
+
+	@Override
+	public List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds) {
+		//组建user-order的map
+		List<TCsqOrder> tCsqOrders = orderIds.isEmpty() ? new ArrayList<>() : csqOrderDao.selectInIds(orderIds);
+		Map<Long, List<TCsqOrder>> userOrderMap = tCsqOrders.stream()
+			.collect(Collectors.groupingBy(TCsqOrder::getUserId));
+
+		//统计捐款数，获取top3
+		Map<Long, List<TCsqUserPaymentRecord>> unsortedMap = tCsqUserPaymentRecords.stream()
+			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getUserId));
+		Map<Long, Double> donaterMoneyMap = new HashMap<>();
+		List<Long> donaterIds = new ArrayList<>();
+		List<TCsqUser> donaters;
+		Set<Map.Entry<Long, List<TCsqUserPaymentRecord>>> entries = unsortedMap.entrySet();
+		Stream<Map.Entry<Long, List<TCsqUserPaymentRecord>>> stream = entries.stream();
+		stream = stream.sorted(Collections.reverseOrder(Comparator.comparing(a -> {    //排序(若元素数量为1会跳过sort函数
+			List<TCsqUserPaymentRecord> value = a.getValue();
+			Double totalDonate = value.stream()
+				//TODO 若匿名捐赠不参与排行top3统计则加入filter筛选 -> 仅筛选非匿名(需要提前构造好payment-order map)
+				.map(TCsqUserPaymentRecord::getMoney)
+				.reduce(0d, Double::sum);
+			donaterMoneyMap.put(a.getKey(), NumberUtil.keep2Places(totalDonate));
+			return totalDonate;
+		})));
+		if (entries.size() == 1) {    //若为一个元素，则收集数据
+			unsortedMap.forEach((k,v) -> donaterMoneyMap.put(k, NumberUtil.keep2Places(v.stream()
+				.map(TCsqUserPaymentRecord::getMoney)
+				.reduce(0d, Double::sum))));
+		}
+		stream.forEachOrdered(a -> {
+				donaterIds.add(a.getKey());    //排序后的集合
+			}
+		);
+
+		donaters = donaterIds.isEmpty() ? new ArrayList<>() : csqUserDao.selectInIds(donaterIds);
+		//纠正排序
+		Map<Long, TCsqUser> donaterMap = new HashMap<>();
+		donaters.stream()
+			.forEach(donater -> donaterMap.put(donater.getId(), donater));
+		donaters = donaterIds.stream()        //通过顺序的ids获取到donaters(按捐款数额排序)
+			.map(a -> donaterMap.get(a)).collect(Collectors.toList());
+
+		donaters = donaters.stream()
+			.map(a -> {
+				Double totalDonate = donaterMoneyMap.get(a.getId());
+				if (totalDonate != null) {
+					a.setTotalDonate(totalDonate);
+				}
+				return a;
+			}).collect(Collectors.toList());
+		//去敏感化
+		List<CsqBasicUserVo> donaterList = donaters.stream()
+			.map(a -> {
+				CsqBasicUserVo csqBasicUserVo = a.copyCsqBasicUserVo();
+				return csqBasicUserVo;
+			}).collect(Collectors.toList());
+		//限制为前3条
+		donaterList = donaterList.stream()
+			.limit(3).collect(Collectors.toList());
+
+		//判断是否匿名
+		donaterList = donaterList.stream()
+			.map(a -> {
+				Long id = a.getId();
+				List<TCsqOrder> orders = userOrderMap.get(id);
+				if (orders != null
+					&& orders.stream()
+					.allMatch(b -> CsqOrderEnum.IS_ANONYMOUS_TRUE.getCode().equals(b.getIsAnonymous()))) {    //判定为匿名者
+
+					a.setName(CsqUserEnum.DEFAULT_ANONYMOUS_NAME);
+					a.setUserHeadPortraitPath(CsqUserEnum.DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH);
+				}
+				return a;
+			}).collect(Collectors.toList());
+		return donaterList;
 	}
 
 }

@@ -216,4 +216,11 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
+	@Override
+	public List<TCsqOrder> selectByUserIdDesc(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, userId)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
 }

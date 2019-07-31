@@ -104,4 +104,7 @@ public class CsqDailyDonateVo {
 	@Column(commit = "银行卡号")
 	private String creditCard;
 
+	@Column(commit = "负责人头像")
+	private String personInChargePic;
+
 }

@@ -2,9 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgTemplateEnum;
-import com.e_commerce.miscroservice.commons.enums.application.SysMsgEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -64,6 +62,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		List<TCsqService> tCsqServices = serviceIds.isEmpty() ? new ArrayList<>() : csqServiceDao.selectInIds(serviceIds);
 		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
+
 		List<CsqSysMsgVo> resultList = tCsqSysMsgs.stream()
 //			.sorted(Comparator.comparing(TCsqSysMsg::getCreateTime))
 			.map(a -> {
@@ -77,11 +76,13 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 				//装载项目信息
 				TCsqService tCsqService = csqServiceList.get(0);
 //				csqSysMsgVo.setCsqService(tCsqService);
+				csqSysMsgVo.setFundId(tCsqService.getFundId());
 				csqSysMsgVo.setServiceId(tCsqService.getId());
 				csqSysMsgVo.setName(tCsqService.getName());
 				csqSysMsgVo.setDescription(tCsqService.getDescription());
 				csqSysMsgVo.setCoverPic(tCsqService.getCoverPic());
 				csqSysMsgVo.setSumTotalIn(tCsqService.getSumTotalIn());
+				csqSysMsgVo.setServiceType(tCsqService.getType());
 				return csqSysMsgVo;
 			}).collect(Collectors.toList());
 

@@ -68,6 +68,8 @@ public class CsqBasicUserVo {
 	@Column(commit = "捐款倾向")
 	protected String trendPubKeys;
 
+	protected Integer authStatus;
+
 	public TCsqUser copyTCsqUser() {
 		TCsqUser user = new TCsqUser();
 		user.setVxId("");

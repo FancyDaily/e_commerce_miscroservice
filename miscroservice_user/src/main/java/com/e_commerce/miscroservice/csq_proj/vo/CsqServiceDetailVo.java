@@ -40,6 +40,9 @@ public class CsqServiceDetailVo extends CsqServiceListVo {
 	@Column(commit = "负责人")
 	private String personInCharge;
 
+	@Column(commit = "负责人头像")
+	private String personInChargePic;
+
 	@Column(commit = "身份证/机构代码")
 	private String certificatedNo;
 

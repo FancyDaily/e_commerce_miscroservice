@@ -18,7 +18,8 @@ public enum CsqFundEnum {
 	;
 
 	public static final Double PUBLIC_MINIMUM = 100000d;	//申请公开基金的最低标准
-	public static final String DEFAULT_COVER_PIC = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png";	//默认封面图
+	public static final String DEFAULT_COVER_PIC = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/congshanqiao/default_cover_pic_fund.jpg";	//默认封面图
+	public static final String DEFAULT_NAME_TEMPLATE = "%s的专项基金";
 
 	int val;
 	String desc;

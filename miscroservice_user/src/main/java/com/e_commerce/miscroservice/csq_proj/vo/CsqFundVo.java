@@ -15,6 +15,8 @@ import java.util.List;
 @Data(matchSuffix = true)
 public class CsqFundVo {
 
+	private List<CsqBasicUserVo> donaterList;	//捐助者记录集合(Top
+
 	private boolean isDonated;	//该项目是否已捐助
 
 	private Long serviceId;	//对应项目

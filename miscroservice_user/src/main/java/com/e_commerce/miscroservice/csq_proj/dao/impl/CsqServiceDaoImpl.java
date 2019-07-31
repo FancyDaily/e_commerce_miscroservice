@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao.impl;
 
+import com.alipay.api.domain.AlipayFundTransDishonorQueryModel;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
@@ -10,6 +11,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,8 +25,7 @@ import java.util.List;
 public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	public MybatisPlusBuild IdWhereBuild(Long id) {
-		return new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES).eq(TCsqService::getId, id);
+		return baseBuild().eq(TCsqService::getId, id);
 	}
 
 	@Override
@@ -57,8 +58,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectAll() {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
 			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
 			.and()
 			.groupBefore()
@@ -90,8 +90,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public TCsqService selectByPrimaryKey(Long serviceId) {
-		return MybatisPlus.getInstance().findOne(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findOne(new TCsqService(), baseBuild()
 			.eq(TCsqService::getId, serviceId));
 	}
 
@@ -102,22 +101,19 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public TCsqService selectByFundId(Long fundId) {
-		return MybatisPlus.getInstance().findOne(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findOne(new TCsqService(), baseBuild()
 			.eq(TCsqService::getFundId, fundId));
 	}
 
 	@Override
 	public int updateByFundId(TCsqService build) {
-		return MybatisPlus.getInstance().update(build, new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().update(build, baseBuild()
 			.eq(TCsqService::getFundId, build.getFundId()));
 	}
 
 	@Override
 	public List<TCsqService> selectByNameAndUserId(String name, Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
 			.eq(TCsqService::getUserId, userId)
 			.eq(TCsqService::getName, name)
 		);
@@ -125,8 +121,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectLikeByPubKeys(String a) {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
 			.and()
 			.groupBefore()
 			.like(TCsqService::getTypePubKeys, "%," + a + "%")
@@ -137,8 +132,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectLikeByPubKeysAndUserIdNeq(String a, Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
 			.neq(TCsqService::getUserId, userId)
 			.and()
 			.groupBefore()
@@ -147,5 +141,41 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.like(TCsqService::getTypePubKeys, "%" + a + ",%")
 			.groupAfter());
 	}
-	
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
+	@Override
+	public List<TCsqService> selectInIdsOrInFundIds(List<Long> serviceIds, List<Long> fundIds) {
+		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.and()
+			.groupBefore();
+		boolean isServiceListEmpty = false;
+		boolean isFundListEmpty = false;
+
+		if(!isServiceListEmpty && !isFundListEmpty) {
+			return new ArrayList<>();
+		}
+
+		if(isServiceListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild
+				.in(TCsqService::getId, 1);
+		}
+
+		if(isServiceListEmpty && isFundListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild.or();
+		}
+
+		if(isFundListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild
+				.in(TCsqService::getFundId, 2);
+		}
+		mybatisPlusBuild = mybatisPlusBuild.groupAfter();
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild);
+	}
+
 }

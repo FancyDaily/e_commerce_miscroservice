@@ -147,8 +147,9 @@ public interface CsqUserService {
 	 * 修改个人基本信息
 	 * @param userId
 	 * @param csqBasicUserVo
+	 * @param isWechatAuth
 	 */
-	void modify(Long userId, CsqBasicUserVo csqBasicUserVo);
+	void modify(Long userId, CsqBasicUserVo csqBasicUserVo, boolean isWechatAuth);
 
 	/**
 	 * 查看个人基本信息

@@ -2,8 +2,11 @@ package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
+import java.util.List;
 import java.util.Map;
 
 public interface CsqPaymentService {
@@ -43,4 +46,8 @@ public interface CsqPaymentService {
 	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description);
 
 	void savePaymentRecord(TCsqOrder tCsqOrder);
+
+	List<Long> getPaymentRelatedOrderIds(Long entityId);
+
+	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
 }

@@ -22,6 +22,8 @@ public class CsqSysMsgVo {
 	@Transient
 	private String dateString;
 
+	private Long fundId;
+
 	private Long serviceId;
 
 	private Integer serviceType;

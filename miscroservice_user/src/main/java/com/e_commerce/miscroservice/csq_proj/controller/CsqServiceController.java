@@ -85,6 +85,7 @@ public class CsqServiceController {
 	 * @param certificatedNo 身份证/机构代码
 	 * @param creditCard     银行卡号
 	 * @param personInCharge 负责人
+	 * @param personInChargePic 负责人头像
 	 *                       <p>
 	 *                       {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
@@ -103,16 +104,17 @@ public class CsqServiceController {
 									 String beneficiary,
 									 String certificatedNo,
 									 String creditCard,
-									 String personInCharge) {
+									 String personInCharge,
+									 String personInChargePic) {
 		AjaxResult result = new AjaxResult();
 		Long id = UserUtil.getTestId();
-		CsqServiceListVo vo = (CsqServiceListVo) ConsumeHelper.getObj();
+		CsqServiceDetailVo vo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = vo.copyTCsqService();
 		try {
 			log.info("发布项目, name={}, recordNo={}, typePubKeys={}, " +
 					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
-					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}",
-				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge);
+					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}, personInChargePic={}",
+				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge, personInChargePic);
 			csqServiceService.publish(id, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

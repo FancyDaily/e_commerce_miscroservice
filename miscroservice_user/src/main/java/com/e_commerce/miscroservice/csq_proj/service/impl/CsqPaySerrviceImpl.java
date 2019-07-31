@@ -127,9 +127,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Override
 	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous) throws Exception {
-//		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
-		TCsqFund csqFund = dealwithFundBeforePay(userId, csqfund);	//针对创建基金业务
+		TCsqFund csqFund = dealwithFundBeforePay(entityType, userId, csqfund);	//针对创建基金业务
 		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
@@ -197,11 +196,16 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		return orderNo;
 	}
 
-	private TCsqFund dealwithFundBeforePay(Long userId, TCsqFund csqFund) {
-		return dealwithFundBeforePay(userId, csqFund, false);
+	private TCsqFund dealwithFundBeforePay(Integer entityType, Long userId, TCsqFund csqFund) {
+		return dealwithFundBeforePay(entityType, userId, csqFund, false);
 	}
 
-	private TCsqFund dealwithFundBeforePay(Long userId, TCsqFund csqFund, boolean isSkipActivate) {
+	private TCsqFund dealwithFundBeforePay(Integer entityType, Long userId, TCsqFund csqFund, boolean isSkipActivate) {
+		if(CsqEntityTypeEnum.TYPE_FUND.toCode() != entityType) {
+			return null;
+		}
+
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
 		if(csqFund == null) {
 			return null;
 		}
@@ -220,7 +224,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 //			}
 		}
 		//若已有一个待激活的基金，则返回(注意，这是在保证只有一个有效基金的前提下,若开放多个基金，则以前端传入的"开设/充值标志"为准)
-		String name = csqFund.getName() == null? "" : csqFund.getName();
+		String name = csqFund.getName() == null? csqUser.getName()==null? "未命名的基金":String.format(csqUser.getName(), CsqFundEnum.DEFAULT_NAME_TEMPLATE): csqFund.getName();
 		String trendPubKeys = csqFund.getTrendPubKeys() == null? "" : csqFund.getTrendPubKeys();
 		List<TCsqFund> waitActivateList = tCsqFunds.stream()
 			.filter(a -> CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal() == a.getStatus() && name.equals(a.getName()) && trendPubKeys.equals(a.getTrendPubKeys()))
@@ -573,7 +577,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		//针对创建基金业务
 		if(toId == null && CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
-			csqFund = dealwithFundBeforePay(userId, csqFund, false);	//基金的支付前逻辑。若可能，包含[创建已激活(未公开)基金]
+			csqFund = dealwithFundBeforePay(toType, userId, csqFund, false);	//基金的支付前逻辑。若可能，包含[创建已激活(未公开)基金]
 			if(csqFund !=null) {
 				toId = csqFund.getId();
 			}
@@ -959,14 +963,12 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			return;
 		}
 
-		Integer serviceType = csqService.getType();
 		TCsqSysMsg build = TCsqSysMsg.builder()
 			.userId(userId)
 			.title(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getTitle())
 			.content(CsqSysMsgTemplateEnum.SERVICE_RECOMMEND.getContent())
 			.type(CsqSysMsgEnum.TYPE_SREVICE.getCode())
-			.serviceId(CsqServiceEnum.TYPE_FUND.getCode() == serviceType? csqService.getFundId(): serviceId)
-			.serviceType(serviceType)
+			.serviceId(serviceId)
 			.build();
 
 		csqMsgDao.insert(build);
