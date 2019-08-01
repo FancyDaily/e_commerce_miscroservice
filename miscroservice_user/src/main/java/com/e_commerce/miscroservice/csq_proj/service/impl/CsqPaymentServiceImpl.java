@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -16,6 +17,7 @@ import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -45,16 +47,19 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private CsqUserPaymentDao csqUserPaymentDao;
 	@Autowired
 	private CsqOrderDao csqOrderDao;
+	@Value("${page.person}")
+	private String PERSON_PAGE;
 
 	@Override
 	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option) {
 		List<TCsqUserPaymentRecord> records;
-		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+//		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		if (option == null) {
-			records = csqPaymentDao.selectByUserIdDesc(userId);
+			records = csqPaymentDao.selectByUserIdDescPage(userId, pageNum, pageSize);
 		} else {
-			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
+			records = csqPaymentDao.selectByUserIdAndInOrOutDescPage(pageNum, pageSize, userId, option);
 		}
+		long total = IdUtil.getTotal();
 
 		List<CsqUserPaymentRecordVo> collect = records.stream()
 			.map(a -> {
@@ -64,7 +69,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(collect);
-		queryResult.setTotalCount(page.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -78,19 +83,20 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option) {
-		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+//		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqUserPaymentRecord> records;
 		if (option == null) {
-			records = csqPaymentDao.selectByUserIdDesc(userId);
+			records = csqPaymentDao.selectByUserIdDescPage(userId, pageNum, pageSize);
 		} else {
-			records = csqPaymentDao.selectByUserIdAndInOrOutDesc(userId, option);
+			records = csqPaymentDao.selectByUserIdAndInOrOutDescPage(pageNum, pageSize, userId, option);
 		}
+		long total = IdUtil.getTotal();
 
 		List<Map<String, Object>> mapList = getMapList(records);
 
 		QueryResult<Map<String, Object>> queryResult = new QueryResult<>();
 		queryResult.setResultList(mapList);
-		queryResult.setTotalCount(page.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -153,13 +159,26 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		if (record == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该记录已不存在!");
 		}
-		TCsqUserPaymentRecord theOtherTypeRecord = findTheOtherTypeRecord(record);
+//		TCsqUserPaymentRecord theOtherTypeRecord = findTheOtherTypeRecord(record);
 
 		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
 
-		Long entityId = theOtherTypeRecord.getEntityId();
-		Integer entityType = theOtherTypeRecord.getEntityType();
 		//获取serviceName
+		String serviceName = "";
+
+		orderId = orderId == null? record.getOrderId(): orderId;
+		TCsqOrder tCsqOrder = csqOrderDao.selectByPrimaryKey(orderId);
+		Long toId = tCsqOrder.getToId();
+		Integer toType = tCsqOrder.getToType();
+		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {
+			TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(toId);
+			serviceName = tCsqFund.getName();
+		} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == toType) {
+			TCsqService csqService = csqServiceDao.selectByPrimaryKey(toId);
+			serviceName = csqService.getName();
+		}
+		/*Long entityId = theOtherTypeRecord.getEntityId();
+		Integer entityType = theOtherTypeRecord.getEntityType();
 		String serviceName = "";
 		if (CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
 			TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
@@ -167,20 +186,37 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		} else if (CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {
 			TCsqService csqService = csqServiceDao.selectByPrimaryKey(entityId);
 			serviceName = csqService == null ? null : csqService.getName() + "项目";
-		}
+		}*/
 
 		//获取name
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		Double money = record.getMoney();
 		map.put("serviceName", serviceName);
 		map.put("name", csqUser.getName());
-		map.put("money", record.getMoney());
-		map.put("countMoney", NumberUtil.keep2Places(accountMoney));
-		// TODO: 2019-06-20  二维码生成
+		map.put("money", money);
+		accountMoney = NumberUtil.keep2Places(accountMoney);
+		map.put("countMoney", accountMoney);
 		//page
-		String page = "/index/fxxk";
-		map.put("code", wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE));
+		String page = PERSON_PAGE;
+		String qrCode = wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);
+		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	//TODO 写死的二维码地址
+		map.put("code", qrCode);
 		map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
-		map.put("date", DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd"));
+		String date = DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd HH:mm");
+		List<String> list1 = Arrays.asList(date.split(" "));
+		String ymd = list1.get(0);
+		List<String> ymdList = Arrays.asList(ymd.split("-"));
+		String year = ymdList.get(0);
+		String month = ymdList.get(1);
+		String day = ymdList.get(2);
+		String hm = list1.get(1);
+		List<String> hmList = Arrays.asList(hm.split(":"));
+		String hour = hmList.get(0);
+		String minute = hmList.get(1);
+		map.put("date", date);
+		String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+			"特发此证，以资感谢！";
+		map.put("description", description);
 		return map;
 	}
 

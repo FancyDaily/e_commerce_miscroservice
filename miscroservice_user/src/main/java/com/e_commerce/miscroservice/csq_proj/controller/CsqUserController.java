@@ -621,17 +621,17 @@ public class CsqUserController {
 
 	/**
 	 * 邀请回馈
-	 * @param scene 场景值
+	 * @param sceneKey 场景值
 	 * @return
 	 */
 	@RequestMapping("payInviter")
 	@UrlAuth
-	public Object payInviter(String scene) {
+	public Object payInviter(String sceneKey) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = UserUtil.getTestId();
 		try {
-			log.info("邀请回馈, userId={}, scene={}", userIds, scene);
-			csqUserService.payInviter(userIds, scene);
+			log.info("邀请回馈, userId={}, scene={}", userIds, sceneKey);
+			csqUserService.payInviter(userIds, sceneKey);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "邀请回馈", e.getMessage());
@@ -647,6 +647,30 @@ public class CsqUserController {
 
 	/**
 	 * 邀请人信息
+	 * {
+	 *     "id": 2114,
+	 *     "weiboAccount": "",
+	 *     "wechatPubAccount": "",
+	 *     "csqUserAuth": "",
+	 *     "existDayCnt": "",
+	 *     "balanceStatus": 1,
+	 *     "gotFund": false,
+	 *     "gotCompanyAccount": false,
+	 *     "accountType": 1,
+	 *     "totalDonate": "",
+	 *     "minutesAgo": "",
+	 *     "userAccount": "",
+	 *     "name": "用户19604367",	昵称
+	 *     "userTel": "",
+	 *     "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png", 头像
+	 *     "sex": 0,
+	 *     "remarks": "",
+	 *     "contactPerson": "",
+	 *     "contactNo": "",
+	 *     "trendPubKeys": "",
+	 *     "authStatus": 0
+	 *   }
+	 *
 	 * @return
 	 */
 	@RequestMapping("inviter/infos")
@@ -673,7 +697,7 @@ public class CsqUserController {
 
 	/**
 	 * 获取场景值
-	 * @param sceneKey
+	 * @param sceneKey 场景值
 	 * @return
 	 */
 	@RequestMapping("scene/values")

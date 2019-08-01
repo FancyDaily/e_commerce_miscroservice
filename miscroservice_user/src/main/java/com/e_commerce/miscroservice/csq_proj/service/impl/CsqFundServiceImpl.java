@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.service.*;
@@ -335,14 +336,38 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return new QueryResult();
 		}
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		//根据订单复写fund类型的toId
+		List<Long> fundIds = tCsqOrders.stream()
+			.filter(a -> CsqEntityTypeEnum.TYPE_FUND.toCode() == a.getToType())    //基金类型
+			.map(TCsqOrder::getToId).distinct().collect(Collectors.toList());
+
+		List<TCsqService> csqServices = fundIds.isEmpty()? new ArrayList(): csqServiceDao.selectInFundIds(fundIds);
+		Map<Long, List<TCsqService>> fundIdServiceMap = csqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getFundId));
+		tCsqOrders = tCsqOrders.stream()
+			.map(a -> {
+				Integer toType = a.getToType();
+				if (CsqEntityTypeEnum.TYPE_FUND.toCode() == a.getToType()) {    //基金类型
+					//将基金对应的serviceId映射的到原有的toId上
+					List<TCsqService> tCsqServices = fundIdServiceMap.get(a.getToId());
+					if (tCsqServices != null) {
+						TCsqService csqService = tCsqServices.get(0);
+						a.setToId(csqService.getId());
+					}
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
+
 		Long total = 0L;
+		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIdsPage(csqServiceIds, pageNum, pageSize);
 		if(pageNum != null && pageSize != null) {
-			Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-			total = startPage.getTotal();
+//			Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+//			total = startPage.getTotal();
+			total = IdUtil.getTotal();
 		}
-		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(csqServiceIds);
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 		List<TCsqOrder> resultList = tCsqOrders.stream()
@@ -399,8 +424,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 	public QueryResult<CsqFundVo> list(Long userId, Integer pageNum, Integer pageSize, Integer[] option) {
 		pageNum = pageNum==null? 1:pageNum;
 		pageSize = pageSize==null? 0:pageSize;
-		Page<Object> startPage = startPage(pageNum, pageSize);
-		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDesc(userId, option);
+//		Page<Object> startPage = startPage(pageNum, pageSize);
+		List<TCsqFund> tCsqFunds = fundDao.selectByUserIdInStatusDescPage(userId, option, pageNum, pageSize);
+		long total = IdUtil.getTotal();
 		List<CsqFundVo> copyList = tCsqFunds.stream()
 			.map(a -> {
 				Integer status = a.getStatus();
@@ -412,7 +438,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 			}).collect(Collectors.toList());
 		QueryResult<CsqFundVo> tCsqFundQueryResult = new QueryResult<>();
 		tCsqFundQueryResult.setResultList(copyList);
-		tCsqFundQueryResult.setTotalCount(startPage.getTotal());
+		tCsqFundQueryResult.setTotalCount(total);
 		return tCsqFundQueryResult;
 	}
 

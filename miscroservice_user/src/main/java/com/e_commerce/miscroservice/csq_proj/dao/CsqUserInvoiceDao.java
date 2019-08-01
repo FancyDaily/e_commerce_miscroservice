@@ -17,4 +17,6 @@ public interface CsqUserInvoiceDao {
 	TCsqUserInvoice selectByPrimaryKey(Long invoiceId);
 
 	List<TCsqUserInvoice> selectByUserIdDesc(Long userId);
+
+	List<TCsqUserInvoice> selectByUserIdDescPage(Long userId, Integer pageNum, Integer pageSize);
 }

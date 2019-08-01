@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserPaymentDao;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import org.springframework.stereotype.Component;
 
@@ -50,12 +50,7 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDesc(Long entityId, int entityType, int inOut) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
-			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
-			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
-			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
-			.eq(TCsqUserPaymentRecord::getInOrOut, inOut)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), byEntityIdAndEntityTypeAndInOutDescBuild(entityId, entityType, inOut));
 	}
 
 	@Override
@@ -76,11 +71,41 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDesc(List<Long> orderIds, int toCode) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), inOrderIdsAndInOutDescBuild(orderIds, toCode)
+			);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDescPage(Long entityId, int entityType, int inOut) {
+		MybatisPlusBuild mybatisPlusBuild = byEntityIdAndEntityTypeAndInOutDescBuild(entityId, entityType, inOut);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDescPage(Integer pageNum, Integer pageSize, List<Long> orderIds, int toCode) {
+		MybatisPlusBuild mybatisPlusBuild = inOrderIdsAndInOutDescBuild(orderIds, toCode);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize)
+		);
+	}
+
+	private MybatisPlusBuild inOrderIdsAndInOutDescBuild(List<Long> orderIds, int toCode) {
+		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
 			.in(TCsqUserPaymentRecord::getOrderId, orderIds)
 			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
-			);
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+	}
+
+	private MybatisPlusBuild byEntityIdAndEntityTypeAndInOutDescBuild(Long entityId, int entityType, int inOut) {
+		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUserPaymentRecord::getEntityId, entityId)
+			.eq(TCsqUserPaymentRecord::getEntityType, entityType)
+			.eq(TCsqUserPaymentRecord::getInOrOut, inOut)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
 	}
 }

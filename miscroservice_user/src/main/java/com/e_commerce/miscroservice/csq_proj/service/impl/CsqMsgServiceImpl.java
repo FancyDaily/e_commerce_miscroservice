@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
@@ -48,13 +49,14 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	private QueryResult<CsqSysMsgVo> list(Long userId, Integer pageNum, Integer pageSize, boolean isUnread) {
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqSysMsg> tCsqSysMsgs;
 		if (isUnread) {
-			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsReadDesc(userId, CsqSysMsgEnum.IS_READ_FALSE.getCode());
+			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsReadDescPage(pageNum, pageSize, userId, CsqSysMsgEnum.IS_READ_FALSE.getCode());
 		} else {
-			tCsqSysMsgs = csqMsgDao.selectByUserIdDesc(userId);
+			tCsqSysMsgs = csqMsgDao.selectByUserIdDescPage(pageNum, pageSize, userId);
 		}
+		long total = IdUtil.getTotal();
 		//如果为"收到一个项目"类型，查询项目
 		List<Long> serviceIds = tCsqSysMsgs.stream()
 			.filter(a -> CsqSysMsgEnum.TYPE_SREVICE.getCode() == a.getType())
@@ -88,7 +90,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 		QueryResult<CsqSysMsgVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(resultList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 

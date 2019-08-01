@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
@@ -128,12 +130,15 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 		Page<Object> startPage;
 		List<TCsqService> tCsqServices;
+		Long total = 0L;
 		if (OPTION_MINE.equals(option)) {
-			startPage = PageHelper.startPage(pageNum, pageSize);
-			tCsqServices = csqServiceDao.selectMine(userId);
+//			startPage = PageHelper.startPage(pageNum, pageSize);
+			tCsqServices = csqServiceDao.selectMinePage(pageNum, pageSize, userId);
+			total = IdUtil.getTotal();
 		} else if (OPTION_ALL.equals(option)) {
-			startPage = PageHelper.startPage(pageNum, pageSize);
-			tCsqServices = csqServiceDao.selectAll();
+//			startPage = PageHelper.startPage(pageNum, pageSize);
+			tCsqServices = csqServiceDao.selectAllPage(pageNum, pageSize);
+			total = IdUtil.getTotal();
 		} else if (OPTION_DONATED.equals(option)) {
 			//找到我捐助过的项目记录
 //			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
@@ -152,8 +157,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				.map(TCsqOrder::getToId)
 				.distinct()
 				.collect(Collectors.toList());
-			startPage = PageHelper.startPage(pageNum, pageSize);
-			tCsqServices = (serviceIds.isEmpty() && fundIds.isEmpty()) ? new ArrayList<>() : csqServiceDao.selectInIdsOrInFundIds(serviceIds, fundIds);
+//			startPage = PageHelper.startPage(pageNum, pageSize);
+			tCsqServices = (serviceIds.isEmpty() && fundIds.isEmpty()) ? new ArrayList<>() : csqServiceDao.selectInIdsOrInFundIdsPage(pageNum, pageSize, serviceIds, fundIds);
+			total = IdUtil.getTotal();
 			tCsqServices = tCsqServices.stream()
 				.sorted(Collections.reverseOrder(Comparator.comparing(a -> {
 					Long toId = CsqServiceEnum.TYPE_FUND.getCode() == a.getType() ? a.getFundId() : a.getId();
@@ -184,7 +190,12 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 		//获取我已捐款金额
 		List<Long> serviceIds = tCsqServices.stream()
-			.map(a -> a.getId()).collect(Collectors.toList());
+			.map(a -> {
+				if(CsqServiceEnum.TYPE_FUND.getCode() == a.getType()) {
+					return a.getFundId();
+				}
+				return a.getId();
+			}).collect(Collectors.toList());
 		List<TCsqOrder> csqOrders = userId == null? new ArrayList<>():csqOrderDao.selectByUserIdInToIdAndStatus(userId, serviceIds, STATUS_ALREADY_PAY.getCode());
 		Map<Long, List<TCsqOrder>> toIdOrderMap = csqOrders.stream()
 			.collect(Collectors.groupingBy(TCsqOrder::getToId));
@@ -192,7 +203,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<CsqServiceListVo> csqServices = tCsqServices.stream()
 			.map(a -> {
 				Integer type = a.getType();
-				if (CsqServiceEnum.TYPE_FUND.getCode() == type) {
+				boolean isFund = CsqServiceEnum.TYPE_FUND.getCode() == type;
+				if (isFund) {
 					Long fundId = a.getFundId();
 					List<TCsqFund> tCsqFunds = fundMap.get(fundId);
 					if (tCsqFunds != null) {
@@ -202,7 +214,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 					}
 				}
 				Long serviceId = a.getId();
-				List<TCsqOrder> tCsqOrders = toIdOrderMap.get(serviceId);
+				List<TCsqOrder> tCsqOrders = toIdOrderMap.get(isFund?a.getFundId():serviceId);
 				Double reduce = 0d;
 				if (tCsqOrders != null) {
 					reduce = tCsqOrders.stream()
@@ -211,7 +223,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				}
 
 				a.setSumTotalPayMine(NumberUtil.keep2Places(reduce));//已筹集
-				double doubleVal = a.getExpectedAmount() == 0 ? 0 : a.getSumTotalIn() / a.getExpectedAmount();
+				double doubleVal = a.getExpectedAmount() == 0 ? 100 : a.getSumTotalIn() / a.getExpectedAmount();
+				doubleVal = doubleVal > 100d ? 100d:doubleVal;
 				String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
 				a.setDonePercent(donePercent);
 				a.setDonaterCnt(a.getTotalInCnt());
@@ -224,7 +237,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				return a.copyCsqServiceListVo();
 			})
 			.collect(Collectors.toList());
-		result.setTotalCount(startPage.getTotal());
+		result.setTotalCount(total);
 		result.setResultList(csqServices);
 		return result;
 	}
@@ -371,8 +384,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	public QueryResult<CsqUserPaymentRecordVo> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum == null ? 1 : pageNum;
 		pageSize = pageSize == null ? 0 : pageSize;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode());
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDescPage(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode());
+		long total = IdUtil.getTotal();
 		/*Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
 		List<TCsqUserPaymentRecord> userPaymentRecords = tCsqUserPaymentRecords.stream()
 			.map(a -> {
@@ -391,7 +405,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
 //		queryResult.setResultList(userPaymentRecords);
 		queryResult.setResultList(copyList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -520,8 +534,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Override
 	public QueryResult<CsqServiceReportVo> reportList(Long serviceId, Integer pageNum, Integer pageSize) {
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDesc(serviceId);
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqServiceReport> csqServiceReports = csqUserServiceReportDao.selectByServiceIdDescPage(pageNum, pageSize, serviceId);
+		long total = IdUtil.getTotal();
 		List<CsqServiceReportVo> voList = csqServiceReports.stream()
 			.map(a -> {
 				CsqServiceReportVo csqServiceReportVo = a.copyCsqServiceReportVo();
@@ -530,7 +545,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			}).collect(Collectors.toList());
 		QueryResult<CsqServiceReportVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(voList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -544,8 +559,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		Long entityId = isFund? csqService.getFundId(): serviceId;
 		List<Long> orderIds = csqPaymentService.getPaymentRelatedOrderIds(entityId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode());
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		tCsqUserPaymentRecords = orderIds.isEmpty() ? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOutDesc(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		tCsqUserPaymentRecords = orderIds.isEmpty() ? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOutDescPage(pageNum, pageSize, orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());
+		long total = IdUtil.getTotal();
 		//构建匿名捐入map
 		HashMap<Long, Boolean> isAnonymousOrderMap = getIsAnonymousOrderMap(orderIds);
 
@@ -576,7 +592,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 		QueryResult result = new QueryResult();
 		result.setResultList(resultList);
-		result.setTotalCount(startPage.getTotal());
+		result.setTotalCount(total);
 		return result;
 	}
 

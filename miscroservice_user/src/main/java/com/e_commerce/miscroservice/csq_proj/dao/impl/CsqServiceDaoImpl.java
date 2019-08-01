@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
@@ -46,9 +47,13 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectInIds(List<Long> csqServiceIds) {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+		return MybatisPlus.getInstance().findAll(new TCsqService(), inIdsBuild(csqServiceIds));
+	}
+
+	private MybatisPlusBuild inIdsBuild(List<Long> csqServiceIds) {
+		return new MybatisPlusBuild(TCsqService.class)
 			.in(TCsqService::getId, csqServiceIds)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES));
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
 	@Override
@@ -58,34 +63,12 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public List<TCsqService> selectAll() {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
-			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
-			.and()
-			.groupBefore()
-			.groupBefore()
-			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
-			.groupAfter()
-			.or()
-			.groupBefore()
-			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())	//若为基金唯一对应项目
-			.eq(TCsqService::getFundStatus, CsqFundEnum.STATUS_PUBLIC.getVal())	//已公开的基金对应的项目
-			.groupAfter()
-			.groupAfter()
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),	//按发布时间倒序
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),	//按类型倒序(把项目排在上边
-				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount)	//按还需筹多少金额正序
-			));
+		return MybatisPlus.getInstance().findAll(new TCsqService(), allBuild());
 	}
 
 	@Override
 	public List<TCsqService> selectMine(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getUserId, userId)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),	//按发布时间倒序
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),	//按类型倒序(把项目排在上边
-				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount)	//按还需筹多少金额正序
-			));
+		return MybatisPlus.getInstance().findAll(new TCsqService(), minePageBuild(userId));
 	}
 
 	@Override
@@ -176,6 +159,105 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		mybatisPlusBuild = mybatisPlusBuild.groupAfter();
 
 		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild);
+	}
+
+	@Override
+	public List<TCsqService> selectInFundIds(List<Long> fundIds) {
+		MybatisPlusBuild build = baseBuild()
+			.in(TCsqService::getFundId, fundIds);
+		/*IdUtil.setTotal(build);
+		build.page(pageNum, pageSize);*/
+		return MybatisPlus.getInstance().findAll(new TCsqService(), build);
+	}
+
+	@Override
+	public List<TCsqService> selectInIdsPage(List<Long> csqServiceIds, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = inIdsBuild(csqServiceIds);
+		IdUtil.setTotal(mybatisPlusBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqService> selectMinePage(Integer pageNum, Integer pageSize, Long userId) {
+		MybatisPlusBuild mybatisPlusBuild = minePageBuild(userId);
+		IdUtil.setTotal(minePageBuild(userId));
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqService> selectAllPage(Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = allBuild();
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqService> selectInIdsOrInFundIdsPage(Integer pageNum, Integer pageSize, List<Long> serviceIds, List<Long> fundIds) {
+		boolean isServiceListEmpty = serviceIds.isEmpty();
+		boolean isFundListEmpty = fundIds.isEmpty();
+
+		if(isServiceListEmpty && isFundListEmpty) {
+			return new ArrayList<>();
+		}
+		MybatisPlusBuild mybatisPlusBuild = inIdsOrInFundIdsBuild(serviceIds, fundIds, isServiceListEmpty, isFundListEmpty);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
+		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.and()
+			.groupBefore();
+
+		if(!isServiceListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild
+				.in(TCsqService::getId, serviceIds);
+		}
+
+		if(!isServiceListEmpty && !isFundListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild.or();
+		}
+
+		if(!isFundListEmpty) {
+			mybatisPlusBuild = mybatisPlusBuild
+				.in(TCsqService::getFundId, fundIds);
+		}
+		mybatisPlusBuild = mybatisPlusBuild.groupAfter();
+		return mybatisPlusBuild;
+	}
+
+	private MybatisPlusBuild allBuild() {
+		return baseBuild()
+			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
+			.and()
+			.groupBefore()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
+			.groupAfter()
+			.or()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())    //若为基金唯一对应项目
+			.eq(TCsqService::getFundStatus, CsqFundEnum.STATUS_PUBLIC.getVal())    //已公开的基金对应的项目
+			.groupAfter()
+			.groupAfter()
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),    //按发布时间倒序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),    //按类型倒序(把项目排在上边
+				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount)    //按还需筹多少金额正序
+			);
+	}
+
+	private MybatisPlusBuild minePageBuild(Long userId) {
+		return new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getUserId, userId)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),    //按发布时间倒序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),    //按类型倒序(把项目排在上边
+				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount)    //按还需筹多少金额正序
+			);
 	}
 
 }

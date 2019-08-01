@@ -33,4 +33,13 @@ public interface CsqCollectionDao {
 	 * @return
 	 */
 	List<TCsqUserCollection> findAll( Long userId);
+
+	/**
+	 * 收藏列表page
+	 * @param valueOf
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	List<TCsqUserCollection> findAllPage(Long valueOf, Integer pageNum, Integer pageSize);
 }

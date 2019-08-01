@@ -499,7 +499,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 				String fundName = csqFund.getName();
 				vo = csqFund.copyCsqShareVo();
 				vo.setTitle("我创建了一个" + fundName + "专项基金");
-				vo.setCurrentAmont(csqFund.getSumTotalIn());
+				Double sumTotalIn = csqFund.getSumTotalIn();
+				sumTotalIn = NumberUtil.keep2Places(sumTotalIn);
+				vo.setCurrentAmont(sumTotalIn);
 				vo.setExpectedAmount(CsqFundEnum.PUBLIC_MINIMUM);
 				Integer status = csqFund.getStatus();
 				if (CsqFundEnum.STATUS_PUBLIC.getVal() != status) {    //未公开
@@ -558,7 +560,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 					.coverPic(coverPic)
 					.name(name)
 					.build();
-				vo.setCurrentAmont(csqService.getSumTotalIn());
+				vo.setCurrentAmont(NumberUtil.keep2Places(csqService.getSumTotalIn()));
 				uploadEnum = UploadPathEnum.innerEnum.CSQ_SERVICE;
 				builder = builder.serviceId(csqService.getId())
 						.type(CsqSceneEnum.TYPE_SERVICE.getCode());
@@ -569,15 +571,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
 		Long sceneKey = null;
 		if(tCsqKeyValue == null) {
-			TCsqKeyValue build = TCsqKeyValue.builder()
+			tCsqKeyValue = TCsqKeyValue.builder()
 				.mainKey(userId)
 				.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
 				.theValue(scene).build();
-			csqKeyValueDao.save(build);
-			sceneKey = build.getId();
+			csqKeyValueDao.save(tCsqKeyValue);
 		}
+		sceneKey = tCsqKeyValue.getId();
 
-		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
+		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);	//TODO 写死的二维码地址
+		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;
@@ -585,13 +588,14 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	public static void main(String[] args) {
 		CsqSceneVo build = CsqSceneVo.builder()
-			.userId(1234L)
+			.userId(2148L)
 			.type(CsqSceneEnum.TYPE_FUND.getCode())
-			.serviceId(1234L)
-			.fundId(1234L)
+//			.serviceId(1234L)
+			.fundId(267L)
 			.build();
 		String string = JSONObject.toJSONString(build);
 		System.out.println(string.length());
+		System.out.println(string);
 	}
 
 	@Override
@@ -886,9 +890,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public CsqBasicUserVo inviterInfo(Long userIds) {
 		//找寻唯一邀请人
 		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByValueAndType(userIds, CsqKeyValueEnum.TYPE_INVITE.getCode());
-		Long inviterId = tCsqKeyValue.getMainKey();
+		Long inviterId;
 		TCsqUser inviter;
-		if(inviterId == null || (inviter = csqUserDao.selectByPrimaryKey(inviterId)) == null) {
+		if(tCsqKeyValue == null || (inviterId=tCsqKeyValue.getMainKey()) == null || (inviter = csqUserDao.selectByPrimaryKey(inviterId)) == null) {
 			//若没有邀请人，返回默认头像和默认昵称小善
 			return TCsqUser.builder()
 				.userHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH)

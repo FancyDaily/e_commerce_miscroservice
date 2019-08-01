@@ -23,4 +23,8 @@ public interface CsqMsgDao {
 	List<TCsqSysMsg> selectByUserIdAndIsReadDesc(Long userId, int code);
 
 	List<TCsqSysMsg> selectByUserIdDesc(Long userId);
+
+	List<TCsqSysMsg> selectByUserIdAndIsReadDescPage(Integer pageNum, Integer pageSize, Long userId, int code);
+
+	List<TCsqSysMsg> selectByUserIdDescPage(Integer pageNum, Integer pageSize, Long userId);
 }

@@ -23,4 +23,8 @@ public interface CsqUserPaymentDao {
 	List<TCsqUserPaymentRecord> selectByUserIdAndInOrOut(Long userId, int toCode);
 
 	List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDesc(List<Long> orderIds, int toCode);
+
+	List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDescPage(Long serviceId, int toCode, int toCode1);
+
+	List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDescPage(Integer pageNum, Integer pageSize, List<Long> orderIds, int toCode);
 }
