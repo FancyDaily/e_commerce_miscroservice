@@ -49,5 +49,7 @@ public interface CsqPaymentService {
 
 	List<Long> getPaymentRelatedOrderIds(Long entityId);
 
+	List<Long> getPaymentRelatedOrderIds(Long entityId, Integer entityType);
+
 	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
 }

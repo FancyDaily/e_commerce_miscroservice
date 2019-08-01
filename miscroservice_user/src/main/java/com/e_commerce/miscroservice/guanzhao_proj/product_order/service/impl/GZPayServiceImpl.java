@@ -182,7 +182,7 @@ public class GZPayServiceImpl implements GZPayService {
         data.put("total_fee", String.valueOf(minMon.intValue()));
         data.put("spbill_create_ip", spbill_create_ip);
         //异步通知地址（请注意必须是外网）
-        data.put("notify_url", "https://test.xiaoshitimebank.com/user/pay/wx/native/notify");
+        data.put("notify_url", "https://getScene.xiaoshitimebank.com/user/pay/wx/native/notify");
 
 //        data.put("trade_type", "APP");
         data.put("trade_type", "NATIVE");

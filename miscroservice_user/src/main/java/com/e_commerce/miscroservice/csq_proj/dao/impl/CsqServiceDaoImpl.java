@@ -153,25 +153,25 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
 			.and()
 			.groupBefore();
-		boolean isServiceListEmpty = false;
-		boolean isFundListEmpty = false;
+		boolean isServiceListEmpty = serviceIds.isEmpty();
+		boolean isFundListEmpty = fundIds.isEmpty();
 
-		if(!isServiceListEmpty && !isFundListEmpty) {
+		if(isServiceListEmpty && isFundListEmpty) {
 			return new ArrayList<>();
 		}
 
-		if(isServiceListEmpty) {
+		if(!isServiceListEmpty) {
 			mybatisPlusBuild = mybatisPlusBuild
-				.in(TCsqService::getId, 1);
+				.in(TCsqService::getId, serviceIds);
 		}
 
-		if(isServiceListEmpty && isFundListEmpty) {
+		if(!isServiceListEmpty && !isFundListEmpty) {
 			mybatisPlusBuild = mybatisPlusBuild.or();
 		}
 
-		if(isFundListEmpty) {
+		if(!isFundListEmpty) {
 			mybatisPlusBuild = mybatisPlusBuild
-				.in(TCsqService::getFundId, 2);
+				.in(TCsqService::getFundId, fundIds);
 		}
 		mybatisPlusBuild = mybatisPlusBuild.groupAfter();
 

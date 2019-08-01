@@ -137,7 +137,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		} else if (OPTION_DONATED.equals(option)) {
 			//找到我捐助过的项目记录
 //			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
-			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdDesc(userId);
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdInToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode());
+			//构建时间map用于排序
+			Map<Long, List<TCsqOrder>> toIdOrderMap = tCsqOrders.stream()
+				.collect(Collectors.groupingBy(TCsqOrder::getToId));
 			//处理（去重等
 			List<Long> serviceIds = tCsqOrders.stream()
 				.filter(a -> CsqEntityTypeEnum.TYPE_SERVICE.toCode() == a.getToType())
@@ -151,6 +154,17 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				.collect(Collectors.toList());
 			startPage = PageHelper.startPage(pageNum, pageSize);
 			tCsqServices = (serviceIds.isEmpty() && fundIds.isEmpty()) ? new ArrayList<>() : csqServiceDao.selectInIdsOrInFundIds(serviceIds, fundIds);
+			tCsqServices = tCsqServices.stream()
+				.sorted(Collections.reverseOrder(Comparator.comparing(a -> {
+					Long toId = CsqServiceEnum.TYPE_FUND.getCode() == a.getType() ? a.getFundId() : a.getId();
+					List<TCsqOrder> csqOrders = toIdOrderMap.get(toId);
+					Long time = 0L;
+					if (csqOrders != null) {
+						TCsqOrder tCsqOrder = csqOrders.get(0);
+						time = tCsqOrder.getCreateTime().getTime();
+					}
+					return time;
+				}))).collect(Collectors.toList());
 		} else {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数option不正确!");
 		}
@@ -526,9 +540,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		pageSize = pageSize == null ? 0 : pageSize;
 		//类型推断
 		TCsqService csqService = csqServiceDao.selectByPrimaryKey(serviceId);
-		boolean isFund = CsqEntityTypeEnum.TYPE_FUND.toCode() == csqService.getType();
+		boolean isFund = CsqServiceEnum.TYPE_FUND.getCode() == csqService.getType();
 		Long entityId = isFund? csqService.getFundId(): serviceId;
-		List<Long> orderIds = csqPaymentService.getPaymentRelatedOrderIds(entityId);
+		List<Long> orderIds = csqPaymentService.getPaymentRelatedOrderIds(entityId, isFund? CsqEntityTypeEnum.TYPE_FUND.toCode(): CsqEntityTypeEnum.TYPE_SERVICE.toCode());
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords;
 		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		tCsqUserPaymentRecords = orderIds.isEmpty() ? new ArrayList<>() : paymentDao.selectInOrderIdsAndInOutDesc(orderIds, CsqUserPaymentEnum.INOUT_OUT.toCode());

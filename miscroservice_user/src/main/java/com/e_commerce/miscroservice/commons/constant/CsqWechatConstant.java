@@ -43,7 +43,7 @@ public class CsqWechatConstant {
 	/**
 	 * 微信服务器回调通知url
 	 */
-	public static String NOTIFY_URL = "https://test.xiaoshitimebank.com/user/csq/pay/wxNotify/pay";
+	public static String NOTIFY_URL = "https://getScene.xiaoshitimebank.com/user/csq/pay/wxNotify/pay";
 
 	/**
 	 * 退款回调通知url

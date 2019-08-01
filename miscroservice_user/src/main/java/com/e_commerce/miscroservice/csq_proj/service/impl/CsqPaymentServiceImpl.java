@@ -298,7 +298,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public List<Long> getPaymentRelatedOrderIds(Long entityId) {
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(entityId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
+		return getPaymentRelatedOrderIds(entityId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
+	}
+
+	@Override
+	public List<Long> getPaymentRelatedOrderIds(Long entityId, Integer entityType) {
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDesc(entityId, entityType, CsqUserPaymentEnum.INOUT_IN.toCode());    //TODO 分页
 		return tCsqUserPaymentRecords.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.distinct().collect(Collectors.toList());

@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSceneVo;
 import com.e_commerce.miscroservice.user.dao.UserDao;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
@@ -620,9 +621,11 @@ public class CsqUserController {
 
 	/**
 	 * 邀请回馈
+	 * @param scene 场景值
 	 * @return
 	 */
 	@RequestMapping("payInviter")
+	@UrlAuth
 	public Object payInviter(String scene) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = UserUtil.getTestId();
@@ -637,6 +640,59 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("邀请回馈", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 邀请人信息
+	 * @return
+	 */
+	@RequestMapping("inviter/infos")
+	@UrlAuth
+	public Object inviterInfos() {
+		AjaxResult result = new AjaxResult();
+		Long userIds = UserUtil.getTestId();
+		try {
+			log.info("邀请人信息, userId={}, scene={}", userIds);
+			CsqBasicUserVo csqBasicUserVo = csqUserService.inviterInfo(userIds);
+			result.setData(csqBasicUserVo);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "邀请人信息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("邀请人信息", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 获取场景值
+	 * @param sceneKey
+	 * @return
+	 */
+	@RequestMapping("scene/values")
+	@UrlAuth(withoutPermission = true)
+	public Object scene(String sceneKey) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = UserUtil.getTestId();
+		try {
+			log.info("获取场景值, userId={}, scene={}", userIds);
+			CsqSceneVo scene = csqUserService.getScene(sceneKey);
+			result.setData(scene);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "获取场景值", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("获取场景值", e);
 			result.setSuccess(false);
 		}
 		return result;

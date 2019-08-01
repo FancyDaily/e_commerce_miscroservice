@@ -50,4 +50,25 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 			.eq(TCsqKeyValue::getTheValue, toString)
 		);
 	}
+
+	@Override
+	public TCsqKeyValue selectByValueAndType(Long userIds, int code) {
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+			.eq(TCsqKeyValue::getTheValue, userIds)
+			.eq(TCsqKeyValue::getType, code));
+	}
+
+	@Override
+	public TCsqKeyValue selectByPrimaryKey(String sceneKey) {
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+			.eq(TCsqKeyValue::getId, sceneKey));
+	}
+
+	@Override
+	public TCsqKeyValue selectByKeyAndTypeAndTheValue(Long userId, int code, String scene) {
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+			.eq(TCsqKeyValue::getMainKey, userId)
+			.eq(TCsqKeyValue::getType, code)
+			.eq(TCsqKeyValue::getTheValue, scene));
+	}
 }

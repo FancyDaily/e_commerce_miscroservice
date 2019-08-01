@@ -97,7 +97,7 @@ public class TestDo {
             if (!ApplicationContextUtil.isDevEnviron()) { // 表示当前运行环境为调试
                 isPushSuccess = fileUrlManagers.push(fileName);
             } else {    //当前环境为生产
-                String url = "https://test.xiaoshitimebank.com/user/push/pre";
+                String url = "https://getScene.xiaoshitimebank.com/user/push/pre";
                 Map<String, Object> params = new HashMap<>();
                 params.put("fileName", fileName);
                 JSONObject jsonObject = HttpsUtils.doGet(url, params);
@@ -127,7 +127,7 @@ public class TestDo {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String url = "https://test.xiaoshitimebank.com/user/push/pre";
+        String url = "https://getScene.xiaoshitimebank.com/user/push/pre";
         Map<String, Object> params = new HashMap<>();
         params.put("fileName", fileName);
         JSONObject jsonObject = HttpsUtils.doGet(url, params);

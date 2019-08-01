@@ -135,12 +135,12 @@ public class Test {
 	}
 
    /* public static void main(String[] args) {
-        *//*Test test = new Test();
-        InnerClazz newInnerClazz = test.getNewInnerClazz();
+        *//*Test getScene = new Test();
+        InnerClazz newInnerClazz = getScene.getNewInnerClazz();
         Map<String, Object> cache = InnerStaticClazz.cache;
         String myKey = "DonaldTrumpIsADick";
         cache.put(myKey, true);
-        test = new Test();
+        getScene = new Test();
         cache = InnerStaticClazz.cache;
         Object o = cache.get(myKey);
         System.out.println(o);*//*

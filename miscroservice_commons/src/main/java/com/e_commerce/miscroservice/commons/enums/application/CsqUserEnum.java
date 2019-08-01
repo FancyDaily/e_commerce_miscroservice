@@ -30,6 +30,10 @@ public enum CsqUserEnum {
 	 * 匿名者名字
 	 */
 	public static final String DEFAULT_ANONYMOUS_NAME = "匿名捐款者";
+	/**
+	 * 默认邀请人名称
+	 */
+	public static final String DEFAULT_INVITER_NAME = "小善";
 
 	Integer code;
 	String desc;

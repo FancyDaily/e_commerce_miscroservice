@@ -17,4 +17,10 @@ public interface CsqKeyValueDao {
 	int save(TCsqKeyValue... build);
 
 	TCsqKeyValue selectByKeyAndTypeAndValue(Long userId, int code, String toString);
+
+	TCsqKeyValue selectByValueAndType(Long userIds, int code);
+
+	TCsqKeyValue selectByPrimaryKey(String sceneKey);
+
+	TCsqKeyValue selectByKeyAndTypeAndTheValue(Long userId, int code, String scene);
 }

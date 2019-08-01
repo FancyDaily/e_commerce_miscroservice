@@ -5,7 +5,7 @@ limter.flow.enabled: false
 #文件加载的环境配置
 spring:
   profiles:
-    active: test
+    active: getScene
   application:
     name: user
 

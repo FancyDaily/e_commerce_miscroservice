@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqSceneVo;
 
 import java.util.List;
 import java.util.Map;
@@ -184,4 +185,18 @@ public interface CsqUserService {
 	 * @param userAuth
 	 */
 	void corpSubmit(Long userId, TCsqUserAuth userAuth);
+
+	/**
+	 * 邀请人信息
+	 * @param userIds
+	 * @return
+	 */
+	CsqBasicUserVo inviterInfo(Long userIds);
+
+	/**
+	 * 根据key获取scene值
+	 * @param sceneKey
+	 * @return
+	 */
+	CsqSceneVo getScene(String sceneKey);
 }

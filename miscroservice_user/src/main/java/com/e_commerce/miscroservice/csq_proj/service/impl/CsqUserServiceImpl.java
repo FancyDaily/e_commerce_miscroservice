@@ -564,11 +564,34 @@ public class CsqUserServiceImpl implements CsqUserService {
 						.type(CsqSceneEnum.TYPE_SERVICE.getCode());
 				break;
 		}
+		//复用记录
 		String scene = JSONObject.toJSONString(builder.build());
-		String qrCode = wechatService.genQRCode(scene, page, uploadEnum);
+		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
+		Long sceneKey = null;
+		if(tCsqKeyValue == null) {
+			TCsqKeyValue build = TCsqKeyValue.builder()
+				.mainKey(userId)
+				.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
+				.theValue(scene).build();
+			csqKeyValueDao.save(build);
+			sceneKey = build.getId();
+		}
+
+		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;
+	}
+
+	public static void main(String[] args) {
+		CsqSceneVo build = CsqSceneVo.builder()
+			.userId(1234L)
+			.type(CsqSceneEnum.TYPE_FUND.getCode())
+			.serviceId(1234L)
+			.fundId(1234L)
+			.build();
+		String string = JSONObject.toJSONString(build);
+		System.out.println(string.length());
 	}
 
 	@Override
@@ -828,11 +851,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void payInviter(Long beInviterId, String scene) {
-		//处理 scene
-		CsqSceneVo csqSceneVo = JSONObject.parseObject(scene, CsqSceneVo.class);
-		Long inviterId = csqSceneVo.getUserId();
-//		Long inviterId = Long.valueOf(scene);    //邀请人
+	public void payInviter(Long beInviterId, String sceneKey) {
+		//处理 sceneKey
+		TCsqKeyValue keyValue = csqKeyValueDao.selectByPrimaryKey(sceneKey);
+		if(keyValue == null) {	//对应scene无效
+			return;
+		}
+		Long inviterId = keyValue.getMainKey();	//邀请人
 		//建立关系
 		//防止重复插入
 		String theVal = beInviterId.toString();
@@ -855,6 +880,29 @@ public class CsqUserServiceImpl implements CsqUserService {
 		csqUserDao.updateByPrimaryKey(csqUser);
 		//check
 		insertOrUpdateUserAuth(csqUser.getUserTel(), userAuth, csqUser);
+	}
+
+	@Override
+	public CsqBasicUserVo inviterInfo(Long userIds) {
+		//找寻唯一邀请人
+		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByValueAndType(userIds, CsqKeyValueEnum.TYPE_INVITE.getCode());
+		Long inviterId = tCsqKeyValue.getMainKey();
+		TCsqUser inviter;
+		if(inviterId == null || (inviter = csqUserDao.selectByPrimaryKey(inviterId)) == null) {
+			//若没有邀请人，返回默认头像和默认昵称小善
+			return TCsqUser.builder()
+				.userHeadPortraitPath(CsqUserEnum.DEFAULT_HEADPORTRAITURE_PATH)
+				.name(CsqUserEnum.DEFAULT_INVITER_NAME)
+				.build().copyCsqBasicUserVo();
+		}
+		return inviter.copyCsqBasicUserVo();
+	}
+
+	@Override
+	public CsqSceneVo getScene(String sceneKey) {
+		TCsqKeyValue keyValue = csqKeyValueDao.selectByPrimaryKey(sceneKey);
+		String scene = keyValue.getTheValue();
+		return JSONObject.parseObject(scene, CsqSceneVo.class);
 	}
 
 	private TCsqUser getCompanyAccount(TCsqUser csqUser) {

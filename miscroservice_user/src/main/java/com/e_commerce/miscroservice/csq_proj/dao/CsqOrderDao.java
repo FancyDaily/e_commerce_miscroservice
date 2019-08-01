@@ -55,4 +55,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByUserIdAndToTypeAndToIdDesc(Long userId, int toCode, Long serviceId);
 
 	List<TCsqOrder> selectByUserIdDesc(Long userId);
+
+	List<TCsqOrder> selectByUserIdInToTypeDesc(Long userId, int toCode, int toCode1);
 }
