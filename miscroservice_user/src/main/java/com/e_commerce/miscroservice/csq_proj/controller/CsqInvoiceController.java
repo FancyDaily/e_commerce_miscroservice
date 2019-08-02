@@ -248,4 +248,30 @@ public class CsqInvoiceController {
 		return result;
 	}
 
+	/**
+	 * 发票标记为已寄出
+	 * @param invoiceId
+	 * @return
+	 */
+	@RequestMapping("express")
+	@UrlAuth(withoutPermission = true)
+	public AjaxResult express(Long invoiceId, String expressNo) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("发票标记为已寄出, userId={}, invoiceId={}, expressNo={}", userId, invoiceId, expressNo);
+			invoiceService.express(invoiceId, expressNo);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "发票标记为已寄出", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("发票标记为已寄出", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
 }

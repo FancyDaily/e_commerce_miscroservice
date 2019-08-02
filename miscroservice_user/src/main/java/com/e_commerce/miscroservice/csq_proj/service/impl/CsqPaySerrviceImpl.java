@@ -16,6 +16,8 @@ import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -777,8 +780,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		if(csqFundService.checkIsOkForPublic(fund)) {
 			//若满足 -> 提审(略) -> 开放
 			fund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
-			//插入基金创建成功消息
-			csqMsgService.insertTemplateMsg(fund.getName(), CsqSysMsgTemplateEnum.FUND_PUBLIC_SUCCESS, userId);
+			csqMsgService.sendServiceMsgForFund(fund, userId);
 		}
 		csqFundDao.update(fund);
 		Long payerId = userId;
@@ -801,6 +803,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		csqService.setStatus(CsqServiceEnum.STATUS_INITIAL.getCode());
 		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
 		csqService.setFundStatus(fund.getStatus());
+		csqService.setName(fund.getName());
+		csqService.setSurplusAmount(fund.getBalance());
 		return csqService;
 	}
 

@@ -33,6 +33,9 @@ import java.util.stream.Stream;
  */
 @Service
 public class CsqPaymentServiceImpl implements CsqPaymentService {
+
+	@Autowired
+	private CsqKeyValueDao csqKeyValueDao;
 	@Autowired
 	private CsqPaymentDao csqPaymentDao;
 	@Autowired
@@ -167,6 +170,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		String serviceName = "";
 
 		orderId = orderId == null? record.getOrderId(): orderId;
+		boolean isSpecial = false;
+		if(orderId == null) { //表明是平台插入
+			serviceName = record.getDescription();
+			isSpecial = true;
+		}
+
 		TCsqOrder tCsqOrder = csqOrderDao.selectByPrimaryKey(orderId);
 		Long toId = tCsqOrder.getToId();
 		Integer toType = tCsqOrder.getToType();
@@ -198,8 +207,15 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		map.put("countMoney", accountMoney);
 		//page
 		String page = PERSON_PAGE;
-		String qrCode = wechatService.genQRCode(String.valueOf(record.getId()), page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);
-		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	//TODO 写死的二维码地址
+		TCsqKeyValue build = TCsqKeyValue.builder()
+			.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
+			.mainKey(userId)
+			.theValue(String.valueOf(record.getId()))
+			.build();
+		csqKeyValueDao.save(build);
+		String sceneKey = build.getId().toString();
+		String qrCode = wechatService.genQRCode(sceneKey, page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);
+//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("code", qrCode);
 		map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
 		String date = DateUtil.timeStamp2Date(record.getCreateTime().getTime(), "yyyy-MM-dd HH:mm");
@@ -216,6 +232,11 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		map.put("date", date);
 		String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
 			"特发此证，以资感谢！";
+		if(isSpecial) {
+			description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+				"特发此证，以资感谢！";
+		}
+
 		map.put("description", description);
 		return map;
 	}
@@ -294,7 +315,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(), tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId());
 	}
 
-	private Map<String, Object> getBeneficiaryMap(Integer toType, Long toId) {
+	@Override
+	public Map<String, Object> getBeneficiaryMap(Integer toType, Long toId) {
 		Map<String, Object> resultMap = new HashMap<>();
 		Long resultId = null;
 		String resultName = "";

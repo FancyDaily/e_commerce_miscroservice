@@ -31,6 +31,8 @@ public class CsqInvoiceRecord {
 
 	private Integer itemType;	//项目类别
 
+	private Integer isOut;	//是否已经邮寄
+
 	public TCsqUserInvoice copyTCsqUserInvoice() {
 		return null;
 	}

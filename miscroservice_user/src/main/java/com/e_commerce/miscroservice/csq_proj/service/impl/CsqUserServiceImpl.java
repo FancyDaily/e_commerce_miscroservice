@@ -371,7 +371,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.authenticationType(CsqUserEnum.AUTHENTICATION_TYPE_ORG_OR_CORP.toCode()).build();
 		csqUserDao.updateByPrimaryKey(build);
 		//插入一条系统消息
-		csqMsgService.insertTemplateMsg(isPass? CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.CORP_CERT_FAIL, userId);
+		CsqSysMsgTemplateEnum csqSysMsgTemplateEnum = isPass ? CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.CORP_CERT_FAIL;
+		CsqServiceMsgEnum csqServiceMsgEnum = isPass ? CsqServiceMsgEnum.CORP_CERT_SUCCESS : CsqServiceMsgEnum.CORP_CERT_FAIL;
+		csqMsgService.insertTemplateMsg(csqSysMsgTemplateEnum, userId);
+		//插入服务通知
+		csqMsgService.sendServiceMsg(userId, csqServiceMsgEnum, CsqServiceMsgParamVo.builder()
+			.csqUserAuthVo(userAuth.copyCsqUserAuthVo()).build());
 	}
 
 	@Override
@@ -579,8 +584,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		sceneKey = tCsqKeyValue.getId();
 
-		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);	//TODO 写死的二维码地址
-		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";
+		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
+//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;

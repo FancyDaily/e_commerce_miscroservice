@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -11,11 +12,14 @@ import lombok.Data;
  * @Date: 2019-06-27 18:04
  */
 @Data(matchSuffix = true)
+@Builder
 public class CsqUserInvoiceVo {
 	@Id
 	private Long id;
 
 	private Long userId;
+
+	private String expressNo;	//快递单号
 
 	@Transient
 	private String dateString;

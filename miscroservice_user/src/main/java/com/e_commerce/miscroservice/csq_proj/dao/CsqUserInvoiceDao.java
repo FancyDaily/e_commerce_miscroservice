@@ -19,4 +19,6 @@ public interface CsqUserInvoiceDao {
 	List<TCsqUserInvoice> selectByUserIdDesc(Long userId);
 
 	List<TCsqUserInvoice> selectByUserIdDescPage(Long userId, Integer pageNum, Integer pageSize);
+
+	int update(TCsqUserInvoice build);
 }

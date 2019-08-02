@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * @Date: 2019-06-27 17:24
  */
 @Data(matchSuffix = true)
+@Builder
 public class CsqServiceListVo {
 	@Id
 	protected Long id;

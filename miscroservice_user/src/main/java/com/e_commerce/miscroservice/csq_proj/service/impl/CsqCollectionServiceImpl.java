@@ -117,7 +117,7 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			csqCollectionVo.setSumTotalIn(csqService.getSumTotalIn());
 			csqCollectionVo.setSurplusAmount(csqService.getSurplusAmount());
 			csqCollectionVo.setType(type);
-			csqCollectionVo.setDonateCnt(csqService.getDonaterCnt());    //人数
+			csqCollectionVo.setDonateCnt(csqService.getTotalInCnt());    //人次
 			csqCollectionVo.setDonatePercent(NumberFormat.getPercentInstance().format(csqService.getExpectedAmount() == 0 ? 0 : csqService.getSumTotalIn() / csqService.getExpectedAmount()).replaceAll("%", ""));//进度
 			list.add(csqCollectionVo);
 		});

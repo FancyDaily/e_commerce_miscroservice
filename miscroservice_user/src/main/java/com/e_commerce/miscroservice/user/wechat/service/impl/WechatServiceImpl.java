@@ -116,6 +116,7 @@ public class WechatServiceImpl implements WechatService {
 	/**
 	 * 获取token
 	 */
+	@Override
 	public String getToken(String appid, String appSecret) {
 		Map<String, Object> params = new HashMap<>();
 		params.put(WechatConst.GRANT_TYPE, "client_credential");

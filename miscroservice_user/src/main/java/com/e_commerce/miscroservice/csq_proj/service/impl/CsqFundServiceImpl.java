@@ -9,12 +9,9 @@ import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.service.*;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqFundDonateVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +31,9 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Throwable.class)
 @Service
 public class CsqFundServiceImpl implements CsqFundService {
+
+	@Autowired
+	private CsqMsgService csqMsgService;
 
 	@Autowired
 	private CsqFundDao fundDao;
@@ -63,6 +64,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 	@Autowired
 	private CsqPaymentService csqPaymentService;
+
+	@Autowired
+	private CsqFundService csqFundService;
 
 	@Override
 	public void applyForAFund(Long userId, String orderNo) {
@@ -145,6 +149,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 						.build();
 					fundDao.update(build);
 					csqFund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+					csqFund.setName(fund.getName());
+					csqMsgService.sendServiceMsgForFund(csqFund, userId);
 				}
 				csqServiceService.synchronizeService(csqFund);
 			}
