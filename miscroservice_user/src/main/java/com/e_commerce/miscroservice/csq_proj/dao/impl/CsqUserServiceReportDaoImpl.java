@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserServiceReportDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqServiceReport;
@@ -24,9 +25,21 @@ public class CsqUserServiceReportDaoImpl implements CsqUserServiceReportDao {
 
 	@Override
 	public List<TCsqServiceReport> selectByServiceIdDesc(Long serviceId) {
-		return MybatisPlus.getInstance().findAll(new TCsqServiceReport(), new MybatisPlusBuild(TCsqServiceReport.class)
+		return MybatisPlus.getInstance().findAll(new TCsqServiceReport(), byServiceIdDescBuild(serviceId));
+	}
+
+	@Override
+	public List<TCsqServiceReport> selectByServiceIdDescPage(Integer pageNum, Integer pageSize, Long serviceId) {
+		MybatisPlusBuild mybatisPlusBuild = byServiceIdDescBuild(serviceId);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqServiceReport(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	private MybatisPlusBuild byServiceIdDescBuild(Long serviceId) {
+		return new MybatisPlusBuild(TCsqServiceReport.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqServiceReport::getServiceId, serviceId)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqServiceReport::getCreateTime)));
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqServiceReport::getCreateTime));
 	}
 }

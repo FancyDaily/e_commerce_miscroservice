@@ -12,4 +12,6 @@ public interface CsqUserServiceReportDao {
 	int insert(TCsqServiceReport serviceReport);
 
 	List<TCsqServiceReport> selectByServiceIdDesc(Long serviceId);
+
+	List<TCsqServiceReport> selectByServiceIdDescPage(Integer pageNum, Integer pageSize, Long serviceId);
 }

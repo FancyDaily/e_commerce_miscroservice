@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqMsgDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
@@ -60,18 +61,42 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 
 	@Override
 	public List<TCsqSysMsg> selectByUserIdAndIsReadDesc(Long userId, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-			.eq(TCsqSysMsg::getUserId, userId)
-			.eq(TCsqSysMsg::getIsRead, code)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime)));
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), byUserIdAndIsReadDescBuild(userId, code));
 	}
 
 	@Override
 	public List<TCsqSysMsg> selectByUserIdDesc(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), new MybatisPlusBuild(TCsqSysMsg.class)
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), byUserIdDescBuild(userId));
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdAndIsReadDescPage(Integer pageNum, Integer pageSize, Long userId, int code) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdAndIsReadDescBuild(userId, code);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdDescPage(Integer pageNum, Integer pageSize, Long userId) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdDescBuild(userId);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	private MybatisPlusBuild byUserIdDescBuild(Long userId) {
+		return new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqSysMsg::getUserId, userId)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime)));
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime));
+	}
+
+	private MybatisPlusBuild byUserIdAndIsReadDescBuild(Long userId, int code) {
+		return new MybatisPlusBuild(TCsqSysMsg.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqSysMsg::getUserId, userId)
+			.eq(TCsqSysMsg::getIsRead, code)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqSysMsg::getCreateTime));
 	}
 }

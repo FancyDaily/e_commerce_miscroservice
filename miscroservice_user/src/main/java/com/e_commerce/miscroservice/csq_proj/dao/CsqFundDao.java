@@ -28,4 +28,6 @@ public interface CsqFundDao {
 	List<TCsqFund> selectByUserIdAndNotEqStatus(Long userId, Integer status);
 
 	TCsqFund selectByUserIdAndPrimaryKey(Long userId, Long fundId);
+
+	List<TCsqFund> selectByUserIdInStatusDescPage(Long userId, Integer[] option, Integer pageNum, Integer pageSize);
 }

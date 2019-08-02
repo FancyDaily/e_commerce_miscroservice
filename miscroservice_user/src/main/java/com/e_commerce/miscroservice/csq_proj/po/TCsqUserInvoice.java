@@ -58,7 +58,11 @@ public class TCsqUserInvoice extends BaseEntity {
 	@Column(commit = "联系方式")
 	private String telephone;
 
-	public CsqUserInvoiceVo copyCsqUserInvoice() {
+	@Column(commit = "快递单号")
+	private String expressNo;
+
+	public CsqUserInvoiceVo copyCsqUserInvoiceVo() {
 		return null;
 	}
+
 }

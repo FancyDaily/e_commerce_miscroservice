@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
@@ -89,6 +90,18 @@ public class CsqFunDaoImpl implements CsqFundDao {
 			.eq(TCsqFund::getUserId, userId)
 			.eq(TCsqFund::getId, fundId)
 			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqFund> selectByUserIdInStatusDescPage(Long userId, Integer[] option, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqFund::getUserId, userId);
+		mybatisPlusBuild = option.length >= 1? mybatisPlusBuild.in(TCsqFund::getStatus, option): mybatisPlusBuild;
+		mybatisPlusBuild = mybatisPlusBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime));
+
+		IdUtil.setTotal(mybatisPlusBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
 }

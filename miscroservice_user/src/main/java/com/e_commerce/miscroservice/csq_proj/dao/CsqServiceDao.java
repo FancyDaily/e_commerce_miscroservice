@@ -63,4 +63,14 @@ public interface CsqServiceDao {
 	List<TCsqService> selectLikeByPubKeysAndUserIdNeq(String a, Long userId);
 
 	List<TCsqService> selectInIdsOrInFundIds(List<Long> serviceIds, List<Long> fundIds);
+
+	List<TCsqService> selectInFundIds(List<Long> fundIds);
+
+	List<TCsqService> selectInIdsPage(List<Long> csqServiceIds, Integer pageNum, Integer pageSize);
+
+	List<TCsqService> selectMinePage(Integer pageNum, Integer pageSize, Long userId);
+
+	List<TCsqService> selectAllPage(Integer pageNum, Integer pageSize);
+
+	List<TCsqService> selectInIdsOrInFundIdsPage(Integer pageNum, Integer pageSize, List<Long> serviceIds, List<Long> fundIds);
 }

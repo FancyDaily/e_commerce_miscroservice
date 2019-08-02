@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.mapper.CsqPaymentMapper;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPaymentDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
@@ -67,9 +68,7 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserIdDesc(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
-			.eq(TCsqUserPaymentRecord::getUserId, userId)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime)));
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), byuserIdDescBuild(userId));
 	}
 
 	@Override
@@ -82,10 +81,7 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDesc(Long userId, Integer option) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild()
-			.eq(TCsqUserPaymentRecord::getUserId, userId)
-			.eq(TCsqUserPaymentRecord::getInOrOut, option)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime))
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), byUserIdAndInOrOutDescBuild(userId, option)
 		);
 	}
 
@@ -109,5 +105,35 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
 			.eq(TCsqUserPaymentRecord::getInOrOut, toCode)
 		);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdDescPage(Long userId, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = byuserIdDescBuild(userId);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDescPage(Integer pageNum, Integer pageSize, Long userId, Integer option) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdAndInOrOutDescBuild(userId, option);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize)
+		);
+	}
+
+	private MybatisPlusBuild byUserIdAndInOrOutDescBuild(Long userId, Integer option) {
+		return baseBuild()
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getInOrOut, option)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+	}
+
+	private MybatisPlusBuild byuserIdDescBuild(Long userId) {
+		return baseBuild()
+			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
 	}
 }

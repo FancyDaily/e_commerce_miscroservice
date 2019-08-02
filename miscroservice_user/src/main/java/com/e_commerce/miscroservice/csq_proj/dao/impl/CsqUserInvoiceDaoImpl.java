@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserInvoiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
@@ -37,9 +38,27 @@ public class CsqUserInvoiceDaoImpl implements CsqUserInvoiceDao {
 
 	@Override
 	public List<TCsqUserInvoice> selectByUserIdDesc(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild()
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), byUserIdDescBuild(userId));
+	}
+
+	private MybatisPlusBuild byUserIdDescBuild(Long userId) {
+		return baseBuild()
 			.eq(TCsqUserInvoice::getUserId, userId)
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserInvoice::getCreateTime)));
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserInvoice::getCreateTime));
+	}
+
+	@Override
+	public List<TCsqUserInvoice> selectByUserIdDescPage(Long userId, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdDescBuild(userId);
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public int update(TCsqUserInvoice build) {
+		return MybatisPlus.getInstance().update(build, new MybatisPlusBuild(TCsqUserInvoice.class)
+			.eq(TCsqUserInvoice::getId, build.getId()));
 	}
 
 	private MybatisPlusBuild baseBuild() {

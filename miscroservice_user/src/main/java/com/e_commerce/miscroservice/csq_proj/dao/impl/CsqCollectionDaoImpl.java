@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqCollectionDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserCollection;
 import org.springframework.stereotype.Repository;
@@ -45,12 +46,23 @@ public class CsqCollectionDaoImpl implements CsqCollectionDao {
 
 	@Override
 	public List<TCsqUserCollection> findAll(Long userId) {
-		List<TCsqUserCollection> list = MybatisPlus.getInstance().findAll(new TCsqUserCollection(), new MybatisPlusBuild(TCsqUserCollection.class)
-			.eq(TCsqUserCollection::getUserId, userId)
-			.eq(TCsqUserCollection::getIsValid, AppConstant.IS_VALID_YES)
+		List<TCsqUserCollection> list = MybatisPlus.getInstance().findAll(new TCsqUserCollection(), findAllBuild(userId)
 		);
 		return list;
 	}
 
+	private MybatisPlusBuild findAllBuild(Long userId) {
+		return new MybatisPlusBuild(TCsqUserCollection.class)
+			.eq(TCsqUserCollection::getUserId, userId)
+			.eq(TCsqUserCollection::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
+	@Override
+	public List<TCsqUserCollection> findAllPage(Long valueOf, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild page = findAllBuild(valueOf);
+		IdUtil.setTotal(page);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserCollection(), page.page(pageNum, pageSize));
+	}
 
 }

@@ -3,13 +3,17 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Author: FangyiXu
  * @Date: 2019-07-05 09:21
  */
 @Data(matchSuffix = true)
+@Builder
+@NoArgsConstructor
 public class CsqUserAuthVo {
 	@Id
 	private Long id;

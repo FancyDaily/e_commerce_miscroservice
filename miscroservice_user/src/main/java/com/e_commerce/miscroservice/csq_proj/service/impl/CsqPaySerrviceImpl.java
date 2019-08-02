@@ -10,13 +10,15 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUI
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.AesUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RandomUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
-import org.bouncycastle.asn1.dvcs.ServiceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -26,6 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -463,8 +466,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	private void afterPaySuccess(String attach, TCsqOrder tCsqOrder) {
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(tCsqOrder.getUserId());
+		//强制开通
 		switch (CsqEntityTypeEnum.getEnum(Integer.valueOf(attach))) {	//attach: 为哪种类型充值
 			case TYPE_FUND:
+				activeAccount(csqUser, tCsqOrder);
 				dealWithFundAfterPay(tCsqOrder);
 				break;
 			case TYPE_SERVICE:
@@ -483,6 +488,23 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 		//处理流水
 		csqPaymentService.savePaymentRecord(tCsqOrder);
+	}
+
+	private void activeAccount(TCsqUser csqUser, TCsqOrder tCsqOrder) {
+		if (CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode().equals(csqUser.getBalanceStatus())) {
+			csqUser.setBalanceStatus(CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());
+			csqMsgService.insertTemplateMsg(CsqSysMsgTemplateEnum.ACCOUNT_ACTIVATE, csqUser.getId());
+			//若类型为基金开通，则表明当前为爱心账户未开通情况下去开通爱心账户并开通基金，需要获取基金的意向
+			Integer toType = tCsqOrder.getToType();
+			if(CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {	//如果为基金类型(此时可能是充值或者开通,可以不必判断
+				Long toId = tCsqOrder.getToId();
+				TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(toId);
+//				Integer status = tCsqFund.getStatus();
+//				if()
+				String trendPubKeys = tCsqFund.getTrendPubKeys();
+				csqUser.setTrendPubKeys(trendPubKeys);
+			}
+		}
 	}
 
 	private void afterPayUser(TCsqOrder tCsqOrder, TCsqUser csqUser) {
@@ -680,10 +702,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private TCsqUser dealWithAccountAfterPay(TCsqOrder tCsqOrder) {
 		Long ownerId = tCsqOrder.getToId();
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(ownerId);
-		if(csqUser.getBalanceStatus().equals(CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode())) {
-			//爱心账户开户
-			csqUser.setBalanceStatus(CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());
-		}
+		activeAccount(csqUser, tCsqOrder);
 		//充值
 		Double price = tCsqOrder.getPrice();
 		Double surplusAmount = csqUser.getSurplusAmount();
@@ -748,7 +767,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 				.title("您的专项基金已经建立")
 				.content("只属于您的专项基金现已建立，您可以自由充值和捐赠项目。如有需要，可以使用托管服务,具体细则详见xxxxx.")
 				.dateString(DateUtil.timeStamp2Date(System.currentTimeMillis())).build();
-			csqMsgDao.insert(build);
+//			csqMsgDao.insert(build);	//8.1.2019 删除创建成功消息
 
 			recommendService(userId, null, fund);	//TODO
 		}
@@ -761,6 +780,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		if(csqFundService.checkIsOkForPublic(fund)) {
 			//若满足 -> 提审(略) -> 开放
 			fund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
+			csqMsgService.sendServiceMsgForFund(fund, userId);
 		}
 		csqFundDao.update(fund);
 		Long payerId = userId;
@@ -783,6 +803,8 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		csqService.setStatus(CsqServiceEnum.STATUS_INITIAL.getCode());
 		csqService.setType(CsqServiceEnum.TYPE_FUND.getCode());
 		csqService.setFundStatus(fund.getStatus());
+		csqService.setName(fund.getName());
+		csqService.setSurplusAmount(fund.getBalance());
 		return csqService;
 	}
 
@@ -953,7 +975,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		for(String a:trendKeyArray) {
 			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeq(a, userId);
 			if(!tCsqServices.isEmpty()) {
-				csqService = tCsqServices.get(0);
+				//获取0 ~ tcsqservices.size()-1的随机数
+				Random random = new Random();
+				int index = random.nextInt(tCsqServices.size() - 1);
+				csqService = tCsqServices.get(index);
 				serviceId = csqService.getId();
 				break;
 			}

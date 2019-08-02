@@ -2,21 +2,20 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqInvoiceEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
+import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqWaitToInvoiceOrderVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.service.CsqInvoiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceRecord;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +45,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 	@Autowired
 	private CsqUserDao csqUserDao;
+
+	@Autowired
+	private CsqMsgService csqMsgService;
 
 	@Override
 	public void submit(Long userId, TCsqUserInvoice userInvoice, String... orderNo) {
@@ -101,6 +103,10 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			return a;
 		}).collect(Collectors.toList());
 
+		//sysMsg
+//		csqMsgService.insertTemplateMsg(Arrays.asList(orderNos.split(",")).get(0) ,CsqSysMsgTemplateEnum.INVOICE_DONE, userId);
+//		csqMsgService.insertTemplateMsg(CsqSysMsgTemplateEnum.INVOICE_DONE, userId);
+
 		csqOrderDao.update(toUpdateList);
 	}
 	
@@ -108,11 +114,12 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	public QueryResult<CsqWaitToInvoiceOrderVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1: pageNum;
 		pageSize = pageSize==null? 0: pageSize;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		//查询所有待开票的订单,找到serivce汇总
 //		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 		//处理 爱心账户、基金、项目的数据，其中基金和项目要获取到名字
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndFromTypeAndInvoiceStatusAndStatusDescPage(pageNum, pageSize, userId, CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.INVOICE_STATUS_NO.getCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		long total = IdUtil.getTotal();
 		//获取名字、以及对时间进行格式化
 		Map<String, Object> typeListMapMap = getTypeListMapMap(userId, tCsqOrders);
 		Map<Long, List<TCsqService>> serviceMap = getServiceListMap(typeListMapMap);
@@ -133,7 +140,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			).collect(Collectors.toList());
 		QueryResult<CsqWaitToInvoiceOrderVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(resultList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -207,19 +214,20 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	public QueryResult<CsqUserInvoiceVo> doneList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1:pageNum;
 		pageSize = pageSize==null? 0:pageSize;
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserIdDesc(userId);
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectByUserIdDescPage(userId, pageNum, pageSize);
+		long total = IdUtil.getTotal();
 		List<CsqUserInvoiceVo> copyList = tCsqUserInvoices.stream()
 			.map(a -> {
 				String orderNos = a.getOrderNos();
 				int recordCnt = orderNos.split(",").length;
 				a.setRecordCnt(recordCnt);
 				a.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd"));
-				return a.copyCsqUserInvoice();
+				return a.copyCsqUserInvoiceVo();
 			}).collect(Collectors.toList());
 		QueryResult<CsqUserInvoiceVo> queryResult = new QueryResult<>();
 		queryResult.setResultList(copyList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
 	}
 
@@ -231,7 +239,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		}
 		String orderNos = tCsqUserInvoice.getOrderNos();
 		tCsqUserInvoice.setRecordCnt(StringUtil.isEmpty(orderNos)? 0: orderNos.split(",").length);
-		return tCsqUserInvoice.copyCsqUserInvoice();
+		return tCsqUserInvoice.copyCsqUserInvoiceVo();
 	}
 
 	public static void main(String[] args) {
@@ -252,8 +260,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			return new QueryResult<>();
 		}
 		String[] split = orderNos.split(",");
-		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectInOrderNos(split);
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectInOrderNosPage(split, pageNum, pageSize);
+		long total = IdUtil.getTotal();
 
 		Map<String, Object> typeListMapMap = getTypeListMapMap(userId, tCsqOrders);
 		Map<Long, List<TCsqService>> serviceMap = getServiceListMap(typeListMapMap);
@@ -276,8 +285,32 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			});
 		QueryResult<CsqInvoiceRecord> queryResult = new QueryResult<>();
 		queryResult.setResultList(csqInvoiceList);
-		queryResult.setTotalCount(startPage.getTotal());
+		queryResult.setTotalCount(total);
 		return queryResult;
+	}
+
+	@Override
+	public int express(Long invoiceId, String expressNo) {
+		if(StringUtil.isEmpty(expressNo)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "快递单号不能为空!");
+		}
+		TCsqUserInvoice tCsqUserInvoice = csqUserInvoiceDao.selectByPrimaryKey(invoiceId);
+		if(tCsqUserInvoice == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该发票不存在!");
+		}
+		Long userId = tCsqUserInvoice.getUserId();
+
+		TCsqUserInvoice build = TCsqUserInvoice.builder()
+			.id(invoiceId)
+			.expressNo(expressNo)
+			.isOut(CsqInvoiceEnum.ISOUT_OUT_ALREADY.getCode()).build();
+		//TODO 发送sysMsg & serivceMsg
+		csqMsgService.insertTemplateMsg(CsqSysMsgTemplateEnum.INVOICE_DONE, userId);	//sysMsg
+		csqMsgService.sendServiceMsg(userId, CsqServiceMsgEnum.INVOICE_DONE, CsqServiceMsgParamVo.builder()
+			.csqUserInvoiceVo(tCsqUserInvoice.copyCsqUserInvoiceVo()).build()
+		);
+
+		return csqUserInvoiceDao.update(build);
 	}
 
 	private String getItemName(Map<Long, List<TCsqService>> serviceMap, Map<Long, List<TCsqFund>> fundMap, Map<Long, List<TCsqUser>> userMap, TCsqOrder a) {

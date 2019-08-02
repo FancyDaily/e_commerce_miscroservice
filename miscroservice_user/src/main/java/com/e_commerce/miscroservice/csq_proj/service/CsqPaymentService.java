@@ -47,6 +47,8 @@ public interface CsqPaymentService {
 
 	void savePaymentRecord(TCsqOrder tCsqOrder);
 
+	Map<String, Object> getBeneficiaryMap(Integer toType, Long toId);
+
 	List<Long> getPaymentRelatedOrderIds(Long entityId);
 
 	List<Long> getPaymentRelatedOrderIds(Long entityId, Integer entityType);

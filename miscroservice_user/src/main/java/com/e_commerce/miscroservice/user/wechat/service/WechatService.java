@@ -37,6 +37,8 @@ public interface WechatService {
 	 */
 	public String getToken();
 
+	String getToken(String appid, String appSecret);
+
 	/**
 	 * 获取二维码
 	 * @param scene 作为二维码唯一标识的值

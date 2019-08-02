@@ -21,4 +21,6 @@ public interface CsqInvoiceService {
 	CsqUserInvoiceVo invoiceDetail(Long userId, Long invoiceId);
 
 	QueryResult<CsqInvoiceRecord> recordList(Long userId, Long invoiceId, Integer pageNum, Integer pageSize);
+
+	int express(Long invoiceId, String expressNo);
 }

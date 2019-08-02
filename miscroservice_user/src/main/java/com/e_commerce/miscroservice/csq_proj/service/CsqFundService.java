@@ -1,9 +1,15 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqServiceMsgEnum;
+import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgTemplateEnum;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 
+import java.text.DecimalFormat;
 import java.util.Map;
 
 /**
@@ -87,4 +93,5 @@ public interface CsqFundService {
 	Long getServiceId(Long fundId);
 
 	boolean isMine(Long fundId, Long userId);
+
 }

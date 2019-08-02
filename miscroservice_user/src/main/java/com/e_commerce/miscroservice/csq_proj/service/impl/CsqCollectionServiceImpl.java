@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqCollectionDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqFundDao;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
@@ -83,12 +84,14 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 	public QueryResult<CsqCollectionVo> collectionList(Integer pageNum, Integer pageSize, Integer userId) {
 		QueryResult<CsqCollectionVo> queryResult = new QueryResult<>();
 
-		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserCollection> li = csqCollectionDao.findAll(Long.valueOf(userId));
+//		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
+		List<TCsqUserCollection> li = csqCollectionDao.findAllPage(Long.valueOf(userId), pageNum, pageSize);
+		long total = IdUtil.getTotal();
 
 		List<CsqCollectionVo> list = new ArrayList<>();
 		if (li == null || li.size() == 0) {
-			queryResult.setTotalCount(page.getTotal());
+//			queryResult.setTotalCount(page.getTotal());
+			queryResult.setTotalCount(total);
 			queryResult.setResultList(list);
 			return queryResult;
 		}
@@ -114,12 +117,12 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 			csqCollectionVo.setSumTotalIn(csqService.getSumTotalIn());
 			csqCollectionVo.setSurplusAmount(csqService.getSurplusAmount());
 			csqCollectionVo.setType(type);
-			csqCollectionVo.setDonateCnt(csqService.getDonaterCnt());    //人数
+			csqCollectionVo.setDonateCnt(csqService.getTotalInCnt());    //人次
 			csqCollectionVo.setDonatePercent(NumberFormat.getPercentInstance().format(csqService.getExpectedAmount() == 0 ? 0 : csqService.getSumTotalIn() / csqService.getExpectedAmount()).replaceAll("%", ""));//进度
 			list.add(csqCollectionVo);
 		});
 
-		queryResult.setTotalCount(page.getTotal());
+		queryResult.setTotalCount(total);
 		queryResult.setResultList(list);
 		return queryResult;
 	}
