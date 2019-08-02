@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TFormid;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -193,6 +194,11 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		insertTemplateMsg(currentEnum, userId);
 	}
 
+	@Override
+	public void collectFormId(Long userId, String formId) {
+
+	}
+
 	private TCsqSysMsg getBaseEntity() {
 		return getBaseBuilder().build();
 	}
@@ -200,5 +206,35 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	private TCsqSysMsg.TCsqSysMsgBuilder getBaseBuilder() {
 		return TCsqSysMsg.builder();
 	}
-	
+
+	/*public void sendServiceMsg() {
+		//服务通知发送函数
+		if (someCondition){
+			//如果需要发送服务消息
+			TCsqUser toUser = csqUserDao.selectByPrimaryKey(messageUserId);	//获取要发放的对象
+			TFormid formid = findFormId(nowTime, toUser);	//获取formid
+			if (formid != null) {
+				try {
+					List<String> msg = new ArrayList<>();
+					String parameter = "?toUserId="+messageUserId+"&lastTime=9999999999999&pageSize=5&returnHome=true";
+					msg.add(nowUser.getName());
+					if (!url.isEmpty()) {
+						//如果url不为空 证明发送的是图片
+						msg.add("[图片]");
+					} else {
+						msg.add(message);
+					}
+					msg.add(changeTime(nowTime));
+					//将模版、参数、用户openid整合发送
+					messageCommonController.pushOneUserMsg(toUser.getVxOpenId() , formid.getFormId() , msg , SetTemplateIdEnum.help_setTemplate_3 , parameter);
+					//使用过的formid即失效
+					formid.setIsValid("0");
+					messageCommonController.updateFormId(formid);
+				} catch (Exception e) {
+					logger.error("发送服务通知失败");
+				}
+			}
+		}
+	}*/
+
 }

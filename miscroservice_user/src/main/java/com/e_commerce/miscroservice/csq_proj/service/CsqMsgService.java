@@ -26,4 +26,6 @@ public interface CsqMsgService {
 	void insertTemplateMsg(String contentChanger, CsqSysMsgTemplateEnum currentEnum, Long... userId);
 
 	void insertTemplateMsg(Integer type, Long... userId);
+
+	void collectFormId(Long userId, String formId);
 }

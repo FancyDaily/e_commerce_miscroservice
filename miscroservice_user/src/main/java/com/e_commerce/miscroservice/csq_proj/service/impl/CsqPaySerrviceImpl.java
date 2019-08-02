@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUI
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.AesUtil;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.encrypt.Md5Util;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RandomUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -463,9 +464,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private void afterPaySuccess(String attach, TCsqOrder tCsqOrder) {
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(tCsqOrder.getUserId());
 		//强制开通
-		activeAccount(csqUser, CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode(), csqUser.getBalanceStatus());
 		switch (CsqEntityTypeEnum.getEnum(Integer.valueOf(attach))) {	//attach: 为哪种类型充值
 			case TYPE_FUND:
+				activeAccount(csqUser, tCsqOrder);
 				dealWithFundAfterPay(tCsqOrder);
 				break;
 			case TYPE_SERVICE:
@@ -486,10 +487,20 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		csqPaymentService.savePaymentRecord(tCsqOrder);
 	}
 
-	private void activeAccount(TCsqUser csqUser, Integer integer, Integer balanceStatus) {
-		if (integer.equals(balanceStatus)) {
+	private void activeAccount(TCsqUser csqUser, TCsqOrder tCsqOrder) {
+		if (CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode().equals(csqUser.getBalanceStatus())) {
 			csqUser.setBalanceStatus(CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());
 			csqMsgService.insertTemplateMsg(CsqSysMsgTemplateEnum.ACCOUNT_ACTIVATE, csqUser.getId());
+			//若类型为基金开通，则表明当前为爱心账户未开通情况下去开通爱心账户并开通基金，需要获取基金的意向
+			Integer toType = tCsqOrder.getToType();
+			if(CsqEntityTypeEnum.TYPE_FUND.toCode() == toType) {	//如果为基金类型(此时可能是充值或者开通,可以不必判断
+				Long toId = tCsqOrder.getToId();
+				TCsqFund tCsqFund = csqFundDao.selectByPrimaryKey(toId);
+//				Integer status = tCsqFund.getStatus();
+//				if()
+				String trendPubKeys = tCsqFund.getTrendPubKeys();
+				csqUser.setTrendPubKeys(trendPubKeys);
+			}
 		}
 	}
 
@@ -688,7 +699,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private TCsqUser dealWithAccountAfterPay(TCsqOrder tCsqOrder) {
 		Long ownerId = tCsqOrder.getToId();
 		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(ownerId);
-		activeAccount(csqUser, csqUser.getBalanceStatus(), CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode());
+		activeAccount(csqUser, tCsqOrder);
 		//充值
 		Double price = tCsqOrder.getPrice();
 		Double surplusAmount = csqUser.getSurplusAmount();
@@ -960,7 +971,10 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		for(String a:trendKeyArray) {
 			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeq(a, userId);
 			if(!tCsqServices.isEmpty()) {
-				csqService = tCsqServices.get(0);
+				//获取0 ~ tcsqservices.size()-1的随机数
+				Random random = new Random();
+				int index = random.nextInt(tCsqServices.size() - 1);
+				csqService = tCsqServices.get(index);
 				serviceId = csqService.getId();
 				break;
 			}
