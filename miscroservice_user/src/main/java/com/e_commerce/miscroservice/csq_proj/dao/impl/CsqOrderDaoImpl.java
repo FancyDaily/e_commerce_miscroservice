@@ -281,7 +281,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		MybatisPlusBuild build = byFromIdAndFromTypeInOrderIdsAndStatusBuild(fundId, toCode, tOrderIds, code);
 		IdUtil.setTotal(build);
 
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), build);
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), build.page(pageNum, pageSize));
 	}
 
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {

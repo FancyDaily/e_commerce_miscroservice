@@ -331,6 +331,10 @@ public class CsqFundServiceImpl implements CsqFundService {
 	}
 
 	private QueryResult getGotoList(Integer pageNum, Integer pageSize, Long fundId, List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
+		if(pageNum == null || pageSize == null) {
+			pageNum = 1;
+			pageSize = 99999;
+		}
 		QueryResult queryResult = new QueryResult();
 		if(tCsqUserPaymentRecords==null) {
 			//根据fundId获取值
