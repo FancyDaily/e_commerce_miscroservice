@@ -213,6 +213,10 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Override
 	public void collectFormId(Long userId, String formId) {
+		//排除譬如"the formId is a mock one"等无效的formid
+		if(formId == null || "the formId is a mock one".equals(formId.trim())) {
+			return;
+		}
 		//复用
 		TCsqFormId csqFormId = csqFormIdDao.selectByUserIdAndFormId(userId, formId);
 

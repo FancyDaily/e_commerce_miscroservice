@@ -81,6 +81,9 @@ public class CsqFundVo {
 	@Column(commit = "负责人")
 	private String personInCharge;	//MARK
 
+	@Column(commit = "负责人头像")
+	private String personInChargePic;
+
 	@Column(commit = "银行名字")
 	private String creditCardName;
 

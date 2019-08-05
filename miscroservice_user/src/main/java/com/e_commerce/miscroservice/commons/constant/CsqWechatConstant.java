@@ -12,12 +12,15 @@ public class CsqWechatConstant {
 	/**
 	 * 微信开发平台应用ID
 	 */
-	public static String APP_ID = "wx77a8c12808edf5b9";
+//	public static String APP_ID = "wx77a8c12808edf5b9";
+	public static String APP_ID = "wx772231ae2be61a3b";
+
 	/**
 	 *
 	 * 微信开发平台应用app_secret
 	 */
-	public static String APP_SECRET = "9e003f827136566c620d94a6817d4b42";
+//	public static String APP_SECRET = "9e003f827136566c620d94a6817d4b42";
+	public static String APP_SECRET = "4fa48a6fffe061e752f1fae11f0e37e0";
 
 	/**
 	 * 应用对应的密钥

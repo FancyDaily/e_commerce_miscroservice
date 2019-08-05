@@ -217,5 +217,4 @@ public class CsqMsgController {
 		return result;
 	}
 
-
 }

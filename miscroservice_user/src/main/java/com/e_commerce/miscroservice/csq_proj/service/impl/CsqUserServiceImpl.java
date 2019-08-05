@@ -508,7 +508,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 				sumTotalIn = NumberUtil.keep2Places(sumTotalIn);
 				vo.setCurrentAmont(sumTotalIn);
 				vo.setExpectedAmount(CsqFundEnum.PUBLIC_MINIMUM);
+				String voCoverPic = vo.getCoverPic();
+				vo.setCoverPic(voCoverPic.contains(",")? Arrays.asList(voCoverPic.split(",")).get(0):voCoverPic);	//只给一张
 				Integer status = csqFund.getStatus();
+				TCsqService tCsqService = csqServiceDao.selectByFundId(csqFund.getId());
+				Long serviceId = tCsqService.getId();
+				vo.setServiceId(serviceId);
 				if (CsqFundEnum.STATUS_PUBLIC.getVal() != status) {    //未公开
 					// 获取捐献记录列表
 					List<TCsqOrder> tCsqOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
@@ -521,6 +526,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 							long mills = System.currentTimeMillis() - a.getUpdateTime().getTime();
 							Long minutesLong = mills / 1000 / 60;
 							Integer minutesAgo = minutesLong.intValue();
+							minutesAgo = minutesAgo > 60? 60: minutesAgo;
 							Long theUserId = a.getUserId();
 							List<TCsqUser> csqUsers = userMap.get(theUserId);
 							TCsqUser csqUser = csqUsers.get(0);
@@ -533,8 +539,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 					vo.setDonateRecordVos(donateRecordVos);
 				}
 				uploadEnum = UploadPathEnum.innerEnum.CSQ_FUND;
+				Long fundId = csqFund.getId();
+				TCsqService service = csqServiceDao.selectByFundId(fundId);
 				//scene
-				builder = builder.fundId(csqFund.getId())
+				builder = builder.fundId(fundId)
+							.serviceId(service.getId())
 							.type(CsqSceneEnum.TYPE_FUND.getCode());
 				break;
 			case OPTION_PERSON:
@@ -562,7 +571,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 				String coverPic = csqService.getCoverPic();
 				coverPic = Arrays.asList(coverPic.split(",")).get(0);
 				vo = CsqShareVo.builder()
-					.coverPic(coverPic)
+					.coverPic(coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic)	//只给一张
 					.name(name)
 					.build();
 				vo.setCurrentAmont(NumberUtil.keep2Places(csqService.getSumTotalIn()));

@@ -15,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 public class CsqShareVo {
 
+	private Long serviceId;
+
 	private String title;
 
 	private String name;
