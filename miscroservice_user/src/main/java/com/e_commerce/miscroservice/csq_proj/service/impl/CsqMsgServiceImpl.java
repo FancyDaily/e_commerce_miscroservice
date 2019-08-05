@@ -100,7 +100,8 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 				csqSysMsgVo.setServiceId(tCsqService.getId());
 				csqSysMsgVo.setName(tCsqService.getName());
 				csqSysMsgVo.setDescription(tCsqService.getDescription());
-				csqSysMsgVo.setCoverPic(tCsqService.getCoverPic());
+				String coverPic = tCsqService.getCoverPic();
+				csqSysMsgVo.setCoverPic(coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic);
 				csqSysMsgVo.setSumTotalIn(tCsqService.getSumTotalIn());
 				csqSysMsgVo.setServiceType(tCsqService.getType());
 				return csqSysMsgVo;
@@ -367,8 +368,8 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	public void sendServiceMsgForFund(TCsqFund fund, Long userId) {
 		insertTemplateMsg(fund.getName(), CsqSysMsgTemplateEnum.FUND_PUBLIC_SUCCESS, userId);
 		//TODO 发送服务通知
-		double doubleVal = CsqFundEnum.PUBLIC_MINIMUM == 0 ? 100 : fund.getSumTotalIn() / CsqFundEnum.PUBLIC_MINIMUM;
-		doubleVal = doubleVal > 100d ? 100d:doubleVal;
+		double doubleVal = CsqFundEnum.PUBLIC_MINIMUM == 0 ? 1 : fund.getSumTotalIn() / CsqFundEnum.PUBLIC_MINIMUM;
+		doubleVal = doubleVal > 1d ? 1d:doubleVal;
 		String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
 		sendServiceMsg(userId, CsqServiceMsgEnum.FUND_PUBLIC_SUCCESS, CsqServiceMsgParamVo.builder()
 			.csqServiceListVo(

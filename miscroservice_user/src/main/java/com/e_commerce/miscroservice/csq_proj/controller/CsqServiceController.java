@@ -420,6 +420,31 @@ public class CsqServiceController {
 	}
 
 	/**
+	 * 项目汇报详情
+	 * @param serviceReportId 项目汇报编号
+	 * @return
+	 */
+	@RequestMapping("reportDetail")
+	public AjaxResult reportDetail(Long serviceReportId) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("项目汇报详情, serviceReportId={}", serviceReportId);
+			CsqServiceReportVo csqServiceReportVo = csqServiceService.reportDetail(serviceReportId);
+			result.setData(csqServiceReportVo);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "项目汇报详情", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("项目汇报详情", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * 捐助记录列表
 	 *
 	 * @param serviceId 服务id

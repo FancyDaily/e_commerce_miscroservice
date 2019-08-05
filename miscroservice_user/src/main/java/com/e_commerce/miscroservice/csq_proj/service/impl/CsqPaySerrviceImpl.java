@@ -973,7 +973,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		TCsqService csqService = null;
 		Long serviceId = null;
 		for(String a:trendKeyArray) {
-			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeq(a, userId);
+			List<TCsqService> tCsqServices = csqServiceDao.selectLikeByPubKeysAndUserIdNeqAndFundStatus(a, userId);
 			if(!tCsqServices.isEmpty()) {
 				//获取0 ~ tcsqservices.size()-1的随机数
 				Random random = new Random();

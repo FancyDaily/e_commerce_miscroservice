@@ -223,8 +223,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				}
 
 				a.setSumTotalPayMine(NumberUtil.keep2Places(reduce));//已筹集
-				double doubleVal = a.getExpectedAmount() == 0 ? 100 : a.getSumTotalIn() / a.getExpectedAmount();
-				doubleVal = doubleVal > 100d ? 100d:doubleVal;
+				double doubleVal = a.getExpectedAmount() == 0 ? 1 : a.getSumTotalIn() / a.getExpectedAmount();
+				doubleVal = doubleVal > 1d ? 1d:doubleVal;
 				String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
 				a.setDonePercent(donePercent);
 				a.setDonaterCnt(a.getTotalInCnt());
@@ -303,7 +303,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			String typePubKeys = csqServiceDetailVo.getTypePubKeys();
 			List<String> publishName = csqPublishService.getPublishName(CsqPublishEnum.MAIN_KEY_TREND.toCode(), typePubKeys);
 			csqServiceDetailVo.setTrendPubNames(publishName);
-			double doubleVal = csqServiceDetailVo.getExpectedAmount() == 0 ? 0 : csqServiceDetailVo.getSumTotalIn() / csqServiceDetailVo.getExpectedAmount();
+			double doubleVal = csqServiceDetailVo.getExpectedAmount() == 0 ? 1 : csqServiceDetailVo.getSumTotalIn() / csqServiceDetailVo.getExpectedAmount();
 			doubleVal = doubleVal > 1d ? 1d : doubleVal;
 			String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
 			Double aDouble = Double.valueOf(donePercent);
@@ -604,6 +604,17 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	@Override
 	public TCsqService getService(Long fundId) {
 		return csqServiceDao.selectByFundId(fundId);
+	}
+
+	@Override
+	public CsqServiceReportVo reportDetail(Long serviceReportId) {
+		TCsqServiceReport tCsqServiceReport = csqUserServiceReportDao.selectByPrimaryKey(serviceReportId);
+		if(tCsqServiceReport == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "项目汇报编号不正确！");
+		}
+		CsqServiceReportVo csqServiceReportVo = tCsqServiceReport.copyCsqServiceReportVo();
+		csqServiceReportVo.setDate(com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(tCsqServiceReport.getCreateTime().getTime()));
+		return csqServiceReportVo;
 	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {

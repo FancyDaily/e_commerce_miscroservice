@@ -14,4 +14,6 @@ public interface CsqUserServiceReportDao {
 	List<TCsqServiceReport> selectByServiceIdDesc(Long serviceId);
 
 	List<TCsqServiceReport> selectByServiceIdDescPage(Integer pageNum, Integer pageSize, Long serviceId);
+
+	TCsqServiceReport selectByPrimaryKey(Long serviceReportId);
 }

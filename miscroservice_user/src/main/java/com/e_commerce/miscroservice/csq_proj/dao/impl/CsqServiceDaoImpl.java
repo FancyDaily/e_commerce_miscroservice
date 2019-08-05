@@ -207,6 +207,30 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public List<TCsqService> selectLikeByPubKeysAndUserIdNeqAndFundStatus(String a, Long userId) {
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.neq(TCsqService::getUserId, userId)
+			.and()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
+			.or()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())
+			.eq(TCsqService::getFundStatus, CsqFundEnum.STATUS_PUBLIC.getVal())
+			.groupAfter()
+			.groupAfter()
+			.and()
+			.groupBefore()
+			.like(TCsqService::getTypePubKeys, "%," + a + "%")
+			.or()
+			.like(TCsqService::getTypePubKeys, "%" + a + ",%")
+			.or()
+			.eq(TCsqService::getTypePubKeys, a)
+			.groupAfter());
+	}
+
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)

@@ -120,4 +120,11 @@ public interface CsqServiceService {
 	 * @return
 	 */
 	TCsqService getService(Long fundId);
+
+	/**
+	 * 项目汇报详情
+	 * @param serviceReportId
+	 * @return
+	 */
+	CsqServiceReportVo reportDetail(Long serviceReportId);
 }

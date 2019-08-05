@@ -36,10 +36,20 @@ public class CsqUserServiceReportDaoImpl implements CsqUserServiceReportDao {
 		return MybatisPlus.getInstance().findAll(new TCsqServiceReport(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public TCsqServiceReport selectByPrimaryKey(Long serviceReportId) {
+		return MybatisPlus.getInstance().findOne(new TCsqServiceReport(), baseBuild()
+			.eq(TCsqServiceReport::getId, serviceReportId));
+	}
+
 	private MybatisPlusBuild byServiceIdDescBuild(Long serviceId) {
-		return new MybatisPlusBuild(TCsqServiceReport.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return baseBuild()
 			.eq(TCsqServiceReport::getServiceId, serviceId)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqServiceReport::getCreateTime));
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqServiceReport.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES);
 	}
 }

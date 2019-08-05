@@ -32,8 +32,8 @@ public class CsqWeChatPay {
 	private CsqOrderDao csqOrderDao;
 
 	private DecimalFormat decimalFormat = new DecimalFormat("0");
-	
-	private static final  int MAX_CAP=1_000;
+
+	private static final int MAX_CAP = 1_000;
 	private static Map<String, String> openIdCache = new ConcurrentHashMap<>(MAX_CAP);
 
 	private String getOpenId(HttpServletRequest request) {
@@ -49,18 +49,18 @@ public class CsqWeChatPay {
 		code = request.getParameter("code");
 		openid = openIdCache.get(code);
 
-		if(openid == null) {
+		if (openid == null) {
 			StringBuilder params = new StringBuilder();
 			params.append("secret=");
 			params.append(CsqWechatConstant.APP_SECRET);
 			params.append("&appid=");
 			params.append(CsqWechatConstant.APP_ID);
 			params.append("&grant_type=authorization_code");
-	//		params.append("&code=");
+			//		params.append("&code=");
 			params.append("&js_code=");
 			params.append(code);
 
-	//		String url = "https://api.weixin.qq.com/sns/oauth2/access_token";
+			//		String url = "https://api.weixin.qq.com/sns/oauth2/access_token";
 			String url = "https://api.weixin.qq.com/sns/jscode2session";
 			String result = httpsRequest(
 				url, "GET", params.toString());
@@ -72,10 +72,10 @@ public class CsqWeChatPay {
 			}
 			openid = jsonObject.get("openid").toString();
 
-			if(openIdCache.size()>=MAX_CAP){
+			if (openIdCache.size() >= MAX_CAP) {
 				openIdCache.clear();
 			}
-			openIdCache.put(code,openid);
+			openIdCache.put(code, openid);
 		}
 
 		return openid;
@@ -202,7 +202,7 @@ public class CsqWeChatPay {
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String>   createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
+	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request) throws Exception {
 		return createWebParam(orderNo, payCount, request, null, false);
 	}
 
@@ -211,7 +211,7 @@ public class CsqWeChatPay {
 	}*/
 
 	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb) throws Exception {
-		log.info("web params= orderNo={} payCount={} ",orderNo,payCount);
+		log.info("web params= orderNo={}, payCount={}, attach={}", orderNo, payCount, attach);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", CsqWechatConstant.APP_ID);
 		String ten_time = String.valueOf(System.currentTimeMillis());
@@ -226,7 +226,7 @@ public class CsqWeChatPay {
 	}
 
 	public Map<String, String> createRefundWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
-		log.info("web params= orderNo{} payCount={} ",orderNo,payCount);
+		log.info("web params= orderNo{} payCount={} ", orderNo, payCount);
 		createRefund(orderNo, payCount, request, attach);
 
 		//一些返还给前端的参数(如果需要
@@ -271,7 +271,7 @@ public class CsqWeChatPay {
 		String output = getOrderRequestXml(orderNo, payCount, openId, attach, isWeb);
 		String json = httpsRequest(CsqWechatConstant.GATEURL, "POST", output);
 		Map resultMap = xmlToMap(json);
-		log.info("sing_info, msg={}",resultMap.toString());
+		log.info("sing_info, msg={}", resultMap.toString());
 		return resultMap;
 	}
 
@@ -284,7 +284,7 @@ public class CsqWeChatPay {
 		String output = getRefundRequestXml(orderNo, payCount, payCount, attach);
 		String json = httpsRequest(CsqWechatConstant.REFUND_URL, "POST", output);
 		Map resultMap = xmlToMap(json);
-		log.info("sing_info",resultMap);
+		log.info("sing_info", resultMap);
 		return resultMap;
 	}
 
@@ -338,7 +338,7 @@ public class CsqWeChatPay {
 		String notify_url = CsqWechatConstant.NOTIFY_URL;
 
 		SortedMap<String, String> param = new TreeMap();
-		if(attach != null) {
+		if (attach != null) {
 			param.put("attach", attach);
 		}
 		param.put("appid", appid);
@@ -355,7 +355,7 @@ public class CsqWeChatPay {
 			param.put("openid", openId);
 			param.put("trade_type", "JSAPI");
 
-		}else{
+		} else {
 			param.put("trade_type", "APP");
 
 		}
@@ -367,7 +367,7 @@ public class CsqWeChatPay {
 		return getRequestXml(param);
 	}
 
-	private void  setSign(SortedMap<String, String> param, boolean isWeb) {
+	private void setSign(SortedMap<String, String> param, boolean isWeb) {
 		String appKey = CsqWechatConstant.APP_KEY;
 		StringBuilder sb = new StringBuilder();
 		for (Map.Entry<String, String> entries : param.entrySet()) {
@@ -422,7 +422,7 @@ public class CsqWeChatPay {
 
 
 	public static void main(String[] args) throws Exception {
-		System.out.println(new CsqWeChatPay().createAppParam(System.currentTimeMillis()+"",12D));
+		System.out.println(new CsqWeChatPay().createAppParam(System.currentTimeMillis() + "", 12D));
 		System.out.println(new CsqWeChatPay().md5("appId=wxb8edf6df645eb4e5&nonceStr=1559657319465&package=prepay_id=wx04220839908978f523d2205e1705732200&signType=MD5&timeStamp=1559657319&mainKey=5uBcQ1wcsu8U46xEwgYxv68aRxqsRsLM"));
 		;
 
