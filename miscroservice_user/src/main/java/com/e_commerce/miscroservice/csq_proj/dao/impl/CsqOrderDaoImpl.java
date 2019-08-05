@@ -243,11 +243,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByFromIdAndFromTypeInOrderIdsAndStatus(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getFromId, fundId)
-			.eq(TCsqOrder::getFromType, toCode)
-			.in(TCsqOrder::getId, tOrderIds)
-			.eq(TCsqOrder::getStatus, code));
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), byFromIdAndFromTypeInOrderIdsAndStatusBuild(fundId, toCode, tOrderIds, code));
 	}
 
 	@Override
@@ -278,6 +274,22 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		IdUtil.setTotal(mybatisPlusBuild);
 
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByFromIdAndFromTypeInOrderIdsAndStatusPage(Integer pageNum, Integer pageSize, Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
+		MybatisPlusBuild build = byFromIdAndFromTypeInOrderIdsAndStatusBuild(fundId, toCode, tOrderIds, code);
+		IdUtil.setTotal(build);
+
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), build);
+	}
+
+	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
+		return new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getFromId, fundId)
+			.eq(TCsqOrder::getFromType, toCode)
+			.in(TCsqOrder::getId, tOrderIds)
+			.eq(TCsqOrder::getStatus, code);
 	}
 
 	private MybatisPlusBuild byUserIdInToTypeDescBuild(Long userId) {

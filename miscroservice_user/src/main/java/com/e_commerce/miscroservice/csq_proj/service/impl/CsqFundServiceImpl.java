@@ -342,7 +342,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(tCsqUserPaymentRecords.isEmpty()) {
 			return new QueryResult();
 		}
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeInOrderIdsAndStatus(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		Long total = 0L;
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromIdAndFromTypeInOrderIdsAndStatusPage(pageNum, pageSize, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), tOrderIds, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		total = IdUtil.getTotal();
 		//根据订单复写fund类型的toId
 		List<Long> fundIds = tCsqOrders.stream()
 			.filter(a -> CsqEntityTypeEnum.TYPE_FUND.toCode() == a.getToType())    //基金类型
@@ -367,13 +369,12 @@ public class CsqFundServiceImpl implements CsqFundService {
 
 		List<Long> csqServiceIds = tCsqOrders.stream().map(TCsqOrder::getToId).collect(Collectors.toList());
 
-		Long total = 0L;
-		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIdsPage(csqServiceIds, pageNum, pageSize);
-		if(pageNum != null && pageSize != null) {
+		List<TCsqService> tCsqServices = csqServiceIds.isEmpty()? new ArrayList<>(): csqServiceDao.selectInIds(csqServiceIds);
+		/*if(pageNum != null && pageSize != null) {
 //			Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 //			total = startPage.getTotal();
 			total = IdUtil.getTotal();
-		}
+		}*/
 		Map<Long, List<TCsqService>> collect = tCsqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 		List<TCsqOrder> resultList = tCsqOrders.stream()

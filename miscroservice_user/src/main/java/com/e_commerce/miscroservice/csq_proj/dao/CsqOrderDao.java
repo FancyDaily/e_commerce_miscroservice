@@ -67,4 +67,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectInOrderNosPage(String[] split, Integer pageNum, Integer pageSize);
 
 	List<TCsqOrder> selectByUserIdInToTypeDescPage(Integer pageNum, Integer pageSize, Long userId, int toCode, int toCode1);
+
+	List<TCsqOrder> selectByFromIdAndFromTypeInOrderIdsAndStatusPage(Integer pageNum, Integer pageSize, Long fundId, int toCode, List<Long> tOrderIds, Integer code);
 }
