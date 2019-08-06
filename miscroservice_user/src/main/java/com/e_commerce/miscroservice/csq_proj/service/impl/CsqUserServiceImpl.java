@@ -596,7 +596,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		sceneKey = tCsqKeyValue.getId();
 
 		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
-		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
+//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;
