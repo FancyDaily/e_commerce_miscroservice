@@ -175,9 +175,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode) throws Exception {
 		String cardId;
 		String name;
-		if (StringUtil.isAnyEmpty(cardId = csqUserAuth.getCardId(), name = csqUserAuth.getName(), csqUserAuth.getPhone())) {
+		String telephone;
+		if (StringUtil.isAnyEmpty(cardId = csqUserAuth.getCardId(), name = csqUserAuth.getName(), telephone = csqUserAuth.getPhone())) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数不全！");
 		}
+		userService.checkSMS(telephone, smsCode);
 		Long userId = csqUserAuth.getUserId();
 		//判断是否已经实名
 		TCsqUser tCsqUser = csqUserDao.selectByPrimaryKey(userId);
@@ -193,7 +195,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 
 		// 判空
-		if (IDCardUtil.checkNameAndNo(cardId, name)) {
+		if (!IDCardUtil.checkNameAndNo(cardId, name)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "身份证号不正确或与姓名不匹配");
 		}
 
@@ -594,7 +596,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		sceneKey = tCsqKeyValue.getId();
 
 		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
-//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
+		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
 		map.put("vo", vo);
 		return map;
