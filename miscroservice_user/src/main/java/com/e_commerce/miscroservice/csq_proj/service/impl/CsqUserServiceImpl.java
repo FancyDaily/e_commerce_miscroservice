@@ -687,7 +687,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			List<Long> userIds = tCsqOrders.stream()
 				.map(TCsqOrder::getUserId).collect(Collectors.toList());
 			Long[] userIdArray = userIds.toArray(new Long[userIds.size()]);
-			csqMsgService.insertTemplateMsg(name, CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME, userIdArray);	//TODO
+			csqMsgService.insertTemplateMsg(name, CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME, userIdArray);	//TODO distinct
 		}
 		if (StringUtil.isEmpty(wholeDescription)) {
 			description = "从" + name + suffix + "拨款";

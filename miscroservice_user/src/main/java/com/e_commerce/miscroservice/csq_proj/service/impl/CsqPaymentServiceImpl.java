@@ -230,13 +230,26 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		String hour = hmList.get(0);
 		String minute = hmList.get(1);
 		map.put("date", date);
-		String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
-			"特发此证，以资感谢！";
+		/*String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+			"特发此证，以资感谢！";*/
+		String description = "感谢您对公益事业的支持!\n"
+				+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
+				+ "用于" + serviceName + "。\n"
+			    + "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
+				+ "\n"
+				+ "谨以此证向您表示最真诚的的感谢！";
 		if(isSpecial) {
-			description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
-				"特发此证，以资感谢！";
+			/*description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+				"特发此证，以资感谢！";*/
+			description = "感谢您对公益事业的支持!\n"
+				+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
+				+ "用于" + "公益事业" + "。\n"
+				+ "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
+				+ "\n"
+				+ "谨以此证向您表示最真诚的的感谢！";
 		}
-
+		String dateDesc = year + "年" + month + "月" + day + "日";
+		map.put("date", dateDesc);
 		map.put("description", description);
 		return map;
 	}

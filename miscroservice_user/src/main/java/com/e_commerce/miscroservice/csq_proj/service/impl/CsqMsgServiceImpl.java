@@ -191,7 +191,8 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		content = contentChanger != null ? String.format(content, contentChanger) : content;
 
 		List<TCsqSysMsg> toInserter = new ArrayList<>();
-		for (Long theId : userId) {
+		List<Long> tUserIds = Arrays.stream(userId).distinct().collect(Collectors.toList());	//去重
+		for (Long theId : tUserIds) {
 			TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
 			builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
 				.userId(theId)
