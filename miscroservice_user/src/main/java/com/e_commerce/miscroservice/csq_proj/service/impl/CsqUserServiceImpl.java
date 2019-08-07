@@ -501,7 +501,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		builder = builder.userId(userId);
 		switch (option) {
 			case OPTION_FUND:
-				page = this.PERSON_PAGE;
+				page = this.FUND_PAGE;
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
 				String fundName = csqFund.getName();
 				vo = csqFund.copyCsqShareVo();
@@ -549,7 +549,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 							.type(CsqSceneEnum.TYPE_FUND.getCode());
 				break;
 			case OPTION_PERSON:
-				page = this.FUND_PAGE;
+				page = this.PERSON_PAGE;
 				//累积捐赠、捐赠项目数
 				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(entityId);
 				Long tUserId = csqUser.getId();
