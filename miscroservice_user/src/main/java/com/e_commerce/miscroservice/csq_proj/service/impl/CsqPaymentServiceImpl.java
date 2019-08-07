@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -50,6 +51,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private CsqUserPaymentDao csqUserPaymentDao;
 	@Autowired
 	private CsqOrderDao csqOrderDao;
+	@Autowired
+	private CsqUserService csqUserService;
 	@Value("${page.person}")
 	private String PERSON_PAGE;
 
@@ -205,7 +208,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		map.put("money", money);
 		accountMoney = NumberUtil.keep2Places(accountMoney);
 		map.put("countMoney", accountMoney);
-		//page
+		/*//page
 		String page = PERSON_PAGE;
 		TCsqKeyValue build = TCsqKeyValue.builder()
 			.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
@@ -214,7 +217,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.build();
 		csqKeyValueDao.save(build);
 		String sceneKey = build.getId().toString();
-		String qrCode = wechatService.genQRCode(sceneKey, page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);
+		String qrCode = wechatService.genQRCode(sceneKey, page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);*/
+		Map<String, Object> shareMap = csqUserService.share(userId, userId, 0);
+		String qrCode = (String) shareMap.get("qrCode");
+
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("code", qrCode);
 		map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
