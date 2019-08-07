@@ -20,6 +20,7 @@ import com.e_commerce.miscroservice.user.wechat.entity.TemplateData;
 import com.e_commerce.miscroservice.user.wechat.entity.WxMssVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Autowired
 	private CsqPaymentService csqPaymentService;
+
+	@Value("${page.person}")
+	private String INDEX_PAGE;
 
 	@Override
 	public QueryResult<CsqSysMsgVo> list(Long userId, Integer pageNum, Integer pageSize) {
@@ -191,7 +195,8 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		content = contentChanger != null ? String.format(content, contentChanger) : content;
 
 		List<TCsqSysMsg> toInserter = new ArrayList<>();
-		for (Long theId : userId) {
+		List<Long> tUserIds = Arrays.stream(userId).distinct().collect(Collectors.toList());	//去重
+		for (Long theId : tUserIds) {
 			TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
 			builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
 				.userId(theId)
@@ -335,7 +340,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		String url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send" + "?access_token=" + token;
 		// 拼接推送的模版
 		WxMssVo wxMssVo = new WxMssVo();
-		wxMssVo.setPage("/pages/logs/logs");    //TODO 设置默认page -> 首页
+		wxMssVo.setPage(INDEX_PAGE);    //设置默认page -> 首页
 
 		wxMssVo.setTouser(openid);// 用户openid
 		wxMssVo.setTemplate_id(setTemplateIdEnum.getTemplateId());

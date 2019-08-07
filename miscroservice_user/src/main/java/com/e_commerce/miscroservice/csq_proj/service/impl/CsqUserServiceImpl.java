@@ -175,9 +175,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public void sendPersonAuth(TCsqUserAuth csqUserAuth, String smsCode) throws Exception {
 		String cardId;
 		String name;
-		if (StringUtil.isAnyEmpty(cardId = csqUserAuth.getCardId(), name = csqUserAuth.getName(), csqUserAuth.getPhone())) {
+		String telephone;
+		if (StringUtil.isAnyEmpty(cardId = csqUserAuth.getCardId(), name = csqUserAuth.getName(), telephone = csqUserAuth.getPhone())) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数不全！");
 		}
+		userService.checkSMS(telephone, smsCode);
 		Long userId = csqUserAuth.getUserId();
 		//判断是否已经实名
 		TCsqUser tCsqUser = csqUserDao.selectByPrimaryKey(userId);
@@ -193,7 +195,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 
 		// 判空
-		if (IDCardUtil.checkNameAndNo(cardId, name)) {
+		if (!IDCardUtil.checkNameAndNo(cardId, name)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "身份证号不正确或与姓名不匹配");
 		}
 
@@ -499,7 +501,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		builder = builder.userId(userId);
 		switch (option) {
 			case OPTION_FUND:
-				page = this.PERSON_PAGE;
+				page = this.FUND_PAGE;
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(entityId);
 				String fundName = csqFund.getName();
 				vo = csqFund.copyCsqShareVo();
@@ -547,7 +549,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 							.type(CsqSceneEnum.TYPE_FUND.getCode());
 				break;
 			case OPTION_PERSON:
-				page = this.FUND_PAGE;
+				page = this.PERSON_PAGE;
 				//累积捐赠、捐赠项目数
 				TCsqUser csqUser = csqUserDao.selectByPrimaryKey(entityId);
 				Long tUserId = csqUser.getId();
@@ -685,7 +687,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			List<Long> userIds = tCsqOrders.stream()
 				.map(TCsqOrder::getUserId).collect(Collectors.toList());
 			Long[] userIdArray = userIds.toArray(new Long[userIds.size()]);
-			csqMsgService.insertTemplateMsg(name, CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME, userIdArray);	//TODO
+			csqMsgService.insertTemplateMsg(name, CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME, userIdArray);	//TODO distinct
 		}
 		if (StringUtil.isEmpty(wholeDescription)) {
 			description = "从" + name + suffix + "拨款";

@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -50,6 +51,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private CsqUserPaymentDao csqUserPaymentDao;
 	@Autowired
 	private CsqOrderDao csqOrderDao;
+	@Autowired
+	private CsqUserService csqUserService;
 	@Value("${page.person}")
 	private String PERSON_PAGE;
 
@@ -205,7 +208,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		map.put("money", money);
 		accountMoney = NumberUtil.keep2Places(accountMoney);
 		map.put("countMoney", accountMoney);
-		//page
+		/*//page
 		String page = PERSON_PAGE;
 		TCsqKeyValue build = TCsqKeyValue.builder()
 			.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
@@ -214,7 +217,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.build();
 		csqKeyValueDao.save(build);
 		String sceneKey = build.getId().toString();
-		String qrCode = wechatService.genQRCode(sceneKey, page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);
+		String qrCode = wechatService.genQRCode(sceneKey, page, UploadPathEnum.innerEnum.CSQ_CERTIFICATE);*/
+		Map<String, Object> shareMap = csqUserService.share(userId, userId, 0);
+		String qrCode = (String) shareMap.get("qrCode");
+
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("code", qrCode);
 		map.put("time", DateUtil.timeStamp2Date(record.getCreateTime().getTime()));
@@ -230,13 +236,26 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		String hour = hmList.get(0);
 		String minute = hmList.get(1);
 		map.put("date", date);
-		String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
-			"特发此证，以资感谢！";
+		/*String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+			"特发此证，以资感谢！";*/
+		String description = "感谢您对公益事业的支持!\n"
+				+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
+				+ "用于" + serviceName + "。\n"
+			    + "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
+				+ "\n"
+				+ "谨以此证向您表示最真诚的的感谢！";
 		if(isSpecial) {
-			description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
-				"特发此证，以资感谢！";
+			/*description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
+				"特发此证，以资感谢！";*/
+			description = "感谢您对公益事业的支持!\n"
+				+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
+				+ "用于" + "公益事业" + "。\n"
+				+ "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
+				+ "\n"
+				+ "谨以此证向您表示最真诚的的感谢！";
 		}
-
+		String dateDesc = year + "年" + month + "月" + day + "日";
+		map.put("date", dateDesc);
 		map.put("description", description);
 		return map;
 	}

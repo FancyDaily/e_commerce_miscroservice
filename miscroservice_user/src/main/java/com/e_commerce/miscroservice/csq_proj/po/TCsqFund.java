@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-06-10 09:47
  */
-@Table(commit = "从善桥专项基金表")
+@Table(commit = "从善桥专项基金表", charset = "utf8mb4")
 @Data(matchSuffix = true)
 @Builder
 @NoArgsConstructor
@@ -36,13 +36,13 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "关注方向(publish表对于id")
 	private String trendPubKeys;
 
-	@Column(commit = "基金名")
+	@Column(commit = "基金名", charset = "utf8mb4")
 	private String name;
 
 	@Column(commit = "详细图")
 	private String detailPic;
 
-	@Column(commit = "描述")
+	@Column(commit = "描述", charset = "utf8mb4")
 	private String description;
 
 	@Column(commit = "封面图")

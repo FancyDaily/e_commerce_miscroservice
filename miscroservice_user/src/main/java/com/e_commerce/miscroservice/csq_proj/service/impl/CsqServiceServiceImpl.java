@@ -142,7 +142,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		} else if (OPTION_DONATED.equals(option)) {
 			//找到我捐助过的项目记录
 //			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode());
-			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdInToTypeDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode());
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdInToTypeAndStatusDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode());
 			//构建时间map用于排序
 			Map<Long, List<TCsqOrder>> toIdOrderMap = tCsqOrders.stream()
 				.collect(Collectors.groupingBy(TCsqOrder::getToId));

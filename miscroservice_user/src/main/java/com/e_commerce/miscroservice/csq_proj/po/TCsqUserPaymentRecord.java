@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-06-10 09:55
  */
-@Table(commit = "从善桥流水表")
+@Table(commit = "从善桥流水表", charset = "utf8mb4")
 @Data
 @Builder
 @NoArgsConstructor
@@ -43,7 +43,7 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	@Transient
 	private String date;
 
-	@Column(commit = "描述")
+	@Column(commit = "描述", charset = "utf8mb4")
 	private String description;
 
 	@Column(commit = "收入0/支出1", length = 11, isNUll = false)
