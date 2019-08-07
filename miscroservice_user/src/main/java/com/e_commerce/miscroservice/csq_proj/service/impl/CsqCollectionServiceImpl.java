@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description 收藏表
@@ -104,7 +101,9 @@ public class CsqCollectionServiceImpl implements CsqCollectionService {
 		serviceList.forEach(csqService -> {
 			Integer type = csqService.getType();
 			CsqCollectionVo csqCollectionVo = new CsqCollectionVo();
-			csqCollectionVo.setCoverPic(csqService.getCoverPic());
+			String coverPic = csqService.getCoverPic();
+			coverPic = coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic;
+			csqCollectionVo.setCoverPic(coverPic);
 			csqCollectionVo.setDesc(csqService.getDescription());
 			csqCollectionVo.setDetailPic(csqService.getDetailPic());
 			csqCollectionVo.setName(csqService.getName());
