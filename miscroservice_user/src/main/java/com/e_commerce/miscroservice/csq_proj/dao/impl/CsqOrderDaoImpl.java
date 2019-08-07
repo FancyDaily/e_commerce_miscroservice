@@ -284,6 +284,13 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), build.page(pageNum, pageSize));
 	}
 
+	@Override
+	public List<TCsqOrder> selectByUserIdInToTypeAndStatusDesc(Long userId, int toCode, int toCode1) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), byUserIdInToTypeBuild(userId)
+			.eq(TCsqOrder::getStatus, CsqOrderEnum.STATUS_ALREADY_PAY.getCode())
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
+	}
+
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
 		return new MybatisPlusBuild(TCsqOrder.class)
 			.eq(TCsqOrder::getFromId, fundId)
@@ -293,11 +300,15 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	}
 
 	private MybatisPlusBuild byUserIdInToTypeDescBuild(Long userId) {
+		return byUserIdInToTypeBuild(userId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime));
+	}
+
+	private MybatisPlusBuild byUserIdInToTypeBuild(Long userId) {
 		return new MybatisPlusBuild(TCsqOrder.class)
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
-			.in(TCsqOrder::getToType, Arrays.asList(CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()))
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime));
+			.in(TCsqOrder::getToType, Arrays.asList(CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()));
 	}
 
 }

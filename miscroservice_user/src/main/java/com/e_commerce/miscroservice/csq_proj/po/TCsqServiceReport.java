@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-06-10 10:02
  */
-@Table(commit = "从善桥项目汇报表")
+@Table(commit = "从善桥项目汇报表", charset = "utf8mb4")
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,10 +24,10 @@ public class TCsqServiceReport extends BaseEntity {
 
 	private Long serviceId;
 
-	@Column(commit = "标题")
+	@Column(commit = "标题", charset = "utf8mb4")
 	private String title;
 
-	@Column(commit = "描述")
+	@Column(commit = "描述", charset = "utf8mb4")
 	private String description;
 
 	@Column(commit = "图片")

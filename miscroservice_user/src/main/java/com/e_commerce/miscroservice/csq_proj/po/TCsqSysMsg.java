@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-06-10 09:58
  */
-@Table(commit = "从善桥系统消息表")
+@Table(commit = "从善桥系统消息表", charset = "utf8mb4")
 @Data(matchSuffix = true)
 @Builder
 @NoArgsConstructor
@@ -34,10 +34,10 @@ public class TCsqSysMsg extends BaseEntity {
 	@Column(commit = "类别", length = 11, isNUll = false, defaultVal = "1")
 	private Integer type;
 
-	@Column(commit = "标题")
+	@Column(commit = "标题", charset = "utf8mb4")
 	private String title;
 
-	@Column(commit = "内容(可能为项目编号)")
+	@Column(commit = "内容(可能为项目编号)", charset = "utf8mb4")
 	private String content;
 
 	@Column(commit = "项目编号")

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-06-12 10:14
  */
-@Table(commit = "从善桥用户表")
+@Table(commit = "从善桥用户表", charset = "utf8mb4")
 @Data(matchSuffix = true)
 @Builder
 @NoArgsConstructor
@@ -39,7 +39,7 @@ public class TCsqUser extends BaseEntity {
 	@Column(commit = "账号")
 	private String userAccount;
 
-	@Column(commit = "昵称")
+	@Column(commit = "昵称", charset = "utf8mb4")
 	private String name;
 
 	@Column(commit = "手机号")
@@ -88,7 +88,7 @@ public class TCsqUser extends BaseEntity {
 	@Column(commit = "关注数", length = 11, defaultVal = "0")
 	private Integer followNum;
 
-	@Column(commit = "个人描述")
+	@Column(commit = "个人描述", charset = "utf8mb4")
 	private String remarks;
 
 	@Column(commit = "等级", length = 11, defaultVal = "1")

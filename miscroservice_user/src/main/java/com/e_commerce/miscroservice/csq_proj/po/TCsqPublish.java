@@ -30,7 +30,7 @@ public class TCsqPublish extends BaseEntity {
 	@Column(commit = "业务类型描述", defaultVal = "未知")
 	private String keyDesc;
 
-	@Column(commit = "值(json)")
+	@Column(commit = "值(json)", charset = "utf8mb4")
 	private String value;
 
 

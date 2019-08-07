@@ -43,16 +43,16 @@ public class TCsqUserInvoice extends BaseEntity {
 	@Column(commit = "类型(0个人、1企业)", length = 11, isNUll = false)
 	private Integer type;
 
-	@Column(commit = "抬头")
+	@Column(commit = "抬头", charset = "utf8mb4")
 	private String name;
 
 	@Column(commit = "税号", length = 11, isNUll = false)
 	private String taxNo;
 
-	@Column(commit = "地址")
+	@Column(commit = "地址", charset = "utf8mb4")
 	private String addr;
 
-	@Column(commit = "收件人")
+	@Column(commit = "收件人", charset = "utf8mb4")
 	private String person;
 
 	@Column(commit = "联系方式")

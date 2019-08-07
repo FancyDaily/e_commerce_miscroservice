@@ -16,7 +16,7 @@ import java.util.List;
  * @Author: FangyiXu
  * @Date: 2019-06-10 10:01
  */
-@Table(commit = "从善桥项目表")
+@Table(commit = "从善桥项目表", charset = "utf8mb4")
 @Data
 @Builder
 @NoArgsConstructor
@@ -62,7 +62,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "项目方向pubkeyId")
 	private String typePubKeys;
 
-	@Column(commit = "项目名称")
+	@Column(commit = "项目名称", charset = "utf8mb4")
 	private String name;
 
 	@Column(commit = "备案编号")
@@ -71,7 +71,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "状态", length = 11, defaultVal = "-1")
 	private Integer status;
 
-	@Column(commit = "目的描述")
+	@Column(commit = "目的描述", charset = "utf8mb4")
 	private String purpose;
 
 	@Column(commit = "累积收到金额(已筹金额)", precision = 2, defaultVal = "0.00")
@@ -98,7 +98,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "封面图")
 	private String coverPic;
 
-	@Column(commit = "描述")
+	@Column(commit = "描述", charset = "utf8mb4")
 	private String description;
 
 	@Column(commit = "描述图")
