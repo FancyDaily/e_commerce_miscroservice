@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -109,6 +110,7 @@ public class CsqFundController {
 	 * @param status          基金状态(用于发起审核)
 	 * @param agentModeStatus 代理状态
 	 * @param detailPic	详情图
+	 * @param purpose	目的描述(概述
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -116,15 +118,15 @@ public class CsqFundController {
 	@UrlAuth
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 								   String description, String coverPic, String orgName, String orgAddr, String detailPic,
-								   String contact, String personInCharge, String creditCardName, String creditCardId,
+								   String contact, String personInCharge, String creditCardName, String creditCardId,String purpose,
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}, detailPic={}",
-				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId, detailPic);
+			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}, detailPic={}, purpose={}",
+				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId, detailPic, purpose);
 			fundService.modifyFund(vo.getUserId(), csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {

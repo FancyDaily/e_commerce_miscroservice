@@ -48,6 +48,9 @@ public class CsqFundVo {
 
 	private Long userId;
 
+	@Column(commit = "目的描述", charset = "utf8mb4")
+	private String purpose;
+
 	@Column(commit = "累积资助项目次数", defaultVal = "0")
 	private Integer helpCnt;
 

@@ -176,7 +176,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 		String detailPic = fund.getDetailPic();
 		String creditCardId = fund.getCreditCardId();
 		String creditCardName = fund.getCreditCardName();
-		return !StringUtil.isAnyEmpty(trendPubKeys, name, description, coverPic, detailPic
+		String purpose = fund.getPurpose();
+		return !StringUtil.isAnyEmpty(trendPubKeys, name, description, coverPic, detailPic, purpose
 //			,creditCardId
 //			,creditCardName
 		);
