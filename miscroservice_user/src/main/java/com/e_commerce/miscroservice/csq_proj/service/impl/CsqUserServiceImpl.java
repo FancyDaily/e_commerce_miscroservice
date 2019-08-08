@@ -871,13 +871,19 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void payInviter(Long beInviterId, String sceneKey) {
+	public void payInviter(Long beInviterId, String sceneKey, Long inviterId) {
 		//处理 sceneKey
-		TCsqKeyValue keyValue = csqKeyValueDao.selectByPrimaryKey(sceneKey);
-		if(keyValue == null) {	//对应scene无效
+		if(!StringUtil.isEmpty(sceneKey)) {
+			TCsqKeyValue keyValue = csqKeyValueDao.selectByPrimaryKey(sceneKey);
+			if(keyValue == null) {	//对应scene无效
+				return;
+			}
+			inviterId = keyValue.getMainKey();	//邀请人
+		}
+		//2次check
+		if(inviterId==null) {	//无效邀请人信息
 			return;
 		}
-		Long inviterId = keyValue.getMainKey();	//邀请人
 		//建立关系
 		//防止重复插入
 		String theVal = beInviterId.toString();

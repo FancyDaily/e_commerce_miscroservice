@@ -622,16 +622,17 @@ public class CsqUserController {
 	/**
 	 * 邀请回馈
 	 * @param sceneKey 场景值
+	 * @param inviterId 邀请人编号
 	 * @return
 	 */
 	@RequestMapping("payInviter")
 	@UrlAuth
-	public Object payInviter(String sceneKey) {
+	public Object payInviter(String sceneKey, Long inviterId) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = UserUtil.getTestId();
 		try {
-			log.info("邀请回馈, userId={}, scene={}", userIds, sceneKey);
-			csqUserService.payInviter(userIds, sceneKey);
+			log.info("邀请回馈, userId={}, sceneKey={}, inviterId={}", userIds, sceneKey, inviterId);
+			csqUserService.payInviter(userIds, sceneKey, inviterId);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "邀请回馈", e.getMessage());

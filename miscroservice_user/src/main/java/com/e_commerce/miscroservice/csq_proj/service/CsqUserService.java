@@ -176,8 +176,9 @@ public interface CsqUserService {
 	 * 邀请回馈
 	 * @param userIds
 	 * @param scene
+	 * @param inviterId
 	 */
-	void payInviter(Long userIds, String scene);
+	void payInviter(Long userIds, String scene, Long inviterId);
 
 	/**
 	 * 提交组织实名认证
