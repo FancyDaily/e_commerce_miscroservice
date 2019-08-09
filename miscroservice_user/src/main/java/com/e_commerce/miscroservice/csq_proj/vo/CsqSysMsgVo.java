@@ -28,6 +28,8 @@ public class CsqSysMsgVo {
 
 	private Integer serviceType;
 
+	private String personInCharge;	//负责人
+
 	private String name;
 
 	private String description;

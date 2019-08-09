@@ -421,6 +421,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		csqDailyDonateVo.setDailyIncome(dailyIncome);
 		csqDailyDonateVo.setDonateCnt(donateCnt);
+		csqDailyDonateVo.setPersonInCharge(csqService.getPersonInCharge());
 
 		return csqDailyDonateVo;
 	}

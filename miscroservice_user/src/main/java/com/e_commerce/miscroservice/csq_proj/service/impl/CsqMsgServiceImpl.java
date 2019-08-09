@@ -108,6 +108,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 				csqSysMsgVo.setCoverPic(coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic);
 				csqSysMsgVo.setSumTotalIn(tCsqService.getSumTotalIn());
 				csqSysMsgVo.setServiceType(tCsqService.getType());
+				csqSysMsgVo.setPersonInCharge(tCsqService.getPersonInCharge());
 				return csqSysMsgVo;
 			}).collect(Collectors.toList());
 
