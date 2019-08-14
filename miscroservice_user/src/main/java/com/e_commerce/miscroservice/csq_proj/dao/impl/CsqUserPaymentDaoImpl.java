@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -41,6 +42,11 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 	@Override
 	public int insert(TCsqUserPaymentRecord... build) {
 		return MybatisPlus.getInstance().save(build);
+	}
+
+	@Override
+	public int insert(List<TCsqUserPaymentRecord> builds) {
+		return MybatisPlus.getInstance().save(builds);
 	}
 
 	@Override
@@ -90,6 +96,25 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize)
 		);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByNotNullExtend() {
+		/*return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.isNotNull(TCsqUserPaymentRecord::getExtend));*/
+		List<TCsqUserPaymentRecord> all = MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES));
+		return all.stream()
+			.filter(a -> a.getExtend() != null).collect(Collectors.toList());
+	}
+
+	@Override
+	public int update(List<TCsqUserPaymentRecord> toUpdater) {
+		List<Long> toUpdaterIds = toUpdater.stream()
+			.map(TCsqUserPaymentRecord::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(toUpdater, new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.in(TCsqUserPaymentRecord::getId, toUpdaterIds));
+
 	}
 
 	private MybatisPlusBuild inOrderIdsAndInOutDescBuild(List<Long> orderIds, int toCode) {

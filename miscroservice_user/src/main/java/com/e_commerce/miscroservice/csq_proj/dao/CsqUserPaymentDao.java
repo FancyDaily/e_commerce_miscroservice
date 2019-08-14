@@ -14,6 +14,8 @@ public interface CsqUserPaymentDao {
 
 	int insert(TCsqUserPaymentRecord... build);
 
+	int insert(List<TCsqUserPaymentRecord> builds);
+
 	int multiInsert(List<TCsqUserPaymentRecord> builds);
 
 	List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDesc(Long serviceId, int toCode, int toCode1);
@@ -27,4 +29,8 @@ public interface CsqUserPaymentDao {
 	List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDescPage(Long serviceId, int toCode, int toCode1);
 
 	List<TCsqUserPaymentRecord> selectInOrderIdsAndInOutDescPage(Integer pageNum, Integer pageSize, List<Long> orderIds, int toCode);
+
+	List<TCsqUserPaymentRecord> selectByNotNullExtend();
+
+	int update(List<TCsqUserPaymentRecord> toUpdater);
 }

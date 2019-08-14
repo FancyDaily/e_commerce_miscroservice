@@ -22,7 +22,7 @@ public interface CsqServiceService {
 	 * @param userId
 	 * @param service
 	 */
-	void publish(Long userId, TCsqService service);
+	Long publish(Long userId, TCsqService service);
 
 	/**
 	 * 项目列表
@@ -127,4 +127,6 @@ public interface CsqServiceService {
 	 * @return
 	 */
 	CsqServiceReportVo reportDetail(Long serviceReportId);
+
+	TCsqService selectByExtend(String extend);
 }

@@ -1,11 +1,13 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -16,10 +18,8 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqFundService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
-import com.e_commerce.miscroservice.xiaoshi_proj.order.dao.OrderDao;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
 import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -30,7 +30,6 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum.STATUS_ALREADY_PAY;
 
@@ -40,6 +39,7 @@ import static com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnu
  */
 @Transactional(rollbackFor = Throwable.class)
 @Component
+@Log
 public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Autowired
@@ -82,7 +82,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	public static String CSQ_GLOBAL_DONATE_BROADCAST = "csq:global:doante:broadcast";
 
 	@Override
-	public void publish(Long userId, TCsqService service) {
+	public Long publish(Long userId, TCsqService service) {
 		//check用户是否满足发布项目的前置条件
 		//1.组织账户
 		//2.已通过机构认证
@@ -98,6 +98,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		//check名下同名项目
 		List<TCsqService> tCsqServices = csqServiceDao.selectByNameAndUserId(name, userId);
 		if (!tCsqServices.isEmpty()) {
+			log.warn("存在同名项目, name={}", name);
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在同名项目!");
 		}
 
@@ -108,6 +109,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		service.setStatus(CsqServiceEnum.STATUS_INITIAL.getCode());
 		service.setType(CsqServiceEnum.TYPE_SERIVE.getCode());
 		csqServiceDao.insert(service);
+		return service.getId();
 	}
 
 	@Override
@@ -615,6 +617,12 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		CsqServiceReportVo csqServiceReportVo = tCsqServiceReport.copyCsqServiceReportVo();
 		csqServiceReportVo.setDate(com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2Date(tCsqServiceReport.getCreateTime().getTime()));
 		return csqServiceReportVo;
+	}
+
+	@Override
+	public TCsqService selectByExtend(String extend) {
+		return MybatisPlus.getInstance().findOne(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getExtend, extend));
 	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {

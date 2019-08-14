@@ -104,4 +104,10 @@ public class CsqFunDaoImpl implements CsqFundDao {
 		return MybatisPlus.getInstance().findAll(new TCsqFund(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public TCsqFund selectByExtend(String extend) {
+		return MybatisPlus.getInstance().findOne(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getExtend, extend));
+	}
+
 }

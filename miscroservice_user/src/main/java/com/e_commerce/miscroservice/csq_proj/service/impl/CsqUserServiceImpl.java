@@ -981,4 +981,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 		return name;
 	}
 
+	@Override
+	public void testRegister(TCsqUser csqUser) {
+		register(csqUser);
+	}
 }

@@ -200,4 +200,6 @@ public interface CsqUserService {
 	 * @return
 	 */
 	CsqSceneVo getScene(String sceneKey);
+
+	void testRegister(TCsqUser csqUser);
 }

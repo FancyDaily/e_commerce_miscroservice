@@ -30,4 +30,6 @@ public interface CsqFundDao {
 	TCsqFund selectByUserIdAndPrimaryKey(Long userId, Long fundId);
 
 	List<TCsqFund> selectByUserIdInStatusDescPage(Long userId, Integer[] option, Integer pageNum, Integer pageSize);
+
+	TCsqFund selectByExtend(String extend);
 }

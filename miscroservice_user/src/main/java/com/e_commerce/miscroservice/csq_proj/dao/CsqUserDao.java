@@ -16,7 +16,9 @@ public interface CsqUserDao {
 
 	int updateByPrimaryKey(TCsqUser tCsqUser);
 
-	int insert(TCsqUser user);
+	int insert(TCsqUser... user);
+
+	int insert(List<TCsqUser> user);
 
 	List<TCsqUser> selectByVxOpenId(String openId);
 
@@ -31,4 +33,6 @@ public interface CsqUserDao {
 	TCsqUser selectByUserTelAndPasswordAndAccountType(String telephone, String password, Integer accountType);
 
 	List<TCsqUser> selectAll();
+
+	TCsqUser selectByOldId(String oldIdStr);
 }

@@ -34,7 +34,7 @@ public class MybatisPlugConfig {
 		dbHandler.setPackageBase("com.e_commerce.miscroservice.csq_proj.po");
         dbHandler.setShowSql(Boolean.TRUE);
         dbHandler.setAlwaysInit(Boolean.TRUE);
-//        dbHandler.generate(false,"t" ,"com.e_commerce.miscroservice.user.controller.doz","t*");
+//        dbHandler.generate(false,"t" ,"com.e_commerce.miscroservice.csq_proj.po.test","t*");
         return dbHandler;
     }
 

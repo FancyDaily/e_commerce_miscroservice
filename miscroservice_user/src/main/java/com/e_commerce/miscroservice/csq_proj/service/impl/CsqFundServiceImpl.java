@@ -112,15 +112,16 @@ public class CsqFundServiceImpl implements CsqFundService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "所有必要参数为空");
 		}
 		//check实名
-		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
-		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
-		}
+//		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
+//		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
+//			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
+//		}
 		Long fundId = fund.getId();
 		if(fundId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "fundId不能为空!");
 		}
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		Long finalUserId = csqFund.getUserId();
 		Integer currentStatus = csqFund.getStatus();
 		//包含[申请公开]基金业务
 		Integer status = fund.getStatus();
@@ -149,8 +150,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 						.build();
 					fundDao.update(build);
 					csqFund.setStatus(CsqFundEnum.STATUS_PUBLIC.getVal());
-					csqFund.setName(fund.getName());
-					csqMsgService.sendServiceMsgForFund(csqFund, userId);
+					csqFund.setName(fund.getName() == null? csqFund.getName(): fund.getName());
+					csqMsgService.sendServiceMsgForFund(csqFund, finalUserId);
 				}
 				csqServiceService.synchronizeService(csqFund);
 			}
