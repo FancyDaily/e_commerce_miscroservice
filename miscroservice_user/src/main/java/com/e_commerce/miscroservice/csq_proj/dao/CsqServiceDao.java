@@ -75,4 +75,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectInIdsOrInFundIdsPage(Integer pageNum, Integer pageSize, List<Long> serviceIds, List<Long> fundIds);
 
 	List<TCsqService> selectLikeByPubKeysAndUserIdNeqAndFundStatus(String a, Long userId);
+
+	int multiUpdate(List<TCsqService> oldServices);
 }

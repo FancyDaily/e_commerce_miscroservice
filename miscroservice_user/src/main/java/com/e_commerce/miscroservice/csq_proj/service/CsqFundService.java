@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,4 +95,5 @@ public interface CsqFundService {
 
 	boolean isMine(Long fundId, Long userId);
 
+	List<TCsqFund> selectAllAndIdGreaterThan(long l);
 }

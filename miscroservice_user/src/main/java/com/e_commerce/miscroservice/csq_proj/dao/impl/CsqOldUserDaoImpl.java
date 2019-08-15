@@ -35,4 +35,10 @@ public class CsqOldUserDaoImpl implements CsqOldUserDao {
 		return MybatisPlus.getInstance().findOne(new TOldUser(), new MybatisPlusBuild(TOldUser.class)
 			.eq(TOldUser::getId, valueOf));
 	}
+
+	@Override
+	public List<TOldUser> selectInPrimaryKeys(List<Long> oldIds) {
+		return MybatisPlus.getInstance().findAll(new TOldUser(), new MybatisPlusBuild(TOldUser.class)
+			.in(TOldUser::getId));
+	}
 }

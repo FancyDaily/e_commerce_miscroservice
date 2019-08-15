@@ -982,7 +982,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void testRegister(TCsqUser csqUser) {
-		register(csqUser);
+	public TCsqUser testRegister(TCsqUser csqUser) {
+		return register(csqUser);
 	}
 }

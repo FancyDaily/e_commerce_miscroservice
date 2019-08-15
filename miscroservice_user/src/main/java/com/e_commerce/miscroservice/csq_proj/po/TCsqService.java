@@ -77,7 +77,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "累积收到金额(已筹金额)", precision = 2, defaultVal = "0.00")
 	private Double sumTotalIn;
 
-	@Column(commit = "累积被捐助次数",  defaultVal = "0")
+	@Column(commit = "累积被捐助次数",  length = 11, defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "剩余金额", precision = 2, defaultVal = "0.00")

@@ -78,7 +78,7 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "资金累积总收入", precision = 2, defaultVal = "0")
 	private Double sumTotalIn;
 
-	@Column(commit = "资金累积流入次数", defaultVal = "0")
+	@Column(commit = "资金累积流入次数", length = 11, defaultVal = "0")
 	private Integer totalInCnt;
 
 	@Column(commit = "托管状态(0未托管，1托管)", defaultVal = "0")
@@ -87,7 +87,7 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "状态(未激活、未公开、审核中、已公开、审核未通过)", defaultVal = "-1")
 	private Integer status;
 
-	@Column(commit = "累积资助项目次数", defaultVal = "0")
+	@Column(commit = "累积资助项目次数", length = 11, defaultVal = "0")
 	private Integer helpCnt;
 
 	public CsqFundVo copyCsqFundVo() {

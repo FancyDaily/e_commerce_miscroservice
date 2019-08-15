@@ -62,4 +62,30 @@ public class CsqOldServiceDaoImpl implements CsqOldServiceDao {
 			.eq(TOldService::getDtype, pf));
 	}
 
+	@Override
+	public List<TOldService> selectByStatusByCheckStatusByDTypeAndDonationAmountNeq(int status, int checkStatus, String pf, String s) {
+		return MybatisPlus.getInstance().findAll(new TOldService(), new MybatisPlusBuild(TOldService.class)
+			.eq(TOldService::getStatus, status)
+			.eq(TOldService::getCheckstatus, checkStatus)
+			.eq(TOldService::getDtype, pf)
+			.neq(TOldService::getDonationamount, s));
+	}
+
+	@Override
+	public List<TOldService> selectByStatusByCheckStatusByDTypeAndDonationAmountNeqAndFinTypeNeq(int status, int checkStatus, String pf, String s, String finType) {
+		return MybatisPlus.getInstance().findAll(new TOldService(), new MybatisPlusBuild(TOldService.class)
+			.eq(TOldService::getStatus, status)
+			.eq(TOldService::getCheckstatus, checkStatus)
+			.eq(TOldService::getDtype, pf)
+			.neq(TOldService::getDonationamount, s)
+			.neq(TOldService::getFintype, finType)
+		);
+	}
+
+	@Override
+	public List<TOldService> selectInNames(List<String> serviceNames) {
+		return MybatisPlus.getInstance().findAll(new TOldService(), new MybatisPlusBuild(TOldService.class)
+			.in(TOldService::getTitle, serviceNames));
+	}
+
 }

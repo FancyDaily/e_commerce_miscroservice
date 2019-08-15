@@ -22,4 +22,10 @@ public interface CsqDataTransferService {
 	String getGrowthFundRecords();
 
 	void dealWithFundNService();
+
+	void dealWithFundNeqGuanMing();
+
+	void dealWithPic();
+
+	void dealWithServicePic();
 }

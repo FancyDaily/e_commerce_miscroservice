@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.csq_proj.dao.impl;
 
-import com.alipay.api.domain.AlipayFundTransDishonorQueryModel;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
 import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
@@ -9,11 +8,11 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -229,6 +228,16 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.or()
 			.eq(TCsqService::getTypePubKeys, a)
 			.groupAfter());
+	}
+
+	@Override
+	public int multiUpdate(List<TCsqService> oldServices) {
+		oldServices = oldServices.stream()
+			.filter(a -> a != null).collect(Collectors.toList());
+		List<Long> updaterIds = oldServices.stream()
+			.map(TCsqService::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(oldServices, new MybatisPlusBuild(TCsqService.class)
+			.in(TCsqService::getId, updaterIds));
 	}
 
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {

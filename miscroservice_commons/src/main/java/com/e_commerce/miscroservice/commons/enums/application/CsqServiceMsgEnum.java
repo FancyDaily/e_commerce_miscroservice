@@ -9,11 +9,11 @@ import java.util.Optional;
  */
 public enum CsqServiceMsgEnum {
 
-	FUND_PUBLIC_SUCCESS(CsqSysMsgTemplateEnum.FUND_PUBLIC_SUCCESS.getCode(), "项目筹款目标达成", "package/logs/pages/shareJinji/shareJinji", "uB6i-_PyETK8W95Ipt8szxQ0_CWwq9MkNSmPMS9j0D8"),
-	CORP_CERT_SUCCESS(CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS.getCode(), "企业认证成功", "/pages/logs/logs", "_jrRQH6g0xY5FChU7Z3_iZqh2olm5IjE0TMNncUmfAI"),
-	CORP_CERT_FAIL(CsqSysMsgTemplateEnum.CORP_CERT_FAIL.getCode(), "企业认证失败", "/package/logs/pages/zuzhirenzheng/zuzhirenzheng", "_jrRQH6g0xY5FChU7Z3_iZqh2olm5IjE0TMNncUmfAI"),
+	FUND_PUBLIC_SUCCESS(CsqSysMsgTemplateEnum.FUND_PUBLIC_SUCCESS.getCode(), "项目筹款目标达成", "package/logs/pages/shareJinji/shareJinji", "FJsfr6rFXxwSvOYPPqZUbvUBSi50D4n2ViT98uCbZBw"),
+	CORP_CERT_SUCCESS(CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS.getCode(), "企业认证成功", "/pages/logs/logs", "Kx1BZks9nZxWD0EKEH1ndArPAlgNQt-pq9F0cg6ea_o"),
+	CORP_CERT_FAIL(CsqSysMsgTemplateEnum.CORP_CERT_FAIL.getCode(), "企业认证失败", "/package/logs/pages/zuzhirenzheng/zuzhirenzheng", "Kx1BZks9nZxWD0EKEH1ndArPAlgNQt-pq9F0cg6ea_o"),
 	SERVICE_NOTIFY_WHILE_CONSUME(CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME.getCode(), "项目资金消耗", "/package/logs/pages/shareDetail/shareDetail", ""),
-	INVOICE_DONE(CsqSysMsgTemplateEnum.INVOICE_DONE.getCode(), "发票已开具", "/package/logs/pages/piaoList/piaoList", "PiA4mWgPtZnaajP98JYWfEdopseqbUcc2ymkPkmTiEc")
+	INVOICE_DONE(CsqSysMsgTemplateEnum.INVOICE_DONE.getCode(), "发票已开具", "/package/logs/pages/piaoList/piaoList", "Xcnby6CR0pLf9oKBIteJsF36iPShQuTiPvsvbLaIo3M")
 	;
 
 	int code;

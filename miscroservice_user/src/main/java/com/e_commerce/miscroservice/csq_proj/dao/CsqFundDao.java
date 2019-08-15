@@ -32,4 +32,6 @@ public interface CsqFundDao {
 	List<TCsqFund> selectByUserIdInStatusDescPage(Long userId, Integer[] option, Integer pageNum, Integer pageSize);
 
 	TCsqFund selectByExtend(String extend);
+
+	int multiUpdate(List<TCsqFund> toUpdaterFunds);
 }

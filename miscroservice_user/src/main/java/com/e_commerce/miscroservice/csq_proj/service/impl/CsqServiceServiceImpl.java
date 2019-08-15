@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -624,6 +625,15 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		return MybatisPlus.getInstance().findOne(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getExtend, extend));
 	}
+
+	@Override
+	public List<TCsqService> findAllByTypeAndIdGreaterThan(int type, long id) {
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqService::getType, type)
+			.gt(TCsqService::getId, id));
+	}
+
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		return donateListNonePage(tCsqUserPaymentRecords, null);

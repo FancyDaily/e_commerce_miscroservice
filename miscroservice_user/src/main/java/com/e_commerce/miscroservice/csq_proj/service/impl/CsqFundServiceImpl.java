@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -111,11 +113,11 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(fund == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "所有必要参数为空");
 		}
-		//check实名
-//		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
-//		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
-//			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
-//		}
+		// check实名
+		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
+		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
+		}
 		Long fundId = fund.getId();
 		if(fundId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "fundId不能为空!");
@@ -502,6 +504,13 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public boolean isMine(Long fundId, Long userId) {
 		return fundDao.selectByUserIdAndPrimaryKey(userId, fundId) != null;
+	}
+
+	@Override
+	public List<TCsqFund> selectAllAndIdGreaterThan(long l) {
+		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
+			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES)
+			.gt(TCsqFund::getId, l));
 	}
 
 }

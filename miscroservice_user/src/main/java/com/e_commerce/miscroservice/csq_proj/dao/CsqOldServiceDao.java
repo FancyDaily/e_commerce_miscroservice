@@ -20,4 +20,10 @@ public interface CsqOldServiceDao {
 	List<TOldService> selectByStatusByCheckStatusAndAdderEqCHargePersonIdAndFinType(int i, int i1, String type);
 
 	List<TOldService> selectByStatusByCheckStatusByDType(int i, int i1, String pf);
+
+	List<TOldService> selectByStatusByCheckStatusByDTypeAndDonationAmountNeq(int i, int i1, String fund, String s);
+
+	List<TOldService> selectByStatusByCheckStatusByDTypeAndDonationAmountNeqAndFinTypeNeq(int i, int i1, String fund, String s, String 个人冠名基金);
+
+	List<TOldService> selectInNames(List<String> serviceNames);
 }

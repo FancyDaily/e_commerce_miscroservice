@@ -129,4 +129,6 @@ public interface CsqServiceService {
 	CsqServiceReportVo reportDetail(Long serviceReportId);
 
 	TCsqService selectByExtend(String extend);
+
+	List<TCsqService> findAllByTypeAndIdGreaterThan(int code, long l);
 }

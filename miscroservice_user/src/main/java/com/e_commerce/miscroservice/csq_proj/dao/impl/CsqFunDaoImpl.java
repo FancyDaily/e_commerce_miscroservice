@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -108,6 +109,18 @@ public class CsqFunDaoImpl implements CsqFundDao {
 	public TCsqFund selectByExtend(String extend) {
 		return MybatisPlus.getInstance().findOne(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 			.eq(TCsqFund::getExtend, extend));
+	}
+
+	@Override
+	public int multiUpdate(List<TCsqFund> toUpdaterFunds) {
+		toUpdaterFunds = toUpdaterFunds.stream()
+			.filter(a -> a != null).collect(Collectors.toList());
+
+		List<Long> toUpdaterIds = toUpdaterFunds.stream()
+			.map(TCsqFund::getId).collect(Collectors.toList());
+
+		return MybatisPlus.getInstance().update(toUpdaterFunds, new MybatisPlusBuild(TCsqFund.class)
+			.in(TCsqFund::getId, toUpdaterIds));
 	}
 
 }
