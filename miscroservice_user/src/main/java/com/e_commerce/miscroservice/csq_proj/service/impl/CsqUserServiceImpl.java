@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -36,6 +37,7 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
  */
 @Transactional(rollbackFor = Throwable.class)
 @Service
+@Log
 public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
@@ -950,6 +952,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 		String namePrefix = UserUtil.getApplicationNamePrefix(ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode());
 		Token token = authorizeRpcService.reg(namePrefix + userId, DEFAULT_PASS, userId.toString(), csqUser.getUuid(), Boolean.FALSE);
 
+
+		log.info("认证中心获取的token为={},msg={}",token!=null?token.getToken():"",token!=null?token.getMsg():"");
 		if (token != null && token.getToken() != null) {
 			csqUser.setToken(token.getToken());
 		}
