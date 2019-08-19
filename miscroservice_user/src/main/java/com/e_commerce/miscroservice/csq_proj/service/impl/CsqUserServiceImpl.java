@@ -153,6 +153,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 				tCsqUser.setUserTel(phoneNumber);
 				tCsqUser = register(tCsqUser);
 				isRegister = true;
+				token = tCsqUser.getToken();
 			}
 
 
