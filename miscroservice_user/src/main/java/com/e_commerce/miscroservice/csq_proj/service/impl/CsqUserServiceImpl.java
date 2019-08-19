@@ -146,6 +146,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setUuid(uuid);
 			tCsqUser = UserUtil.login(tCsqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
 			token = tCsqUser.getToken();
+			if(token==null||token.isEmpty()){
+				tCsqUser = new TCsqUser();
+				tCsqUser.setUuid(uuid);
+				tCsqUser.setVxOpenId(openid);
+				tCsqUser.setUserTel(phoneNumber);
+				tCsqUser = register(tCsqUser);
+				isRegister = true;
+			}
+
+
 		}
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("token", token);
