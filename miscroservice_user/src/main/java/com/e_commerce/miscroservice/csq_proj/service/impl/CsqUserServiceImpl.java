@@ -140,6 +140,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser = register(tCsqUser);
 			isRegister = true;
 		}
+
 		//登录
 		String token = tCsqUser.getToken();
 		if (token == null) {
@@ -147,13 +148,18 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser = UserUtil.login(tCsqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
 			token = tCsqUser.getToken();
 			if(token==null||token.isEmpty()){
-				tCsqUser = new TCsqUser();
-				tCsqUser.setUuid(uuid);
-				tCsqUser.setVxOpenId(openid);
-				tCsqUser.setUserTel(phoneNumber);
-				tCsqUser = register(tCsqUser);
-				isRegister = true;
-				token = tCsqUser.getToken();
+				if(tCsqUser!=null){
+					//注册到认证中心
+					String namePrefix = UserUtil.getApplicationNamePrefix(ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode());
+					Token to = authorizeRpcService.reg(namePrefix + tCsqUser.getId(), DEFAULT_PASS, tCsqUser.getId().toString(), tCsqUser.getUuid(), Boolean.FALSE);
+					if(to!=null){
+						token = to.getToken();
+					}
+
+
+				}
+
+
 			}
 
 
