@@ -2,10 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
-import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
@@ -137,10 +134,17 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		//处理用户与流水(1/2 账户充值流水)
 		List<TOldUser> tOldUsers = csqOldUserDao.selectAll();
 		List<TCsqUserPaymentRecord> toInserterPayment = new ArrayList<>();
+		List<TOldService> tOldServices = csqOldServiceDao.selectByNames("随手捐");
+		List<String> serviceIds = tOldServices.stream()
+			.map(TOldService::getId).collect(Collectors.toList());
 		List<TCsqUser> toInserters = tOldUsers.stream()
 			.map(a -> {
 				//有用信息
-
+				boolean flag = false;
+				String id = a.getId();
+				if(id.equals("153820346900000003")) {
+					flag = true;
+				}
 				Long oldId = Long.valueOf(a.getId());
 				String userTel = a.getAccount();
 				String openid = a.getOpenid();
@@ -160,11 +164,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				build.setCreateTime(new Timestamp(createTime));
 				//余额 -> 统计捐赠到随手捐或者爱心账户的数额 并 使得他们变成余额
 //				List<TOldService> tOldServices = csqOldServiceDao.selectByNames("随手捐", "成长基金");
-				List<TOldService> tOldServices = csqOldServiceDao.selectByNames("随手捐");
-				List<String> serviceIds = tOldServices.stream()
-					.map(TOldService::getId).collect(Collectors.toList());
 				List<TOldPayment> tOldPayments = serviceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectByOptionUserInPFId(a.getId(), serviceIds);
-
 
 				tOldPayments.stream()
 					.forEach(b -> {
@@ -244,6 +244,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				Long userId = userWithCurrentId.getId();
 
 				TCsqUserPaymentRecord csqUserPaymentRecord = TCsqUserPaymentRecord.builder()
+					.userId(userId)
 					.id(a.getId())
 					.entityId(userId)    //补缺 -> 获取正确的用户编号
 					.build();
@@ -318,11 +319,17 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		//TODO 1.拷贝基金(排除"随手捐"和"成长基金")到 -> 专项基金 现平台所有信息保留(创建专项基金流程、充值专项基金流程
 		Map<String, Integer> pfCount = new HashMap<>();
 		Map<String, Long> fundIdMap = new HashMap<>();
+		List<Map<String, Object>> toDealWithFakePay = new ArrayList<>();
 		paymentsOfFund.stream()
 			.forEach(a -> {
+				boolean flag = false;
+				if("153820346900000001".equals(a.getOptionuser())) {
+					flag = true;
+				}
 				String pfid = a.getPfid();
 				log.info("拷贝基金...当前的pfid={}, paymentId={}", pfid, a.getId());
 				List<TOldService> tOldServices1 = fundMap.get(pfid);
+				boolean createAFaker = false;
 				if (!tOldServices1.isEmpty()) {
 					Integer cnt = pfCount.get(pfid);
 					if (cnt == null) cnt = 0;
@@ -330,7 +337,9 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 					Double singleAmount = Double.valueOf(a.getDonationmoney());
 					Double amount = Double.valueOf(tOldService.getDonationamount());
-					if (amount > 0) {    //仅对筹款大于0的做保留
+					String remark = a.getRemark();
+					remark = remark == null? "":remark;
+					if (amount > 0 && !remark.contains("成长基金")) {    //仅对筹款大于0的做保留
 						String detail = tOldService.getDetail();
 						detail = detail == null ? "" : detail;
 						Long userId = getUserId(a.getOptionuser());    //找到 new
@@ -344,6 +353,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 										.remarks("为基金名\"" + tOldService.getTitle() + "\",旧编号为:" + tOldService.getId() + "而创建的假用户，该基金负责人名称为" + tOldService.getChargeperson() + ",编号为" + getUserId(chargepersonid)).build()
 								);
 								userId = csqUser.getId();
+								createAFaker = true;
 							} else {
 								userId = Long.valueOf(getUserId(chargepersonid));
 							}
@@ -363,10 +373,29 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 							TCsqFund build = builder
 								.build();
 							build.setExtend(pfid);    //旧的基金编号
-							Long fundId = csqPayService.fakeWechatPay(userId, null, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount,
-								build, Long.valueOf(DateUtil.wholeDateToStamp(a.getAddtime()))
-								//						.description(a.getDetail())
-							);//创建
+							Long fundId;
+							if(createAFaker) {	//代持
+								build.setUserId(userId);
+								build.setStatus(CsqFundEnum.STATUS_ACTIVATED.getVal());
+								csqFundDao.insert(build);
+								fundId = build.getId();
+							} else  {
+								fundId = csqPayService.fakeWechatPay(userId, null, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount,
+									build, Long.valueOf(DateUtil.wholeDateToStamp(a.getAddtime()))
+									//						.description(a.getDetail())
+								);//创建
+							}
+
+							if(createAFaker) {
+								csqPayService.fakeWechatPay(getUserId(a.getOptionuser()), fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount, null, Long.valueOf(DateUtil.dateToStamp(a.getAddtime())));    //单笔充值
+								/*Map<String, Object> theHoldingParam = new HashMap<>();
+								theHoldingParam.put("userId", userId);
+								theHoldingParam.put("entityId", fundId);
+								theHoldingParam.put("type", CsqEntityTypeEnum.TYPE_FUND.toCode());
+								toDealWithFakePay.add(theHoldingParam);*/
+							}
+
+
 							//fundId map
 							fundIdMap.put(pfid, fundId);
 						} else {

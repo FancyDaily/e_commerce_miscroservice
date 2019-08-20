@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -278,6 +279,11 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description) {
+		savePaymentRecord(userId, fromType, fromId, toType, toId, amount, orderId, description, null);
+	}
+
+	@Override
+	public void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description, Timestamp timestamp) {
 		boolean isFromHuman = CsqEntityTypeEnum.TYPE_HUMAN.toCode() == fromType;
 		String demoIncomeDesc = "充值";
 		TCsqUserPaymentRecord build3 = null;
@@ -292,6 +298,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //现金充值类型
 				.money(amount)
 				.orderId(orderId).build();
+				build3.setCreateTime(timestamp);
 			if (CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == toType) {    //仅向爱心账户充值
 				csqUserPaymentDao.insert(build3);
 				return;
@@ -316,6 +323,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.entityType(fromType)
 			.money(amount)
 			.orderId(orderId).build();
+		build1.setCreateTime(timestamp);
 
 		TCsqUserPaymentRecord build2 = TCsqUserPaymentRecord.builder()
 			.userId(beneficiaryId)
@@ -326,12 +334,13 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.entityType(toType)
 			.money(amount)
 			.orderId(orderId).build();
+		build2.setCreateTime(timestamp);
 		csqUserPaymentDao.multiInsert(build3 == null ? Arrays.asList(build1, build2) : Arrays.asList(build1, build2, build3));
 	}
 
 	@Override
 	public void savePaymentRecord(TCsqOrder tCsqOrder) {
-		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(), tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId());
+		savePaymentRecord(tCsqOrder.getUserId(), tCsqOrder.getFromType(), tCsqOrder.getFromId(), tCsqOrder.getToType(), tCsqOrder.getToId(), tCsqOrder.getPrice(), tCsqOrder.getId(), null, tCsqOrder.getCreateTime());
 	}
 
 	@Override

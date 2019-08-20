@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,8 @@ public interface CsqPaymentService {
 	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId);
 
 	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description);
+
+	void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description, Timestamp timestamp);
 
 	void savePaymentRecord(TCsqOrder tCsqOrder);
 

@@ -37,7 +37,7 @@ public class TCsqSysMsg extends BaseEntity {
 	@Column(commit = "标题", charset = "utf8mb4")
 	private String title;
 
-	@Column(commit = "内容(可能为项目编号)", charset = "utf8mb4")
+	@Column(commit = "内容(可能为项目编号)", charset = "utf8mb4", length = 2048)
 	private String content;
 
 	@Column(commit = "项目编号")
