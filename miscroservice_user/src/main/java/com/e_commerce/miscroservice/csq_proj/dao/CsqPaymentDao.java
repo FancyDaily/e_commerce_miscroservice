@@ -62,4 +62,7 @@ public interface CsqPaymentDao {
 
 	List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutDescPage(Integer pageNum, Integer pageSize, Long userId, Integer option);
 
+	List<TCsqUserPaymentRecord> selectByUserIdAndNeqEntityTypeDescPage(Long userId, Integer pageNum, Integer pageSize, Integer... entityType);
+
+	List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutAndNeqEntityDescPage(Integer pageNum, Integer pageSize, Long userId, Integer option, Integer... entityType);
 }

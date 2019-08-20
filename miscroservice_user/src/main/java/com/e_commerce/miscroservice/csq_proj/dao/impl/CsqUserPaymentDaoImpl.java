@@ -117,6 +117,13 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	}
 
+	@Override
+	public List<TCsqUserPaymentRecord> selectInEntityType(int... entityType) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.in(TCsqUserPaymentRecord::getEntityType, entityType));
+	}
+
 	private MybatisPlusBuild inOrderIdsAndInOutDescBuild(List<Long> orderIds, int toCode) {
 		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)

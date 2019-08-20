@@ -12,7 +12,6 @@ import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
-import org.bouncycastle.asn1.nist.NISTNamedCurves;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -20,6 +19,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -64,22 +64,44 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	@Autowired
 	private CsqServiceDao csqServiceDao;
 
+	@Autowired
+	CsqPaymentService csqPaymentService;
+
 	@Override
 	public void dealWithOpenid() {
 		//处理openid
 		MybatisPlus instance = MybatisPlus.getInstance();
 		List<TOldOpenId> all = instance.findAll(new TOldOpenId(), new MybatisPlusBuild(TOldOpenId.class));
 		ArrayList<TOldUser> toUpdaters = new ArrayList<>();
+		Map<String,String> cache=new ConcurrentHashMap<>();
 		all.stream()
 			.forEach(a -> {
-				String userid = a.getUserid();
-				TOldUser tOldUser = new TOldUser();
-				tOldUser.setId(userid);
-				tOldUser.setOpenid(a.getOpenid());
-				toUpdaters.add(tOldUser);
+				if(cache.putIfAbsent(a.getOpenid(),a.getOpenid())==null){
+
+					String userid = a.getUserid();
+					TOldUser tOldUser = new TOldUser();
+					tOldUser.setId(userid);
+					tOldUser.setOpenid(a.getOpenid());
+					toUpdaters.add(tOldUser);
+				}
+
 			});
 
-		csqOldUserDao.update(toUpdaters);
+		//将toUpdaters分段
+		ArrayList<TOldUser> toUpdater = new ArrayList<>();
+		for(int i=0; i < toUpdaters.size(); i++) {
+			/*if(toUpdaters.size() < 500) {
+				csqOldUserDao.update(toUpdaters);
+				break;
+			}
+			toUpdater.add(toUpdaters.get(i));
+			if((i > 500 && i % 500 == 0) || i == toUpdater.size() - 1) {	//每五百转更新一次
+				csqOldUserDao.update(toUpdater);
+				toUpdater = new ArrayList<>();
+			}*/
+
+			csqOldUserDao.update(toUpdaters.get(i));
+		}
 	}
 
 	@Override
@@ -150,7 +172,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 						TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
 							.orderId(null)    //缺失
 							.money(Double.valueOf(donationmoney == null ? "0" : donationmoney))    //金额
-							.entityType(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //账户余额
+							.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //账户余额
 							.entityId(null)
 							.description("充值")
 							.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
@@ -199,7 +221,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
 					.orderId(null)    //缺失
 					.money(Double.valueOf(donationmoney == null ? "0" : donationmoney))    //金额
-					.entityType(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //账户余额
+					.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //账户余额
 					.entityId(null)
 					.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
 					.description("充值")
@@ -289,8 +311,8 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		List<String> oldFundIds = fundTypeServices.stream()
 			.map(TOldService::getId).collect(Collectors.toList());
 		//流水
-		List<TOldPayment> paymentsOfFund = oldFundIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectInPfIdsDesc(oldFundIds);
-		List<TOldPayment> paymentsOfService = oldServiceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectInPfIdsDesc(oldServiceIds);
+		List<TOldPayment> paymentsOfFund = oldFundIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectInPfIdsAsc(oldFundIds);
+		List<TOldPayment> paymentsOfService = oldServiceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectInPfIdsAsc(oldServiceIds);
 
 		//TODO 拷贝
 		//TODO 1.拷贝基金(排除"随手捐"和"成长基金")到 -> 专项基金 现平台所有信息保留(创建专项基金流程、充值专项基金流程
@@ -342,7 +364,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 								.build();
 							build.setExtend(pfid);    //旧的基金编号
 							Long fundId = csqPayService.fakeWechatPay(userId, null, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount,
-								build
+								build, Long.valueOf(DateUtil.wholeDateToStamp(a.getAddtime()))
 								//						.description(a.getDetail())
 							);//创建
 							//fundId map
@@ -351,7 +373,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 							if (userId != null) {    //用户数据必须存在
 								//							Long fundId = getFundId(pfid);    //找到new
 								Long fundId = fundIdMap.get(pfid);
-								csqPayService.fakeWechatPay(userId, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount, null);    //单笔充值
+								csqPayService.fakeWechatPay(userId, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount, null, Long.valueOf(DateUtil.dateToStamp(a.getAddtime())));    //单笔充值
 							}
 						}
 						++cnt;
@@ -377,6 +399,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 									String adder = tOldService.getAdder();
 									Long userId = getUserId(adder);
 									TCsqService build = TCsqService.builder()
+										.expectedAmount(Double.valueOf(tOldService.getTotalamount()))
 										.name(tOldService.getTitle())
 										.description(detail.length() > 511 ? "" : detail)
 										//								.typePubKeys()	//意向
@@ -386,12 +409,12 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 									fundIdMap.put(pfid, serviceId);
 								}
 							}
-							Long serviceId = fundIdMap.get(pfid);
-							//捐赠
-							csqPayService.fakeWechatPay(getUserId(b.getOptionuser()), serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), Double.valueOf(b.getDonationmoney()), null);
 							cnt++;
 							pfCount.put(pfid, cnt);
 						}
+						Long serviceId = fundIdMap.get(pfid);
+						//捐赠
+						csqPayService.fakeWechatPay(getUserId(b.getOptionuser()), serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), Double.valueOf(b.getDonationmoney()), null, Long.valueOf(DateUtil.wholeDateToStamp(b.getAddtime())));
 					}
 				}
 			});
@@ -462,7 +485,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 								.build();
 							build.setExtend(pfid);    //旧的基金编号
 							Long fundId = csqPayService.fakeWechatPay(userId, null, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount,
-								build
+								build, Long.valueOf(DateUtil.wholeDateToStamp(a.getAddtime()))
 								//						.description(a.getDetail())
 							);//创建
 							//fundId map
@@ -471,7 +494,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 							if (userId != null) {    //用户数据必须存在
 								//							Long fundId = getFundId(pfid);    //找到new
 								Long fundId = fundIdMap.get(pfid);
-								csqPayService.fakeWechatPay(userId, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount, null);    //单笔充值
+								csqPayService.fakeWechatPay(userId, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), singleAmount, null, Long.valueOf(DateUtil.wholeDateToStamp(a.getAddtime())));    //单笔充值
 							}
 						}
 						++cnt;
@@ -484,8 +507,8 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	@Override
 	public void dealWithPic() {
 		//基金和项目。
-		List<TCsqService> csqServices = csqServiceService.findAllByTypeAndIdGreaterThan(CsqServiceEnum.TYPE_SERIVE.getCode(), 379L);
-		List<TCsqFund> csqFunds = csqFundService.selectAllAndIdGreaterThan(23L);
+		List<TCsqService> csqServices = csqServiceService.findAllByTypeAndIdGreaterThan(CsqServiceEnum.TYPE_SERIVE.getCode(), 0L);
+		List<TCsqFund> csqFunds = csqFundService.selectAllAndIdGreaterThan(0L);
 
 		//项目
 		List<String> serviceNames = csqServices.stream()
@@ -580,7 +603,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		List<Long> collect = toUpdaterFunds.stream().map(TCsqFund::getId).collect(Collectors.toList());
 		log.info("json =======>{}", JSON.toJSONString(collect));
 
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+		/*TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
@@ -590,16 +613,132 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 					}
 				);
 			}
-		});
+		});*/
 	}
 
 	@Override
 	public void dealWithServicePic() {
-		int[] ints = {64, 64, 64, 57, 50, 60, 67, 62, 59, 56, 44, 26, 65, 66, 50, 29, 24, 31, 32, 39, 38, 37, 63, 41, 33, 28, 36, 35, 34, 58, 61, 30, 25, 27, 43, 55, 54, 52, 53, 40, 50, 51, 49, 48, 47, 46, 45, 44, 42, 68};
+		int[] ints = {20,20,20,13,39,28,4,27,32,17,46,3,19,18,39,5,6,7,8,9,10,11,12,14,15,16,23,2,21,22,1,24,25,29,26,30,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48};
 		for(int theInt:ints) {
 			csqServiceService.synchronizeService(Long.valueOf(theInt));
 		}
 	}
+
+	@Override
+	public void dealWithServicePayment() {
+		//TODO 注意！ 在此之前需要清除对应的csqUserPayments
+		List<TCsqService> tCsqServices = csqServiceService.selectInIds(396l, 397l, 398l, 399l, 400l, 401l);
+		List<String> serviceNames = tCsqServices.stream()
+			.map(TCsqService::getName).collect(Collectors.toList());
+
+		List<TOldService> oldServices = csqOldServiceDao.selectInNames(serviceNames);
+		List<String> oldServiceIds = oldServices.stream()
+			.map(TOldService::getId).collect(Collectors.toList());
+		List<TOldPayment> tOldPayments = csqOldPaymentDao.selectInPfIds(oldServiceIds);
+
+		//transfer oldPayments -> csqUserPayments
+		/*tOldPayments.stream()
+			.map(a -> {
+				TCsqUserPaymentRecord.builder()
+
+			})*/
+	}
+
+	@Override
+	public void fixUpServiceRelated() {
+			List<TOldService> tOldServices = csqOldServiceDao.selectByStatusByCheckStatusByDType(1, 1, "pf");
+			//Map
+			Map<String, List<TOldService>> pfMap = tOldServices.stream()
+				.collect(Collectors.groupingBy(TOldService::getId));
+			//区分
+			List<TOldService> pfTypeServices = tOldServices
+				;
+			List<String> oldServiceIds = pfTypeServices.stream()
+				.map(TOldService::getId).collect(Collectors.toList());
+
+			//流水
+			List<TOldPayment> paymentsOfService = oldServiceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectInPfIdsAsc(oldServiceIds);
+
+			//拷贝
+			Map<String, Integer> pfCount = new HashMap<>();
+		Map<String, Long> fundIdMap = new HashMap<>();
+		List<Long> collect = pfTypeServices.stream()
+			.filter(a -> !"随手捐".equals(a.getTitle()))
+			.map(TOldService::getId).map(Long::valueOf).distinct().collect(Collectors.toList());
+		List<TCsqService> tCsqServices = csqServiceService.selectInExtends(collect);
+		tCsqServices.stream()
+			.forEach(a -> {
+				fundIdMap.put(a.getExtend(), a.getId());
+			});
+			//TODO 2.拷贝项目 -> 项目(创建项目流程、捐赠流程
+			paymentsOfService.stream()
+				.forEach(b -> {
+					String pfid = b.getPfid();
+					List<TOldService> oldServices = pfMap.get(pfid);
+					if (!oldServices.isEmpty()) {
+						TOldService tOldService = oldServices.get(0);
+						if (!"随手捐".equals(tOldService.getTitle())) {
+							String detail = tOldService.getDetail();
+							Integer cnt = pfCount.get(pfid);
+							if (cnt == null) {
+								cnt = 0;
+								//开启项目
+								if (cnt == 0) {
+									if (Double.valueOf(tOldService.getDonationamount()) >= 1) {
+
+									}
+								}
+
+							} else {
+								Long serviceId = fundIdMap.get(pfid);
+								//捐赠
+								csqPayService.fakeWechatPay(getUserId(b.getOptionuser()), serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), Double.valueOf(b.getDonationmoney()), null, Long.valueOf(DateUtil.wholeDateToStamp(b.getAddtime())));
+							}
+							cnt++;
+							pfCount.put(pfid, cnt);
+						}
+					}
+				});
+	}
+
+	private void dealWithPaymentThatIsFundAndService() {
+		/*List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectInEntityType();
+		List<Long> fundIds = tCsqUserPaymentRecords.stream()
+			.filter(a -> a.getEntityType() == CsqEntityTypeEnum.TYPE_FUND.toCode())
+			.map(TCsqUserPaymentRecord::getEntityId).collect(Collectors.toList());
+
+		List<Long> serviceIds = tCsqUserPaymentRecords.stream()
+			.filter(a -> a.getEntityType() == CsqEntityTypeEnum.TYPE_SERVICE.toCode())
+			.map(TCsqUserPaymentRecord::getEntityId).collect(Collectors.toList());
+
+		List<TCsqFund> tCsqFunds = csqFundDao.selectInIds(fundIds);
+		List<TCsqService> tCsqServices = csqServiceDao.selectInIds(serviceIds);
+
+		//构建map
+		Map<Long, List<TCsqFund>> fundMap = tCsqFunds.stream()
+			.collect(Collectors.groupingBy(TCsqFund::getId));
+
+		Map<Long, List<TCsqService>> serviceMap = tCsqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getId));
+
+		//装载待更新项
+		tCsqUserPaymentRecords.stream()
+			.map(a -> {
+				//类型推断
+				Integer entityType = a.getEntityType();
+				Long benificialId =
+				if(CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {	//基金
+
+				} else if(CsqEntityTypeEnum.TYPE_SERVICE.toCode() == entityType) {	//项目
+
+				}
+			})
+*/
+	}
+
+
+
+
 
 	private Long getUserId(String oldUserId) {
 		TCsqUser csqUser = csqUserDao.selectByOldId(oldUserId);

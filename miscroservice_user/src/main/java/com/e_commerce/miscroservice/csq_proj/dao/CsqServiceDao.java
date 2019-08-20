@@ -77,4 +77,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectLikeByPubKeysAndUserIdNeqAndFundStatus(String a, Long userId);
 
 	int multiUpdate(List<TCsqService> oldServices);
+
+	List<TCsqService> selectInExtends(List<Long> collect);
 }

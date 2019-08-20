@@ -1,47 +1,54 @@
 package com.e_commerce.miscroservice.commons.entity.colligate;
 
 import java.io.Serializable;
+
 /**
  * 功能描述:AJAX请求返回结果
  */
 public class AjaxResult implements Serializable {
 
-    public static final int SUCCESS = 1;
-    public static final int FAILURE = -1;
+	public static final int SUCCESS = 1;
+	public static final int FAILURE = -1;
 
-    private static final long serialVersionUID = 5576237395711742681L;
+	private static final long serialVersionUID = 5576237395711742681L;
 
-    private boolean success = false;
-    
-    private String errorCode;
+	private boolean success = false;
 
-    private String msg = "";
+	private String errorCode;
 
-    private Object data = null;
+	private String msg = "";
 
-    public boolean isSuccess() {
-        return success;
-    }
+	private Object data = null;
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
+	public static AjaxResult successMsg(String msg) {
+		AjaxResult result = new AjaxResult();
+		result.setMsg(msg);
+		return result;
+	}
 
-    public String getMsg() {
-        return msg;
-    }
+	public boolean isSuccess() {
+		return success;
+	}
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
 
-    public Object getData() {
-        return data;
-    }
+	public String getMsg() {
+		return msg;
+	}
 
-    public void setData(Object obj) {
-        this.data = obj;
-    }
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object obj) {
+		this.data = obj;
+	}
 
 	public String getErrorCode() {
 		return errorCode;

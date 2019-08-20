@@ -124,6 +124,30 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("test6_2")
+	public Object test6_2() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.dealWithServicePayment();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("test6_3")
+	public Object test6_3() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.fixUpServiceRelated();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	@RequestMapping("test6_1")
 	public Object test6_1() {
 		AjaxResult result = new AjaxResult();

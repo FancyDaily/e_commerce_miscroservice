@@ -33,4 +33,6 @@ public interface CsqUserPaymentDao {
 	List<TCsqUserPaymentRecord> selectByNotNullExtend();
 
 	int update(List<TCsqUserPaymentRecord> toUpdater);
+
+	List<TCsqUserPaymentRecord> selectInEntityType(int... entityType);
 }

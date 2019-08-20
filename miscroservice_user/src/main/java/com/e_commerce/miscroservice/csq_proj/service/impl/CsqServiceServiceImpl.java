@@ -634,6 +634,20 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.gt(TCsqService::getId, id));
 	}
 
+	@Override
+	public List<TCsqService> selectInIds(Long... ids) {
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.in(TCsqService::getId, ids)
+		);
+	}
+
+	@Override
+	public List<TCsqService> selectInExtends(List<Long> collect) {
+		return csqServiceDao.selectInExtends(collect);
+	}
+
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		return donateListNonePage(tCsqUserPaymentRecords, null);

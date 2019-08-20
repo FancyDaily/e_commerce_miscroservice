@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Check;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
@@ -61,7 +62,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
-	public AjaxResult checkAuth(String code) {
+	public AjaxResult checkAuth(@Check("==''") String code,@Check("(>10 || <20 ) && !=40") Integer age) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("与微信校验授权，code={}");

@@ -129,7 +129,6 @@ public class DateUtil {
         return res;
     }
 
-
     /*
      * 功能描述: 将年月字符串转换成时间戳区间
      * 作者: 许方毅
@@ -544,11 +543,13 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-		long currentTimeMillis = System.currentTimeMillis();
+		/*long currentTimeMillis = System.currentTimeMillis();
 		System.out.println(currentTimeMillis);
 		System.out.println(interval);
-		System.out.println(timestamp2Days(currentTimeMillis / interval));
-    }
+		System.out.println(timestamp2Days(currentTimeMillis / interval));*/
+		String s = wholeDateToStamp("2019-01-03 23:53:00");
+		System.out.println(s);
+	}
 
 	public static int getContinueDayCnt(List<Long> createTimeList) {
     	//要求参数createTimeList为倒序
@@ -567,5 +568,19 @@ public class DateUtil {
 	public static int timestamp2Days(long time) {
 		Long longVal = time / interval;
     	return longVal.intValue();
+	}
+
+	public static String wholeDateToStamp(String s) {
+		String res;
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = null;
+		try {
+			date = simpleDateFormat.parse(s);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		long ts = date.getTime();
+		res = String.valueOf(ts);
+		return res;
 	}
 }

@@ -28,4 +28,8 @@ public interface CsqDataTransferService {
 	void dealWithPic();
 
 	void dealWithServicePic();
+
+	void dealWithServicePayment();
+
+	void fixUpServiceRelated();
 }

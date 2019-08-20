@@ -41,5 +41,5 @@ public interface CsqPayService {
 	 */
 	String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous);
 
-	Long fakeWechatPay(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqFund);
+	Long fakeWechatPay(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqFund, Long timeStamp);
 }

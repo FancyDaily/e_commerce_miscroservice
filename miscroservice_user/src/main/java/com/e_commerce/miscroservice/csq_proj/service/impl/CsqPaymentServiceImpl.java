@@ -58,13 +58,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option) {
-		List<TCsqUserPaymentRecord> records;
-//		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-		if (option == null) {
-			records = csqPaymentDao.selectByUserIdDescPage(userId, pageNum, pageSize);
-		} else {
-			records = csqPaymentDao.selectByUserIdAndInOrOutDescPage(pageNum, pageSize, userId, option);
-		}
+		List<TCsqUserPaymentRecord> records = getWaters(pageNum, pageSize, userId, option);
 		long total = IdUtil.getTotal();
 
 		List<CsqUserPaymentRecordVo> collect = records.stream()
@@ -90,12 +84,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	@Override
 	public QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option) {
 //		Page<Object> page = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> records;
-		if (option == null) {
-			records = csqPaymentDao.selectByUserIdDescPage(userId, pageNum, pageSize);
-		} else {
-			records = csqPaymentDao.selectByUserIdAndInOrOutDescPage(pageNum, pageSize, userId, option);
-		}
+		List<TCsqUserPaymentRecord> records = getWaters(pageNum, pageSize, userId, option);
 		long total = IdUtil.getTotal();
 
 		List<Map<String, Object>> mapList = getMapList(records);
@@ -104,6 +93,17 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		queryResult.setResultList(mapList);
 		queryResult.setTotalCount(total);
 		return queryResult;
+	}
+
+	private List<TCsqUserPaymentRecord> getWaters(Integer pageNum, Integer pageSize, Long userId, Integer option) {
+		List<TCsqUserPaymentRecord> records;
+		if (option == null) {
+//			records = csqPaymentDao.selectByUserIdDescPage(userId, pageNum, pageSize);
+			records = csqPaymentDao.selectByUserIdAndNeqEntityTypeDescPage(userId, pageNum, pageSize, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode());
+		} else {
+			records = csqPaymentDao.selectByUserIdAndInOrOutAndNeqEntityDescPage(pageNum, pageSize, userId, option, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqEntityTypeEnum.TYPE_SERVICE.toCode());
+		}
+		return records;
 	}
 
 	private List<Map<String, Object>> getMapList(List<TCsqUserPaymentRecord> records) {
@@ -348,7 +348,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				break;
 			case TYPE_FUND:
 				TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
-				resultId = csqFund.getId();
+				resultId = csqFund.getUserId();
 				if (StringUtil.isEmpty(csqFund.getName())) {
 					builder.append("我的");
 				} else {
@@ -360,7 +360,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				break;
 			case TYPE_SERVICE:
 				TCsqService csqService = csqServiceDao.selectByPrimaryKey(toId);
-				resultId = csqService.getId();
+				resultId = csqService.getUserId();
 				builder.append("\"");
 				builder.append(csqService.getName());
 				builder.append("\"");

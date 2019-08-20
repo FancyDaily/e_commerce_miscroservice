@@ -124,16 +124,48 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 		);
 	}
 
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdAndNeqEntityTypeDescPage(Long userId, Integer pageNum, Integer pageSize, Integer... entityType) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdBuild(userId);
+		for(Integer eT:entityType) {
+			mybatisPlusBuild = mybatisPlusBuild.neq(TCsqUserPaymentRecord::getEntityType, eT);
+		}
+		mybatisPlusBuild = mybatisPlusBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectByUserIdAndInOrOutAndNeqEntityDescPage(Integer pageNum, Integer pageSize, Long userId, Integer option, Integer... entityType) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdAndInOrOutBuild(userId, option);
+		for(Integer et:entityType) {
+			mybatisPlusBuild = mybatisPlusBuild.neq(TCsqUserPaymentRecord::getEntityType, et);
+		}
+		mybatisPlusBuild = mybatisPlusBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
 	private MybatisPlusBuild byUserIdAndInOrOutDescBuild(Long userId, Integer option) {
-		return baseBuild()
-			.eq(TCsqUserPaymentRecord::getUserId, userId)
-			.eq(TCsqUserPaymentRecord::getInOrOut, option)
+		return byUserIdAndInOrOutBuild(userId, option)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
 	}
 
-	private MybatisPlusBuild byuserIdDescBuild(Long userId) {
+	private MybatisPlusBuild byUserIdAndInOrOutBuild(Long userId, Integer option) {
 		return baseBuild()
 			.eq(TCsqUserPaymentRecord::getUserId, userId)
+			.eq(TCsqUserPaymentRecord::getInOrOut, option);
+	}
+
+	private MybatisPlusBuild byuserIdDescBuild(Long userId) {
+		return byUserIdBuild(userId)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+	}
+
+	private MybatisPlusBuild byUserIdBuild(Long userId) {
+		return baseBuild()
+			.eq(TCsqUserPaymentRecord::getUserId, userId);
 	}
 }

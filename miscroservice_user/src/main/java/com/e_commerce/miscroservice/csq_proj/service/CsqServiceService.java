@@ -131,4 +131,8 @@ public interface CsqServiceService {
 	TCsqService selectByExtend(String extend);
 
 	List<TCsqService> findAllByTypeAndIdGreaterThan(int code, long l);
+
+	List<TCsqService> selectInIds(Long... ids);
+
+	List<TCsqService> selectInExtends(List<Long> collect);
 }

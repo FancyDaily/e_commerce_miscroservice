@@ -41,4 +41,10 @@ public class CsqOldUserDaoImpl implements CsqOldUserDao {
 		return MybatisPlus.getInstance().findAll(new TOldUser(), new MybatisPlusBuild(TOldUser.class)
 			.in(TOldUser::getId));
 	}
+
+	@Override
+	public int update(TOldUser user) {
+		return MybatisPlus.getInstance().update(user, new MybatisPlusBuild(TOldUser.class)
+			.eq(TOldUser::getId, user.getId()));
+	}
 }

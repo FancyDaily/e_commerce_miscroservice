@@ -15,4 +15,5 @@ public interface CsqOldPaymentDao {
 
 	List<TOldPayment> selectInPfIdsDesc(List<String> oldFundIds);
 
+	List<TOldPayment> selectInPfIdsAsc(List<String> oldFundIds);
 }

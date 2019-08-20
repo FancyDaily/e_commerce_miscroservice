@@ -18,4 +18,6 @@ public interface CsqOldUserDao {
 	TOldUser selectByPrimaryKey(Long valueOf);
 
 	List<TOldUser> selectInPrimaryKeys(List<Long> oldIds);
+
+	int update(TOldUser user);
 }
