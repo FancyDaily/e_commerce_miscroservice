@@ -8,6 +8,7 @@
          select  sum(money)
         from t_csq_user_payment_record
         where user_id = #{userId} and is_valid = '1' and in_or_out = #{inOut}
+        and entity_type not in (3,4)
     </select>
 </mapper>
 
