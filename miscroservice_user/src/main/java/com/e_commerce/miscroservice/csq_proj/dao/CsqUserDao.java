@@ -35,4 +35,10 @@ public interface CsqUserDao {
 	List<TCsqUser> selectAll();
 
 	TCsqUser selectByOldId(String oldIdStr);
+
+	int update(List<TCsqUser> asList);
+
+	TCsqUser selectByNameAndNotNullUserTel(String name);
+
+	TCsqUser selectByNameAndNotNullUserTelAndNullOpenid(String name);
 }

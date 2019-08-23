@@ -202,4 +202,16 @@ public interface CsqUserService {
 	CsqSceneVo getScene(String sceneKey);
 
 	TCsqUser testRegister(TCsqUser csqUser);
+
+	/**
+	 * 生成openid手机号匹配者
+	 * @param userIds
+	 * @param userTel
+	 * @return
+	 */
+	Map<String, Object> generateOpenidMatcher(Long userIds, String userTel);
+
+	boolean isOpenidMatchGenerateAuth(Long userIds);
+
+	String dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel);
 }

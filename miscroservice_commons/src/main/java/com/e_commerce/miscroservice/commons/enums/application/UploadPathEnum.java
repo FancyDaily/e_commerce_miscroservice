@@ -42,6 +42,8 @@ public class UploadPathEnum {
 
 	static private String CSQ_SAVEPATH_CERTIFICATE;
 
+	static private String CSQ_SAVEPATH_OPENIDMATCHER;
+
 	@Value("${savepath.service}")
 	public void setSAVEPATH_SERVICE(String sAVEPATH_SERVICE) {
 		SAVEPATH_SERVICE = sAVEPATH_SERVICE;
@@ -73,14 +75,18 @@ public class UploadPathEnum {
 	}
 
 	@Value("${savepath.csq.certificate}")
-	public static void setCsqSavepathCertificate(String csqSavepathCertificate) {
-		CSQ_SAVEPATH_CERTIFICATE = csqSavepathCertificate;
+	public static void setCsqSavepathCertificate(String csqSavepathCertificate) { CSQ_SAVEPATH_CERTIFICATE = csqSavepathCertificate; }
+
+	@Value("${savepath.csq.openidmatcher}")
+	public static void setCsqSavepathOpenidmatcher(String csqSavepathOpenidmatcher) {
+		CSQ_SAVEPATH_OPENIDMATCHER = csqSavepathOpenidmatcher;
 	}
 
 	public enum innerEnum {
 
 		SERVICE(1, SAVEPATH_SERVICE), IDCARD(2, SAVEPATH_IDCARD), PERSON(3, SAVEPATH_PERSON),
-		CSQ_FUND(0, CSQ_SAVEPATH_FUND), CSQ_SERVICE(1, CSQ_SAVEPATH_SERVICE), CSQ_PERSON(2, CSQ_SAVEPATH_PERSON),CSQ_CERTIFICATE(3, CSQ_SAVEPATH_CERTIFICATE);
+		CSQ_FUND(0, CSQ_SAVEPATH_FUND), CSQ_SERVICE(1, CSQ_SAVEPATH_SERVICE),
+		CSQ_PERSON(2, CSQ_SAVEPATH_PERSON), CSQ_CERTIFICATE(3, CSQ_SAVEPATH_CERTIFICATE),CSQ_OPENIDMATCHER(4, CSQ_SAVEPATH_OPENIDMATCHER);
 
 		private int code;
 		private String path;

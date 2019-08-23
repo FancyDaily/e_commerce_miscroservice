@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -477,7 +478,9 @@ public class CsqUserController {
 	public AjaxResult recordForConsumption(Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
-		userIds = 2114L;
+		if(userIds == null) {
+			userIds = 239L;
+		}
 		try {
 			log.info("平台托管消费行为的记录, userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}", userIds, fromId, fromType, amount, wholeDescription);
 			csqUserService.recordForConsumption(userIds, fromId, fromType, amount, wholeDescription);
@@ -602,7 +605,7 @@ public class CsqUserController {
 	@UrlAuth(withoutPermission = true)
 	public Object globleDonateRecord() {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		try {
 			log.info("全局捐赠播报, userId={}", userIds);
 			List<CsqDonateRecordVo> objects = csqUserService.globleDonateRecord();
@@ -630,7 +633,7 @@ public class CsqUserController {
 	@UrlAuth
 	public Object payInviter(String sceneKey, Long inviterId) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		try {
 			log.info("邀请回馈, userId={}, sceneKey={}, inviterId={}", userIds, sceneKey, inviterId);
 			csqUserService.payInviter(userIds, sceneKey, inviterId);
@@ -679,7 +682,7 @@ public class CsqUserController {
 	@UrlAuth
 	public Object inviterInfos() {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		try {
 			log.info("邀请人信息, userId={}, scene={}", userIds);
 			CsqBasicUserVo csqBasicUserVo = csqUserService.inviterInfo(userIds);
@@ -706,7 +709,7 @@ public class CsqUserController {
 	@UrlAuth(withoutPermission = true)
 	public Object scene(String sceneKey) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = UserUtil.getTestId();
+		Long userIds = IdUtil.getId();
 		try {
 			log.info("获取场景值, userId={}, scene={}", userIds);
 			CsqSceneVo scene = csqUserService.getScene(sceneKey);
@@ -719,6 +722,103 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("获取场景值", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 获取openid手机号匹配小程序码权限确认
+	 * @return
+	 */
+	@RequestMapping("openid/matcher/generate/check")
+	@UrlAuth(withoutPermission = true)
+	public Object openidMatcherGenerateAuthCheck() {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("获取openid手机号匹配小程序码权限确认, userId={}", userIds);
+			boolean openidMatchGenerateAuth = csqUserService.isOpenidMatchGenerateAuth(userIds);
+			Map<String, Object> map = new HashMap<>();
+			map.put("auth", openidMatchGenerateAuth);
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "获取openid手机号匹配小程序码权限确认", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("获取openid手机号匹配小程序码权限确认", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 获取openid手机号匹配小程序码
+	 * @param userTel 手机号
+	 *
+	 * {
+	 *         "msg": "生成成功！手机号为：15068718947。请勿将二维码交给他人（除该手机号号号主以外的人），以免匹配失败。",
+	 *         "qrCode": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/null/QR17.jpg"
+	 * }
+	 *
+	 * @return
+	 */
+	@RequestMapping("openid/matcher/generate")
+	@UrlAuth
+	public Object openidMatcherGenerate(String userTel) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("获取openid手机号匹配小程序码, userId={}, userTel={}", userIds, userTel);
+			Map<String, Object> map = csqUserService.generateOpenidMatcher(userIds, userTel);
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "获取openid手机号匹配小程序码", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("获取openid手机号匹配小程序码", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 匹配openid手机号
+	 * @param sceneKey 场景值的key(扫码带的key型scene)
+	 * @param userTel 手机号
+	 *
+	 * {
+	 *     "success": true,
+	 *     "errorCode": "",
+	 *     "msg": "",
+	 *     "data": "匹配的之前的用户名为：丹尘"
+	 * }
+	 *
+	 * @return
+	 */
+	@RequestMapping("openid/matcher/do")
+	@UrlAuth
+	public Object openidMathcerDo(String sceneKey, String userTel) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("匹配openid手机号, userId={}, sceneKey={}, userTel={}", userIds, sceneKey, userTel);
+			String msg = csqUserService.dealWithOpenidMatcher(userIds, sceneKey, userTel);
+			result.setData(msg);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "匹配openid手机号", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("匹配openid手机号", e);
 			result.setSuccess(false);
 		}
 		return result;

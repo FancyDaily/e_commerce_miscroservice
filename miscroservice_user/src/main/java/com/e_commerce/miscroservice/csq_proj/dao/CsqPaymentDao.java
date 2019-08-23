@@ -29,6 +29,8 @@ public interface CsqPaymentDao {
 	 */
 	Double countMoney(Long userId, Integer inOut);
 
+	Double countMoney(Long userId, Integer inOut, Long endTimeStamp);
+
 	/**
 	 * 插入
 	 * @param build

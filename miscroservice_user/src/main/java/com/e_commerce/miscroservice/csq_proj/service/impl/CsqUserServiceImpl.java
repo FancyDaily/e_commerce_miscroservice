@@ -18,6 +18,7 @@ import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import jodd.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -605,15 +606,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//复用记录
 		String scene = JSONObject.toJSONString(builder.build());
 		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
-		Long sceneKey = null;
-		if(tCsqKeyValue == null) {
-			tCsqKeyValue = TCsqKeyValue.builder()
-				.mainKey(userId)
-				.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
-				.theValue(scene).build();
-			csqKeyValueDao.save(tCsqKeyValue);
-		}
-		sceneKey = tCsqKeyValue.getId();
+		Long sceneKey = insertKeyValIfAbsent(userId, scene, tCsqKeyValue);
 
 		String qrCode = wechatService.genQRCode(sceneKey.toString(), page, uploadEnum);
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
@@ -623,7 +616,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	public static void main(String[] args) {
-		CsqSceneVo build = CsqSceneVo.builder()
+		/*CsqSceneVo build = CsqSceneVo.builder()
 			.userId(2148L)
 			.type(CsqSceneEnum.TYPE_FUND.getCode())
 //			.serviceId(1234L)
@@ -631,7 +624,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.build();
 		String string = JSONObject.toJSONString(build);
 		System.out.println(string.length());
-		System.out.println(string);
+		System.out.println(string);*/
 	}
 
 	@Override
@@ -1005,5 +998,132 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Override
 	public TCsqUser testRegister(TCsqUser csqUser) {
 		return register(csqUser);
+	}
+
+	@Override
+	public Map<String, Object> generateOpenidMatcher(Long userIds, String userTel) {
+		Map<String, Object> map = new HashMap<>();
+		//check权限
+		checkOpenidMatchGenerateAuth(userIds);
+		//生成带餐小程序码
+		CsqSceneVo.CsqSceneVoBuilder builder = CsqSceneVo.builder();
+		builder.usertel(userTel);	//放入手机号
+		String scene = JSONObject.toJSONString(builder.build());
+		TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userIds, CsqKeyValueEnum.TYPE_OPENIDMATCHER.getCode(), scene);
+		Long sceneKey = insertKeyValIfAbsent(userIds, scene, tCsqKeyValue);
+
+		String qrCode = wechatService.genQRCode(sceneKey.toString(), this.PERSON_PAGE, UploadPathEnum.innerEnum.CSQ_OPENIDMATCHER);
+//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
+		StringBuilder msgBuilder = new StringBuilder();
+		msgBuilder.append("生成成功！手机号为：").append(userTel).append("。请勿将二维码交给他人（除该手机号号号主以外的人），以免匹配失败。");
+		map.put("qrCode", qrCode);
+		map.put("msg", msgBuilder.toString());
+		return map;
+	}
+
+	private Long insertKeyValIfAbsent(Long userIds, String scene, TCsqKeyValue tCsqKeyValue) {
+		Long sceneKey = null;
+		if (tCsqKeyValue == null) {
+			tCsqKeyValue = TCsqKeyValue.builder()
+				.mainKey(userIds)
+				.type(CsqKeyValueEnum.TYPE_SCENE.getCode())
+				.theValue(scene).build();
+			csqKeyValueDao.save(tCsqKeyValue);
+		}
+		sceneKey = tCsqKeyValue.getId();
+		return sceneKey;
+	}
+
+	private void checkOpenidMatchGenerateAuth(Long userIds) {
+		List<Long> permissionIds = Arrays.asList(1835L, 2433L);	//TODO 用户编号白名单
+		if(!permissionIds.contains(userIds)) {	//不在白名单内
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您不在允许名单内!");
+		}
+	}
+
+	@Override
+	public boolean isOpenidMatchGenerateAuth(Long userIds) {
+		boolean flag = true;
+		try {
+			checkOpenidMatchGenerateAuth(userIds);
+		} catch (Exception e) {
+			flag = false;
+		}
+		return flag;
+	}
+
+	@Override
+	public String dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel) {
+		StringBuilder noticeMsgBuilder = new StringBuilder();
+		//判断当前的secenekey是否为空 -> 判断当前sceneKey是否符合当前业务场景
+		if(StringUtil.isEmpty(sceneKey) && StringUtil.isEmpty(userTel)) {
+//			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数sceneKey、userTel不能都为空！");
+			noticeMsgBuilder.append("参数sceneKey、userTel不能都为空！");
+			return noticeMsgBuilder.toString();
+		}
+		//处理 sceneKey
+		if(!StringUtil.isEmpty(sceneKey)) {	//通过sceneKey去解析获取userTel
+			TCsqKeyValue keyValue = csqKeyValueDao.selectByPrimaryKey(sceneKey);
+			if(keyValue == null) {	//对应scene无效
+				noticeMsgBuilder.append("sceneKey无效");
+				noticeMsgBuilder.append("，处理终止。");
+				return noticeMsgBuilder.toString();
+			}
+			String theValue = keyValue.getTheValue();
+			CsqSceneVo csqSceneVo = JSONObject.parseObject(theValue, CsqSceneVo.class);
+			String theUserTel = csqSceneVo.getUsertel();
+			if(!StringUtil.isEmpty(theUserTel)) {
+				userTel = theUserTel;
+			}
+		}
+		//2次check
+		if(StringUtil.isEmpty(userTel)) {	//无效
+			if(StringUtil.isEmpty(sceneKey)) {
+				noticeMsgBuilder.append("收到的userTel为空");
+			} else {
+				noticeMsgBuilder.append("由sceneKey得到的userTel为空");
+			}
+			noticeMsgBuilder.append("，处理终止。");
+			return noticeMsgBuilder.toString();
+		}
+		//判断用户是否有必要进行openid 手机号匹配 -> 同时校验userTel
+		TCsqUser currentUser = csqUserDao.selectByPrimaryKey(userIds);
+		if(!StringUtil.isEmpty(currentUser.getUserTel())) {	//对于已经满足 手机号不为空 openid不为空的用户，不再进行匹配
+			noticeMsgBuilder.append("当前用户已经进行过匹配!");
+			return noticeMsgBuilder.toString();
+		}
+		TCsqUser userWithTel = csqUserDao.selectByUserTel(userTel);
+		String currentName = currentUser.getName();
+		String userWithTelName = userWithTel.getName();
+		noticeMsgBuilder.append("匹配已进行。").append("之前的用户名为：").append("\"").append(userWithTelName).append("\"");
+		if(!currentName.equals(userWithTelName)) {
+			noticeMsgBuilder.append("与当前用户名").append("\"").append(currentName).append("\"").append("不匹配。").append("如有疑问，联系管理员");
+		}
+		String vxOpenId = currentUser.getVxOpenId();
+		userWithTel.setVxOpenId(vxOpenId);
+		//updater
+		TCsqUser build = TCsqUser.builder()
+			.id(currentUser.getId())
+			.vxOpenId(null).build();
+		TCsqUser build2 = TCsqUser.builder()
+			.id(userWithTel.getId())
+			.vxOpenId(vxOpenId).build();
+		//DO
+		csqUserDao.update(Arrays.asList(build, build2));
+		return noticeMsgBuilder.toString();
+	}
+
+	private String motivateOpenidMatcher(Long userIds, String userTel) {
+		return dealWithOpenidMatcher(userIds, null, userTel);
+	}
+
+	private boolean needToShowMotivateOpenidMathcherView(Long userId) {
+		TCsqUser csqUser = csqUserDao.selectByPrimaryKey(userId);
+		String userTel = csqUser.getUserTel();
+		if(userTel != null) {
+			return false;
+		}
+		TCsqUser userWithTel = csqUserDao.selectByNameAndNotNullUserTelAndNullOpenid(csqUser.getName());
+		return userWithTel != null;
 	}
 }

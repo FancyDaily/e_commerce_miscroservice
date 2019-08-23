@@ -136,7 +136,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 			}
 		}
 		//若 status =2 直接处理成【公开】
-		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
+//		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
 
 		fundDao.update(fund);
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {

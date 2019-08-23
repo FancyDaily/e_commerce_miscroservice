@@ -168,8 +168,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		}
 //		TCsqUserPaymentRecord theOtherTypeRecord = findTheOtherTypeRecord(record);
 
-		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
-
+//		Double accountMoney = csqPaymentDao.countMoney(userId, 1);
+		Double accountMoney = csqPaymentDao.countMoney(userId, 1, record.getCreateTime().getTime());
 		//获取serviceName
 		String serviceName = "";
 

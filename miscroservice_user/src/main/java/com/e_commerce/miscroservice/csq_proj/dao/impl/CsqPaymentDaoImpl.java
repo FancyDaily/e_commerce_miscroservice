@@ -6,11 +6,14 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.mapper.CsqPaymentMapper;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqPaymentDao;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -52,6 +55,20 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 		Double money = csqPaymentMapper.countMoney(userId,inOut);
 		money = money == null? 0:money;
 		return money;
+	}
+
+	@Override
+	public Double countMoney(Long userId, Integer inOut, Long endTimeStamp) {
+		if(endTimeStamp != null) {
+			List<TCsqUserPaymentRecord> all = MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+				.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+				.eq(TCsqUserPaymentRecord::getUserId, userId)
+				.eq(TCsqUserPaymentRecord::getInOrOut, inOut)
+				.lte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(endTimeStamp).toString()));
+			return all.stream().map(TCsqUserPaymentRecord::getMoney).reduce(0d, (a,b) -> a + b);
+		} else {
+			return countMoney(userId, inOut);
+		}
 	}
 
 	@Override

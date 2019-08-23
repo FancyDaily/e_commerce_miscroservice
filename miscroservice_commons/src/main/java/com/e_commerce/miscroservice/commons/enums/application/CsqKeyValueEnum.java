@@ -8,7 +8,7 @@ public enum CsqKeyValueEnum {
 
 	TYPE_DAILY_DONATE(1, "每日一善"),
 	TYPE_INVITE(2, "邀请人关系"),
-	TYPE_SCENE(3, "场景值");
+	TYPE_SCENE(3, "场景值"), TYPE_OPENIDMATCHER(4, "openId手机号匹配者");
 
 	int code;
 	String msg;

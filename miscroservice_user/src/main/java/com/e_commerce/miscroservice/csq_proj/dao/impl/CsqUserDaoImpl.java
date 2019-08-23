@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.user.po.TUser;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -106,5 +107,31 @@ public class CsqUserDaoImpl implements CsqUserDao {
 			.eq(TCsqUser::getOldId, oldIdStr));
 	}
 
+	@Override
+	public int update(List<TCsqUser> asList) {
+		List<Long> ids = asList.stream()
+			.map(TCsqUser::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(asList, new MybatisPlusBuild(TCsqUser.class)
+			.in(TCsqUser::getId, ids));
+	}
+
+	@Override
+	public TCsqUser selectByNameAndNotNullUserTel(String name) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), byNameAndNotNullUserTelBuild(name)
+		);
+	}
+
+	private MybatisPlusBuild byNameAndNotNullUserTelBuild(String name) {
+		return new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUser::getName, name)
+			.isNotNull(TCsqUser::getUserTel);
+	}
+
+	@Override
+	public TCsqUser selectByNameAndNotNullUserTelAndNullOpenid(String name) {
+		return MybatisPlus.getInstance().findOne(new TCsqUser(), byNameAndNotNullUserTelBuild(name)
+			.isNull(TCsqUser::getVxOpenId));
+	}
 
 }
