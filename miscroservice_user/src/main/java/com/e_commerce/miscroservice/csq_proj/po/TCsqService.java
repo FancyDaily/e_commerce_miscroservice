@@ -98,7 +98,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "封面图")
 	private String coverPic;
 
-	@Column(commit = "描述", charset = "utf8mb4")
+	@Column(commit = "描述", charset = "utf8mb4", length = 4096)
 	private String description;
 
 	@Column(commit = "描述图")

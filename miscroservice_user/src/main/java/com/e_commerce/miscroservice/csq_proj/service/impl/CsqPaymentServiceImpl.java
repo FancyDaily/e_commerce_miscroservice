@@ -472,4 +472,5 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		return donaterList;
 	}
 
+
 }

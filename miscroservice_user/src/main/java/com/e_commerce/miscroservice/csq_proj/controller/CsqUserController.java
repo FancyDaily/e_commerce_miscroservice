@@ -63,7 +63,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
-	public AjaxResult checkAuth(@Check("==''") String code,@Check("(>10 || <20 ) && !=40") Integer age) {
+	public AjaxResult checkAuth(@Check("==''") String code, @Check("(>10 || <20 ) && !=40") Integer age) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("与微信校验授权，code={}");
@@ -478,7 +478,7 @@ public class CsqUserController {
 	public AjaxResult recordForConsumption(Long fromId, Integer fromType, Double amount, String wholeDescription) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
-		if(userIds == null) {
+		if (userIds == null) {
 			userIds = 239L;
 		}
 		try {
@@ -563,8 +563,8 @@ public class CsqUserController {
 	 * @param wechatPubAccount     微信公众号
 	 * @param contactPerson        联系人
 	 * @param contactNo            联系方式
-	 * @param trendPubKeys			倾向
-	 * @param isWechatAuth		是否微信基本授权信息
+	 * @param trendPubKeys         倾向
+	 * @param isWechatAuth         是否微信基本授权信息
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -599,6 +599,7 @@ public class CsqUserController {
 
 	/**
 	 * 全局捐赠播报
+	 *
 	 * @return
 	 */
 	@RequestMapping("globle/donate/record")
@@ -625,7 +626,8 @@ public class CsqUserController {
 
 	/**
 	 * 邀请回馈
-	 * @param sceneKey 场景值
+	 *
+	 * @param sceneKey  场景值
 	 * @param inviterId 邀请人编号
 	 * @return
 	 */
@@ -653,28 +655,28 @@ public class CsqUserController {
 	/**
 	 * 邀请人信息
 	 * {
-	 *     "id": 2114,
-	 *     "weiboAccount": "",
-	 *     "wechatPubAccount": "",
-	 *     "csqUserAuth": "",
-	 *     "existDayCnt": "",
-	 *     "balanceStatus": 1,
-	 *     "gotFund": false,
-	 *     "gotCompanyAccount": false,
-	 *     "accountType": 1,
-	 *     "totalDonate": "",
-	 *     "minutesAgo": "",
-	 *     "userAccount": "",
-	 *     "name": "用户19604367",	昵称
-	 *     "userTel": "",
-	 *     "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png", 头像
-	 *     "sex": 0,
-	 *     "remarks": "",
-	 *     "contactPerson": "",
-	 *     "contactNo": "",
-	 *     "trendPubKeys": "",
-	 *     "authStatus": 0
-	 *   }
+	 * "id": 2114,
+	 * "weiboAccount": "",
+	 * "wechatPubAccount": "",
+	 * "csqUserAuth": "",
+	 * "existDayCnt": "",
+	 * "balanceStatus": 1,
+	 * "gotFund": false,
+	 * "gotCompanyAccount": false,
+	 * "accountType": 1,
+	 * "totalDonate": "",
+	 * "minutesAgo": "",
+	 * "userAccount": "",
+	 * "name": "用户19604367",	昵称
+	 * "userTel": "",
+	 * "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png", 头像
+	 * "sex": 0,
+	 * "remarks": "",
+	 * "contactPerson": "",
+	 * "contactNo": "",
+	 * "trendPubKeys": "",
+	 * "authStatus": 0
+	 * }
 	 *
 	 * @return
 	 */
@@ -702,6 +704,7 @@ public class CsqUserController {
 
 	/**
 	 * 获取场景值
+	 *
 	 * @param sceneKey 场景值
 	 * @return
 	 */
@@ -729,6 +732,11 @@ public class CsqUserController {
 
 	/**
 	 * 获取openid手机号匹配小程序码权限确认
+	 * <p>
+	 * {
+	 * "auth": false
+	 * }
+	 *
 	 * @return
 	 */
 	@RequestMapping("openid/matcher/generate/check")
@@ -757,13 +765,13 @@ public class CsqUserController {
 
 	/**
 	 * 获取openid手机号匹配小程序码
+	 *
 	 * @param userTel 手机号
-	 *
-	 * {
-	 *         "msg": "生成成功！手机号为：15068718947。请勿将二维码交给他人（除该手机号号号主以外的人），以免匹配失败。",
-	 *         "qrCode": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/null/QR17.jpg"
-	 * }
-	 *
+	 *                <p>
+	 *                {
+	 *                "msg": "生成成功！手机号为：15068718947。请勿将二维码交给他人（除该手机号号号主以外的人），以免匹配失败。",
+	 *                "qrCode": "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/null/QR17.jpg"
+	 *                }
 	 * @return
 	 */
 	@RequestMapping("openid/matcher/generate")
@@ -790,16 +798,16 @@ public class CsqUserController {
 
 	/**
 	 * 匹配openid手机号
+	 *
 	 * @param sceneKey 场景值的key(扫码带的key型scene)
-	 * @param userTel 手机号
-	 *
-	 * {
-	 *     "success": true,
-	 *     "errorCode": "",
-	 *     "msg": "",
-	 *     "data": "匹配的之前的用户名为：丹尘"
-	 * }
-	 *
+	 * @param userTel  手机号
+	 *                 <p>
+	 *                 {
+	 *                 "success": true,
+	 *                 "errorCode": "",
+	 *                 "msg": "",
+	 *                 "data": "匹配的之前的用户名为：丹尘"
+	 *                 }
 	 * @return
 	 */
 	@RequestMapping("openid/matcher/do")

@@ -45,7 +45,7 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "详细图")
 	private String detailPic;
 
-	@Column(commit = "描述", charset = "utf8mb4")
+	@Column(commit = "描述", charset = "utf8mb4", length = 4096)
 	private String description;
 
 	@Column(commit = "封面图")

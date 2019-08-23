@@ -1002,6 +1002,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public Map<String, Object> generateOpenidMatcher(Long userIds, String userTel) {
+		if(StringUtil.isEmpty(userTel)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "手机号不能为空!");
+		}
 		Map<String, Object> map = new HashMap<>();
 		//check权限
 		checkOpenidMatchGenerateAuth(userIds);
