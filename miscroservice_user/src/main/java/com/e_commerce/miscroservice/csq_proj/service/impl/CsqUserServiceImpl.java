@@ -625,6 +625,31 @@ public class CsqUserServiceImpl implements CsqUserService {
 		String string = JSONObject.toJSONString(build);
 		System.out.println(string.length());
 		System.out.println(string);*/
+//		"xcsd,4";
+		for(;;) {
+			Scanner scanner = new Scanner(System.in);
+			System.out.println("例子qcxd_8.png -> 请输入: ");
+			String stringSpiltBy = scanner.nextLine();
+			String[] split1 = stringSpiltBy.split("/");
+			String subPrefix = split1[0] + "/";
+			String cuiers = split1[1];
+			cuiers = cuiers.substring(0, cuiers.length() - 4) + ",png";
+			String[] split = cuiers.split(",");
+			String[] s = split[0].split("_");
+			String name = s[0];
+			int num = Integer.valueOf(s[1]);
+			String str = "";
+			for(int i=1; i<=num; i++) {
+				String prefix = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/csq/";
+				prefix += subPrefix;
+				String currentStr = prefix + name + "_" +  i + "." + split[1];
+				if(!"".equals(str)) {
+					str += ",";
+				}
+				str += currentStr;
+			}
+			System.out.println(str);
+		}
 	}
 
 	@Override
@@ -1005,6 +1030,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if(StringUtil.isEmpty(userTel)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "手机号不能为空!");
 		}
+		TCsqUser csqUser = csqUserDao.selectByUserTel(userTel);
+		if(csqUser == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "手机号不正确！-> 当前手机号对应账户不存在!");
+		}
+
 		Map<String, Object> map = new HashMap<>();
 		//check权限
 		checkOpenidMatchGenerateAuth(userIds);
@@ -1096,6 +1126,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			return noticeMsgBuilder.toString();
 		}
 		TCsqUser userWithTel = csqUserDao.selectByUserTel(userTel);
+		if(userWithTel == null) {
+			noticeMsgBuilder.append("匹配未进行。").append("来自小程序码的手机号对应用户不存在。");
+		}
 		String currentName = currentUser.getName();
 		String userWithTelName = userWithTel.getName();
 		noticeMsgBuilder.append("匹配已进行。").append("之前的用户名为：").append("\"").append(userWithTelName).append("\"");
@@ -1129,4 +1162,5 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser userWithTel = csqUserDao.selectByNameAndNotNullUserTelAndNullOpenid(csqUser.getName());
 		return userWithTel != null;
 	}
+
 }

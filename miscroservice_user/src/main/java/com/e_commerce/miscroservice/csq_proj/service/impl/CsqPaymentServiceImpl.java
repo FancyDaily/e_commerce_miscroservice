@@ -64,7 +64,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 		List<CsqUserPaymentRecordVo> collect = records.stream()
 			.map(a -> {
-				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "MM/dd"));
+				dealWithPaymentRecords(a);
 				return a.copyUserPaymentRecordVo();
 			}).collect(Collectors.toList());
 
@@ -72,6 +72,18 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		queryResult.setResultList(collect);
 		queryResult.setTotalCount(total);
 		return queryResult;
+	}
+
+	private void dealWithPaymentRecords(TCsqUserPaymentRecord a) {
+		a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "MM/dd"));
+		String description = a.getDescription();
+		if (!StringUtil.isEmpty(description)) {
+			if (description.startsWith("向")) {
+				a.setDescription(description + "捐款");
+			} else {
+				a.setDescription("捐赠到爱心账户");    //TODO 替换描述 -> 捐赠到爱心账户
+			}
+		}
 	}
 
 	@Override
@@ -118,7 +130,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				if (userPaymentRecords == null) {
 					userPaymentRecords = new ArrayList<>();
 				}
-				a.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "MM/dd"));
+				dealWithPaymentRecords(a);
 				userPaymentRecords.add(a.copyUserPaymentRecordVo());
 				currentMap.put(year, userPaymentRecords);
 			});
