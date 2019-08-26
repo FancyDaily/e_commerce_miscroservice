@@ -213,5 +213,7 @@ public interface CsqUserService {
 
 	boolean isOpenidMatchGenerateAuth(Long userIds);
 
-	String dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel);
+	Map dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel);
+
+	Object dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel, boolean needPayments);
 }

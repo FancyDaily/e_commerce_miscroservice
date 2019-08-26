@@ -18,7 +18,6 @@ import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import jodd.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,6 +84,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Autowired
 	private CsqServiceService csqServiceService;
+
+	@Autowired
+	private CsqPaymentService csqPaymentService;
 
 	@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -1068,7 +1070,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	private void checkOpenidMatchGenerateAuth(Long userIds) {
-		List<Long> permissionIds = Arrays.asList(1835L, 2433L);	//TODO 用户编号白名单
+		Map map = csqPublishService.get(16);
+		ArrayList<Long> permissionIds = new ArrayList<>();
+		map.forEach((k,v) -> {
+			permissionIds.add(Long.valueOf((String)v));
+		});
+//		List<Long> permissionIds = Arrays.asList(1835L, 2433L);	//TODO 用户编号白名单
 		if(!permissionIds.contains(userIds)) {	//不在白名单内
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您不在允许名单内!");
 		}
@@ -1086,13 +1093,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public String dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel) {
+	public Map dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel) {
+		return dealWithOpenidMatcher(userIds, sceneKey, userTel, false);
+	}
+
+	@Override
+	public Map dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel, boolean needPayments) {
 		StringBuilder noticeMsgBuilder = new StringBuilder();
+		HashMap<Object, Object> map = new HashMap<>();
 		//判断当前的secenekey是否为空 -> 判断当前sceneKey是否符合当前业务场景
 		if(StringUtil.isEmpty(sceneKey) && StringUtil.isEmpty(userTel)) {
 //			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数sceneKey、userTel不能都为空！");
 			noticeMsgBuilder.append("参数sceneKey、userTel不能都为空！");
-			return noticeMsgBuilder.toString();
+			map.put("msg", noticeMsgBuilder.toString());
+			return map;
 		}
 		//处理 sceneKey
 		if(!StringUtil.isEmpty(sceneKey)) {	//通过sceneKey去解析获取userTel
@@ -1100,7 +1114,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 			if(keyValue == null) {	//对应scene无效
 				noticeMsgBuilder.append("sceneKey无效");
 				noticeMsgBuilder.append("，处理终止。");
-				return noticeMsgBuilder.toString();
+				map.put("msg", noticeMsgBuilder.toString());
+				return map;
 			}
 			String theValue = keyValue.getTheValue();
 			CsqSceneVo csqSceneVo = JSONObject.parseObject(theValue, CsqSceneVo.class);
@@ -1117,13 +1132,15 @@ public class CsqUserServiceImpl implements CsqUserService {
 				noticeMsgBuilder.append("由sceneKey得到的userTel为空");
 			}
 			noticeMsgBuilder.append("，处理终止。");
-			return noticeMsgBuilder.toString();
+			map.put("msg", noticeMsgBuilder.toString());
+			return map;
 		}
 		//判断用户是否有必要进行openid 手机号匹配 -> 同时校验userTel
 		TCsqUser currentUser = csqUserDao.selectByPrimaryKey(userIds);
 		if(!StringUtil.isEmpty(currentUser.getUserTel())) {	//对于已经满足 手机号不为空 openid不为空的用户，不再进行匹配
 			noticeMsgBuilder.append("当前用户已经进行过匹配!");
-			return noticeMsgBuilder.toString();
+			map.put("msg", noticeMsgBuilder.toString());
+			return map;
 		}
 		TCsqUser userWithTel = csqUserDao.selectByUserTel(userTel);
 		if(userWithTel == null) {
@@ -1146,11 +1163,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.vxOpenId(vxOpenId).build();
 		//DO
 		csqUserDao.update(Arrays.asList(build, build2));
-		return noticeMsgBuilder.toString();
+		// 将他的捐赠流水按年份展现
+		Object waters = csqPaymentService.findWaters(1, 999999, userWithTel.getId(), CsqUserPaymentEnum.INOUT_OUT.toCode(), true);
+
+		map.put("msg", noticeMsgBuilder.toString());
+		map.put("waters", waters);
+		return map;
 	}
 
-	private String motivateOpenidMatcher(Long userIds, String userTel) {
-		return dealWithOpenidMatcher(userIds, null, userTel);
+	private Map motivateOpenidMatcher(Long userIds, String userTel) {
+		return dealWithOpenidMatcher(userIds, null, userTel, false);
 	}
 
 	private boolean needToShowMotivateOpenidMathcherView(Long userId) {

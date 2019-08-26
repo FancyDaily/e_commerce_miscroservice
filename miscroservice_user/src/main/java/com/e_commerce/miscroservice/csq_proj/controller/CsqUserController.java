@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
@@ -817,8 +818,8 @@ public class CsqUserController {
 		Long userIds = IdUtil.getId();
 		try {
 			log.info("匹配openid手机号, userId={}, sceneKey={}, userTel={}", userIds, sceneKey, userTel);
-			String msg = csqUserService.dealWithOpenidMatcher(userIds, sceneKey, userTel);
-			result.setData(msg);
+			Map map = csqUserService.dealWithOpenidMatcher(userIds, sceneKey, userTel);
+			result.setData(map.get("msg"));
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "匹配openid手机号", e.getMessage());
@@ -827,6 +828,40 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("匹配openid手机号", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 带验sms的匹配openid手机号
+	 * @param userTel 手机号
+	 * @param name 姓名
+	 * @param smsCode 验证码
+	 * @return
+	 */
+	@RequestMapping("openid/matcher/check/do")
+	@UrlAuth
+	public Object openidMatcherCheckAuthDo(String userTel, @RequestParam(required = false) String name, String smsCode) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("带验sms的匹配openid手机号, userId={}, userTel={}", userIds, userTel);
+			userService.checkSMS(userTel, smsCode);
+			Map map = csqUserService.dealWithOpenidMatcher(userIds, null, userTel);
+			result.setData(map);
+			result.setSuccess(true);
+			String msg = (String) map.get("msg");
+			if(!StringUtil.isEmpty(msg) && !msg.contains("匹配已进行")) {	//若有提醒信息
+				result.setSuccess(false);
+			}
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "带验sms的匹配openid手机号", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("带验sms的匹配openid手机号", e);
 			result.setSuccess(false);
 		}
 		return result;
