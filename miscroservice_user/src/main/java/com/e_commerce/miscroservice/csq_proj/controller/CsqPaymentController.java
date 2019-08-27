@@ -5,6 +5,8 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAut
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +31,13 @@ public class CsqPaymentController {
 	@Autowired
 	private CsqPaymentService csqPaymentService;
 
-
+	@Autowired
+	private CsqUserService csqUserService;
 
 	/**
 	 * 查询流水
 	 *
+	 * @param userTel		   手机号
 	 * @param pageNum          页码
 	 * @param pageSize         大小
 	 * @param option           收入0/支出1 全部null
@@ -65,10 +69,15 @@ public class CsqPaymentController {
 	 */
 	@RequestMapping("find/waters")
 	@UrlAuth
-	public AjaxResult findWarters(Integer pageNum, Integer pageSize, @RequestParam(required = false) Integer option, boolean isGroupingByYear) {
+	public AjaxResult findWarters(String userTel, Integer pageNum, Integer pageSize, @RequestParam(required = false) Integer option, boolean isGroupingByYear) {
 		AjaxResult result = new AjaxResult();
-
-		Long userId = IdUtil.getId();
+		Long userId;
+		TCsqUser csqUserByUserTel;
+		if(StringUtil.isEmpty(userTel) || (csqUserByUserTel = csqUserService.findCsqUserByUserTel(userTel)) == null) {
+			userId = IdUtil.getId();
+		} else {
+			userId = csqUserByUserTel.getId();
+		}
 		log.info("流水查询num={},size={},userId={}", pageNum, pageSize, userId);
 		try {
 			Object records = csqPaymentService.findWaters(pageNum, pageSize, userId, option, isGroupingByYear);
@@ -133,4 +142,5 @@ public class CsqPaymentController {
 		}
 		return result;
 	}
+
 }

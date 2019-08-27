@@ -840,7 +840,7 @@ public class CsqUserController {
 	 * @param smsCode 验证码
 	 * @return
 	 */
-	@RequestMapping("openid/matcher/check/do")
+	@RequestMapping("openid/matcher/checks/do")
 	@UrlAuth
 	public Object openidMatcherCheckAuthDo(String userTel, @RequestParam(required = false) String name, String smsCode) {
 		AjaxResult result = new AjaxResult();
@@ -866,4 +866,5 @@ public class CsqUserController {
 		}
 		return result;
 	}
+
 }

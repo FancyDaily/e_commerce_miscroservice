@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
@@ -1099,6 +1100,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public Map dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel, boolean needPayments) {
+		// 状态码code解释：
+		// 0 匹配过 1 手机号不存在
+		// 2 无记录 3 有记录
 		StringBuilder noticeMsgBuilder = new StringBuilder();
 		HashMap<Object, Object> map = new HashMap<>();
 		//判断当前的secenekey是否为空 -> 判断当前sceneKey是否符合当前业务场景
@@ -1139,12 +1143,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser currentUser = csqUserDao.selectByPrimaryKey(userIds);
 		if(!StringUtil.isEmpty(currentUser.getUserTel())) {	//对于已经满足 手机号不为空 openid不为空的用户，不再进行匹配
 			noticeMsgBuilder.append("当前用户已经进行过匹配!");
+			map.put("code", 0);
 			map.put("msg", noticeMsgBuilder.toString());
 			return map;
 		}
 		TCsqUser userWithTel = csqUserDao.selectByUserTel(userTel);
 		if(userWithTel == null) {
 			noticeMsgBuilder.append("匹配未进行。").append("来自小程序码的手机号对应用户不存在。");
+			map.put("code", 1);
+			map.put("msg", noticeMsgBuilder.toString());
+			return map;
 		}
 		String currentName = currentUser.getName();
 		String userWithTelName = userWithTel.getName();
@@ -1153,6 +1161,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			noticeMsgBuilder.append("与当前用户名").append("\"").append(currentName).append("\"").append("不匹配。").append("如有疑问，联系管理员");
 		}
 		String vxOpenId = currentUser.getVxOpenId();
+		if(StringUtil.isEmpty(vxOpenId)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请重新登录再试!");
+		}
 		userWithTel.setVxOpenId(vxOpenId);
 		//updater
 		TCsqUser build = TCsqUser.builder()
@@ -1164,11 +1175,19 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//DO
 		csqUserDao.update(Arrays.asList(build, build2));
 		// 将他的捐赠流水按年份展现
-		Object waters = csqPaymentService.findWaters(1, 999999, userWithTel.getId(), CsqUserPaymentEnum.INOUT_OUT.toCode(), true);
+		Object waters = csqPaymentService.findWaters(1, 5, userWithTel.getId(), CsqUserPaymentEnum.INOUT_OUT.toCode(), true);
 
 		map.put("msg", noticeMsgBuilder.toString());
 		map.put("waters", waters);
+		QueryResult waters1 = (QueryResult) waters;
+		map.put("code", waters1.getTotalCount()>0?3:2);
+		map.put("userTel", userTel);
 		return map;
+	}
+
+	@Override
+	public TCsqUser findCsqUserByUserTel(String userTel) {
+		return csqUserDao.selectByUserTel(userTel);
 	}
 
 	private Map motivateOpenidMatcher(Long userIds, String userTel) {

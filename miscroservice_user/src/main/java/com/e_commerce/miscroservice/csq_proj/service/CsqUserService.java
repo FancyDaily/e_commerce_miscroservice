@@ -216,4 +216,6 @@ public interface CsqUserService {
 	Map dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel);
 
 	Object dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel, boolean needPayments);
+
+	TCsqUser findCsqUserByUserTel(String userTel);
 }
