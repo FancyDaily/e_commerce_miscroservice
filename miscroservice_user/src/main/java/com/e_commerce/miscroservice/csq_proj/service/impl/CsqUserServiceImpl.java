@@ -657,6 +657,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription) {
+		recordForConsumption(userId, fromId, fromType, amount, wholeDescription, null);
+	}
+
+	@Override
+	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription, Long timeStamp) {
 		//check入餐
 		if (fromId == null || fromType == null || amount == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数为空!");
@@ -679,10 +684,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 			if (csqFund == null) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "基金不存在!");
 			}
+			//TODO 取消了托管校验
+			/*
 			Integer agentModeStatus = csqFund.getAgentModeStatus();
 			if (CsqFundEnum.AGENT_MODE_STATUS_ON.getVal() != agentModeStatus) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前基金未设置托管!");
 			}
+			*/
 		}
 
 		Long ownerId = null;
@@ -741,6 +749,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())
 			.money(amount).build();
 		build.setCreateUser(userId);
+		if(timeStamp != null) {
+			build.setCreateTime(new Timestamp(timeStamp));
+		}
 		csqUserPaymentDao.insert(build);
 
 		/*// 平台托管如果为基金类型，应当留下订单记录(用户会在我已捐赠列表中找到) -> 等待托管细则 后续补充或迁移

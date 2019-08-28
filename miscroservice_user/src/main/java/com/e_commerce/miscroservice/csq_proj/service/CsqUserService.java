@@ -116,6 +116,8 @@ public interface CsqUserService {
 	 */
 	void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription);
 
+	void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription, Long timeStamp);
+
 	/**
 	 * 个人实名认证审核
 	 * @param userAuthId

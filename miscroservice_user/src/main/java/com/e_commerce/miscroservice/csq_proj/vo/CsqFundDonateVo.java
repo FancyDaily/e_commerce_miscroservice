@@ -20,4 +20,6 @@ public class CsqFundDonateVo {
 	private Double money;
 
 	private String name;
+
+	private String wholeDecription;
 }

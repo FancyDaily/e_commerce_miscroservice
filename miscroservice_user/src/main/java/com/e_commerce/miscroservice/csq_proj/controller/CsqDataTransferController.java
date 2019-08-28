@@ -172,5 +172,16 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("off_line_test_1")
+	public Object off_line_1() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.offLineDeal();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
 }

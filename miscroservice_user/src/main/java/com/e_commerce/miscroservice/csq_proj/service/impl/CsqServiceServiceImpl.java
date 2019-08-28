@@ -386,9 +386,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	@Override
 	public QueryResult<CsqUserPaymentRecordVo> billOut(Long userId, Long serviceId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum == null ? 1 : pageNum;
-		pageSize = pageSize == null ? 0 : pageSize;
+		pageSize = pageSize == null ? 9999999 : pageSize;
 //		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
-		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDescPage(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode());
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectByEntityIdAndEntityTypeAndInOutDescPage(serviceId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode(), pageNum, pageSize);
 		long total = IdUtil.getTotal();
 		/*Map<Long, List<TCsqService>> serviceMap = getServiceMap(tCsqUserPaymentRecords);
 		List<TCsqUserPaymentRecord> userPaymentRecords = tCsqUserPaymentRecords.stream()

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.alipay.api.domain.LoanMoneyTypeAmt;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -163,8 +164,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public boolean checkIsOkForPublic(TCsqFund fund) {
 		Double currentBalance = fund.getBalance();
-		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM <= currentBalance;
-		return achieveMinimum && checkFundCompletion(fund);	//满足开放条件
+		boolean undone = CsqFundEnum.STATUS_ACTIVATED.getVal() == fund.getStatus();	//当前为 "已激活"(未公开的状态)
+		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM <= currentBalance;	//达到下限值
+		return undone & achieveMinimum && checkFundCompletion(fund);	//满足开放条件
 	}
 
 	@Override
@@ -469,7 +471,85 @@ public class CsqFundServiceImpl implements CsqFundService {
 	public QueryResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
 		//根据serviceId获取fundId
 //		Long fundId = getFundId(serviceId);
-		return getGotoList(fundId, pageNum, pageSize);
+
+//		return getGotoList(fundId, pageNum, pageSize);
+		return getGotoListByPaymentRecord(fundId, pageNum, pageSize);
+	}
+
+	private QueryResult getGotoListByPaymentRecord(Long fundId, Integer pageNum, Integer pageSize) {
+		QueryResult queryResult = getFundOutPaymentPage(fundId, pageNum, pageSize);
+		List resultList = queryResult.getResultList();
+		//按年份分组
+		List<Map<String, Object>> mapList = getMapList(resultList);
+		queryResult.setResultList(mapList);
+		return queryResult;
+	}
+
+	public static void main(String[] args) {
+		String description = "向\"Fancy\uD83D\uDE0Bzzz\"基金";
+		description = "从魏老爸和粉丝们公益基金基金拨款";
+		description = description.startsWith("向")?description.substring(1):description;
+		System.out.println(description);
+		description = !description.contains("\"")?new StringBuilder(description).insert(description.length(), "\"").insert(0, "\"").append("事务花费").toString():description;
+		System.out.println(description);
+	}
+
+	private QueryResult getFundOutPaymentPage(Long fundId, Integer pageNum, Integer pageSize) {
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDescPage(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode(), pageNum, pageSize);
+		long total = IdUtil.getTotal();
+		//若要筛选出真实名称
+		/*List<Long> orderIds = tCsqUserPaymentRecords.stream()
+			.filter(a -> a.getOrderId() != null)
+			.map(TCsqUserPaymentRecord::getOrderId).collect(Collectors.toList());
+		List<TCsqUserPaymentRecord> theOtherUserPayments = paymentDao.selectInOrderIdsAndInOut(orderIds, CsqUserPaymentEnum.INOUT_IN.toCode());	//找到项目对应的payments
+		List<Long> fundIds = theOtherUserPayments.stream()
+			.filter(a -> CsqEntityTypeEnum.TYPE_FUND.toCode() == a.getEntityType())
+			.map(TCsqUserPaymentRecord::getEntityId).collect(Collectors.toList());
+		List<Long> serviceIds = theOtherUserPayments.stream()
+			.filter(a -> CsqEntityTypeEnum.TYPE_SERVICE.toCode() == a.getEntityType())
+			.map(TCsqUserPaymentRecord::getEntityId).collect(Collectors.toList());
+		List<TCsqService> tCsqService = csqServiceDao.selectInIds(serviceIds);
+		List<TCsqFund> tCsqFunds = fundDao.selectInIds(fundIds);
+		Map<Long, List<TCsqService>> serviceMap = tCsqService.stream().collect(Collectors.groupingBy(TCsqService::getId));
+		Map<Long, List<TCsqFund>> fundMap = tCsqFunds.stream().collect(Collectors.groupingBy(TCsqFund::getId));*/
+
+		//装载
+		List<CsqFundDonateVo> resultList = tCsqUserPaymentRecords.stream()
+			.map(a -> {
+				Long time = a.getCreateTime().getTime();
+				Double money = a.getMoney();
+				String name = a.getDescription();
+				name = !name.endsWith("\"")?new StringBuilder(name).append("因").insert(name.length(), "\"").insert(1, "\"").append("事务花费").toString():name;
+				CsqFundDonateVo build = CsqFundDonateVo.builder()
+					.year(DateUtil.timeStamp2Date(time, "yyyy"))
+					.date(DateUtil.timeStamp2Date(time, "MM-dd"))
+					.money(money)
+					.name(name).build();
+				String wholeDescription =  new StringBuilder().append(name).append(money).append("元").toString();
+				if(a.getOrderId() != null) {
+					wholeDescription = new StringBuilder().append(wholeDescription).append("捐款").append(money).append("元").toString();
+				}
+				build.setWholeDecription(wholeDescription);
+			/*
+			//若要筛选出真实名称
+				Long entityId = a.getEntityId();
+				if(a.getOrderId() != null) {
+					String serviceName = "未知项目或基金";
+					List<TCsqService> tCsqServices = serviceMap.get(entityId);
+					if(tCsqServices.isEmpty()) {
+						List<TCsqFund> tCsqFundList = fundMap.get(entityId);
+						tCsqFundList.get(0).getName();
+					}
+					serviceName = tCsqServices.get(0).getName();
+					csqFundDonateVo.setName(serviceName);
+				}
+				*/
+				return build;
+			}).collect(Collectors.toList());
+		QueryResult result = new QueryResult();
+		result.setResultList(resultList);
+		result.setTotalCount(total);
+		return result;
 	}
 
 	private Long getFundId(Long serviceId) {

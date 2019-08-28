@@ -134,4 +134,11 @@ public class CsqUserDaoImpl implements CsqUserDao {
 			.isNull(TCsqUser::getVxOpenId));
 	}
 
+	@Override
+	public List<TCsqUser> selectByName(String name) {
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqUser::getName, name));
+	}
+
 }

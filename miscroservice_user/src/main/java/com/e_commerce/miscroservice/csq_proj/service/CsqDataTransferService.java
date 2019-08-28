@@ -32,4 +32,7 @@ public interface CsqDataTransferService {
 	void dealWithServicePayment();
 
 	void fixUpServiceRelated();
+
+	void offLineDeal();
+
 }

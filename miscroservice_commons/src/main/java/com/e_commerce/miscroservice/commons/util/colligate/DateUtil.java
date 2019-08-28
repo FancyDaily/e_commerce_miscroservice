@@ -543,12 +543,29 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-		/*long currentTimeMillis = System.currentTimeMillis();
-		System.out.println(currentTimeMillis);
-		System.out.println(interval);
-		System.out.println(timestamp2Days(currentTimeMillis / interval));*/
 		String s = wholeDateToStamp("2019-01-03 23:53:00");
-		System.out.println(s);
+
+		String date = "2019.7.3";
+		StringBuffer stringBuffer = new StringBuffer(date);
+		int i = date.lastIndexOf(".");
+//		stringBuffer.delete(i ,i + 1);	//从后面开始
+//		stringBuffer.delete(4,5);
+		stringBuffer.replace(i, i+1, "-");
+		stringBuffer.replace(4,5, "-");
+		String s1 = dateToStamp(stringBuffer.toString());
+		System.out.println(stringBuffer);
+		System.out.println(s1);
+		/*String s2 = date.replaceAll(".", "");
+		System.out.println(s2);
+		String s1 = null;
+		try {
+			Date parse = new SimpleDateFormat("yyyyMMdd").parse(s2);
+			parse.getTime();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+//		System.out.println(s);
+		System.out.println(s1);*/
 	}
 
 	public static int getContinueDayCnt(List<Long> createTimeList) {

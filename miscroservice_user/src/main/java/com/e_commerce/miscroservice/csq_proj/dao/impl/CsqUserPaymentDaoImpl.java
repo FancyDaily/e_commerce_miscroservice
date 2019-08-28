@@ -82,11 +82,11 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 	}
 
 	@Override
-	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDescPage(Long entityId, int entityType, int inOut) {
+	public List<TCsqUserPaymentRecord> selectByEntityIdAndEntityTypeAndInOutDescPage(Long entityId, int entityType, int inOut, int pageNum, int pageSize) {
 		MybatisPlusBuild mybatisPlusBuild = byEntityIdAndEntityTypeAndInOutDescBuild(entityId, entityType, inOut);
 		IdUtil.setTotal(mybatisPlusBuild);
 
-		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
 	@Override

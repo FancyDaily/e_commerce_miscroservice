@@ -41,4 +41,6 @@ public interface CsqUserDao {
 	TCsqUser selectByNameAndNotNullUserTel(String name);
 
 	TCsqUser selectByNameAndNotNullUserTelAndNullOpenid(String name);
+
+	List<TCsqUser> selectByName(String name);
 }

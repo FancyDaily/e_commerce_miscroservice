@@ -6,9 +6,11 @@ import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -27,6 +29,9 @@ import java.util.stream.Collectors;
 @Service
 @Log
 public class CsqDataTransferServiceImpl implements CsqDataTransferService {
+
+	@Autowired
+	private CsqOfflineDataDao csqOfflineDataDao;
 
 	@Autowired
 	private CsqOldUserDao csqOldUserDao;
@@ -728,6 +733,83 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 						}
 					}
 				});
+	}
+
+	@Override
+	public void offLineDeal() {
+		//找到记录。
+		List<TCsqOffLineData> tCsqOffLineData = csqOfflineDataDao.selectAll();
+		List<TCsqOffLineData> inList = tCsqOffLineData.stream()
+			.filter(a -> 0 == a.getType()).collect(Collectors.toList());
+		List<TCsqOffLineData> outList = tCsqOffLineData.stream()
+			.filter(a -> 1 == a.getType()).collect(Collectors.toList());
+		dealWithOffLineIn(inList);
+		dealWithOffLineOut(outList);
+	}
+
+	private void dealWithOffLineOut(List<TCsqOffLineData> outList) {
+		//调用recordForConsumption
+		//TODO
+		outList.stream()
+			.forEach(a -> {
+				Long fundId = a.getFundId();
+				String description = a.getDescription();
+				//处理description
+				String[] descStrArray = description.split(" ");
+				description = descStrArray[1];	//得到的文本可能需要再处理
+				csqUserService.recordForConsumption(null, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), description);
+			});
+	}
+
+	private void dealWithOffLineIn(List<TCsqOffLineData> offLineData) {
+		List<String> userWithNamesToCreate = offLineData.stream()
+			.map(TCsqOffLineData::getUserName)
+			.distinct()
+			.collect(Collectors.toList());
+		//创建虚拟账户
+		//TODO
+		List<TCsqUser> users = userWithNamesToCreate.stream()
+			.map(a ->
+				TCsqUser.builder()
+					.name(a).build()
+			).collect(Collectors.toList());
+		Map<String, List<TCsqUser>> csqUserNameUserMap = users.stream()
+			.map(a ->{
+					a.setUuid("123");
+					//校验同名用户是否存在
+					String name = a.getName();
+					List<TCsqUser> tCsqUsers = csqUserDao.selectByName(name);
+					TCsqUser returnUser = null;
+					if(!tCsqUsers.isEmpty()) {
+						returnUser = tCsqUsers.get(0);
+						if(tCsqUsers.size() > 1) {
+							for(TCsqUser csqUser: tCsqUsers) {
+								if(!StringUtil.isEmpty(csqUser.getUserTel())) {	//不为空
+									returnUser = csqUser;
+								}
+							}
+						}
+					}
+					return returnUser == null? csqUserService.testRegister(a): returnUser;
+			}).collect(Collectors.groupingBy(TCsqUser::getName));
+		//调用fakeWechatPay(after commit)
+		offLineData.stream()
+			.forEach(a -> {
+				log.info("当前转移的数据 a={}", a);
+				String userName = a.getUserName();
+				List<TCsqUser> tCsqUsers = csqUserNameUserMap.get(userName);
+				if(!tCsqUsers.isEmpty()) {
+					TCsqUser csqUser = tCsqUsers.get(0);
+					Long userId = csqUser.getId();
+					String date = a.getDate();//format
+					StringBuffer stringBuffer = new StringBuffer(date);
+					int i = date.lastIndexOf(".");
+					stringBuffer.replace(i, i+1, "-");
+					stringBuffer.replace(4,5, "-");
+					Long timeStamp = Long.valueOf(DateUtil.dateToStamp(stringBuffer.toString()));
+					csqPayService.fakeWechatPay(userId, a.getFundId(), CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), null, timeStamp);
+				}
+			});
 	}
 
 	private void dealWithPaymentThatIsFundAndService() {
