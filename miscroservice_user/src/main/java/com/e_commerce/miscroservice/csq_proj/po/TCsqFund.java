@@ -63,6 +63,9 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "负责人")
 	private String personInCharge;
 
+	@Column(commit = "负责人职位")
+	private String occupation;
+
 	@Column(commit = "负责人头像")
 	private String personInChargePic;
 

@@ -46,4 +46,5 @@ public interface CsqDataTransferService {
 
 	void dealWithTransferData();
 
+	void currentDealWithServicePayment();
 }

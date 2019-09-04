@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
 import com.e_commerce.miscroservice.csq_proj.po.TOldPayment;
+import com.sun.mail.util.LineOutputStream;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface CsqOldPaymentDao {
 	List<TOldPayment> selectInPfIdsDesc(List<String> oldFundIds);
 
 	List<TOldPayment> selectInPfIdsAsc(List<String> oldFundIds);
+
+	List<TOldPayment> selectNotInPFId(Long... pfIds);
 }

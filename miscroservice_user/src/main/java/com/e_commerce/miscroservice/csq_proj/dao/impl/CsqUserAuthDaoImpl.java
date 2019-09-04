@@ -3,8 +3,8 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserAuthDao;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 import org.springframework.stereotype.Component;
@@ -89,8 +89,15 @@ public class CsqUserAuthDaoImpl implements CsqUserAuthDao {
 		return userAuth.getId() != null ? instance.update(userAuth, baseBuild().eq(TCsqUserAuth::getId, userAuth.getId())) : instance.save(userAuth);
 	}
 
-	private MybatisPlusBuild baseBuild() {
+	@Override
+	public MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TCsqUserAuth.class)
 			.eq(TCsqUserAuth::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
+	@Override
+	public List<TCsqUserAuth> selectWithBuildPage(MybatisPlusBuild mybatisPlusBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(mybatisPlusBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqUserAuth(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 }

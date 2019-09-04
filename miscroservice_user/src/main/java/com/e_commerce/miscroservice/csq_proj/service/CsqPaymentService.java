@@ -57,4 +57,6 @@ public interface CsqPaymentService {
 	List<Long> getPaymentRelatedOrderIds(Long entityId, Integer entityType);
 
 	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
+
+	List<CsqUserPaymentRecordVo> findWaters(String searchParma, Integer pageNum, Integer pageSize);
 }

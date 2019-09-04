@@ -88,4 +88,11 @@ public class CsqOldServiceDaoImpl implements CsqOldServiceDao {
 			.in(TOldService::getTitle, serviceNames));
 	}
 
+	@Override
+	public TOldService selectByPrimaryKey(String pfid) {
+		return MybatisPlus.getInstance().findOne(new TOldService(), new MybatisPlusBuild(TOldService.class)
+			.eq(TOldService::getId, pfid)
+		);
+	}
+
 }

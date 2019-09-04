@@ -253,9 +253,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		boolean isFund = false;
 		TCsqService tCsqService = csqServiceDao.selectByPrimaryKey(serviceId);
 		// 判断是否为自己
-		if (tCsqService.getUserId().equals(userId)) {
-			isMine = true;
-		}
+		isMine = tCsqService.getUserId().equals(userId);
 		//进入查询过程
 		Integer type = tCsqService.getType();
 
@@ -320,9 +318,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		}
 		//是否捐助过该项目
 		boolean isDonated = false;
-		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeAndToIdDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), serviceId);
-		if (!tCsqOrders.isEmpty()) {
-			isDonated = true;
+		if(userId != null) {
+			List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeAndToIdDesc(userId, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), serviceId);
+			if (!tCsqOrders.isEmpty()) {
+				isDonated = true;
+			}
 		}
 		resultMap.put("donated", isDonated);
 		resultMap.put("isMine", isMine);

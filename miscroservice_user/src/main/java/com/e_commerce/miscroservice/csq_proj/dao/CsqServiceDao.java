@@ -88,4 +88,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
 	List<TCsqService> selectByType(int code);
+
+	TCsqService selectByName(String name);
 }

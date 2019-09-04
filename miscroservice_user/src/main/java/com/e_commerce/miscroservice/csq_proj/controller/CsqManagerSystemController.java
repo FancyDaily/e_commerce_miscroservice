@@ -46,6 +46,9 @@ public class CsqManagerSystemController {
 	@Autowired
 	private CsqMsgService csqMsgService;
 
+	@Autowired
+	private CsqPaymentService csqPaymentService;
+
 	@RequestMapping("alive")
 	public Object test() {
 		return "true";
@@ -479,6 +482,13 @@ public class CsqManagerSystemController {
 		return result;
 	}
 
+	/**
+	 * 消息列表
+	 * @param searchParam
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
 	@RequestMapping("message/list")
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult msgList(String searchParam, Integer pageNum, Integer pageSize) {
@@ -500,4 +510,135 @@ public class CsqManagerSystemController {
 		}
 		return result;
 	}
+
+	/**
+	 * 组织实名的认证审核
+	 *
+	 * @param userAuthId 认证记录编号
+	 * @param option     操作1通过2拒绝
+	 * @param content	描述
+	 *                   <p>
+	 *                   {"success":true,"errorCode":"","msg":"","data":""}
+	 * @return
+	 */
+	@RequestMapping("corp/cert/do")
+	public AjaxResult certCorpDo(Long userAuthId, Integer option, String content) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("组织实名的认证审核, ");
+			csqUserService.certCorp(userAuthId, option, content);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名的认证审核", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名的认证审核", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 组织实名认证详情
+	 * @param userAuthId  实名认证编号
+	 * @return
+	 */
+	@RequestMapping("corp/detail")
+	public AjaxResult certCorpDetail(Long userAuthId) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("组织实名的认证详情, ");
+			TCsqUserAuth userAuth = csqUserService.corpCertDetail(userAuthId);
+			result.setData(userAuth);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名的认证详情", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名的认证详情", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 组织实名认证列表
+	 * @param status  状态
+	 * @param pageNum  页码
+	 * @param pageSize  分页大小
+	 * @return
+	 */
+	@RequestMapping("corp/cert/list")
+	public AjaxResult certCorpList(Integer status, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("组织实名认证列表, userIds={}, status={}, pageNum={}, pageSize={}", userIds, status, pageNum, pageSize);
+			QueryResult<TCsqUserAuth> userAuth = csqUserService.certCorpList(status, pageNum, pageSize);
+			result.setData(userAuth);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名认证列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名认证列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 组织实名认证数量
+	 * @param status 状态
+	 * @return
+	 */
+	@RequestMapping("corp/cert/count")
+	public AjaxResult certCorpCnt(Integer status) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("组织实名认证数量, userIds={}, status={}", userIds, status);
+			int count = csqUserService.certCorpCount(status);
+			result.setData(count);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "组织实名认证数量", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("组织实名认证数量", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	public AjaxResult findWaters(String searchParma, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}", userIds, searchParma, pageNum, pageSize);
+			csqPaymentService.findWaters(searchParma, pageNum, pageSize);
+//			result.setData(count);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "爱心账户充值记录", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("爱心账户充值记录", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
 }

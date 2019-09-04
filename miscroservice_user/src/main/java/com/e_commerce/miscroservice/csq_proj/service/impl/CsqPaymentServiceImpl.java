@@ -484,5 +484,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		return donaterList;
 	}
 
+	@Override
+	public List<CsqUserPaymentRecordVo> findWaters(String searchParma, Integer pageNum, Integer pageSize) {
+		return null;
+	}
+
 
 }

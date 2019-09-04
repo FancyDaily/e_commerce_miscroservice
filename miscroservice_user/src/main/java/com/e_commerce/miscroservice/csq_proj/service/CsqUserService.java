@@ -78,8 +78,9 @@ public interface CsqUserService {
 	 * 组织实名认证审核
 	 * @param userAuthId
 	 * @param option
+	 * @param content
 	 */
-	void certCorp(Long userAuthId, Integer option);
+	void certCorp(Long userAuthId, Integer option, String content);
 
 	/**
 	 * 日行一善
@@ -223,4 +224,12 @@ public interface CsqUserService {
 	TCsqUser findCsqUserByUserTel(String userTel);
 
 	QueryResult<TCsqUser> list(Long managerId, String searchParam, Integer pageNum, Integer pageSize, Boolean fuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean isFuzzySearch);
+
+	TCsqUserAuth corpCertDetail(Long userAuthId);
+
+	QueryResult<TCsqUserAuth> certCorpList(Integer status, Integer pageNum, Integer pageSize);
+
+	int certCorpCount(Integer status);
+
+	Map qrCode(Long userId, CsqSceneVo scene, String page, Integer uploadCode);
 }

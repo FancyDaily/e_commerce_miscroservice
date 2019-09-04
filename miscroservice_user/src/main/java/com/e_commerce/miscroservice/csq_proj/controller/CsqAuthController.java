@@ -154,16 +154,17 @@ public class CsqAuthController {
 	 *
 	 * @param userAuthId 认证记录编号
 	 * @param option     操作1通过2拒绝
+	 * @param content	描述
 	 *                   <p>
 	 *                   {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("corp/do")
-	public AjaxResult certCorpDo(Long userAuthId, Integer option) {
+	public AjaxResult certCorpDo(Long userAuthId, Integer option, String content) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("组织实名认证审核, ");
-			csqUserService.certCorp(userAuthId, option);
+			csqUserService.certCorp(userAuthId, option, content);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织实名认证审核", e.getMessage());

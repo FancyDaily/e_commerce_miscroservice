@@ -377,7 +377,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public void certCorp(Long userAuthId, Integer option) {
+	public void certCorp(Long userAuthId, Integer option, String content) {
 		Integer OPTION_PASS = CsqUserAuthEnum.STATUS_CERT_PASS.getCode();
 		Integer OPTION_REFUSE = CsqUserAuthEnum.STATUS_CERT_REFUSE.getCode();
 		boolean isPass = OPTION_PASS.equals(option);
@@ -391,7 +391,6 @@ public class CsqUserServiceImpl implements CsqUserService {
 		}
 		if (CsqUserAuthEnum.STATUS_UNDER_CERT.getCode() != userAuth.getStatus()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前审核状态不正确！");
-
 		}
 		userAuth.setStatus(option);
 		csqUserAuthDao.update(userAuth);
@@ -404,7 +403,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//插入一条系统消息
 		CsqSysMsgTemplateEnum csqSysMsgTemplateEnum = isPass ? CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS : CsqSysMsgTemplateEnum.CORP_CERT_FAIL;
 		CsqServiceMsgEnum csqServiceMsgEnum = isPass ? CsqServiceMsgEnum.CORP_CERT_SUCCESS : CsqServiceMsgEnum.CORP_CERT_FAIL;
-		csqMsgService.insertTemplateMsg(csqSysMsgTemplateEnum, userId);
+		csqMsgService.insertTemplateMsg(StringUtil.isEmpty(content)? null : "描述：" + content, csqSysMsgTemplateEnum, userId);
 		//插入服务通知
 		csqMsgService.sendServiceMsg(userId, csqServiceMsgEnum, CsqServiceMsgParamVo.builder()
 			.csqUserAuthVo(userAuth.copyCsqUserAuthVo()).build());
@@ -1259,6 +1258,56 @@ public class CsqUserServiceImpl implements CsqUserService {
 		queryResult.setResultList(tCsqUsers);
 		queryResult.setTotalCount(total);
 		return queryResult;
+	}
+
+	@Override
+	public TCsqUserAuth corpCertDetail(Long userAuthId) {
+		return csqUserAuthDao.selectByPrimaryKey(userAuthId);
+	}
+
+	@Override
+	public QueryResult<TCsqUserAuth> certCorpList(Integer status, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = csqUserAuthDao.baseBuild();
+
+		mybatisPlusBuild = status != null? mybatisPlusBuild
+			.eq(TCsqUserAuth::getStatus, status): mybatisPlusBuild;
+
+		//排序时间倒序、审核状态正序
+		mybatisPlusBuild
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserAuth::getCreateTime))
+			.orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TCsqUserAuth::getStatus));
+
+		List<TCsqUserAuth> tCsqUserAuths = csqUserAuthDao.selectWithBuildPage(mybatisPlusBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		QueryResult<TCsqUserAuth> tCsqUserAuthQueryResult = new QueryResult<>();
+		tCsqUserAuthQueryResult.setTotalCount(total);
+		tCsqUserAuthQueryResult.setResultList(tCsqUserAuths);
+
+		return tCsqUserAuthQueryResult;
+	}
+
+	@Override
+	public int certCorpCount(Integer status) {
+		return certCorpList(status, 1, 999999).getTotalCount().intValue();
+	}
+
+	@Override
+	public Map qrCode(Long userId, CsqSceneVo vo, String page, Integer uploadCode) {
+		page = StringUtil.isEmpty(page)? this.PERSON_PAGE: page;
+		String scene = JSONObject.toJSONString(vo);
+		Long sceneKey = -1L;
+		if(userId != null) {
+			TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
+			sceneKey = insertKeyValIfAbsent(userId, scene, tCsqKeyValue);
+		}
+
+		HashMap map = new HashMap();
+		UploadPathEnum.innerEnum anEnum = UploadPathEnum.innerEnum.getEnum(uploadCode);
+		String qrCode = wechatService.genQRCode(sceneKey == -1L? "":sceneKey.toString(), page, anEnum == null? UploadPathEnum.innerEnum.CSQ_PERSON: anEnum);
+//		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
+		map.put("qrCode", qrCode);
+		return map;
 	}
 
 	private void buildWithAccountTypeAndAvailableStatus(Integer accountType, Integer availableStatus, MybatisPlusBuild baseBuild) {

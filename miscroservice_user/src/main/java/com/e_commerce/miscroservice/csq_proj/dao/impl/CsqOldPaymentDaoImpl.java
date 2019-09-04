@@ -44,4 +44,11 @@ public class CsqOldPaymentDaoImpl implements CsqOldPaymentDao {
 			.in(TOldPayment::getPfid, oldFundIds)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TOldPayment::getAddtime)));
 	}
+
+	@Override
+	public List<TOldPayment> selectNotInPFId(Long... pfIds) {
+		return MybatisPlus.getInstance().findAll(new TOldPayment(), new MybatisPlusBuild(TOldPayment.class)
+			.notIn(TOldPayment::getPfid, pfIds)
+		);
+	}
 }

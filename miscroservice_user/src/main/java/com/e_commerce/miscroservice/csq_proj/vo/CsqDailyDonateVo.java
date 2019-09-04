@@ -31,6 +31,9 @@ public class CsqDailyDonateVo {
 
 	private String personInCharge;	//负责人(某种情况下的受益人
 
+	@Column(commit = "负责人职位")
+	private String occupation;
+
 	@Transient
 	private Integer donaterCnt;	//捐助人数
 

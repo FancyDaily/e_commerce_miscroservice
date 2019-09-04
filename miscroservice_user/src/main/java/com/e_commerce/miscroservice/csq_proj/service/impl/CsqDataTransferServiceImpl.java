@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.AlipayIserviceMindvAnswersBatchqueryModel;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -119,7 +120,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				tOldUsers.stream()
 					.forEach(b -> {
 						if (a.getAccountType().equals(CsqUserEnum.ACCOUNT_TYPE_PERSON.toCode())) {    //个人用户
-							if (vxOpenId.equals(b.getOpenid())) {    //发现重复的openid
+							if (vxOpenId != null && vxOpenId.equals(b.getOpenid())) {    //发现重复的openid
 								//记录
 								a.setOldId(Long.valueOf(b.getId()));
 								log.warn("发现重复的用户标示, user={}", a);
@@ -137,68 +138,77 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 	@Override
 	public void transferUser() {
+		List<TOldUser> theUsers = csqOldUserDao.selectAll();
+		ArrayList<TCsqUser> sthInCommon = (ArrayList<TCsqUser>) getSthInCommon(theUsers);	//包含重复用户信息
+		List<Long> unexpectedIds = sthInCommon.stream()
+			.map(TCsqUser::getOldId).collect(Collectors.toList());
+
 		//处理用户与流水(1/2 账户充值流水)
 		List<TOldUser> tOldUsers = csqOldUserDao.selectAll();
 		List<TCsqUserPaymentRecord> toInserterPayment = new ArrayList<>();
 		List<TOldService> tOldServices = csqOldServiceDao.selectByNames("随手捐");
 		List<String> serviceIds = tOldServices.stream()
 			.map(TOldService::getId).collect(Collectors.toList());
-		List<TCsqUser> toInserters = tOldUsers.stream()
-			.map(a -> {
-				//有用信息
-				boolean flag = false;
-				String id = a.getId();
-				if (id.equals("153820346900000003")) {
-					flag = true;
+		tOldUsers.stream()
+			.forEach(a -> {
+				String theId = a.getId();
+				if(theId.equals("156747275200000001")) {
+					System.out.println("got you!");
 				}
-				Long oldId = Long.valueOf(a.getId());
-				String userTel = a.getAccount();
-				String openid = a.getOpenid();
+				if(!unexpectedIds.contains(Long.valueOf(theId))) {
+					//有用信息
+					boolean flag = false;
+					String id = theId;
+					if (id.equals("153820346900000003")) {
+						flag = true;
+					}
+					Long oldId = Long.valueOf(theId);
+					String userTel = a.getAccount();
+					String openid = a.getOpenid();
 //				Long createTime = Long.valueOf(a.getAddtime() + "000");
-				Long createTime = Long.valueOf(DateUtil.dateToStamp(a.getAddtime()));
+					Long createTime = Long.valueOf(DateUtil.dateToStamp(a.getAddtime()));
 
-				String nickname = a.getNickname();
-				String regex = "^[1-9]\\d*$";
-				Pattern compile = Pattern.compile(regex);
-				boolean matches = compile.matcher(nickname).matches();
-				TCsqUser build = TCsqUser.builder()
-					.name(nickname.equals("爱心人士") || matches ? null : nickname)
-					.oldId(oldId)    //旧用户id
-					.userTel(userTel)    //手机号码
-					.mail(a.getEmail())
-					.vxOpenId(openid).build();    //微信id
-				build.setCreateTime(new Timestamp(createTime));
-				//余额 -> 统计捐赠到随手捐或者爱心账户的数额 并 使得他们变成余额
+					String nickname = a.getNickname();
+					String regex = "^[1-9]\\d*$";
+					Pattern compile = Pattern.compile(regex);
+					boolean matches = compile.matcher(nickname).matches();
+					TCsqUser build = TCsqUser.builder()
+						.name(nickname.equals("爱心人士") || matches ? null : nickname)
+						.oldId(oldId)    //旧用户id
+						.userTel(userTel)    //手机号码
+						.mail(a.getEmail())
+						.vxOpenId(openid).build();    //微信id
+					build.setCreateTime(new Timestamp(createTime));
+					//余额 -> 统计捐赠到随手捐或者爱心账户的数额 并 使得他们变成余额
 //				List<TOldService> tOldServices = csqOldServiceDao.selectByNames("随手捐", "成长基金");
-				List<TOldPayment> tOldPayments = serviceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectByOptionUserInPFId(a.getId(), serviceIds);
+					List<TOldPayment> tOldPayments = serviceIds.isEmpty() ? new ArrayList<>() : csqOldPaymentDao.selectByOptionUserInPFId(theId, serviceIds);
 
-				tOldPayments.stream()
-					.forEach(b -> {
-						String donationmoney = b.getDonationmoney();
-						TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
-							.orderId(null)    //缺失
-							.money(Double.valueOf(donationmoney == null ? "0" : donationmoney))    //金额
-							.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //账户余额
-							.entityId(null)
-							.description("充值")
-							.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
-							.build();
-						build1.setExtend(b.getOptionuser());    //TODO extend存放旧id
-						String donationtime = b.getDonationtime();
-						build1.setCreateTime(new Timestamp(Long.valueOf(DateUtil.dateToStamp(donationtime.substring(0, donationtime.length() - 4)))));
-						toInserterPayment.add(build1);
-					});
+					tOldPayments.stream()
+						.forEach(b -> {
+							String donationmoney = b.getDonationmoney();
+							TCsqUserPaymentRecord build1 = TCsqUserPaymentRecord.builder()
+								.orderId(null)    //缺失
+								.money(Double.valueOf(donationmoney == null ? "0" : donationmoney))    //金额
+								.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //账户余额
+								.entityId(null)
+								.description("充值")
+								.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
+								.build();
+							build1.setExtend(b.getOptionuser());    //TODO extend存放旧id
+							String donationtime = b.getDonationtime();
+							build1.setCreateTime(new Timestamp(Long.valueOf(DateUtil.dateToStamp(donationtime.substring(0, donationtime.length() - 4)))));
+							toInserterPayment.add(build1);
+						});
 
-				Double money = tOldPayments.stream()
-					.map(TOldPayment::getDonationmoney).map(Double::valueOf)
-					.reduce(0d, Double::sum);
+					Double money = tOldPayments.stream()
+						.map(TOldPayment::getDonationmoney).map(Double::valueOf)
+						.reduce(0d, Double::sum);
 
-				build.setSurplusAmount(money);    //余额
+					build.setSurplusAmount(money);    //余额
+					csqUserService.testRegister(build);
 
-				csqUserService.testRegister(build);
-
-				return build;
-			}).collect(Collectors.toList());
+				}
+			});
 //		csqUserDao.insert(toInserters);
 		csqUserPaymentDao.insert(toInserterPayment);
 	}
@@ -851,6 +861,37 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		dealWithOffLineData(offLineData);
 	}
 
+	@Override
+	public void currentDealWithServicePayment() {
+		//排除随手捐和快乐冬衣
+		List<TOldPayment> tOldPayments = csqOldPaymentDao.selectNotInPFId(156710913200000001L, 153820441700000001L);
+		//拆解成fakePay
+		tOldPayments.stream()
+			.forEach(a -> {
+				Double money = Double.valueOf(a.getDonationmoney());
+				String oldId = a.getOptionuser();
+				TCsqUser csqUser = csqUserDao.selectByOldId(oldId);
+				Long userId = csqUser.getId();
+
+				String addtime = a.getAddtime();
+				addtime = Arrays.asList(addtime.split(" ")).get(0);
+				Long timeStamp = Long.valueOf(DateUtil.dateToStamp(addtime));
+				String pfid = a.getPfid();
+				TOldService tOldService = csqOldServiceDao.selectByPrimaryKey(pfid);
+				String name = tOldService.getTitle();
+				TCsqService csqService = csqServiceDao.selectByName(name);
+				Integer type = csqService.getType();
+				Long entityId = csqService.getId();
+				Integer entityType = CsqEntityTypeEnum.TYPE_SERVICE.toCode();
+				if(CsqServiceEnum.TYPE_FUND.getCode() == type) {	//为基金
+					entityId = csqService.getFundId();
+					entityType = CsqEntityTypeEnum.TYPE_FUND.toCode();
+				}
+				csqPayService.fakeWechatPay(userId, entityId, entityType, money, null, timeStamp);
+			});
+
+	}
+
 	private void dealWithOffLineData(List<TCsqOffLineData> offLineData) {
 		offLineData = offLineData.stream()
 			.filter(a -> AppConstant.IS_VALID_YES.equals(a.getIsValid())).collect(Collectors.toList());
@@ -958,7 +999,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				}
 			});
 	}
-
+/*
 	public static void main(String[] args) {
 		String date = "2018-07-25";
 		if(date.contains("-")) {
@@ -975,7 +1016,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		Long timeStamp = Long.valueOf(DateUtil.dateToStamp(s));
 		System.out.println(s);
 		System.out.println(timeStamp);
-	}
+	}*/
 
 	private void dealWithPaymentThatIsFundAndService() {
 		/*List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectInEntityType();
@@ -1028,4 +1069,23 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		return csqService == null ? null : csqService.getId();
 	}
 
+	public static String picDeal(String src, Integer num) {
+		String[] s = src.split("_");
+		String suffix = s[1];
+		String prefix = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/csq/";
+		String destination = "";
+		for(int i=1; i<=num; i++) {
+			String simpleOne = prefix + src + "/" + suffix + "_" + i + ".png" + ",";
+			destination += simpleOne;
+		}
+		if(destination.endsWith(",")) {
+			destination = destination.substring(0, destination.length()-1);
+		}
+		return destination;
+	}
+
+	public static void main(String[] args) {
+		String s = picDeal("56_kldy", 22);
+		System.out.println(s);
+	}
 }

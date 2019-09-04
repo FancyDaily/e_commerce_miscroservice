@@ -26,4 +26,6 @@ public interface CsqOldServiceDao {
 	List<TOldService> selectByStatusByCheckStatusByDTypeAndDonationAmountNeqAndFinTypeNeq(int i, int i1, String fund, String s, String 个人冠名基金);
 
 	List<TOldService> selectInNames(List<String> serviceNames);
+
+	TOldService selectByPrimaryKey(String pfid);
 }

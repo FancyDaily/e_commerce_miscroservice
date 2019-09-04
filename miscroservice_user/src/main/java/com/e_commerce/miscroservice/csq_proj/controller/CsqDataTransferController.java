@@ -124,6 +124,18 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("test6_4")
+	public Object test6_4() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.currentDealWithServicePayment();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	@RequestMapping("test6_2")
 	public Object test6_2() {
 		AjaxResult result = new AjaxResult();

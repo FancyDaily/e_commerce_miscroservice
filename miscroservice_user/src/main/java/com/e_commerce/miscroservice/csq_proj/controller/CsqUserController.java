@@ -835,8 +835,9 @@ public class CsqUserController {
 
 	/**
 	 * 带验sms的匹配openid手机号
+	 *
 	 * @param userTel 手机号
-	 * @param name 姓名
+	 * @param name    姓名
 	 * @param smsCode 验证码
 	 * @return
 	 */
@@ -852,7 +853,7 @@ public class CsqUserController {
 			result.setData(map);
 			result.setSuccess(true);
 			String msg = (String) map.get("msg");
-			if(!StringUtil.isEmpty(msg) && !msg.contains("匹配已进行")) {	//若有提醒信息
+			if (!StringUtil.isEmpty(msg) && !msg.contains("匹配已进行")) {    //若有提醒信息
 				result.setSuccess(false);
 			}
 		} catch (MessageException e) {
@@ -862,6 +863,45 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("带验sms的匹配openid手机号", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 生成二维码
+	 * @param userId
+	 * @param fundId
+	 * @param serviceId
+	 * @param usertel
+	 * @param type
+	 * @param page
+	 * @param uploadCode
+	 * @return
+	 */
+	@Consume(CsqSceneVo.class)
+	@RequestMapping("qrCode")
+	@UrlAuth
+	public Object qrCode(Long userId,
+						 Long fundId,
+						 Long serviceId,
+						 String usertel,
+						 Integer type, String page, Integer uploadCode) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		CsqSceneVo vo = (CsqSceneVo) ConsumeHelper.getObj();
+		try {
+			log.info("生成qrCode, userId={}, vo={}, page={}, uploadCode={}", userIds, vo, page, uploadCode);
+			Map map = csqUserService.qrCode(userIds, vo, page, uploadCode);
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "生成qrCode", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("生成qrCode", e);
 			result.setSuccess(false);
 		}
 		return result;

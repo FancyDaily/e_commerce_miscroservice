@@ -106,5 +106,14 @@ public class UploadPathEnum {
 			this.path = path;
 		}
 
+		public static innerEnum getEnum(int code) {
+			for(innerEnum theEnum:innerEnum.values()) {
+				if(code == theEnum.getCode()) {
+					return theEnum;
+				}
+			}
+			return null;
+		}
+
 	}
 }

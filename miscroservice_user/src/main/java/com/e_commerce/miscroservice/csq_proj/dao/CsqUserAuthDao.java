@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
 
 import java.util.List;
@@ -27,4 +28,8 @@ public interface CsqUserAuthDao {
 	TCsqUserAuth findByCardId(String cardId);
 
 	int insertOrUpdate(TCsqUserAuth userAuth);
+
+	MybatisPlusBuild baseBuild();
+
+	List<TCsqUserAuth> selectWithBuildPage(MybatisPlusBuild mybatisPlusBuild, Integer pageNum, Integer pageSize);
 }
