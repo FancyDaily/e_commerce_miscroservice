@@ -1038,7 +1038,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	private static String getDefaultName(TCsqUser csqUser) {
 		String name = csqUser.getName();
-		String prefix = "小善";
+		String prefix = CsqUserEnum.DEFAULT_NAME_PREFIX;
 		long currentTimeMillis = System.currentTimeMillis();
 		String nowStringSuffix = String.valueOf(currentTimeMillis).substring(5);
 		StringBuilder builder = new StringBuilder();

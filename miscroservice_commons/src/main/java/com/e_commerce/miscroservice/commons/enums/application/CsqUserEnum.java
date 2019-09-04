@@ -33,7 +33,8 @@ public enum CsqUserEnum {
 	/**
 	 * 默认邀请人名称
 	 */
-	public static final String DEFAULT_INVITER_NAME = "小桥";
+	public static final String DEFAULT_NAME_PREFIX = "小桥";
+	public static final String DEFAULT_INVITER_NAME = DEFAULT_NAME_PREFIX;
 
 	Integer code;
 	String desc;
