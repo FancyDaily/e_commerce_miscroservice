@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 
 import java.util.List;
@@ -40,7 +41,15 @@ public interface CsqUserDao {
 
 	TCsqUser selectByNameAndNotNullUserTel(String name);
 
+	MybatisPlusBuild baseBuild();
+
 	TCsqUser selectByNameAndNotNullUserTelAndNullOpenid(String name);
 
 	List<TCsqUser> selectByName(String name);
+
+	List<TCsqUser> selectByBuild(MybatisPlusBuild baseBuild);
+
+	List<TCsqUser> selectByBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
+	List<TCsqUser> selectByName(String searchParam, boolean isLike);
 }

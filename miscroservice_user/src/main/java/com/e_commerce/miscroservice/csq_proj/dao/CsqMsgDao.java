@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
 
 import java.util.List;
@@ -27,4 +28,8 @@ public interface CsqMsgDao {
 	List<TCsqSysMsg> selectByUserIdAndIsReadDescPage(Integer pageNum, Integer pageSize, Long userId, int code);
 
 	List<TCsqSysMsg> selectByUserIdDescPage(Integer pageNum, Integer pageSize, Long userId);
+
+	List<TCsqSysMsg> selectWithBuild(MybatisPlusBuild baseBuild);
+
+	List<TCsqSysMsg> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 }

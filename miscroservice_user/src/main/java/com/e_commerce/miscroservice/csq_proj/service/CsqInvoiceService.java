@@ -23,4 +23,8 @@ public interface CsqInvoiceService {
 	QueryResult<CsqInvoiceRecord> recordList(Long userId, Long invoiceId, Integer pageNum, Integer pageSize);
 
 	int express(Long invoiceId, String expressNo);
+
+	QueryResult<CsqUserInvoiceVo> list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize);
+
+	void modify(TCsqUserInvoice obj);
 }

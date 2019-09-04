@@ -184,4 +184,54 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("person_in_charge_infos_test")
+	public Object dealWithPersonInCahrgeInfos(String folderPath) {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.dealWithPersonInChargeInfos(folderPath);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("person_in_charge_infos_test1")
+	public Object findAllPersonInChargeInfos(String json) {
+		AjaxResult result = new AjaxResult();
+		try {
+//			List<TCsqPersonInChargeInfo> allPersonInChargeInfos = csqDataTransferService.findAllPersonInChargeInfos();
+//			result.setData(allPersonInChargeInfos);
+			csqDataTransferService.insert(json);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("findOutTheIdOfFund")
+	public Object findOutTheIdOfFund() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.findOutTheIdOfFund();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("transferData/deal")
+	public Object dealWithTransferData() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.dealWithTransferData();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 }

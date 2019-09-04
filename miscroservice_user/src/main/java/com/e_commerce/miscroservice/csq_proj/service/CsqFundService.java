@@ -1,15 +1,9 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CsqFundEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqServiceMsgEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgTemplateEnum;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -96,4 +90,8 @@ public interface CsqFundService {
 	boolean isMine(Long fundId, Long userId);
 
 	List<TCsqFund> selectAllAndIdGreaterThan(long l);
+
+	QueryResult<TCsqFund> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> asList, Integer pageNum, Integer pageSize, Boolean fundParam);
+
+	void modifyFundManager(Long managerId, TCsqFund obj);
 }

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface CsqUserInvoiceDao {
 	List<TCsqUserInvoice> selectByUserIdDescPage(Long userId, Integer pageNum, Integer pageSize);
 
 	int update(TCsqUserInvoice build);
+
+	MybatisPlusBuild baseBuild();
+
+	List<TCsqUserInvoice> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 }

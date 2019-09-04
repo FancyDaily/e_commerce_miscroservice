@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 
 import java.util.List;
@@ -34,4 +35,16 @@ public interface CsqFundDao {
 	TCsqFund selectByExtend(String extend);
 
 	int multiUpdate(List<TCsqFund> toUpdaterFunds);
+
+	TCsqFund selectByName(String fundName);
+
+	List<TCsqFund> selectAll();
+
+	MybatisPlusBuild baseBuild();
+
+	List<TCsqFund> selectInNames(List<String> names);
+
+	List<TCsqFund> selectWithBuild(MybatisPlusBuild baseBuild);
+
+	List<TCsqFund> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 }

@@ -14,11 +14,13 @@ public enum CsqFundEnum {
 	STATUS_PUBLIC(2, "已公开"),
 	STATUS_CERT_FAIL(3, "审核失败"),
 	RAISE_STATUS_RAISING(0, "筹备中"),
-	RAISE_STAUTS_DONE(1, "已公开")
+	RAISE_STAUTS_DONE(1, "已公开"),
+	IS_SHOWN_YES(1, "可展示"),
+	IS_SHOWN_NO(0, "不展示")
 	;
 
-//	public static final Double PUBLIC_MINIMUM = 100000d;
-	public static final Double PUBLIC_MINIMUM = 10000d;	//申请公开基金的最低标准
+//	public static final Double PUBLIC_MINIMUM = 10000d;
+	public static final Double PUBLIC_MINIMUM = 100000d;	//申请公开基金的最低标准
 	public static final String DEFAULT_COVER_PIC = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/congshanqiao/default_cover_pic_fund.jpg";	//默认封面图
 	public static final String DEFAULT_NAME_TEMPLATE = "%s的专项基金";
 

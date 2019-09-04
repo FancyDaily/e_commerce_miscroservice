@@ -135,4 +135,8 @@ public interface CsqServiceService {
 	List<TCsqService> selectInIds(Long... ids);
 
 	List<TCsqService> selectInExtends(List<Long> collect);
+
+	QueryResult<TCsqService> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch);
+
+	Map<Integer, Object> countGroupByStatus(Long userId);
 }

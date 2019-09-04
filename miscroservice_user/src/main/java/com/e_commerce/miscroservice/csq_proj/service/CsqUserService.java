@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserAuth;
@@ -220,4 +221,6 @@ public interface CsqUserService {
 	Object dealWithOpenidMatcher(Long userIds, String sceneKey, String userTel, boolean needPayments);
 
 	TCsqUser findCsqUserByUserTel(String userTel);
+
+	QueryResult<TCsqUser> list(Long managerId, String searchParam, Integer pageNum, Integer pageSize, Boolean fuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean isFuzzySearch);
 }

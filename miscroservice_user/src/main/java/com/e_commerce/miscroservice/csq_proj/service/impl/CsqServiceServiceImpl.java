@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum.STATUS_ALREADY_PAY;
@@ -601,6 +602,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Override
 	public void modify(TCsqService csqService) {
+		Double expectedAmount = csqService.getExpectedAmount();
+		//针对修改期望金额需要更多逻辑
+		if(expectedAmount != null) {
+			//重新计算剩余期望金额
+			TCsqService csqService1 = csqServiceDao.selectByPrimaryKey(csqService.getId());
+			Double sumTotalIn = csqService1.getSumTotalIn();
+			double amount = expectedAmount - sumTotalIn;
+			Double expectRemainAmount = amount > 0d? amount: 0d;
+			csqService.setExpectedRemainAmount(expectRemainAmount);
+		}
 		csqServiceDao.update(csqService);
 	}
 
@@ -648,6 +659,61 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		return csqServiceDao.selectInExtends(collect);
 	}
 
+	@Override
+	public QueryResult<TCsqService> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
+		MybatisPlusBuild baseBuild = csqServiceDao.getBaseBuild();
+
+		boolean emptySearchParam = StringUtil.isEmpty(searchParam);
+		//根据业务需求，增加筛选条件
+		baseBuild = baseBuild
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode());	//仅要类型为 -> 项目的数据
+
+		//参数判定 & 条件预装
+		String pattern = "^[1-9]\\d*$";
+		boolean matches = Pattern.matches(pattern, searchParam);
+		if(matches) {	//参数为id
+			baseBuild = baseBuild
+				.eq(TCsqService::getId, searchParam);
+		} else {
+			if(isFuzzySearch) {	//模糊查询
+				baseBuild = emptySearchParam?baseBuild:baseBuild
+					.like(TCsqService::getName, getLikeParam(searchParam));
+			} else {
+				baseBuild = emptySearchParam?baseBuild:baseBuild
+					.eq(TCsqService::getName, searchParam);
+			}
+		}
+		//排序
+		baseBuild = baseBuild
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime));
+
+		//列表
+		List<TCsqService> tCsqServices = csqServiceDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		QueryResult<TCsqService> queryResult = new QueryResult<>();
+		queryResult.setResultList(tCsqServices);
+		queryResult.setTotalCount(total);
+		return queryResult;
+	}
+
+	@Override
+	public Map<Integer, Object> countGroupByStatus(Long userId) {
+		HashMap<Integer, Object> map = new HashMap<>();
+		List<TCsqService> tCsqServices = csqServiceDao.selectByType(CsqServiceEnum.TYPE_SERIVE.getCode());
+		Map<Integer, List<TCsqService>> statusServiceMap = tCsqServices.stream()
+			.collect(Collectors.groupingBy(TCsqService::getStatus));
+		statusServiceMap.forEach((k,v) -> {
+			int size = v==null?0:v.size();
+			map.put(k, size);	//数量
+		});
+
+		return map;
+	}
+
+	private String getLikeParam(String searchParam) {
+		return "%" + searchParam + "%";
+	}
 
 	private List<TCsqUserPaymentRecord> donateListNonePage(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords) {
 		return donateListNonePage(tCsqUserPaymentRecords, null);

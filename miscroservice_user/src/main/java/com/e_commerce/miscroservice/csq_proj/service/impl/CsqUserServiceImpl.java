@@ -8,6 +8,8 @@ import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.*;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
@@ -662,6 +665,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public void recordForConsumption(Long userId, Long fromId, Integer fromType, Double amount, String wholeDescription, Long timeStamp) {
+		log.info("recordForConsumption => userId={}, fromId={}, fromType={}, amount={}, wholeDescription={}, timeStamp={}", userId, fromId, fromType, amount, wholeDescription, timeStamp);
 		//check入餐
 		if (fromId == null || fromType == null || amount == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必填参数为空!");
@@ -1199,6 +1203,66 @@ public class CsqUserServiceImpl implements CsqUserService {
 	@Override
 	public TCsqUser findCsqUserByUserTel(String userTel) {
 		return csqUserDao.selectByUserTel(userTel);
+	}
+
+	@Override
+	public QueryResult<TCsqUser> list(Long managerId, String searchParam, Integer pageNum, Integer pageSize, Boolean fuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean gotFund) {
+		MybatisPlusBuild baseBuild = csqUserDao.baseBuild();
+
+		String pattern = "^[1-9]\\d*$";
+		boolean matches = Pattern.matches(pattern, searchParam);
+		if(matches) {	//编号
+			baseBuild
+				.eq(TCsqUser::getId, managerId);
+		} else {
+			if(!StringUtil.isEmpty(searchParam)) {
+				if(fuzzySearch) {	//模糊查询
+					baseBuild
+						.like(TCsqUser::getName, searchParam);
+				} else {
+					baseBuild
+						.eq(TCsqUser::getName, searchParam);
+				}
+			}
+		}
+
+		buildWithAccountTypeAndAvailableStatus(accountType, availableStatus, baseBuild);
+
+		baseBuild = gotBalance? baseBuild.eq(TCsqUser::getBalanceStatus, CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode()) :
+			baseBuild.neq(TCsqUser::getBalanceStatus, CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());
+
+		if(gotFund) {	//是否有基金
+			//找到所有符合条件的userId
+			List<TCsqFund> tCsqFundList = csqFundDao.selectAll();
+			List<Long> userIds = tCsqFundList.stream()
+				.map(TCsqFund::getUserId).collect(Collectors.toList());
+			baseBuild
+				.in(TCsqUser::getId, userIds);
+		}
+
+		//last
+		baseBuild
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUser::getCreateTime));
+
+		List<TCsqUser> tCsqUsers = csqUserDao.selectByBuildPage(baseBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		QueryResult<TCsqUser> queryResult = new QueryResult<>();
+		queryResult.setResultList(tCsqUsers);
+		queryResult.setTotalCount(total);
+		return queryResult;
+	}
+
+	private void buildWithAccountTypeAndAvailableStatus(Integer accountType, Integer availableStatus, MybatisPlusBuild baseBuild) {
+		if(accountType != null) {
+			baseBuild
+				.eq(TCsqUser::getAccountType, accountType);
+		}
+
+		if(availableStatus != null) {
+			baseBuild
+				.eq(TCsqUser::getAvaliableStatus, availableStatus);
+		}
 	}
 
 	private Map motivateOpenidMatcher(Long userIds, String userTel) {

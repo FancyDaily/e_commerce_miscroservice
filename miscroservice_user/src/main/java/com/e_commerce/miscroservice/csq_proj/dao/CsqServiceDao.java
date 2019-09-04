@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 
 import java.util.List;
@@ -62,6 +63,8 @@ public interface CsqServiceDao {
 
 	List<TCsqService> selectLikeByPubKeysAndUserIdNeq(String a, Long userId);
 
+	MybatisPlusBuild getBaseBuild();
+
 	List<TCsqService> selectInIdsOrInFundIds(List<Long> serviceIds, List<Long> fundIds);
 
 	List<TCsqService> selectInFundIds(List<Long> fundIds);
@@ -79,4 +82,10 @@ public interface CsqServiceDao {
 	int multiUpdate(List<TCsqService> oldServices);
 
 	List<TCsqService> selectInExtends(List<Long> collect);
+
+	List<TCsqService> selectWithBuild(MybatisPlusBuild baseBuild);
+
+	List<TCsqService> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
+	List<TCsqService> selectByType(int code);
 }

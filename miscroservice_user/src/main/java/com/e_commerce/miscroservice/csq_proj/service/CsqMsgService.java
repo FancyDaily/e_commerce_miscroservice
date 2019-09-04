@@ -35,4 +35,6 @@ public interface CsqMsgService {
 	void sendServiceMsg(Long messageUserId, CsqServiceMsgEnum csqServiceMsgEnum, CsqServiceMsgParamVo csqServiceMsgParamVo);
 
 	void sendServiceMsgForFund(TCsqFund fund, Long userId);
+
+	QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize);
 }

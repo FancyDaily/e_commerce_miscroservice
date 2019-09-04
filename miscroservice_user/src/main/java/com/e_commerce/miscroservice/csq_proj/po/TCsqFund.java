@@ -90,6 +90,9 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "累积资助项目次数", length = 11, defaultVal = "0")
 	private Integer helpCnt;
 
+	@Column(commit = "是否可展示(首页列表),被管理员关闭的基金,不再在首页展示", defaultVal = "1")
+	private Integer isShown;
+
 	public CsqFundVo copyCsqFundVo() {
 		CsqFundVo vo = new CsqFundVo();
 		vo.setStationcreditCardId("");

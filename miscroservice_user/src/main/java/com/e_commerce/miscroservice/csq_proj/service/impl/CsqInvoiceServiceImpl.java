@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -311,6 +313,52 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		);
 
 		return csqUserInvoiceDao.update(build);
+	}
+
+	@Override
+	public QueryResult<CsqUserInvoiceVo> list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild baseBuild = csqUserInvoiceDao.baseBuild();
+		//判断是哪种searchParam
+		String pattern = "^[1-9]\\d*$";
+		boolean isNum = Pattern.matches(pattern, searchParam);
+		if(!StringUtil.isEmpty(searchParam)) {
+			if(isNum) {
+				boolean matches = searchParam.length() > 30;	//生成的orderoNo长度为31,且以020开头
+				if(!matches) {    //orderId
+					TCsqOrder tCsqOrder = csqOrderDao.selectByPrimaryKey(Long.valueOf(searchParam));
+					searchParam = tCsqOrder == null? "": tCsqOrder.getOrderNo();
+				}
+				if("".equals(searchParam)) {
+					return new QueryResult<CsqUserInvoiceVo>();
+				}
+				baseBuild.like(TCsqUserInvoice::getOrderNos, "%" + searchParam + "%");	//订单编号
+			} else {	//按开票申请人名称搜索
+				List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, false);//当前为关闭模糊查找
+				List<Long> userIds = tCsqUsers.stream()
+					.map(TCsqUser::getId).collect(Collectors.toList());
+				baseBuild.in(TCsqUserInvoice::getUserId, userIds);	//申请人
+			}
+		}
+		baseBuild
+			.eq(TCsqUserInvoice::getIsOut, isOut);	//是否已开票
+
+		baseBuild
+			.orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TCsqUserInvoice::getIsOut));	//排序
+
+		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		List<CsqUserInvoiceVo> resultList = tCsqUserInvoices.stream().map(a -> a.copyCsqUserInvoiceVo()).collect(Collectors.toList());
+		QueryResult<CsqUserInvoiceVo> csqUserInvoiceVoQueryResult = new QueryResult<>();
+		csqUserInvoiceVoQueryResult.setResultList(resultList);
+		csqUserInvoiceVoQueryResult.setTotalCount(total);
+
+		return csqUserInvoiceVoQueryResult;
+	}
+
+	@Override
+	public void modify(TCsqUserInvoice obj) {
+		csqUserInvoiceDao.update(obj);
 	}
 
 	private String getItemName(Map<Long, List<TCsqService>> serviceMap, Map<Long, List<TCsqFund>> fundMap, Map<Long, List<TCsqUser>> userMap, TCsqOrder a) {

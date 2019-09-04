@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.csq_proj.po.TCsqPersonInChargeInfo;
 import com.e_commerce.miscroservice.csq_proj.po.TOldUser;
 
 import java.util.List;
@@ -34,5 +35,15 @@ public interface CsqDataTransferService {
 	void fixUpServiceRelated();
 
 	void offLineDeal();
+
+	void dealWithPersonInChargeInfos(String folderPath);
+
+	List<TCsqPersonInChargeInfo> findAllPersonInChargeInfos();
+
+	void insert(String json);
+
+	void findOutTheIdOfFund();
+
+	void dealWithTransferData();
 
 }

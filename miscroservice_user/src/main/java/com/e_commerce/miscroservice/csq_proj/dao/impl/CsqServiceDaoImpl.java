@@ -124,6 +124,11 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.groupAfter());
 	}
 
+	@Override
+	public MybatisPlusBuild getBaseBuild() {
+		return baseBuild();
+	}
+
 	private MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES);
@@ -246,6 +251,25 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.in(TCsqService::getExtend, collect));
 	}
 
+	@Override
+	public List<TCsqService> selectWithBuild(MybatisPlusBuild baseBuild) {
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild);
+	}
+
+	@Override
+	public List<TCsqService> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(baseBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqService> selectByType(int code) {
+		return MybatisPlus.getInstance().findAll(new TCsqService(), baseBuild()
+			.eq(TCsqService::getType, code)
+		);
+	}
+
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
@@ -271,6 +295,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	private MybatisPlusBuild allBuild() {
 		return baseBuild()
+			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())	//判断是否可展示
 			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
 			.and()
 			.groupBefore()

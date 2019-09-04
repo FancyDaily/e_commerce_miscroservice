@@ -85,6 +85,17 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public List<TCsqSysMsg> selectWithBuild(MybatisPlusBuild baseBuild) {
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), baseBuild);
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(baseBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), baseBuild.page(pageNum, pageSize));
+	}
+
 	private MybatisPlusBuild byUserIdDescBuild(Long userId) {
 		return new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)

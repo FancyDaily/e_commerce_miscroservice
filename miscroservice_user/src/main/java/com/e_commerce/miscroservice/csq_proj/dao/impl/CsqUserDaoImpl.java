@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
@@ -97,8 +98,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectAll() {
-		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), baseBuild());
 	}
 
 	@Override
@@ -122,10 +122,15 @@ public class CsqUserDaoImpl implements CsqUserDao {
 	}
 
 	private MybatisPlusBuild byNameAndNotNullUserTelBuild(String name) {
-		return new MybatisPlusBuild(TCsqUser.class)
-			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES)
+		return baseBuild()
 			.eq(TCsqUser::getName, name)
 			.isNotNull(TCsqUser::getUserTel);
+	}
+
+	@Override
+	public MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqUser.class)
+			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
 	@Override
@@ -136,9 +141,27 @@ public class CsqUserDaoImpl implements CsqUserDao {
 
 	@Override
 	public List<TCsqUser> selectByName(String name) {
-		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
-			.eq(TCsqUser::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), baseBuild()
 			.eq(TCsqUser::getName, name));
+	}
+
+	@Override
+	public List<TCsqUser> selectByBuild(MybatisPlusBuild baseBuild) {
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), baseBuild);
+	}
+
+	@Override
+	public List<TCsqUser> selectByBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(baseBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), baseBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqUser> selectByName(String searchParam, boolean isLike) {
+		MybatisPlusBuild mybatisPlusBuild =
+			isLike? baseBuild().like(TCsqUser::getName, searchParam) : baseBuild().eq(TCsqUser::getName, "%" + searchParam + "%");
+
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), mybatisPlusBuild);
 	}
 
 }

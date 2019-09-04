@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
-import com.alipay.api.domain.LoanMoneyTypeAmt;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -120,16 +118,13 @@ public class CsqFundServiceImpl implements CsqFundService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
 		}
 		Long fundId = fund.getId();
-		if(fundId == null) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "fundId不能为空!");
-		}
-		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+		TCsqFund csqFund = getFundIfNotNullFundId(fundId);
 		Long finalUserId = csqFund.getUserId();
 		Integer currentStatus = csqFund.getStatus();
 		//包含[申请公开]基金业务
 		Integer status = fund.getStatus();
 		if(status != null) {
-			if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//申请公开基金
+			if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_UNDER_CERT.getVal() == status) {	//申请公开基金
 				Double totalIn = csqFund.getSumTotalIn();
 				if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
 					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
@@ -485,14 +480,20 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return queryResult;
 	}
 
-	public static void main(String[] args) {
-		String description = "向\"Fancy\uD83D\uDE0Bzzz\"基金";
+	/*public static void main(String[] args) {
+		*//*String description = "向\"Fancy\uD83D\uDE0Bzzz\"基金";
 		description = "从魏老爸和粉丝们公益基金基金拨款";
 		description = description.startsWith("向")?description.substring(1):description;
 		System.out.println(description);
 		description = !description.contains("\"")?new StringBuilder(description).insert(description.length(), "\"").insert(0, "\"").append("事务花费").toString():description;
-		System.out.println(description);
-	}
+		System.out.println(description);*//**//*
+
+		String description = "项目活动费用";
+		String name = description;
+		String s = new StringBuilder("因").append(name).insert(name.length() + 1, "\"").insert(1, "\"").append("事务花费").toString();
+		name = !name.endsWith("\"")?s:name;
+		System.out.println(name);*//*
+	}*/
 
 	private QueryResult getFundOutPaymentPage(Long fundId, Integer pageNum, Integer pageSize) {
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = paymentDao.selectByEntityIdAndEntityTypeAndInOutDescPage(fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqUserPaymentEnum.INOUT_OUT.toCode(), pageNum, pageSize);
@@ -519,17 +520,24 @@ public class CsqFundServiceImpl implements CsqFundService {
 				Long time = a.getCreateTime().getTime();
 				Double money = a.getMoney();
 				String name = a.getDescription();
-				name = !name.endsWith("\"")?new StringBuilder(name).append("因").insert(name.length(), "\"").insert(1, "\"").append("事务花费").toString():name;
+				name = !name.contains("\"")?new StringBuilder("因").append(name).insert(name.length() + 1, "\"").insert(1, "\"").append("事务花费").toString():name;
 				CsqFundDonateVo build = CsqFundDonateVo.builder()
 					.year(DateUtil.timeStamp2Date(time, "yyyy"))
 					.date(DateUtil.timeStamp2Date(time, "MM-dd"))
 					.money(money)
 					.name(name).build();
-				String wholeDescription =  new StringBuilder().append(name).append(money).append("元").toString();
+				String wholeDescription = "";
 				if(a.getOrderId() != null) {
-					wholeDescription = new StringBuilder().append(wholeDescription).append("捐款").append(money).append("元").toString();
+					wholeDescription = new StringBuilder().append(name).append("捐款")
+//						.append(money).append("元")
+						.toString();
+				} else {
+					wholeDescription = new StringBuilder().append(name)
+//						.append(money).append("元")
+						.toString();
 				}
-				build.setWholeDecription(wholeDescription);
+				build.setName(wholeDescription);	//此处故意这样使用
+				build.setWholeDecription(name);
 			/*
 			//若要筛选出真实名称
 				Long entityId = a.getEntityId();
@@ -591,6 +599,125 @@ public class CsqFundServiceImpl implements CsqFundService {
 		return MybatisPlus.getInstance().findAll(new TCsqFund(), new MybatisPlusBuild(TCsqFund.class)
 			.eq(TCsqFund::getIsValid, AppConstant.IS_VALID_YES)
 			.gt(TCsqFund::getId, l));
+	}
+
+	@Override
+	public QueryResult<TCsqFund> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> trendPubkeys, Integer pageNum, Integer pageSize, Boolean fuzzySearch) {
+		MybatisPlusBuild baseBuild = fundDao.baseBuild();
+		if(searchParam != null) {
+			if(! isFundParam) {	//用户名查找
+				List<TCsqFund> tCsqFundList = fundDao.selectAll();
+				List<Long> userIds = tCsqFundList.stream()
+					.map(TCsqFund::getUserId).collect(Collectors.toList());
+				List<TCsqUser> tCsqUsers = userDao.selectInIds(userIds);
+				List<String> userNames = tCsqUsers.stream().map(TCsqUser::getName).collect(Collectors.toList());
+				List<String> matchUserNames = new ArrayList<>();
+				matchUserNames.add(searchParam);
+				matchUserNames = fuzzySearch? userNames.stream()
+					.filter(a -> a.contains(searchParam)).collect(Collectors.toList()) : matchUserNames;
+
+				Map<String, List<TCsqUser>> nameUserMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getName));
+				ArrayList<Long> createrIdsCondition = new ArrayList<>();
+				List<String> finalMatchUserNames = matchUserNames;
+				nameUserMap.forEach(
+					(k,v) -> {
+						TCsqUser csqUser = v.get(0);
+						if(finalMatchUserNames.contains(k)) {
+							Long id = csqUser.getId();
+							createrIdsCondition.add(id);
+						}
+					}
+				);
+				baseBuild
+					.in(TCsqFund::getUserId, createrIdsCondition);
+			} else {
+				baseBuild = fuzzySearch? baseBuild.like(TCsqFund::getName, "%" + searchParam + "%"): baseBuild.eq(TCsqFund::getName, searchParam);
+			}
+		}
+
+		baseBuild
+			.eq(TCsqFund::getStatus, status);	//状态
+
+		Iterator<String> iterator = trendPubkeys.iterator();
+		while(iterator.hasNext()) {
+			String next = iterator.next();
+			baseBuild.like(TCsqFund::getTrendPubKeys, "%" + next + "%");	//倾向
+			if(iterator.hasNext()) {
+				baseBuild.and();	//同时包含指定的trendPubkeys
+			}
+		}
+
+		baseBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFund::getCreateTime));
+
+		List<TCsqFund> tCsqFundList = fundDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		return getQueryResult(tCsqFundList, total);
+	}
+
+	@Override
+	public void modifyFundManager(Long managerId, TCsqFund fund) {
+		// check manager
+		TCsqUser tCsqUser = userDao.selectByPrimaryKey(managerId);
+		Long fundId = fund.getId();
+		TCsqFund csqFund = getFundIfNotNullFundId(fundId);
+		Integer currentStatus = csqFund.getStatus();
+		Integer status = fund.getStatus();
+		if(status != null) {	//针对状态的修改
+			if(CsqFundEnum.STATUS_ACTIVATED.getVal() == currentStatus && CsqFundEnum.STATUS_PUBLIC.getVal() == status) {	//进行公开基金
+				Double totalIn = csqFund.getSumTotalIn();
+				if(!checkIsOkForPublic(csqFund)) {
+					if(totalIn < CsqFundEnum.PUBLIC_MINIMUM) {	//未达到标准
+						//给予提示
+					}
+					if(checkFundCompletion(csqFund)) {
+						//给予提示
+					}
+					if(CsqFundEnum.IS_SHOWN_NO.getVal() == csqFund.getIsShown()) {	//当前为不可展示
+//						fund.setIsShown(CsqFundEnum.IS_SHOWN_YES.getVal());	//TODO 是否修改为显示
+					}
+					//发送基金开放提示
+					csqMsgService.sendServiceMsgForFund(csqFund, csqFund.getUserId());
+				}
+			}
+			//注意如果是用于强制关闭基金，应当修改可展示状态为不可展示，而不是修改status为未公开, 否则关闭之后满足条件继续开放
+			//注意修改为关闭之后，除非管理员再次发送开放指令，否则基金即使达成条件不会被开放
+			if(CsqFundEnum.STATUS_PUBLIC.getVal() == currentStatus && CsqFundEnum.STATUS_ACTIVATED.getVal() == status) {	//TODO 如果选择了其他状态，是否认为将其置为不可展示
+//				fund.setIsShown(CsqFundEnum.IS_SHOWN_NO.getVal());
+			}
+		}
+
+		Integer isShown = fund.getIsShown();
+		if(isShown != null) {	//针对可展示状态的修改
+
+		}
+
+		//若 status =2 直接处理成【公开】
+		fund.setUserId(null);	//可能与基金持有者不同的修改人
+		fundDao.update(fund);
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
+				csqServiceService.synchronizeService(csqFund);
+			}
+		});
+	}
+
+	private TCsqFund getFundIfNotNullFundId(Long fundId) {
+		if(fundId == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "fundId不能为空!");
+		}
+		return fundDao.selectByPrimaryKey(fundId);
+	}
+
+	private QueryResult<TCsqFund> getQueryResult(List<TCsqFund> tCsqFundList, long total) {
+		QueryResult<TCsqFund> tCsqFundQueryResult = new QueryResult<>();
+		tCsqFundQueryResult.setResultList(tCsqFundList);
+		tCsqFundQueryResult.setTotalCount(total);
+
+		return tCsqFundQueryResult;
 	}
 
 }

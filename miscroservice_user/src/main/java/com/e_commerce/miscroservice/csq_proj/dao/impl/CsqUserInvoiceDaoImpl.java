@@ -61,8 +61,16 @@ public class CsqUserInvoiceDaoImpl implements CsqUserInvoiceDao {
 			.eq(TCsqUserInvoice::getId, build.getId()));
 	}
 
-	private MybatisPlusBuild baseBuild() {
+	@Override
+	public MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TCsqUserInvoice.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
+	@Override
+	public List<TCsqUserInvoice> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(baseBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild.page(pageNum, pageSize));
+
 	}
 }

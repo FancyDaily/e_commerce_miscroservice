@@ -119,6 +119,9 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "身份证/机构代码")
 	private String certificatedNo;
 
+	@Column(commit = "可展示状态(首页),管理员关闭项目/基金后，将不可展示", defaultVal = "1")
+	private Integer isShown;
+
 	public CsqDailyDonateVo copyCsqDailyDonateVo() {
 		return null;
 	}

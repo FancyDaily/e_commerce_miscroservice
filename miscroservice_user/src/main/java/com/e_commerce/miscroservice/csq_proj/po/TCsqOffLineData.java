@@ -39,4 +39,7 @@ public class TCsqOffLineData {
 	@Column(commit = "描述")
 	private String description;
 
+	@Column(defaultVal = "1")
+	private String isValid;
+
 }

@@ -7,12 +7,12 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
-import com.e_commerce.miscroservice.csq_proj.service.CsqOrderService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
@@ -388,6 +388,22 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			)
 			.build()
 		);
+	}
+
+	@Override
+	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize) {
+		//searchParam为标题
+		MybatisPlusBuild baseBuild = csqServiceDao.getBaseBuild();
+		baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
+
+		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		long total = IdUtil.getTotal();
+
+		QueryResult<TCsqSysMsg> tCsqSysMsgQueryResult = new QueryResult<>();
+		tCsqSysMsgQueryResult.setResultList(tCsqSysMsgs);
+		tCsqSysMsgQueryResult.setTotalCount(total);
+
+		return tCsqSysMsgQueryResult;
 	}
 
 }
