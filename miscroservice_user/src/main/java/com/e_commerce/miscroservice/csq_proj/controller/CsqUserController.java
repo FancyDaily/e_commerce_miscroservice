@@ -445,7 +445,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("share")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult share(Long entityId, Integer option) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();

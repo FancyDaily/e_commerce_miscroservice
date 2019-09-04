@@ -93,6 +93,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 	private CsqPaymentService csqPaymentService;
 
 	@Autowired
+	private CsqFundService csqFundService;
+
+	@Autowired
 	@Qualifier("csqRedisTemplate")
 	HashOperations<String, String, Object> userRedisTemplate;
 
@@ -716,6 +719,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			if(csqFund.getBalance() < amount) {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "资金不足，消费失败！");
 			}
+
+			csqFund.setBalance(csqFund.getBalance() - amount);
+			csqFundService.modifyFundManager(userId, csqFund);
 		}
 
 		if (service) {
@@ -757,6 +763,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 			build.setCreateTime(new Timestamp(timeStamp));
 		}
 		csqUserPaymentDao.insert(build);
+
+
 
 		/*// 平台托管如果为基金类型，应当留下订单记录(用户会在我已捐赠列表中找到) -> 等待托管细则 后续补充或迁移
 		if(isFund) {

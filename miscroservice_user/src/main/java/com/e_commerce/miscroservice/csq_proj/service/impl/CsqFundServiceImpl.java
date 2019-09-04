@@ -658,7 +658,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public void modifyFundManager(Long managerId, TCsqFund fund) {
 		// check manager
-		TCsqUser tCsqUser = userDao.selectByPrimaryKey(managerId);
+//		TCsqUser tCsqUser = userDao.selectByPrimaryKey(managerId);
 		Long fundId = fund.getId();
 		TCsqFund csqFund = getFundIfNotNullFundId(fundId);
 		Integer currentStatus = csqFund.getStatus();
