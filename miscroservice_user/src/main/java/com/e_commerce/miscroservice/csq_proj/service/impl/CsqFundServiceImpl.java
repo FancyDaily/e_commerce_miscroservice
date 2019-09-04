@@ -112,11 +112,11 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(fund == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "所有必要参数为空");
 		}
-		// check实名
+		/*// check实名
 		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
 		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "请先进行实名认证!");
-		}
+		}*/
 		Long fundId = fund.getId();
 		TCsqFund csqFund = getFundIfNotNullFundId(fundId);
 		Long finalUserId = csqFund.getUserId();
