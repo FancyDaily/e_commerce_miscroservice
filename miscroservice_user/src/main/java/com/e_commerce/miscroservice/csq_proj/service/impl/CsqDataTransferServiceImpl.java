@@ -2,7 +2,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.AlipayIserviceMindvAnswersBatchqueryModel;
+import com.alipay.api.domain.AlipayFundTransDishonorQueryModel;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -15,10 +15,11 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.File;
 import java.sql.Timestamp;
-import java.text.BreakIterator;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -70,6 +71,9 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 	@Autowired
 	CsqPaymentService csqPaymentService;
+
+	@Autowired
+	CsqOrderDao csqOrderDao;
 
 	@Override
 	public void dealWithOpenid() {
@@ -826,14 +830,43 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 	@Override
 	public void findOutTheIdOfFund() {
-		List<TCsqTransferData> csqTransferDataList = MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class));
-		List<String> names = csqTransferDataList.stream()
-			.map(TCsqTransferData::getFundName)
+		findOutTheIdOfFund(true);
+	}
+
+	@Override
+	public void findOutTheIdOfFund(boolean isTransferData) {
+		if(isTransferData) {
+			List<TCsqTransferData> csqTransferDataList = MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class));
+			List<String> names = csqTransferDataList.stream()
+				.map(TCsqTransferData::getFundName)
+				.distinct().collect(Collectors.toList());
+			List<TCsqFund> tCsqFundList = csqFundDao.selectInNames(names);
+			Map<String, List<TCsqFund>> nameMap = tCsqFundList.stream()
+				.collect(Collectors.groupingBy(TCsqFund::getName));
+			List<TCsqTransferData> collect = csqTransferDataList.stream()
+				.map(a -> {
+					String fundName = a.getFundName();
+					List<TCsqFund> tCsqFundList1 = nameMap.get(fundName);
+					if (tCsqFundList1 != null) {
+						TCsqFund csqFund = tCsqFundList1.get(0);
+						a.setFundId(csqFund.getId());
+					}
+					return a;
+				}).collect(Collectors.toList());
+			List<Long> ids = collect.stream().map(TCsqTransferData::getId).collect(Collectors.toList());
+			MybatisPlus.getInstance().update(collect, new MybatisPlusBuild(TCsqTransferData.class)
+				.in(TCsqTransferData::getId, ids));
+			return;
+		}
+
+		List<TCsqToDeleteRecordClue> csqToDeleteRecordClues = MybatisPlus.getInstance().findAll(new TCsqToDeleteRecordClue(), new MybatisPlusBuild(TCsqToDeleteRecordClue.class));
+		List<String> names = csqToDeleteRecordClues.stream()
+			.map(TCsqToDeleteRecordClue::getFundName)
 			.distinct().collect(Collectors.toList());
 		List<TCsqFund> tCsqFundList = csqFundDao.selectInNames(names);
 		Map<String, List<TCsqFund>> nameMap = tCsqFundList.stream()
 			.collect(Collectors.groupingBy(TCsqFund::getName));
-		List<TCsqTransferData> collect = csqTransferDataList.stream()
+		List<TCsqToDeleteRecordClue> collect = csqToDeleteRecordClues.stream()
 			.map(a -> {
 				String fundName = a.getFundName();
 				List<TCsqFund> tCsqFundList1 = nameMap.get(fundName);
@@ -843,9 +876,9 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				}
 				return a;
 			}).collect(Collectors.toList());
-		List<Long> ids = collect.stream().map(TCsqTransferData::getId).collect(Collectors.toList());
-		MybatisPlus.getInstance().update(collect, new MybatisPlusBuild(TCsqTransferData.class)
-			.in(TCsqTransferData::getId, ids));
+		List<Long> ids = collect.stream().map(TCsqToDeleteRecordClue::getId).collect(Collectors.toList());
+		MybatisPlus.getInstance().update(collect, new MybatisPlusBuild(TCsqToDeleteRecordClue.class)
+			.in(TCsqToDeleteRecordClue::getId, ids));
 	}
 
 	@Override
@@ -890,6 +923,214 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 				csqPayService.fakeWechatPay(userId, entityId, entityType, money, null, timeStamp);
 			});
 
+	}
+
+	@Override
+	public void deleteRecords(List<Long> recordIds) {
+		//删除指定项目下，指定流水id集合的捐赠记录（流水、订单置为0，累计捐款人数减少，余额和累计捐入变动
+		//通过订单找到用户id，衰减用户的累计支出，以及捐赠次数(由于是微信支付，所以不涉及余额变动)
+		//通过订单找到to_id，对目标基金的累计捐款人数减少，衰减余额以及累计捐入
+		//通过流水找到订单号，锁定本订单所有record记录，全部置为0，并将订单置为0
+
+		//通过指定的recordid 流水编号找到所有相关订单id
+		List<TCsqUserPaymentRecord> records = csqUserPaymentDao.selectInPrimaryKeys(recordIds);
+		List<Long> orderIds = records.stream()
+			.map(TCsqUserPaymentRecord::getOrderId).collect(Collectors.toList());
+
+		//orderIds -> records
+		List<TCsqUserPaymentRecord> recordsByOrderIds = csqUserPaymentDao.selectInOrderIds(orderIds);
+		//筛选出捐赠的用户
+		List<TCsqOrder> csqOrders = csqOrderDao.selectInOrderIds(orderIds);
+		List<Long> userIds = csqOrders.stream()
+			.map(TCsqOrder::getUserId).distinct().collect(Collectors.toList());
+		List<TCsqUser> csqUsers = csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> idUserMap = csqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
+
+		Map<Long, TCsqUser> userMap = new HashMap<>();
+		//USER -> 修改数据
+		csqOrders.stream()
+			.forEach(a -> {
+				Double price = a.getPrice();
+				Long userId = a.getUserId();
+
+				TCsqUser csqUser = userMap.get(userId);
+				if(csqUser == null) {
+					List<TCsqUser> csqUserContainer = idUserMap.get(userId);
+					if (!csqUserContainer.isEmpty()) {
+						csqUser = csqUserContainer.get(0);
+					}
+				}
+
+				Double sumTotalPay = csqUser.getSumTotalPay();
+				Double currentResult;
+				sumTotalPay = (currentResult = sumTotalPay - price) < 0d ? 0d : currentResult;
+				Integer payNum = csqUser.getPayNum();
+				Integer currentPayNum;
+				payNum = (currentPayNum = payNum - 1) < 0 ? 0 : currentPayNum;
+				TCsqUser build = TCsqUser.builder()
+					.id(csqUser.getId())
+					.sumTotalPay(sumTotalPay)
+					.payNum(payNum)
+					.build();
+				userMap.put(userId, csqUser);
+			});
+
+		List<Long> userIdsToDo = csqOrders.stream()
+			.map(TCsqOrder::getUserId).collect(Collectors.toList());
+		List<TCsqUser> toUpdaterUsers = userIdsToDo.stream()
+			.map(a -> {
+				TCsqUser csqUser = userMap.get(a);
+				return csqUser;
+			}).collect(Collectors.toList());
+
+			List<Long> fundIds = csqOrders.stream()
+			.map(a -> {
+				Long toId = a.getToId();
+				//此处由于知道来源是基金，略过了type判断
+				return toId;
+			}).collect(Collectors.toList());
+		List<TCsqFund> csqFunds = csqFundDao.selectInIds(fundIds);
+		Map<Long, List<TCsqFund>> idFundMap = csqFunds.stream().collect(Collectors.groupingBy(TCsqFund::getId));
+		Map<Long, TCsqFund> fundMap = new HashMap<>();
+		csqOrders.stream()
+			.forEach(a -> {
+				Double price = a.getPrice();
+				Long fundId = a.getToId();
+				TCsqFund csqFund = fundMap.get(fundId);
+				if(csqFund == null) {
+					List<TCsqFund> csqFundContainer = idFundMap.get(fundId);
+					if (csqFundContainer != null) {
+						csqFund = csqFundContainer.get(0);
+					}
+				}
+				Double sumTotalIn = csqFund.getSumTotalIn();    //累计捐入
+				Double balance = csqFund.getBalance();    //金额
+				Integer totalInCnt = csqFund.getTotalInCnt();    //捐款人次
+
+				sumTotalIn = sumTotalIn - price;
+				sumTotalIn = sumTotalIn < 0d ? 0d : sumTotalIn;
+
+				balance = balance - price;
+				balance = balance < 0d ? 0d : balance;
+
+				totalInCnt--;
+				totalInCnt = totalInCnt < 0 ? 0 : totalInCnt;
+
+				TCsqFund build = TCsqFund.builder()
+					.id(csqFund.getId())
+					.sumTotalIn(sumTotalIn)
+					.balance(balance)
+					.totalInCnt(totalInCnt).build();
+
+				fundMap.put(fundId, build);
+		});
+
+		List<Long> distinctFundIds = csqOrders.stream()
+			.filter(a -> a.getToType() == CsqEntityTypeEnum.TYPE_FUND.toCode())
+			.map(TCsqOrder::getToId).distinct().collect(Collectors.toList());
+		List<TCsqFund> toUpdateFunds = distinctFundIds.stream()
+			.map(a -> {
+				TCsqFund csqFund = fundMap.get(a);
+				return csqFund;
+			}).collect(Collectors.toList());
+
+		List<TCsqFund> brandNewFundList = csqFundDao.selectInIds(fundIds);
+
+		// REOCRD -> 置 '0'
+		List<TCsqUserPaymentRecord> toDeleteByUpdateRecords = recordsByOrderIds.stream()
+			.map(a -> {
+				TCsqUserPaymentRecord build = TCsqUserPaymentRecord.builder()
+					.id(a.getId()).build();
+				build.setIsValid(AppConstant.IS_VALID_NO);
+				return build;
+			}).collect(Collectors.toList());
+
+		// ORDER -> 置 '0'
+		List<TCsqOrder> toDeleteByUpdateOrders = recordsByOrderIds.stream()
+			.map(a -> {
+				TCsqOrder build = TCsqOrder.builder()
+					.id(a.getId()).build();
+				build.setIsValid(AppConstant.IS_VALID_NO);
+				return build;
+			}).collect(Collectors.toList());
+
+		csqUserDao.update(toUpdaterUsers);
+		csqFundDao.batchUpdate(toUpdateFunds);
+		csqUserPaymentDao.update(toDeleteByUpdateRecords);
+		csqOrderDao.update(toDeleteByUpdateOrders);
+
+		/*TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void afterCompletion(int status) {
+				super.afterCompletion(status);
+				csqServiceService.synchronizeService(brandNewFundList);
+			}
+		});*/
+
+		List<Long> funIdNotified = brandNewFundList.stream().map(TCsqFund::getId).collect(Collectors.toList());
+
+		String s = funIdNotified.stream()
+			.map(a -> {
+				return a.toString();
+			})
+			.reduce((a, b) -> (a + "," + b)).get();
+		log.info("fundIds={}", s);
+
+	}
+
+	@Override
+	public void synchronizeService(String fundIds) {
+		List<Long> fundIdsLong = Arrays.asList(fundIds.split(",")).stream()
+			.map(Long::valueOf).collect(Collectors.toList());
+		fundIdsLong.stream()
+			.distinct()
+			.forEach(a -> {
+				csqServiceService.synchronizeService(a);
+			});
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> findRecords() {
+		List<TCsqToDeleteRecordClue> allRecords = MybatisPlus.getInstance().findAll(new TCsqToDeleteRecordClue(), new MybatisPlusBuild(TCsqToDeleteRecordClue.class)
+			.eq(TCsqToDeleteRecordClue::getIsValid, AppConstant.IS_VALID_YES)
+		);
+
+		List<String> userNames = allRecords.stream()
+			.map(TCsqToDeleteRecordClue::getDonaterName).collect(Collectors.toList());
+		List<TCsqUser> users = csqUserDao.selectInNames(userNames);
+		Map<String, List<TCsqUser>> nameUserMap = users.stream()
+			.collect(Collectors.groupingBy(TCsqUser::getName));
+		List<Long> orderIds = new ArrayList<>();
+		allRecords.stream()
+			.forEach(a -> {
+				Double money = a.getMoney();
+				String name = a.getDonaterName();
+				TCsqUser csqUser = null;
+				List<TCsqUser> csqUsers = nameUserMap.get(name);
+				if(csqUsers == null) {
+					System.out.println("got' em");
+				}
+				if (csqUsers != null) {
+					csqUser = csqUsers.get(0);
+				}
+				String date = a.getDate();
+				Long timeStamp = Long.valueOf(DateUtil.dateToStamp(date));
+				List<TCsqOrder> tCsqOrders = csqOrderDao.selectByUserIdAndToTypeAndToIdAndPriceAndCreateTimeDesc(csqUser.getId(), CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getFundId(), money, timeStamp);
+				if(!tCsqOrders.isEmpty()) {
+					List<Long> orIds = tCsqOrders.stream()
+						.map(TCsqOrder::getId).collect(Collectors.toList());
+					orderIds.addAll(orIds);
+				}
+			});
+		return csqUserPaymentDao.selectInOrderIds(orderIds);
+	}
+
+	@Override
+	public void findAndDeleteRecords() {
+		List<TCsqUserPaymentRecord> records = findRecords();
+		List<Long> recordIds = records.stream()
+			.map(TCsqUserPaymentRecord::getId).collect(Collectors.toList());
+		deleteRecords(recordIds);
 	}
 
 	private void dealWithOffLineData(List<TCsqOffLineData> offLineData) {
@@ -937,7 +1178,9 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 						String[] descStrArray = description.split(" ");
 						description = descStrArray[1];    //得到的文本可能需要再处理
 					}
-					csqUserService.recordForConsumption(null, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), description);
+					String date = a.getDate();
+					Long timeStamp =StringUtil.isEmpty(date)? System.currentTimeMillis(): Long.valueOf(DateUtil.dateToStamp(date));
+					csqUserService.recordForConsumption(null, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), description, timeStamp);
 				}
 			});
 	}

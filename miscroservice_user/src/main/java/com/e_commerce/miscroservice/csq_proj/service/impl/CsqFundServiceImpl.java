@@ -78,7 +78,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 		//6.11	基金申请即通过(付款后激活变为可用)，状态为未公开，达到标准线（eg.10000）时可以申请公开，此间状态为待审核
 		TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);	//check订单支付状态
 //		csqOrderService.checkPaid(tCsqOrder);	//TODO 为了测试拿掉了check
-	//开始基金创建流程:
+		//开始基金创建流程:
 		Long fundId = tCsqOrder.getToId();
 		TCsqFund csqFund = fundDao.selectByPrimaryKey(fundId);
 		if(CsqFundEnum.STATUS_ACTIVATED.getVal() == csqFund.getStatus()) {

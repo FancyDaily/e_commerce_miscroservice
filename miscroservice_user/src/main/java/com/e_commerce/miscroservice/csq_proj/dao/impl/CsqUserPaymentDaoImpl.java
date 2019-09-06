@@ -124,6 +124,29 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 			.in(TCsqUserPaymentRecord::getEntityType, entityType));
 	}
 
+	@Override
+	public TCsqUserPaymentRecord selectByPrimaryKey(Long recordId) {
+		return MybatisPlus.getInstance().findOne(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getId, recordId)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+		);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectInPrimaryKeys(List<Long> recordIds) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.in(TCsqUserPaymentRecord::getId, recordIds)
+		);
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectInOrderIds(List<Long> orderIds) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.in(TCsqUserPaymentRecord::getOrderId, orderIds)
+		);
+	}
+
 	private MybatisPlusBuild inOrderIdsAndInOutDescBuild(List<Long> orderIds, int toCode) {
 		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)

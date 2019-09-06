@@ -164,4 +164,11 @@ public class CsqUserDaoImpl implements CsqUserDao {
 		return MybatisPlus.getInstance().findAll(new TCsqUser(), mybatisPlusBuild);
 	}
 
+	@Override
+	public List<TCsqUser> selectInNames(List<String> userNames) {
+		return MybatisPlus.getInstance().findAll(new TCsqUser(), new MybatisPlusBuild(TCsqUser.class)
+			.in(TCsqUser::getName, userNames)
+		);
+	}
+
 }

@@ -157,4 +157,12 @@ public class CsqFunDaoImpl implements CsqFundDao {
 		return MybatisPlus.getInstance().findAll(new TCsqFund(), baseBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public int batchUpdate(List<TCsqFund> toUpdateFunds) {
+		List<Long> fundIds = toUpdateFunds.stream().map(TCsqFund::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(toUpdateFunds, new MybatisPlusBuild(TCsqFund.class)
+			.in(TCsqFund::getId, fundIds)
+		);
+	}
+
 }

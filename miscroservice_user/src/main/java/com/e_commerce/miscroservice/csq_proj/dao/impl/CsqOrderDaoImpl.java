@@ -6,11 +6,12 @@ import com.e_commerce.miscroservice.commons.enums.application.CsqOrderEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOrderDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import org.springframework.stereotype.Component;
-import sun.security.krb5.internal.PAEncTSEnc;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -289,6 +290,35 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), byUserIdInToTypeBuild(userId)
 			.eq(TCsqOrder::getStatus, CsqOrderEnum.STATUS_ALREADY_PAY.getCode())
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
+	}
+
+	@Override
+	public List<TCsqOrder> selectInOrderIds(List<Long> orderIds) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+			.in(TCsqOrder::getId, orderIds)
+		);
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdAndToTypeAndToIdAndPriceDesc(Long userId, int fundType, Long fundId, Double money) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, userId)
+			.eq(TCsqOrder::getToType, fundType)
+			.eq(TCsqOrder::getToId, fundId)
+			.eq(TCsqOrder::getPrice, money)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByUserIdAndToTypeAndToIdAndPriceAndCreateTimeDesc(Long id, int toCode, Long fundId, Double money, Long timeStamp) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getUserId, id)
+			.eq(TCsqOrder::getToType, toCode)
+			.eq(TCsqOrder::getToId, fundId)
+			.eq(TCsqOrder::getPrice, money)
+			.eq(TCsqOrder::getCreateTime, new Timestamp(timeStamp).toString()	 )
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
 	}
 
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {

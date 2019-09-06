@@ -139,4 +139,6 @@ public interface CsqServiceService {
 	QueryResult<TCsqService> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch);
 
 	Map<Integer, Object> countGroupByStatus(Long userId);
+
+	void synchronizeService(List<TCsqFund> toUpdateFunds);
 }

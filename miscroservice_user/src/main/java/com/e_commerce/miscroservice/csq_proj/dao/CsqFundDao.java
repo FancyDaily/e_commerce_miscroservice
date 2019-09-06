@@ -47,4 +47,6 @@ public interface CsqFundDao {
 	List<TCsqFund> selectWithBuild(MybatisPlusBuild baseBuild);
 
 	List<TCsqFund> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
+	int batchUpdate(List<TCsqFund> toUpdateFunds);
 }

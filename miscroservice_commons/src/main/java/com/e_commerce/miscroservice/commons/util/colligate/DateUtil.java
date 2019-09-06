@@ -543,7 +543,7 @@ public class DateUtil {
     }
 
     public static void main(String[] args) {
-		String s = wholeDateToStamp("2019-01-03 23:53:00");
+		/*String s = wholeDateToStamp("2019-01-03 23:53:00");
 
 		String date = "2019.7.3";
 		StringBuffer stringBuffer = new StringBuffer(date);
@@ -554,7 +554,7 @@ public class DateUtil {
 		stringBuffer.replace(4,5, "-");
 		String s1 = dateToStamp(stringBuffer.toString());
 		System.out.println(stringBuffer);
-		System.out.println(s1);
+		System.out.println(s1);*/
 		/*String s2 = date.replaceAll(".", "");
 		System.out.println(s2);
 		String s1 = null;

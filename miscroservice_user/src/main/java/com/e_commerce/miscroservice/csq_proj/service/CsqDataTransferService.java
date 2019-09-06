@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
 import com.e_commerce.miscroservice.csq_proj.po.TCsqPersonInChargeInfo;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.po.TOldUser;
 
 import java.util.List;
@@ -44,7 +45,17 @@ public interface CsqDataTransferService {
 
 	void findOutTheIdOfFund();
 
+	void findOutTheIdOfFund(boolean isTransferData);
+
 	void dealWithTransferData();
 
 	void currentDealWithServicePayment();
+
+	void deleteRecords(List<Long> recordIds);
+
+	void synchronizeService(String fundIds);
+
+	List<TCsqUserPaymentRecord> findRecords();
+
+	void findAndDeleteRecords();
 }

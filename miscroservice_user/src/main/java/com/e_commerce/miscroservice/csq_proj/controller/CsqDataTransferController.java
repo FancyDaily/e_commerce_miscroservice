@@ -2,13 +2,16 @@ package com.e_commerce.miscroservice.csq_proj.controller;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqOldUserDao;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.po.TOldUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqDataTransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据导入
@@ -234,11 +237,64 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("findOutTheIdOfFund_2")
+	public Object findOutTheIdOfFund_2() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.findOutTheIdOfFund(false);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 	@RequestMapping("transferData/deal")
 	public Object dealWithTransferData() {
 		AjaxResult result = new AjaxResult();
 		try {
 			csqDataTransferService.dealWithTransferData();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
+	@RequestMapping("deleteCraft_1")
+	public Object deleteCraft_1() {
+		AjaxResult result = new AjaxResult();
+		try {
+			List<TCsqUserPaymentRecord> records = csqDataTransferService.findRecords();
+			Map<String, Object> map = new HashMap<>();
+			map.put("records", records);
+			map.put("total", records.size());
+			result.setData(records);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("deleteCraft_2")
+	public Object deleteCraft_2() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.findAndDeleteRecords();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("deleteCraft_3")
+	public Object deleteCraft_3(String fundIds) {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.synchronizeService(fundIds);
 			result.setSuccess(true);
 		} catch (Exception e) {
 			e.printStackTrace();

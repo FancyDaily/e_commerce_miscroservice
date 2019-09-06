@@ -1304,7 +1304,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		HashMap map = new HashMap();
 		UploadPathEnum.innerEnum anEnum = UploadPathEnum.innerEnum.getEnum(uploadCode);
-		String qrCode = wechatService.genQRCode(sceneKey == -1L? "":sceneKey.toString(), page, anEnum == null? UploadPathEnum.innerEnum.CSQ_PERSON: anEnum);
+		String qrCode = wechatService.genQRCode(sceneKey == -1L? null:sceneKey.toString(), page, anEnum == null? UploadPathEnum.innerEnum.CSQ_PERSON: anEnum);
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
 		return map;

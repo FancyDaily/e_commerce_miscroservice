@@ -35,4 +35,10 @@ public interface CsqUserPaymentDao {
 	int update(List<TCsqUserPaymentRecord> toUpdater);
 
 	List<TCsqUserPaymentRecord> selectInEntityType(int... entityType);
+
+	TCsqUserPaymentRecord selectByPrimaryKey(Long recordId);
+
+	List<TCsqUserPaymentRecord> selectInPrimaryKeys(List<Long> recordIds);
+
+	List<TCsqUserPaymentRecord> selectInOrderIds(List<Long> orderIds);
 }

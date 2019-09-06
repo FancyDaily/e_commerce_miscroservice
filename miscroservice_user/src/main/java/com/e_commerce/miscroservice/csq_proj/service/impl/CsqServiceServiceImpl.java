@@ -529,6 +529,9 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqService.setDescription(csqFund.getDescription());
 		csqService.setCoverPic(csqFund.getCoverPic());
 		csqService.setDescription(csqFund.getDescription());
+		csqService.setPersonInCharge(csqFund.getPersonInCharge());
+		csqService.setPersonInChargePic(csqFund.getPersonInChargePic());
+		csqService.setOccupation(csqFund.getOccupation());
 		if (isInsert) {
 			csqServiceDao.insert(csqService);
 			return;
@@ -709,6 +712,13 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		});
 
 		return map;
+	}
+
+	@Override
+	public void synchronizeService(List<TCsqFund> toUpdateFunds) {
+		toUpdateFunds.stream().forEach(a -> {
+			synchronizeService(a);
+		});
 	}
 
 	private String getLikeParam(String searchParam) {

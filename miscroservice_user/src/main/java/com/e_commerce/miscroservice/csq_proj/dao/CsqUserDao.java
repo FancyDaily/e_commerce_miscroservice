@@ -52,4 +52,6 @@ public interface CsqUserDao {
 	List<TCsqUser> selectByBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
 	List<TCsqUser> selectByName(String searchParam, boolean isLike);
+
+	List<TCsqUser> selectInNames(List<String> userNames);
 }
