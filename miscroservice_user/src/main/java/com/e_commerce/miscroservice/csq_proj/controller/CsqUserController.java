@@ -380,7 +380,7 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("daily/donate/detail")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult dailyDonateDetail() {
 		AjaxResult result = new AjaxResult();
 		Long userId = UserUtil.getTestId();
