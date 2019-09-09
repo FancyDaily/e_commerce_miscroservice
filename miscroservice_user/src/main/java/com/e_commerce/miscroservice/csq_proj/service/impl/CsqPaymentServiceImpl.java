@@ -1,13 +1,16 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
@@ -15,8 +18,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
+import com.sun.tools.corba.se.idl.ParameterGen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -68,10 +70,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				return a.copyUserPaymentRecordVo();
 			}).collect(Collectors.toList());
 
-		QueryResult<CsqUserPaymentRecordVo> queryResult = new QueryResult<>();
-		queryResult.setResultList(collect);
-		queryResult.setTotalCount(total);
-		return queryResult;
+		return PageUtil.buildQueryResult(collect, total);
 	}
 
 	private void dealWithPaymentRecords(TCsqUserPaymentRecord a) {
@@ -87,7 +86,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public Object findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears) {
+	public Object findWatersAndTotal(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears) {
 		if (isGroupingByYears) {
 			return findWatersGroupingByYear(pageNum, pageSize, userId, option);
 		}
@@ -185,9 +184,9 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		//获取serviceName
 		String serviceName = "";
 
-		orderId = orderId == null? record.getOrderId(): orderId;
+		orderId = orderId == null ? record.getOrderId() : orderId;
 		boolean isSpecial = false;
-		if(orderId == null) { //表明是平台插入
+		if (orderId == null) { //表明是平台插入
 			serviceName = record.getDescription();
 			isSpecial = true;
 		}
@@ -252,12 +251,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		/*String description = "感谢您为" + serviceName + "捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
 			"特发此证，以资感谢！";*/
 		String description = "感谢您对公益事业的支持!\n"
-				+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
-				+ "用于" + serviceName + "。\n"
-			    + "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
-				+ "\n"
-				+ "谨以此证向您表示最真诚的的感谢！";
-		if(isSpecial) {
+			+ "您捐赠的" + money + "元，我们将遵照您的意愿，\n"
+			+ "用于" + serviceName + "。\n"
+			+ "截止当前，您已累计通过丛善桥捐赠" + accountMoney + "元。\n"
+			+ "\n"
+			+ "谨以此证向您表示最真诚的的感谢！";
+		if (isSpecial) {
 			/*description = "感谢您此次捐赠" + money + "元，截止" + year + "年" + month + "月" + day + "日" + hour + "点" + minute + "分，您在浙江省爱心事业基金会累计捐款" + accountMoney + "元，扫描下面的二维码可以及时获取我们的项目执行反馈情况。\n" +
 				"特发此证，以资感谢！";*/
 			description = "感谢您对公益事业的支持!\n"
@@ -310,7 +309,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //现金充值类型
 				.money(amount)
 				.orderId(orderId).build();
-				build3.setCreateTime(timestamp);
+			build3.setCreateTime(timestamp);
 			if (CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() == toType) {    //仅向爱心账户充值
 				csqUserPaymentDao.insert(build3);
 				return;
@@ -432,7 +431,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			return totalDonate;
 		})));
 		if (entries.size() == 1) {    //若为一个元素，则收集数据
-			unsortedMap.forEach((k,v) -> donaterMoneyMap.put(k, NumberUtil.keep2Places(v.stream()
+			unsortedMap.forEach((k, v) -> donaterMoneyMap.put(k, NumberUtil.keep2Places(v.stream()
 				.map(TCsqUserPaymentRecord::getMoney)
 				.reduce(0d, Double::sum))));
 		}
@@ -485,9 +484,53 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public List<CsqUserPaymentRecordVo> findWaters(String searchParma, Integer pageNum, Integer pageSize) {
-		return null;
+	public Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
+		Page page = PageUtil.prePage(pageNum, pageSize);
+		pageNum = page.getPageNum();
+		pageSize = page.getPageSize();
+		boolean isSearch = StringUtil.isEmpty(searchParma);
+		List<TCsqUser> csqUsers = new ArrayList<>();
+		if (isSearch) {
+			csqUsers = csqUserDao.selectByName(searchParma, isFuzzySearch);
+		}
+		List<Long> userIds = csqUsers.stream()
+			.map(a -> a.getId()).collect(Collectors.toList());
+
+		MybatisPlusBuild baseBuild = csqUserPaymentDao.baseBuild();
+		baseBuild
+			.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //账户充值
+			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
+		;
+
+		baseBuild =
+			isSearch ? baseBuild
+				.in(TCsqUserPaymentRecord::getUserId, userIds)    //搜索参数得到的用户编号
+				: baseBuild;
+
+		List<TCsqUserPaymentRecord> userPaymentRecordList = csqUserPaymentDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		//统计
+		Double totalAmount = userPaymentRecordList.stream()
+			.map(TCsqUserPaymentRecord::getMoney)
+			.reduce(0d, Double::sum);
+		//结果集
+		List<CsqUserPaymentRecordVo> vos = userPaymentRecordList.stream()
+			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+
+		long total = IdUtil.getTotal();
+
+		QueryResult queryResult = PageUtil.buildQueryResult(vos, total);
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("queryResult", queryResult);
+		resultMap.put("totalAmount", totalAmount);
+
+		return resultMap;
 	}
 
+	public static void main(String[] args) {
+		Integer pageNum = 0;
+		Integer pageSize = null;
+		PageUtil.prePage(pageNum, pageSize);
+		System.out.println(pageNum + "," + pageSize);
+	}
 
 }

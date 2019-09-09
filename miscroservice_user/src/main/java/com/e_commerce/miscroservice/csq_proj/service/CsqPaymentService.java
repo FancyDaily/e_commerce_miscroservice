@@ -20,7 +20,7 @@ public interface CsqPaymentService {
 	 */
 	QueryResult<CsqUserPaymentRecordVo> findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option);
 
-	Object findWaters(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears);
+	Object findWatersAndTotal(Integer pageNum, Integer pageSize, Long userId, Integer option, boolean isGroupingByYears);
 
 	QueryResult<Map<String, Object>> findWatersGroupingByYear(Integer pageNum, Integer pageSize, Long userId, Integer option);
 
@@ -58,5 +58,5 @@ public interface CsqPaymentService {
 
 	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
 
-	List<CsqUserPaymentRecordVo> findWaters(String searchParma, Integer pageNum, Integer pageSize);
+	Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch);
 }

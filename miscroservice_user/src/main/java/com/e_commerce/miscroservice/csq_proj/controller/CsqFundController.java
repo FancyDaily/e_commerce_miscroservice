@@ -383,7 +383,7 @@ public class CsqFundController {
 	 * @return
 	 */
 	@RequestMapping("donate/list")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult donateServiceList(Long fundId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();

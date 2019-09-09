@@ -80,7 +80,7 @@ public class CsqPaymentController {
 		}
 		log.info("流水查询num={},size={},userId={}", pageNum, pageSize, userId);
 		try {
-			Object records = csqPaymentService.findWaters(pageNum, pageSize, userId, option, isGroupingByYear);
+			Object records = csqPaymentService.findWatersAndTotal(pageNum, pageSize, userId, option, isGroupingByYear);
 			Double inMoney = csqPaymentService.countMoney(userId, 0);
 			Double outMoney = csqPaymentService.countMoney(userId, 1);
 			Map<String, Object> map = new HashMap<>();

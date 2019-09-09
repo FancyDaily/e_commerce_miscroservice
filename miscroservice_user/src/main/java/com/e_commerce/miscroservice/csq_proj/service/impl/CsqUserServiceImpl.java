@@ -1197,7 +1197,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//DO
 		csqUserDao.update(Arrays.asList(build, build2));
 		// 将他的捐赠流水按年份展现
-		Object waters = csqPaymentService.findWaters(1, 5, userWithTel.getId(), CsqUserPaymentEnum.INOUT_OUT.toCode(), true);
+		Object waters = csqPaymentService.findWatersAndTotal(1, 5, userWithTel.getId(), CsqUserPaymentEnum.INOUT_OUT.toCode(), true);
 
 		map.put("msg", noticeMsgBuilder.toString());
 		map.put("waters", waters);

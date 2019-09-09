@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.dao;
 
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 
 import java.util.List;
@@ -41,4 +42,9 @@ public interface CsqUserPaymentDao {
 	List<TCsqUserPaymentRecord> selectInPrimaryKeys(List<Long> recordIds);
 
 	List<TCsqUserPaymentRecord> selectInOrderIds(List<Long> orderIds);
+
+	MybatisPlusBuild baseBuild();
+
+	List<TCsqUserPaymentRecord> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
 }

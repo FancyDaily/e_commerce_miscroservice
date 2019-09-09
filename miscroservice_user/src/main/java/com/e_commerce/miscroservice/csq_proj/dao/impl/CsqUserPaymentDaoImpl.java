@@ -147,6 +147,20 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 		);
 	}
 
+	@Override
+	public MybatisPlusBuild baseBuild() {
+		MybatisPlusBuild baseBuild = new MybatisPlusBuild(TCsqUserPaymentRecord.class)
+			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES);
+		return baseBuild;
+	}
+
+	@Override
+	public List<TCsqUserPaymentRecord> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(baseBuild);
+		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild.page(pageNum, pageSize)
+		);
+	}
+
 	private MybatisPlusBuild inOrderIdsAndInOutDescBuild(List<Long> orderIds, int toCode) {
 		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES)

@@ -308,7 +308,7 @@ public class CsqServiceController {
 	 * @return
 	 */
 	@RequestMapping("bill/out")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult billOut(@RequestParam Long serviceId, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();

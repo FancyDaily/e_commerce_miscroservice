@@ -621,13 +621,21 @@ public class CsqManagerSystemController {
 		return result;
 	}
 
-	public AjaxResult findWaters(String searchParma, Integer pageNum, Integer pageSize) {
+	/**
+	 * 爱心账户充值记录
+	 * @param searchParma 搜索参数(用户昵称)
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	@RequestMapping("account/record/list")
+	public AjaxResult accountRecordList(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		try {
-			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}", userIds, searchParma, pageNum, pageSize);
-			csqPaymentService.findWaters(searchParma, pageNum, pageSize);
-//			result.setData(count);
+			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParma, pageNum, pageSize, isFuzzySearch);
+			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParma, pageNum, pageSize, isFuzzySearch);
+			result.setData(watersAndTotal);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "爱心账户充值记录", e.getMessage());
@@ -636,6 +644,35 @@ public class CsqManagerSystemController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("爱心账户充值记录", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 递(提)交打款申请
+	 * @param entityType 实体类型
+	 * @param entityId 实体编号
+	 * @param money 金额
+	 * @param invoicePic 发票图片
+	 * @param description 描述
+	 * @return
+	 */
+	@RequestMapping("money/apply/add")
+	public AjaxResult addMoneyApply(Integer entityType, Long entityId, Double money, String invoicePic, String description) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		try {
+			log.info("递(提)交打款申请, userIds={}, entityType={}, entityId={}, money={}, invoicePic={}, description={}", userIds, entityType, entityId, money, invoicePic, description);
+//			csqMoneyApplyRecordService.addMoneyApply();	//TODO
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "递(提)交打款申请", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("递(提)交打款申请", e);
 			result.setSuccess(false);
 		}
 		return result;
