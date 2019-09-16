@@ -18,12 +18,14 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.sun.xml.internal.ws.api.server.EndpointData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -572,6 +574,54 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		resultMap.put("queryResult", result);
 
 		return resultMap;
+	}
+
+	@Override
+	public QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
+		//基本构建
+		MybatisPlusBuild baseBuild = csqPaymentDao.baseBuild();
+
+		//处理通用信息
+		//处理日期
+		if(StringUtil.isEmpty(startDate)) {
+			Long startTime = Long.valueOf(DateUtil.dateToStamp(startDate));
+			baseBuild.gte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(startTime).toString());
+		}
+
+		if(StringUtil.isEmpty((endDate))) {
+			Long endTime = Long.valueOf(DateUtil.dateToStamp(endDate));
+			baseBuild.lte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(endTime).toString());
+		}
+
+		//容器doesntmatters
+		if(isServiceOnly) {
+			String pattern = "^[1-9]\\d*$";
+			boolean isNum = Pattern.matches(pattern, searchParam);
+			if(isNum) {	//按编号查找
+
+			} else { //按名字查找
+				if(isFuzzySearch) {
+
+				}
+			}
+
+		}
+
+		//把查找的数据进行分类组装
+
+
+
+
+
+
+
+
+
+
+
+
+
+		return null;
 	}
 
 	public static void main(String[] args) {

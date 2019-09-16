@@ -27,6 +27,7 @@ public class CsqPaymentDaoImpl implements CsqPaymentDao {
 	@Resource
 	private CsqPaymentMapper csqPaymentMapper;
 
+	@Override
 	public MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TCsqUserPaymentRecord.class)
 			.eq(TCsqUserPaymentRecord::getIsValid, AppConstant.IS_VALID_YES);

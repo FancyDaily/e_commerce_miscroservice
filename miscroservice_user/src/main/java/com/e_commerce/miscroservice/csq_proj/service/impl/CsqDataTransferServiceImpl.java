@@ -1425,8 +1425,21 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		return destination;
 	}
 
+	public static String picDealAddSuffix(String srcDir, String halfPrefix, Integer num) {
+		String prefix = "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/csq/";
+		String destination = "";
+		for(int i=1; i<=num; i++) {
+			String simpleOne = prefix + srcDir + "/" + halfPrefix + "_" + i + ".png" + ",";
+			destination += simpleOne;
+		}
+		if(destination.endsWith(",")) {
+			destination = destination.substring(0, destination.length()-1);
+		}
+		return destination;
+	}
+
 	public static void main(String[] args) {
-		String s = picDeal("27_zlyjwjj", 10);
+		String s = picDealAddSuffix("27_zlyjwjj", "zlyjwjj_whole_description", 8);
 		System.out.println(s);
 		/*String date = "2017-09-18 12:00:00.000";
 		date = date.substring(0, date.length()-4);

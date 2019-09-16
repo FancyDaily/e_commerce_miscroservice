@@ -323,7 +323,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			log.error("发送服务通知失败, userId={}, formid={}, csqServiceMsgEnum={}", messageUserId, formid.getFormId(), csqServiceMsgEnum.name());
 		}
 	}
-	
+
 	/**
 	 * 发送服务通知
 	 *
@@ -394,7 +394,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize) {
 		//searchParam为标题
 		MybatisPlusBuild baseBuild = csqServiceDao.getBaseBuild();
-		baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
+		if(!StringUtil.isEmpty(searchParam)) {
+			baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
+		}
 
 		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		long total = IdUtil.getTotal();

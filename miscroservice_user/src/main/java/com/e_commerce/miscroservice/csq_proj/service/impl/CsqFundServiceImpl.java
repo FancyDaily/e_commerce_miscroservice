@@ -604,7 +604,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 	@Override
 	public QueryResult<TCsqFund> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> trendPubkeys, Integer pageNum, Integer pageSize, Boolean fuzzySearch) {
 		MybatisPlusBuild baseBuild = fundDao.baseBuild();
-		if(searchParam != null) {
+		if(!StringUtil.isEmpty(searchParam)) {
 			if(! isFundParam) {	//用户名查找
 				List<TCsqFund> tCsqFundList = fundDao.selectAll();
 				List<Long> userIds = tCsqFundList.stream()
@@ -643,7 +643,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 			String next = iterator.next();
 			baseBuild.like(TCsqFund::getTrendPubKeys, "%" + next + "%");	//倾向
 			if(iterator.hasNext()) {
-				baseBuild.and();	//同时包含指定的trendPubkeys
+//				baseBuild.and();	//同时包含指定的trendPubkeys
 			}
 		}
 

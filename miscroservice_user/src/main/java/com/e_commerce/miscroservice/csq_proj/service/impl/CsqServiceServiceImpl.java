@@ -289,6 +289,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			tCsqService.setReports(csqServiceReports);
 			// 若为已捐款，则还需要项目汇报信息（PC端开发时再添加）
 			CsqServiceDetailVo csqServiceDetailVo = tCsqService.copyCsqServiceDetailVo();
+			String description = csqServiceDetailVo.getDescription();
+			description = description.replaceAll("<br>", "\n");
+			csqServiceDetailVo.setDescription(description);
+
 			List<CsqUserPaymentRecordVo> collect1 = csqUserPaymentRecords.stream()
 				.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
 			csqServiceDetailVo.setCsqUserPaymentRecordVos(collect1);    //处理userpayemnt => toVo()
