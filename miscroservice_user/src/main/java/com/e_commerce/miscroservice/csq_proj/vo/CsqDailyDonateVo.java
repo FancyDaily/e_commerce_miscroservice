@@ -97,6 +97,9 @@ public class CsqDailyDonateVo {
 	@Column(commit = "封面图")
 	private String coverPic;
 
+	@Column(commit = "分享图")
+	private String sharePic;
+
 	@Column(commit = "描述")
 	private String description;
 

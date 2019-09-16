@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateUserPaymentVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import lombok.Builder;
 import lombok.Data;
@@ -53,6 +54,10 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	private Double money;
 
 	public CsqUserPaymentRecordVo copyUserPaymentRecordVo() {
+		return null;
+	}
+
+	public CsqDonateUserPaymentVo copyCsqDonateUserPaymentVo() {
 		return null;
 	}
 }

@@ -47,4 +47,5 @@ public interface CsqUserPaymentDao {
 
 	List<TCsqUserPaymentRecord> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
+	List<TCsqUserPaymentRecord> selectWithBuild(MybatisPlusBuild baseBuild);
 }

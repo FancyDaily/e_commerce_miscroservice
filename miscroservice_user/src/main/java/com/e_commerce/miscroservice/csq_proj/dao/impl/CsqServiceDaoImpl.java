@@ -276,6 +276,16 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 			.eq(TCsqService::getName, name));
 	}
 
+	@Override
+	public List<TCsqService> selectByName(String name, Boolean isFuzzySearch) {
+		MybatisPlusBuild build = baseBuild();
+		build = isFuzzySearch?
+			build.eq(TCsqService::getName, name):
+			build.like(TCsqService::getName, "%" + name + "%");
+
+		return MybatisPlus.getInstance().findAll(new TCsqService(), build);
+	}
+
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
@@ -301,7 +311,7 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	private MybatisPlusBuild allBuild() {
 		return baseBuild()
-			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())	//判断是否可展示
+			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())    //判断是否可展示
 			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
 			.and()
 			.groupBefore()
@@ -318,8 +328,10 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),    //按类型倒序(把项目排在上边
 				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount),    //按还需筹多少金额正序
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)    //按收入倒序*/
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime),
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)
+			.orderBy(
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getPriority),	//优先级从高到底
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn),	//累计收入倒序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime)	//更新时间倒序
 			);
 	}
 
@@ -343,11 +355,39 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),    //按类型倒序(把项目排在上边
 				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount),    //按还需筹多少金额正序
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)    //按收入倒序*/
+			.orderBy(
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getPriority),
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn),
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime)
+			).build();
+		System.out.println(build);
+	}
+
+	/*public static void main(String[] args) {
+		String build = new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())    //判断是否可展示
+			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
+			.and()
+			.groupBefore()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode())
+			.groupAfter()
+			.or()
+			.groupBefore()
+			.eq(TCsqService::getType, CsqServiceEnum.TYPE_FUND.getCode())    //若为基金唯一对应项目
+			.eq(TCsqService::getFundStatus, CsqFundEnum.STATUS_PUBLIC.getVal())    //已公开的基金对应的项目
+			.groupAfter()
+			.groupAfter()
+			*//*.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getCreateTime),    //按发布时间倒序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getType),    //按类型倒序(把项目排在上边
+				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount),    //按还需筹多少金额正序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)    //按收入倒序*//*
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime),
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)
 			).build();
 		System.out.println(build);
-	}
+	}*/
 
 	private MybatisPlusBuild minePageBuild(Long userId) {
 		return new MybatisPlusBuild(TCsqService.class)

@@ -1,9 +1,11 @@
 package com.e_commerce.miscroservice.csq_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Check;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
+import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -11,6 +13,7 @@ import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +51,9 @@ public class CsqManagerSystemController {
 
 	@Autowired
 	private CsqPaymentService csqPaymentService;
+
+	@Autowired
+	private CsqMoneyApplyRecordService csqMoneyApplyRecordService;
 
 	@RequestMapping("alive")
 	public Object test() {
@@ -655,16 +661,27 @@ public class CsqManagerSystemController {
 	 * @param entityId 实体编号
 	 * @param money 金额
 	 * @param invoicePic 发票图片
+	 * @param applyPerson 申请人
+	 * @param applyPersonContact 申请人联系方式
 	 * @param description 描述
 	 * @return
 	 */
 	@RequestMapping("money/apply/add")
-	public AjaxResult addMoneyApply(Integer entityType, Long entityId, Double money, String invoicePic, String description) {
+	@Consume(CsqMoneyApplyRecordVo.class)
+	public AjaxResult addMoneyApply(@Check("==null || ==''") Integer entityType,
+									@Check("==null || ==''") Long entityId,
+									@Check("==null || ==''") Double money,
+									@Check("==null || ==''") String invoicePic,
+									@Check("==null || ==''") String applyPerson,
+									@Check("==null || ==''") String applyPersonContact,
+									String description) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
+		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
+		TCsqMoneyApplyRecord tCsqMoneyApplyRecord = obj.copyTCsqMoneyApplyRecord();
 		try {
-			log.info("递(提)交打款申请, userIds={}, entityType={}, entityId={}, money={}, invoicePic={}, description={}", userIds, entityType, entityId, money, invoicePic, description);
-//			csqMoneyApplyRecordService.addMoneyApply();	//TODO
+			log.info("递(提)交打款申请, userIds={}, entityType={}, entityId={}, money={}, invoicePic={}, applyPerson={}, applyPersonContact={}, description={}", userIds, entityType, entityId, money, invoicePic, applyPerson, applyPersonContact, description);
+			csqMoneyApplyRecordService.addMoneyApply(tCsqMoneyApplyRecord);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "递(提)交打款申请", e.getMessage());
@@ -673,6 +690,99 @@ public class CsqManagerSystemController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("递(提)交打款申请", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 打款申请列表
+	 * @param searchParam 搜索参数
+	 * @param searchType 搜索参数类型
+	 * @param status 状态
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @param isFuzzySearch 是否采用模糊查询
+	 * @return
+	 */
+	@RequestMapping("money/apply/list")
+	@Consume(Page.class)
+	public AjaxResult addMoneyApply(@Check("==null || ==''") String searchParam,
+									@Check("==null || ==''") Integer searchType,
+									Integer pageNum,
+									Integer pageSize,
+									Boolean isFuzzySearch,
+									@Check("==null || ==''") Integer... status) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		Page page = (Page) ConsumeHelper.getObj();
+		try {
+			log.info("打款申请列表, searchParam={}, searchType={}, status={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, searchType, status, pageNum, pageSize, isFuzzySearch);
+			csqMoneyApplyRecordService.moneyApplyList(searchParam, searchType,isFuzzySearch, page, status);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "打款申请列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("打款申请列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 打款申请审核
+	 * @param csqMoneyApplyRecordId 打款申请编号
+	 * @param status 状态
+	 * @return
+	 */
+	@RequestMapping("money/apply/cert")
+	@Consume(CsqMoneyApplyRecordVo.class)
+	public AjaxResult certMoneyApply(Long csqMoneyApplyRecordId,
+									 @Check("==null || ==''") Integer status) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
+		try {
+			log.info("打款申请审核, status={}", userIds, status);
+			csqMoneyApplyRecordService.certMoneyApply(userIds, csqMoneyApplyRecordId, status);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "打款申请审核", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("打款申请审核", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 基金/项目捐赠记录
+	 * @param searchParam 搜索参数
+	 * @return
+	 */
+	@RequestMapping("donate/record/list")
+	@Consume(Page.class)
+	public AjaxResult donateRecordList(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
+		AjaxResult result = new AjaxResult();
+		Long userIds = IdUtil.getId();
+		Page page = (Page) ConsumeHelper.getObj();
+		try {
+			log.info("基金/项目捐赠记录, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", searchParam, pageNum, pageSize, isFuzzySearch);
+			csqPaymentService.donateRecordList(userIds, searchParam, page, isFuzzySearch);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "基金/项目捐赠记录", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("基金/项目捐赠记录", e);
 			result.setSuccess(false);
 		}
 		return result;

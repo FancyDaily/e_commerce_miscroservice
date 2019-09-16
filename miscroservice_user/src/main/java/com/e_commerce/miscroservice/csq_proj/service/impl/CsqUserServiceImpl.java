@@ -540,7 +540,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 				vo.setCurrentAmont(sumTotalIn);
 				vo.setExpectedAmount(CsqFundEnum.PUBLIC_MINIMUM);
 				String voCoverPic = vo.getCoverPic();
+				String sharePic = vo.getSharePic();
 				vo.setCoverPic(voCoverPic.contains(",")? Arrays.asList(voCoverPic.split(",")).get(0):voCoverPic);	//只给一张
+				vo.setSharePic(sharePic == null? null : sharePic.contains(",")? Arrays.asList(sharePic.split(",")).get(0):sharePic);	//只给一张
 				Integer status = csqFund.getStatus();
 				TCsqService tCsqService = csqServiceDao.selectByFundId(csqFund.getId());
 				Long serviceId = tCsqService.getId();
@@ -601,8 +603,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 				String name = csqService.getName();
 				String coverPic = csqService.getCoverPic();
 				coverPic = Arrays.asList(coverPic.split(",")).get(0);
+				String theSharePic = csqService.getSharePic();
 				vo = CsqShareVo.builder()
 					.coverPic(coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic)	//只给一张
+					.sharePic(theSharePic == null? null :theSharePic.contains(",")? Arrays.asList(theSharePic.split(",")).get(0):theSharePic)	//只给一张
 					.name(name)
 					.build();
 				vo.setCurrentAmont(NumberUtil.keep2Places(csqService.getSumTotalIn()));

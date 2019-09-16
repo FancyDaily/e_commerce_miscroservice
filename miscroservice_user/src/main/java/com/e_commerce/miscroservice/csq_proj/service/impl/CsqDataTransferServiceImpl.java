@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.AlipayFundTransDishonorQueryModel;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.enums.application.*;
@@ -1133,6 +1132,104 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		deleteRecords(recordIds);
 	}
 
+	@Override
+	public void transeferGrowthFundRecord() {
+		dealWithGrowthValueTransfer(false);
+	}
+
+	@Override
+	public void transeferGrowthFundRecordAfter() {
+		dealWithGrowthValueTransfer(true);
+	}
+
+	private void dealWithGrowthValueTransfer(boolean isAfterDeal) {
+		//从老数据得到成长基金数据
+		// -> 每个用户以自己的第一笔捐助建立专项基金(日期同步）
+		//	  并且后续的捐助，成为捐助流水进入到成长基金当中去
+		//获取成长基金捐赠记录(Json)
+		List<TOldService> oldServices = csqOldServiceDao.selectByNames("成长基金");
+		if (oldServices.isEmpty()) {
+			return;
+		}
+		TOldService oldService = oldServices.get(0);
+		String pfId = oldService.getId();
+		List<TOldPayment> tOldPayments = csqOldPaymentDao.selectInPfIds(Arrays.asList(pfId));
+		Map<String, List<TOldPayment>> optionUserPaymentMap = tOldPayments.stream()
+			.collect(Collectors.groupingBy(TOldPayment::getOptionuser));
+
+		//进行前的基金持有检查。对每个用户持有的基金进行检查，如果已经存在一个基金，则提示。
+		List<Long> oldUserIds = new ArrayList<>();
+		if(!isAfterDeal) {
+			oldUserIds = checkBeforeTranseferGrowthFundRecord(optionUserPaymentMap);
+			/*if(!oldUserIds.isEmpty()) {
+				return;
+			}*/
+		}
+		final List<Long> theIds = oldUserIds;
+		optionUserPaymentMap.forEach((k,v) -> {
+//			Long oldUserId = Long.valueOf(k);
+			TCsqUser csqUser = csqUserDao.selectByOldId(k);
+			Long userId = csqUser.getId();
+			v = v.stream()
+				.sorted(Comparator.comparing(TOldPayment::getDonationtime).reversed()).collect(Collectors.toList());//捐助时间倒序
+			//找到名下的基金
+			List<TCsqFund> csqFunds = csqFundDao.selectByUserIdAndNotEqStatus(userId, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
+			for (int i=0; i<v.size(); i++) {
+				TOldPayment tOldPayment = v.get(i);
+				Double amount = Double.valueOf(tOldPayment.getDonationmoney());
+				String date = tOldPayment.getDonationtime();
+				date = date.substring(0, date.length() - 4);
+				Long timeStamp = Long.valueOf(DateUtil.dateToStamp(date));
+				//第一条记录将被转换成专项基金
+				if (!isAfterDeal) {
+					if(theIds.contains(Long.valueOf(k))) {	//如果包含该基金说明已重复，按充值处理
+						if (!csqFunds.isEmpty()) {
+							TCsqFund csqFund = csqFunds.get(0);
+							csqPayService.fakeWechatPay(userId, csqFund.getId(), CsqEntityTypeEnum.TYPE_FUND.toCode(), amount, null, timeStamp);
+						}
+					} else {
+						csqPayService.fakeWechatPay(userId, null, CsqEntityTypeEnum.TYPE_FUND.toCode(), amount, TCsqFund.builder().build(), timeStamp);
+					}
+					break;
+				} else {
+					if(i != 0) {
+						if (!csqFunds.isEmpty()) {
+							TCsqFund csqFund = csqFunds.get(0);
+							csqPayService.fakeWechatPay(userId, csqFund.getId(), CsqEntityTypeEnum.TYPE_FUND.toCode(), amount, null, timeStamp);
+						}
+					}
+				}
+			}
+			});
+	}
+
+	private List<Long> checkBeforeTranseferGrowthFundRecord(Map<String, List<TOldPayment>> optionUserPaymentMap) {
+		List<Long> oldUserIds = new ArrayList<>();
+		List<Long> userIds = new ArrayList<>();
+		List<Long> oldUserIdsTotalInCnt = new ArrayList<>();
+		optionUserPaymentMap.forEach((k,v) -> {
+			Long oldUserId = Long.valueOf(k);
+			TCsqUser csqUser = csqUserDao.selectByOldId(k);
+			Long userId = csqUser.getId();
+			List<TCsqFund> csqFunds = csqFundDao.selectByUserIdAndNotEqStatus(userId, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
+			if(!csqFunds.isEmpty()) {
+				oldUserIds.add(oldUserId);
+				userIds.add(userId);
+				TCsqFund csqFund = csqFunds.get(0);
+				Integer totalInCnt = csqFund.getTotalInCnt();
+				if(totalInCnt > 0) {
+					oldUserIdsTotalInCnt.add(oldUserId);
+				}
+			}
+		});
+		if(!oldUserIds.isEmpty()) {
+			log.info("已经拥有一个基金的旧账户编号={}", oldUserIds);
+			log.info("已经拥有一个基金的账户编号={}", userIds);
+			log.info("已经拥有一个基金, 且基金收入大于0的旧账户编号={}", oldUserIds);
+		}
+		return oldUserIds;
+	}
+
 	private void dealWithOffLineData(List<TCsqOffLineData> offLineData) {
 		offLineData = offLineData.stream()
 			.filter(a -> AppConstant.IS_VALID_YES.equals(a.getIsValid())).collect(Collectors.toList());
@@ -1144,8 +1241,9 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		dealWithOffLineOut(outList);
 	}
 
+
 	/*public static void main(String[] args) {
-		*//*for (; ; ) {
+		for (; ; ) {
 			System.out.println("write down please:");
 			String folderPath = new Scanner(System.in).nextLine();
 			try {
@@ -1162,7 +1260,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}*//*
+		}
 	}*/
 
 	private void dealWithOffLineOut(List<TCsqOffLineData> outList) {
@@ -1328,7 +1426,13 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	}
 
 	public static void main(String[] args) {
-		String s = picDeal("56_kldy", 22);
+		String s = picDeal("27_zlyjwjj", 10);
 		System.out.println(s);
+		/*String date = "2017-09-18 12:00:00.000";
+		date = date.substring(0, date.length()-4);
+		String s = DateUtil.dateToStamp(date);
+		System.out.println(s);*/
+
 	}
+
 }

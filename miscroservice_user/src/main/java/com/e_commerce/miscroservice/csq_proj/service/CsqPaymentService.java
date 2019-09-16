@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
+import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
@@ -7,6 +8,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,4 +61,6 @@ public interface CsqPaymentService {
 	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
 
 	Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch);
+
+	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch);
 }

@@ -58,4 +58,8 @@ public interface CsqDataTransferService {
 	List<TCsqUserPaymentRecord> findRecords();
 
 	void findAndDeleteRecords();
+
+	void transeferGrowthFundRecord();
+
+	void transeferGrowthFundRecordAfter();
 }

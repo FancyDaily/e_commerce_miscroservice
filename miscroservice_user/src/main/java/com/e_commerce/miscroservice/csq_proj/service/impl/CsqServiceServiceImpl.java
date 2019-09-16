@@ -532,6 +532,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqService.setPersonInCharge(csqFund.getPersonInCharge());
 		csqService.setPersonInChargePic(csqFund.getPersonInChargePic());
 		csqService.setOccupation(csqFund.getOccupation());
+		csqService.setSharePic(csqFund.getSharePic());
 		if (isInsert) {
 			csqServiceDao.insert(csqService);
 			return;

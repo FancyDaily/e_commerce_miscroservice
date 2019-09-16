@@ -111,6 +111,7 @@ public class CsqFundController {
 	 * @param agentModeStatus 代理状态
 	 * @param detailPic	详情图
 	 * @param purpose	目的描述(概述
+	 * @param sharePic 分享图
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -119,6 +120,7 @@ public class CsqFundController {
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 								   String description, String coverPic, String orgName, String orgAddr, String detailPic,
 								   String contact, String personInCharge, String creditCardName, String creditCardId,String purpose,
+								   String sharePic,
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();

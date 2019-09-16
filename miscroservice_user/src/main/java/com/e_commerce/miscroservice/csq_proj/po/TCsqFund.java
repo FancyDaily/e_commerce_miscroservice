@@ -42,7 +42,7 @@ public class TCsqFund extends BaseEntity {
 	@Column(commit = "基金名", charset = "utf8mb4")
 	private String name;
 
-	@Column(commit = "详细图")
+	@Column(commit = "详细图", length = 2048)
 	private String detailPic;
 
 	@Column(commit = "描述", charset = "utf8mb4", length = 4096)
@@ -50,6 +50,9 @@ public class TCsqFund extends BaseEntity {
 
 	@Column(commit = "封面图")
 	private String coverPic;
+
+	@Column(commit = "分享图")
+	private String sharePic;
 
 	@Column(commit = "机构名称")
 	private String orgName;

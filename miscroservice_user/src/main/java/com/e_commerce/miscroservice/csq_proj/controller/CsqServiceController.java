@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
+import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -86,6 +87,7 @@ public class CsqServiceController {
 	 * @param creditCard     银行卡号
 	 * @param personInCharge 负责人
 	 * @param personInChargePic 负责人头像
+	 * @param sharePic 分享图
 	 *                       <p>
 	 *                       {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
@@ -105,7 +107,8 @@ public class CsqServiceController {
 									 String certificatedNo,
 									 String creditCard,
 									 String personInCharge,
-									 String personInChargePic) {
+									 String personInChargePic,
+									 String sharePic) {
 		AjaxResult result = new AjaxResult();
 		Long id = UserUtil.getTestId();
 		CsqServiceDetailVo vo = (CsqServiceDetailVo) ConsumeHelper.getObj();
@@ -113,8 +116,8 @@ public class CsqServiceController {
 		try {
 			log.info("发布项目, name={}, recordNo={}, typePubKeys={}, " +
 					"purpose={}, expectedAmount={}, coverPic={}, description={}, " +
-					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}, personInChargePic={}",
-				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge, personInChargePic);
+					"detailPic={}, beneficiary={}, certificatedNo={}, creditCard={}, personInCharge={}, personInChargePic={}, sharePic={}",
+				name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, certificatedNo, creditCard, personInCharge, personInChargePic, sharePic);
 			csqServiceService.publish(id, csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -507,15 +510,16 @@ public class CsqServiceController {
 							 @RequestParam(required = false) String beneficiary,
 							 @RequestParam(required = false) String creditCard,
 							 @RequestParam(required = false) String personInCharge,
-							 @RequestParam(required = false) String certificatedNo
+							 @RequestParam(required = false) String certificatedNo,
+							 @RequestParam(required = false) String sharePic
 	) {
 		AjaxResult result = new AjaxResult();
 		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = csqServiceVo.copyTCsqService();
 		try {
 			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
-					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}",
-				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo);
+					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}, sharePic={}",
+				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo, sharePic);
 			csqServiceService.modify(csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

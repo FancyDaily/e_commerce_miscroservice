@@ -1,8 +1,9 @@
-package com.e_commerce.miscroservice.csq_proj.po;
+package com.e_commerce.miscroservice.csq_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqMoneyApplyRecord;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,15 +12,18 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-09-09 17:29
  */
-@Table(commit = "打款申请表")
 @Data
 @NoArgsConstructor
 @Builder
-public class TCsqMoneyApplyRecord extends BaseEntity {
+public class CsqMoneyApplyRecordVo {
+
+	@Id
+	private Long id;
 
 	private Long entityId;
 
 	private Integer entityType;
+
 
 	@Column(commit = "打款申请的发起人")
 	private Long userId;
@@ -42,5 +46,8 @@ public class TCsqMoneyApplyRecord extends BaseEntity {
 	@Column(commit = "审核状态")
 	private Integer status;
 
-	public CsqMoneyApplyRecordVo copyCsqMoneyApplyRecordVo() {return null;}
+	public TCsqMoneyApplyRecord copyTCsqMoneyApplyRecord() {
+		return null;
+	}
+
 }

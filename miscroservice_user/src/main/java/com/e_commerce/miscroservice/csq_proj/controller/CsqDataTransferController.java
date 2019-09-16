@@ -302,4 +302,28 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("transfer/growthFund_1")
+	public Object transeferGrowthFundRecord() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.transeferGrowthFundRecord();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@RequestMapping("transfer/growthFund_2")
+	public Object transeferGrowthFundRecordAfter() {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqDataTransferService.transeferGrowthFundRecordAfter();
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 }

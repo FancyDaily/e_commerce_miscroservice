@@ -79,6 +79,9 @@ public class CsqServiceListVo {
 	@Column(commit = "封面图")
 	protected String coverPic;
 
+	@Column(commit = "分享图")
+	private String sharePic;
+
 	@Column(commit = "描述")
 	protected String description;	//MARK
 

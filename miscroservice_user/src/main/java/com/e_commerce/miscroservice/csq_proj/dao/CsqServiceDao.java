@@ -90,4 +90,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectByType(int code);
 
 	TCsqService selectByName(String name);
+
+	List<TCsqService> selectByName(String searchParam, Boolean isFuzzySearch);
 }

@@ -98,6 +98,9 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "封面图")
 	private String coverPic;
 
+	@Column(commit = "分享图")
+	private String sharePic;
+
 	@Column(commit = "描述", charset = "utf8mb4", length = 4096)
 	private String description;
 
@@ -124,6 +127,9 @@ public class TCsqService extends BaseEntity {
 
 	@Column(commit = "可展示状态(首页),管理员关闭项目/基金后，将不可展示", defaultVal = "1")
 	private Integer isShown;
+
+	@Column(commit = "优先级", defaultVal = "0")
+	private Integer priority;
 
 	public CsqDailyDonateVo copyCsqDailyDonateVo() {
 		return null;

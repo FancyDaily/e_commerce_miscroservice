@@ -37,4 +37,8 @@ public class PageUtil {
 		pageNum = pageNum == null? 0: pageNum;
 		return pageNum;
 	}
+
+	public static Page prePage(Page page) {
+		return prePage(page.getPageNum(), page.getPageSize());
+	}
 }

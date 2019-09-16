@@ -72,6 +72,9 @@ public class CsqFundVo {
 	@Column(commit = "封面图")
 	private String coverPic;
 
+	@Column(commit = "分享图")
+	private String sharePic;
+
 	@Column(commit = "机构名称")
 	private String orgName;	//MARK
 

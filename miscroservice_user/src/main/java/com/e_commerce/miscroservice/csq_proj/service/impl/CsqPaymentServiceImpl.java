@@ -18,7 +18,6 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.sun.tools.corba.se.idl.ParameterGen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -522,6 +521,55 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("queryResult", queryResult);
 		resultMap.put("totalAmount", totalAmount);
+
+		return resultMap;
+	}
+
+	@Override
+	public HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch) {
+		page = PageUtil.prePage(page);
+
+		MybatisPlusBuild baseBuild = csqUserPaymentDao.baseBuild();
+
+		//构建目标
+		baseBuild = baseBuild
+			.in(TCsqUserPaymentRecord::getEntityType, Arrays.asList(CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()))
+			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode());
+		List<TCsqUserPaymentRecord> orderIdHoder = csqUserPaymentDao.selectWithBuild(baseBuild);
+		List<Long> orderIds = orderIdHoder.stream()
+			.map(TCsqUserPaymentRecord::getOrderId)
+			.distinct().collect(Collectors.toList());
+		//统计捐款比数、捐赠总金额
+		Double donateTotalAmount = orderIdHoder.stream()
+			.map(TCsqUserPaymentRecord::getMoney).reduce(0d, Double::sum);
+		int donateCnt = orderIdHoder.size();
+
+		//初始化
+		baseBuild = csqUserPaymentDao.baseBuild();
+
+		//主要构建
+		baseBuild
+			.in(TCsqUserPaymentRecord::getOrderId, orderIds)
+			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode());
+
+		//用户昵称到用户编号
+		List<TCsqUser> csqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
+		List<Long> csqUserIds = csqUsers.stream()
+			.map(TCsqUser::getId).collect(Collectors.toList());
+
+		baseBuild = csqUserIds.isEmpty()? baseBuild:baseBuild.in(TCsqUserPaymentRecord::getUserId, csqUserIds);
+
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectWithBuildPage(baseBuild, page.getPageNum(), page.getPageSize());
+		List<CsqUserPaymentRecordVo> vos = tCsqUserPaymentRecords.stream()
+			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+
+		//结果集
+		QueryResult result = PageUtil.buildQueryResult(vos, IdUtil.getTotal());
+
+		HashMap<String, Object> resultMap = new HashMap<>();
+		resultMap.put("donateCnt", donateCnt);
+		resultMap.put("donateTotalAmount", donateTotalAmount);
+		resultMap.put("queryResult", result);
 
 		return resultMap;
 	}

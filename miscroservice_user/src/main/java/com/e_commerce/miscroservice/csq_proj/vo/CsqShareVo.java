@@ -23,6 +23,8 @@ public class CsqShareVo {
 
 	private String coverPic;
 
+	private String sharePic;
+
 	private Double currentAmont;
 
 	private Double expectedAmount;
