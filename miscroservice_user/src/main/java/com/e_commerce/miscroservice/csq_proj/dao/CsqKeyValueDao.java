@@ -23,4 +23,6 @@ public interface CsqKeyValueDao {
 	TCsqKeyValue selectByPrimaryKey(String sceneKey);
 
 	TCsqKeyValue selectByKeyAndTypeAndTheValue(Long userId, int code, String scene);
+
+	TCsqKeyValue selectByTypeAndTheValue(int type, String theValue);
 }

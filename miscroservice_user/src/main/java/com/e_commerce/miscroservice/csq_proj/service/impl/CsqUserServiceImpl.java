@@ -1278,8 +1278,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		//排序时间倒序、审核状态正序
 		mybatisPlusBuild
-			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserAuth::getCreateTime))
-			.orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TCsqUserAuth::getStatus));
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserAuth::getCreateTime), MybatisPlusBuild.OrderBuild.buildAsc(TCsqUserAuth::getStatus));
 
 		List<TCsqUserAuth> tCsqUserAuths = csqUserAuthDao.selectWithBuildPage(mybatisPlusBuild, pageNum, pageSize);
 		long total = IdUtil.getTotal();
@@ -1301,16 +1300,51 @@ public class CsqUserServiceImpl implements CsqUserService {
 		page = StringUtil.isEmpty(page)? this.PERSON_PAGE: page;
 		String scene = JSONObject.toJSONString(vo);
 		Long sceneKey = -1L;
+		TCsqKeyValue tCsqKeyValue;
 		if(userId != null) {
-			TCsqKeyValue tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
-			sceneKey = insertKeyValIfAbsent(userId, scene, tCsqKeyValue);
+			tCsqKeyValue = csqKeyValueDao.selectByKeyAndTypeAndTheValue(userId, CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
+		} else {
+			tCsqKeyValue = csqKeyValueDao.selectByTypeAndTheValue(CsqKeyValueEnum.TYPE_SCENE.getCode(), scene);
 		}
+		sceneKey = insertKeyValIfAbsent(userId, scene, tCsqKeyValue);
 
 		HashMap map = new HashMap();
 		UploadPathEnum.innerEnum anEnum = UploadPathEnum.innerEnum.getEnum(uploadCode);
 		String qrCode = wechatService.genQRCode(sceneKey == -1L? null:sceneKey.toString(), page, anEnum == null? UploadPathEnum.innerEnum.CSQ_PERSON: anEnum);
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
+		return map;
+	}
+
+	@Override
+	public String share(String name) {
+		List<TCsqService> csqServices = csqServiceDao.selectByName(name, false);
+		if(csqServices.isEmpty()) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该项目/基金不存在，请确认输入的名字！");
+		}
+		TCsqService csqService = csqServices.get(0);
+		boolean isFund = CsqServiceEnum.TYPE_FUND.getCode() == csqService.getType();
+
+		CsqSceneVo vo = CsqSceneVo.builder()
+			.serviceId(csqService.getId())
+			.fundId(csqService.getFundId())
+			.type(isFund? CsqServiceEnum.TYPE_FUND.getCode() : CsqServiceEnum.TYPE_SERIVE.getCode())
+			.activityMark(CsqOrderEnum.IS_ACTIVITY_TRUE.getCode())
+			.build();
+		JSONObject.toJSONString(vo);
+		Map map = qrCode(null, vo, isFund ? FUND_PAGE : SERVICE_PAGE, isFund ? UploadPathEnum.innerEnum.CSQ_FUND.getCode() : UploadPathEnum.innerEnum.CSQ_SERVICE.getCode());
+		return (String) map.get("qrCode");
+	}
+
+	@Override
+	public Map<String, Object> platformPreview() {
+		List<TCsqUser> csqUsers = csqUserDao.selectAll();
+		int personNum = csqUsers.size();
+		Double totalIn = csqPaymentService.getPlatFromInCome();
+
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("personNum", personNum);
+		map.put("totalIn", totalIn);
 		return map;
 	}
 

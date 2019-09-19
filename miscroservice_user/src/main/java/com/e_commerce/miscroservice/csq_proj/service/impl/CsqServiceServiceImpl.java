@@ -578,7 +578,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		HashMap<Long, Boolean> isAnonymousOrderMap = getIsAnonymousOrderMap(orderIds);
 
 		List<TCsqUserPaymentRecord> csqUserPaymentRecords = donateListNonePage(tCsqUserPaymentRecords);
-		List<CsqDonateRecordVo> resultList = csqUserPaymentRecords.stream()
+		List<CsqDonateRecordVo> resultList;
+		resultList = csqUserPaymentRecords.stream()
 			.map(a -> {
 				//获取是否匿名信息
 				TCsqUser user = a.getUser();
@@ -590,10 +591,12 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 				Integer minutesAgo = a.getMinutesAgo();
 				//处理 minuteAgo
+				String minutesAgoStr = com.e_commerce.miscroservice.commons.util.colligate.DateUtil.minutes2TimeAgo(minutesAgo);
 				minutesAgo = minutesAgo > 60 ? 60 : minutesAgo;
 
 				return CsqDonateRecordVo.builder()
 					.minutesAgo(minutesAgo)
+					.minutesAgoStr(minutesAgoStr)
 					.name(name)    //姓名
 					.userHeadPortraitPath(userHeadPath)    //头像
 					.donateAmount(a.getMoney())

@@ -33,6 +33,9 @@ public class TCsqUserPaymentRecord extends BaseEntity {
 	private Integer entityType;	//支出或收入的实体类型
 
 	@Transient
+	private String minutesAgoStr;	//多少时间以前
+
+	@Transient
 	private Integer minutesAgo;
 
 	@Transient

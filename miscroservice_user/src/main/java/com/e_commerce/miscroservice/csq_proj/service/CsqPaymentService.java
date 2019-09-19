@@ -65,4 +65,6 @@ public interface CsqPaymentService {
 	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch);
 
 	QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly);
+
+	Double getPlatFromInCome();
 }

@@ -743,7 +743,7 @@ public class CsqManagerSystemController {
 	 */
 	@RequestMapping("money/apply/list")
 	@Consume(Page.class)
-	public AjaxResult addMoneyApply(@Check("==null || ==''") String searchParam,
+	public AjaxResult addMoneyApply(String searchParam,
 									@Check("==null || ==''") Integer searchType,
 									Integer pageNum,
 									Integer pageSize,
@@ -833,12 +833,12 @@ public class CsqManagerSystemController {
 
 	/**
 	 * 数据BI(收支统计)
-	 * @param searchParam
-	 * @param startDate
-	 * @param endDate
-	 * @param pageNum
-	 * @param pageSize
-	 * @param isServiceOnly
+	 * @param searchParam 搜索参数
+	 * @param startDate 开始日期,eg.1999-01-01
+	 * @param endDate 结束日期
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @param isServiceOnly 是否为仅服务和基金
 	 * @return
 	 */
 	@RequestMapping("statistics")

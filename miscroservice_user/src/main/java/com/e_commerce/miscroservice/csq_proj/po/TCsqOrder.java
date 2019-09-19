@@ -64,6 +64,9 @@ public class TCsqOrder extends BaseEntity {
 	@Column(commit = "是否为匿名发起人")
 	private Integer isAnonymous;
 
+	@Column(commit = "是否为活动相关")
+	private Integer isActivity;
+
 	public CsqWaitToInvoiceOrderVo copyCsqOrderVo() {
 		return null;
 	}

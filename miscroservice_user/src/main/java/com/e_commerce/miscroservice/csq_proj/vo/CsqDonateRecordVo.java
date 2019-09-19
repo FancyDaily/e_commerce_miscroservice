@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.vo;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,11 @@ public class CsqDonateRecordVo {
 	 * 分钟前
 	 */
 	private Integer minutesAgo;
+
+	/**
+	 * 多少时间以前
+	 */
+	private String minutesAgoStr;
 
 	/**
 	 * 捐款人头像

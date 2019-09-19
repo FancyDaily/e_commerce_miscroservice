@@ -9,7 +9,7 @@ import java.util.List;
  * @Date: 2019-06-12 11:13
  */
 public interface CsqOrderDao {
-	
+
 	TCsqOrder selectByOrderNo(String orderNo);
 
 	int update(TCsqOrder tCsqOrder);
@@ -77,4 +77,8 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByUserIdAndToTypeAndToIdAndPriceDesc(Long userId, int fundType, Long fundId, Double money);
 
 	List<TCsqOrder> selectByUserIdAndToTypeAndToIdAndPriceAndCreateTimeDesc(Long id, int toCode, Long fundId, Double money, Long timeStamp);
+
+	List<TCsqOrder> selectByFromTypeAndStatus(int toCode, Integer code);
+
+	List<TCsqOrder> selectByToType(int toCode);
 }

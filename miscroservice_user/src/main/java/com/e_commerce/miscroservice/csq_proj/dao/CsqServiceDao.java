@@ -92,4 +92,6 @@ public interface CsqServiceDao {
 	TCsqService selectByName(String name);
 
 	List<TCsqService> selectByName(String searchParam, Boolean isFuzzySearch);
+
+	List<TCsqService> selectByNamePage(String searchParam, Boolean isFuzzySearch, Integer pageNum, Integer pageSize);
 }

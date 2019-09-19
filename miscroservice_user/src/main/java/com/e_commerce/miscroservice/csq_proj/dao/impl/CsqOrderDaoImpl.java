@@ -38,8 +38,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByUserIdAndFromTypeAndInvoiceStatus(Long userId, int toCode, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromType, toCode)
 			.eq(TCsqOrder::getInVoiceStatus, code));
@@ -47,8 +46,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByUserIdAndFromTypeAndInvoiceStatusDesc(Long userId, int toCode, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromType, toCode)
 			.eq(TCsqOrder::getInVoiceStatus, code)
@@ -61,8 +59,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 	}
 
 	private MybatisPlusBuild inOrderNosBuild(String[] orderNo) {
-		return new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return baseBuild()
 			.in(TCsqOrder::getOrderNo, orderNo);
 	}
 
@@ -82,8 +79,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIds(Long fromId, int fromType, int toType, List<Long> orderIds) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getFromId, fromId)
 			.eq(TCsqOrder::getFromType, fromType)
 			.eq(TCsqOrder::getToType, toType)
@@ -92,8 +88,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByFromIdAndFromTypeAndToTypeInOrderIdsAndStatus(Long fromId, int fromType, int toType, List<Long> tOrderIds, int status) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getFromId, fromId)
 			.eq(TCsqOrder::getFromType, fromType)
 			.eq(TCsqOrder::getToType, toType)
@@ -103,8 +98,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByUserIdAndToTypeDesc(Long userId, int toCode) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getToType, toCode)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime)));
@@ -112,8 +106,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByToIdAndToTypeAndOrderTimeBetweenDesc(Long toId, int toCode, long startStamp, long endStamp) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getToId, toId)
 			.eq(TCsqOrder::getToType, toCode)
 			.between(TCsqOrder::getOrderTime, startStamp, endStamp)
@@ -122,8 +115,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public TCsqOrder selectByUserIdAndFromIdAndFromTypeAndToIdAndToTypeAndAmountAndStatusDesc(Long userId, Long fromId, int fromtype, Long toId, int toType, Double amount, Integer status) {
-		return MybatisPlus.getInstance().findOne(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findOne(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromId, fromId)
 			.eq(TCsqOrder::getFromType, fromtype)
@@ -136,8 +128,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int status) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromType, fromType)
 			.eq(TCsqOrder::getToType, toType)
@@ -147,8 +138,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByUserIdAndFromTypeAndToTypeInvoiceStatusAndStatusDesc(Long userId, int fromType, int toType, int invoiceStatus, int status) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getUserId, userId)
 			.eq(TCsqOrder::getFromType, fromType)
 			.eq(TCsqOrder::getToType, toType)
@@ -159,8 +149,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectByToIdAndToTypeAndStatusDesc(Long entityId, int toCode, int status) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getToId, entityId)
 			.eq(TCsqOrder::getToType, toCode)
 			.eq(TCsqOrder::getStatus, status)
@@ -249,8 +238,7 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public TCsqOrder selectByPrimaryKey(Long orderId) {
-		return MybatisPlus.getInstance().findOne(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findOne(new TCsqOrder(), baseBuild()
 			.eq(TCsqOrder::getId, orderId));
 	}
 
@@ -294,10 +282,14 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectInOrderIds(List<Long> orderIds) {
-		return MybatisPlus.getInstance().findAll(new TCsqOrder(), new MybatisPlusBuild(TCsqOrder.class)
-			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
 			.in(TCsqOrder::getId, orderIds)
 		);
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TCsqOrder.class)
+			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
 	@Override
@@ -319,6 +311,20 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 			.eq(TCsqOrder::getPrice, money)
 			.eq(TCsqOrder::getCreateTime, new Timestamp(timeStamp).toString()	 )
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByFromTypeAndStatus(int toCode, Integer code) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
+			.eq(TCsqOrder::getFromType, toCode)
+			.eq(TCsqOrder::getStatus, code));
+	}
+
+	@Override
+	public List<TCsqOrder> selectByToType(int toCode) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
+			.eq(TCsqOrder::getToType, toCode)
+		);
 	}
 
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {

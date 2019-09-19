@@ -43,6 +43,7 @@ public class CsqPayController {
 	 * @param name         基金名
 	 * @param trendPubKeys 趋向
 	 * @param isAnonymous 是否匿名
+	 * @param isActivity 是否活动相关0否1是
 	 * @return
 	 */
 	@Consume(CsqFundVo.class)
@@ -55,14 +56,15 @@ public class CsqPayController {
 						   @RequestParam(required = false) String name,
 						   @RequestParam(required = false) String trendPubKeys,
 						   @RequestParam(required = false) boolean isAnonymous,
+						   @RequestParam(required = false) Integer isActivity,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys);
+			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}, isActivity={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys, isActivity);
 			entityId = entityId == -1 ? null : entityId;
-			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund, isAnonymous);
+			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund, isAnonymous, isActivity);
 			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -161,6 +163,7 @@ public class CsqPayController {
 	 * @param name         基金名字
 	 * @param trendPubKeys 捐助方向
 	 * @param isAnonymous 是否匿名
+	 * @param isActivity 是否活动相关0否1是
 	 * @return
 	 */
 	@Consume(CsqFundVo.class)
@@ -173,14 +176,15 @@ public class CsqPayController {
 										Double fee,
 										String name,
 										String trendPubKeys,
-										boolean isAnonymous) {
+										boolean isAnonymous,
+										Integer isActivity) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}, isAnonymous={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys, isAnonymous);
+			log.info("平台内充值/捐助, userId={}, fromType={}, fromId={}, entityType={}, entityId={}, fee={}, name={}, trendPubKeys={}, isAnonymous={}, isActivity={}", vo.getUserId(), fromType, fromId, entityType, entityId, fee, name, trendPubKeys, isAnonymous, isActivity);
 			entityId = entityId == -1 ? null : entityId;
-			String orderNo = csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund, isAnonymous);
+			String orderNo = csqPayService.withinPlatFormPay(vo.getUserId(), fromType, fromId, entityType, entityId, fee, csqFund, isAnonymous, isActivity);
 			result.setData(orderNo);
 			result.setSuccess(true);
 		} catch (MessageException e) {

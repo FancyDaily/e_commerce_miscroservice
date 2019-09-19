@@ -20,4 +20,6 @@ public class CsqSceneVo {
 	private String usertel;
 
 	private Integer type;	//类型 1基金 2项目 3openid匹配业务 etc.
+
+	private Integer activityMark;	//活动标识
 }

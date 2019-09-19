@@ -286,6 +286,16 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return MybatisPlus.getInstance().findAll(new TCsqService(), build);
 	}
 
+	@Override
+	public List<TCsqService> selectByNamePage(String searchParam, Boolean isFuzzySearch, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild build = baseBuild();
+		build = isFuzzySearch?
+			build.eq(TCsqService::getName, searchParam):
+			build.like(TCsqService::getName, "%" + searchParam + "%");
+		IdUtil.setTotal(build);
+		return MybatisPlus.getInstance().findAll(new TCsqService(), build.page(pageNum, pageSize));
+	}
+
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)

@@ -115,5 +115,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 			.status(status).build();
 		//针对审核通过和不通过可能有不同额外操作
 		csqMoneyApplyRecordDao.update(build);
+		//TODO
+		//实现从项目或基金到 entityType为1 即平台外的支出
 	}
 }

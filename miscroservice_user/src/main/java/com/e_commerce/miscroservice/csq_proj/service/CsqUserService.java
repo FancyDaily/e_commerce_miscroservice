@@ -232,4 +232,8 @@ public interface CsqUserService {
 	int certCorpCount(Integer status);
 
 	Map qrCode(Long userId, CsqSceneVo scene, String page, Integer uploadCode);
+
+	String share(String name);
+
+	Map<String, Object> platformPreview();
 }

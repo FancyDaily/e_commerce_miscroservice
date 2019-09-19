@@ -11,7 +11,7 @@ import java.util.Map;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import org.apache.commons.collections.bag.SynchronizedSortedBag;
+import org.redisson.client.protocol.convertor.IntegerReplayConvertor;
 
 
 /**
@@ -566,6 +566,7 @@ public class DateUtil {
 		}
 //		System.out.println(s);
 		System.out.println(s1);*/
+
 	}
 
 	public static int getContinueDayCnt(List<Long> createTimeList) {
@@ -599,5 +600,48 @@ public class DateUtil {
 		long ts = date.getTime();
 		res = String.valueOf(ts);
 		return res;
+	}
+
+	public static String minutes2TimeAgo(Integer minutesAgo) {
+		Integer HOURS_1 = 60;
+		Integer HOURS_3 = 3 * HOURS_1;
+		Integer HOURS_6 = 2 * HOURS_3;
+		Integer HOURS_12 = 4 * HOURS_3;
+		Integer DAY_1 = 8 * HOURS_3;
+		Integer DAY_3 = 3 * DAY_1;
+		Integer DAY_10 = 10 * DAY_1;
+		Integer MONTH_1 = 30 * DAY_1;
+		Integer MONTH_3 = 3 * MONTH_1;
+
+		String timeAgo;
+		if(minutesAgo > MONTH_3) {
+			timeAgo = "3个月前";
+		} else if(minutesAgo > MONTH_1) {
+			timeAgo = "1个月前";
+		} else if(minutesAgo > DAY_10) {
+			timeAgo = "10天前";
+		} else if(minutesAgo > DAY_3) {
+			timeAgo = "3天前";
+		} else if(minutesAgo > DAY_1) {
+			timeAgo = "1天前";
+		} else if(minutesAgo > HOURS_12) {
+			timeAgo = "12小时前";
+		} else if(minutesAgo > HOURS_6) {
+			timeAgo = "6小时前";
+		} else if(minutesAgo > HOURS_3) {
+			timeAgo = "3小时前";
+		} else if(minutesAgo > HOURS_1) {
+			timeAgo = "60分钟前";
+		} else if(minutesAgo > 30) {
+			timeAgo = "30分钟前";
+		} else if(minutesAgo > 5) {
+			timeAgo = "5分钟前";
+		} else if(minutesAgo > 1) {
+			timeAgo = "1分钟前";
+		} else {
+			timeAgo = "刚刚";
+		}
+
+		return timeAgo;
 	}
 }

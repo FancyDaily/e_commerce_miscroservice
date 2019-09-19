@@ -22,6 +22,9 @@ public enum CsqOrderEnum {
 
 	INVOICE_STATUS_NO(0, "未开票"),
 	INVOICE_STATUS_YES(1, "已开票"),
+
+	IS_ACTIVITY_FALSE(0, "活动相关"),
+	IS_ACTIVITY_TRUE(1, "非活动相关")
 	;
 
 	public static final long INTERVAL = 30l * 60 * 1000;

@@ -122,13 +122,13 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Override
 	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest) throws Exception {
-		return preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, null, false);
+		return preOrder(userId, orderNo, entityId, entityType, fee, httpServletRequest, null, false, null);
 	}
 
 	@Override
-	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous) throws Exception {
+	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous, Integer isActivity) throws Exception {
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
-		orderNo = beforePreOrder(userId, entityId, entityType, fee, csqfund, isAnonymous);
+		orderNo = beforePreOrder(userId, entityId, entityType, fee, csqfund, isAnonymous, isActivity);
 		String attach = entityType.toString();	//支付目标的类型
 		//向微信请求发起支付
 		Map<String, String> webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
@@ -136,7 +136,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		return webParam;
 	}
 
-	private String beforePreOrder(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqfund, boolean isAnonymous) {
+	private String beforePreOrder(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqfund, boolean isAnonymous, Integer isActivity) {
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
 		}
@@ -145,12 +145,12 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		TCsqFund csqFund = dealwithFundBeforePay(entityType, userId, csqfund);	//针对创建基金业务
 		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		entityId = entityId == null? csqFund.getId(): entityId;
-		orderNo = dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous);
+		orderNo = dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous, isActivity);
 		return orderNo;
 	}
 
 	private Map<String, Object> beforePreOrderWithFundId(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqfund, boolean isAnonymous) {
-		return beforePreOrderWithFundId(userId, entityId, entityType, fee, csqfund, isAnonymous, null);
+		return beforePreOrderWithFundId(userId, entityId, entityType, fee, csqfund, isAnonymous, null, null);
 	}
 
 	private void dealwithAccountTrendPubKeys(Long userId, Integer entityType, TCsqFund csqfund) {
@@ -190,11 +190,11 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		csqUserDao.updateByPrimaryKey(build);	//更新账户倾向
 	}
 
-	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee, boolean isAnonymous) {
-		return dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous, null);
+	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee, boolean isAnonymous, Integer isActivity) {
+		return dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous, null, isActivity);
 	}
 
-	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee, boolean isAnonymous, Long timeStamp) {
+	private String dealWithPreOrder(Long userId, Long entityId, Integer entityType, Double fee, boolean isAnonymous, Long timeStamp, Integer isActivity) {
 		Integer anonymous = isAnonymous? CsqOrderEnum.IS_ANONYMOUS_TRUE.getCode(): CsqOrderEnum.IS_ANONYMOUS_FALSE.getCode();
 		String orderNo;
 		orderNo = UUIdUtil.generateOrderNo();	//默认生成新的订单号
@@ -218,6 +218,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			.status(CsqOrderEnum.STATUS_UNPAY.getCode())
 			.orderTime(System.currentTimeMillis())
 			.isAnonymous(anonymous)
+			.isActivity(isActivity)	//是否活动相关
 			.build();
 		csqOrder.setCreateTime(timeStamp == null? null: new Timestamp(timeStamp));
 		csqOrderDao.insert(csqOrder);
@@ -623,7 +624,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	}
 
 	@Override
-	public String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous) {
+	public String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous, Integer isActivity) {
 		//check参数
 		List<Integer> types = Arrays.stream(CsqEntityTypeEnum.values())
 			.map(CsqEntityTypeEnum::toCode).collect(Collectors.toList());
@@ -662,6 +663,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			.orderNo(orderNo)
 			.isAnonymous(isAnonymous? CsqOrderEnum.IS_ANONYMOUS_TRUE.getCode(): CsqOrderEnum.IS_ANONYMOUS_FALSE.getCode())	//匿名
 			.status(CsqOrderEnum.STATUS_ALREADY_PAY.getCode())	//状态为已支付
+			.isActivity(isActivity)
 			.orderTime(System.currentTimeMillis()).build();
 		csqOrderDao.insert(order);
 		Long orderId = order.getId();
@@ -693,7 +695,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	@Override
 	public Long fakeWechatPay(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqFund, Long timeStamp) {
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
-		Map<String, Object> map = beforePreOrderWithFundId(userId, entityId, entityType, fee, csqFund, false, timeStamp);
+		Map<String, Object> map = beforePreOrderWithFundId(userId, entityId, entityType, fee, csqFund, false, timeStamp, null);
 		String orderNo = (String) map.get("orderNo");
 		Long fundId = (Long) map.get("fundId");
 		String attach = entityType.toString();	//支付目标的类型
@@ -709,7 +711,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		return fundId;
 	}
 
-	private Map<String, Object> beforePreOrderWithFundId(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqfund, boolean isAnonymous, Long timeStamp) {
+	private Map<String, Object> beforePreOrderWithFundId(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqfund, boolean isAnonymous, Long timeStamp, Integer isActivity) {
 		Map<String, Object> hashMap = new HashMap();
 		if(csqfund == null && entityId == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "充值基金时，编号不能为空!");
@@ -719,7 +721,7 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 		TCsqFund csqFund = dealwithFundBeforePay(entityType, userId, csqfund, false, timeStamp);	//针对创建基金业务
 		dealwithAccountTrendPubKeys(userId, entityType, csqfund);
 		entityId = entityId == null? csqFund.getId(): entityId;
-		orderNo = dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous, timeStamp);
+		orderNo = dealWithPreOrder(userId, entityId, entityType, fee, isAnonymous, timeStamp, isActivity);
 
 		hashMap.put("orderNo", orderNo);
 		hashMap.put("fundId", csqFund == null? null: csqFund.getId());

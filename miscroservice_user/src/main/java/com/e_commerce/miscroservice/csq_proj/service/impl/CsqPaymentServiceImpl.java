@@ -16,9 +16,10 @@ import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqDataBIVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqLineDiagramData;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.sun.xml.internal.ws.api.server.EndpointData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -307,7 +308,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
 				.description(demoIncomeDesc)
 				.entityId(userId)
-				.entityType(CsqEntityTypeEnum.TYPE_HUMAN.toCode())    //现金充值类型
+				.entityType(CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //现金充值类型
 				.money(amount)
 				.orderId(orderId).build();
 			build3.setCreateTime(timestamp);
@@ -504,7 +505,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		;
 
 		baseBuild =
-			isSearch ? baseBuild
+			isSearch ?
+				userIds.isEmpty()? baseBuild: baseBuild
 				.in(TCsqUserPaymentRecord::getUserId, userIds)    //搜索参数得到的用户编号
 				: baseBuild;
 
@@ -578,9 +580,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Override
 	public QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
+		List<CsqDataBIVo> csqDataBIVos = new ArrayList<>();
 		//基本构建
 		MybatisPlusBuild baseBuild = csqPaymentDao.baseBuild();
+		long total =0L;
 
+		List<TCsqUserPaymentRecord> unHandledList = new ArrayList<>();
 		//处理通用信息
 		//处理日期
 		if(StringUtil.isEmpty(startDate)) {
@@ -593,35 +598,163 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			baseBuild.lte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(endTime).toString());
 		}
 
-		//容器doesntmatters
 		if(isServiceOnly) {
-			String pattern = "^[1-9]\\d*$";
-			boolean isNum = Pattern.matches(pattern, searchParam);
-			if(isNum) {	//按编号查找
+			List<TCsqService> csqServices = new ArrayList<>();
 
-			} else { //按名字查找
-				if(isFuzzySearch) {
-
+			if(!StringUtil.isEmpty(searchParam)) {
+				String pattern = "^[1-9]\\d*$";
+				boolean isNum = Pattern.matches(pattern, searchParam);
+				if(isNum) {	//按编号查找
+					TCsqService csqService = csqServiceDao.selectByPrimaryKey(Long.valueOf(searchParam));
+					csqServices.add(csqService);
+				} else { //按名字查找
+					csqServices = csqServiceDao.selectByNamePage(searchParam, isFuzzySearch, pageNum, pageSize);
 				}
+			} else {
+				csqServices = csqServiceDao.selectAllPage(pageNum, pageSize);
+			}
+			total = IdUtil.getTotal();
+
+			List<Long> fundIds = csqServices.stream()
+				.filter(a -> CsqEntityTypeEnum.TYPE_FUND.toCode() == a.getType())
+				.map(TCsqService::getFundId).collect(Collectors.toList());
+			List<Long> serviceIds = csqServices.stream()
+				.filter(a -> CsqEntityTypeEnum.TYPE_SERVICE.toCode() == a.getType())
+				.map(TCsqService::getId).collect(Collectors.toList());
+
+			boolean fundIdsEmpty = fundIds.isEmpty();
+			boolean serviceIdsEmpty = serviceIds.isEmpty();
+			if(!fundIdsEmpty || !serviceIdsEmpty) {
+				if(!fundIdsEmpty) {
+					baseBuild = baseBuild.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_FUND.toCode())
+									.in(TCsqUserPaymentRecord::getEntityId, fundIds);
+					if(!serviceIdsEmpty) {
+						baseBuild.or();
+					}
+				}
+				baseBuild = !serviceIdsEmpty?
+					baseBuild.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_SERVICE.toCode())
+								.in(TCsqUserPaymentRecord::getEntityId, serviceIds) :baseBuild;
 			}
 
+			unHandledList = csqUserPaymentDao.selectWithBuild(baseBuild);
+
+			//把查找的数据进行组装
+			//如果是serviceOnly，需要根据entity_id分组, 两者的结果实体类型可能相同、可能不同
+
+			//数据构建
+			Map<Long, List<TCsqUserPaymentRecord>> unhandledMap = unHandledList.stream()
+				.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getEntityId));
+
+			unhandledMap.forEach((k,v) -> {
+				Integer entityType = v.get(0).getEntityType();
+				HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(v);
+
+				CsqDataBIVo build = CsqDataBIVo.builder()
+					.entityId(k)
+					.entityType(entityType)
+					.name(null)    //名字后续处理
+					.diagramMap(diagramMap).build();
+				csqDataBIVos.add(build);
+
+				//处理这些项目或者是基金的名字,甚至给予没有什么用的编号
+			});
+		} else {	//平台总数据
+			//查询提现的数据，加入到基金的筛选条件
+			List<TCsqOrder> csqOrderList = csqOrderDao.selectByToType(CsqEntityTypeEnum.TYPE_HUMAN.toCode());
+			List<Long> outOrderIds = csqOrderList.stream()
+				.map(TCsqOrder::getId).collect(Collectors.toList());
+
+			//收入(即微信充值对应的order_id）
+			List<TCsqOrder> csqOrders = csqOrderDao.selectByFromTypeAndStatus(CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+			List<Long> inOrderIds = csqOrders.stream()
+				.map(TCsqOrder::getToId).collect(Collectors.toList());
+
+			//支出
+			baseBuild = baseBuild
+				.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_OUT.toCode())
+				.and()
+				.groupBefore()
+				.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_SERVICE.toCode())
+				.or()
+				.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_FUND.toCode())
+				.and()
+				.groupBefore()
+				.isNull(TCsqUserPaymentRecord::getOrderId)
+				.or()
+				.in(TCsqUserPaymentRecord::getOrderId, outOrderIds)
+				.groupAfter()
+				.groupAfter();
+
+			//总
+			baseBuild
+				.or()
+				.in(TCsqUserPaymentRecord::getOrderId, inOrderIds);
+
+			unHandledList = csqUserPaymentDao.selectWithBuild(baseBuild);
+			//把查找的数据进行组装
+			HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList);
+
+			CsqDataBIVo build = CsqDataBIVo.builder()
+				.entityId(null)
+				.entityType(null)
+				.name(null)
+				.diagramMap(diagramMap).build();
+			csqDataBIVos.add(build);
 		}
 
-		//把查找的数据进行分类组装
+		return PageUtil.buildQueryResult(csqDataBIVos, total);
+	}
 
+	@Override
+	public Double getPlatFromInCome() {
+		List<TCsqOrder> tCsqOrders = csqOrderDao.selectByFromTypeAndStatus(CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		return tCsqOrders.stream()
+			.map(TCsqOrder::getPrice).reduce(0d, Double::sum);
+	}
 
+	private HashMap<String, List<CsqLineDiagramData>> getDiagramMap(List<TCsqUserPaymentRecord> v) {
+		List<TCsqUserPaymentRecord> inList = v.stream()
+			.filter(a -> CsqUserPaymentEnum.INOUT_IN.toCode() == a.getInOrOut()).collect(Collectors.toList());
+		List<TCsqUserPaymentRecord> outList = v.stream()
+			.filter(a -> CsqUserPaymentEnum.INOUT_OUT.toCode() == a.getInOrOut()).collect(Collectors.toList());
+		//构建折线图
+		//1.根据划定的时间段，确定x轴(即日期)有几个时间点
+		//将createTime去掉Hms部分，然后按日期分组。
+		Map<String, List<TCsqUserPaymentRecord>> inDateRecordMap = getDateRecordMap(inList);
+		Map<String, List<TCsqUserPaymentRecord>> outDateRecordMap = getDateRecordMap(outList);
 
+		//TODO 这里有一点，当日没有发生交易的日期在这里是不存在的，也就不会返给前端，需要作出说明
+		List<CsqLineDiagramData> inDiagramDataList = getDiagramDataList(inDateRecordMap);
+		List<CsqLineDiagramData> outDiagramDataList = getDiagramDataList(outDateRecordMap);
+		HashMap<String, List<CsqLineDiagramData>> diagramMap = new HashMap<>();
+		diagramMap.put("in", inDiagramDataList);
+		diagramMap.put("out", outDiagramDataList);
+		return diagramMap;
+	}
 
+	private ArrayList<CsqLineDiagramData> getDiagramDataList(Map<String, List<TCsqUserPaymentRecord>> inDateRecordMap) {
+		ArrayList<CsqLineDiagramData> inDiagramDataList = new ArrayList<>();
 
+		inDateRecordMap.forEach((date, dataList) -> {
+			Double amount = dataList.stream()
+				.map(TCsqUserPaymentRecord::getMoney).reduce(0d, Double::sum);
+			CsqLineDiagramData lineDiagramData = CsqLineDiagramData.builder()
+				.date(date)
+				.amount(amount).build();
+			inDiagramDataList.add(lineDiagramData);
+		});
+		return inDiagramDataList;
+	}
 
-
-
-
-
-
-
-
-		return null;
+	private Map<String, List<TCsqUserPaymentRecord>> getDateRecordMap(List<TCsqUserPaymentRecord> inList) {
+		return inList.stream()
+			.map(a -> {
+				Timestamp createTime = a.getCreateTime();
+				String date = Arrays.asList(createTime.toString().split(" ")).get(0);
+				a.setDate(date);
+				return a;
+			}).collect(Collectors.groupingBy(TCsqUserPaymentRecord::getDate));
 	}
 
 	public static void main(String[] args) {

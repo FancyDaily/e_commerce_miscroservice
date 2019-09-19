@@ -5,7 +5,6 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqKeyValueDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqKeyValue;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,21 +16,21 @@ import java.util.List;
 @Component
 public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
-	private MybatisPlusBuild baseBUild() {
+	private MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TCsqKeyValue.class)
 			.eq(TCsqKeyValue::getIsValid, AppConstant.IS_VALID_YES);
 	}
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndType(Long userId, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code));
 	}
 
 	@Override
 	public List<TCsqKeyValue> selectByKeyAndTypeDesc(Long userId, int code) {
-		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findAll(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqKeyValue::getCreateTime)));
@@ -44,7 +43,7 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
 	@Override
 	public TCsqKeyValue selectByKeyAndTypeAndValue(Long userId, int code, String toString) {
-		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.eq(TCsqKeyValue::getTheValue, toString)
@@ -53,22 +52,29 @@ public class CsqKeyValueDaoImpl implements CsqKeyValueDao {
 
 	@Override
 	public TCsqKeyValue selectByValueAndType(Long userIds, int code) {
-		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getTheValue, userIds)
 			.eq(TCsqKeyValue::getType, code));
 	}
 
 	@Override
 	public TCsqKeyValue selectByPrimaryKey(String sceneKey) {
-		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getId, sceneKey));
 	}
 
 	@Override
 	public TCsqKeyValue selectByKeyAndTypeAndTheValue(Long userId, int code, String scene) {
-		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBUild()
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBuild()
 			.eq(TCsqKeyValue::getMainKey, userId)
 			.eq(TCsqKeyValue::getType, code)
 			.eq(TCsqKeyValue::getTheValue, scene));
+	}
+
+	@Override
+	public TCsqKeyValue selectByTypeAndTheValue(int type, String theValue) {
+		return MybatisPlus.getInstance().findOne(new TCsqKeyValue(), baseBuild()
+			.eq(TCsqKeyValue::getType, type)
+			.eq(TCsqKeyValue::getTheValue, theValue));
 	}
 }

@@ -467,6 +467,32 @@ public class CsqUserController {
 	}
 
 	/**
+	 * 分享活动页
+	 *
+	 * @param name 项目名字/基金名字
+	 * @return
+	 */
+	@RequestMapping("share/activity")
+	public AjaxResult shareActivity(String name) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("分享活动页, name={}", name);
+			String share = csqUserService.share(name);
+			result.setData(share);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "分享活动页", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("分享活动页", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * 平台托管消费行为的记录
 	 *
 	 * @param fromId           来源编号
@@ -902,6 +928,38 @@ public class CsqUserController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("生成qrCode", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 平台数据预览
+	 * {
+	 * "data":
+	 * {
+	 * 	 "personNum":1,	人数
+	 * 	 "totalIn":999	总收入
+	 * }
+	 * }
+	 *
+	 * @return
+	 */
+	@RequestMapping("platform/preview")
+	public Object platformPreview() {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("平台数据预览");
+			Map<String, Object> map = csqUserService.platformPreview();
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "平台数据预览", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("平台数据预览", e);
 			result.setSuccess(false);
 		}
 		return result;

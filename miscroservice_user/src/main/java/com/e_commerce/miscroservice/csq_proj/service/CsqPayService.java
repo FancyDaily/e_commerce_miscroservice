@@ -14,7 +14,7 @@ public interface CsqPayService {
 
 	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest) throws Exception;
 
-	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous) throws Exception;
+	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous, Integer isActivity) throws Exception;
 
 	void wxNotify(HttpServletRequest request, boolean b) throws Exception;
 
@@ -38,8 +38,9 @@ public interface CsqPayService {
 	 * @param amount
 	 * @param csqFund
 	 * @param isAnonymous
+	 * @param isActivity
 	 */
-	String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous);
+	String withinPlatFormPay(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, TCsqFund csqFund, boolean isAnonymous, Integer isActivity);
 
 	Long fakeWechatPay(Long userId, Long entityId, Integer entityType, Double fee, TCsqFund csqFund, Long timeStamp);
 }
