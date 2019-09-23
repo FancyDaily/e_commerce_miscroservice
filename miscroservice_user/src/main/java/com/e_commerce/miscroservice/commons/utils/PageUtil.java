@@ -23,9 +23,10 @@ public class PageUtil {
 	public static Page prePage(Integer pageNum, Integer pageSize) {
 		pageNum = prePageNum(pageNum);
 		pageSize = prePageSize(pageSize);
-		return Page.builder()
-					.pageNum(pageNum)
-					.pageSize(pageSize).build();
+		Page page = new Page();
+		page.setPageNum(pageNum);
+		page.setPageSize(pageSize);
+		return page;
 	}
 
 	private static Integer prePageSize(Integer pageSize) {

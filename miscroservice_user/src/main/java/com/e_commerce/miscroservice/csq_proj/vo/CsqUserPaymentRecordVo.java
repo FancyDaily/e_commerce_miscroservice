@@ -20,6 +20,8 @@ public class CsqUserPaymentRecordVo extends CsqBasicUserVo {
 
 	private Long userId;
 
+	private String nickName;
+
 	private Long entityId;	//支出或收入的实体Id
 
 	private Integer entityType;	//支出或收入的实体类型

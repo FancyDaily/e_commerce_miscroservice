@@ -517,7 +517,25 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.reduce(0d, Double::sum);
 		//结果集
 		List<CsqUserPaymentRecordVo> vos = userPaymentRecordList.stream()
-			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+			.map(a -> {
+				CsqUserPaymentRecordVo csqUserPaymentRecordVo = a.copyUserPaymentRecordVo();
+				Timestamp createTime = a.getCreateTime();
+				csqUserPaymentRecordVo.setDate(DateUtil.timeStamp2Date(createTime.getTime()));
+				return csqUserPaymentRecordVo;
+			}).collect(Collectors.toList());
+		List<Long> uIds = vos.stream()
+			.map(CsqUserPaymentRecordVo::getUserId).collect(Collectors.toList());
+		List<TCsqUser> tCsqUsers = csqUserDao.selectInIds(uIds);
+		Map<Long, List<TCsqUser>> idUserMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
+		vos = vos.stream()
+			.map(a -> {
+				List<TCsqUser> tCsqUsers1 = idUserMap.get(a.getUserId());
+				if(tCsqUsers1 != null) {
+					String name = tCsqUsers1.get(0).getName();
+					a.setNickName(name);
+				}
+				return a;
+			}).collect(Collectors.toList());
 
 		long total = IdUtil.getTotal();
 
@@ -566,6 +584,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectWithBuildPage(baseBuild, page.getPageNum(), page.getPageSize());
 		List<CsqUserPaymentRecordVo> vos = tCsqUserPaymentRecords.stream()
 			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+
+
+		//名称、时间
+
 
 		//结果集
 		QueryResult result = PageUtil.buildQueryResult(vos, IdUtil.getTotal());
