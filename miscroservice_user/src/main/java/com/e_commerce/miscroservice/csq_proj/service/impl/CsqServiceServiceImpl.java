@@ -700,6 +700,22 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 		//列表
 		List<TCsqService> tCsqServices = csqServiceDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		//获得最后收入时间戳
+		List<Long> serviceIds = tCsqServices.stream().map(TCsqService::getId).collect(Collectors.toList());
+		List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectInEntityIdsAndEntityTypeAndInOrOutDesc(serviceIds, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
+		Map<Long, List<TCsqUserPaymentRecord>> entityIdPaymentMap = userPaymentRecords.stream()
+			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getEntityId));
+		tCsqServices = tCsqServices.stream()
+			.map(a -> {
+				Long entityId = a.getId();
+				List<TCsqUserPaymentRecord> userPaymentRecordList = entityIdPaymentMap.get(entityId);
+				if(userPaymentRecordList != null) {
+					TCsqUserPaymentRecord csqUserPaymentRecord = userPaymentRecordList.get(0);
+					a.setLastIncomeStamp(csqUserPaymentRecord.getCreateTime().getTime());
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		long total = IdUtil.getTotal();
 
 		QueryResult<TCsqService> queryResult = new QueryResult<>();

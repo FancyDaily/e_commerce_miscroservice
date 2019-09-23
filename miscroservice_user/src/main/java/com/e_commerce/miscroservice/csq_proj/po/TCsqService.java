@@ -30,6 +30,9 @@ public class TCsqService extends BaseEntity {
 	private Long fundId;
 
 	@Transient
+	private Long lastIncomeStamp;	//最后收入时间戳
+
+	@Transient
 	private Double sumTotalOut;
 
 	@Transient
@@ -52,6 +55,9 @@ public class TCsqService extends BaseEntity {
 
 	@Transient
 	private List<TCsqServiceReport> reports;
+
+	@Column(commit = "白名单")
+	private String whiteList;
 
 	@Column(commit = "基金状态")
 	private Integer fundStatus;

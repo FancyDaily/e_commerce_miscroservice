@@ -490,7 +490,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		Page page = PageUtil.prePage(pageNum, pageSize);
 		pageNum = page.getPageNum();
 		pageSize = page.getPageSize();
-		boolean isSearch = StringUtil.isEmpty(searchParma);
+		boolean isSearch = !StringUtil.isEmpty(searchParma);
 		List<TCsqUser> csqUsers = new ArrayList<>();
 		if (isSearch) {
 			csqUsers = csqUserDao.selectByName(searchParma, isFuzzySearch);
@@ -758,10 +758,14 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	public static void main(String[] args) {
-		Integer pageNum = 0;
-		Integer pageSize = null;
-		PageUtil.prePage(pageNum, pageSize);
-		System.out.println(pageNum + "," + pageSize);
+		/*for(;;) {
+			System.out.println("Are you coughing?");
+			Scanner scanner = new Scanner(System.in);
+			scanner.next();
+			if() {
+
+			}
+		}*/
 	}
 
 }

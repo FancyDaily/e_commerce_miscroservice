@@ -24,6 +24,9 @@ public class CsqMoneyApplyRecordVo {
 
 	private Integer entityType;
 
+	private String name;
+
+	private String date;
 
 	@Column(commit = "打款申请的发起人")
 	private Long userId;

@@ -477,7 +477,7 @@ public class CsqUserController {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("分享活动页, name={}", name);
-			String share = csqUserService.share(name);
+			Map share = csqUserService.share(name);
 			result.setData(share);
 			result.setSuccess(true);
 		} catch (MessageException e) {

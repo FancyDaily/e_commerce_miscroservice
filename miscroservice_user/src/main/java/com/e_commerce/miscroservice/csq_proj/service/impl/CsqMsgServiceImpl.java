@@ -393,12 +393,28 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	@Override
 	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize) {
 		//searchParam为标题
-		MybatisPlusBuild baseBuild = csqServiceDao.getBaseBuild();
+		MybatisPlusBuild baseBuild = csqMsgDao.getBaseBuild();
 		if(!StringUtil.isEmpty(searchParam)) {
-			baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
+			baseBuild = baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
 		}
 
 		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
+		List<Long> userIds = tCsqSysMsgs.stream()
+			.map(TCsqSysMsg::getUserId).collect(Collectors.toList());
+		List<TCsqUser> csqUsers = csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> idUserMap = csqUsers.stream()
+			.collect(Collectors.groupingBy(TCsqUser::getId));
+		tCsqSysMsgs = tCsqSysMsgs.stream()
+			.map(a -> {
+				Long userId = a.getUserId();
+				List<TCsqUser> tCsqUsers = idUserMap.get(userId);
+				if(!tCsqUsers.isEmpty()) {
+					String name = tCsqUsers.get(0).getName();
+					a.setReceiverName(name);
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		long total = IdUtil.getTotal();
 
 		QueryResult<TCsqSysMsg> tCsqSysMsgQueryResult = new QueryResult<>();

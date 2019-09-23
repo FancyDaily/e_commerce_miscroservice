@@ -32,4 +32,6 @@ public interface CsqMsgDao {
 	List<TCsqSysMsg> selectWithBuild(MybatisPlusBuild baseBuild);
 
 	List<TCsqSysMsg> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
+	MybatisPlusBuild getBaseBuild();
 }

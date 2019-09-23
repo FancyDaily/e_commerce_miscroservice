@@ -80,7 +80,7 @@ public class CsqServiceListVo {
 	protected String coverPic;
 
 	@Column(commit = "分享图")
-	private String sharePic;
+	protected String sharePic;
 
 	@Column(commit = "描述")
 	protected String description;	//MARK

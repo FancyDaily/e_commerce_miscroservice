@@ -65,6 +65,8 @@ public class CsqBasicUserVo {
 	@Column(commit = "联系方式")
 	protected String contactNo;
 
+	protected Integer availableStatus;
+
 	@Column(commit = "捐款倾向")
 	protected String trendPubKeys;
 

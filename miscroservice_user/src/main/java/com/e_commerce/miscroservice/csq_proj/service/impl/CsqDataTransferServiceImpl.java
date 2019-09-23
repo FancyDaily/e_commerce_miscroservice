@@ -1439,7 +1439,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	}
 
 	public static void main(String[] args) {
-		String s = picDealAddSuffix("27_zlyjwjj", "zlyjwjj_whole_description", 8);
+		String s = picDealAddSuffix("75_xhsqnlhxq", "xhsqnlhxq", 5);
 		System.out.println(s);
 		/*String date = "2017-09-18 12:00:00.000";
 		date = date.substring(0, date.length()-4);

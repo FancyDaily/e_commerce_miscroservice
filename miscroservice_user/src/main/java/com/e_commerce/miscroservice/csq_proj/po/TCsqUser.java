@@ -130,8 +130,8 @@ public class TCsqUser extends BaseEntity {
 	@Column(commit = "邀请码")
 	private String inviteCode;    //unused
 
-	@Column(commit = "可用状态")
-	private String avaliableStatus;
+	@Column(commit = "可用状态", defaultVal = "1")
+	private Integer availableStatus;
 
 	@Column(commit = "账号类型(个人，组织 etc.)", length = 11, defaultVal = "1")
 	private Integer accountType;

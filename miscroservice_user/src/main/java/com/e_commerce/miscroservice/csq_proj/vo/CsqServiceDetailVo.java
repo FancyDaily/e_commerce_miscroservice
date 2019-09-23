@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 

@@ -48,4 +48,8 @@ public interface CsqUserPaymentDao {
 	List<TCsqUserPaymentRecord> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
 	List<TCsqUserPaymentRecord> selectWithBuild(MybatisPlusBuild baseBuild);
+
+	List<TCsqUserPaymentRecord> selectInEntityIdsAndEntityTypeAndInOrOut(List<Long> serviceIds, int entityType, int iOrOut);
+
+	List<TCsqUserPaymentRecord> selectInEntityIdsAndEntityTypeAndInOrOutDesc(List<Long> serviceIds, int entityType, int iOrOut);
 }

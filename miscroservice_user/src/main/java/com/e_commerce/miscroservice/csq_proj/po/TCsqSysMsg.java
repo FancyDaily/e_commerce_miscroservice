@@ -26,6 +26,9 @@ public class TCsqSysMsg extends BaseEntity {
 	private Long userId;
 
 	@Transient
+	private String receiverName;
+
+	@Transient
 	private String dateString;
 
 	@Transient

@@ -67,4 +67,5 @@ public interface CsqPaymentService {
 	QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly);
 
 	Double getPlatFromInCome();
+
 }

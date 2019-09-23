@@ -1239,10 +1239,11 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		buildWithAccountTypeAndAvailableStatus(accountType, availableStatus, baseBuild);
 
-		baseBuild = gotBalance? baseBuild.eq(TCsqUser::getBalanceStatus, CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode()) :
+		baseBuild = gotBalance==null? baseBuild:
+			gotBalance? baseBuild.eq(TCsqUser::getBalanceStatus, CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode()) :
 			baseBuild.neq(TCsqUser::getBalanceStatus, CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());
 
-		if(gotFund) {	//是否有基金
+		if(gotFund != null && gotFund) {	//是否有基金
 			//找到所有符合条件的userId
 			List<TCsqFund> tCsqFundList = csqFundDao.selectAll();
 			List<Long> userIds = tCsqFundList.stream()
@@ -1313,11 +1314,12 @@ public class CsqUserServiceImpl implements CsqUserService {
 		String qrCode = wechatService.genQRCode(sceneKey == -1L? null:sceneKey.toString(), page, anEnum == null? UploadPathEnum.innerEnum.CSQ_PERSON: anEnum);
 //		qrCode = "https://timebank-test-img.oss-cn-hangzhou.aliyuncs.com/person/QR0201905161712443084870123470880.jpg";	// 写死的二维码地址
 		map.put("qrCode", qrCode);
+		map.put("sceneKey",	sceneKey);
 		return map;
 	}
 
 	@Override
-	public String share(String name) {
+	public Map share(String name) {
 		List<TCsqService> csqServices = csqServiceDao.selectByName(name, false);
 		if(csqServices.isEmpty()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该项目/基金不存在，请确认输入的名字！");
@@ -1333,7 +1335,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.build();
 		JSONObject.toJSONString(vo);
 		Map map = qrCode(null, vo, isFund ? FUND_PAGE : SERVICE_PAGE, isFund ? UploadPathEnum.innerEnum.CSQ_FUND.getCode() : UploadPathEnum.innerEnum.CSQ_SERVICE.getCode());
-		return (String) map.get("qrCode");
+		return map;
 	}
 
 	@Override
@@ -1356,7 +1358,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 		if(availableStatus != null) {
 			baseBuild
-				.eq(TCsqUser::getAvaliableStatus, availableStatus);
+				.eq(TCsqUser::getAvailableStatus, availableStatus);
 		}
 	}
 

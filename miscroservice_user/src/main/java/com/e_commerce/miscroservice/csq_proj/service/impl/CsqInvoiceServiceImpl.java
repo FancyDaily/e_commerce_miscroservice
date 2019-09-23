@@ -111,7 +111,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 		csqOrderDao.update(toUpdateList);
 	}
-	
+
 	@Override
 	public QueryResult<CsqWaitToInvoiceOrderVo> waitToList(Long userId, Integer pageNum, Integer pageSize) {
 		pageNum = pageNum==null? 1: pageNum;
@@ -339,7 +339,8 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 				baseBuild.in(TCsqUserInvoice::getUserId, userIds);	//申请人
 			}
 		}
-		baseBuild
+		baseBuild = isOut == null? baseBuild
+			:baseBuild
 			.eq(TCsqUserInvoice::getIsOut, isOut);	//是否已开票
 
 		baseBuild

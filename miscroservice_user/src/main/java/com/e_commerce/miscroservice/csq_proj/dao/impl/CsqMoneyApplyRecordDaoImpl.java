@@ -40,4 +40,12 @@ public class CsqMoneyApplyRecordDaoImpl implements CsqMoneyApplyRecordDao {
 			.eq(TCsqMoneyApplyRecord::getId, build.getId())
 		);
 	}
+
+	@Override
+	public TCsqMoneyApplyRecord selectByPrimaryKey(Long csqMoneyRecordId) {
+		return MybatisPlus.getInstance().findOne(new TCsqMoneyApplyRecord(), new MybatisPlusBuild(TCsqMoneyApplyRecord.class)
+			.eq(TCsqMoneyApplyRecord::getIsValid, AppConstant.IS_VALID_YES)
+			.eq(TCsqMoneyApplyRecord::getId, csqMoneyRecordId)
+		);
+	}
 }

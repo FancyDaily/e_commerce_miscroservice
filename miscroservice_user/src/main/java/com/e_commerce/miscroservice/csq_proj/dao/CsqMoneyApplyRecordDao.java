@@ -19,4 +19,6 @@ public interface CsqMoneyApplyRecordDao {
 	List<TCsqMoneyApplyRecord> selectWithBuildPage(MybatisPlusBuild baseBuild, Page page);
 
 	int update(TCsqMoneyApplyRecord build);
+
+	TCsqMoneyApplyRecord selectByPrimaryKey(Long csqMoneyRecordId);
 }

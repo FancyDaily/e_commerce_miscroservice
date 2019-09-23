@@ -233,7 +233,7 @@ public interface CsqUserService {
 
 	Map qrCode(Long userId, CsqSceneVo scene, String page, Integer uploadCode);
 
-	String share(String name);
+	Map share(String name);
 
 	Map<String, Object> platformPreview();
 }

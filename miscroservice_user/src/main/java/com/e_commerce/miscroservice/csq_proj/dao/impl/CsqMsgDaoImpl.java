@@ -96,6 +96,12 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), baseBuild.page(pageNum, pageSize));
 	}
 
+	@Override
+	public MybatisPlusBuild getBaseBuild() {
+		return new MybatisPlusBuild(TCsqSysMsg.class)
+			.eq(TCsqSysMsg::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
 	private MybatisPlusBuild byUserIdDescBuild(Long userId) {
 		return new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqOrder::getIsValid, AppConstant.IS_VALID_YES)
