@@ -1459,7 +1459,7 @@ public class CsqManagerSystemController {
 	/**
 	 * 用户修改
 	 *
-	 * @param userId          用户编号
+	 * @param id          用户编号
 	 * @param availableStatus 可用状态
 	 *                        <p>
 	 *                        {"success":true,"errorCode":"","msg":"","data":""}
@@ -1468,13 +1468,13 @@ public class CsqManagerSystemController {
 	@RequestMapping("user/modify")
 	@UrlAuth(withoutPermission = true)
 	@Consume(CsqBasicUserVo.class)
-	public AjaxResult modify(Long userId, Integer availableStatus) {
+	public AjaxResult modify(Long id, Integer availableStatus) {
 		AjaxResult result = new AjaxResult();
 		Long managerId = IdUtil.getId();
 		CsqBasicUserVo obj = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("用户列表, userId={}, availableStatus={}", userId, availableStatus);
-			csqUserService.modify(userId, obj, false);
+			log.info("用户列表, userId={}, availableStatus={}", id, availableStatus);
+			csqUserService.modify(id, obj, false);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "用户列表", e.getMessage());
@@ -1491,7 +1491,7 @@ public class CsqManagerSystemController {
 	/**
 	 * 用户详情
 	 *
-	 * @param userId 用户编号
+	 * @param id 用户编号
 	 *               <p>
 	 *               {
 	 *               "id": 2,
@@ -1532,12 +1532,12 @@ public class CsqManagerSystemController {
 	@RequestMapping("user/detail")
 	@UrlAuth(withoutPermission = true)
 	@Consume(CsqBasicUserVo.class)
-	public AjaxResult detail(Long userId) {
+	public AjaxResult detail(Long id) {
 		AjaxResult result = new AjaxResult();
 		Long managerId = IdUtil.getId();
 		try {
-			log.info("用户详情, userId={}", userId);
-			CsqBasicUserVo infos = csqUserService.infos(userId);
+			log.info("用户详情, userId={}", id);
+			CsqBasicUserVo infos = csqUserService.infos(id);
 			result.setData(infos);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -2354,6 +2354,7 @@ public class CsqManagerSystemController {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
+		obj.setId(csqMoneyApplyRecordId);
 		try {
 			log.info("打款申请审核, status={}", userIds, status);
 			csqMoneyApplyRecordService.certMoneyApply(userIds, csqMoneyApplyRecordId, status);

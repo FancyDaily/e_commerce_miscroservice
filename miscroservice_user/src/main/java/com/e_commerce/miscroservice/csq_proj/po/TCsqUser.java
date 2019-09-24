@@ -22,6 +22,9 @@ public class TCsqUser extends BaseEntity {
 	private Long id;
 
 	@Transient
+	private String fundName;
+
+	@Transient
 	private Double totalDonate;    //累积捐助(项目详情)
 
 	@Transient

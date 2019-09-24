@@ -1224,7 +1224,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 		boolean matches = Pattern.matches(pattern, searchParam);
 		if(matches) {	//编号
 			baseBuild
-				.eq(TCsqUser::getId, managerId);
+				.eq(TCsqUser::getId, searchParam);
 		} else {
 			if(!StringUtil.isEmpty(searchParam)) {
 				if(fuzzySearch) {	//模糊查询
@@ -1257,6 +1257,23 @@ public class CsqUserServiceImpl implements CsqUserService {
 			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUser::getCreateTime));
 
 		List<TCsqUser> tCsqUsers = csqUserDao.selectByBuildPage(baseBuild, pageNum, pageSize);
+		List<Long> userIds = tCsqUsers.stream()
+			.map(TCsqUser::getId).collect(Collectors.toList());
+		List<TCsqFund> csqFunds = userIds.isEmpty()? new ArrayList<>() : csqFundDao.selectInUserIds(userIds);
+		Map<Long, List<TCsqFund>> userIdFundMap = csqFunds.stream()
+			.collect(Collectors.groupingBy(TCsqFund::getUserId));
+		tCsqUsers.stream()
+			.map(a -> {
+				Long id = a.getId();
+				List<TCsqFund> tCsqFundList = userIdFundMap.get(id);
+				//基金名
+				if(tCsqFundList != null) {
+					String name = tCsqFundList.get(0).getName();
+					a.setFundName(name);
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		long total = IdUtil.getTotal();
 
 		QueryResult<TCsqUser> queryResult = new QueryResult<>();

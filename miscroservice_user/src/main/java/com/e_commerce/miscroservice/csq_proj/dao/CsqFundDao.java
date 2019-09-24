@@ -49,4 +49,6 @@ public interface CsqFundDao {
 	List<TCsqFund> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
 	int batchUpdate(List<TCsqFund> toUpdateFunds);
+
+	List<TCsqFund> selectInUserIds(List<Long> userIds);
 }

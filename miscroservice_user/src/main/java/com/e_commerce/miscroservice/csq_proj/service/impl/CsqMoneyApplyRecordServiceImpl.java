@@ -147,12 +147,14 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 	@Override
 	public void certMoneyApply(Long ids, Long csqMoneyRecordId, Integer status) {
 		TCsqMoneyApplyRecord csqMoneyApplyRecord = csqMoneyApplyRecordDao.selectByPrimaryKey(csqMoneyRecordId);
+		Integer originStatus = csqMoneyApplyRecord.getStatus();
 		TCsqMoneyApplyRecord build = TCsqMoneyApplyRecord.builder()
 			.status(status).build();
+		build.setId(csqMoneyRecordId);
 		//针对审核通过和不通过可能有不同额外操作
 		csqMoneyApplyRecordDao.update(build);
 		//TODO 若审核通过，项目或基金做一条支出记录, 同时余额减少,如果是基金，要同步项目
-		if (CsqMoneyApplyRecordEnum.STATUS_CERT_PASS.getCode().equals(status)) {    //审核通过
+		if (CsqMoneyApplyRecordEnum.STATUS_CERT_PASS.getCode().equals(status) && !CsqMoneyApplyRecordEnum.STATUS_CERT_PASS.getCode().equals(originStatus)) {    //审核通过
 			Integer entityType = csqMoneyApplyRecord.getEntityType();
 			Long entityId = csqMoneyApplyRecord.getEntityId();
 			Double money = csqMoneyApplyRecord.getMoney();
@@ -162,13 +164,14 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 			Long userId = (Long) beneficiaryMap.get("beneficiaryId");
 			StringBuilder builder = new StringBuilder("提款");
 			builder.append(money).append("元");
+			String description = "提款";
 			TCsqUserPaymentRecord inserter = TCsqUserPaymentRecord.builder()
 				.entityId(entityId)
 				.entityType(entityType)
 				.userId(userId)
 				.money(money)
 				.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())
-				.description(build.toString()).build();
+				.description(description).build();
 			csqPaymentDao.insert(inserter);
 
 			if (isFund) {    //为基金
@@ -177,6 +180,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 				double theAmount = getSurplusMoney(money, balance);
 				csqFund.setBalance(theAmount);
 				csqServiceService.synchronizeService(csqFund);
+				csqFundDao.update(csqFund);
 				return;
 			}
 			//为项目
