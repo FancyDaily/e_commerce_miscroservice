@@ -26,8 +26,10 @@ public class CsqUserPaymentRecordVo extends CsqBasicUserVo {
 
 	private Integer entityType;	//支出或收入的实体类型
 
+	private Integer invoiceStatus;	//发票申请状态
+
 	@Transient
-	private String fromType;	//当为收入数据时才存在的来源信息
+	private Integer fromType;	//当为收入数据时才存在的来源信息
 
 	@Transient
 	private String serviceName;

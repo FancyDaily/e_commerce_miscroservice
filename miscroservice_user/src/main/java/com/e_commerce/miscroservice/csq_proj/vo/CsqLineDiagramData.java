@@ -17,4 +17,8 @@ public class CsqLineDiagramData {
 
 	Double amount;
 
+	String label;	//横坐标
+
+	Double value;	//纵坐标
+
 }

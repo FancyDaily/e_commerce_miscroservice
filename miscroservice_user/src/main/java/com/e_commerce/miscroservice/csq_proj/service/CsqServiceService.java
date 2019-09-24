@@ -141,4 +141,6 @@ public interface CsqServiceService {
 	Map<Integer, Object> countGroupByStatus(Long userId);
 
 	void synchronizeService(List<TCsqFund> toUpdateFunds);
+
+	String getName(Integer entityType, Long k);
 }

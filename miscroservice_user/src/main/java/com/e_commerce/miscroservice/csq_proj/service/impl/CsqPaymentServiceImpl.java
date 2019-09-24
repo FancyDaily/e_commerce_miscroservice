@@ -14,6 +14,7 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqUserService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDataBIVo;
@@ -58,6 +59,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	private CsqOrderDao csqOrderDao;
 	@Autowired
 	private CsqUserService csqUserService;
+	@Autowired
+	private CsqServiceService csqServiceService;
+	@Autowired
+	private CsqPaymentService csqPaymentService;
 	@Value("${page.person}")
 	private String PERSON_PAGE;
 
@@ -298,6 +303,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	@Override
 	public void savePaymentRecord(Long userId, Integer fromType, Long fromId, Integer toType, Long toId, Double amount, Long orderId, String description, Timestamp timestamp) {
 		boolean isFromHuman = CsqEntityTypeEnum.TYPE_HUMAN.toCode() == fromType;
+		boolean isToHuman = CsqEntityTypeEnum.TYPE_HUMAN.toCode() == toType;
 		String demoIncomeDesc = "充值";
 		TCsqUserPaymentRecord build3 = null;
 
@@ -333,22 +339,26 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.inOrOut(CsqUserPaymentEnum.INOUT_OUT.toCode())    //支出
 			.description(description)
 			.entityId(fromId)
-			.entityType(fromType)
+			.entityType(isFromHuman? CsqEntityTypeEnum.TYPE_ACCOUNT.toCode() : fromType)	//MODIFIED 平台外账户不再作为流水记录的主体
 			.money(amount)
 			.orderId(orderId).build();
 		build1.setCreateTime(timestamp);
 
-		TCsqUserPaymentRecord build2 = TCsqUserPaymentRecord.builder()
-			.userId(beneficiaryId)
-			.orderId(orderId)
-			.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())
-			.description(demoIncomeDesc)
-			.entityId(toId)
-			.entityType(toType)
-			.money(amount)
-			.orderId(orderId).build();
-		build2.setCreateTime(timestamp);
-		csqUserPaymentDao.multiInsert(build3 == null ? Arrays.asList(build1, build2) : Arrays.asList(build1, build2, build3));
+		TCsqUserPaymentRecord build2 = null;
+		if(!isToHuman) {
+			build2 = TCsqUserPaymentRecord.builder()
+				.userId(beneficiaryId)
+				.orderId(orderId)
+				.inOrOut(CsqUserPaymentEnum.INOUT_IN.toCode())
+				.description(demoIncomeDesc)
+				.entityId(toId)
+				.entityType(toType)
+				.money(amount)
+				.orderId(orderId).build();
+			build2.setCreateTime(timestamp);
+		}
+
+		csqUserPaymentDao.multiInsert(build3 == null ? build2 == null? Arrays.asList(build1): Arrays.asList(build1, build2) : Arrays.asList(build1, build2, build3));
 	}
 
 	@Override
@@ -558,6 +568,8 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.in(TCsqUserPaymentRecord::getEntityType, Arrays.asList(CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqEntityTypeEnum.TYPE_FUND.toCode()))
 			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode());
 		List<TCsqUserPaymentRecord> orderIdHoder = csqUserPaymentDao.selectWithBuild(baseBuild);
+		Map<Long, List<TCsqUserPaymentRecord>> orderIdPaymentMap = orderIdHoder.stream()
+			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getOrderId));
 		List<Long> orderIds = orderIdHoder.stream()
 			.map(TCsqUserPaymentRecord::getOrderId)
 			.distinct().collect(Collectors.toList());
@@ -572,7 +584,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		//主要构建
 		baseBuild
 			.in(TCsqUserPaymentRecord::getOrderId, orderIds)
-			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode());
+			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_OUT.toCode());	//MODIFY from INOUT_IN to INOUT_OUT
 
 		//用户昵称到用户编号
 		List<TCsqUser> csqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
@@ -581,13 +593,60 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 		baseBuild = csqUserIds.isEmpty()? baseBuild:baseBuild.in(TCsqUserPaymentRecord::getUserId, csqUserIds);
 
+		baseBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+
 		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectWithBuildPage(baseBuild, page.getPageNum(), page.getPageSize());
+
+		//订单
+		List<TCsqOrder> csqOrders = csqOrderDao.selectInOrderIds(orderIds);
+		Map<Long, List<TCsqOrder>> idOrderMap = csqOrders.stream()
+			.collect(Collectors.groupingBy(TCsqOrder::getId));
+
+		//构建
 		List<CsqUserPaymentRecordVo> vos = tCsqUserPaymentRecords.stream()
-			.map(a -> a.copyUserPaymentRecordVo()).collect(Collectors.toList());
+			.map(a -> {
+				CsqUserPaymentRecordVo csqUserPaymentRecordVo = a.copyUserPaymentRecordVo();
+				csqUserPaymentRecordVo.setDate(DateUtil.timeStamp2Date(a.getCreateTime().getTime()));
+				return csqUserPaymentRecordVo;
+			}).collect(Collectors.toList());
 
-
+		List<Long> uIds = vos.stream()
+			.map(CsqUserPaymentRecordVo::getUserId).collect(Collectors.toList());
+		List<TCsqUser> users = csqUserDao.selectInIds(uIds);
+		Map<Long, List<TCsqUser>> idUserMap = users.stream().collect(Collectors.groupingBy(TCsqUser::getId));
 		//名称、时间
-
+		vos = vos.stream()
+			.map(a -> {
+				String description = a.getDescription();
+				String[] split = description.split("\"");
+				String serviceName = Arrays.asList(split[1].split("\"")).get(0);
+				a.setServiceName(serviceName);
+				Long orderId = a.getOrderId();
+				List<TCsqUserPaymentRecord> userPaymentRecords = orderIdPaymentMap.get(orderId);
+				if(userPaymentRecords != null) {
+					TCsqUserPaymentRecord csqUserPaymentRecord = userPaymentRecords.get(0);
+					Integer entityType = csqUserPaymentRecord.getEntityType();
+					Long entityId = csqUserPaymentRecord.getEntityId();
+					a.setEntityId(entityId);	//项目/基金编号
+					a.setEntityType(entityType);	//类型
+				}
+				List<TCsqOrder> orders = idOrderMap.get(orderId);
+				if(orders != null) {
+					TCsqOrder tCsqOrder = orders.get(0);
+					Integer fromType = tCsqOrder.getFromType();
+					a.setFromType(fromType);	//支付类型，eg. 1微信 2爱心账户 3个人基金
+					a.setInvoiceStatus(tCsqOrder.getInVoiceStatus());
+				}
+				List<TCsqUser> tCsqUsers = idUserMap.get(a.getUserId());
+				if(tCsqUsers != null) {
+					TCsqUser csqUser = tCsqUsers.get(0);
+					Long userId = csqUser.getId();
+					String name = csqUser.getName();
+					a.setUserId(userId);	//用户编号
+					a.setNickName(name);	//用户昵称
+				}
+				return a;
+			}).collect(Collectors.toList());
 
 		//结果集
 		QueryResult result = PageUtil.buildQueryResult(vos, IdUtil.getTotal());
@@ -600,6 +659,13 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		return resultMap;
 	}
 
+	public static void main(String[] args) {
+	    String str = "向\"奇妙爱心基金\"基金";
+		String[] split = str.split("\"");
+		String s = Arrays.asList(split[1].split("\"")).get(0);
+		System.out.println(s);
+	}
+
 	@Override
 	public QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
 		List<CsqDataBIVo> csqDataBIVos = new ArrayList<>();
@@ -610,12 +676,12 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		List<TCsqUserPaymentRecord> unHandledList = new ArrayList<>();
 		//处理通用信息
 		//处理日期
-		if(StringUtil.isEmpty(startDate)) {
+		if(!StringUtil.isEmpty(startDate)) {
 			Long startTime = Long.valueOf(DateUtil.dateToStamp(startDate));
 			baseBuild.gte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(startTime).toString());
 		}
 
-		if(StringUtil.isEmpty((endDate))) {
+		if(!StringUtil.isEmpty((endDate))) {
 			Long endTime = Long.valueOf(DateUtil.dateToStamp(endDate));
 			baseBuild.lte(TCsqUserPaymentRecord::getCreateTime, new Timestamp(endTime).toString());
 		}
@@ -633,7 +699,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 					csqServices = csqServiceDao.selectByNamePage(searchParam, isFuzzySearch, pageNum, pageSize);
 				}
 			} else {
-				csqServices = csqServiceDao.selectAllPage(pageNum, pageSize);
+				csqServices = csqServiceDao.selectAllPage(userIds, pageNum, pageSize);
 			}
 			total = IdUtil.getTotal();
 
@@ -672,25 +738,31 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				Integer entityType = v.get(0).getEntityType();
 				HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(v);
 
-				CsqDataBIVo build = CsqDataBIVo.builder()
-					.entityId(k)
-					.entityType(entityType)
-					.name(null)    //名字后续处理
-					.diagramMap(diagramMap).build();
-				csqDataBIVos.add(build);
+			//处理这些项目或者是基金的名字,甚至给予没有什么用的编号
+			String name = csqServiceService.getName(entityType, k);
 
-				//处理这些项目或者是基金的名字,甚至给予没有什么用的编号
+			CsqDataBIVo build = CsqDataBIVo.builder()
+			.entityId(k)
+			.entityType(entityType)
+			.name(name)    //名字后续处理
+			.diagramMap(diagramMap).build();
+			csqDataBIVos.add(build);
+
 			});
 		} else {	//平台总数据
 			//查询提现的数据，加入到基金的筛选条件
 			List<TCsqOrder> csqOrderList = csqOrderDao.selectByToType(CsqEntityTypeEnum.TYPE_HUMAN.toCode());
 			List<Long> outOrderIds = csqOrderList.stream()
-				.map(TCsqOrder::getId).collect(Collectors.toList());
+				.map(TCsqOrder::getId)
+				.distinct()	//去重
+				.collect(Collectors.toList());
 
 			//收入(即微信充值对应的order_id）
 			List<TCsqOrder> csqOrders = csqOrderDao.selectByFromTypeAndStatus(CsqEntityTypeEnum.TYPE_HUMAN.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
 			List<Long> inOrderIds = csqOrders.stream()
-				.map(TCsqOrder::getToId).collect(Collectors.toList());
+				.map(TCsqOrder::getToId)
+				.distinct()	//去重
+				.collect(Collectors.toList());
 
 			//支出
 			baseBuild = baseBuild
@@ -702,14 +774,16 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_FUND.toCode())
 				.and()
 				.groupBefore()
-				.isNull(TCsqUserPaymentRecord::getOrderId)
+				.isNull(TCsqUserPaymentRecord::getOrderId);
+			baseBuild = outOrderIds.isEmpty()? baseBuild : baseBuild
 				.or()
-				.in(TCsqUserPaymentRecord::getOrderId, outOrderIds)
+				.in(TCsqUserPaymentRecord::getOrderId, outOrderIds);
+			baseBuild = baseBuild
 				.groupAfter()
 				.groupAfter();
 
 			//总
-			baseBuild
+			baseBuild = inOrderIds.isEmpty()? baseBuild : baseBuild
 				.or()
 				.in(TCsqUserPaymentRecord::getOrderId, inOrderIds);
 
@@ -763,7 +837,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.map(TCsqUserPaymentRecord::getMoney).reduce(0d, Double::sum);
 			CsqLineDiagramData lineDiagramData = CsqLineDiagramData.builder()
 				.date(date)
-				.amount(amount).build();
+				.amount(amount)
+				.label(date)
+				.value(amount)
+				.build();
 			inDiagramDataList.add(lineDiagramData);
 		});
 		return inDiagramDataList;
@@ -779,15 +856,5 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			}).collect(Collectors.groupingBy(TCsqUserPaymentRecord::getDate));
 	}
 
-	public static void main(String[] args) {
-		/*for(;;) {
-			System.out.println("Are you coughing?");
-			Scanner scanner = new Scanner(System.in);
-			scanner.next();
-			if() {
-
-			}
-		}*/
-	}
 
 }

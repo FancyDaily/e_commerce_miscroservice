@@ -2412,7 +2412,8 @@ public class CsqManagerSystemController {
 	 * @param endDate       结束日期
 	 * @param pageNum       页码
 	 * @param pageSize      大小
-	 * @param isServiceOnly 是否为仅服务和基金
+	 * @param isFuzzySearch 是否为模糊查找TOF
+	 * @param isServiceOnly 是否为仅服务和基金TOF
 	 * @return
 	 */
 	@RequestMapping("statistics")
@@ -2422,7 +2423,8 @@ public class CsqManagerSystemController {
 		Page page = (Page) ConsumeHelper.getObj();
 		try {
 			log.info("数据BI(收支统计), searchParam={}, startDate={}, endDate={}, pageNum={}, pageSize={}, isFuzzySearch={}, isServiceOnly={}", searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
-			csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
+			QueryResult queryResult = csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
+			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "数据BI(收支统计)", e.getMessage());

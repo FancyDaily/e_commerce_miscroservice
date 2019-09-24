@@ -141,7 +141,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			total = IdUtil.getTotal();
 		} else if (OPTION_ALL.equals(option)) {
 //			startPage = PageHelper.startPage(pageNum, pageSize);
-			tCsqServices = csqServiceDao.selectAllPage(pageNum, pageSize);
+			tCsqServices = csqServiceDao.selectAllPage(userId, pageNum, pageSize);
 			total = IdUtil.getTotal();
 		} else if (OPTION_DONATED.equals(option)) {
 			//找到我捐助过的项目记录
@@ -743,6 +743,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		toUpdateFunds.stream().forEach(a -> {
 			synchronizeService(a);
 		});
+	}
+
+	@Override
+	public String getName(Integer entityType, Long k) {
+		String name = "";
+		TCsqService csqService = CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType? csqServiceDao.selectByFundId(k) : csqServiceDao.selectByPrimaryKey(k);
+		if(csqService != null) {
+			name = csqService.getName();
+		}
+		return name;
 	}
 
 	private String getLikeParam(String searchParam) {

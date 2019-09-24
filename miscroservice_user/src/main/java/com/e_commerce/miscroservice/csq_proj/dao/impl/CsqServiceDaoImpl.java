@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -190,11 +191,15 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	}
 
 	@Override
-	public List<TCsqService> selectAllPage(Integer pageNum, Integer pageSize) {
-		MybatisPlusBuild mybatisPlusBuild = allBuild();
+	public List<TCsqService> selectAllPage(Long userId, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild mybatisPlusBuild = allBuild(userId);
 		IdUtil.setTotal(mybatisPlusBuild);
 
 		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	private MybatisPlusBuild allBuild() {
+		return allBuild(null);
 	}
 
 	@Override
@@ -319,10 +324,22 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return mybatisPlusBuild;
 	}
 
-	private MybatisPlusBuild allBuild() {
+	private MybatisPlusBuild allBuild(Long userId) {
 		return baseBuild()
 			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())    //判断是否可展示
 			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
+			.and()
+			.groupBefore()
+			.isNull(TCsqService::getWhiteList)
+			.or()
+			.groupBefore()
+			.like(TCsqService::getWhiteList, "%" + userId + ",%")
+			.or()
+			.like(TCsqService::getWhiteList, "%," + userId + ",%")
+			.or()
+			.like(TCsqService::getWhiteList, "%," + userId + "%")
+			.groupAfter()
+			.groupAfter()
 			.and()
 			.groupBefore()
 			.groupBefore()
@@ -346,10 +363,23 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	}
 
 	public static void main(String[] args) {
+		Long userId = 18L;
 		String build = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())    //判断是否可展示
 			.eq(TCsqService::getStatus, CsqServiceEnum.STATUS_INITIAL.getCode())
+			.and()
+			.groupBefore()
+			.isNull(TCsqService::getWhiteList)
+			.or()
+			.groupBefore()
+			.like(TCsqService::getWhiteList, "%" + userId + ",%")
+			.or()
+			.like(TCsqService::getWhiteList, "%," + userId + ",%")
+			.or()
+			.like(TCsqService::getWhiteList, "%," + userId + "%")
+			.groupAfter()
+			.groupAfter()
 			.and()
 			.groupBefore()
 			.groupBefore()
@@ -366,9 +396,9 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 				MybatisPlusBuild.OrderBuild.buildAsc(TCsqService::getExpectedRemainAmount),    //按还需筹多少金额正序
 				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn)    //按收入倒序*/
 			.orderBy(
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getPriority),
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn),
-				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime)
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getPriority),	//优先级从高到底
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getSumTotalIn),	//累计收入倒序
+				MybatisPlusBuild.OrderBuild.buildDesc(TCsqService::getUpdateTime)	//更新时间倒序
 			).build();
 		System.out.println(build);
 	}
