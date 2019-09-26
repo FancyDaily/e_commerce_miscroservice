@@ -2266,13 +2266,15 @@ public class CsqManagerSystemController {
 	@Consume(CsqMoneyApplyRecordVo.class)
 	@RequestMapping("money/apply/add")
 	@UrlAuth(withoutPermission = true)
-	public AjaxResult addMoneyApply(@Check("==null || ==''") Integer entityType,
-									@Check("==null || ==''") Long entityId,
-									@Check("==null || ==''") Double money,
+	public AjaxResult addMoneyApply(@Check("==null") Integer entityType,
+									@Check("==null") Long entityId,
+									@Check("==null") Double money,
 									@Check("==null || ==''") String invoicePic,
 									@Check("==null || ==''") String applyPerson,
 									@Check("==null || ==''") String applyPersonContact,
 									String description) {
+
+
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();

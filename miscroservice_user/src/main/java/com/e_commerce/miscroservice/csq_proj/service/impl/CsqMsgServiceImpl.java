@@ -105,7 +105,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 				csqSysMsgVo.setName(tCsqService.getName());
 				csqSysMsgVo.setDescription(tCsqService.getDescription());
 				String coverPic = tCsqService.getCoverPic();
-				csqSysMsgVo.setCoverPic(coverPic.contains(",")? Arrays.asList(coverPic.split(",")).get(0):coverPic);
+				csqSysMsgVo.setCoverPic(coverPic.contains(",") ? Arrays.asList(coverPic.split(",")).get(0) : coverPic);
 				csqSysMsgVo.setSumTotalIn(tCsqService.getSumTotalIn());
 				csqSysMsgVo.setServiceType(tCsqService.getType());
 				csqSysMsgVo.setPersonInCharge(tCsqService.getPersonInCharge());
@@ -196,15 +196,13 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		content = contentChanger != null ? String.format(content, contentChanger) : content;
 
 		List<TCsqSysMsg> toInserter = new ArrayList<>();
-		List<Long> tUserIds = Arrays.stream(userId).distinct().collect(Collectors.toList());	//去重
+		List<Long> tUserIds = Arrays.stream(userId).distinct().collect(Collectors.toList());    //去重
 		for (Long theId : tUserIds) {
-			TCsqSysMsg.TCsqSysMsgBuilder builder = getBaseBuilder();
-			builder.type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
+
+			toInserter.add(TCsqSysMsg.builder().type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
 				.userId(theId)
 				.title(title)
-				.content(content);
-			TCsqSysMsg build = builder.build();
-			toInserter.add(build);
+				.content(content).build());
 		}
 		csqMsgDao.insert(toInserter);
 	}
@@ -221,7 +219,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	@Override
 	public void collectFormId(Long userId, String formId) {
 		//排除譬如"the formId is a mock one"等无效的formid
-		if(formId == null || "the formId is a mock one".equals(formId.trim())) {
+		if (formId == null || "the formId is a mock one".equals(formId.trim())) {
 			return;
 		}
 		//复用
@@ -238,11 +236,11 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	}
 
 	private TCsqSysMsg getBaseEntity() {
-		return getBaseBuilder().build();
+		return getBaseBuilder();
 	}
 
-	private TCsqSysMsg.TCsqSysMsgBuilder getBaseBuilder() {
-		return TCsqSysMsg.builder();
+	private TCsqSysMsg getBaseBuilder() {
+		return TCsqSysMsg.builder().build();
 	}
 
 	@Override
@@ -268,24 +266,24 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			switch (csqServiceMsgEnum) {
 				case FUND_PUBLIC_SUCCESS:
 					CsqServiceListVo entity = csqServiceMsgParamVo.getCsqServiceListVo();
-					msg.add(entity.getName());	//项目名称(此处为基金名称)
-					msg.add(entity.getExpectedAmount().toString());	//筹款目标(此处为平台标定的定额)
-					msg.add(entity.getSurplusAmount().toString());	//实际筹款
-					msg.add(entity.getDonePercent());	//完成百分比
+					msg.add(entity.getName());    //项目名称(此处为基金名称)
+					msg.add(entity.getExpectedAmount().toString());    //筹款目标(此处为平台标定的定额)
+					msg.add(entity.getSurplusAmount().toString());    //实际筹款
+					msg.add(entity.getDonePercent());    //完成百分比
 
 					//参数: ?type=1&serviceId=    (此处的serviceId需传fundId
 					Long fundId = entity.getFundId();
 					builder.append("?type=1").append(and).append("serviceId=").append(fundId);
 					break;
 				case CORP_CERT_SUCCESS:
-					msg.add(authVo.getName());	//公司名
-					msg.add("通过");	//审核结果(通过、不通过
-					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));	//认证时间
+					msg.add(authVo.getName());    //公司名
+					msg.add("通过");    //审核结果(通过、不通过
+					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
 					break;
 				case CORP_CERT_FAIL:
-					msg.add(authVo.getName());	//公司名
-					msg.add("不通过");	//审核结果(通过、不通过
-					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));	//认证时间
+					msg.add(authVo.getName());    //公司名
+					msg.add("不通过");    //审核结果(通过、不通过
+					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
 					break;
 				case SERVICE_NOTIFY_WHILE_CONSUME:
 					//参数 type=3,serviceId=
@@ -295,7 +293,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 					CsqUserInvoiceVo csqUserInvoiceVo = csqServiceMsgParamVo.getCsqUserInvoiceVo();
 					String orderNos = csqUserInvoiceVo.getOrderNos();
 					String serviceName = "";
-					if(!StringUtil.isEmpty(orderNos)) {
+					if (!StringUtil.isEmpty(orderNos)) {
 						String[] split = orderNos.split(",");
 						String orderNo = split[0];
 						TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);
@@ -304,14 +302,14 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 						//TODO
 						Map<String, Object> beneficiaryMap = csqPaymentService.getBeneficiaryMap(toType, toId);
 						serviceName = (String) beneficiaryMap.get("beneficiaryName");
-						if(split.length > 1) {
+						if (split.length > 1) {
 							serviceName += "等";
 						}
 					}
-					msg.add(serviceName);	//开票项目(节选
-					msg.add(csqUserInvoiceVo.getName());	//发票抬头
-					msg.add(csqUserInvoiceVo.getExpressNo());	//快递单号
-					msg.add(csqUserInvoiceVo.getAmount().toString());	//开票金额
+					msg.add(serviceName);    //开票项目(节选
+					msg.add(csqUserInvoiceVo.getName());    //发票抬头
+					msg.add(csqUserInvoiceVo.getExpressNo());    //快递单号
+					msg.add(csqUserInvoiceVo.getAmount().toString());    //开票金额
 					break;
 			}
 			parameter = builder.append(parameter).toString();
@@ -375,7 +373,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		insertTemplateMsg(fund.getName(), CsqSysMsgTemplateEnum.FUND_PUBLIC_SUCCESS, userId);
 		//TODO 发送服务通知
 		double doubleVal = CsqFundEnum.PUBLIC_MINIMUM == 0 ? 1 : fund.getSumTotalIn() / CsqFundEnum.PUBLIC_MINIMUM;
-		doubleVal = doubleVal > 1d ? 1d:doubleVal;
+		doubleVal = doubleVal > 1d ? 1d : doubleVal;
 		String donePercent = DecimalFormat.getPercentInstance().format(doubleVal).replaceAll("%", "");
 		sendServiceMsg(userId, CsqServiceMsgEnum.FUND_PUBLIC_SUCCESS, CsqServiceMsgParamVo.builder()
 			.csqServiceListVo(
@@ -394,21 +392,21 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize) {
 		//searchParam为标题
 		MybatisPlusBuild baseBuild = csqMsgDao.getBaseBuild();
-		if(!StringUtil.isEmpty(searchParam)) {
+		if (!StringUtil.isEmpty(searchParam)) {
 			baseBuild = baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
 		}
 
 		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		List<Long> userIds = tCsqSysMsgs.stream()
 			.map(TCsqSysMsg::getUserId).collect(Collectors.toList());
-		List<TCsqUser> csqUsers = userIds.isEmpty()? new ArrayList<>() : csqUserDao.selectInIds(userIds);
+		List<TCsqUser> csqUsers = userIds.isEmpty() ? new ArrayList<>() : csqUserDao.selectInIds(userIds);
 		Map<Long, List<TCsqUser>> idUserMap = csqUsers.stream()
 			.collect(Collectors.groupingBy(TCsqUser::getId));
 		tCsqSysMsgs = tCsqSysMsgs.stream()
 			.map(a -> {
 				Long userId = a.getUserId();
 				List<TCsqUser> tCsqUsers = idUserMap.get(userId);
-				if(!tCsqUsers.isEmpty()) {
+				if (!tCsqUsers.isEmpty()) {
 					String name = tCsqUsers.get(0).getName();
 					a.setReceiverName(name);
 				}

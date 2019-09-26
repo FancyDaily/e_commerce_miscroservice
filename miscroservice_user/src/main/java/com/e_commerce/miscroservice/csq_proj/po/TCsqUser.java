@@ -141,7 +141,7 @@ public class TCsqUser extends BaseEntity {
 	private Integer accountType;
 
 	@Column(commit = "管理员权限(非管理员、一般管理员 etc.)", length = 11, defaultVal = "0")
-	private Integer maanagerTypes;
+	private Integer maanagerType;
 
 	@Column(commit = "是否为预注册账号", length = 11, defaultVal = "0")
 	private Integer isFake;
