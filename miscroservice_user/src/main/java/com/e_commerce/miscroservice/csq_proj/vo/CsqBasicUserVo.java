@@ -25,6 +25,9 @@ public class CsqBasicUserVo {
 
 	private Integer existDayCnt;	//加入天数
 
+	@Column(commit = "管理员权限(非管理员、一般管理员 etc.)", length = 11, defaultVal = "0")
+	private Integer maanagerType;
+
 	@Column(commit = "爱心账户状态")
 	private Integer balanceStatus;
 

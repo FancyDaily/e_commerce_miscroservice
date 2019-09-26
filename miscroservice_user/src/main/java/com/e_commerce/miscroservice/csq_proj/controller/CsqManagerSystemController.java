@@ -21,6 +21,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,9 +66,13 @@ public class CsqManagerSystemController {
 	@Autowired
 	private CsqUserDao csqUserDao;
 
-	@Autowired
+	/*@Autowired
 	@Qualifier("csqRedisTemplate")
-	HashOperations<String, String, Object> userRedisTemplate;
+	HashOperations<String, String, Object> userRedisTemplate;*/
+
+	@Autowired
+	@Qualifier("csqRedisUnHashTemplate")
+	RedisTemplate<String, Object> userRedisTemplate;
 
 	@RequestMapping("alive")
 	public Object test() {
@@ -131,12 +136,12 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult listService(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
-		Long userId = IdUtil.getId();
 		try {
-			log.info("项目列表, userId={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", userId, searchParam, pageNum, pageSize, isFuzzySearch);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("项目列表, userId={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, pageNum, pageSize, isFuzzySearch);
 			QueryResult<TCsqService> list = csqServiceService.list(searchParam, pageNum, pageSize, isFuzzySearch);
 			result.setData(list);
 			result.setSuccess(true);
@@ -161,13 +166,13 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/count")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult countService() {
 		AjaxResult result = new AjaxResult();
-		Long userId = IdUtil.getId();
 		try {
-			log.info("项目状态数量统计, userId={}", userId);
-			Map<Integer, Object> integerObjectMap = csqServiceService.countGroupByStatus(userId);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("项目状态数量统计, userId={}", userIds);
+			Map<Integer, Object> integerObjectMap = csqServiceService.countGroupByStatus(userIds);
 			result.setData(integerObjectMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -193,13 +198,13 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/modify")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(TCsqService.class)
 	public AjaxResult serviceModify(@RequestParam(required = true) Long serviceId, Integer status, Integer expectedAmount) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		TCsqService obj = (TCsqService) ConsumeHelper.getObj();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("修改项目数据, userId={}, serviceId={}, status={}, expectedMoney={}", serviceId, userIds, status, expectedAmount);
 			obj.setId(serviceId);
 			csqServiceService.modify(obj);
@@ -1351,13 +1356,13 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/detail")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult serviceDetail(Long serviceId) {
 		AjaxResult result = new AjaxResult();
-		Long userId = IdUtil.getId();
 		try {
-			log.info("项目详情, userId={}, serviceId={}", userId, serviceId);
-			Map<String, Object> detail = csqServiceService.detail(userId, serviceId);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("项目详情, userId={}, serviceId={}", userIds, serviceId);
+			Map<String, Object> detail = csqServiceService.detail(userIds, serviceId);
 			result.setData(detail);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1446,12 +1451,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("user/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult listUser(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean gotFund) {
 		AjaxResult result = new AjaxResult();
-//		Long managerId = IdUtil.getId();
-		Long managerId = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 		try {
+			Long managerId = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("用户列表, managerId={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}, accountType={}, availableStatus={}, gotBalance={}, gotFund={}", managerId, searchParam, pageNum, pageSize, isFuzzySearch, accountType, availableStatus, gotBalance, gotFund);
 			QueryResult<TCsqUser> list = csqUserService.list(managerId, searchParam, pageNum, pageSize, isFuzzySearch, accountType, availableStatus, gotBalance, gotFund);
 			result.setData(list);
@@ -1471,25 +1475,25 @@ public class CsqManagerSystemController {
 	/**
 	 * 用户修改
 	 *
-	 * @param id          用户编号
+	 * @param id              用户编号
 	 * @param availableStatus 可用状态
 	 *                        <p>
 	 *                        {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
 	@RequestMapping("user/modify")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(CsqBasicUserVo.class)
 	public AjaxResult modify(Long id, Integer availableStatus) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		CsqBasicUserVo obj = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("用户列表, userId={}, availableStatus={}", id, availableStatus);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("用户修改, userId={}, availableStatus={}", id, availableStatus);
 			csqUserService.modify(id, obj, false);
 			result.setSuccess(true);
 		} catch (MessageException e) {
-			log.warn("====方法描述: {}, Message: {}====", "用户列表", e.getMessage());
+			log.warn("====方法描述: {}, Message: {}====", "用户修改", e.getMessage());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1504,50 +1508,50 @@ public class CsqManagerSystemController {
 	 * 用户详情
 	 *
 	 * @param id 用户编号
-	 *               <p>
-	 *               {
-	 *               "id": 2,
-	 *               "weiboAccount": "",
-	 *               "wechatPubAccount": "",
-	 *               "csqUserAuth": {
-	 *               "id": "",
-	 *               "userId": "",
-	 *               "type": "",
-	 *               "cardId": "",
-	 *               "name": "",
-	 *               "phone": "",
-	 *               "licensePic": "",
-	 *               "licenseId": "",
-	 *               "status": ""
-	 *               },
-	 *               "existDayCnt": 1187,
-	 *               "balanceStatus": 0,
-	 *               "gotFund": false,
-	 *               "gotCompanyAccount": false,
-	 *               "accountType": 1,
-	 *               "totalDonate": "",
-	 *               "minutesAgo": "",
-	 *               "userAccount": "",
-	 *               "name": "灏灏",
-	 *               "userTel": "15950210733",
-	 *               "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
-	 *               "sex": 0,
-	 *               "remarks": "",
-	 *               "contactPerson": "",
-	 *               "contactNo": "",
-	 *               "availableStatus": 1,
-	 *               "trendPubKeys": "",
-	 *               "authStatus": 0
-	 *               }
+	 *           <p>
+	 *           {
+	 *           "id": 2,
+	 *           "weiboAccount": "",
+	 *           "wechatPubAccount": "",
+	 *           "csqUserAuth": {
+	 *           "id": "",
+	 *           "userId": "",
+	 *           "type": "",
+	 *           "cardId": "",
+	 *           "name": "",
+	 *           "phone": "",
+	 *           "licensePic": "",
+	 *           "licenseId": "",
+	 *           "status": ""
+	 *           },
+	 *           "existDayCnt": 1187,
+	 *           "balanceStatus": 0,
+	 *           "gotFund": false,
+	 *           "gotCompanyAccount": false,
+	 *           "accountType": 1,
+	 *           "totalDonate": "",
+	 *           "minutesAgo": "",
+	 *           "userAccount": "",
+	 *           "name": "灏灏",
+	 *           "userTel": "15950210733",
+	 *           "userHeadPortraitPath": "https://timebank-prod-img.oss-cn-hangzhou.aliyuncs.com/default/default_head.png",
+	 *           "sex": 0,
+	 *           "remarks": "",
+	 *           "contactPerson": "",
+	 *           "contactNo": "",
+	 *           "availableStatus": 1,
+	 *           "trendPubKeys": "",
+	 *           "authStatus": 0
+	 *           }
 	 * @return
 	 */
 	@RequestMapping("user/detail")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(CsqBasicUserVo.class)
 	public AjaxResult detail(Long id) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("用户详情, userId={}", id);
 			CsqBasicUserVo infos = csqUserService.infos(id);
 			result.setData(infos);
@@ -1617,12 +1621,12 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("fund/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult fundList(Integer pageNum, Integer pageSize, Boolean isFundParam, String searchParam, Integer status, Boolean isFuzzySearch, String... trendPubKeys) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
-			log.info("基金列表,pageNum={}, pageSize={}, managerId={}, isFundParam={}, searchParam={}, status={}, isFuzzySearch={}, trendPubKeys={}", pageNum, pageSize, managerId, isFundParam, searchParam, status, isFuzzySearch, trendPubKeys);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("基金列表,pageNum={}, pageSize={}, managerId={}, isFundParam={}, searchParam={}, status={}, isFuzzySearch={}, trendPubKeys={}", pageNum, pageSize, userIds, isFundParam, searchParam, status, isFuzzySearch, trendPubKeys);
 			QueryResult<TCsqFund> queryResult = csqFundService.searchList(isFundParam, searchParam, status, trendPubKeys == null ? new ArrayList<>() : Arrays.asList(trendPubKeys), pageNum, pageSize, isFundParam);
 			result.setData(queryResult);
 			result.setSuccess(true);
@@ -1648,16 +1652,16 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("fund/modify")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(TCsqFund.class)
 	public AjaxResult fundModify(@RequestParam Long fundId, Integer status) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		TCsqFund obj = (TCsqFund) ConsumeHelper.getObj();
 		obj.setId(fundId);
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("基金修改, fundId={}, status={}", fundId, status);
-			csqFundService.modifyFundManager(managerId, obj);
+			csqFundService.modifyFundManager(userIds, obj);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金修改", e.getMessage());
@@ -1723,14 +1727,14 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("fund/detail")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(TCsqFund.class)
 	public AjaxResult fundDetail(@RequestParam Long fundId) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("基金详情, fundId={}", fundId);
-			CsqFundVo fundVo = csqFundService.fundDetail(managerId, fundId);
+			CsqFundVo fundVo = csqFundService.fundDetail(userIds, fundId);
 			result.setData(fundVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1760,11 +1764,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("invoice/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult invoiceList(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("发票申请列表, searchParam={}, inOut={}, pageNum={}, pageSize={}", searchParam, isOut, pageNum, pageSize);
 			Map list = csqInvoiceService.list(searchParam, isOut, pageNum, pageSize);
 			result.setData(list);
@@ -1791,15 +1795,15 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("invoice/modify")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	@Consume(TCsqUserInvoice.class)
 	public AjaxResult invoiceModify(Long invoiceId, Integer isOut) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
-		TCsqUserInvoice obj = (TCsqUserInvoice) ConsumeHelper.getObj();
-		obj.setId(invoiceId);
 		try {
-			log.info("发票修改, userId={}, invoiceId={}, isOut={}", managerId, invoiceId, isOut);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			TCsqUserInvoice obj = (TCsqUserInvoice) ConsumeHelper.getObj();
+			obj.setId(invoiceId);
+			log.info("发票修改, userId={}, invoiceId={}, isOut={}", userIds, invoiceId, isOut);
 			csqInvoiceService.modify(obj);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1829,13 +1833,13 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("invoice/detail")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult invoiceDetail(Long invoiceId) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
-			log.info("发票的详情, userId={}, invoiceId={}", managerId, invoiceId);
-			CsqUserInvoiceVo csqUserInvoiceVo = csqInvoiceService.invoiceDetail(managerId, invoiceId);
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("发票的详情, userId={}, invoiceId={}", userIds, invoiceId);
+			CsqUserInvoiceVo csqUserInvoiceVo = csqInvoiceService.invoiceDetail(userIds, invoiceId);
 			result.setData(csqUserInvoiceVo);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1901,11 +1905,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("message/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult msgList(String searchParam, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("消息列表, searchParam={},pageNum={}, pageSize={}", searchParam, pageNum, pageSize);
 			QueryResult<TCsqSysMsg> list = csqMsgService.list(searchParam, pageNum, pageSize);
 			result.setData(list);
@@ -1933,11 +1937,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/do")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult certCorpDo(Long userAuthId, Integer option, String content) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("组织实名的认证审核, ");
 			csqUserService.certCorp(userAuthId, option, content);
 			result.setSuccess(true);
@@ -1979,11 +1983,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/detail")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult certCorpDetail(Long userAuthId) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("组织实名的认证详情, ");
 			TCsqUserAuth userAuth = csqUserService.corpCertDetail(userAuthId);
 			result.setData(userAuth);
@@ -2051,11 +2055,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult certCorpList(Integer status, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("组织实名认证列表, userIds={}, status={}, pageNum={}, pageSize={}", userIds, status, pageNum, pageSize);
 			QueryResult<TCsqUserAuth> userAuth = csqUserService.certCorpList(status, pageNum, pageSize);
 			result.setData(userAuth);
@@ -2086,11 +2090,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/count")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult certCorpCnt(Integer status) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("组织实名认证数量, userIds={}, status={}", userIds, status);
 			int count = csqUserService.certCorpCount(status);
 			result.setData(count);
@@ -2228,11 +2232,12 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("account/record/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult accountRecordList(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
+//		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, pageNum, pageSize, isFuzzySearch);
 			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParam, pageNum, pageSize, isFuzzySearch);
 			result.setData(watersAndTotal);
@@ -2265,22 +2270,20 @@ public class CsqManagerSystemController {
 	 */
 	@Consume(CsqMoneyApplyRecordVo.class)
 	@RequestMapping("money/apply/add")
-	@UrlAuth(withoutPermission = true)
-	public AjaxResult addMoneyApply(@Check("==null") Integer entityType,
-									@Check("==null") Long entityId,
-									@Check("==null") Double money,
-									@Check("==null || ==''") String invoicePic,
-									@Check("==null || ==''") String applyPerson,
-									@Check("==null || ==''") String applyPersonContact,
+	@UrlAuth()
+	public AjaxResult addMoneyApply(Integer entityType,
+									Long entityId,
+									Double money,
+									String invoicePic,
+									String applyPerson,
+									String applyPersonContact,
 									String description) {
-
-
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
-		obj.setUserId(userIds);    //即便是代申请，也将代申请人记录写入申请者id
-		TCsqMoneyApplyRecord tCsqMoneyApplyRecord = obj.copyTCsqMoneyApplyRecord();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			obj.setUserId(userIds);    //即便是代申请，也将代申请人记录写入申请者id
+			TCsqMoneyApplyRecord tCsqMoneyApplyRecord = obj.copyTCsqMoneyApplyRecord();
 			log.info("递(提)交打款申请, userIds={}, entityType={}, entityId={}, money={}, invoicePic={}, applyPerson={}, applyPersonContact={}, description={}", userIds, entityType, entityId, money, invoicePic, applyPerson, applyPersonContact, description);
 			csqMoneyApplyRecordService.addMoneyApply(tCsqMoneyApplyRecord);
 			result.setSuccess(true);
@@ -2327,17 +2330,17 @@ public class CsqManagerSystemController {
 	 */
 	@Consume(Page.class)
 	@RequestMapping("money/apply/list")
-	@UrlAuth(withoutPermission = true)
-	public AjaxResult addMoneyApply(String searchParam,
-									@Check("==null || ==''") Integer searchType,
+	@UrlAuth()
+	public AjaxResult listMoneyApply(String searchParam,
+									Integer searchType,
 									Integer pageNum,
 									Integer pageSize,
 									Boolean isFuzzySearch,
-									@Check("==null || ==''") Integer... status) {
+									Integer... status) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		Page page = (Page) ConsumeHelper.getObj();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("打款申请列表, searchParam={}, searchType={}, status={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, searchType, status, pageNum, pageSize, isFuzzySearch);
 			QueryResult queryResult = csqMoneyApplyRecordService.moneyApplyList(searchParam, searchType, isFuzzySearch, page, status);
 			result.setData(queryResult);
@@ -2370,14 +2373,14 @@ public class CsqManagerSystemController {
 	 */
 	@Consume(CsqMoneyApplyRecordVo.class)
 	@RequestMapping("money/apply/cert")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult certMoneyApply(Long csqMoneyApplyRecordId,
-									 @Check("==null || ==''") Integer status) {
+									 @Check("==null") Integer status) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
-		CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
-		obj.setId(csqMoneyApplyRecordId);
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			CsqMoneyApplyRecordVo obj = (CsqMoneyApplyRecordVo) ConsumeHelper.getObj();
+			obj.setId(csqMoneyApplyRecordId);
 			log.info("打款申请审核, status={}", userIds, status);
 			csqMoneyApplyRecordService.certMoneyApply(userIds, csqMoneyApplyRecordId, status);
 			result.setSuccess(true);
@@ -2406,12 +2409,12 @@ public class CsqManagerSystemController {
 	 */
 	@Consume(Page.class)
 	@RequestMapping("donate/record/list")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public AjaxResult donateRecordList(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		Page page = (Page) ConsumeHelper.getObj();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("基金/项目捐赠记录, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", searchParam, pageNum, pageSize, isFuzzySearch);
 			HashMap<String, Object> map = csqPaymentService.donateRecordList(userIds, searchParam, page, isFuzzySearch);
 			result.setData(map);
@@ -2441,11 +2444,11 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("statistics")
-	@UrlAuth(withoutPermission = true)
+	@UrlAuth()
 	public Object platformDataStatistics(String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
 		AjaxResult result = new AjaxResult();
-		Long userIds = IdUtil.getId();
 		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("数据BI(收支统计), searchParam={}, startDate={}, endDate={}, pageNum={}, pageSize={}, isFuzzySearch={}, isServiceOnly={}", searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
 			QueryResult queryResult = csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
 			result.setData(queryResult);

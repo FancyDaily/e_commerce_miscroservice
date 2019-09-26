@@ -1222,18 +1222,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 		MybatisPlusBuild baseBuild = csqUserDao.baseBuild();
 
 		String pattern = "^[1-9]\\d*$";
-		boolean matches = Pattern.matches(pattern, searchParam);
-		if(matches) {	//编号
-			baseBuild
-				.eq(TCsqUser::getId, searchParam);
-		} else {
-			if(!StringUtil.isEmpty(searchParam)) {
-				if(fuzzySearch) {	//模糊查询
-					baseBuild
-						.like(TCsqUser::getName, searchParam);
-				} else {
-					baseBuild
-						.eq(TCsqUser::getName, searchParam);
+		if(!StringUtil.isEmpty(searchParam)) {
+			boolean matches = Pattern.matches(pattern, searchParam);
+			if(matches) {	//编号
+				baseBuild
+					.eq(TCsqUser::getId, searchParam);
+			} else {
+				if(!StringUtil.isEmpty(searchParam)) {
+					if(fuzzySearch) {	//模糊查询
+						baseBuild
+							.like(TCsqUser::getName, searchParam);
+					} else {
+						baseBuild
+							.eq(TCsqUser::getName, searchParam);
+					}
 				}
 			}
 		}
