@@ -401,7 +401,7 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		List<Long> userIds = tCsqSysMsgs.stream()
 			.map(TCsqSysMsg::getUserId).collect(Collectors.toList());
-		List<TCsqUser> csqUsers = csqUserDao.selectInIds(userIds);
+		List<TCsqUser> csqUsers = userIds.isEmpty()? new ArrayList<>() : csqUserDao.selectInIds(userIds);
 		Map<Long, List<TCsqUser>> idUserMap = csqUsers.stream()
 			.collect(Collectors.groupingBy(TCsqUser::getId));
 		tCsqSysMsgs = tCsqSysMsgs.stream()

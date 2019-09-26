@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.po;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.CopyIgnore;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
  * @Date: 2019-06-12 10:14
  */
 @Table(commit = "从善桥用户表", charset = "utf8mb4")
-@Data(matchSuffix = true)
+@Data
 @Builder
 @NoArgsConstructor
 public class TCsqUser extends BaseEntity {
@@ -138,6 +139,9 @@ public class TCsqUser extends BaseEntity {
 
 	@Column(commit = "账号类型(个人，组织 etc.)", length = 11, defaultVal = "1")
 	private Integer accountType;
+
+	@Column(commit = "管理员权限(非管理员、一般管理员 etc.)", length = 11, defaultVal = "0")
+	private Integer maanagerTypes;
 
 	@Column(commit = "是否为预注册账号", length = 11, defaultVal = "0")
 	private Integer isFake;
