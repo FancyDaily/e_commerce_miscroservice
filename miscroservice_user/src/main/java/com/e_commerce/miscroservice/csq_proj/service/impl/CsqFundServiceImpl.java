@@ -635,8 +635,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 			}
 		}
 
-		baseBuild
-			.eq(TCsqFund::getStatus, status);	//状态
+		baseBuild = status == null? baseBuild:
+				baseBuild
+				.eq(TCsqFund::getStatus, status);	//状态
 
 		Iterator<String> iterator = trendPubkeys.iterator();
 		while(iterator.hasNext()) {

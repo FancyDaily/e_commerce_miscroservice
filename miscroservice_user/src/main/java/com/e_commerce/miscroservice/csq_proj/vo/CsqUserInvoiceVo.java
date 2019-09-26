@@ -19,6 +19,10 @@ public class CsqUserInvoiceVo {
 
 	private Long userId;
 
+	private Long toId;	//项目或基金编号(如果为项目)
+
+	private String toName;
+
 	private String expressNo;	//快递单号
 
 	@Transient

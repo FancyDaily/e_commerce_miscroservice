@@ -32,6 +32,9 @@ public class TCsqOrder extends BaseEntity {
 	private Long toId;
 
 	@Transient
+	private String toName;
+
+	@Transient
 	private String date;
 
 	@Transient

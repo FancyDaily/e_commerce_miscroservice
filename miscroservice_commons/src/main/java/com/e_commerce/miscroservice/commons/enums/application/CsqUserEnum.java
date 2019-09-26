@@ -17,7 +17,9 @@ public enum CsqUserEnum {
 	AUTH_STATUS_FALSE(0, "未进行过微信基本信息授权"),
 	AUTH_STATUS_TRUE(1, "已完成微信基本信息授权"),
 	AVAILABLE_STATUS_NO(0, "不可用"),
-	AVAILABLE_STATUS_YES(1, "可用")
+	AVAILABLE_STATUS_YES(1, "可用"),
+	MANAGER_TYPE_NOT_A_MANAGER(0, "非后台管理员"),
+	MANAGER_TYPE_NORMAL(1, "普通后台管理员"),
 	;
 
 	/**

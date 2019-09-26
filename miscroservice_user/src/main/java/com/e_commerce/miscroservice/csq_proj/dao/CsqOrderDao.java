@@ -20,6 +20,8 @@ public interface CsqOrderDao {
 
 	List<TCsqOrder> selectInOrderNos(String... orderNo);
 
+	List<TCsqOrder> selectInOrderNos(List<String> orderNo);
+
 	int update(List<TCsqOrder> toUpdateList);
 
 	int update(List<TCsqOrder> toUpdateList, List<Long> toUpdateIds);

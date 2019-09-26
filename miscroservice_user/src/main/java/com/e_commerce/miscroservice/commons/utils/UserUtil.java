@@ -1,7 +1,12 @@
 package com.e_commerce.miscroservice.commons.utils;
 
+import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
+import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
+import com.e_commerce.miscroservice.commons.enums.application.UserEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -10,10 +15,14 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.other.Applicat
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
+import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
@@ -30,6 +39,7 @@ public class UserUtil {
 
     public static Log logger = Log.getInstance(UserUtil.class);
 
+	private static String MANAGER_USER_DESCRIBE = "manager:user:%s";
 
     /**
      * 根据用户token获取User
@@ -108,6 +118,26 @@ public class UserUtil {
 
 	public static Long getId() {
 		return IdUtil.getId();
+	}
+
+	public static Long getManagerId(CsqUserDao csqUserDao, HashOperations<String, String, Object> userRedisTemplate) {
+		Long id = IdUtil.getId();
+		TCsqUser csqUser = (TCsqUser) userRedisTemplate.get(String.format(MANAGER_USER_DESCRIBE,id), String.valueOf(id));
+		logger.info("获取缓存={}", csqUser);
+		if (csqUser == null){
+			csqUser = csqUserDao.selectByPrimaryKey(id);
+			if (csqUser!=null){
+				userRedisTemplate.put(String.format(MANAGER_USER_DESCRIBE, id), String.valueOf(id), csqUser);
+			} else {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在!");
+			}
+		}
+
+		Integer maanagerType = csqUser.getMaanagerType();
+		if(CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {	//非管理员
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有权限！");
+		}
+		return id;
 	}
 
 	public static Integer getApplication(Integer option) {

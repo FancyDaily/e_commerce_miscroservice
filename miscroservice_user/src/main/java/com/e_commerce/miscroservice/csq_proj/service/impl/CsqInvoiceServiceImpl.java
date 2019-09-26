@@ -316,7 +316,13 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	}
 
 	@Override
-	public QueryResult<CsqUserInvoiceVo> list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
+	public Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
+		//已开票总金额统计
+		List<TCsqUserInvoice> csqUserInvoices = csqUserInvoiceDao.selectByIsOut(CsqInvoiceEnum.ISOUT_OUT_ALREADY.getCode());
+		Double totalAmount = csqUserInvoices.stream()
+			.map(TCsqUserInvoice::getAmount).reduce(0d, Double::sum);
+		Map map = new HashMap();
+		map.put("totalAmount", totalAmount);
 		MybatisPlusBuild baseBuild = csqUserInvoiceDao.baseBuild();
 		//判断是哪种searchParam
 		String pattern = "^[1-9]\\d*$";
@@ -324,19 +330,20 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		if(!StringUtil.isEmpty(searchParam)) {
 			if(isNum) {
 				boolean matches = searchParam.length() > 30;	//生成的orderoNo长度为31,且以020开头
-				if(!matches) {    //orderId
-					TCsqOrder tCsqOrder = csqOrderDao.selectByPrimaryKey(Long.valueOf(searchParam));
+				if(!matches) {
+					TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(searchParam);
 					searchParam = tCsqOrder == null? "": tCsqOrder.getOrderNo();
 				}
 				if("".equals(searchParam)) {
-					return new QueryResult<CsqUserInvoiceVo>();
+					map.put("queryResult", new QueryResult<>());
+					return map;
 				}
 				baseBuild.like(TCsqUserInvoice::getOrderNos, "%" + searchParam + "%");	//订单编号
 			} else {	//按开票申请人名称搜索
 				List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, false);//当前为关闭模糊查找
 				List<Long> userIds = tCsqUsers.stream()
 					.map(TCsqUser::getId).collect(Collectors.toList());
-				baseBuild.in(TCsqUserInvoice::getUserId, userIds);	//申请人
+				baseBuild = userIds.isEmpty()? baseBuild : baseBuild.in(TCsqUserInvoice::getUserId, userIds);	//申请人
 			}
 		}
 		baseBuild = isOut == null? baseBuild
@@ -350,11 +357,55 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		long total = IdUtil.getTotal();
 
 		List<CsqUserInvoiceVo> resultList = tCsqUserInvoices.stream().map(a -> a.copyCsqUserInvoiceVo()).collect(Collectors.toList());
+		List<String> orderNos = tCsqUserInvoices.stream().map(TCsqUserInvoice::getOrderNos).collect(Collectors.toList());
+		List<TCsqOrder> orders = orderNos.isEmpty()? new ArrayList<>() : csqOrderDao.selectInOrderNos(orderNos);
+		Map<String, List<TCsqOrder>> orderNoOrderMap = orders.stream().collect(Collectors.groupingBy(TCsqOrder::getOrderNo));
+		List<TCsqOrder> theOrders = orders.stream()
+			.map(a -> {
+				Integer toType = a.getToType();
+				Long toId = a.getToId();
+				String name = "";
+				if(toType == CsqEntityTypeEnum.TYPE_FUND.toCode()) {
+					TCsqFund csqFund = csqFundDao.selectByPrimaryKey(toId);
+					if(csqFund != null) {
+						name = csqFund.getName();
+					}
+				} else if(toType == CsqEntityTypeEnum.TYPE_SERVICE.toCode()){
+					TCsqService csqService = csqServiceDao.selectByPrimaryKey(toId);
+					if(csqService != null) {
+						name = csqService.getName();
+					}
+				} else {
+					TCsqUser csqUser = csqUserDao.selectByPrimaryKey(toId);
+					if(csqUser != null) {
+						name = csqUser.getName() + "的爱心账户";
+					}
+				}
+				a.setToName(name);
+				return a;
+			}).collect(Collectors.toList());
+
+		resultList = resultList.stream()
+			.map(a -> {
+				String orderNos1 = a.getOrderNos();
+				List<TCsqOrder> orders1 = orderNoOrderMap.get(orderNos1);
+				if(orders1 != null) {
+					TCsqOrder tCsqOrder = theOrders.get(0);
+					Long toId = tCsqOrder.getToId();
+					String toName = tCsqOrder.getToName();
+					a.setToId(toId);
+					a.setToName(toName);
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		QueryResult<CsqUserInvoiceVo> csqUserInvoiceVoQueryResult = new QueryResult<>();
 		csqUserInvoiceVoQueryResult.setResultList(resultList);
 		csqUserInvoiceVoQueryResult.setTotalCount(total);
 
-		return csqUserInvoiceVoQueryResult;
+		map.put("queryResult", csqUserInvoiceVoQueryResult);
+
+		return map;
 	}
 
 	@Override

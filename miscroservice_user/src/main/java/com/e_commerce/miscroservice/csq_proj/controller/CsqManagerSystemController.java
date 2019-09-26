@@ -10,6 +10,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
@@ -17,6 +19,8 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +61,13 @@ public class CsqManagerSystemController {
 
 	@Autowired
 	private CsqMoneyApplyRecordService csqMoneyApplyRecordService;
+
+	@Autowired
+	private CsqUserDao csqUserDao;
+
+	@Autowired
+	@Qualifier("csqRedisTemplate")
+	HashOperations<String, String, Object> userRedisTemplate;
 
 	@RequestMapping("alive")
 	public Object test() {
@@ -1438,7 +1449,8 @@ public class CsqManagerSystemController {
 	@UrlAuth(withoutPermission = true)
 	public AjaxResult listUser(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean gotFund) {
 		AjaxResult result = new AjaxResult();
-		Long managerId = IdUtil.getId();
+//		Long managerId = IdUtil.getId();
+		Long managerId = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 		try {
 			log.info("用户列表, managerId={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}, accountType={}, availableStatus={}, gotBalance={}, gotFund={}", managerId, searchParam, pageNum, pageSize, isFuzzySearch, accountType, availableStatus, gotBalance, gotFund);
 			QueryResult<TCsqUser> list = csqUserService.list(managerId, searchParam, pageNum, pageSize, isFuzzySearch, accountType, availableStatus, gotBalance, gotFund);
@@ -1754,7 +1766,7 @@ public class CsqManagerSystemController {
 		Long managerId = IdUtil.getId();
 		try {
 			log.info("发票申请列表, searchParam={}, inOut={}, pageNum={}, pageSize={}", searchParam, isOut, pageNum, pageSize);
-			QueryResult<CsqUserInvoiceVo> list = csqInvoiceService.list(searchParam, isOut, pageNum, pageSize);
+			Map list = csqInvoiceService.list(searchParam, isOut, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1921,6 +1933,7 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/do")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certCorpDo(Long userAuthId, Integer option, String content) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
@@ -1966,6 +1979,7 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/detail")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certCorpDetail(Long userAuthId) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
@@ -2037,6 +2051,7 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certCorpList(Integer status, Integer pageNum, Integer pageSize) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
@@ -2071,6 +2086,7 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("corp/cert/count")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certCorpCnt(Integer status) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
@@ -2094,7 +2110,7 @@ public class CsqManagerSystemController {
 	/**
 	 * 爱心账户充值记录
 	 *
-	 * @param searchParma   搜索参数(用户昵称)
+	 * @param searchParam   搜索参数(用户昵称)
 	 * @param pageNum       页码
 	 * @param pageSize      大小
 	 * @param isFuzzySearch 是否模糊查询
@@ -2212,12 +2228,13 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("account/record/list")
-	public AjaxResult accountRecordList(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
+	@UrlAuth(withoutPermission = true)
+	public AjaxResult accountRecordList(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		try {
-			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParma, pageNum, pageSize, isFuzzySearch);
-			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParma, pageNum, pageSize, isFuzzySearch);
+			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, pageNum, pageSize, isFuzzySearch);
+			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParam, pageNum, pageSize, isFuzzySearch);
 			result.setData(watersAndTotal);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -2246,8 +2263,9 @@ public class CsqManagerSystemController {
 	 *                           {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping("money/apply/add")
 	@Consume(CsqMoneyApplyRecordVo.class)
+	@RequestMapping("money/apply/add")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult addMoneyApply(@Check("==null || ==''") Integer entityType,
 									@Check("==null || ==''") Long entityId,
 									@Check("==null || ==''") Double money,
@@ -2305,8 +2323,9 @@ public class CsqManagerSystemController {
 	 *                      }
 	 * @return
 	 */
-	@RequestMapping("money/apply/list")
 	@Consume(Page.class)
+	@RequestMapping("money/apply/list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult addMoneyApply(String searchParam,
 									@Check("==null || ==''") Integer searchType,
 									Integer pageNum,
@@ -2347,8 +2366,9 @@ public class CsqManagerSystemController {
 	 *                              }
 	 * @return
 	 */
-	@RequestMapping("money/apply/cert")
 	@Consume(CsqMoneyApplyRecordVo.class)
+	@RequestMapping("money/apply/cert")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult certMoneyApply(Long csqMoneyApplyRecordId,
 									 @Check("==null || ==''") Integer status) {
 		AjaxResult result = new AjaxResult();
@@ -2382,8 +2402,9 @@ public class CsqManagerSystemController {
 	 *                      {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
 	 */
-	@RequestMapping("donate/record/list")
 	@Consume(Page.class)
+	@RequestMapping("donate/record/list")
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult donateRecordList(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
@@ -2418,10 +2439,10 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("statistics")
+	@UrlAuth(withoutPermission = true)
 	public Object platformDataStatistics(String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
-		Page page = (Page) ConsumeHelper.getObj();
 		try {
 			log.info("数据BI(收支统计), searchParam={}, startDate={}, endDate={}, pageNum={}, pageSize={}, isFuzzySearch={}, isServiceOnly={}", searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
 			QueryResult queryResult = csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);

@@ -73,4 +73,12 @@ public class CsqUserInvoiceDaoImpl implements CsqUserInvoiceDao {
 		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild.page(pageNum, pageSize));
 
 	}
+
+	@Override
+	public List<TCsqUserInvoice> selectByIsOut(int code) {
+		return MybatisPlus.getInstance().findAll(new TCsqUserInvoice(), baseBuild()
+			.eq(TCsqUserInvoice::getIsOut, code)
+		);
+
+	}
 }

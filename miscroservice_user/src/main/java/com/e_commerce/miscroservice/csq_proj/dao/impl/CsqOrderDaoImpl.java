@@ -55,10 +55,19 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 
 	@Override
 	public List<TCsqOrder> selectInOrderNos(String... orderNo) {
+		return selectInOrderNos(Arrays.asList(orderNo));
+	}
+
+	@Override
+	public List<TCsqOrder> selectInOrderNos(List<String> orderNo) {
 		return MybatisPlus.getInstance().findAll(new TCsqOrder(), inOrderNosBuild(orderNo));
 	}
 
 	private MybatisPlusBuild inOrderNosBuild(String[] orderNo) {
+		return inOrderNosBuild(Arrays.asList(orderNo));
+	}
+
+	private MybatisPlusBuild inOrderNosBuild(List<String> orderNo) {
 		return baseBuild()
 			.in(TCsqOrder::getOrderNo, orderNo);
 	}

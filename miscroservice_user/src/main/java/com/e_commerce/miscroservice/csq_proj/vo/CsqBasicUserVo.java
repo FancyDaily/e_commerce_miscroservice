@@ -10,7 +10,7 @@ import lombok.Data;
  * @Author: FangyiXu
  * @Date: 2019-06-26 15:36
  */
-@Data(matchSuffix = true)
+@Data
 public class CsqBasicUserVo {
 
 	@Id

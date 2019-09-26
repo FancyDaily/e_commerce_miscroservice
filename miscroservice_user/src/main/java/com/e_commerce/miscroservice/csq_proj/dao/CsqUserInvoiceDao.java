@@ -26,4 +26,6 @@ public interface CsqUserInvoiceDao {
 	MybatisPlusBuild baseBuild();
 
 	List<TCsqUserInvoice> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
+
+	List<TCsqUserInvoice> selectByIsOut(int code);
 }

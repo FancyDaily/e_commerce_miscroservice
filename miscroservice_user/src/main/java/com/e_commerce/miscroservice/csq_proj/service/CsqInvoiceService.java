@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqInvoiceRecord;
 
+import java.util.Map;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-18 14:42
@@ -24,7 +26,7 @@ public interface CsqInvoiceService {
 
 	int express(Long invoiceId, String expressNo);
 
-	QueryResult<CsqUserInvoiceVo> list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize);
+	Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize);
 
 	void modify(TCsqUserInvoice obj);
 }

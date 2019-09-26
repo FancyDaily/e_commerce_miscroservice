@@ -159,7 +159,7 @@ public class CsqUserDaoImpl implements CsqUserDao {
 	@Override
 	public List<TCsqUser> selectByName(String searchParam, boolean isLike) {
 		MybatisPlusBuild mybatisPlusBuild =
-			isLike? baseBuild().like(TCsqUser::getName, searchParam) : baseBuild().eq(TCsqUser::getName, "%" + searchParam + "%");
+			isLike? baseBuild().like(TCsqUser::getName, "%" + searchParam + "%") : baseBuild().eq(TCsqUser::getName, searchParam);
 
 		return MybatisPlus.getInstance().findAll(new TCsqUser(), mybatisPlusBuild);
 	}
