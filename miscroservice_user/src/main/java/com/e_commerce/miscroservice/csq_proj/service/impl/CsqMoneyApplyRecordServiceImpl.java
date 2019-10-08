@@ -74,7 +74,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 			List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
 			List<Long> userIds = tCsqUsers.stream()
 				.map(TCsqUser::getId).collect(Collectors.toList());
-			baseBuild
+			baseBuild = userIds.isEmpty()? baseBuild : baseBuild
 				.in(TCsqMoneyApplyRecord::getUserId, userIds);    //实际递交申请的申请者的昵称
 		} else {    //去serivce表获取到编号
 			List<TCsqService> csqServices = csqServiceDao.selectByName(searchParam, isFuzzySearch);

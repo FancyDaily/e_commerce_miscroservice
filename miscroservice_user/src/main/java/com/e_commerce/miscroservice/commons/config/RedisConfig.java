@@ -27,4 +27,9 @@ public class RedisConfig extends RedisTemplateConfig {
 		return createTemplateCache(OperateEnum.HASH).opsForHash();
 	}
 
+	@Bean(name = "csqRedisUnHashTemplate")
+	public RedisTemplate<String, Object> createCsqUnHashRedisTemplate() {
+		return createTemplateCache(OperateEnum.STR);
+	}
+
 }

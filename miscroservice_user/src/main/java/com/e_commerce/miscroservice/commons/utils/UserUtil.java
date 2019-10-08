@@ -23,6 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
@@ -120,14 +123,17 @@ public class UserUtil {
 		return IdUtil.getId();
 	}
 
-	public static Long getManagerId(CsqUserDao csqUserDao, HashOperations<String, String, Object> userRedisTemplate) {
+	public static Long getManagerId(CsqUserDao csqUserDao, RedisTemplate<String, Object> userRedisTemplate) {
 		Long id = IdUtil.getId();
-		TCsqUser csqUser = (TCsqUser) userRedisTemplate.get(String.format(MANAGER_USER_DESCRIBE,id), String.valueOf(id));
+		String key = String.format(MANAGER_USER_DESCRIBE, id);
+		TCsqUser csqUser = (TCsqUser) userRedisTemplate.opsForValue().get(key);
 		logger.info("获取缓存={}", csqUser);
+		Long expire = userRedisTemplate.getExpire(key);
+		logger.info("剩余有效时间={}", expire);
 		if (csqUser == null){
 			csqUser = csqUserDao.selectByPrimaryKey(id);
 			if (csqUser!=null){
-				userRedisTemplate.put(String.format(MANAGER_USER_DESCRIBE, id), String.valueOf(id), csqUser);
+				userRedisTemplate.opsForValue().set(key, csqUser, 30, TimeUnit.SECONDS);
 			} else {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在!");
 			}
@@ -135,7 +141,32 @@ public class UserUtil {
 
 		Integer maanagerType = csqUser.getMaanagerType();
 		if(CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {	//非管理员
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有权限！");
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前用户没有权限！");
+		}
+		return id;
+	}
+
+	public static Long getManagerId(CsqUserDao csqUserDao, HashOperations<String, String, Object> userRedisTemplate) {
+		Long id = IdUtil.getId();
+		String key = String.format(MANAGER_USER_DESCRIBE, id);
+		String hashKey = String.valueOf(id);
+		TCsqUser csqUser = (TCsqUser) userRedisTemplate.get(key, hashKey);
+		logger.info("获取缓存={}", csqUser);
+		Long expire = userRedisTemplate.getOperations().getExpire(key);
+		logger.info("剩余有效时间={}", expire);
+		if (csqUser == null){
+			csqUser = csqUserDao.selectByPrimaryKey(id);
+			if (csqUser!=null){
+				userRedisTemplate.put(key, hashKey, csqUser);
+				Boolean aBoolean = userRedisTemplate.getOperations().expire(key, 30, TimeUnit.SECONDS);
+			} else {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在!");
+			}
+		}
+
+		Integer maanagerType = csqUser.getMaanagerType();
+		if(CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {	//非管理员
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前用户没有权限！");
 		}
 		return id;
 	}
