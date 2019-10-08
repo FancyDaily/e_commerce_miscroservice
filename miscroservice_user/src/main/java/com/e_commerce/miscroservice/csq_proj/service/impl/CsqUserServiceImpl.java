@@ -1221,7 +1221,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	public QueryResult<TCsqUser> list(Long managerId, String searchParam, Integer pageNum, Integer pageSize, Boolean fuzzySearch, Integer accountType, Integer availableStatus, Boolean gotBalance, Boolean gotFund) {
 		MybatisPlusBuild baseBuild = csqUserDao.baseBuild();
 
-		String pattern = "^[1-9]\\d*$";
+		String pattern = "^[0-9]\\d*$";
 		if(!StringUtil.isEmpty(searchParam)) {
 			boolean matches = Pattern.matches(pattern, searchParam);
 			if(matches) {	//编号
@@ -1339,7 +1339,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map share(String name) {
+	public Map share(String name, boolean isActivity) {
 		List<TCsqService> csqServices = csqServiceDao.selectByName(name, false);
 		if(csqServices.isEmpty()) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该项目/基金不存在，请确认输入的名字！");
@@ -1347,11 +1347,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqService csqService = csqServices.get(0);
 		boolean isFund = CsqServiceEnum.TYPE_FUND.getCode() == csqService.getType();
 
-		CsqSceneVo vo = CsqSceneVo.builder()
+		CsqSceneVo.CsqSceneVoBuilder builder = CsqSceneVo.builder()
 			.serviceId(csqService.getId())
 			.fundId(csqService.getFundId())
-			.type(isFund? CsqServiceEnum.TYPE_FUND.getCode() : CsqServiceEnum.TYPE_SERIVE.getCode())
-			.activityMark(CsqOrderEnum.IS_ACTIVITY_TRUE.getCode())
+			.type(isFund ? CsqServiceEnum.TYPE_FUND.getCode() : CsqServiceEnum.TYPE_SERIVE.getCode());
+		builder = isActivity? builder
+			.activityMark(CsqOrderEnum.IS_ACTIVITY_TRUE.getCode()):builder;
+		CsqSceneVo vo = builder
 			.build();
 		JSONObject.toJSONString(vo);
 		Map map = qrCode(null, vo, isFund ? FUND_PAGE : SERVICE_PAGE, isFund ? UploadPathEnum.innerEnum.CSQ_FUND.getCode() : UploadPathEnum.innerEnum.CSQ_SERVICE.getCode());

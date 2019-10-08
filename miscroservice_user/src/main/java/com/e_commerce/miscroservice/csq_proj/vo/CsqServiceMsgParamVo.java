@@ -29,4 +29,9 @@ public class CsqServiceMsgParamVo {
 	 */
 	CsqUserInvoiceVo csqUserInvoiceVo;
 
+	/**
+	 * 打款申请成功(即项目或基金支出)通知展示内容
+	 */
+	CsqMoneyApplyRecordVo csqMoneyApplyRecordVo;
+
 }

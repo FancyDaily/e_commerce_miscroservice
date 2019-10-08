@@ -125,6 +125,9 @@ public class UserUtil {
 
 	public static Long getManagerId(CsqUserDao csqUserDao, RedisTemplate<String, Object> userRedisTemplate) {
 		Long id = IdUtil.getId();
+		if(id == null) {
+			throw new MessageException(AppErrorConstant.EMPTY_TOKEN, "用户未登录");
+		}
 		String key = String.format(MANAGER_USER_DESCRIBE, id);
 		TCsqUser csqUser = (TCsqUser) userRedisTemplate.opsForValue().get(key);
 		logger.info("获取缓存={}", csqUser);

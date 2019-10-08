@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CsqLineDiagramData {
 
+	Long timeStamp;
+
 	String date;
 
 	Double amount;

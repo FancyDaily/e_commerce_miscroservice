@@ -14,11 +14,13 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import com.e_commerce.miscroservice.user.wechat.entity.TemplateData;
 import com.e_commerce.miscroservice.user.wechat.entity.WxMssVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
+import com.netflix.eureka.registry.Key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +61,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Autowired
 	private CsqPaymentService csqPaymentService;
+
+	@Autowired
+	private CsqServiceService csqServiceService;
 
 	@Value("${page.person}")
 	private String INDEX_PAGE;
@@ -245,81 +250,128 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Override
 	public void sendServiceMsg(Long messageUserId, CsqServiceMsgEnum csqServiceMsgEnum, CsqServiceMsgParamVo csqServiceMsgParamVo) {
+		sendServiceMsg(csqServiceMsgEnum, csqServiceMsgParamVo, messageUserId);
+	}
+
+	@Override
+	public void sendServiceMsg(CsqServiceMsgEnum csqServiceMsgEnum, CsqServiceMsgParamVo csqServiceMsgParamVo, Long... messageUserId) {
 		log.info("开始发送服务通知..., userId={}, csqServiceMsgEnum={}", messageUserId, csqServiceMsgEnum.name());
 		//check
-		TCsqUser toUser = csqUserDao.selectByPrimaryKey(messageUserId);    //获取要发放的对象
-		if (StringUtil.isEmpty(toUser.getVxOpenId())) {    //没有微信openid的用户无法收到通知
-			log.warn("发送服务通知终止。该用户没有openid. userId={}", messageUserId);
-			return;
-		}
-		TCsqFormId formid = csqFormIdDao.selectAvailableFormIdByUserId(messageUserId);    //获取formid
-		if (formid == null) {
-			return;
-		}
-		try {
-			//do
-			String parameter = "";
-			String and = "&";
-			StringBuilder builder = new StringBuilder();
-			List<String> msg = new ArrayList<>();
-			CsqUserAuthVo authVo = csqServiceMsgParamVo.getCsqUserAuthVo();
-			switch (csqServiceMsgEnum) {
-				case FUND_PUBLIC_SUCCESS:
-					CsqServiceListVo entity = csqServiceMsgParamVo.getCsqServiceListVo();
-					msg.add(entity.getName());    //项目名称(此处为基金名称)
-					msg.add(entity.getExpectedAmount().toString());    //筹款目标(此处为平台标定的定额)
-					msg.add(entity.getSurplusAmount().toString());    //实际筹款
-					msg.add(entity.getDonePercent());    //完成百分比
+		List<Long> toUserIds = Arrays.asList(messageUserId);
+		List<TCsqUser> toUsers = csqUserDao.selectInIds(toUserIds);    //获取要发放的对象
+		List<TCsqFormId> formids = csqFormIdDao.selectAvailableFormIdInUserIds(toUserIds);    //获取formid
+		Map<Long, List<TCsqFormId>> userFromIdMap = formids.stream()
+			.collect(Collectors.groupingBy(TCsqFormId::getUserId));
+		ArrayList<TCsqFormId> toUpdater = new ArrayList<>();
+		for (TCsqUser theUser : toUsers) {
+			Long theUserId = theUser.getId();
+			TCsqFormId currentFormId = null;
+			String formId = "";
+			try {
+				if (StringUtil.isEmpty(theUser.getVxOpenId())) {    //没有微信openid的用户无法收到通知
+					log.warn("发送服务通知终止。该用户没有openid. userId={}", theUserId);
+					continue;
+				}
+				List<TCsqFormId> formIds = userFromIdMap.get(theUserId);
+				if (formIds == null) {
+					continue;
+				}
+				currentFormId = formIds.get(0);
+				formId = currentFormId.getFormId();
 
-					//参数: ?type=1&serviceId=    (此处的serviceId需传fundId
-					Long fundId = entity.getFundId();
-					builder.append("?type=1").append(and).append("serviceId=").append(fundId);
-					break;
-				case CORP_CERT_SUCCESS:
-					msg.add(authVo.getName());    //公司名
-					msg.add("通过");    //审核结果(通过、不通过
-					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
-					break;
-				case CORP_CERT_FAIL:
-					msg.add(authVo.getName());    //公司名
-					msg.add("不通过");    //审核结果(通过、不通过
-					msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
-					break;
-				case SERVICE_NOTIFY_WHILE_CONSUME:
-					//参数 type=3,serviceId=
+				//do
+				String parameter = "";
+				String and = "&";
+				StringBuilder builder = new StringBuilder();
+				List<String> msg = new ArrayList<>();
+				CsqUserAuthVo authVo = csqServiceMsgParamVo.getCsqUserAuthVo();
+				switch (csqServiceMsgEnum) {
+					case FUND_PUBLIC_SUCCESS:
+						CsqServiceListVo entity = csqServiceMsgParamVo.getCsqServiceListVo();
+						msg.add(entity.getName());    //项目名称(此处为基金名称)
+						msg.add(entity.getExpectedAmount().toString());    //筹款目标(此处为平台标定的定额)
+						msg.add(entity.getSurplusAmount().toString());    //实际筹款
+						msg.add(entity.getDonePercent());    //完成百分比
+
+						//参数: ?type=1&serviceId=    (此处的serviceId需传fundId
+						Long fundId = entity.getFundId();
+						builder.append("?shareType=1").append(and).append("serviceId=").append(entity.getId()).append("serviceId2=").append(fundId);
+						break;
+					case CORP_CERT_SUCCESS:
+						msg.add(authVo.getName());    //公司名
+						msg.add("通过");    //审核结果(通过、不通过
+						msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
+						break;
+					case CORP_CERT_FAIL:
+						msg.add(authVo.getName());    //公司名
+						msg.add("不通过");    //审核结果(通过、不通过
+						msg.add(DateUtil.timeStamp2Date(System.currentTimeMillis(), "yyyy-MM-dd"));    //认证时间
+						break;
+					case SERVICE_NOTIFY_WHILE_CONSUME:
+						//参数 type=3,serviceId=
 //					builder.append("?type=3").append(and).append("serviceId=").append(serviceId);
-					break;
-				case INVOICE_DONE:
-					CsqUserInvoiceVo csqUserInvoiceVo = csqServiceMsgParamVo.getCsqUserInvoiceVo();
-					String orderNos = csqUserInvoiceVo.getOrderNos();
-					String serviceName = "";
-					if (!StringUtil.isEmpty(orderNos)) {
-						String[] split = orderNos.split(",");
-						String orderNo = split[0];
-						TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);
-						Long toId = tCsqOrder.getToId();
-						Integer toType = tCsqOrder.getToType();
-						//TODO
-						Map<String, Object> beneficiaryMap = csqPaymentService.getBeneficiaryMap(toType, toId);
-						serviceName = (String) beneficiaryMap.get("beneficiaryName");
-						if (split.length > 1) {
-							serviceName += "等";
+						break;
+					case INVOICE_DONE:
+						CsqUserInvoiceVo csqUserInvoiceVo = csqServiceMsgParamVo.getCsqUserInvoiceVo();
+						String orderNos = csqUserInvoiceVo.getOrderNos();
+						String serviceName = "";
+						if (!StringUtil.isEmpty(orderNos)) {
+							String[] split = orderNos.split(",");
+							String orderNo = split[0];
+							TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(orderNo);
+							Long toId = tCsqOrder.getToId();
+							Integer toType = tCsqOrder.getToType();
+							//TODO
+							Map<String, Object> beneficiaryMap = csqPaymentService.getBeneficiaryMap(toType, toId);
+							serviceName = (String) beneficiaryMap.get("beneficiaryName");
+							if (split.length > 1) {
+								serviceName += "等";
+							}
 						}
-					}
-					msg.add(serviceName);    //开票项目(节选
-					msg.add(csqUserInvoiceVo.getName());    //发票抬头
-					msg.add(csqUserInvoiceVo.getExpressNo());    //快递单号
-					msg.add(csqUserInvoiceVo.getAmount().toString());    //开票金额
-					break;
+						msg.add(serviceName);    //开票项目(节选
+						msg.add(csqUserInvoiceVo.getName());    //发票抬头
+						msg.add(csqUserInvoiceVo.getExpressNo());    //快递单号
+						msg.add(csqUserInvoiceVo.getAmount().toString());    //开票金额
+						break;
+					case SERVICE_OR_FUND_OUT:
+						Integer type = -1;
+						CsqMoneyApplyRecordVo csqMoneyApplyRecordVo = csqServiceMsgParamVo.getCsqMoneyApplyRecordVo();
+
+						Integer entityType = csqMoneyApplyRecordVo.getEntityType();
+						boolean isFund = CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType;
+						type = isFund? 1: 2;
+						Long entityId = csqMoneyApplyRecordVo.getEntityId();
+						String name = csqServiceService.getName(entityType, entityId);
+						msg.add(name);    //项目名称
+						StringBuilder theBuilder = new StringBuilder();
+						theBuilder.append("支出").append(csqMoneyApplyRecordVo.getMoney()).append("元");
+						msg.add(theBuilder.toString());    //进展内容（打款多少元）
+						msg.add(csqMoneyApplyRecordVo.getApplyPerson());    //打款用户
+						builder.append("?shareType=").append(type).append(and);
+
+						TCsqService csqService = null;
+						Long theServiceId = null;
+						Long theFundId = null;
+						csqService = isFund? csqServiceDao.selectByFundId(entityId) : csqServiceDao.selectByPrimaryKey(entityId);
+						theServiceId = csqService.getId();
+						theFundId = csqService.getFundId();
+
+						builder.append("serviceId=").append(theServiceId);
+						builder = theFundId == null? builder: builder.append("serviceId2=").append(theFundId);
+						break;
+				}
+//				parameter = builder.append(parameter).toString();
+				parameter = builder.toString();
+				pushOneUserMsg(theUser.getVxOpenId(), formId, msg, csqServiceMsgEnum, parameter);
+				//使用过的formid即失效
+				currentFormId.setIsValid(AppConstant.IS_VALID_NO);
+//				csqFormIdDao.update(currentFormId);
+				toUpdater.add(currentFormId);
+			} catch (Exception e) {
+				log.error("发送服务通知失败, userId={}, formid={}, csqServiceMsgEnum={}", theUserId, currentFormId, csqServiceMsgEnum.name());
 			}
-			parameter = builder.append(parameter).toString();
-			pushOneUserMsg(toUser.getVxOpenId(), formid.getFormId(), msg, csqServiceMsgEnum, parameter);
-			//使用过的formid即失效
-			formid.setIsValid(AppConstant.IS_VALID_NO);
-			csqFormIdDao.update(formid);
-		} catch (Exception e) {
-			log.error("发送服务通知失败, userId={}, formid={}, csqServiceMsgEnum={}", messageUserId, formid.getFormId(), csqServiceMsgEnum.name());
 		}
+		csqFormIdDao.update(toUpdater);
 	}
 
 	/**
@@ -344,7 +396,13 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		wxMssVo.setTouser(openid);// 用户openid
 		wxMssVo.setTemplate_id(setTemplateIdEnum.getTemplateId());
 		if (!setTemplateIdEnum.getPage().isEmpty()) {
-			wxMssVo.setPage(setTemplateIdEnum.getPage() + parameter);    //构建 跳转的page和参数
+			String page = setTemplateIdEnum.getPage();
+			if(page.contains(",")) {
+				String[] split = page.split(",");
+				boolean isFund = parameter.contains("serviceId2");
+				page = isFund? split[0] : split[1];
+			}
+			wxMssVo.setPage(page + parameter);    //构建 跳转的page和参数
 		}
 		wxMssVo.setForm_id(formid);// formid
 

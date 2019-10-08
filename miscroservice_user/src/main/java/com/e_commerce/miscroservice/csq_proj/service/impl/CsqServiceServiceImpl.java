@@ -290,6 +290,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			// 若为已捐款，则还需要项目汇报信息（PC端开发时再添加）
 			CsqServiceDetailVo csqServiceDetailVo = tCsqService.copyCsqServiceDetailVo();
 			String description = csqServiceDetailVo.getDescription();
+			description = description == null? "": description;
 			description = description.replaceAll("<br>", "\n");
 			csqServiceDetailVo.setDescription(description);
 
@@ -680,7 +681,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			.eq(TCsqService::getType, CsqServiceEnum.TYPE_SERIVE.getCode());	//仅要类型为 -> 项目的数据
 
 		//参数判定 & 条件预装
-		String pattern = "^[1-9]\\d*$";
+		String pattern = "^[0-9]\\d*$";
 		boolean matches = Pattern.matches(pattern, searchParam);
 		if(matches) {	//参数为id
 			baseBuild = baseBuild

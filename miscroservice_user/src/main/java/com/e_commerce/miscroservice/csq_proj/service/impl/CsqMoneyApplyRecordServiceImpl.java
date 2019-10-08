@@ -3,10 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.enums.application.CsqEntityTypeEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqMoneyApplyRecordEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqServiceEnum;
-import com.e_commerce.miscroservice.commons.enums.application.CsqUserPaymentEnum;
+import com.e_commerce.miscroservice.commons.enums.application.*;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -15,12 +12,16 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMoneyApplyRecordService;
+import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,12 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 
 	@Autowired
 	CsqPaymentService csqPaymentService;
+
+	@Autowired
+	CsqMsgService csqMsgService;
+
+	@Autowired
+	CsqOrderDao csqOrderDao;
 
 	@Override
 	public void addMoneyApply(TCsqMoneyApplyRecord obj) {
@@ -121,6 +128,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 
 		List<TCsqMoneyApplyRecord> tCsqMoneyApplyRecords = csqMoneyApplyRecordDao.selectWithBuildPage(baseBuild, page);
 		List<Long> fundIds = tCsqMoneyApplyRecords.stream()
+			.filter(a -> a.getEntityId() != null)
 			.filter(a -> a.getEntityType() == CsqEntityTypeEnum.TYPE_FUND.toCode())
 			.map(TCsqMoneyApplyRecord::getEntityId).collect(Collectors.toList());
 		List<Long> serviceIds = tCsqMoneyApplyRecords.stream()
@@ -130,6 +138,10 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 		Map<Long, List<TCsqService>> serviceMap = csqServices.stream()
 			.collect(Collectors.groupingBy(TCsqService::getId));
 
+		List<Long> userIds = tCsqMoneyApplyRecords.stream()
+			.map(TCsqMoneyApplyRecord::getUserId).collect(Collectors.toList());
+		List<TCsqUser> csqUsers = csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> idUserMap = csqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
 		List<CsqMoneyApplyRecordVo> vos = tCsqMoneyApplyRecords.stream()
 			.map(a -> {
 				CsqMoneyApplyRecordVo vo = a.copyCsqMoneyApplyRecordVo();
@@ -139,8 +151,14 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 				if(services != null) {
 					vo.setName(services.get(0).getName());
 				}
+				//申请人昵称
+				List<TCsqUser> users = idUserMap.get(a.getUserId());
+				if(users != null) {
+					vo.setUserName(users.get(0).getName());
+				}
 				return vo;
 			}).collect(Collectors.toList());
+
 		return PageUtil.buildQueryResult(vos, IdUtil.getTotal());
 	}
 
@@ -191,7 +209,21 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 			csqServiceDao.update(csqService);
 			//说明: 实现从项目或基金到 entityType为1 即平台外的支出.此处有个问题，即没有接收方的时候，会缺订单和流水。
 			//那么当有接收方时，才会产生对方的订单与流水。
+
+			//找到所有相关捐助者id
+			List<Long> userIds = getOrdererIds(entityType, entityId);
+			if(!userIds.isEmpty()) {
+				Long[] array = userIds.toArray(new Long[0]);
+
+				//向相关人员发送服务通知
+				csqMsgService.sendServiceMsg(CsqServiceMsgEnum.SERVICE_OR_FUND_OUT, CsqServiceMsgParamVo.builder().csqMoneyApplyRecordVo(csqMoneyApplyRecord.copyCsqMoneyApplyRecordVo()).build(), array);
+			}
 		}
+	}
+
+	private List<Long> getOrdererIds(Integer entityType, Long entityId) {
+		List<TCsqOrder> orders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(entityId, entityType, CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		return orders.stream().map(TCsqOrder::getUserId).collect(Collectors.toList());
 	}
 
 	private double getSurplusMoney(Double money, Double balance) {

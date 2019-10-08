@@ -26,6 +26,9 @@ public class CsqUserInvoiceVo {
 	private String expressNo;	//快递单号
 
 	@Transient
+	private String userName;
+
+	@Transient
 	private String dateString;
 
 	@Transient
@@ -61,4 +64,5 @@ public class CsqUserInvoiceVo {
 	public TCsqUserInvoice copyTCsqUserInvoice() {
 		return null;
 	}
+
 }
