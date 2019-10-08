@@ -8,6 +8,10 @@ import com.e_commerce.miscroservice.csq_proj.dao.CsqFormIdDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFormId;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-08-02 14:11
@@ -45,5 +49,30 @@ public class CsqFormIdDaoImpl implements CsqFormIdDao {
 	public int update(TCsqFormId formid) {
 		return MybatisPlus.getInstance().update(formid, new MybatisPlusBuild(TCsqFormId.class)
 			.eq(TCsqFormId::getId, formid.getId()));
+	}
+
+	@Override
+	public List<TCsqFormId> selectAvailableFormIdInUserIds(List<Long> messageUserId) {
+		long time = System.currentTimeMillis() - 7L * 24 * 3600 * 1000;
+		List<TCsqFormId> tcsqFormId = MybatisPlus.getInstance().findAll(new TCsqFormId(), baseBuild()
+			.in(TCsqFormId::getUserId, messageUserId)
+			.neq(TFormid::getFormId, "undefined")
+			.neq(TFormid::getFormId, "the formId is a mock one")
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqFormId::getCreateTime)));
+		for(TCsqFormId csqFormId:tcsqFormId) {
+			if(csqFormId == null || csqFormId.getCreateTime().getTime() <= time) {
+				return null;
+			}
+		}
+		return tcsqFormId;
+	}
+
+	@Override
+	public int update(ArrayList<TCsqFormId> toUpdater) {
+		List<Long> toUpdaterIds = toUpdater.stream()
+			.map(TCsqFormId::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(toUpdater, new MybatisPlusBuild(TCsqFormId.class)
+			.in(TCsqFormId::getId, toUpdaterIds)
+		);
 	}
 }

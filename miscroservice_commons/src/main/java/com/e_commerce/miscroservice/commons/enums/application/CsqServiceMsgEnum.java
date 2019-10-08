@@ -13,7 +13,8 @@ public enum CsqServiceMsgEnum {
 	CORP_CERT_SUCCESS(CsqSysMsgTemplateEnum.CORP_CERT_SUCCESS.getCode(), "企业认证成功", "/pages/logs/logs", "Kx1BZks9nZxWD0EKEH1ndArPAlgNQt-pq9F0cg6ea_o"),
 	CORP_CERT_FAIL(CsqSysMsgTemplateEnum.CORP_CERT_FAIL.getCode(), "企业认证失败", "/package/logs/pages/zuzhirenzheng/zuzhirenzheng", "Kx1BZks9nZxWD0EKEH1ndArPAlgNQt-pq9F0cg6ea_o"),
 	SERVICE_NOTIFY_WHILE_CONSUME(CsqSysMsgTemplateEnum.SERVICE_NOTIFY_WHILE_CONSUME.getCode(), "项目资金消耗", "/package/logs/pages/shareDetail/shareDetail", ""),
-	INVOICE_DONE(CsqSysMsgTemplateEnum.INVOICE_DONE.getCode(), "发票已开具", "/package/logs/pages/piaoList/piaoList", "Xcnby6CR0pLf9oKBIteJsF36iPShQuTiPvsvbLaIo3M")
+	INVOICE_DONE(CsqSysMsgTemplateEnum.INVOICE_DONE.getCode(), "发票已开具", "/package/logs/pages/piaoList/piaoList", "Xcnby6CR0pLf9oKBIteJsF36iPShQuTiPvsvbLaIo3M"),
+	SERVICE_OR_FUND_OUT(CsqSysMsgTemplateEnum.SERVICE_OR_FUND_OUT.getCode(), "项目执行进展提醒", "/package/logs/pages/shareJinji/shareJinji,/package/logs/pages/shareDetail/shareDetail", "hY692Kn29TE-zxJG-fO5EdyeFN5h0F6pyQIZZHnpmMg")
 	;
 
 	int code;

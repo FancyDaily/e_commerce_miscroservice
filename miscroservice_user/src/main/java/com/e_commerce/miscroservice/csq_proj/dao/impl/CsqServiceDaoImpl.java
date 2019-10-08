@@ -301,6 +301,12 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 		return MybatisPlus.getInstance().findAll(new TCsqService(), build.page(pageNum, pageSize));
 	}
 
+	@Override
+	public List<TCsqService> selectAll(Long userIds) {
+		MybatisPlusBuild mybatisPlusBuild = allBuild(userIds);
+		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild);
+	}
+
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TCsqService.class)
 			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)

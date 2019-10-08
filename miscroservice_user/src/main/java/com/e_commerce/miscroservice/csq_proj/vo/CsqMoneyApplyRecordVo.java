@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.csq_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqMoneyApplyRecord;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,9 @@ public class CsqMoneyApplyRecordVo {
 	private String name;
 
 	private String date;
+
+	@Transient
+	private String userName;
 
 	@Column(commit = "打款申请的发起人")
 	private Long userId;

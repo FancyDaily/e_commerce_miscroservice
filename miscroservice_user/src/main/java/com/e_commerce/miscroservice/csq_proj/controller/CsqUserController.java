@@ -473,11 +473,11 @@ public class CsqUserController {
 	 * @return
 	 */
 	@RequestMapping("share/activity")
-	public AjaxResult shareActivity(String name) {
+	public AjaxResult shareActivity(String name, boolean isActivity) {
 		AjaxResult result = new AjaxResult();
 		try {
-			log.info("分享活动页, name={}", name);
-			Map share = csqUserService.share(name);
+			log.info("分享活动页, name={}, isActivity={}", name, isActivity);
+			Map share = csqUserService.share(name, isActivity);
 			result.setData(share);
 			result.setSuccess(true);
 		} catch (MessageException e) {

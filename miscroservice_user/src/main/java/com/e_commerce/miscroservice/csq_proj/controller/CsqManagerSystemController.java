@@ -14,10 +14,7 @@ import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqUserInvoiceVo;
+import com.e_commerce.miscroservice.csq_proj.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -26,10 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 丛善桥后台管理系统通用
@@ -136,17 +130,19 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/list")
-	@UrlAuth()
+	@UrlAuth(withoutPermission = true)
 	public AjaxResult listService(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		try {
-			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			Long managerId = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			Long userIds = managerId;
 			log.info("项目列表, userId={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, pageNum, pageSize, isFuzzySearch);
 			QueryResult<TCsqService> list = csqServiceService.list(searchParam, pageNum, pageSize, isFuzzySearch);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "项目列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -177,6 +173,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "项目状态数量统计", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -211,6 +208,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "修改项目数据", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1367,6 +1365,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "项目详情", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1462,6 +1461,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "用户列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1494,6 +1494,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "用户修改", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1558,6 +1559,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "用户详情", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1632,6 +1634,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1665,6 +1668,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金修改", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1739,6 +1743,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金详情", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1775,6 +1780,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票申请列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1808,6 +1814,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票修改", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1844,6 +1851,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "发票的详情", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1916,6 +1924,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "消息列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1947,6 +1956,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织实名的认证审核", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -1994,6 +2004,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织实名的认证详情", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2066,6 +2077,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织实名认证列表", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2101,6 +2113,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "组织实名认证数量", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2244,6 +2257,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "爱心账户充值记录", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2289,6 +2303,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "递(提)交打款申请", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2386,6 +2401,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "打款申请审核", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2421,6 +2437,7 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金/项目捐赠记录", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
@@ -2455,11 +2472,38 @@ public class CsqManagerSystemController {
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "数据BI(收支统计)", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
 			result.setMsg(e.getMessage());
 			result.setSuccess(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("数据BI(收支统计)", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 项目/基金 数据BI
+	 * @param entityId 实体编号
+	 * @param entityType 实体类型
+	 * @param startDate 开始日期
+	 * @param endDate 结束日期
+	 * @return
+	 */
+	@RequestMapping("statics/service")
+	@UrlAuth
+	public Object serviceDataStatistics(Long entityId, Integer entityType, String startDate, String endDate) {
+		AjaxResult result = new AjaxResult();
+		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("项目/基金 数据BI, entityId={}, entityType={}, startDate={}, endDate={}", entityId, entityType, startDate, endDate);
+			HashMap<String, List<CsqLineDiagramData>> stringListHashMap = csqPaymentService.platformDataStatistics(userIds, entityId, entityType, startDate, endDate);
+			result.setData(stringListHashMap);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("项目/基金 数据BI", e);
 			result.setSuccess(false);
 		}
 		return result;

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author: FangyiXu
@@ -325,7 +326,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 		map.put("totalAmount", totalAmount);
 		MybatisPlusBuild baseBuild = csqUserInvoiceDao.baseBuild();
 		//判断是哪种searchParam
-		String pattern = "^[1-9]\\d*$";
+		String pattern = "^[0-9]\\d*$";
 		boolean isNum = Pattern.matches(pattern, searchParam);
 		if(!StringUtil.isEmpty(searchParam)) {
 			if(isNum) {
@@ -395,6 +396,18 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 					String toName = tCsqOrder.getToName();
 					a.setToId(toId);
 					a.setToName(toName);
+				}
+				return a;
+			}).collect(Collectors.toList());
+		List<Long> userIds = resultList.stream()
+			.map(CsqUserInvoiceVo::getUserId).collect(Collectors.toList());
+		List<TCsqUser> tCsqUsers = csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> idUserMap = tCsqUsers.stream().collect(Collectors.groupingBy(TCsqUser::getId));
+		resultList = resultList.stream()
+			.map(a -> {
+				List<TCsqUser> tCsqUsers1 = idUserMap.get(a.getUserId());
+				if(tCsqUsers1 != null) {
+					a.setUserName(tCsqUsers1.get(0).getName());
 				}
 				return a;
 			}).collect(Collectors.toList());
