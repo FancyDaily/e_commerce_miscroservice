@@ -289,8 +289,8 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	public List<TCsqService> selectByName(String name, Boolean isFuzzySearch) {
 		MybatisPlusBuild build = baseBuild();
 		build = isFuzzySearch?
-			build.eq(TCsqService::getName, name):
-			build.like(TCsqService::getName, "%" + name + "%");
+			build.like(TCsqService::getName, "%" + name + "%"):
+			build.eq(TCsqService::getName, name);
 
 		return MybatisPlus.getInstance().findAll(new TCsqService(), build);
 	}

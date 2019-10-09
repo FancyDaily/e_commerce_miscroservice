@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
@@ -21,6 +22,7 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.xiaoshi_proj.product.util.DateUtil;
 import com.github.pagehelper.Page;
+import jodd.json.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -560,6 +562,41 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		queryResult.setResultList(voList);
 		queryResult.setTotalCount(total);
 		return queryResult;
+	}
+
+	public static void main(String[] args) {
+		List<TCsqTransferData> list = new ArrayList<>();
+		TCsqTransferData tCsqTransferData = new TCsqTransferData();
+		tCsqTransferData.setFundId(123123l);
+		tCsqTransferData.setDate("1231313");
+		tCsqTransferData.setDescription("dadadad");
+		tCsqTransferData.setDonaterName("1321313");
+		tCsqTransferData.setFundName("123131");
+		tCsqTransferData.setInOrOut(1);
+		tCsqTransferData.setMoney(123d);
+		tCsqTransferData.setBillNumber("123123");
+		list.add(tCsqTransferData);
+
+		TCsqTransferData tCsqTransferData1 = new TCsqTransferData();
+		tCsqTransferData1.setFundId(123123l);
+		tCsqTransferData1.setDate("1231313");
+		tCsqTransferData1.setDescription("dadadad");
+		tCsqTransferData1.setDonaterName("1321313");
+		tCsqTransferData1.setFundName("123131");
+		tCsqTransferData1.setInOrOut(1);
+		tCsqTransferData1.setMoney(123d);
+		tCsqTransferData1.setBillNumber("123123");
+		list.add(tCsqTransferData1);
+
+		Object o = JSONObject.toJSON(list);
+		String s = JSONObject.toJSONString(list);
+
+		List<TCsqTransferData> tCsqTransferData2 = JSONObject.parseArray(s, TCsqTransferData.class);
+		System.out.println(o);
+		System.out.println("-----------");
+		System.out.println(s);
+		System.out.println("-----------");
+		System.out.println(tCsqTransferData2);
 	}
 
 	@Override

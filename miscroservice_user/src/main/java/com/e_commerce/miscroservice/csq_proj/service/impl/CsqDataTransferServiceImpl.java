@@ -1173,9 +1173,11 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 			if(tCsqFunds != null) {
 				TCsqFund csqFund = tCsqFunds.get(0);
 				Double balance = csqFund.getBalance();
-				Double inDouble = inData.stream()
+				Double inDouble = 0d;
+				Double outDouble = 9d;
+				inDouble = inData == null? 0d: inData.stream()
 					.map(TCsqTransferData::getMoney).reduce(0d, Double::sum);
-				Double outDouble = outData.stream()
+				outDouble = outData == null? 0d: outData.stream()
 					.map(TCsqTransferData::getMoney).reduce(0d, Double::sum);
 				if((balance + inDouble - outDouble) < 0) {
 					StringBuilder builder = new StringBuilder();

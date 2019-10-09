@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -2517,6 +2518,7 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("service/name/check")
+	@UrlAuth
 	public Object checkServiceName(String name, Integer type) {
 		AjaxResult result = new AjaxResult();
 		try {
@@ -2539,7 +2541,8 @@ public class CsqManagerSystemController {
 	 * @return
 	 */
 	@RequestMapping("offline/data/record/in")
-	public Object offlineDataRecordIn(List<TCsqTransferData> datas) {
+	@UrlAuth
+	public Object offlineDataRecordIn(@RequestBody List<TCsqTransferData> datas) {
 		AjaxResult result = new AjaxResult();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
