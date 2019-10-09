@@ -17,11 +17,9 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqMoneyApplyRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +79,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 			List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
 			List<Long> userIds = tCsqUsers.stream()
 				.map(TCsqUser::getId).collect(Collectors.toList());
-			baseBuild = userIds.isEmpty()? baseBuild : baseBuild
+			baseBuild = userIds.isEmpty() ? baseBuild : baseBuild
 				.in(TCsqMoneyApplyRecord::getUserId, userIds);    //实际递交申请的申请者的昵称
 		} else {    //去serivce表获取到编号
 			List<TCsqService> csqServices = csqServiceDao.selectByName(searchParam, isFuzzySearch);
@@ -110,8 +108,8 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 					baseBuild
 						.or()
 						.groupBefore()
-						.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ?  CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode())
-						.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? serviceIds: fundIds)
+						.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ? CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode())
+						.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? serviceIds : fundIds)
 						.groupAfter() : baseBuild
 				;
 
@@ -121,7 +119,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 		}
 
 		//状态
-		baseBuild = status == null || status.length==0 ? baseBuild : baseBuild.in(TCsqMoneyApplyRecord::getStatus, Arrays.asList(status));
+		baseBuild = status == null || status.length == 0 ? baseBuild : baseBuild.in(TCsqMoneyApplyRecord::getStatus, Arrays.asList(status));
 
 		//排序
 		baseBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqMoneyApplyRecord::getCreateTime));
@@ -148,12 +146,12 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 				String date = DateUtil.timeStamp2Date(a.getCreateTime().getTime());
 				vo.setDate(date);
 				List<TCsqService> services = serviceMap.get(a.getEntityId());
-				if(services != null) {
+				if (services != null) {
 					vo.setName(services.get(0).getName());
 				}
 				//申请人昵称
 				List<TCsqUser> users = idUserMap.get(a.getUserId());
-				if(users != null) {
+				if (users != null) {
 					vo.setUserName(users.get(0).getName());
 				}
 				return vo;
@@ -212,7 +210,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 
 			//找到所有相关捐助者id
 			List<Long> userIds = getOrdererIds(entityType, entityId);
-			if(!userIds.isEmpty()) {
+			if (!userIds.isEmpty()) {
 				Long[] array = userIds.toArray(new Long[0]);
 
 				//向相关人员发送服务通知
