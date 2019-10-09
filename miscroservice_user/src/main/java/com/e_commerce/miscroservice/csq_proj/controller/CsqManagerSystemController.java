@@ -9,7 +9,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -17,7 +16,6 @@ import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,6 +57,9 @@ public class CsqManagerSystemController {
 
 	@Autowired
 	private CsqUserDao csqUserDao;
+
+	@Autowired
+	private CsqDataTransferService csqDataTransferService;
 
 	/*@Autowired
 	@Qualifier("csqRedisTemplate")
@@ -2504,6 +2505,51 @@ public class CsqManagerSystemController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("项目/基金 数据BI", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 检查项目/基金 名字
+	 * @param name 名字
+	 * @param type 类型 项目0基金1
+	 * @return
+	 */
+	@RequestMapping("service/name/check")
+	public Object checkServiceName(String name, Integer type) {
+		AjaxResult result = new AjaxResult();
+		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("检查项目/基金名字, name={}, type={}", name, type);
+			Map map = csqServiceService.serviceNameCheck(name, type);
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("检查项目/基金名字", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 基金线下数据转移(收入/支出)
+	 * @param datas 完整列表数据
+	 * @return
+	 */
+	@RequestMapping("offline/data/record/in")
+	public Object offlineDataRecordIn(List<TCsqTransferData> datas) {
+		AjaxResult result = new AjaxResult();
+		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("基金线下数据转移(收入/支出), datas={}", datas);
+			csqDataTransferService.offlineDataRecordIn(datas);
+			result.setData(datas);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("基金线下数据转移(收入/支出)", e);
 			result.setSuccess(false);
 		}
 		return result;

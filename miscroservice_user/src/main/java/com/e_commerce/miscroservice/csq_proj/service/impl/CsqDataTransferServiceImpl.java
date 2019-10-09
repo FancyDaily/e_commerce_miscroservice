@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.enums.application.*;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
@@ -880,13 +882,14 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 	@Override
 	public void dealWithTransferData() {
-		List<TCsqTransferData> csqTransferDataList = MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class));
+		dealWithTransferData(null);
+	}
+
+	private void dealWithTransferData(List<TCsqTransferData> csqTransferDataList) {
+		csqTransferDataList = csqTransferDataList == null || csqTransferDataList.isEmpty()? MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class)) : csqTransferDataList;
 		List<TCsqOffLineData> offLineData = csqTransferDataList.stream()
 			.filter(a -> AppConstant.IS_VALID_YES.equals(a.getIsValid()))
-			.map(a -> {
-				TCsqOffLineData tCsqOffLineData = a.copyTCsqOffLineData();
-				return tCsqOffLineData;
-			}).collect(Collectors.toList());
+			.map(TCsqTransferData::copyTCsqOffLineData).collect(Collectors.toList());
 
 		dealWithOffLineData(offLineData);
 	}
@@ -1138,6 +1141,59 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	@Override
 	public void transeferGrowthFundRecordAfter() {
 		dealWithGrowthValueTransfer(true);
+	}
+
+	@Override
+	public void offlineDataRecordIn(List<TCsqTransferData> datas) {
+		//确认基金名填写正确
+		if(datas.stream().anyMatch(a -> a.getFundId() == null))
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "存在错误基金名字的行项，请确认！");
+		//将数据排序，收入支出正序排列
+		datas = datas.stream()
+			.sorted(Comparator.comparing(TCsqTransferData::getInOrOut)).collect(Collectors.toList());
+		//校验支出是否大于收入
+		Map<Long, List<TCsqTransferData>> fundIdTransferDataMap = datas.stream()
+			.collect(Collectors.groupingBy(TCsqTransferData::getFundId));
+		List<Long> fundIds = new ArrayList<>();
+		fundIdTransferDataMap.forEach((k,v) -> {
+			fundIds.add(k);
+		});
+		List<TCsqFund> csqFunds = csqFundDao.selectInIds(fundIds);
+		Map<Long, List<TCsqFund>> idFundMap = csqFunds.stream()
+			.collect(Collectors.groupingBy(TCsqFund::getId));
+
+		List<String> messages = new ArrayList<>();
+		fundIdTransferDataMap.forEach((fundId, dataList) -> {
+			Map<Integer, List<TCsqTransferData>> inOutMap = dataList.stream()
+				.collect(Collectors.groupingBy(TCsqTransferData::getInOrOut));
+			List<TCsqTransferData> inData = inOutMap.get(CsqUserPaymentEnum.INOUT_IN.toCode());
+			List<TCsqTransferData> outData = inOutMap.get(CsqUserPaymentEnum.INOUT_OUT.toCode());
+
+			List<TCsqFund> tCsqFunds = idFundMap.get(fundId);
+			if(tCsqFunds != null) {
+				TCsqFund csqFund = tCsqFunds.get(0);
+				Double balance = csqFund.getBalance();
+				Double inDouble = inData.stream()
+					.map(TCsqTransferData::getMoney).reduce(0d, Double::sum);
+				Double outDouble = outData.stream()
+					.map(TCsqTransferData::getMoney).reduce(0d, Double::sum);
+				if((balance + inDouble - outDouble) < 0) {
+					StringBuilder builder = new StringBuilder();
+
+					builder.append("基金 ").append(csqFund.getName()).append("余额不足！");
+					messages.add(builder.toString());
+				}
+			}
+		});
+
+		if(!messages.isEmpty()) {
+			String message = "所有信息并未提交！请确认以上信息，重新整理数据并提交。";
+			messages.add(message);
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, messages.toString());
+		}
+
+		//进行数据转移
+		dealWithTransferData(datas);
 	}
 
 	private void dealWithGrowthValueTransfer(boolean isAfterDeal) {

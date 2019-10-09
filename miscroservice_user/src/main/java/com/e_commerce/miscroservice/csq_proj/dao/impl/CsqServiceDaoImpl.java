@@ -277,8 +277,12 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 
 	@Override
 	public TCsqService selectByName(String name) {
-		return MybatisPlus.getInstance().findOne(new TCsqService(), new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getName, name));
+		return MybatisPlus.getInstance().findOne(new TCsqService(), byNameBuild(name));
+	}
+
+	private MybatisPlusBuild byNameBuild(String name) {
+		return new MybatisPlusBuild(TCsqService.class)
+			.eq(TCsqService::getName, name);
 	}
 
 	@Override
@@ -305,6 +309,13 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	public List<TCsqService> selectAll(Long userIds) {
 		MybatisPlusBuild mybatisPlusBuild = allBuild(userIds);
 		return MybatisPlus.getInstance().findAll(new TCsqService(), mybatisPlusBuild);
+	}
+
+	@Override
+	public TCsqService selectByNameAndType(String name, Integer type) {
+		return MybatisPlus.getInstance().findOne(new TCsqService(), byNameBuild(name)
+			.eq(TCsqService::getType, type)
+		);
 	}
 
 	private MybatisPlusBuild inIdsOrInFundIdsBuild(List<Long> serviceIds, List<Long> fundIds, boolean isServiceListEmpty, boolean isFundListEmpty) {

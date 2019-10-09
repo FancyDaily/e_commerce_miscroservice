@@ -756,6 +756,23 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		return name;
 	}
 
+	@Override
+	public Map serviceNameCheck(String name, Integer type) {
+		HashMap<String, Object> resultMap = new HashMap<>();
+		List<TCsqService> csqServices = csqServiceDao.selectByName(name, Boolean.TRUE);
+		if(type != null) {
+			csqServices = csqServices.stream()
+				.filter(a -> type.equals(a.getType())).collect(Collectors.toList());
+		}
+		List<String> names = csqServices.stream()
+			.map(TCsqService::getName).collect(Collectors.toList());
+		resultMap.put("entityNames", names);
+
+		TCsqService csqService = type == null? csqServiceDao.selectByName(name): csqServiceDao.selectByNameAndType(name, type);
+		resultMap.put("entityId", csqService==null?null:csqService.getType().equals(CsqServiceEnum.TYPE_FUND.getCode())?csqService.getFundId():csqService.getId());
+		return resultMap;
+	}
+
 	private String getLikeParam(String searchParam) {
 		return "%" + searchParam + "%";
 	}

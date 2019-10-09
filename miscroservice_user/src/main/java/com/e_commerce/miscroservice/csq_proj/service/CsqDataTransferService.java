@@ -1,8 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service;
 
-import com.e_commerce.miscroservice.csq_proj.po.TCsqPersonInChargeInfo;
-import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
-import com.e_commerce.miscroservice.csq_proj.po.TOldUser;
+import com.e_commerce.miscroservice.csq_proj.po.*;
 
 import java.util.List;
 
@@ -62,4 +60,6 @@ public interface CsqDataTransferService {
 	void transeferGrowthFundRecord();
 
 	void transeferGrowthFundRecordAfter();
+
+	void offlineDataRecordIn(List<TCsqTransferData> datas);
 }

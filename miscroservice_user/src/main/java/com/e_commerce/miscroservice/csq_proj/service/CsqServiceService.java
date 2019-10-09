@@ -143,4 +143,6 @@ public interface CsqServiceService {
 	void synchronizeService(List<TCsqFund> toUpdateFunds);
 
 	String getName(Integer entityType, Long k);
+
+	Map serviceNameCheck(String name, Integer type);
 }
