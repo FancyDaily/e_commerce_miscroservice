@@ -886,9 +886,8 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	}
 
 	private void dealWithTransferData(List<TCsqTransferData> csqTransferDataList) {
-		csqTransferDataList = csqTransferDataList == null || csqTransferDataList.isEmpty()? MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class)) : csqTransferDataList;
+		csqTransferDataList = csqTransferDataList == null || csqTransferDataList.isEmpty()? MybatisPlus.getInstance().findAll(new TCsqTransferData(), new MybatisPlusBuild(TCsqTransferData.class).eq(TCsqTransferData::getIsValid, AppConstant.IS_VALID_YES)) : csqTransferDataList;
 		List<TCsqOffLineData> offLineData = csqTransferDataList.stream()
-			.filter(a -> AppConstant.IS_VALID_YES.equals(a.getIsValid()))
 			.map(TCsqTransferData::copyTCsqOffLineData).collect(Collectors.toList());
 
 		dealWithOffLineData(offLineData);
@@ -1193,6 +1192,12 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 			messages.add(message);
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, messages.toString());
 		}
+
+		datas = datas.stream()
+			.map(a -> {
+				a.setIsValid(AppConstant.IS_VALID_YES);
+				return a;
+			}).collect(Collectors.toList());
 
 		//进行数据转移
 		dealWithTransferData(datas);

@@ -20,6 +20,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceMsgParamVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,8 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 		baseBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqMoneyApplyRecord::getCreateTime));
 
 		List<TCsqMoneyApplyRecord> tCsqMoneyApplyRecords = csqMoneyApplyRecordDao.selectWithBuildPage(baseBuild, page);
+		if(tCsqMoneyApplyRecords.isEmpty())
+			return PageUtil.buildQueryResult(new ArrayList<>(), IdUtil.getTotal());
 		List<Long> fundIds = tCsqMoneyApplyRecords.stream()
 			.filter(a -> a.getEntityId() != null)
 			.filter(a -> a.getEntityType() == CsqEntityTypeEnum.TYPE_FUND.toCode())

@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.NumberUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
@@ -356,7 +357,10 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 		List<TCsqUserInvoice> tCsqUserInvoices = csqUserInvoiceDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		long total = IdUtil.getTotal();
-
+		if(tCsqUserInvoices.isEmpty()) {
+			map.put("queryResult", PageUtil.buildQueryResult(new ArrayList<>(), total));
+			return map;
+		}
 		List<CsqUserInvoiceVo> resultList = tCsqUserInvoices.stream().map(a -> a.copyCsqUserInvoiceVo()).collect(Collectors.toList());
 		List<String> orderNos = tCsqUserInvoices.stream().map(TCsqUserInvoice::getOrderNos).collect(Collectors.toList());
 		List<TCsqOrder> orders = orderNos.isEmpty()? new ArrayList<>() : csqOrderDao.selectInOrderNos(orderNos);
