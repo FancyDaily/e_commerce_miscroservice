@@ -1,10 +1,10 @@
 package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 商品房表
@@ -14,6 +14,7 @@ import lombok.Data;
 @Table(commit = "商品房表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TLpglHouse extends BaseEntity {
 
 	/**
@@ -21,6 +22,12 @@ public class TLpglHouse extends BaseEntity {
 	 */
 	@Column(commit = "楼盘编号")
 	private Long estateId;
+
+	/**
+	 * 房间号
+	 */
+	@Column(commit = "房间号")
+	private Integer houseNum;
 
 	/**
 	 * 房间名称
@@ -39,6 +46,18 @@ public class TLpglHouse extends BaseEntity {
 	 */
 	@Column(commit = "房源结构")
 	private String structType;
+
+	/**
+	 * 楼号
+	 */
+	@Column(commit = "楼号", length = 11)
+	private Integer buildingNum;
+
+	/**
+	 * 单元号
+	 */
+	@Column(commit = "单元号", length = 11)
+	private Integer groupNum;
 
 	/**
 	 * 楼层
@@ -75,5 +94,11 @@ public class TLpglHouse extends BaseEntity {
 	 */
 	@Column(commit = "室内单价", precision = 2)
 	private Double insidePrice;
+
+	/**
+	 * 状态
+	 */
+	@Column(commit = "状态")
+	private Integer status;
 
 }

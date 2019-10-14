@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
