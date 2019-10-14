@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
@@ -27,5 +28,11 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		long total = IdUtil.getTotal();
 
 		return PageUtil.buildQueryResult(tLpglHouses, total);
+	}
+
+	@Override
+	public int save(TLpglHouse tLpglHouse) {
+		int i = MybatisPlus.getInstance().save(tLpglHouse);
+		return i;
 	}
 }

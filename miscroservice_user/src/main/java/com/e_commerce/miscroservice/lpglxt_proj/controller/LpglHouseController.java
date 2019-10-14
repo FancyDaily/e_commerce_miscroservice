@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +47,36 @@ public class LpglHouseController {
 			log.error("商品房列表", e);
 			result.setSuccess(false);
 		}
+		return result;
+	}
+
+
+	/**
+	 * 添加房源
+	 * @param estateId
+	 * @param houseNum
+	 * @param name
+	 * @param houseType
+	 * @param structType
+	 * @param buildingNum
+	 * @param groupNum
+	 * @param floorNum
+	 * @param directionNum
+	 * @param buildingArea
+	 * @param insideArea
+	 * @param buildingPrice
+	 * @param insidePrice
+	 * @param status
+	 * @return
+	 */
+	@Consume(TLpglHouse.class)
+	@RequestMapping("house/insert")
+	public Object houseInsert(	Long estateId,Integer houseNum,String name, String houseType,String structType, Integer buildingNum,Integer groupNum, Integer floorNum,Integer directionNum, Double buildingArea,Double insideArea, Double buildingPrice,Double insidePrice, Integer status){
+		AjaxResult result = new AjaxResult();
+		TLpglHouse tLpglHouse =  (TLpglHouse)ConsumeHelper.getObj();
+		int i = lpglHouseService.save(tLpglHouse);
+		log.info("房源录入");
+		result.setSuccess(true);
 		return result;
 	}
 }
