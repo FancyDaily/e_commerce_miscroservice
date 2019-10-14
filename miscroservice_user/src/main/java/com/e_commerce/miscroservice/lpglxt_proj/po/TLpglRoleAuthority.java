@@ -11,28 +11,16 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-10-14 14:31
  */
-@Table(commit = "楼盘管理权限表")
+@Table(commit = "楼盘管理角色权限表")
 @Data
 @Builder
 @NoArgsConstructor
-public class TLpglAuthority extends BaseEntity{
+public class TLpglRoleAuthority extends BaseEntity{
 
 
-	@Column(commit = "权限名称")
-	private String authorityName;
+	@Column(commit = "角色id")
+	private Integer roleId;
 
-	@Column(commit = "父级Id")
-	private Integer parentId;
-
-	@Column(commit = "权限地址")
-	private String url;
-
-	@Column(commit = "权限类型id",length = 11)
-	private Integer typeId;
-
-
-
-
-
-
+	@Column(commit = "权限id")
+	private Integer authorityId;
 }

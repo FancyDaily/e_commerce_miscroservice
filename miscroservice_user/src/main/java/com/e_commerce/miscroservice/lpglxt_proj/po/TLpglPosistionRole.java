@@ -11,14 +11,16 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-10-14 14:51
  */
-@Table(commit = "楼盘管理职位表")
+@Table(commit = "楼盘管理职位角色表")
 @Data
 @Builder
 @NoArgsConstructor
-public class TLpglPosistion extends BaseEntity {
+public class TLpglPosistionRole extends BaseEntity {
 
-	@Column(commit = "职位名称")
-	String posisitionName;
+	@Column(commit = "职位id")
+	private Integer posisitionId;
 
 
+	@Column(commit = "角色id",length = 11)
+	private Integer roleId;
 }

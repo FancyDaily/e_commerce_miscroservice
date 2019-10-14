@@ -7,18 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 楼盘管理职位表
+ * 楼盘管理角色表
  * @Author: FangyiXu
- * @Date: 2019-10-14 14:51
+ * @Date: 2019-10-14 14:45
  */
-@Table(commit = "楼盘管理职位表")
+@Table(commit = "楼盘管理用户职位关联表")
 @Data
 @Builder
 @NoArgsConstructor
-public class TLpglPosistion extends BaseEntity {
+public class TLpglUserPosistion extends BaseEntity {
 
-	@Column(commit = "职位名称")
-	String posisitionName;
+	@Column(commit = "用户id",length = 11)
+	private Integer userId;
 
-
+	@Column(commit = "职位id",length = 11)
+	private Integer posistionId;
 }
