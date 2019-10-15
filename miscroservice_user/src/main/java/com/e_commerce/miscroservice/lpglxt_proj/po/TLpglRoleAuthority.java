@@ -19,8 +19,8 @@ public class TLpglRoleAuthority extends BaseEntity{
 
 
 	@Column(commit = "角色id")
-	private Integer roleId;
+	private Long roleId;
 
 	@Column(commit = "权限id")
-	private Integer authorityId;
+	private Long authorityId;
 }

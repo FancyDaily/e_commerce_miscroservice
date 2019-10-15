@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 public class TLpglUserPosistion extends BaseEntity {
 
 	@Column(commit = "用户id",length = 11)
-	private Integer userId;
+	private Long userId;
 
 	@Column(commit = "职位id",length = 11)
-	private Integer posistionId;
+	private Long posistionId;
 }
