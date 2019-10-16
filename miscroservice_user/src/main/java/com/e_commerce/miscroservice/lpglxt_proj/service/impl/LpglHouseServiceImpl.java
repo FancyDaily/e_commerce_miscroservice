@@ -38,7 +38,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 	private LpglEstateDao lpglEstateDao;
 
 	@Override
-	public QueryResult list(Long estateId, Integer pageNum, Integer pageSize) {
+	public QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize) {
 		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectByEstateIdPage(estateId, pageNum, pageSize);
 		long total = IdUtil.getTotal();
 

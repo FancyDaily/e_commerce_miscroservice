@@ -105,6 +105,9 @@ public class TLpglHouse extends BaseEntity {
 	@Column(commit = "优惠状态", length = 11)
 	private Integer disCountStatus;
 
+	@Column(commit = "销售员编号")
+	private Long saleManId;
+
 	/**
 	 * 状态
 	 */

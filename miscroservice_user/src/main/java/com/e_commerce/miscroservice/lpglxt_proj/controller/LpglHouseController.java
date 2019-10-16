@@ -45,8 +45,8 @@ public class LpglHouseController {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("商品房列表, estateId={}, buildingNum={}, pageNum={}, pageSize={}", estateId, buildingNum, pageNum, pageSize);
-			QueryResult list = lpglHouseService.list(estateId, pageNum, pageSize);
+			log.info("商品房列表, userId, estateId={}, buildingNum={}, pageNum={}, pageSize={}", userId, estateId, buildingNum, pageNum, pageSize);
+			QueryResult list = lpglHouseService.list(userId, estateId, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {

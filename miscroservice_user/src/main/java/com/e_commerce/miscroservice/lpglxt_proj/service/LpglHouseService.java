@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface LpglHouseService {
 
-	QueryResult list(Long estateId, Integer pageNum, Integer pageSize);
+	QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize);
 
 	TLpglHouse detail(Long houseId);
 
