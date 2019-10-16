@@ -1,9 +1,10 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.lpglxt_proj.vo.LpglHouseMapVo;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: FangyiXu
@@ -13,5 +14,5 @@ public interface LpglEstateService {
 
 	QueryResult list(Integer pageNum, Integer pageSize);
 
-	List<LpglHouseMapVo> houseMap(Long estateId, Integer buildingNum);
+	Map<String, Map<Integer, Map<Double, Map<Integer, List<TLpglHouse>>>>> houseMap(Long estateId, Integer buildingNum);
 }

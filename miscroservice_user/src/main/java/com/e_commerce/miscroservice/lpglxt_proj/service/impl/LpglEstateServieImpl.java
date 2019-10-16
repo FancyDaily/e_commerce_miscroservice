@@ -8,11 +8,14 @@ import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglEstateService;
-import com.e_commerce.miscroservice.lpglxt_proj.vo.LpglHouseMapVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @Author: FangyiXu
@@ -36,15 +39,24 @@ public class LpglEstateServieImpl implements LpglEstateService {
 	}
 
 	@Override
-	public List<LpglHouseMapVo> houseMap(Long estateId, Integer buildingNum) {
-		List<TLpglHouse> tLpglEstates =
+	public Map<String, Map<Integer, Map<Double, Map<Integer, List<TLpglHouse>>>>> houseMap(Long estateId, Integer buildingNum) {
+		List<TLpglHouse> tLpglHouses =
 			estateId == null ? lpglHouseDao.selectAll() :
 				buildingNum == null ? lpglHouseDao.selectByEstateId(estateId) :
 					lpglHouseDao.selectByEstateIdAndBuildingNum(estateId, buildingNum);
 
-		//按面积分组
-
-		//TODO
-		return null;
+		if(tLpglHouses == null) {
+			return new HashMap<>();
+		}
+		//按楼号分组
+		return tLpglHouses.stream()
+			.collect(groupingBy(TLpglHouse::getGroupName,
+				groupingBy(TLpglHouse::getBuildingNum,
+					groupingBy(TLpglHouse::getBuildingArea,
+						groupingBy(TLpglHouse::getFloorNum)
+					)
+				)
+				)
+			);
 	}
 }

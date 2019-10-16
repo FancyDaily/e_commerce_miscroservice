@@ -16,7 +16,7 @@ import java.util.List;
 public class LpglGroupHouseMapVo {
 
 	/**
-	 * 面积
+	 * 单元
 	 */
 	private Integer group;
 

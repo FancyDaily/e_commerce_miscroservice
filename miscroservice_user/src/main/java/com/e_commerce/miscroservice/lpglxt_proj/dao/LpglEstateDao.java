@@ -14,4 +14,7 @@ public interface LpglEstateDao {
 
 	List<TLpglEstate> selectAllPage(Integer pageNum, Integer pageSize);
 
+	TLpglEstate selectByPrimaryKey(Long estateId);
+
+	List<TLpglEstate> selectInIds(List<Long> houseIds);
 }

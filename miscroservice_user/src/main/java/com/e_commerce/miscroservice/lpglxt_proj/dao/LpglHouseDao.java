@@ -17,4 +17,24 @@ public interface LpglHouseDao {
 	List<TLpglHouse> selectAll();
 
 	List<TLpglHouse> selectByEstateIdAndBuildingNum(Long estateId, Integer buildingNum);
+
+	TLpglHouse selectByPrimaryKey(Long houseId);
+
+	int update(TLpglHouse obj);
+
+	int insert(TLpglHouse obj);
+
+	int remove(Long houseId);
+
+	List<TLpglHouse> selectInIds(List<Long> houseIds);
+
+	int insert(List<TLpglHouse> addList);
+
+	int insert(List<TLpglHouse> addList, boolean isMultiple);
+
+	int modify(List<TLpglHouse> modifyList);
+
+	int modify(List<TLpglHouse> modifyList, boolean isMultiple);
+
+	List<TLpglHouse> selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(List<TLpglHouse> todoList);
 }

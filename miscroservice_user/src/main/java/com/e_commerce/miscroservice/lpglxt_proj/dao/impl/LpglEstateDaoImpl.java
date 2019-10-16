@@ -32,4 +32,18 @@ public class LpglEstateDaoImpl implements LpglEstateDao {
 		IdUtil.setTotal(baseBuild());
 		return MybatisPlus.getInstance().findAll(new TLpglEstate(), baseBuild().page(pageNum, pageSize));
 	}
+
+	@Override
+	public TLpglEstate selectByPrimaryKey(Long estateId) {
+		return MybatisPlus.getInstance().findOne(new TLpglEstate(), baseBuild()
+			.eq(TLpglEstate::getId, estateId)
+		);
+	}
+
+	@Override
+	public List<TLpglEstate> selectInIds(List<Long> houseIds) {
+		return MybatisPlus.getInstance().findAll(new TLpglEstate(), baseBuild()
+			.in(TLpglEstate::getId, houseIds)
+		);
+	}
 }

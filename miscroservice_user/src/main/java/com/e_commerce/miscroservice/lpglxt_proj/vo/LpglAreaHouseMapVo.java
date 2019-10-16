@@ -18,7 +18,7 @@ public class LpglAreaHouseMapVo {
 	/**
 	 * 面积
 	 */
-	private Double are;
+	private Double area;
 
 	/**
 	 * 楼层房号列表
