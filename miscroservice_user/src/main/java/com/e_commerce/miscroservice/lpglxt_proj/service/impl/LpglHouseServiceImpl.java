@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
@@ -134,5 +135,11 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public int save(TLpglHouse tLpglHouse) {
+		int i = MybatisPlus.getInstance().save(tLpglHouse);
+		return i;
 	}
 }

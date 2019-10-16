@@ -5,12 +5,15 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 
 /**
  * @Author: FangyiXu
  * @Date: 2019-10-14 16:40
  */
 public interface LpglHouseService {
+
+	int save(TLpglHouse tLpglHouse);
 
 	QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize);
 

@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TLpglRole extends BaseEntity {
 
-	@Column(commit = "权限编号")
-	String authorityIds;
+	@Column(commit = "角色名称")
+	private String roleName;
 
 }

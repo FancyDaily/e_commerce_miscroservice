@@ -226,4 +226,34 @@ public class LpglHouseController {
 		return result;
 	}
 
+
+
+	/**
+	 * 添加房源
+	 * @param estateId
+	 * @param houseNum
+	 * @param name
+	 * @param houseType
+	 * @param structType
+	 * @param buildingNum
+	 * @param groupNum
+	 * @param floorNum
+	 * @param directionNum
+	 * @param buildingArea
+	 * @param insideArea
+	 * @param buildingPrice
+	 * @param insidePrice
+	 * @param status
+	 * @return
+	 */
+	@Consume(TLpglHouse.class)
+	@RequestMapping("house/insert")
+	public Object houseInsert(	Long estateId,Integer houseNum,String name, String houseType,String structType, Integer buildingNum,Integer groupNum, Integer floorNum,Integer directionNum, Double buildingArea,Double insideArea, Double buildingPrice,Double insidePrice, Integer status){
+		AjaxResult result = new AjaxResult();
+		TLpglHouse tLpglHouse =  (TLpglHouse)ConsumeHelper.getObj();
+		int i = lpglHouseService.save(tLpglHouse);
+		log.info("房源录入");
+		result.setSuccess(true);
+		return result;
+	}
 }
