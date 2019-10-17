@@ -126,7 +126,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 				modifyList = modifyList.stream()
 					.filter(a -> a.getId() != null).collect(Collectors.toList());
 
-				lpglHouseDao.modify(modifyList, true);	//TODO 批量更新不可用
+				lpglHouseDao.modify(modifyList, false);	//TODO 批量更新不可用
 			}
 
 		} catch (IOException e) {
