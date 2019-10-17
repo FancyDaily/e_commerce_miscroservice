@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
+ * 分组表
  * @Author: FangyiXu
  * @Date: 2019-10-17 13:41
  */
