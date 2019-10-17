@@ -3,7 +3,6 @@ package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglCertDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglCustomerInfoDao;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,10 +39,21 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 	private LpglCustomerInfoDao lpglCustomerInfoDao;
 
 	@Override
-	public QueryResult list(Integer status, Integer pageNum, Integer pageSize) {
+	public HashMap<String, Object> list(Integer status, Integer pageNum, Integer pageSize, Long estateId, Integer isDone, String area, String department, boolean isToday) {
 		//十五天有效
 		Long timeStamp = System.currentTimeMillis() - 15L * 24 * 60 * 60 * 1000;
-		List<TLpglCustomerInfos> list = TlpglCustomerInfoEnum.STATUS_VALID.getCode() == status? lpglCustomerInfoDao.selectByStatusAndGteUpdateTimePage(status, timeStamp, pageNum, pageSize) : lpglCustomerInfoDao.selectByStatusPage(status, pageNum, pageSize);
+//		List<TLpglCustomerInfos> list = TlpglCustomerInfoEnum.STATUS_VALID.getCode() == status? lpglCustomerInfoDao.selectByStatusAndGteUpdateTimePage(status, timeStamp, pageNum, pageSize) : lpglCustomerInfoDao.selectByStatusPage(status, pageNum, pageSize);
+		List<TLpglCustomerInfos> list = lpglCustomerInfoDao.selectByStatusAndEstateIdAndIsDoneAndAreAndDepartmentAndIsToday(status, estateId, isDone, area, department, isToday);
+		pageNum --;
+		//手动分片
+		int total = list.size();	//总数
+		long isDoneCnt = list.stream()	//带看总数
+			.filter(a -> TlpglCustomerInfoEnum.IS_DONE_YES.getCode() == a.getIsDone()).count();
+		list = list.stream()
+			.skip(pageNum * pageSize)
+			.limit(pageNum * pageSize + pageSize).collect(Collectors.toList());
+
+
 		//处理手机号敏感信息
 		list = list.stream()
 			.map(a -> {
@@ -52,7 +63,11 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 			}).collect(Collectors.toList());
 
 		lpglCustomerInfoDao.updateByStatusAndLtUpdateTimePage(status, timeStamp);	//清理失效
-		return PageUtil.buildQueryResult(list, IdUtil.getTotal());
+		HashMap<String, Object> res = new HashMap<>();
+		QueryResult result = PageUtil.buildQueryResult(list, total);
+		res.put("queryResult", result);
+		res.put("isDoneCnt", isDoneCnt);
+		return res;
 	}
 
 	private static String replaceTelephone(String telephone) {

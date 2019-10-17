@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
-import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
@@ -11,6 +10,8 @@ import com.e_commerce.miscroservice.lpglxt_proj.service.LpglHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
 
 /**
  * 客户报备
@@ -36,16 +37,21 @@ public class LpglCustomerInfoController {
 	 * @param status 状态
 	 * @param pageNum 页码
 	 * @param pageSize 大小
+	 * @param estateId 楼盘编号
+	 * @param isDone 是否带看
+	 * @param area 来访区域
+	 * @param department 对接部门
+	 * @param isToday 是否筛选今天
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object commitCustomerInfos(Integer status, Integer pageNum, Integer pageSize) {
+	public Object commitCustomerInfos(Integer status, Integer pageNum, Integer pageSize, Long estateId, Integer isDone, String area, String department, boolean isToday) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("报备信息列表, status={}, pageNum={}, pageSize={}",status, pageNum, pageSize);
-			QueryResult list = lpglCustomerInfoService.list(status, pageNum, pageSize);
-			result.setData(list);
+			log.info("报备信息列表, status={}, pageNum={}, pageSize={}, estateId={}, isDone={}, area={}, department={}, isToday={}",status, pageNum, pageSize, estateId, isDone, area, department, isToday);
+			HashMap<String, Object> res = lpglCustomerInfoService.list(status, pageNum, pageSize, estateId, isDone, area, department, isToday);
+			result.setData(res);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "报备信息列表", e.getMessage());
@@ -110,4 +116,5 @@ public class LpglCustomerInfoController {
 		}
 		return result;
 	}
+
 }

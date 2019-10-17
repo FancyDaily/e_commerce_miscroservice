@@ -39,4 +39,6 @@ public interface LpglUserDao {
 	List<TLpglUser> selectByName(String searchParam, boolean isLike);
 
 	List<TLpglUser> selectInNames(List<String> userNames);
+
+	List<TLpglUser> selectByGroupId(Long groupId);
 }

@@ -114,6 +114,30 @@ public class TLpglHouse extends BaseEntity {
 	@Column(commit = "状态")
 	private Integer status;
 
+	@Column(commit = "首付")
+	private Double downPayment;
+
+	@Column(commit = "贷款金额")
+	private Double loanAmount;
+
+	@Column(commit = "购买日期")
+	private String buyDate;
+
+	@Column(commit = "签约日期")
+	private String signDate;
+
+	@Column(commit = "买受人姓名")
+	private String purchaserName;
+
+	@Column(commit = "买受人电话")
+	private String purchaserTel;
+
+	@Column(commit = "市场专员编号")
+	private Long marketingCommisionerId;
+
+	@Column(commit = "分销公司名字")
+	private String companyName;
+
 	public LpglFloorHouseMapVo copyLpglFloorHouseMapVo() {return null;}
 
 }

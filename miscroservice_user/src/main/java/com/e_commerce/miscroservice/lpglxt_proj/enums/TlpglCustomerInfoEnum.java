@@ -8,6 +8,8 @@ public enum TlpglCustomerInfoEnum {
 
 	STATUS_INVALID(0, "初始"),
 	STATUS_VALID(1, "有效"),
+	IS_DONE_NO(0, "未带看"),
+	IS_DONE_YES(1, "已带看")
 	;
 
 	private int code;

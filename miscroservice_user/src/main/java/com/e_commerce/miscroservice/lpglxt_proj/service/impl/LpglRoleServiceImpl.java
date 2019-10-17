@@ -195,7 +195,7 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 	}
 
 	public static void main(String[] args) {
-		String code = "1190001";
+		String code = "1190000";
 		System.out.println(code.matches("\\d{1,3}0000"));
 		System.out.println(code.substring(0, code.length() - 4) + "0000");
 	}
