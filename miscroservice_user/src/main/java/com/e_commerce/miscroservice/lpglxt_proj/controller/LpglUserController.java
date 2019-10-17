@@ -264,8 +264,9 @@ public class LpglUserController {
 
 	/**
 	 * 注册
-	 * @param username
-	 * @param password
+	 * @param username 用户名
+	 * @param password 密码
+	 * @param posistionId 职位id
 	 * @return
 	 */
 	@RequestMapping("register")
@@ -301,8 +302,8 @@ public class LpglUserController {
 
 	/**
 	 * 登录
-	 * @param username
-	 * @param password
+	 * @param username 用户名
+	 * @param password 密码
 	 * @return
 	 */
 	@RequestMapping("login")

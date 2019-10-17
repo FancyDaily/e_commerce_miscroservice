@@ -12,7 +12,7 @@ import lombok.Data;
 @Table(commit = "分组表")
 @Data
 @Builder
-public class TlpglGroup {
+public class TlpglGroup extends BaseEntity{
 
 	@Column(commit = "楼盘编号")
 	private Long estateId;
