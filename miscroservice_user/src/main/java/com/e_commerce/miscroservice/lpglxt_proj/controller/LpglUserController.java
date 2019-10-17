@@ -81,6 +81,7 @@ public class LpglUserController {
 
 	/**
 	 * 查找职位角色
+	 * @param posistionId 职位id
 	 * @return
 	 */
 	@RequestMapping("findAllPosistionRole")
@@ -93,6 +94,7 @@ public class LpglUserController {
 	}
 	/**
 	 * 查找角色权限
+	 * @param roleId 角色id
 	 * @return
 	 */
 	@RequestMapping("findAllRoleAuthority")
@@ -232,9 +234,9 @@ public class LpglUserController {
 	 * 添加权限
 	 * @param authorityName 权限名称
 	 * @param parentId 父级Id
-	 * @param code 权限Code 一级 1xxxx 二级 11xxx 三级111xx 按钮 1111x
+	 * @param code 权限Code
 	 * @param url 权限地址
-	 * @param operationType 操作类型：1 增 2 删 3 改 4 查
+	 * @param operationType 操作类型
 	 * @return
 	 */
 	@RequestMapping("editAuthority")

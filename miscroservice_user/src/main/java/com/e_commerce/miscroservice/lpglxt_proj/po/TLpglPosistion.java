@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class TLpglPosistion extends BaseEntity {
 
 	@Column(commit = "职位名称")
-	String posisitionName;
+	private String posisitionName;
 
 
 }
