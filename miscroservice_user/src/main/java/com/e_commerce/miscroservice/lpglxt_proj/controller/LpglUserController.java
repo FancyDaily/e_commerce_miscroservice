@@ -1,20 +1,23 @@
 package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
-import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -36,6 +39,8 @@ public class LpglUserController {
 	@Autowired
 	private LpglUserService lpglUserService;
 
+	@Autowired
+	private RedisUtil redisUtil;
 
 
 	/**
@@ -237,14 +242,16 @@ public class LpglUserController {
 	 * @param code 权限Code
 	 * @param url 权限地址
 	 * @param operationType 操作类型
+	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
 	 * @return
 	 */
 	@RequestMapping("editAuthority")
-	public Object editAuthority(String authorityName, Long parentId,String code,String url,Integer operationType){
+	public Object editAuthority(String authorityName, Long parentId,String code,String url,Integer operationType,Integer status){
 		AjaxResult ajaxResult = new AjaxResult();
 		TLpglAuthority authority = new TLpglAuthority();
 		authority.setAuthorityName(authorityName);
 		authority.setCode(code);
+		authority.setStatus(status);
 
 		if(parentId!=null){
 			authority.setParentId(parentId);
@@ -263,6 +270,20 @@ public class LpglUserController {
 		return ajaxResult;
 	}
 
+	/**
+	 * 查询权限
+	 * @param id 权限id（为空则表示为一级页面）
+	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
+	 * @return
+	 */
+	@RequestMapping("/findRolePage/auth")
+	public Object findRolePage(Long id,Integer status){
+		Long userId = IdUtil.getId();
+
+		AjaxResult ajaxResult = lpglRoleService.findRolePage(userId,id,status);
+		return ajaxResult;
+	}
+
 
 	/**
 	 * 注册
@@ -272,33 +293,10 @@ public class LpglUserController {
 	 * @return
 	 */
 	@RequestMapping("register")
-	public Object register(String username,String password,Long posistionId){
-		AjaxResult ajaxResult = new AjaxResult();
+	public Object register(HttpServletResponse response, HttpServletRequest request,String username, String password, Long posistionId){
 
+		AjaxResult ajaxResult = lpglUserService.register(username,password,posistionId,response,request);
 
-		TLpglUser req = new TLpglUser();
-		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
-		if (user!=null){
-			log.warn("用户已注册");
-			ajaxResult.setSuccess(false);
-			ajaxResult.setMsg("用户已注册");
-			return ajaxResult;
-		}
-		TLpglPosistion tLpglPosistion = lpglRoleService.findAllPosistionById(posistionId);
-		if (tLpglPosistion==null){
-			log.warn("职位不存在");
-			ajaxResult.setSuccess(false);
-			ajaxResult.setMsg("用户已注册");
-			return ajaxResult;
-		}
-		req.setUserAccount(username);
-		req.setPassword(password);
-		MybatisPlus.getInstance().save(req);
-		TLpglUser result = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
-
-		int i =lpglRoleService.updatePosistionRole(posistionId,result.getId());
-
-		ajaxResult.setSuccess(true);
 		return ajaxResult;
 	}
 
@@ -309,26 +307,15 @@ public class LpglUserController {
 	 * @return
 	 */
 	@RequestMapping("login")
-	public Object login(String username,String password){
-		AjaxResult ajaxResult = new AjaxResult();
+	public Object login(HttpServletResponse response, HttpServletRequest request,String username,String password){
 
-		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class)
-			.eq(TLpglUser::getUserAccount,username)
-			.eq(TLpglUser::getPassword,password)
-		);
-		if (user==null){
-			log.warn("用户名或密码错误");
-			ajaxResult.setSuccess(false);
-			ajaxResult.setMsg("用户名或密码错误");
-			return ajaxResult;
-		}
-		JSONObject jsonObject = lpglRoleService.findRole(user.getId());
 
-		ajaxResult.setData(jsonObject);
 
-		ajaxResult.setSuccess(true);
+		AjaxResult ajaxResult = lpglUserService.login(username,password,request,response);
+
 		return ajaxResult;
 	}
+
 
 
 

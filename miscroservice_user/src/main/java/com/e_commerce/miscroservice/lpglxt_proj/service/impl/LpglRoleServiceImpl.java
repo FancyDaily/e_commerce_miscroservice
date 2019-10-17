@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
@@ -78,7 +79,6 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 									if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
 										tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
 										buttonList.add(tLpglAuthorityVo);
-
 									}
 								}
 							}
@@ -192,6 +192,83 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 		tLpglUserPosistion.setPosistionId(posistionId);
 		int i = MybatisPlus.getInstance().save(tLpglUserPosistion);
 		return i;
+	}
+
+	@Override
+	public AjaxResult findRolePage(Long userId, Long id, Integer status) {
+		AjaxResult ajaxResult = new AjaxResult();
+		List<TLpglAuthority> firstPageList = new ArrayList();
+
+		if (id==null){
+			TLpglUserPosistion tLpglUserPosistion = MybatisPlus.getInstance().findOne(
+				new TLpglUserPosistion(), new MybatisPlusBuild(TLpglUserPosistion.class)
+					.eq(TLpglUserPosistion::getUserId, userId)
+					.eq(TLpglUserPosistion::getDeletedFlag, 0)
+			);
+			//获取职位 角色关联
+			if (tLpglUserPosistion != null && tLpglUserPosistion.getPosistionId() != null) {
+				List<TLpglPosistionRole> tLpglPosistionRole = MybatisPlus.getInstance().findAll(new TLpglPosistionRole(), new MybatisPlusBuild(TLpglPosistionRole.class)
+					.eq(TLpglPosistionRole::getPosisitionId, tLpglUserPosistion.getPosistionId())
+					.eq(TLpglPosistionRole::getDeletedFlag, 0)
+				);
+				if (tLpglPosistionRole != null && tLpglPosistionRole.size() > 0) {
+					for (TLpglPosistionRole lpglPosistionRole : tLpglPosistionRole) {
+						//角色关联权限
+						List<TLpglRoleAuthority> tLpglRoleAuthorityList = MybatisPlus.getInstance().findAll(new TLpglRoleAuthority(), new MybatisPlusBuild(TLpglRoleAuthority.class)
+							.eq(TLpglRoleAuthority::getRoleId, lpglPosistionRole.getRoleId())
+							.eq(TLpglRoleAuthority::getDeletedFlag, 0)
+						);
+						if (tLpglRoleAuthorityList != null && tLpglRoleAuthorityList.size() > 0) {
+							for (TLpglRoleAuthority tLpglRoleAuthority : tLpglRoleAuthorityList) {
+								//权限表
+								List<TLpglAuthority> tLpglAuthoriyList = MybatisPlus.getInstance().findAll(new TLpglAuthority(), new MybatisPlusBuild(TLpglAuthority.class)
+									.eq(TLpglAuthority::getId, tLpglRoleAuthority.getAuthorityId())
+									.eq(TLpglAuthority::getDeletedFlag, 0)
+									.eq(TLpglAuthority::getStatus, status)
+								);
+								//权限分配
+								if (tLpglAuthoriyList != null && tLpglAuthoriyList.size() > 0) {
+									for (TLpglAuthority tLpglAuthority : tLpglAuthoriyList) {
+										if (tLpglAuthority.getParentId()==null){
+											firstPageList.add(tLpglAuthority);
+										}
+									}
+								}
+
+							}
+						}
+
+
+					}
+				}
+			}
+		}else {
+			TLpglRoleAuthority tLpglRoleAuthority = MybatisPlus.getInstance().findOne(new TLpglRoleAuthority(),new MybatisPlusBuild(TLpglRoleAuthority.class).eq(TLpglRoleAuthority::getAuthorityId,id));
+			if (tLpglRoleAuthority!=null&&tLpglRoleAuthority.getRoleId()!=null){
+				TLpglPosistionRole tLpglPosistionRole = MybatisPlus.getInstance().findOne(new TLpglPosistionRole(),new MybatisPlusBuild(TLpglPosistionRole.class).eq(TLpglPosistionRole::getRoleId,tLpglRoleAuthority.getRoleId()));
+
+				if (tLpglPosistionRole!=null&&tLpglPosistionRole.getPosisitionId()!=null){
+					TLpglUserPosistion tLpglUserPosistion = MybatisPlus.getInstance().findOne(new TLpglUserPosistion(),new MybatisPlusBuild(TLpglUserPosistion.class)
+						.eq(TLpglUserPosistion::getPosistionId,tLpglPosistionRole.getPosisitionId())
+						.eq(TLpglUserPosistion::getUserId,userId)
+					);
+					if (tLpglUserPosistion!=null){
+						List<TLpglAuthority> list = MybatisPlus.getInstance().findAll(new TLpglAuthority(),new MybatisPlusBuild(TLpglAuthority.class)
+							.eq(TLpglAuthority::getParentId,id)
+							.eq(TLpglAuthority::getStatus,status)
+						);
+						firstPageList = list;
+					}
+
+				}
+
+			}
+		}
+
+		ajaxResult.setSuccess(true);
+		ajaxResult.setData(firstPageList);
+		return ajaxResult;
+
 	}
 
 	public static void main(String[] args) {

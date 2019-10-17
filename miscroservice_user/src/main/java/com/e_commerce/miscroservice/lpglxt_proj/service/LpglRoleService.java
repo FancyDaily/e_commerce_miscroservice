@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglAuthority;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglRole;
@@ -30,4 +31,6 @@ public interface LpglRoleService {
 	TLpglPosistion findAllPosistionById(Long posistionId);
 
 	int updatePosistionRole(Long posistionId, Long userId);
+
+	AjaxResult findRolePage(Long userId, Long id, Integer status);
 }

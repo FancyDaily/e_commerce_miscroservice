@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.TimeUnit;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
@@ -236,5 +238,16 @@ public class UserUtil {
 			tCsqUser.setToken(load.getToken());
 		}
 		return tCsqUser;
+	}
+
+	public static TLpglUser loginTLpg(TLpglUser tLpglUser, Integer application, AuthorizeRpcService authorizeRpcService, HttpServletResponse response) {
+		String namePrefix = UserUtil.getApplicationNamePrefix(application);
+		Token load = authorizeRpcService.load(namePrefix + tLpglUser.getId(),
+			DEFAULT_PASS, tLpglUser.getUserAccount());
+		if (load != null && load.getToken() != null) {
+			response.addHeader("token",load.getToken());
+
+		}
+		return tLpglUser;
 	}
 }
