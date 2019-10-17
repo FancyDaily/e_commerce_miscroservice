@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * @Author: FangyiXu
  * @Date: 2019-10-14 14:51
  */
-@Table(commit = "楼盘管理职位表")
+@Table(value = "t_lpgl_posistion",commit = "楼盘管理职位表")
 @Data
 @Builder
 @NoArgsConstructor
