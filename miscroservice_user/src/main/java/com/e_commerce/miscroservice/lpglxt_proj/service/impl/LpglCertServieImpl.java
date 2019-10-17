@@ -62,6 +62,7 @@ public class LpglCertServieImpl implements LpglCertService {
 
 	@Override
 	public void commitCert(Long houseId, Integer type, Double disCountPrice, String description) {
+		//确认当前用户，所处职位的优惠额度, 如果不够审批，则提示//TODO 或通知上级（将上级信息返回给前端，用于可选发送通知）
 		TLpglCert build = TLpglCert.builder()
 			.houseId(houseId)
 			.type(type)

@@ -15,4 +15,8 @@ public interface LpglEstateService {
 	QueryResult list(Integer pageNum, Integer pageSize);
 
 	Map<String, Map<Integer, Map<Double, Map<Integer, List<TLpglHouse>>>>> houseMap(Long estateId, Integer buildingNum);
+
+	void save(String name);
+
+	void modify(Long estateId, String name, String isValid);
 }

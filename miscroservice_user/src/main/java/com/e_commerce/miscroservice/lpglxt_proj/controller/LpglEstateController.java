@@ -29,6 +29,56 @@ public class LpglEstateController {
 	private LpglEstateService lpglEstateService;
 
 	/**
+	 * 添加楼盘
+	 * @param name 楼盘名字
+	 * @return
+	 */
+	@RequestMapping("add")
+	public Object addEstate(String name) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("添加楼盘, name={}", name);
+			lpglEstateService.save(name);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "添加楼盘", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("添加楼盘", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 修改楼盘
+	 * @param name 楼盘名字
+	 * @return
+	 */
+	@RequestMapping("modify")
+	public Object modifyEstate(Long estateId, String name, String isValid) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("修改楼盘, estateId={}, name={}, isValid={}", estateId, name, isValid);
+			lpglEstateService.modify(estateId, name, isValid);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "修改楼盘", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("修改楼盘", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * 楼盘列表
 	 * @param pageNum 页码
 	 * @param pageSize 大小

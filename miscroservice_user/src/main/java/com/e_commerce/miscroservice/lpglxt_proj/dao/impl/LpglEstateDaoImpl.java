@@ -29,7 +29,8 @@ public class LpglEstateDaoImpl implements LpglEstateDao {
 
 	@Override
 	public List<TLpglEstate> selectAllPage(Integer pageNum, Integer pageSize) {
-		IdUtil.setTotal(baseBuild());
+		MybatisPlusBuild baseBuild = baseBuild();
+		IdUtil.setTotal(baseBuild);
 		return MybatisPlus.getInstance().findAll(new TLpglEstate(), baseBuild().page(pageNum, pageSize));
 	}
 
@@ -46,4 +47,17 @@ public class LpglEstateDaoImpl implements LpglEstateDao {
 			.in(TLpglEstate::getId, houseIds)
 		);
 	}
+
+	@Override
+	public int insert(TLpglEstate... name) {
+		return MybatisPlus.getInstance().save(name);
+	}
+
+	@Override
+	public int update(TLpglEstate build) {
+		return MybatisPlus.getInstance().update(build, baseBuild()
+			.eq(TLpglEstate::getId, build.getId())
+		);
+	}
+
 }
