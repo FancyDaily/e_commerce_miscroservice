@@ -1,0 +1,40 @@
+GET http://127.0.0.1:8087/lpgl/user/findAllPosistion
+
+<> 2019-10-17T014846.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posistionName=测试
+
+<> 2019-10-17T014829.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posiitionName=测试
+
+<> 2019-10-17T014808.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posiitionName=测试
+
+<> 2019-10-17T014736.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posiitionName=测试
+
+<> 2019-10-17T014719.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion？posiitionName=测试
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/findAllPosistion
+
+<> 2019-10-17T014636.200.json
+
+###
+
