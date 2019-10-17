@@ -62,4 +62,6 @@ public interface CsqDataTransferService {
 	void transeferGrowthFundRecordAfter();
 
 	void offlineDataRecordIn(List<TCsqTransferData> datas);
+
+	String dataOut_1();
 }

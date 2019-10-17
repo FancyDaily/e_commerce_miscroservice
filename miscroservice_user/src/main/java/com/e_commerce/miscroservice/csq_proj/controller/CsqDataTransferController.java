@@ -326,4 +326,16 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	@RequestMapping("dataOut_1")
+	public Object dataOut_1() {
+		AjaxResult result = new AjaxResult();
+		try {
+			String path = csqDataTransferService.dataOut_1();
+			result.setData(path);
+			result.setSuccess(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 }

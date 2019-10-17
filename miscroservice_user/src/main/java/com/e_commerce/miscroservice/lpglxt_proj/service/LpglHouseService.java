@@ -2,6 +2,10 @@ package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 
 /**
  * @Author: FangyiXu
@@ -9,8 +13,17 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
  */
 public interface LpglHouseService {
 
-	QueryResult list(Long estateId, Integer pageNum, Integer pageSize);
-
 	int save(TLpglHouse tLpglHouse);
 
+	QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize);
+
+	TLpglHouse detail(Long houseId);
+
+	int modify(TLpglHouse obj);
+
+	int add(TLpglHouse obj);
+
+	void remove(Long houseId);
+
+	List<String> recordIn(Long estateId, MultipartFile file, boolean skipModify);
 }

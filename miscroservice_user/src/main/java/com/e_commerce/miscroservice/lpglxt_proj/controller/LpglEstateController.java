@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglEstateService;
 import com.e_commerce.miscroservice.lpglxt_proj.vo.LpglHouseMapVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 楼盘
@@ -65,8 +67,8 @@ public class LpglEstateController {
 		Long userId = IdUtil.getId();
 		try {
 			log.info("售楼情况图谱数据, estateId={}, buildingNum={}", estateId, buildingNum);
-			List<LpglHouseMapVo> list = lpglEstateService.houseMap(estateId, buildingNum);
-			result.setData(list);
+			Map<String, Map<Integer, Map<Double, Map<Integer, List<TLpglHouse>>>>> res = lpglEstateService.houseMap(estateId, buildingNum);
+			result.setData(res);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "售楼情况图谱数据", e.getMessage());

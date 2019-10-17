@@ -336,6 +336,17 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		);
 	}
 
+	@Override
+	public List<TCsqOrder> selectByFromTypeAndToIdAndToTypeAndStatusDesc(int fromType, long toId, int toType, int status) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
+			.eq(TCsqOrder::getFromType, fromType)
+			.eq(TCsqOrder::getToId, toId)
+			.eq(TCsqOrder::getToType, toType)
+			.eq(TCsqOrder::getStatus, status)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqOrder::getCreateTime))
+		);
+	}
+
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
 		return new MybatisPlusBuild(TCsqOrder.class)
 			.eq(TCsqOrder::getFromId, fundId)

@@ -10,14 +10,19 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
+import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceUserOutVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1201,6 +1206,80 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 
 		//进行数据转移
 		dealWithTransferData(datas);
+	}
+
+	@Override
+	public String dataOut_1() {
+		//查询订单表
+		List<TCsqOrder> orignOrders = csqOrderDao.selectByFromTypeAndToIdAndToTypeAndStatusDesc(1, 76L, 4, 2);	//TODO 写死的数据
+		List<Long> userIds = orignOrders.stream()
+			.map(TCsqOrder::getFromId)
+			.distinct()
+			.collect(Collectors.toList());
+		Map<Long, List<TCsqOrder>> userIdOrderMap = orignOrders.stream()
+			.collect(Collectors.groupingBy(TCsqOrder::getFromId));
+		List<TCsqUser> tCsqUsers = csqUserDao.selectInIds(userIds);
+		Map<Long, List<TCsqUser>> idUserMap = tCsqUsers.stream()
+			.collect(Collectors.groupingBy(TCsqUser::getId));
+
+		List<CsqServiceUserOutVo> outPutVo = userIds.stream()
+			.map(userId -> {
+				List<TCsqOrder> orders = userIdOrderMap.get(userId);
+				//捐款笔数
+				int donateNum = orders.size();
+				//累计捐款金额
+				Double donateAmount = orders.stream()
+					.map(TCsqOrder::getPrice).reduce(0d, Double::sum);
+				//最近订单创建时间
+				orders = orders.stream()
+					.sorted(Comparator.comparing(TCsqOrder::getCreateTime).reversed()).collect(Collectors.toList());
+				TCsqOrder lastOrder = orders.get(0);
+				Timestamp lastOrderTime = lastOrder.getCreateTime();
+				//最近订单金额
+				Double lastOrderPrice = lastOrder.getPrice();
+				//用户头像、昵称、手机号、创建时间
+				List<TCsqUser> theList = idUserMap.get(userId);
+				TCsqUser theUser = theList.get(0);
+				String headPic = theUser.getUserHeadPortraitPath();
+				String name = theUser.getName();
+				String userTel = theUser.getUserTel();
+				Timestamp createTime = theUser.getCreateTime();
+
+				return CsqServiceUserOutVo.builder()
+					.createTime(createTime)
+					.telephone(userTel)
+					.name(name)
+					.headPic(headPic)
+					.donateNum(donateNum)
+					.donateAmount(donateAmount)
+					.lastDonatetime(lastOrderTime)
+					.lastDonateAmount(lastOrderPrice).build();
+			}).collect(Collectors.toList());
+
+		//将列表打印成excel的第二行
+		//第一行为头像、昵称、手机号、注册时间、捐赠笔数、累计捐赠金额、最近一次捐款时间、最近一次捐款金额
+		OutputStream outputStream = null;
+		String path = "/Users/xufangyi/Downloads/newFile";
+		try {
+			outputStream = new FileOutputStream(new File(path));
+			List<Object[]> objects = outPutVo.stream()
+				.map(a -> new Object[]{
+					a.getHeadPic(),
+					a.getName(),
+					a.getTelephone(),
+					a.getCreateTime(),
+					a.getDonateNum(),
+					a.getDonateAmount(),
+					a.getLastDonatetime(),
+					a.getLastDonateAmount()
+				}).collect(Collectors.toList());
+			POIUtil.export(null, Arrays.asList("头像", "昵称", "手机号", "注册时间", "捐赠笔数", "累计捐赠金额", "最近一次捐款时间", "最近一次捐款金额"), objects, outputStream);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return path;
 	}
 
 	private void dealWithGrowthValueTransfer(boolean isAfterDeal) {

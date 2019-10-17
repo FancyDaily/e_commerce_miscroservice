@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.lpglxt_proj.vo.LpglFloorHouseMapVo;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class TLpglHouse extends BaseEntity {
 	/**
 	 * 房间号
 	 */
-	@Column(commit = "房间号")
+	@Column(commit = "房间号", length = 11)
 	private Integer houseNum;
 
 	/**
@@ -57,7 +58,7 @@ public class TLpglHouse extends BaseEntity {
 	 * 单元号
 	 */
 	@Column(commit = "单元号", length = 11)
-	private Integer groupNum;
+	private String groupName;
 
 	/**
 	 * 楼层
@@ -68,8 +69,8 @@ public class TLpglHouse extends BaseEntity {
 	/**
 	 * 朝向(东北到西北，分为八个方位)
 	 */
-	@Column(commit = "朝向", length = 11)
-	private Integer directionNum;
+	@Column(commit = "朝向")
+	private String direction;
 
 	/**
 	 * 建筑面积
@@ -95,10 +96,24 @@ public class TLpglHouse extends BaseEntity {
 	@Column(commit = "室内单价", precision = 2)
 	private Double insidePrice;
 
+	@Column(commit = "总价", precision = 2)
+	private Double totalPrice;
+
+	@Column(commit = "优惠总价", precision = 2)
+	private Double disCountPrice;
+
+	@Column(commit = "优惠状态", length = 11)
+	private Integer disCountStatus;
+
+	@Column(commit = "销售员编号")
+	private Long saleManId;
+
 	/**
 	 * 状态
 	 */
 	@Column(commit = "状态")
 	private Integer status;
+
+	public LpglFloorHouseMapVo copyLpglFloorHouseMapVo() {return null;}
 
 }

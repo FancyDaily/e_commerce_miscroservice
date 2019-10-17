@@ -83,4 +83,6 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByFromTypeAndStatus(int toCode, Integer code);
 
 	List<TCsqOrder> selectByToType(int toCode);
+
+	List<TCsqOrder> selectByFromTypeAndToIdAndToTypeAndStatusDesc(int i, long l, int i1, int i2);
 }

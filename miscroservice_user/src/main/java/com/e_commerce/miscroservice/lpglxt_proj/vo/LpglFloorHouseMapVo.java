@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.lpglxt_proj.vo;
 
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,6 @@ public class LpglFloorHouseMapVo {
 	 * 房号
 	 */
 	Integer houseNum;
+
+	public TLpglHouse copyTLpglHouse() {return null;}
 }
