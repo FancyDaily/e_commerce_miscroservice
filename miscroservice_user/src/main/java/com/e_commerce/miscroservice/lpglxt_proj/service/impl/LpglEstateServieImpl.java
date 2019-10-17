@@ -59,4 +59,19 @@ public class LpglEstateServieImpl implements LpglEstateService {
 				)
 			);
 	}
+
+	@Override
+	public void save(String name) {
+		TLpglEstate build = TLpglEstate.builder()
+			.name(name).build();
+		lpglEstateDao.insert(build);
+	}
+
+	@Override
+	public void modify(Long estateId, String name, String isValid) {
+		TLpglEstate build = TLpglEstate.builder().name(name).build();
+		build.setId(estateId);
+		build.setIsValid(isValid);
+		lpglEstateDao.update(build);
+	}
 }

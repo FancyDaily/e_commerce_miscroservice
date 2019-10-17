@@ -17,4 +17,9 @@ public interface LpglEstateDao {
 	TLpglEstate selectByPrimaryKey(Long estateId);
 
 	List<TLpglEstate> selectInIds(List<Long> houseIds);
+
+	int insert(TLpglEstate... name);
+
+	int update(TLpglEstate build);
+
 }

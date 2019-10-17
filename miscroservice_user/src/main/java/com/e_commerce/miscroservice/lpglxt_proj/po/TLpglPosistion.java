@@ -20,5 +20,7 @@ public class TLpglPosistion extends BaseEntity {
 	@Column(commit = "职位名称")
 	private String posisitionName;
 
+	@Column(commit = "优惠额度")
+	private Double discountCredit;
 
 }

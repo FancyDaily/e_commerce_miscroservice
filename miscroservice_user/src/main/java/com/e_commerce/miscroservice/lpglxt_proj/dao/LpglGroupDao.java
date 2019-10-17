@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.dao;
 
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TlpglGroup;
 
 import java.util.List;
 
@@ -10,4 +11,9 @@ import java.util.List;
  */
 public interface LpglGroupDao {
 
+	List<TlpglGroup> selectByEstateIdPage(Long estateId, Integer pageNum, Integer pageSize);
+
+	int insert(TlpglGroup build);
+
+	int update(TlpglGroup build);
 }

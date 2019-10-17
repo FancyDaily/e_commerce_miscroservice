@@ -5,4 +5,6 @@ package com.e_commerce.miscroservice.lpglxt_proj.dao;
  * @Date: 2019-10-14 16:47
  */
 public interface LpglPositionDao {
+
+	int modify(Long positionId, Double discountCredit);
 }

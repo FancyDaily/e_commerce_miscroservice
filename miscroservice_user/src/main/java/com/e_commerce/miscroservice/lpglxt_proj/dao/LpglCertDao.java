@@ -10,11 +10,13 @@ import java.util.List;
  */
 public interface LpglCertDao {
 
-	List<TLpglCert> selectByTypeAndStatusPage(Integer type, Integer status, Integer pageNum, Integer pageSize);
+	List<TLpglCert> selectByTypeAndStatusPage(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday);
 
 	TLpglCert selectByPrimaryKey(Long certId);
 
 	int update(TLpglCert tLpglCert);
 
 	int insert(TLpglCert build);
+
+	List<TLpglCert> selectByTypeAndStatusInApplyUserIdsPage(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds);
 }
