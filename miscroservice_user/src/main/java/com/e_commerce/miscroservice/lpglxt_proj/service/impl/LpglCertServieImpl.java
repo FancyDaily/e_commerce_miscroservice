@@ -13,9 +13,14 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCustomerInfos;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
+import com.e_commerce.miscroservice.lpglxt_proj.utils.WxUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -48,7 +53,7 @@ public class LpglCertServieImpl implements LpglCertService {
 	public void cert(Long userId, Long certId, Integer status) {
 		boolean certPass = TlpglCertEnum.STATUS_PASS.getCode() == status;
 		TLpglCert tLpglCert = lpglCertDao.selectByPrimaryKey(certId);
-		dealWithLpglHouse(tLpglCert, certPass);
+		dealWithLpglHouse(userId, tLpglCert, certPass);
 
 		tLpglCert.setCertUserId(userId);
 		tLpglCert.setStatus(status);
@@ -65,7 +70,12 @@ public class LpglCertServieImpl implements LpglCertService {
 		lpglCertDao.insert(build);
 	}
 
-	private void dealWithLpglHouse(TLpglCert tLpglCert, boolean certPass) {
+	public static void main(String[] args) {
+		String format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now());
+		System.out.println(format);
+	}
+
+	private void dealWithLpglHouse(Long userId, TLpglCert tLpglCert, boolean certPass) {
 		/*boolean pass = TlpglCertEnum.TYPE_PRICEDISCOUNT.getCode() != tLpglCert.getType();
 		if(pass) return;*/
 		TlpglCertEnum type = TlpglCertEnum.getType(tLpglCert.getType());
@@ -76,15 +86,54 @@ public class LpglCertServieImpl implements LpglCertService {
 		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
 		switch (type) {
 			case TYPE_PRICEDISCOUNT:
+				//TODO 优惠金额大于自己可支配额度的，递交上级处理(通知上级)
+
 				tLpglHouse.setDisCountStatus(!certPass ? TlpglHouseEnum.DISCOUNT_STAUTS_NO.getCode() : TlpglHouseEnum.DISCOUNT_STATUS_YES.getCode());
 				if (certPass) {
 					tLpglHouse.setDisCountPrice(tLpglHouse.getDisCountPrice());
 				}
 				//TODO 消息通知：审核结果抄送销售经理确认
+				List<String> openIds = new ArrayList<>();
+
+				//发送通知消息
+				for(String openId: openIds) {
+					/*HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
+					String tipMsg = "";
+					templateDatas.put("first", new WxUtil.TemplateData(tipMsg));
+//					templateDatas.put("keyword1", new WxUtil.TemplateData(productName));
+//					templateDatas.put("keyword2", new WxUtil.TemplateData(payMoney));
+//					templateDatas.put("keyword3", new WxUtil.TemplateData(payerName));
+					templateDatas.put("keyword4", new WxUtil.TemplateData(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now())));
+//					templateDatas.put("keyword5", new WxUtil.TemplateData(orderNo));
+					templateDatas.put("keyword6", new WxUtil.TemplateData("点击查看详情"));
+					String templateId = "";
+					String url = "";
+					WxUtil.publicNotify(openId, templateId, url, templateDatas);*/
+				}
+
 				break;
 			case TYPE_SOLDOUTREQUEST:
 				tLpglHouse.setStatus(!certPass ? TlpglHouseEnum.STATUS_INITAIL.getCode() : TlpglHouseEnum.STATUS_SOLDOUT.getCode());
-				//TODO 消息通知：审核结果抄送最高级领导[总经理,副总经理]
+				//TODO 消息通知：审核结果抄送最高级领导[总经理,总经办]
+				//获得总经理和总经办的openid
+				List<String> theOpenIds = new ArrayList<>();
+
+				//发送通知消息
+				for(String openId: theOpenIds) {
+					HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
+					String tipMsg = "";
+					templateDatas.put("first", new WxUtil.TemplateData(tipMsg));
+//					templateDatas.put("keyword1", new WxUtil.TemplateData(productName));
+//					templateDatas.put("keyword2", new WxUtil.TemplateData(payMoney));
+//					templateDatas.put("keyword3", new WxUtil.TemplateData(payerName));
+					templateDatas.put("keyword4", new WxUtil.TemplateData(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now())));
+//					templateDatas.put("keyword5", new WxUtil.TemplateData(orderNo));
+					templateDatas.put("keyword6", new WxUtil.TemplateData("点击查看详情"));
+					String templateId = "";
+					String url = "";
+					WxUtil.publicNotify(openId, templateId, url, templateDatas);
+				}
+
 				break;
 			case TYPE_CUSTOMER:
 				Long customerInfoId = tLpglCert.getCustomerInfoId();

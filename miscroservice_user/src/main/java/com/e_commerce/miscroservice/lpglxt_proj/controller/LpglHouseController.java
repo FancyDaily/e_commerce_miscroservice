@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglGroupDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglHouseService;
@@ -32,21 +33,25 @@ public class LpglHouseController {
 	@Autowired
 	private LpglCertService lpglCertService;
 
+	@Autowired
+	private LpglGroupDao lpglGroupDao;
+
 	/**
 	 * 商品房列表
 	 * @param estateId 楼盘编号
 	 * @param buildingNum 楼号
 	 * @param pageNum 页码
 	 * @param pageSize 大小
+	 * @param groupId 分组编号
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object houseList(Long estateId, Integer buildingNum, Integer pageNum, Integer pageSize) {
+	public Object houseList(Long estateId, Integer buildingNum, Integer pageNum, Integer pageSize, Long groupId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("商品房列表, userId, estateId={}, buildingNum={}, pageNum={}, pageSize={}", userId, estateId, buildingNum, pageNum, pageSize);
-			QueryResult list = lpglHouseService.list(userId, estateId, pageNum, pageSize);
+			log.info("商品房列表, userId, estateId={}, buildingNum={}, pageNum={}, pageSize={}, groupId={}", userId, estateId, buildingNum, pageNum, pageSize, groupId);
+			QueryResult list = lpglHouseService.list(userId, estateId, pageNum, pageSize, groupId);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {

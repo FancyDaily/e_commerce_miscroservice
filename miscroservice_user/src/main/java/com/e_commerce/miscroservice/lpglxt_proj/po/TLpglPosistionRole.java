@@ -20,7 +20,10 @@ public class TLpglPosistionRole extends BaseEntity {
 	@Column(commit = "职位id")
 	private Long posisitionId;
 
-
-	@Column(commit = "角色id",length = 11)
+	@Column(commit = "角色id", length = 11)
 	private Long roleId;
+
+	@Column(commit = "楼盘id", length = 11)
+	private Long estateId;
+
 }

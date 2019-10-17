@@ -25,4 +25,6 @@ public interface LpglCustomerInfoDao {
 	int updateByStatusAndLtUpdateTimePage(Integer status, Long timeStamp);
 
 	int remove(Long id);
+
+	List<TLpglCustomerInfos> selectByStatusAndEstateIdAndIsDoneAndAreAndDepartmentAndIsToday(Integer status, Long estateId, Integer isDone, String area, String department, boolean isToday);
 }

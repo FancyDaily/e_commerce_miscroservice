@@ -1,6 +1,6 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service;
 
-import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import java.util.HashMap;
 
 /**
  * @Author: FangyiXu
@@ -9,7 +9,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 public interface LpglCustomerInfoService {
 
 
-	QueryResult list(Integer status, Integer pageNum, Integer pageSize);
+	HashMap<String, Object> list(Integer integer, Integer status, Integer pageNum, Long estateId, Integer pageSize, String area, String department, boolean isToday);
 
 	void commit(Long id, Long houseId, String telephone, String description);
 

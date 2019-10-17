@@ -115,4 +115,11 @@ public class LpglUserDaoImpl implements LpglUserDao {
 		);
 	}
 
+	@Override
+	public List<TLpglUser> selectByGroupId(Long groupId) {
+		return MybatisPlus.getInstance().findAll(new TLpglUser(), baseBuild()
+			.eq(TLpglUser::getGroupId, groupId)
+		);
+	}
+
 }

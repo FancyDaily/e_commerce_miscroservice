@@ -71,6 +71,24 @@ public class TLpglCustomerInfos extends BaseEntity {
 	@Column(commit = "自驾车牌号码")
 	private String licenseName;
 
+	/**
+	 * 类型 - 自驾或接送
+	 */
+	@Column(commit = "类型")
+	private Integer type;
+
+	@Column(commit = "是否带看")
+	private Integer isDone;
+
+	@Column(commit = "区域")
+	private String area;
+
+	@Column(commit = "对接部门")
+	private String department;
+
+	@Column(commit = "报销金额")
+	private Double reimbursementAmount;
+
 	@Column(commit = "描述")
 	private String description;
 

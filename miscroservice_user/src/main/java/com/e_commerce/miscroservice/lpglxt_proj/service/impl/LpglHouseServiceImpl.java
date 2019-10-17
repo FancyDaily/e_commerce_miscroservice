@@ -9,8 +9,10 @@ import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglEstateDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,9 +40,15 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 	@Autowired
 	private LpglEstateDao lpglEstateDao;
 
+	@Autowired
+	private LpglUserDao lpglUserDao;
+
 	@Override
-	public QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize) {
-		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectByEstateIdPage(estateId, pageNum, pageSize);
+	public QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize, Long groupId) {
+		List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
+		List<Long> userIds = tLpglUsers.stream()
+			.map(TLpglUser::getId).collect(Collectors.toList());
+		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectByEstateIdInSalesManIdsPage(estateId, pageNum, pageSize, userIds);
 		long total = IdUtil.getTotal();
 
 		return PageUtil.buildQueryResult(tLpglHouses, total);

@@ -9,11 +9,8 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @Author: FangyiXu
@@ -109,7 +106,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 	public int insert(List<TLpglHouse> addList, boolean isMultiple) {
 		MybatisPlus instance = MybatisPlus.getInstance();
 		int saveNum = 0;
-		if(isMultiple) {
+		if (isMultiple) {
 			//如果数量超过piece，进行分割
 			int offset = 0;
 			int piece = 200;
@@ -123,7 +120,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 				offset += dealList.size();
 			}
 		} else {
-			for(TLpglHouse element: addList) {
+			for (TLpglHouse element : addList) {
 				saveNum = instance.save(element);
 			}
 		}
@@ -139,7 +136,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 	public int modify(List<TLpglHouse> modifyList, boolean isMultiple) {
 		MybatisPlus instance = MybatisPlus.getInstance();
 		int modifyNum = 0;
-		if(isMultiple) {
+		if (isMultiple) {
 			//如果数量超过piece，进行分割
 			int offset = 0;
 			int piece = 50;
@@ -156,7 +153,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 				offset += dealList.size();
 			}
 		} else {
-			for(TLpglHouse theModify: modifyList) {
+			for (TLpglHouse theModify : modifyList) {
 				modifyNum += instance.update(theModify, baseBuild()
 					.eq(TLpglHouse::getId, theModify.getId()));
 			}
@@ -176,7 +173,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 			baseBuild.eq(TLpglHouse::getEstateId, estateId)
 				.eq(TLpglHouse::getBuildingNum, buildingNum)
 				.eq(TLpglHouse::getHouseNum, houseNum);
-			if(cnt != 0) {
+			if (cnt != 0) {
 				baseBuild.groupAfter();
 			}
 
@@ -190,11 +187,21 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 		);
 	}
 
+	@Override
+	public List<TLpglHouse> selectByEstateIdInSalesManIdsPage(Long estateId, Integer pageNum, Integer pageSize, List<Long> salesManIds) {
+		MybatisPlusBuild mybatisPlusBuild = byEstateBuild(estateId);
+		mybatisPlusBuild = salesManIds == null || salesManIds.isEmpty() ? mybatisPlusBuild.in(TLpglHouse::getSaleManId) : mybatisPlusBuild;
+		return MybatisPlus.getInstance().findAll(new TLpglHouse(), mybatisPlusBuild
+		);
+	}
+
+
 	public static void main(String[] args) {
 		MybatisPlusBuild baseBuild = new MybatisPlusBuild(TLpglHouse.class)
-			.eq(TLpglHouse::getIsValid, AppConstant.IS_VALID_YES);;
+			.eq(TLpglHouse::getIsValid, AppConstant.IS_VALID_YES);
+		;
 		ArrayList<TLpglHouse> todoList = new ArrayList<>();
-		for(int i=0; i < 4000; i++) {
+		for (int i = 0; i < 4000; i++) {
 			TLpglHouse tLpglHouse = new TLpglHouse();
 			tLpglHouse.setEstateId(Long.valueOf(i));
 			tLpglHouse.setBuildingNum(i);
@@ -211,7 +218,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 			baseBuild.eq(TLpglHouse::getEstateId, estateId)
 				.eq(TLpglHouse::getBuildingNum, buildingNum)
 				.eq(TLpglHouse::getHouseNum, houseNum);
-			if(cnt != 0) {
+			if (cnt != 0) {
 				baseBuild.groupAfter();
 			}
 

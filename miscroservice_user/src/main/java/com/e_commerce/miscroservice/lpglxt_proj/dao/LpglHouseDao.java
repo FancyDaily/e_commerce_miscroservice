@@ -37,4 +37,6 @@ public interface LpglHouseDao {
 	int modify(List<TLpglHouse> modifyList, boolean isMultiple);
 
 	List<TLpglHouse> selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(List<TLpglHouse> todoList);
+
+	List<TLpglHouse> selectByEstateIdInSalesManIdsPage(Long estateId, Integer pageNum, Integer pageSize, List<Long> salesManIds);
 }
