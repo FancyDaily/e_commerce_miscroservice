@@ -3,7 +3,6 @@ package com.e_commerce.miscroservice.commons.util.colligate;
 import java.io.*;
 import java.util.*;
 
-import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
@@ -11,10 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -355,7 +351,6 @@ public class POIUtil {
 						System.out.println("area = " + areString);
 
 						System.out.println("楼层号 = " + floorNumString);
-						//TODO 售出状态信息(颜色)
 
 						String houseNum = cell.toString();
 						if(houseNum.contains(".")) {
@@ -369,6 +364,11 @@ public class POIUtil {
 						Integer floorNum = Integer.valueOf(floorNumString.substring(0, floorNumString.length() - 1));
 						Double area = Double.valueOf(areString.substring(0, areString.length() - 1));
 						HashMap<String, Object> resultMap = new HashMap<>();
+
+						XSSFCellStyle cellStyle = cell.getCellStyle();
+						XSSFColor fillBackgroundColorColor = cellStyle.getFillBackgroundColorColor();
+						resultMap.put("haveColor", fillBackgroundColorColor != null);
+
 						resultMap.put("buildingNum", buildingNum);
 						resultMap.put("groupName", groupName);
 						resultMap.put("floorNum", floorNum);

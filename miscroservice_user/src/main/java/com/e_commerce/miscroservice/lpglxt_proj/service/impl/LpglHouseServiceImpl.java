@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglEstateDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
+import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglHouseEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
@@ -93,12 +94,14 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 						Double area = (Double) a.get("area");
 						Integer buildingNum = (Integer) a.get("buildingNum");
 						String groupName = (String) a.get("groupName");
+						Boolean haveColor = (Boolean) a.get("haveColor");
 						return TLpglHouse.builder()
 							.estateId(estateId)
 							.houseNum(houseNum)
 							.floorNum(floorNum)
 							.buildingArea(area)
 							.buildingNum(buildingNum)
+							.status(haveColor? TlpglHouseEnum.STATUS_SOLDOUT.getCode() : TlpglHouseEnum.STATUS_INITAIL.getCode())
 							.groupName(groupName).build();
 					}
 				).collect(Collectors.toList());

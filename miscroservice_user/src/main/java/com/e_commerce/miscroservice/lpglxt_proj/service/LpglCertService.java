@@ -8,7 +8,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
  */
 public interface LpglCertService {
 
-	QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize);
+	QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId);
 
 	void cert(Long userId, Long certId, Integer status);
 

@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 分组表
@@ -13,6 +14,7 @@ import lombok.Data;
 @Table(commit = "分组表")
 @Data
 @Builder
+@NoArgsConstructor
 public class TlpglGroup extends BaseEntity{
 
 	@Column(commit = "楼盘编号")

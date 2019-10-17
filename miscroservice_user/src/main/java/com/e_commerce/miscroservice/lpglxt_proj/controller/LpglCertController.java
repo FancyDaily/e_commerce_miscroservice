@@ -33,15 +33,17 @@ public class LpglCertController {
 	 * @param type 类型1优惠价申请2售出申请3客户报备
 	 * @param pageNum 页码
 	 * @param pageSize 大小
+	 * @param isToday 是否筛选今天
+	 * @param groupId 分组编号
 	 * @return
 	 */
 	@RequestMapping("list")
-	public Object houseUnderCertList(Integer status, Integer type, Integer pageNum, Integer pageSize) {
+	public Object houseUnderCertList(Integer status, Integer type, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("审批商品房列表(优惠价申请、更改状态为已售出申请、客户报备)");
-			QueryResult result1 = lpglCertService.underCertList(type, status, pageNum, pageSize);
+			log.info("审批商品房列表(优惠价申请、更改状态为已售出申请、客户报备), status={}, type={}, pageNum={}, pageSize={}, isToday={}, groupId={}", status, type, pageNum, pageSize, isToday, groupId);
+			QueryResult result1 = lpglCertService.underCertList(type, status, pageNum, pageSize, isToday, groupId);
 			result.setData(result1);
 			result.setSuccess(true);
 		} catch (MessageException e) {

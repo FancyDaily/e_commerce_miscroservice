@@ -6,12 +6,14 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglCertDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglCustomerInfoDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
 import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglCertEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglCustomerInfoEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglHouseEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCustomerInfos;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.utils.WxUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -41,9 +44,18 @@ public class LpglCertServieImpl implements LpglCertService {
 	@Autowired
 	private LpglCustomerInfoDao lpglCustomerInfoDao;
 
+	@Autowired
+	private LpglUserDao lpglUserDao;
+
 	@Override
-	public QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize) {
-		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeAndStatusPage(type, status, pageNum, pageSize);
+	public QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
+		List<Long> userIds = null;
+		if(groupId != null) {
+			List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
+			userIds = tLpglUsers.stream()
+				.map(TLpglUser::getId).collect(Collectors.toList());
+		}
+		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeAndStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
 		long total = IdUtil.getTotal();
 
 		return PageUtil.buildQueryResult(tLpglCerts, total);
@@ -62,7 +74,6 @@ public class LpglCertServieImpl implements LpglCertService {
 
 	@Override
 	public void commitCert(Long houseId, Integer type, Double disCountPrice, String description) {
-		//确认当前用户，所处职位的优惠额度, 如果不够审批，则提示//TODO 或通知上级（将上级信息返回给前端，用于可选发送通知）
 		TLpglCert build = TLpglCert.builder()
 			.houseId(houseId)
 			.type(type)
@@ -87,7 +98,9 @@ public class LpglCertServieImpl implements LpglCertService {
 		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
 		switch (type) {
 			case TYPE_PRICEDISCOUNT:
+				//确认当前用户，所处职位的优惠额度, 如果不够审批，则提示//TODO 或通知上级（将上级信息返回给前端，用于可选发送通知）
 				//TODO 优惠金额大于自己可支配额度的，递交上级处理(通知上级)
+
 
 				tLpglHouse.setDisCountStatus(!certPass ? TlpglHouseEnum.DISCOUNT_STAUTS_NO.getCode() : TlpglHouseEnum.DISCOUNT_STATUS_YES.getCode());
 				if (certPass) {
