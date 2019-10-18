@@ -70,7 +70,7 @@ public class LpglUserServiceImpl  implements LpglUserService {
 			);
 		}
 
-		user = UserUtil.loginTLpg(user, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService,response);
+		user = UserUtil.loginTLpg(user, ApplicationEnum.LPGL_APPLICATION.toCode(), authorizeRpcService,response);
 		ajaxResult.setData(user);
 		ajaxResult.setSuccess(true);
 		return ajaxResult;

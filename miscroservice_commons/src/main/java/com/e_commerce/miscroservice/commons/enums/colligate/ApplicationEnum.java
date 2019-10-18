@@ -10,7 +10,8 @@ public enum ApplicationEnum {
 
     XIAOSHI_APPLICATION(1,"晓时互助", "XIOASHI_AUTHORIZE_"),
     GUANZHAO_APPLICATION(2,"观照律师训练营", "GUANZHAO_AUTHORIZE_"),
-	CONGSHANQIAO_APPLICATION(3, "丛善桥", "CONGSHANQIAO_AUTHORIZE_");
+	CONGSHANQIAO_APPLICATION(3, "丛善桥", "CONGSHANQIAO_AUTHORIZE_"),
+	LPGL_APPLICATION(4, "楼盘管理", "LPGL_AUTHORIZE_");
 
     public static LoadingCache loadingCache = CacheBuilder.newBuilder()
             .maximumSize(10000) //设置缓存上线
