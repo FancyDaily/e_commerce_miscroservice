@@ -71,7 +71,7 @@ public class WxUtil {
 //                "11","111", "11");
 //        String token = getAccessToken();
 //        System.out.println(token);
-        sendPublicMsg("ob5kc1St_xBVeAssuOQN3Qt4ua-Q","msg","name","10","我","jjjjj","url",null);
+		sendPublicWaitMsg("ob5kc1St_xBVeAssuOQN3Qt4ua-Q","头部消息","订单号","订单类型","订单内容","点击查看详情","wwww.baidu.com");
 //        JSONObject jsonObject = getUserList(token);
 //        JSONObject data = jsonObject.getJSONObject("data");
 //        JSONArray jsonArray = data.getJSONArray("openid");
@@ -179,6 +179,35 @@ public class WxUtil {
         map.put("keyword4", new TemplateData(format.format(LocalDateTime.now())));
         map.put("keyword5", new TemplateData(orderNo));
         map.put("keyword6", new TemplateData("点击查看详情"));
+
+
+        publicNotify(openId, templateId, url, map);
+
+
+    }
+	/**
+	 * 公众号发送通知
+	 * @param openId
+	 * @param firstData
+	 * @param orderNo
+	 * @param orderType
+	 * @param content
+	 * @param lastData
+	 * @param url
+	 */
+    public static void sendPublicWaitMsg(String openId,
+                                     String firstData, String orderNo, String orderType,String content,String lastData,String url
+                                     ) {
+
+    	String templateId = "CniLsHXOBFx7yoPyTMYhTa8ow_0XpTyzM9KJHEkZvPE";
+
+        Map<String, TemplateData> map = new HashMap<>();
+        map.put("first", new TemplateData(firstData));
+        map.put("keyword1", new TemplateData(orderNo));
+        map.put("keyword2", new TemplateData(orderType));
+        map.put("keyword3", new TemplateData(format.format(LocalDateTime.now())));
+        map.put("keyword4", new TemplateData(content));
+        map.put("remark", new TemplateData(lastData));
 
 
         publicNotify(openId, templateId, url, map);
