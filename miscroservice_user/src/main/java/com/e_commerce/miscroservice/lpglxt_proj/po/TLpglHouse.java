@@ -111,7 +111,7 @@ public class TLpglHouse extends BaseEntity {
 	/**
 	 * 状态
 	 */
-	@Column(commit = "状态")
+	@Column(commit = "状态", length = 11, defaultVal = "0")
 	private Integer status;
 
 	@Column(commit = "首付")

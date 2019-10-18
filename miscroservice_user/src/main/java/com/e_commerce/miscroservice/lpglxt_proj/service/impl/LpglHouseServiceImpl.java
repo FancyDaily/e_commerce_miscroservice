@@ -1,15 +1,18 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglEstateDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
+import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglCertEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglHouseEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
@@ -27,8 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Author: FangyiXu
@@ -63,8 +67,13 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 	}
 
 	@Override
-	public TLpglHouse detail(Long houseId) {
-		return lpglHouseDao.selectByPrimaryKey(houseId);
+	public TLpglHouse detail(Long userId, Long houseId) {
+		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
+		boolean isDone = TlpglCertEnum.STATUS_PASS.getCode() == tLpglHouse.getStatus();
+		if(isDone) {
+			if(!userId.equals(tLpglHouse.getSaleManId())) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您没有权限查看！");
+		}
+		return tLpglHouse;
 	}
 
 	@Override
@@ -175,6 +184,80 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 			.forEach(System.out::println);
 		//插入或者修改
 		dealWithImportDatas(skipModify, houses);
+	}
+
+	public static void main(String[] args) {
+	    try {
+			List<String[]> strings = POIUtil.readExcel(new FileInputStream(new File("/Users/xufangyi/Downloads/12312313.xlsx")));
+			strings.stream()
+				.map(Arrays::asList).forEach(System.out::println);
+		} catch (Exception e) {
+	    	e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void recordInDetail2(Long estateId, MultipartFile file, boolean skipModify) throws Exception {
+		InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/12312313.xlsx"));
+		List<String[]> strings = POIUtil.readExcel(inputStream);
+		List<List<String>> todoList = strings.stream().map(Arrays::asList).collect(Collectors.toList());
+		List<String> titleString = todoList.get(0);
+		String title = titleString.get(0);
+		String regEx="[^0-9]";
+		Pattern p = Pattern.compile(regEx);
+		Matcher m = p.matcher(title);
+		String buildingNum = m.replaceAll("").trim();
+		ArrayList<TLpglHouse> houses = new ArrayList<>();
+		for(int i = 3; i < todoList.size(); i++) {
+			List<String> listString = todoList.get(i);
+			String s = listString.get(1);
+			if(StringUtil.isEmpty(s))
+				System.out.println("!!!!!!");
+			String groupName = "";
+			String groupNum = listString.get(7);
+			if("1".equals(groupNum)) {
+				groupName = "一单元";
+			} else if("2".equals(groupNum)) {
+				groupName = "二单元";
+			} else if("3".equals(groupNum)) {
+				groupName = "三单元";
+			}
+			//TODO 楼层号
+			Integer buildingNumer = Integer.valueOf(buildingNum);
+			TLpglHouse build = TLpglHouse.builder()
+				.estateId(estateId)
+				.buildingNum(buildingNumer)
+				.houseNum(Integer.valueOf(listString.get(1)))
+				.buildingArea(Double.valueOf(listString.get(4)))
+				.buildingPrice(Double.valueOf(listString.get(5)))
+				.totalPrice(Double.valueOf(listString.get(6)))
+				.groupName(groupName)
+				.build();
+			if(buildingNumer.equals(12) || buildingNumer.equals(18)) {
+				build.setIsValid(AppConstant.IS_VALID_YES);
+			}
+			houses.add(build);
+		}
+		houses
+			.stream()
+			.forEach(System.out::println);
+		//插入或者修改
+		dealWithImportDatas(skipModify, houses);
+	}
+
+	@Override
+	public void floorNumDeal() {
+		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectAll();
+		tLpglHouses.stream()
+			.map(a -> {
+				String houseNumStr = String.valueOf(a.getHouseNum());
+				String substring = houseNumStr.substring(0, houseNumStr.length() - 2);
+				a.setFloorNum(Integer.valueOf(substring));
+				return a;
+			}).forEach(a -> {
+				lpglHouseDao.update(a);
+				}
+			);
 	}
 
 	@Override

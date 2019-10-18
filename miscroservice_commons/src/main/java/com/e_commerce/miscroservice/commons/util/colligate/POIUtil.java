@@ -35,6 +35,8 @@ public class POIUtil {
 	private final static String xls = "xls";
 	private final static String xlsx = "xlsx";
 
+	private static FormulaEvaluator evaluator;
+
 	/**
 	 * 根据路径读取excel文件
 	 */
@@ -48,6 +50,7 @@ public class POIUtil {
         checkFile(file);  */
 		//获得Workbook工作薄对象
 		Workbook workbook = WorkbookFactory.create(inputStream);
+		evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 //		Workbook workbook = new XSSFWorkbook(inputStream);
 		//创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回
 		List<String[]> list = new ArrayList<String[]>();
@@ -78,7 +81,7 @@ public class POIUtil {
 					//循环当前行
 					for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
 						Cell cell = row.getCell(cellNum);
-						cells[cellNum] = getCellValue(cell);
+						cells[cellNum] = getCellValue(cell, evaluator);
 					}
 					list.add(cells);
 				}
@@ -100,6 +103,7 @@ public class POIUtil {
 		checkFile(file);
 		//获得Workbook工作薄对象
 		Workbook workbook = getWorkBook(file);
+		evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 		//创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回
 		List<String[]> list = new ArrayList<String[]>();
 		if (workbook != null) {
@@ -128,7 +132,7 @@ public class POIUtil {
 					//循环当前行
 					for (int cellNum = firstCellNum; cellNum < lastCellNum; cellNum++) {
 						Cell cell = row.getCell(cellNum);
-						cells[cellNum] = getCellValue(cell);
+						cells[cellNum] = getCellValue(cell, evaluator);
 					}
 					list.add(cells);
 				}
@@ -176,7 +180,7 @@ public class POIUtil {
 		return workbook;
 	}
 
-	public static String getCellValue(Cell cell) {
+	public static String getCellValue(Cell cell, FormulaEvaluator evaluator) {
 		String cellValue = "";
 		if (cell == null) {
 			return cellValue;
@@ -198,6 +202,10 @@ public class POIUtil {
 				break;
 			case Cell.CELL_TYPE_FORMULA: //公式
 				cellValue = String.valueOf(cell.getCellFormula());
+				CellValue evaluate = evaluator.evaluate(cell);
+				double numberValue = evaluate.getNumberValue();
+				numberValue = (double)((int)(numberValue * 100)) /100;
+				if(cellValue.equals(cell.toString())) cellValue = String.valueOf(numberValue);
 				break;
 			case Cell.CELL_TYPE_BLANK: //空值
 				cellValue = "";

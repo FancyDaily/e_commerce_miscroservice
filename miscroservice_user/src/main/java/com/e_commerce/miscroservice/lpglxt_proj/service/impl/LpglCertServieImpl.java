@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
 
 /**
  * @Author: FangyiXu
@@ -31,6 +30,9 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @Service
 public class LpglCertServieImpl implements LpglCertService {
+
+	@Autowired
+	private LpglEstateDao lpglEstateDao;
 
 	@Autowired
 	private LpglCertDao lpglCertDao;
@@ -62,7 +64,7 @@ public class LpglCertServieImpl implements LpglCertService {
 	@Override
 	public QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
 		List<Long> userIds = null;
-		if(groupId != null) {
+		if (groupId != null) {
 			List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
 			userIds = tLpglUsers.stream()
 				.map(TLpglUser::getId).collect(Collectors.toList());
@@ -86,8 +88,9 @@ public class LpglCertServieImpl implements LpglCertService {
 
 	@Override
 	public void commitCert(Long userId, Long houseId, Integer type, Double disCountPrice, String description) {
-		disCountPrice = disCountPrice <= 0? disCountPrice=null: disCountPrice;
+		disCountPrice = disCountPrice != null ? disCountPrice <= 0 ? null : disCountPrice : disCountPrice;
 		TLpglCert build = TLpglCert.builder()
+			.applyUserId(userId)
 			.houseId(houseId)
 			.type(type)
 			.discountPrice(disCountPrice)
@@ -102,11 +105,12 @@ public class LpglCertServieImpl implements LpglCertService {
 		String lastData = "点击查看或处理";
 		String url = "";
 		String content = "";
-		switch (theEnum=TlpglCertEnum.getType(type)) {
+		String param = null;
+		switch (theEnum = TlpglCertEnum.getType(type)) {
 			case TYPE_SOLDOUTREQUEST:
 				//1.递交售卖完成审核 -> TODO 通知销售经理、财务 level3除了市场角色 ;总经理、总经办 level1
-//				TODO url = "";
-//				TODO content = "";
+				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=1&certId=" + build.getId();
+				//				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "市场经理");
 
 				List<String> names1 = TlpglRoleEnum.getNames(1);
@@ -115,14 +119,14 @@ public class LpglCertServieImpl implements LpglCertService {
 				break;
 			case TYPE_PRICEDISCOUNT:
 				//2.申请优惠 -> TODO 通知市场经理、销售经理 level3除了财务角色
-//				TODO url = "";
+				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=2&certId=" + build.getId();
 //				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "财务经理");
 
 				break;
 			case TYPE_CUSTOMER:
 				//3.客户报备 -> TODO 通知前台人员、销售经理、销售主管 level3销售经理 level4销售主管、前台
-//				TODO url = "";
+				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=3&certId=" + build.getId();
 //				TODO content = "";
 				roleNames = getRoleNamesInArray(names, "前台人员", "销售经理", "销售主管");
 
@@ -135,7 +139,7 @@ public class LpglCertServieImpl implements LpglCertService {
 		//根据角色列表找到职位，找到用户
 		//对以下列表判isEmpty()
 		List<String> openIds = getOpenIds(roleNames);
-		for(String openId: openIds) {
+		for (String openId : openIds) {
 			//TODO 发送模版消息，针对不同类型有不同的页面，可能有不同的消息内容
 			HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
 //			String tipMsg = "";
@@ -144,19 +148,39 @@ public class LpglCertServieImpl implements LpglCertService {
 		}
 	}
 
+	@Override
+	public TLpglCert detail(Long certId) {
+		TLpglCert tLpglCert = lpglCertDao.selectByPrimaryKey(certId);
+		Long houseId = tLpglCert.getHouseId();
+		if(houseId == null) return tLpglCert;
+		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
+		if (tLpglHouse != null) {
+			tLpglCert.setHouseNum(tLpglHouse.getHouseNum());
+			tLpglCert.setBuildingNum(tLpglHouse.getBuildingNum());
+			tLpglCert.setGroupName(tLpglHouse.getGroupName());
+
+			Long estateId = tLpglHouse.getEstateId();
+			TLpglEstate tLpglEstate = lpglEstateDao.selectByPrimaryKey(estateId);
+			if (tLpglEstate != null) {
+				tLpglCert.setEstateName(tLpglEstate.getName());
+			}
+		}
+		return tLpglCert;
+	}
+
 	private List<String> getOpenIds(List<String> roleNames) {
-		List<TLpglRole> tLpglRoles = roleNames == null || roleNames.isEmpty()? new ArrayList<>() : lpglRoleDao.selectInNames(roleNames);
+		List<TLpglRole> tLpglRoles = roleNames == null || roleNames.isEmpty() ? new ArrayList<>() : lpglRoleDao.selectInNames(roleNames);
 		List<Long> roleIds = tLpglRoles.stream()
 			.map(TLpglRole::getId).collect(Collectors.toList());
-		List<TLpglPosistionRole> lpglPosistionRoles = roleIds.isEmpty()? new ArrayList<>() : lpglPositionRoleDao.selectInRoleIds(roleIds);
+		List<TLpglPosistionRole> lpglPosistionRoles = roleIds.isEmpty() ? new ArrayList<>() : lpglPositionRoleDao.selectInRoleIds(roleIds);
 		List<Long> positionIds = lpglPosistionRoles.stream()
 			.map(TLpglPosistionRole::getPosisitionId)
 			.distinct().collect(Collectors.toList());
-		List<TLpglUserPosistion> userPosistions = positionIds.isEmpty()? new ArrayList<>() : lpglUserPositionDao.selectInPositionIds(positionIds);
+		List<TLpglUserPosistion> userPosistions = positionIds.isEmpty() ? new ArrayList<>() : lpglUserPositionDao.selectInPositionIds(positionIds);
 		List<Long> userIds = userPosistions.stream()
 			.map(TLpglUserPosistion::getUserId)
 			.distinct().collect(Collectors.toList());
-		List<TLpglUser> users = userIds.isEmpty()? new ArrayList<>() : lpglUserDao.selectInIds(userIds);
+		List<TLpglUser> users = userIds.isEmpty() ? new ArrayList<>() : lpglUserDao.selectInIds(userIds);
 		return users.stream()
 			.map(TLpglUser::getVxOpenId).collect(Collectors.toList());
 	}
@@ -200,7 +224,7 @@ public class LpglCertServieImpl implements LpglCertService {
 				url = TlpglServMsgEnum.TYPE_PRICEDISCOUNT.getUrl();
 				Double discountPrice = tLpglCert.getDiscountPrice();
 				TLpglPosistion position = lpglPositionService.getPosition(userId);
-				if(position == null || position.getDiscountCredit() < discountPrice) {
+				if (position == null || (position.getDiscountCredit()!= null && position.getDiscountCredit() < discountPrice)) {
 					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "超过审核权限!");
 				/*	//获取直属上级
 					TLpglPosistion higherPosition = lpglPositionService.getHigherPosition(position);
@@ -231,6 +255,7 @@ public class LpglCertServieImpl implements LpglCertService {
 			case TYPE_SOLDOUTREQUEST:
 				url = TlpglServMsgEnum.TYPE_SOLDOUTREQUEST.getUrl();
 				tLpglHouse.setStatus(!certPass ? TlpglHouseEnum.STATUS_INITAIL.getCode() : TlpglHouseEnum.STATUS_SOLDOUT.getCode());
+				tLpglHouse.setSaleManId(tLpglCert.getApplyUserId());
 				//TODO 消息通知：审核结果抄送最高级领导[总经理,总经办] => level = 1
 				//获得总经理和总经办的openid
 				level = 1;
@@ -245,10 +270,10 @@ public class LpglCertServieImpl implements LpglCertService {
 				TLpglCustomerInfos tLpglCustomerInfos = lpglCustomerInfoDao.selectByPrimaryKey(customerInfoId);
 				tLpglCustomerInfos.setStatus(!certPass ? TlpglCustomerInfoEnum.STATUS_INVALID.getCode() : TlpglCustomerInfoEnum.STATUS_VALID.getCode());
 				lpglCustomerInfoDao.update(tLpglCustomerInfos);
-				return;
+				break;
 		}
 		//发送通知
-		for(String openId: openIds) {
+		for (String openId : openIds) {
 			//TODO 发送模版消息，针对不同类型有不同的页面，可能有不同的消息内容
 			HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
 //			String tipMsg = "";
@@ -267,7 +292,7 @@ public class LpglCertServieImpl implements LpglCertService {
 	}
 
 	private List<String> getOpenIds(TLpglPosistion higherPosition) {
-		if(higherPosition == null) return new ArrayList<>();
+		if (higherPosition == null) return new ArrayList<>();
 		List<TLpglUserPosistion> userPosistions = lpglUserPositionDao.selectByPositionId(higherPosition.getId());
 		List<Long> userIds = userPosistions.stream()
 			.map(TLpglUserPosistion::getUserId).collect(Collectors.toList());

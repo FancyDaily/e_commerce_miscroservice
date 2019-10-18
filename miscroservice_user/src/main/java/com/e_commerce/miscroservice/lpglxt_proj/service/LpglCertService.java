@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 
 /**
  * @Author: FangyiXu
@@ -14,4 +15,5 @@ public interface LpglCertService {
 
 	void commitCert(Long userId, Long houseId, Integer type, Double disCountPrice, String description);
 
+	TLpglCert detail(Long certId);
 }

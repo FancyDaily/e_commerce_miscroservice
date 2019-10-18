@@ -66,7 +66,7 @@ public class LpglHouseDaoImpl implements LpglHouseDao {
 
 	@Override
 	public int update(TLpglHouse obj) {
-		return MybatisPlus.getInstance().update(new TLpglHouse(), idBuild(obj.getId())
+		return MybatisPlus.getInstance().update(obj, idBuild(obj.getId())
 		);
 	}
 

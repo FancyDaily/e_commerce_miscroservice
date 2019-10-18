@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglHouseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,12 +62,40 @@ public class LpglCertController {
 	}
 
 	/**
+	 * 审批详情
+	 * @param certId 审批详情
+	 * @return
+	 */
+	@RequestMapping("detail")
+	public Object certDetail(Long certId) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("审批详情, certId={}", certId);
+			TLpglCert detail = lpglCertService.detail(certId);
+			result.setData(detail);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "审批详情", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("审批详情", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+
+	/**
 	 * 审批(优惠价申请、更改状态为已售出申请、客户报备申请)
 	 * @param certId 审批编号
 	 * @param status 状态
 	 * @return
 	 */
 	@RequestMapping("do")
+	@UrlAuth(withoutPermission = true)
 	public Object houseCert(Integer status, Long certId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
@@ -93,6 +124,7 @@ public class LpglCertController {
 	 * @return
 	 */
 	@RequestMapping("commit")
+	@UrlAuth(withoutPermission = true)
 	public Object commitCert(Long houseId, Integer type, Double disCountPrice, String description) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
