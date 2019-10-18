@@ -307,17 +307,13 @@ public class LpglUserController {
 	 * @return
 	 */
 	@RequestMapping("login")
-	public Object login(HttpServletResponse response, HttpServletRequest request,String username,String password){
+	public Object login(HttpServletResponse response, HttpServletRequest request,String username,String password, String openid){
 
 
 
-		AjaxResult ajaxResult = lpglUserService.login(username,password,request,response);
+		AjaxResult ajaxResult = lpglUserService.login(username,password,request,response, openid);
 
 		return ajaxResult;
 	}
-
-
-
-
 
 }

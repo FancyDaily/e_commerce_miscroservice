@@ -1,12 +1,12 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
@@ -47,17 +47,24 @@ public class LpglUserServiceImpl  implements LpglUserService {
 	}
 
 	@Override
-	public AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response) {
+	public AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response, String openid) {
 		AjaxResult ajaxResult = new AjaxResult();
 		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class)
 			.eq(TLpglUser::getUserAccount,username)
 			.eq(TLpglUser::getPassword,password)
 		);
+
 		if (user==null){
 			log.warn("用户名或密码错误");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("用户名或密码错误");
 			return ajaxResult;
+		}
+		if(!StringUtil.isEmpty(openid) && !openid.equals(user.getVxOpenId())) {
+			user.setVxOpenId(openid);
+			MybatisPlus.getInstance().update(user, new MybatisPlusBuild(TLpglUser.class)
+				.eq(TLpglUser::getId, user.getId())
+			);
 		}
 
 		user = UserUtil.loginTLpg(user, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService,response);

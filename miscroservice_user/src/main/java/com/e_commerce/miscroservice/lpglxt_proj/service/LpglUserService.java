@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 public interface LpglUserService {
 	TLpglUser findOne(Long id);
 
-	AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response);
+	AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response, String openid);
 
 	AjaxResult register(String username, String password, Long posistionId, HttpServletResponse response, HttpServletRequest request);
 }

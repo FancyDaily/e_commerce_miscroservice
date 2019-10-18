@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +47,14 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 
 	@Override
 	public QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize, Long groupId) {
-		List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
-		List<Long> userIds = tLpglUsers.stream()
-			.map(TLpglUser::getId).collect(Collectors.toList());
+		List<Long> userIds = new ArrayList<>();
+		if(groupId != null) {
+			List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
+			userIds = tLpglUsers.stream()
+				.map(TLpglUser::getId).collect(Collectors.toList());
+		} else {
+			userIds.add(userId);
+		}
 		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectByEstateIdInSalesManIdsPage(estateId, pageNum, pageSize, userIds);
 		long total = IdUtil.getTotal();
 
