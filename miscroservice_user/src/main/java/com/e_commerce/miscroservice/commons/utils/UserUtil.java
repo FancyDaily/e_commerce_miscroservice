@@ -245,7 +245,7 @@ public class UserUtil {
 		Token load = authorizeRpcService.load(namePrefix + tLpglUser.getId(),
 			DEFAULT_PASS, tLpglUser.getUserAccount());
 		if (load != null && load.getToken() != null) {
-			response.addHeader("token",load.getToken());
+			tLpglUser.setToken(load.getToken());
 
 		}
 		return tLpglUser;

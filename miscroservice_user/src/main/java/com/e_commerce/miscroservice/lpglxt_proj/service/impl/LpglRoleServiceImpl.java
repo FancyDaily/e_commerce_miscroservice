@@ -144,48 +144,48 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 										if (status!=null){
 											if (tLpglAuthority.getStatus()==status){
 												//一级页面
-												if (code.matches("\\d{1,2}0000")) {
+//												if (code.matches("\\d{1,2}0000")) {
 													firstPageList.add(tLpglAuthorityVo);
-												}
-												//二级页面
-												if (code.matches("\\d{1,2}[1-9]000")) {
-													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
-													secondPageList.add(tLpglAuthorityVo);
-												}
-												//三级级页面
-												if (code.matches("\\d{1,2}[1-9][1-9]00")) {
-													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
-													thirdPageList.add(tLpglAuthorityVo);
-
-												}
-												//页面按钮
-												if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
-													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
-													buttonList.add(tLpglAuthorityVo);
-												}
+//												}
+//												//二级页面
+//												if (code.matches("\\d{1,2}[1-9]000")) {
+//													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
+//													secondPageList.add(tLpglAuthorityVo);
+//												}
+//												//三级级页面
+//												if (code.matches("\\d{1,2}[1-9][1-9]00")) {
+//													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
+//													thirdPageList.add(tLpglAuthorityVo);
+//
+//												}
+//												//页面按钮
+//												if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
+//													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
+//													buttonList.add(tLpglAuthorityVo);
+//												}
 											}
 
 										}else {
 											//一级页面
-											if (code.matches("\\d{1,2}0000")) {
+//											if (code.matches("\\d{1,2}0000")) {
 												firstPageList.add(tLpglAuthorityVo);
-											}
+//											}
 											//二级页面
-											if (code.matches("\\d{1,2}[1-9]000")) {
-												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
-												secondPageList.add(tLpglAuthorityVo);
-											}
-											//三级级页面
-											if (code.matches("\\d{1,2}[1-9][1-9]00")) {
-												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
-												thirdPageList.add(tLpglAuthorityVo);
-
-											}
-											//页面按钮
-											if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
-												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
-												buttonList.add(tLpglAuthorityVo);
-											}
+//											if (code.matches("\\d{1,2}[1-9]000")) {
+//												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
+//												secondPageList.add(tLpglAuthorityVo);
+//											}
+//											//三级级页面
+//											if (code.matches("\\d{1,2}[1-9][1-9]00")) {
+//												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
+//												thirdPageList.add(tLpglAuthorityVo);
+//
+//											}
+//											//页面按钮
+//											if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
+//												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
+//												buttonList.add(tLpglAuthorityVo);
+//											}
 										}
 
 									}

@@ -53,6 +53,10 @@ public class TLpglUser extends BaseEntity {
 	@Column(commit = "邮箱")
 	private String mail;
 
+
+	@Column(commit = "token")
+	private String token;
+
 	@Column(commit = "分组编号")
 	private Integer groupId;
 

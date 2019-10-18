@@ -80,12 +80,7 @@ public class LpglUserServiceImpl  implements LpglUserService {
 
 		TLpglUser req = new TLpglUser();
 		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
-		if (user!=null){
-			log.warn("用户已注册");
-			ajaxResult.setSuccess(false);
-			ajaxResult.setMsg("用户已注册");
-			return ajaxResult;
-		}
+
 		TLpglPosistion tLpglPosistion = lpglRoleService.findAllPosistionById(posistionId);
 		if (tLpglPosistion==null){
 			log.warn("职位不存在");
@@ -95,6 +90,14 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		}
 		req.setUserAccount(username);
 		req.setPassword(password);
+		if (user!=null){
+			log.warn("用户已注册 更新职位");
+			ajaxResult.setSuccess(true);
+			int i =lpglRoleService.updatePosistionRole(posistionId,user.getId());
+
+			return ajaxResult;
+		}
+
 		MybatisPlus.getInstance().save(req);
 		TLpglUser result = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
 
