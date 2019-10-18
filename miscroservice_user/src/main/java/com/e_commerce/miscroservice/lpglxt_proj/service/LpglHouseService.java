@@ -25,4 +25,6 @@ public interface LpglHouseService {
 	void remove(Long houseId);
 
 	List<String> recordIn(Long estateId, MultipartFile file, boolean skipModify);
+
+	void recordInDetail(Long estateId, MultipartFile file, boolean skipModify) throws Exception;
 }

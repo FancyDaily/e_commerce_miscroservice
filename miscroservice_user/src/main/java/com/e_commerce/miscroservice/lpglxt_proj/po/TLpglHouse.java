@@ -138,6 +138,15 @@ public class TLpglHouse extends BaseEntity {
 	@Column(commit = "分销公司名字")
 	private String companyName;
 
+	@Column(commit = "自行车位编号")
+	private String bicycleNum;
+
+	@Column(commit = "自行车位总价")
+	private String bicyclePrice;
+
+	@Column(commit = "汽车位总价")
+	private String carPrice;
+
 	public LpglFloorHouseMapVo copyLpglFloorHouseMapVo() {return null;}
 
 }

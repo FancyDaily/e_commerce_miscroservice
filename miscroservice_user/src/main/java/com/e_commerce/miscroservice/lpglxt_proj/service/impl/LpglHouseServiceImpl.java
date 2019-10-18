@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author: FangyiXu
@@ -90,7 +91,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 			if(tLpglEstate == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该楼盘不存在！");
 			//收集表格数据
 //			InputStream inputStream = file.getInputStream();
-			InputStream inputStream = new FileInputStream(new File("/Users/xufangyi/Downloads/楼盘管理导入demo.xlsx"));
+			InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/楼盘管理导入demo.xlsx"));
 			List<Map<String, Object>> maps = POIUtil.estateDemo(inputStream);
 			List<TLpglHouse> todoList = maps.stream()
 				.map(
@@ -112,28 +113,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 					}
 				).collect(Collectors.toList());
 			//插入数据(楼盘号、楼号、房间号已存在则进行修改
-			List<TLpglHouse> lpglHouses = lpglHouseDao.selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(todoList);
-			Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
-
-			Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
-				.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) != null));	//新增/修改 推断分区
-			List<TLpglHouse> modifyList = conditonMap.get(Boolean.TRUE);
-			List<TLpglHouse> addList = conditonMap.get(Boolean.FALSE);
-			lpglHouseDao.insert(addList, true);
-
-			if(!skipModify) {
-				//处理待修改的数据,赋予id
-				modifyList = modifyList.stream()
-					.map(a -> {
-						List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum());
-						a.setId(tLpglHouses == null? null: tLpglHouses.get(0).getId());
-						return a;
-					}).collect(Collectors.toList());
-				modifyList = modifyList.stream()
-					.filter(a -> a.getId() != null).collect(Collectors.toList());
-
-				lpglHouseDao.modify(modifyList, false);	//TODO 批量更新不可用
-			}
+			dealWithImportDatas(skipModify, todoList);
 
 		} catch (IOException e) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, e.getMessage());
@@ -141,17 +121,59 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		String path = "/Users/xufangyi/Downloads/导入模版.xlsx";
-		try {
-			List<String[]> strings = POIUtil.readFromPath(path);
-			strings.stream()
-				.forEach(a -> {
-					Arrays.stream(a).forEach(System.out::println);
-				});
-		} catch (IOException e) {
-			e.printStackTrace();
+	private void dealWithImportDatas(boolean skipModify, List<TLpglHouse> todoList) {
+		List<TLpglHouse> lpglHouses = lpglHouseDao.selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(todoList);
+		Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
+
+		Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
+			.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) != null));	//新增/修改 推断分区
+		List<TLpglHouse> modifyList = conditonMap.get(Boolean.TRUE);
+		List<TLpglHouse> addList = conditonMap.get(Boolean.FALSE);
+		lpglHouseDao.insert(addList, true);
+
+		if(!skipModify) {
+			//处理待修改的数据,赋予id
+			modifyList = modifyList.stream()
+				.map(a -> {
+					List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum());
+					a.setId(tLpglHouses == null? null: tLpglHouses.get(0).getId());
+					return a;
+				}).collect(Collectors.toList());
+			modifyList = modifyList.stream()
+				.filter(a -> a.getId() != null).collect(Collectors.toList());
+
+			lpglHouseDao.modify(modifyList, false);	//TODO 批量更新不可用
 		}
+	}
+
+	@Override
+	public void recordInDetail(Long estateId, MultipartFile file, boolean skipModify) throws Exception {
+		InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/导入商品房数据.xls"));
+		List<String[]> strings = POIUtil.readExcel(inputStream);
+		List<List<String>> todoList = strings.stream().map(Arrays::asList).collect(Collectors.toList());
+		List<String> titleString = todoList.get(0);
+		String title = titleString.get(0);
+		String buildingNum = title.substring(0, title.length() - 5);
+		ArrayList<TLpglHouse> houses = new ArrayList<>();
+		for(int i = 2; i < todoList.size(); i++) {
+			List<String> listString = todoList.get(i);
+			TLpglHouse build = TLpglHouse.builder()
+				.buildingNum(Integer.valueOf(buildingNum))
+				.houseNum(Integer.valueOf(listString.get(0)))
+				.buildingArea(Double.valueOf(listString.get(1)))
+				.buildingPrice(Double.valueOf(listString.get(2)))
+				.totalPrice(Double.valueOf(listString.get(3)))
+				.bicycleNum(listString.get(4))
+				.bicyclePrice(listString.get(5))
+				.carPrice(listString.get(6))
+				.build();
+			houses.add(build);
+		}
+		houses
+			.stream()
+			.forEach(System.out::println);
+		//插入或者修改
+		dealWithImportDatas(skipModify, houses);
 	}
 
 	@Override

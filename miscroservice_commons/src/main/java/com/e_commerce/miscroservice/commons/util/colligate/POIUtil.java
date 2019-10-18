@@ -3,12 +3,11 @@ package com.e_commerce.miscroservice.commons.util.colligate;
 import java.io.*;
 import java.util.*;
 
+import com.beust.jcommander.Strings;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,12 +38,17 @@ public class POIUtil {
 	/**
 	 * 根据路径读取excel文件
 	 */
-	public static List<String[]> readFromPath(String path) throws IOException {
+	public static List<String[]> readFromPath(String path) throws IOException, InvalidFormatException {
 		InputStream inputStream = new FileInputStream(new File(path));
+    	return readExcel(inputStream);
+	}
+
+	public static List<String[]> readExcel(InputStream inputStream) throws IOException, InvalidFormatException {
     	/*//检查文件
         checkFile(file);  */
 		//获得Workbook工作薄对象
-		Workbook workbook = new XSSFWorkbook(inputStream);
+		Workbook workbook = WorkbookFactory.create(inputStream);
+//		Workbook workbook = new XSSFWorkbook(inputStream);
 		//创建返回对象，把每行中的值作为一个数组，所有行作为一个集合返回
 		List<String[]> list = new ArrayList<String[]>();
 		if (workbook != null) {
@@ -59,7 +63,8 @@ public class POIUtil {
 				//获得当前sheet的结束行
 				int lastRowNum = sheet.getLastRowNum();
 				//循环除了第一行的所有行
-				for (int rowNum = firstRowNum + 1; rowNum <= lastRowNum; rowNum++) {
+//				for (int rowNum = firstRowNum + 1; rowNum <= lastRowNum; rowNum++) {
+				for (int rowNum = firstRowNum; rowNum <= lastRowNum; rowNum++) {
 					//获得当前行
 					Row row = sheet.getRow(rowNum);
 					if (row == null) {
@@ -384,6 +389,110 @@ public class POIUtil {
 		return list;
 	}
 
+	/*public static List<Map<String, Object>> housesDemo(InputStream in) {
+		List<Map<String, Object>> list = new ArrayList<>();
+		try {
+			//得到整个excel对象
+			XSSFWorkbook excel = new XSSFWorkbook(in);
+			//获取整个excel有多少个sheet
+			int sheets = excel.getNumberOfSheets();
+			//遍历每一个sheet
+			for (int i = 0; i < sheets; i++) {
+				XSSFSheet sheet = excel.getSheetAt(i);
+				if (sheet == null) {
+					continue;
+				}
+				int mergedRegions = sheet.getNumMergedRegions();
+				XSSFRow rowFirst = sheet.getRow(0);
+				//处理合并单元格(获取首行构筑标题cate(楼号)、获取非首行构建单元cate)
+				Map<Integer, String> titleCategory = new HashMap<>();
+				for (int j = 0; j < mergedRegions; j++) {        //遍历所有合并单元格
+					CellRangeAddress rangeAddress = sheet.getMergedRegion(j);
+					int firstColumn = rangeAddress.getFirstColumn();
+					int lastColumn = rangeAddress.getLastColumn();
+					int firstRow = rangeAddress.getFirstRow();    //起始行索引
+					rowFirst = sheet.getRow(firstRow);
+					if (firstRow == 0) {    //标题行
+						titleCategory.put(firstColumn, lastColumn + "-" + rowFirst.getCell(firstColumn).toString());
+					}
+				}
+				//处理表头信息
+				XSSFRow rowSecond = sheet.getRow(1);
+				HashMap<Integer, String> tableHeadCategory = new HashMap<>();
+				for (int col = 1; col < rowSecond.getLastCellNum(); col++) {
+					XSSFCell cell = rowSecond.getCell(col);
+					if (skipEmptyCell(cell)) continue;
+					int columnIndex = cell.getColumnIndex();
+					tableHeadCategory.put(columnIndex, cell.toString());    //装载列索引，面积
+				}
+				//遍历每一行
+				for (int rowNum = 2; rowNum <= sheet.getLastRowNum(); rowNum++) {
+					XSSFRow row = sheet.getRow(rowNum);
+					//如果最后一行以空行开头，则忽略
+					int firstCellNum = row.getFirstCellNum();
+					XSSFCell firstCell = row.getCell(firstCellNum);
+					if (skipEmptyCell(firstCell)) continue;
+					String floorNumString = firstCell.toString();    //当前行需要的楼层数
+
+					//处理常规
+					String s = titleCategory.get(firstCellNum);
+					String[] ss = s.split("-");
+					String buidingName = ss[1];
+					Integer maxIndex = Integer.parseInt(ss[0]);
+
+					String groupName = "";
+					Integer maxIndex2 = 0;
+					for (int col = firstCellNum + 1; col < row.getLastCellNum(); col++) {
+						XSSFCell cell = row.getCell(col);
+						if (skipEmptyCell(cell)) continue;
+						int columnIndex = cell.getColumnIndex();
+						//获取楼号，获取表头
+						String string = titleCategory.get(columnIndex);
+						Map<String, Object> res0 = getCate(col, string, buidingName, maxIndex);
+						buidingName = (String) res0.get("cate");
+						maxIndex = (Integer) res0.get("maxIndex");
+
+						String headString = tableHeadCategory.get(columnIndex);
+
+						System.out.println("楼号 = " + buidingName);
+						System.out.println("单元 = " + groupName);
+
+						System.out.println("area = " + headString);
+
+						System.out.println("楼层号 = " + floorNumString);
+
+						String houseNum = cell.toString();
+						if(houseNum.contains(".")) {
+							houseNum = houseNum.substring(0, houseNum.indexOf("."));
+						}
+						System.out.println("以上是当前信息。房号 = " + houseNum);
+
+						System.out.println("<==================================>");
+
+						Integer buildingNum = Integer.valueOf(buidingName.substring(0, buidingName.length() - 2));
+						Integer floorNum = Integer.valueOf(floorNumString.substring(0, floorNumString.length() - 1));
+						Double area = Double.valueOf(headString.substring(0, headString.length() - 1));
+						HashMap<String, Object> resultMap = new HashMap<>();
+
+						XSSFCellStyle cellStyle = cell.getCellStyle();
+						XSSFColor fillBackgroundColorColor = cellStyle.getFillBackgroundColorColor();
+						resultMap.put("haveColor", fillBackgroundColorColor != null);
+
+						resultMap.put("buildingNum", buildingNum);
+						resultMap.put("groupName", groupName);
+						resultMap.put("floorNum", floorNum);
+						resultMap.put("area", area);
+						resultMap.put("houseNum", Integer.valueOf(houseNum));
+						list.add(resultMap);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}*/
+
 	/*
 	 * 导出数据
 	 */
@@ -467,7 +576,7 @@ public class POIUtil {
 		}
 	}
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			OutputStream outputStream = new FileOutputStream(new File("/Users/xufangyi/Downloads/newFile"));
 			List<String> strings = Arrays.asList("年龄", "性别", "课程");
@@ -476,7 +585,7 @@ public class POIUtil {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	private static Map<String, Object> getCate(int columnIndex, String groupString, String cate, Integer maxIndex) {
 		HashMap<String, Object> res = new HashMap<>();
@@ -495,6 +604,19 @@ public class POIUtil {
 		}
 		res.put("maxIndex", maxIndex);
 		return res;
+	}
+
+	public static void main(String[] args) {
+		String path = "/Users/xufangyi/Downloads/导入数据10-18.17.56.xls";
+		try {
+			List<String[]> strings = readFromPath(path);
+			strings.stream()
+				.map(Arrays::asList).forEach(System.out::println);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static boolean skipEmptyCell(XSSFCell cell) {
