@@ -245,12 +245,12 @@ public class UserUtil {
 	public static TLpglUser loginTLpg(TLpglUser tLpglUser, Integer application, AuthorizeRpcService authorizeRpcService, HttpServletResponse response) {
 		String namePrefix = UserUtil.getApplicationNamePrefix(application);
 		Token load = authorizeRpcService.load(namePrefix + tLpglUser.getId(),
-			DEFAULT_PASS, tLpglUser.getUserAccount());
+			DEFAULT_PASS, tLpglUser.getUserAccount().trim());
 		if (load != null && !StringUtil.isEmpty(load.getToken())) {
 			tLpglUser.setToken(load.getToken());
 		} else {
 			//注册到认证中心
-			Token to = authorizeRpcService.reg(namePrefix + tLpglUser.getId(), DEFAULT_PASS, tLpglUser.getId().toString(), tLpglUser.getUserAccount(), Boolean.FALSE);
+			Token to = authorizeRpcService.reg(namePrefix + tLpglUser.getId(), DEFAULT_PASS, tLpglUser.getId().toString(), tLpglUser.getUserAccount().trim(), Boolean.FALSE);
 			if (to != null) {
 				tLpglUser.setToken(to.getToken());
 			}
