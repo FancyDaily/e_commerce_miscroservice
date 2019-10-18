@@ -37,6 +37,9 @@ public class TLpglAuthority extends BaseEntity{
 	private Integer operationType;
 
 
+	@Column(commit = "平台类型:0-pc后台,1-小程序前端，2-公众号前端",defaultVal = "0",length = 4)
+	private Integer status;
+
 
 
 }
