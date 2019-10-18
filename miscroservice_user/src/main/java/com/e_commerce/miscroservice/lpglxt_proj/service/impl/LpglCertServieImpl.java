@@ -97,9 +97,16 @@ public class LpglCertServieImpl implements LpglCertService {
 		//递交审核时，根据类别，向相应负责人发送通知
 		List<String> roleNames = null;
 		List<String> names = TlpglRoleEnum.getNames(3);
-		switch (TlpglCertEnum.getType(type)) {
+		String firstData = "您有一个待处理请求";
+		TlpglCertEnum theEnum = null;
+		String lastData = "点击查看或处理";
+		String url = "";
+		String content = "";
+		switch (theEnum=TlpglCertEnum.getType(type)) {
 			case TYPE_SOLDOUTREQUEST:
 				//1.递交售卖完成审核 -> TODO 通知销售经理、财务 level3除了市场角色 ;总经理、总经办 level1
+//				TODO url = "";
+//				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "市场经理");
 
 				List<String> names1 = TlpglRoleEnum.getNames(1);
@@ -108,11 +115,15 @@ public class LpglCertServieImpl implements LpglCertService {
 				break;
 			case TYPE_PRICEDISCOUNT:
 				//2.申请优惠 -> TODO 通知市场经理、销售经理 level3除了财务角色
+//				TODO url = "";
+//				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "财务经理");
 
 				break;
 			case TYPE_CUSTOMER:
 				//3.客户报备 -> TODO 通知前台人员、销售经理、销售主管 level3销售经理 level4销售主管、前台
+//				TODO url = "";
+//				TODO content = "";
 				roleNames = getRoleNamesInArray(names, "前台人员", "销售经理", "销售主管");
 
 				List<String> names2 = TlpglRoleEnum.getNames(4);
@@ -124,9 +135,13 @@ public class LpglCertServieImpl implements LpglCertService {
 		//根据角色列表找到职位，找到用户
 		//对以下列表判isEmpty()
 		List<String> openIds = getOpenIds(roleNames);
-		//TODO 发送模版消息，针对不同类型有不同的页面，可能有不同的消息内容
-
-
+		for(String openId: openIds) {
+			//TODO 发送模版消息，针对不同类型有不同的页面，可能有不同的消息内容
+			HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
+//			String tipMsg = "";
+			//String openId, String firstData, String orderNo, String orderType, String content, String lastData, String url
+			WxUtil.sendPublicWaitMsg(openId, firstData, build.getId().toString(), theEnum.getMsg(), content, lastData, url);
+		}
 	}
 
 	private List<String> getOpenIds(List<String> roleNames) {
@@ -174,42 +189,44 @@ public class LpglCertServieImpl implements LpglCertService {
 		}
 		Long houseId = tLpglCert.getHouseId();
 		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
+		List<String> openIds = new ArrayList<>();
+		String firstData = "您有一个待处理请求";
+		TlpglCertEnum theEnum = null;
+		String lastData = "点击查看或处理";
 		String url = "";
+		String content = "";
 		switch (type) {
 			case TYPE_PRICEDISCOUNT:
 				url = TlpglServMsgEnum.TYPE_PRICEDISCOUNT.getUrl();
 				Double discountPrice = tLpglCert.getDiscountPrice();
 				TLpglPosistion position = lpglPositionService.getPosition(userId);
 				if(position == null || position.getDiscountCredit() < discountPrice) {
-//					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "超过审核权限!");
-					//获取直属上级
+					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "超过审核权限!");
+				/*	//获取直属上级
 					TLpglPosistion higherPosition = lpglPositionService.getHigherPosition(position);
 					if(higherPosition == null) {
 						throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "已超过最高审核权限!");
 					}
 					List<String> openIds = getOpenIds(higherPosition);
-					//TODO 发送通知
+					// 发送通知
 					for(String openId: openIds) {
 
 //						WxUtil.publicNotify(openId, templateId, url, templateDatas);
 					}
 
-					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "超过您的审核权限，现已通知更高级别处理!");
+					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "超过您的审核权限，现已通知更高级别处理!");*/
 				}
 
 				tLpglHouse.setDisCountStatus(!certPass ? TlpglHouseEnum.DISCOUNT_STAUTS_NO.getCode() : TlpglHouseEnum.DISCOUNT_STATUS_YES.getCode());
 				if (certPass) {
 					tLpglHouse.setDisCountPrice(discountPrice);
 				}
-				//TODO 消息通知：审核结果抄送销售经理确认 => level = 3
+				// 消息通知：审核结果抄送销售经理确认 => level = 3
 				Integer level = 3;
-				List<String> openIds = getOpenIds(level, "销售经理");
-
-				//发送通知消息
-				for(String openId: openIds) {
-
-//					WxUtil.publicNotify(openId, templateId, url, templateDatas);
-				}
+				openIds = getOpenIds(level, "销售经理");
+				//TODO url
+//				url = "";
+//				content = "";
 
 				break;
 			case TYPE_SOLDOUTREQUEST:
@@ -220,22 +237,8 @@ public class LpglCertServieImpl implements LpglCertService {
 				level = 1;
 //				List<String> theOpenIds = getOpenIds(lpglPositionDao.getPosition(level));
 				List<String> theOpenIds = getOpenIds(level, "总经理", "总经办");
-
-				//发送通知消息
-				for(String openId: theOpenIds) {
-					HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
-					String tipMsg = "";
-					/*templateDatas.put("first", new WxUtil.TemplateData(tipMsg));
-//					templateDatas.put("keyword1", new WxUtil.TemplateData(productName));
-//					templateDatas.put("keyword2", new WxUtil.TemplateData(payMoney));
-//					templateDatas.put("keyword3", new WxUtil.TemplateData(payerName));
-					templateDatas.put("keyword4", new WxUtil.TemplateData(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(LocalDateTime.now())));
-//					templateDatas.put("keyword5", new WxUtil.TemplateData(orderNo));
-					templateDatas.put("keyword6", new WxUtil.TemplateData("点击查看详情"));*/
-					String templateId = "";
-					url = "";
-					WxUtil.publicNotify(openId, templateId, url, templateDatas);
-				}
+//				url = "";
+//				content = "";
 
 				break;
 			case TYPE_CUSTOMER:
@@ -244,13 +247,17 @@ public class LpglCertServieImpl implements LpglCertService {
 				tLpglCustomerInfos.setStatus(!certPass ? TlpglCustomerInfoEnum.STATUS_INVALID.getCode() : TlpglCustomerInfoEnum.STATUS_VALID.getCode());
 				lpglCustomerInfoDao.update(tLpglCustomerInfos);
 				return;
-			case STATUS_INITAIL:
-				break;
-			case STATUS_PASS:
-				break;
-			case STATUS_REFUSE:
-				break;
 		}
+		//发送通知
+		for(String openId: openIds) {
+			//TODO 发送模版消息，针对不同类型有不同的页面，可能有不同的消息内容
+			HashMap<String, WxUtil.TemplateData> templateDatas = new HashMap<>();
+//			String tipMsg = "";
+			//String openId, String firstData, String orderNo, String orderType, String content, String lastData, String url
+			WxUtil.sendPublicWaitMsg(openId, firstData, tLpglCert.getId().toString(), type.getMsg(), content, lastData, url);
+		}
+
+
 		lpglHouseDao.update(tLpglHouse);
 	}
 
