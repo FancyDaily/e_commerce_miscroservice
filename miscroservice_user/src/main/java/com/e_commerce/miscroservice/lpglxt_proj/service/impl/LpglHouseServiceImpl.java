@@ -107,10 +107,10 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 				).collect(Collectors.toList());
 			//插入数据(楼盘号、楼号、房间号已存在则进行修改
 			List<TLpglHouse> lpglHouses = lpglHouseDao.selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(todoList);
-			Map<Integer, List<TLpglHouse>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getHouseNum));
+			Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
 
 			Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
-				.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getHouseNum()) != null));	//新增/修改 推断分区
+				.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) != null));	//新增/修改 推断分区
 			List<TLpglHouse> modifyList = conditonMap.get(Boolean.TRUE);
 			List<TLpglHouse> addList = conditonMap.get(Boolean.FALSE);
 			lpglHouseDao.insert(addList, true);
@@ -119,7 +119,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 				//处理待修改的数据,赋予id
 				modifyList = modifyList.stream()
 					.map(a -> {
-						List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getHouseNum());
+						List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum());
 						a.setId(tLpglHouses == null? null: tLpglHouses.get(0).getId());
 						return a;
 					}).collect(Collectors.toList());

@@ -757,6 +757,8 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	public void offLineDeal() {
 		//找到记录。
 		List<TCsqOffLineData> tCsqOffLineData = csqOfflineDataDao.selectAll();
+		if(tCsqOffLineData.isEmpty()) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有数据!");
+
 		dealWithOffLineData(tCsqOffLineData);
 	}
 
@@ -1408,8 +1410,10 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		//TODO
 		outList.stream()
 			.forEach(a -> {
+				boolean isService = a.getServiceId() != null;
 				Long fundId = a.getFundId();
-				if(fundId != null) {
+				Long serviceId = a.getServiceId();
+				if(fundId != null || serviceId != null) {
 					String description = a.getDescription();
 					//处理description
 					if(description.contains(" ")) {
@@ -1418,14 +1422,14 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 					}
 					String date = a.getDate();
 					Long timeStamp =StringUtil.isEmpty(date)? System.currentTimeMillis(): Long.valueOf(DateUtil.dateToStamp(date));
-					csqUserService.recordForConsumption(null, fundId, CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), description, timeStamp);
+					csqUserService.recordForConsumption(null, isService? serviceId : fundId, isService? CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), description, timeStamp);
 				}
 			});
 	}
 
 	private void dealWithOffLineIn(List<TCsqOffLineData> offLineData) {
 		List<String> userWithNamesToCreate = offLineData.stream()
-			.filter(a -> a.getFundId() != null)
+			.filter(a -> a.getFundId() != null || a.getServiceId() != null)
 			.map(TCsqOffLineData::getUserName)
 			.distinct()
 			.collect(Collectors.toList());
@@ -1458,12 +1462,14 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		//调用fakeWechatPay(after commit)
 		offLineData.stream()
 			.forEach(a -> {
-				log.info("已排除基金编号为空的数据...");
-				if(a.getFundId() != null) {
+				log.info("已排除基金编号为空并且项目编号为空的数据...");
+				if(a.getFundId() != null || a.getServiceId() != null) {
 					log.info("当前转移的数据 a={}", a);
 					String userName = a.getUserName();
 					List<TCsqUser> tCsqUsers = csqUserNameUserMap.get(userName);
-					if (!tCsqUsers.isEmpty()) {
+					if (tCsqUsers != null && !tCsqUsers.isEmpty()) {
+						boolean isService = a.getServiceId() != null;
+
 						TCsqUser csqUser = tCsqUsers.get(0);
 						Long userId = csqUser.getId();
 						String date = a.getDate();//format
@@ -1475,7 +1481,8 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 						stringBuffer.replace(i, i + 1, "-");
 						stringBuffer.replace(4, 5, "-");
 						Long timeStamp = Long.valueOf(DateUtil.dateToStamp(stringBuffer.toString()));
-						csqPayService.fakeWechatPay(userId, a.getFundId(), CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), null, timeStamp);
+
+						csqPayService.fakeWechatPay(userId, isService? a.getServiceId() : a.getFundId(), isService? CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode(), a.getMoney(), null, timeStamp);
 					}
 				}
 			});

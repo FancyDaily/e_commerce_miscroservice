@@ -24,6 +24,8 @@ public class TCsqOffLineData {
 
 	private String fundName;
 
+	private Long serviceId;
+
 	@Column(commit = "类型")
 	private Integer type;
 

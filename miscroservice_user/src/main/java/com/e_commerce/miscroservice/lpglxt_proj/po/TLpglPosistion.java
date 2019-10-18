@@ -23,4 +23,7 @@ public class TLpglPosistion extends BaseEntity {
 	@Column(commit = "优惠额度")
 	private Double discountCredit;
 
+	@Column(commit = "级别", length = 11)
+	private Integer level;
+
 }

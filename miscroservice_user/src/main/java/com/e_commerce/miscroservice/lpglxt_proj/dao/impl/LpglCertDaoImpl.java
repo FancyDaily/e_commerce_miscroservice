@@ -56,8 +56,8 @@ public class LpglCertDaoImpl implements LpglCertDao {
 	@Override
 	public List<TLpglCert> selectByTypeAndStatusInApplyUserIdsPage(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds) {
 		MybatisPlusBuild eq = baseBuild()
-			.eq(TLpglCert::getType, type)
-			.eq(TLpglCert::getStatus, status);
+			.eq(TLpglCert::getType, type);
+		eq = status != null? eq.eq(TLpglCert::getStatus, status) : eq;
 
 		long currentTimeMillis = System.currentTimeMillis();
 		long startStamp = DateUtil.getStartStamp(currentTimeMillis);

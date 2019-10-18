@@ -12,6 +12,6 @@ public interface LpglCertService {
 
 	void cert(Long userId, Long certId, Integer status);
 
-	void commitCert(Long houseId, Integer type, Double disCountPrice, String description);
+	void commitCert(Long userId, Long houseId, Integer type, Double disCountPrice, String description);
 
 }

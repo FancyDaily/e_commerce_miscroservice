@@ -97,8 +97,8 @@ public class LpglCertController {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("递交审核申请, houseId={}, type={}, disCountPrice={}, description={}, telephone={}", houseId, type, disCountPrice, description);
-			lpglCertService.commitCert(houseId, type, disCountPrice, description);
+			log.info("递交审核申请, userId={}, houseId={}, type={}, disCountPrice={}, description={}, telephone={}", houseId, type, disCountPrice, description);
+			lpglCertService.commitCert(userId, houseId, type, disCountPrice, description);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "递交审核申请", e.getMessage());
