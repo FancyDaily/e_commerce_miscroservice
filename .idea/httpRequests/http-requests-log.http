@@ -1,3 +1,87 @@
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=按钮3&parentId=7&code=10000&operationType=3
+
+<> 2019-10-17T031433.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=按钮2&parentId=7&code=10000&operationType=2
+
+<> 2019-10-17T031427.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=按钮1&parentId=7&code=10000&operationType=1
+
+<> 2019-10-17T031418.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=三级页面权限1&parentId=5&code=10000&url=html
+
+<> 2019-10-17T031336.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=二级页面权限3&parentId=3&code=10000&url=html
+
+<> 2019-10-17T031253.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=二级页面权限2&parentId=2&code=10000&url=html
+
+<> 2019-10-17T031246.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=测试权限3&code=20000&url=html
+
+<> 2019-10-17T031234.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=测试权限2&code=20000&url=html
+
+<> 2019-10-17T031221.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=二级页面权限1&parentId=1&code=10000&url=html
+
+<> 2019-10-17T031147.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editAuthority?authorityName=测试权限1&code=10000&url=html
+
+<> 2019-10-17T030458.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/findAllPosistion
+
+<> 2019-10-17T024304.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/findAllPosistion
+
+<> 2019-10-17T024205.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posistionName=测试
+
+<> 2019-10-17T024159.200.json
+
+###
+
+GET http://127.0.0.1:8087/lpgl/user/editPosistion?posistionName=测试
+
+<> 2019-10-17T021254.200.json
+
+###
+
 GET http://127.0.0.1:8087/lpgl/user/findAllPosistion
 
 <> 2019-10-17T014846.200.json
