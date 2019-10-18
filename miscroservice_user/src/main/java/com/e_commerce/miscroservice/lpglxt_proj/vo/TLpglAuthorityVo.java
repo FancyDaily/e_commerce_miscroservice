@@ -46,6 +46,10 @@ public class TLpglAuthorityVo{
 	@Column(commit = "操作类型：1 增 2 删 3 改 4 查",length = 4)
 	private Integer operationType;
 
+
+	@Column(commit = "平台类型:0-pc后台,1-小程序前端，2-公众号前端",defaultVal = "0",length = 4)
+	private Integer status;
+
 	//下级权限列表
 	private List<TLpglAuthorityVo> childAuthority;
 

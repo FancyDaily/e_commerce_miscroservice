@@ -1,17 +1,16 @@
 package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
-import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -283,6 +282,23 @@ public class LpglUserController {
 		AjaxResult ajaxResult = lpglRoleService.findRolePage(userId,id,status);
 		return ajaxResult;
 	}
+
+
+	/**
+	 * 查询所有权限
+	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
+	 * @return
+	 */
+	@RequestMapping("/findAllRolePage/auth")
+	public Object findAllRolePage(Integer status){
+		Long userId = IdUtil.getId();
+		AjaxResult ajaxResult = new AjaxResult();
+		JSONObject jsonObject = lpglRoleService.findRole(userId,status);
+		ajaxResult.setSuccess(true);
+		ajaxResult.setData(jsonObject);
+		return ajaxResult;
+	}
+
 
 
 	/**

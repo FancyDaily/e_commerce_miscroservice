@@ -131,4 +131,31 @@ public class LpglEstateController {
 		}
 		return result;
 	}
+
+
+	/**
+	 * 楼层表头
+	 * @param estateId 楼盘编号
+	 * @param buildingNum 楼号
+	 * @return
+	 */
+	@RequestMapping("house/topic")
+	public Object houseTopic(Long estateId, Integer buildingNum){
+		AjaxResult result = lpglEstateService.houseTopic(estateId,buildingNum);
+		return result;
+
+	}
+
+	/**
+	 * 楼层内容
+	 * @param estateId 楼盘编号
+	 * @param buildingNum 楼号
+	 * @return
+	 */
+	@RequestMapping("house/content")
+	public Object houseContent(Long estateId, Integer buildingNum){
+		AjaxResult result = lpglEstateService.houseContent(estateId,buildingNum);
+		return result;
+
+	}
 }
