@@ -102,6 +102,115 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 	}
 
 	@Override
+	public JSONObject findRole(Long userId, Integer status) {
+		{
+			TLpglUserPosistion tLpglUserPosistion = MybatisPlus.getInstance().findOne(
+				new TLpglUserPosistion(), new MybatisPlusBuild(TLpglUserPosistion.class)
+					.eq(TLpglUserPosistion::getUserId, userId)
+					.eq(TLpglUserPosistion::getDeletedFlag, 0)
+			);
+
+			List<TLpglAuthorityVo> firstPageList = new ArrayList();
+			List<TLpglAuthorityVo> secondPageList = new ArrayList();
+			List<TLpglAuthorityVo> thirdPageList = new ArrayList();
+			List<TLpglAuthorityVo> buttonList = new ArrayList();
+//		List<TLpglAuthorityVo> totalList = new ArrayList();
+			//获取职位 角色关联
+			if (tLpglUserPosistion != null && tLpglUserPosistion.getPosistionId() != null) {
+				List<TLpglPosistionRole> tLpglPosistionRole = MybatisPlus.getInstance().findAll(new TLpglPosistionRole(), new MybatisPlusBuild(TLpglPosistionRole.class)
+					.eq(TLpglPosistionRole::getPosisitionId, tLpglUserPosistion.getPosistionId())
+					.eq(TLpglPosistionRole::getDeletedFlag, 0)
+				);
+				if (tLpglPosistionRole != null && tLpglPosistionRole.size() > 0) {
+					for (TLpglPosistionRole lpglPosistionRole : tLpglPosistionRole) {
+						//角色关联权限
+						List<TLpglRoleAuthority> tLpglRoleAuthorityList = MybatisPlus.getInstance().findAll(new TLpglRoleAuthority(), new MybatisPlusBuild(TLpglRoleAuthority.class)
+							.eq(TLpglRoleAuthority::getRoleId, lpglPosistionRole.getRoleId())
+							.eq(TLpglRoleAuthority::getDeletedFlag, 0)
+						);
+						if (tLpglRoleAuthorityList != null && tLpglRoleAuthorityList.size() > 0) {
+							for (TLpglRoleAuthority tLpglRoleAuthority : tLpglRoleAuthorityList) {
+								//权限表
+								List<TLpglAuthority> tLpglAuthoriyList = MybatisPlus.getInstance().findAll(new TLpglAuthority(), new MybatisPlusBuild(TLpglAuthority.class)
+									.eq(TLpglAuthority::getId, tLpglRoleAuthority.getAuthorityId())
+									.eq(TLpglAuthority::getDeletedFlag, 0)
+								);
+								//权限分配
+								if (tLpglAuthoriyList != null && tLpglAuthoriyList.size() > 0) {
+									for (TLpglAuthority tLpglAuthority : tLpglAuthoriyList) {
+										TLpglAuthorityVo tLpglAuthorityVo = new TLpglAuthorityVo();
+										BeanUtils.copyProperties(tLpglAuthority, tLpglAuthorityVo);
+										String code = tLpglAuthority.getCode();
+										if (status!=null){
+											if (tLpglAuthority.getStatus()==status){
+												//一级页面
+												if (code.matches("\\d{1,2}0000")) {
+													firstPageList.add(tLpglAuthorityVo);
+												}
+												//二级页面
+												if (code.matches("\\d{1,2}[1-9]000")) {
+													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
+													secondPageList.add(tLpglAuthorityVo);
+												}
+												//三级级页面
+												if (code.matches("\\d{1,2}[1-9][1-9]00")) {
+													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
+													thirdPageList.add(tLpglAuthorityVo);
+
+												}
+												//页面按钮
+												if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
+													tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
+													buttonList.add(tLpglAuthorityVo);
+												}
+											}
+
+										}else {
+											//一级页面
+											if (code.matches("\\d{1,2}0000")) {
+												firstPageList.add(tLpglAuthorityVo);
+											}
+											//二级页面
+											if (code.matches("\\d{1,2}[1-9]000")) {
+												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 4) + "0000");
+												secondPageList.add(tLpglAuthorityVo);
+											}
+											//三级级页面
+											if (code.matches("\\d{1,2}[1-9][1-9]00")) {
+												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 3) + "000");
+												thirdPageList.add(tLpglAuthorityVo);
+
+											}
+											//页面按钮
+											if (code.matches("\\d{1,2}[1-9][1-9][1-9]0")) {
+												tLpglAuthorityVo.setParentCode(code.substring(0, code.length() - 2) + "00");
+												buttonList.add(tLpglAuthorityVo);
+											}
+										}
+
+									}
+								}
+
+							}
+						}
+
+
+					}
+				}
+			}
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("firstPageList", firstPageList);
+			jsonObject.put("secondPageList", secondPageList);
+			jsonObject.put("thirdPageList", thirdPageList);
+			jsonObject.put("buttonList", buttonList);
+//		jsonObject.put("totalList",totalList);
+
+			return jsonObject;
+		}
+	}
+
+	@Override
 	public List<TLpglRole> findAllRole() {
 		List<TLpglRole> tLpglRoles = MybatisPlus.getInstance().findAll(new TLpglRole(), new MybatisPlusBuild(TLpglRole.class)
 			.eq(TLpglRole::getDeletedFlag, 0)

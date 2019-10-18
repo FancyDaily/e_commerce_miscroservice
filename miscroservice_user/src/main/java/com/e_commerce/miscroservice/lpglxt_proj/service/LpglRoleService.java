@@ -16,6 +16,8 @@ public interface LpglRoleService {
 
 	JSONObject findRole(Long userId);
 
+	JSONObject findRole(Long userId, Integer status);
+
 	List<TLpglRole> findAllRole();
 
 	List<TLpglPosistion> findAllPosistion();
@@ -33,4 +35,5 @@ public interface LpglRoleService {
 	int updatePosistionRole(Long posistionId, Long userId);
 
 	AjaxResult findRolePage(Long userId, Long id, Integer status);
+
 }
