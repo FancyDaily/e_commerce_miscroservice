@@ -126,9 +126,9 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
 
 		Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
-			.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) != null));	//新增/修改 推断分区
-		List<TLpglHouse> modifyList = conditonMap.get(Boolean.TRUE);
-		List<TLpglHouse> addList = conditonMap.get(Boolean.FALSE);
+			.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()) == null || idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) == null));	//新增/修改 推断分区
+		List<TLpglHouse> modifyList = conditonMap.get(Boolean.FALSE);
+		List<TLpglHouse> addList = conditonMap.get(Boolean.TRUE);
 		lpglHouseDao.insert(addList, true);
 
 		if(!skipModify) {
@@ -158,6 +158,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		for(int i = 2; i < todoList.size(); i++) {
 			List<String> listString = todoList.get(i);
 			TLpglHouse build = TLpglHouse.builder()
+				.estateId(estateId)
 				.buildingNum(Integer.valueOf(buildingNum))
 				.houseNum(Integer.valueOf(listString.get(0)))
 				.buildingArea(Double.valueOf(listString.get(1)))

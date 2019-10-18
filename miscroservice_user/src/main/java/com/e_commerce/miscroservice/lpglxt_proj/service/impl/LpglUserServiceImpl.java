@@ -12,12 +12,15 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
+import com.e_commerce.miscroservice.lpglxt_proj.utils.WxUtil;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.HashMap;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
@@ -115,5 +118,15 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		int i =lpglRoleService.updatePosistionRole(posistionId,result.getId());
 		ajaxResult.setSuccess(true);
 		return ajaxResult;
+	}
+
+	@Override
+	public AjaxResult getOpenid(String code) {
+		AjaxResult result = new AjaxResult();
+		String openId = WxUtil.code2PublicOpenId(code);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("openid", openId);
+		result.setData(map);
+		return result;
 	}
 }

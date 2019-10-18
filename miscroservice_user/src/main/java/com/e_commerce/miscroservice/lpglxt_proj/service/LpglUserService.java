@@ -16,4 +16,6 @@ public interface LpglUserService {
 	AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response, String openid);
 
 	AjaxResult register(String username, String password, Long posistionId, HttpServletResponse response, HttpServletRequest request);
+
+	AjaxResult getOpenid(String code);
 }

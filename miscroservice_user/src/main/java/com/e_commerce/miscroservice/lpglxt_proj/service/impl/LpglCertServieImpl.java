@@ -224,8 +224,7 @@ public class LpglCertServieImpl implements LpglCertService {
 				// 消息通知：审核结果抄送销售经理确认 => level = 3
 				Integer level = 3;
 				openIds = getOpenIds(level, "销售经理");
-				//TODO url
-//				url = "";
+				url = "";
 //				content = "";
 
 				break;
@@ -237,7 +236,7 @@ public class LpglCertServieImpl implements LpglCertService {
 				level = 1;
 //				List<String> theOpenIds = getOpenIds(lpglPositionDao.getPosition(level));
 				List<String> theOpenIds = getOpenIds(level, "总经理", "总经办");
-//				url = "";
+				url = "";
 //				content = "";
 
 				break;
