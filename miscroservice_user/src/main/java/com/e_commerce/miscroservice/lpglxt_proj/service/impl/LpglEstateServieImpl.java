@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglEstateService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -180,15 +181,32 @@ public class LpglEstateServieImpl implements LpglEstateService {
             ],
 	 */
 	@Override
-	public AjaxResult houseContent(Long estateId, Integer buildingNum) {
+	public AjaxResult houseContent(Long estateId, String buildingNum) {
 		AjaxResult ajaxResult = new AjaxResult();
 		List result = new LinkedList();
-		List<TLpglHouse> allHouse = null;
-		if (buildingNum!=null){
-			allHouse = MybatisPlus.getInstance().findAll(new TLpglHouse(),new MybatisPlusBuild(TLpglHouse.class)
-				.eq(TLpglHouse::getEstateId,estateId)
-				.eq(TLpglHouse::getBuildingNum,buildingNum)
-			);
+		List<TLpglHouse> allHouse = new ArrayList<>();
+		String[] strs = buildingNum.split(",");
+		List<Integer> numberList = new ArrayList<>();
+		if (StringUtils.isNotEmpty(buildingNum) &&strs.length>0){
+			for (String str : strs) {
+				Integer number = Integer.valueOf(str);
+				numberList.add(number);
+			}
+		}
+		if (numberList!=null&&numberList.size()>0){
+			for (Integer itg : numberList) {
+				List<TLpglHouse> lis = MybatisPlus.getInstance().findAll(new TLpglHouse(),new MybatisPlusBuild(TLpglHouse.class)
+					.eq(TLpglHouse::getEstateId,estateId)
+					.eq(TLpglHouse::getBuildingNum,itg)
+				);
+				if (lis!=null&&lis.size()>0){
+					allHouse.addAll(lis);
+				}
+			}
+//			allHouse = MybatisPlus.getInstance().findAll(new TLpglHouse(),new MybatisPlusBuild(TLpglHouse.class)
+//				.eq(TLpglHouse::getEstateId,estateId)
+//				.eq(TLpglHouse::getBuildingNum,buildingNum)
+//			);
 		}else {
 			allHouse = MybatisPlus.getInstance().findAll(new TLpglHouse(),new MybatisPlusBuild(TLpglHouse.class)
 				.eq(TLpglHouse::getEstateId,estateId)

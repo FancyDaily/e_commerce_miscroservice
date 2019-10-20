@@ -29,5 +29,5 @@ public interface LpglEstateService {
 	 */
 	AjaxResult houseTopic(Long estateId, Integer buildingNum);
 
-	AjaxResult houseContent(Long estateId, Integer buildingNum);
+	AjaxResult houseContent(Long estateId, String buildingNum);
 }
