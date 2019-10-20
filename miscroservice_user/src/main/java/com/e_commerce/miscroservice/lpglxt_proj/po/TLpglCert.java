@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,30 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TLpglCert extends BaseEntity {
+
+	/**
+	 * 楼盘编号
+	 */
+	@Transient
+	private String estateName;
+
+	/**
+	 * 房间号
+	 */
+	@Transient
+	private Integer houseNum;
+
+	/**
+	 * 楼号
+	 */
+	@Transient
+	private Integer buildingNum;
+
+	/**
+	 * 单元号
+	 */
+	@Transient
+	private String groupName;
 
 	@Column(commit = "商品房编号")
 	private Long houseId;

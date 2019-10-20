@@ -14,6 +14,7 @@ import com.e_commerce.miscroservice.commons.helper.log.Log;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.ApplicationContextUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.TokenUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqUserDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
@@ -40,62 +41,63 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
  */
 public class UserUtil {
 
-    public static UserUtil userUtil;
+	public static UserUtil userUtil;
 
-    public static Log logger = Log.getInstance(UserUtil.class);
+	public static Log logger = Log.getInstance(UserUtil.class);
 
 	private static String MANAGER_USER_DESCRIBE = "manager:user:%s";
 
-    /**
-     * 根据用户token获取User
-     * @param token
-     * @return
-     */
-    public static TUser getUser(String token){
-        logger.info("获取用户信息token={}",token);
-        RedisUtil redisUtil = ApplicationContextUtil.getBean(RedisUtil.class);
-        TUser user = (TUser) redisUtil.get(token);
-        if (user==null&& StringUtils.isNoneEmpty(token)){
-            UserService userService = ApplicationContextUtil.getBean(UserService.class);
-            if (TokenUtil.genUserId(token)==null){
-                logger.info("异常登陆信息，清除token={}重新登陆",token);
-                redisUtil.del(token);
-                throw new MessageException(String.valueOf(AppErrorEnums.LOGIN_ERROR.getCode()),"请重新登陆");
-            }
-            String userId = null;
-            try {
-                userId = TokenUtil.genUserId(token);
+	/**
+	 * 根据用户token获取User
+	 *
+	 * @param token
+	 * @return
+	 */
+	public static TUser getUser(String token) {
+		logger.info("获取用户信息token={}", token);
+		RedisUtil redisUtil = ApplicationContextUtil.getBean(RedisUtil.class);
+		TUser user = (TUser) redisUtil.get(token);
+		if (user == null && StringUtils.isNoneEmpty(token)) {
+			UserService userService = ApplicationContextUtil.getBean(UserService.class);
+			if (TokenUtil.genUserId(token) == null) {
+				logger.info("异常登陆信息，清除token={}重新登陆", token);
+				redisUtil.del(token);
+				throw new MessageException(String.valueOf(AppErrorEnums.LOGIN_ERROR.getCode()), "请重新登陆");
+			}
+			String userId = null;
+			try {
+				userId = TokenUtil.genUserId(token);
 
-            }catch (Exception e){
-                logger.error("解析用户id出错token={}",token);
-            }
-            if (StringUtils.isNotEmpty(userId)){
-                user = userService.getUserbyId(Long.valueOf(userId));
-            }else {
-                redisUtil.del(token);
-                throw new MessageException(String.valueOf(AppErrorEnums.LOGIN_ERROR.getCode()),"请重新登陆");
+			} catch (Exception e) {
+				logger.error("解析用户id出错token={}", token);
+			}
+			if (StringUtils.isNotEmpty(userId)) {
+				user = userService.getUserbyId(Long.valueOf(userId));
+			} else {
+				redisUtil.del(token);
+				throw new MessageException(String.valueOf(AppErrorEnums.LOGIN_ERROR.getCode()), "请重新登陆");
 
-            }
+			}
 
-        }
-        return user;
-    }
+		}
+		return user;
+	}
 
-    public static TUser getUser() {
-        Long currentId = IdUtil.getId();
-        TUser user = new TUser();
-        if(currentId==null) {
-            return null;
-        }
-        user.setId(currentId);
-        return user;
-    }
+	public static TUser getUser() {
+		Long currentId = IdUtil.getId();
+		TUser user = new TUser();
+		if (currentId == null) {
+			return null;
+		}
+		user.setId(currentId);
+		return user;
+	}
 
-    public static TUser getTestUser(Long userId) {
+	public static TUser getTestUser(Long userId) {
 		TUser user = getUser();
-		if(user == null) {
+		if (user == null) {
 			user = new TUser();
-			userId = userId == null? 1292:userId;
+			userId = userId == null ? 1292 : userId;
 			user.setId(userId);
 			user.setName("测试用户-三胖");
 		}
@@ -103,7 +105,7 @@ public class UserUtil {
 	}
 
 	public static TUser getTestUser() {
-    	return getTestUser(null);
+		return getTestUser(null);
 	}
 
 	public static Long getTestId() {
@@ -115,7 +117,7 @@ public class UserUtil {
 	}
 
 	public static Long getTestId(Long userId) {
-		if(userId == null) {
+		if (userId == null) {
 			return getTestId();
 		}
 		return userId;
@@ -127,7 +129,7 @@ public class UserUtil {
 
 	public static Long getManagerId(CsqUserDao csqUserDao, RedisTemplate<String, Object> userRedisTemplate) {
 		Long id = IdUtil.getId();
-		if(id == null) {
+		if (id == null) {
 			throw new MessageException(AppErrorConstant.EMPTY_TOKEN, "用户未登录");
 		}
 		String key = String.format(MANAGER_USER_DESCRIBE, id);
@@ -135,9 +137,9 @@ public class UserUtil {
 		logger.info("获取缓存={}", csqUser);
 		Long expire = userRedisTemplate.getExpire(key);
 		logger.info("剩余有效时间={}", expire);
-		if (csqUser == null){
+		if (csqUser == null) {
 			csqUser = csqUserDao.selectByPrimaryKey(id);
-			if (csqUser!=null){
+			if (csqUser != null) {
 				userRedisTemplate.opsForValue().set(key, csqUser, 30, TimeUnit.SECONDS);
 			} else {
 				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在!");
@@ -145,7 +147,7 @@ public class UserUtil {
 		}
 
 		Integer maanagerType = csqUser.getMaanagerType();
-		if(CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {	//非管理员
+		if (CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {    //非管理员
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前用户没有权限！");
 		}
 		return id;
@@ -159,9 +161,9 @@ public class UserUtil {
 		logger.info("获取缓存={}", csqUser);
 		Long expire = userRedisTemplate.getOperations().getExpire(key);
 		logger.info("剩余有效时间={}", expire);
-		if (csqUser == null){
+		if (csqUser == null) {
 			csqUser = csqUserDao.selectByPrimaryKey(id);
-			if (csqUser!=null){
+			if (csqUser != null) {
 				userRedisTemplate.put(key, hashKey, csqUser);
 				Boolean aBoolean = userRedisTemplate.getOperations().expire(key, 30, TimeUnit.SECONDS);
 			} else {
@@ -170,24 +172,24 @@ public class UserUtil {
 		}
 
 		Integer maanagerType = csqUser.getMaanagerType();
-		if(CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {	//非管理员
+		if (CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {    //非管理员
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前用户没有权限！");
 		}
 		return id;
 	}
 
 	public static Integer getApplication(Integer option) {
-		Integer application = ApplicationEnum.XIAOSHI_APPLICATION.toCode();	//默认值
-		if(option!=null) {
+		Integer application = ApplicationEnum.XIAOSHI_APPLICATION.toCode();    //默认值
+		if (option != null) {
 			boolean flag = false;
-			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
-				if(tEnum.toCode() == option) {
+			for (ApplicationEnum tEnum : ApplicationEnum.values()) {
+				if (tEnum.toCode() == option) {
 					flag = true;
 					application = option;
 					break;
 				}
 			}
-			if(!flag) {
+			if (!flag) {
 				throw new MessageException("application参数不合法!");
 			}
 		}
@@ -195,17 +197,17 @@ public class UserUtil {
 	}
 
 	public static ApplicationEnum getApplicationEnum(Integer option) {
-		ApplicationEnum applicationEnum = ApplicationEnum.XIAOSHI_APPLICATION;	//默认值
-		if(option!=null) {
+		ApplicationEnum applicationEnum = ApplicationEnum.XIAOSHI_APPLICATION;    //默认值
+		if (option != null) {
 			boolean flag = false;
-			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
-				if(tEnum.toCode() == option) {
+			for (ApplicationEnum tEnum : ApplicationEnum.values()) {
+				if (tEnum.toCode() == option) {
 					flag = true;
 					applicationEnum = tEnum;
 					break;
 				}
 			}
-			if(!flag) {
+			if (!flag) {
 				throw new MessageException("application参数不合法!");
 			}
 		}
@@ -213,17 +215,17 @@ public class UserUtil {
 	}
 
 	public static String getApplicationNamePrefix(Integer option) {
-		String namePrefix = ApplicationEnum.XIAOSHI_APPLICATION.getNamePrefix();	//默认值
-		if(option!=null) {
+		String namePrefix = ApplicationEnum.XIAOSHI_APPLICATION.getNamePrefix();    //默认值
+		if (option != null) {
 			boolean flag = false;
-			for(ApplicationEnum tEnum:ApplicationEnum.values()) {
-				if(tEnum.toCode() == option) {
+			for (ApplicationEnum tEnum : ApplicationEnum.values()) {
+				if (tEnum.toCode() == option) {
 					flag = true;
 					namePrefix = tEnum.getNamePrefix();
 					break;
 				}
 			}
-			if(!flag) {
+			if (!flag) {
 				throw new MessageException("application参数不合法!");
 			}
 		}
@@ -243,10 +245,15 @@ public class UserUtil {
 	public static TLpglUser loginTLpg(TLpglUser tLpglUser, Integer application, AuthorizeRpcService authorizeRpcService, HttpServletResponse response) {
 		String namePrefix = UserUtil.getApplicationNamePrefix(application);
 		Token load = authorizeRpcService.load(namePrefix + tLpglUser.getId(),
-			DEFAULT_PASS, tLpglUser.getUserAccount());
-		if (load != null && load.getToken() != null) {
+			DEFAULT_PASS, tLpglUser.getUserAccount().trim());
+		if (load != null && !StringUtil.isEmpty(load.getToken())) {
 			tLpglUser.setToken(load.getToken());
-
+		} else {
+			//注册到认证中心
+			Token to = authorizeRpcService.reg(namePrefix + tLpglUser.getId(), DEFAULT_PASS, tLpglUser.getId().toString(), tLpglUser.getUserAccount().trim(), Boolean.FALSE);
+			if (to != null) {
+				tLpglUser.setToken(to.getToken());
+			}
 		}
 		return tLpglUser;
 	}

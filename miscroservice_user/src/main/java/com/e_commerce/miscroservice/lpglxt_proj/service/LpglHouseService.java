@@ -16,7 +16,7 @@ public interface LpglHouseService {
 
 	QueryResult list(Long userId, Long estateId, Integer pageNum, Integer pageSize, Long groupId);
 
-	TLpglHouse detail(Long houseId);
+	TLpglHouse detail(Long userId, Long houseId);
 
 	int modify(TLpglHouse obj);
 
@@ -25,4 +25,10 @@ public interface LpglHouseService {
 	void remove(Long houseId);
 
 	List<String> recordIn(Long estateId, MultipartFile file, boolean skipModify);
+
+	void recordInDetail(Long estateId, MultipartFile file, boolean skipModify) throws Exception;
+
+	void recordInDetail2(Long estateId, MultipartFile file, boolean skipModify) throws Exception;
+
+	void floorNumDeal();
 }

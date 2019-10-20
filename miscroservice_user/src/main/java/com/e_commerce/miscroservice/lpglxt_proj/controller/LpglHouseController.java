@@ -76,8 +76,8 @@ public class LpglHouseController {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("商品房详情, houseId={}", houseId);
-			TLpglHouse res = lpglHouseService.detail(houseId);
+			log.info("商品房详情, userId={}, houseId={}", userId, houseId);
+			TLpglHouse res = lpglHouseService.detail(userId, houseId);
 			result.setData(res);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -205,7 +205,7 @@ public class LpglHouseController {
 	}
 
 	/**
-	 * 商品房信息导入
+	 * 商品房信息导入-图谱模式
 	 * @param estateId 楼盘编号
 	 * @param file 多部件文件
 	 * @param skipModify 跳过覆写
@@ -231,6 +231,83 @@ public class LpglHouseController {
 		return result;
 	}
 
+	/**
+	 * 商品房信息导入-详细模式
+	 * @param estateId 楼盘编号
+	 * @param file 多部件文件
+	 * @param skipModify 跳过覆写
+	 * @return
+	 */
+	@RequestMapping("record/in/detail")
+	public Object houseRecordIn2(Long estateId, MultipartFile file, boolean skipModify) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("商品房信息导入-详细模式, estateId={}, file={}, skipModify={}", estateId, file, skipModify);
+			lpglHouseService.recordInDetail(estateId, file, skipModify);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "商品房信息导入-详细模式", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("商品房信息导入-详细模式", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 商品房信息导入-简化
+	 * @param estateId 楼盘编号
+	 * @param file 多部件文件
+	 * @param skipModify 跳过覆写
+	 * @return
+	 */
+	@RequestMapping("record/in/detail/2")
+	public Object houseRecordIn222(Long estateId, MultipartFile file, boolean skipModify) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("商品房信息导入-简化, estateId={}, file={}, skipModify={}", estateId, file, skipModify);
+			lpglHouseService.recordInDetail2(estateId, file, skipModify);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "商品房信息导入-简化", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("商品房信息导入-简化", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 楼层
+	 * @return
+	 */
+	@RequestMapping("floor")
+	public Object floorNumDeal() {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("楼层");
+			lpglHouseService.floorNumDeal();
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "楼层", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("楼层", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
 
 
 	/**

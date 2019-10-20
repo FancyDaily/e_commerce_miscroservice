@@ -257,7 +257,7 @@ public class LpglEstateServieImpl implements LpglEstateService {
 												List<TLpglHouse> floorList = MybatisPlus.getInstance().findAll(new TLpglHouse(),new MybatisPlusBuild(TLpglHouse.class)
 													.eq(TLpglHouse::getEstateId,estateId)
 													.eq(TLpglHouse::getBuildingNum,num)
-													.eq(TLpglHouse::getGroupName,groupName)
+//													.eq(TLpglHouse::getGroupName,groupName)
 													.eq(TLpglHouse::getFloorNum,danyuanName.getFloorNum())
 													.orderBy(MybatisPlusBuild.OrderBuild.buildAsc(TLpglHouse::getFloorNum))
 

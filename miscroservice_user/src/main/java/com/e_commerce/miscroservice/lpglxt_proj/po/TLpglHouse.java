@@ -111,7 +111,7 @@ public class TLpglHouse extends BaseEntity {
 	/**
 	 * 状态
 	 */
-	@Column(commit = "状态")
+	@Column(commit = "状态", length = 11, defaultVal = "0")
 	private Integer status;
 
 	@Column(commit = "首付")
@@ -137,6 +137,15 @@ public class TLpglHouse extends BaseEntity {
 
 	@Column(commit = "分销公司名字")
 	private String companyName;
+
+	@Column(commit = "自行车位编号")
+	private String bicycleNum;
+
+	@Column(commit = "自行车位总价")
+	private String bicyclePrice;
+
+	@Column(commit = "汽车位总价")
+	private String carPrice;
 
 	public LpglFloorHouseMapVo copyLpglFloorHouseMapVo() {return null;}
 

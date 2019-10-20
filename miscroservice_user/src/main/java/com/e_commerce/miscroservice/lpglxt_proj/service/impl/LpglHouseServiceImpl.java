@@ -1,15 +1,18 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.POIUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglEstateDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglHouseDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
+import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglCertEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglHouseEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglEstate;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
@@ -27,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -62,8 +67,13 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 	}
 
 	@Override
-	public TLpglHouse detail(Long houseId) {
-		return lpglHouseDao.selectByPrimaryKey(houseId);
+	public TLpglHouse detail(Long userId, Long houseId) {
+		TLpglHouse tLpglHouse = lpglHouseDao.selectByPrimaryKey(houseId);
+		boolean isDone = TlpglCertEnum.STATUS_PASS.getCode() == tLpglHouse.getStatus();
+		if(isDone) {
+			if(!userId.equals(tLpglHouse.getSaleManId())) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您没有权限查看！");
+		}
+		return tLpglHouse;
 	}
 
 	@Override
@@ -90,7 +100,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 			if(tLpglEstate == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "该楼盘不存在！");
 			//收集表格数据
 //			InputStream inputStream = file.getInputStream();
-			InputStream inputStream = new FileInputStream(new File("/Users/xufangyi/Downloads/楼盘管理导入demo.xlsx"));
+			InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/楼盘管理导入demo.xlsx"));
 			List<Map<String, Object>> maps = POIUtil.estateDemo(inputStream);
 			List<TLpglHouse> todoList = maps.stream()
 				.map(
@@ -112,28 +122,7 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 					}
 				).collect(Collectors.toList());
 			//插入数据(楼盘号、楼号、房间号已存在则进行修改
-			List<TLpglHouse> lpglHouses = lpglHouseDao.selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(todoList);
-			Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
-
-			Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
-				.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) != null));	//新增/修改 推断分区
-			List<TLpglHouse> modifyList = conditonMap.get(Boolean.TRUE);
-			List<TLpglHouse> addList = conditonMap.get(Boolean.FALSE);
-			lpglHouseDao.insert(addList, true);
-
-			if(!skipModify) {
-				//处理待修改的数据,赋予id
-				modifyList = modifyList.stream()
-					.map(a -> {
-						List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum());
-						a.setId(tLpglHouses == null? null: tLpglHouses.get(0).getId());
-						return a;
-					}).collect(Collectors.toList());
-				modifyList = modifyList.stream()
-					.filter(a -> a.getId() != null).collect(Collectors.toList());
-
-				lpglHouseDao.modify(modifyList, false);	//TODO 批量更新不可用
-			}
+			dealWithImportDatas(skipModify, todoList);
 
 		} catch (IOException e) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, e.getMessage());
@@ -141,17 +130,134 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		String path = "/Users/xufangyi/Downloads/导入模版.xlsx";
-		try {
-			List<String[]> strings = POIUtil.readFromPath(path);
-			strings.stream()
-				.forEach(a -> {
-					Arrays.stream(a).forEach(System.out::println);
-				});
-		} catch (IOException e) {
-			e.printStackTrace();
+	private void dealWithImportDatas(boolean skipModify, List<TLpglHouse> todoList) {
+		List<TLpglHouse> lpglHouses = lpglHouseDao.selectWithListWhereEstateIdAndBuildingNumAndHouseNumCondition(todoList);
+		Map<Integer, Map<Integer, List<TLpglHouse>>> idHouseMap = lpglHouses.stream().collect(Collectors.groupingBy(TLpglHouse::getBuildingNum, Collectors.groupingBy(TLpglHouse::getHouseNum)));
+
+		Map<Boolean, List<TLpglHouse>> conditonMap = todoList.stream()
+			.collect(Collectors.partitioningBy(a -> idHouseMap.get(a.getBuildingNum()) == null || idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum()) == null));	//新增/修改 推断分区
+		List<TLpglHouse> modifyList = conditonMap.get(Boolean.FALSE);
+		List<TLpglHouse> addList = conditonMap.get(Boolean.TRUE);
+		lpglHouseDao.insert(addList, true);
+
+		if(!skipModify) {
+			//处理待修改的数据,赋予id
+			modifyList = modifyList.stream()
+				.map(a -> {
+					List<TLpglHouse> tLpglHouses = idHouseMap.get(a.getBuildingNum()).get(a.getHouseNum());
+					a.setId(tLpglHouses == null? null: tLpglHouses.get(0).getId());
+					return a;
+				}).collect(Collectors.toList());
+			modifyList = modifyList.stream()
+				.filter(a -> a.getId() != null).collect(Collectors.toList());
+
+			lpglHouseDao.modify(modifyList, false);	//TODO 批量更新不可用
 		}
+	}
+
+	@Override
+	public void recordInDetail(Long estateId, MultipartFile file, boolean skipModify) throws Exception {
+		InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/导入商品房数据.xls"));
+		List<String[]> strings = POIUtil.readExcel(inputStream);
+		List<List<String>> todoList = strings.stream().map(Arrays::asList).collect(Collectors.toList());
+		List<String> titleString = todoList.get(0);
+		String title = titleString.get(0);
+		String buildingNum = title.substring(0, title.length() - 5);
+		ArrayList<TLpglHouse> houses = new ArrayList<>();
+		for(int i = 2; i < todoList.size(); i++) {
+			List<String> listString = todoList.get(i);
+			TLpglHouse build = TLpglHouse.builder()
+				.estateId(estateId)
+				.buildingNum(Integer.valueOf(buildingNum))
+				.houseNum(Integer.valueOf(listString.get(0)))
+				.buildingArea(Double.valueOf(listString.get(1)))
+				.buildingPrice(Double.valueOf(listString.get(2)))
+				.totalPrice(Double.valueOf(listString.get(3)))
+				.bicycleNum(listString.get(4))
+				.bicyclePrice(listString.get(5))
+				.carPrice(listString.get(6))
+				.build();
+			houses.add(build);
+		}
+		houses
+			.stream()
+			.forEach(System.out::println);
+		//插入或者修改
+		dealWithImportDatas(skipModify, houses);
+	}
+
+	public static void main(String[] args) {
+	    try {
+			List<String[]> strings = POIUtil.readExcel(new FileInputStream(new File("/Users/xufangyi/Downloads/12312313.xlsx")));
+			strings.stream()
+				.map(Arrays::asList).forEach(System.out::println);
+		} catch (Exception e) {
+	    	e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void recordInDetail2(Long estateId, MultipartFile file, boolean skipModify) throws Exception {
+		InputStream inputStream = file != null? file.getInputStream() : new FileInputStream(new File("/Users/xufangyi/Downloads/12312313.xlsx"));
+		List<String[]> strings = POIUtil.readExcel(inputStream);
+		List<List<String>> todoList = strings.stream().map(Arrays::asList).collect(Collectors.toList());
+		List<String> titleString = todoList.get(0);
+		String title = titleString.get(0);
+		String regEx="[^0-9]";
+		Pattern p = Pattern.compile(regEx);
+		Matcher m = p.matcher(title);
+		String buildingNum = m.replaceAll("").trim();
+		ArrayList<TLpglHouse> houses = new ArrayList<>();
+		for(int i = 3; i < todoList.size(); i++) {
+			List<String> listString = todoList.get(i);
+			String s = listString.get(1);
+			if(StringUtil.isEmpty(s))
+				System.out.println("!!!!!!");
+			String groupName = "";
+			String groupNum = listString.get(7);
+			if("1".equals(groupNum)) {
+				groupName = "一单元";
+			} else if("2".equals(groupNum)) {
+				groupName = "二单元";
+			} else if("3".equals(groupNum)) {
+				groupName = "三单元";
+			}
+			//TODO 楼层号
+			Integer buildingNumer = Integer.valueOf(buildingNum);
+			TLpglHouse build = TLpglHouse.builder()
+				.estateId(estateId)
+				.buildingNum(buildingNumer)
+				.houseNum(Integer.valueOf(listString.get(1)))
+				.buildingArea(Double.valueOf(listString.get(4)))
+				.buildingPrice(Double.valueOf(listString.get(5)))
+				.totalPrice(Double.valueOf(listString.get(6)))
+				.groupName(groupName)
+				.build();
+			if(buildingNumer.equals(12) || buildingNumer.equals(18)) {
+				build.setIsValid(AppConstant.IS_VALID_YES);
+			}
+			houses.add(build);
+		}
+		houses
+			.stream()
+			.forEach(System.out::println);
+		//插入或者修改
+		dealWithImportDatas(skipModify, houses);
+	}
+
+	@Override
+	public void floorNumDeal() {
+		List<TLpglHouse> tLpglHouses = lpglHouseDao.selectAll();
+		tLpglHouses.stream()
+			.map(a -> {
+				String houseNumStr = String.valueOf(a.getHouseNum());
+				String substring = houseNumStr.substring(0, houseNumStr.length() - 2);
+				a.setFloorNum(Integer.valueOf(substring));
+				return a;
+			}).forEach(a -> {
+				lpglHouseDao.update(a);
+				}
+			);
 	}
 
 	@Override
