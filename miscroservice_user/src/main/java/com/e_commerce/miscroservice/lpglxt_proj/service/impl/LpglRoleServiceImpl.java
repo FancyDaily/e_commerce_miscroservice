@@ -11,7 +11,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: FangyiXu
@@ -239,9 +241,19 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 
 	@Override
 	public List<TLpglRole> findAllPosistionRole(Long posistionId) {
-		List<TLpglPosistionRole> list = MybatisPlus.getInstance().findAll(new TLpglPosistionRole(), new MybatisPlusBuild(TLpglPosistionRole.class)
+		return findAllPosistionRole(posistionId);
+	}
+
+	@Override
+	public List<TLpglRole> findAllPosistionRole(Long... posistionId) {
+		return findAllPosistionRole(Arrays.asList(posistionId));
+	}
+
+	@Override
+	public List<TLpglRole> findAllPosistionRole(List<Long> posistionId) {
+		List<TLpglPosistionRole> list = posistionId.isEmpty()? new ArrayList<>(): MybatisPlus.getInstance().findAll(new TLpglPosistionRole(), new MybatisPlusBuild(TLpglPosistionRole.class)
 			.eq(TLpglPosistionRole::getDeletedFlag, 0)
-			.eq(TLpglPosistionRole::getPosisitionId, posistionId)
+			.in(TLpglPosistionRole::getPosisitionId, posistionId)
 		);
 		List<TLpglRole> lpglRoles = new ArrayList<>();
 		if (list != null && list.size() > 0) {
@@ -259,11 +271,15 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 	}
 
 	@Override
-	public List<TLpglAuthority> findAllRoleAuthority(Long roleId) {
+	public List<TLpglAuthority> findAllRoleAuthority(Long... roleId) {
+		return findAllRoleAuthority(Arrays.asList(roleId));
+	}
 
-		List<TLpglRoleAuthority> list = MybatisPlus.getInstance().findAll(new TLpglRoleAuthority(), new MybatisPlusBuild(TLpglRoleAuthority.class)
+	@Override
+	public List<TLpglAuthority> findAllRoleAuthority(List<Long> roleId) {
+		List<TLpglRoleAuthority> list = roleId.isEmpty()? new ArrayList<>(): MybatisPlus.getInstance().findAll(new TLpglRoleAuthority(), new MybatisPlusBuild(TLpglRoleAuthority.class)
 			.eq(TLpglRoleAuthority::getDeletedFlag, 0)
-			.eq(TLpglRoleAuthority::getRoleId, roleId)
+			.in(TLpglRoleAuthority::getRoleId, roleId)
 		);
 		List<TLpglAuthority> tLpglAuthorities = new ArrayList<>();
 		if (list != null && list.size() > 0) {
@@ -277,8 +293,10 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 				}
 			}
 		}
-		return tLpglAuthorities;
+		return tLpglAuthorities.stream().filter(a -> a.getOperationType() != 5).collect(Collectors.toList());
 	}
+
+
 
 	@Override
 	public JSONObject findAllPosistionRoleAuthority() {
@@ -378,6 +396,20 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 		ajaxResult.setData(firstPageList);
 		return ajaxResult;
 
+	}
+
+	@Override
+	public List<TLpglAuthority> findAllFloorAuthority(Long roleId) {
+		List<TLpglAuthority> allRoleAuthority = findAllRoleAuthority(roleId);
+		return allRoleAuthority.stream()
+			.filter(a -> a.getOperationType() == 5).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<TLpglUserPosistion> findUserPosition(Long id) {
+		return MybatisPlus.getInstance().findAll(new TLpglUserPosistion(), new MybatisPlusBuild(TLpglUserPosistion.class)
+			.eq(TLpglUserPosistion::getUserId, id)
+		);
 	}
 
 	public static void main(String[] args) {

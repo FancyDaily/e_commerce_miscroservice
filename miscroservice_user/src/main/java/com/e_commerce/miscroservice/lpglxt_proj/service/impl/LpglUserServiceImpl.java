@@ -6,10 +6,11 @@ import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
-import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
-import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
+import com.e_commerce.miscroservice.lpglxt_proj.po.*;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import com.e_commerce.miscroservice.lpglxt_proj.utils.WxUtil;
@@ -21,6 +22,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
 
@@ -71,13 +74,24 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		}
 
 		user = UserUtil.loginTLpg(user, ApplicationEnum.LPGL_APPLICATION.toCode(), authorizeRpcService,response);
-		ajaxResult.setData(user);
+
+		List<TLpglUserPosistion> userPosition = lpglRoleService.findUserPosition(user.getId());
+		List<Long> positionIds = userPosition.stream()
+			.map(TLpglUserPosistion::getPosistionId)
+			.distinct()
+			.collect(Collectors.toList());
+		List<TLpglRole> roles = lpglRoleService.findAllPosistionRole(positionIds);
+
+		HashMap<String, Object> resMap = new HashMap<>();
+		resMap.put("user", user);
+		resMap.put("roles", roles);
+		ajaxResult.setData(resMap);
 		ajaxResult.setSuccess(true);
 		return ajaxResult;
 	}
 
 	@Override
-	public AjaxResult register(String username, String password, Long posistionId, HttpServletResponse response, HttpServletRequest request) {
+	public AjaxResult register(String username, String password, Long posistionId, HttpServletResponse response, HttpServletRequest request, String name) {
 
 		AjaxResult ajaxResult = new AjaxResult();
 
@@ -93,6 +107,8 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		}
 		req.setUserAccount(username);
 		req.setPassword(password);
+		req.setName(name);
+		req.setUserTel(username);
 		if (user!=null){
 			log.warn("用户已注册 更新职位");
 			ajaxResult.setSuccess(true);
@@ -128,5 +144,42 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		map.put("openid", openId);
 		result.setData(map);
 		return result;
+	}
+
+	@Override
+	public AjaxResult userList(String name, String userAccount, Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TLpglUser.class);
+
+		mybatisPlusBuild.like(TLpglUser::getName, buildLikeString(name));
+		mybatisPlusBuild.like(TLpglUser::getUserAccount, buildLikeString(userAccount));
+
+		IdUtil.setTotal(mybatisPlusBuild);
+		result.setData(PageUtil.buildQueryResult(MybatisPlus.getInstance().findAll(new TLpglUser(), mybatisPlusBuild.page(pageNum, pageSize)), IdUtil.getTotal()));
+		result.setSuccess(true);
+		return result;
+	}
+
+	@Override
+	public AjaxResult authorities(Long id) {
+		List<TLpglUserPosistion> userPosition = lpglRoleService.findUserPosition(id);
+		List<Long> positionIds = userPosition.stream()
+			.map(TLpglUserPosistion::getPosistionId).collect(Collectors.toList());
+		;
+		List<TLpglRole> allPosistionRole = lpglRoleService.findAllPosistionRole(positionIds);
+		List<Long> roleIds = allPosistionRole.stream()
+			.map(TLpglRole::getId).collect(Collectors.toList());
+		AjaxResult result = new AjaxResult();
+		result.setData(lpglRoleService.findAllRoleAuthority(roleIds));
+		result.setSuccess(true);
+		return result;
+	}
+
+	private String buildLikeString(String str) {
+		return '%' + str + '%';
+	}
+
+	private String preStringParam(String str) {
+		return str == null? "": str;
 	}
 }

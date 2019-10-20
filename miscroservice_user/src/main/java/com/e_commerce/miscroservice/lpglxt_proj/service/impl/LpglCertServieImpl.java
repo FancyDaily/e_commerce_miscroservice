@@ -264,6 +264,7 @@ public class LpglCertServieImpl implements LpglCertService {
 				url = "";
 //				content = "";
 
+
 				break;
 			case TYPE_CUSTOMER:
 				Long customerInfoId = tLpglCert.getCustomerInfoId();

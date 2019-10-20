@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
@@ -105,6 +106,20 @@ public class LpglUserController {
 	public Object findAllRoleAuthority(Long roleId){
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglAuthority> tLpglAuthorities = lpglRoleService.findAllRoleAuthority(roleId);
+		ajaxResult.setSuccess(true);
+		ajaxResult.setData(tLpglAuthorities);
+		return ajaxResult;
+	}
+
+	/**
+	 * 查找楼层权限
+	 * @param roleId
+	 * @return
+	 */
+	@RequestMapping("findAllFloorAuthority")
+	public Object findAllFloorAuthority(Long roleId) {
+		AjaxResult ajaxResult = new AjaxResult();
+		List<TLpglAuthority> tLpglAuthorities = lpglRoleService.findAllFloorAuthority(roleId);
 		ajaxResult.setSuccess(true);
 		ajaxResult.setData(tLpglAuthorities);
 		return ajaxResult;
@@ -305,13 +320,31 @@ public class LpglUserController {
 	 * 注册
 	 * @param username 用户名
 	 * @param password 密码
+	 * @param name 姓名
 	 * @param posistionId 职位id
 	 * @return
 	 */
 	@RequestMapping("register")
-	public Object register(HttpServletResponse response, HttpServletRequest request,String username, String password, Long posistionId){
+	public Object register(HttpServletResponse response, HttpServletRequest request,String username, String password, Long posistionId, String name){
 
-		AjaxResult ajaxResult = lpglUserService.register(username,password,posistionId,response,request);
+		AjaxResult ajaxResult = lpglUserService.register(username,password,posistionId,response,request, name);
+
+		return ajaxResult;
+	}
+
+
+	/**
+	 * 用户列表
+	 * @param name 昵称
+	 * @param userAccount 用户名
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @return
+	 */
+	@RequestMapping("user/list")
+	public Object userList(String name, String userAccount, Integer pageNum, Integer pageSize){
+
+		AjaxResult ajaxResult = lpglUserService.userList(name, userAccount, pageNum, pageSize);
 
 		return ajaxResult;
 	}
@@ -326,6 +359,19 @@ public class LpglUserController {
 	public Object login(HttpServletResponse response, HttpServletRequest request, String username, String password, String openid){
 
 		AjaxResult ajaxResult = lpglUserService.login(username,password,request,response, openid);
+
+		return ajaxResult;
+	}
+
+	/**
+	 * 查询用户权限
+	 * @return
+	 */
+	@RequestMapping("user/authorities")
+	@UrlAuth(withoutPermission = true)
+	public Object userAuthorities(){
+
+		AjaxResult ajaxResult = lpglUserService.authorities(IdUtil.getId());
 
 		return ajaxResult;
 	}

@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglAuthority;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglRole;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUserPosistion;
 
 import java.util.List;
 
@@ -26,7 +27,13 @@ public interface LpglRoleService {
 
 	List<TLpglRole> findAllPosistionRole(Long posistionId);
 
-	List<TLpglAuthority> findAllRoleAuthority(Long roleId);
+	List<TLpglRole> findAllPosistionRole(Long... posistionId);
+
+	List<TLpglRole> findAllPosistionRole(List<Long> posistionId);
+
+	List<TLpglAuthority> findAllRoleAuthority(Long... roleId);
+
+	List<TLpglAuthority> findAllRoleAuthority(List<Long> roleId);
 
 	JSONObject findAllPosistionRoleAuthority();
 
@@ -36,4 +43,7 @@ public interface LpglRoleService {
 
 	AjaxResult findRolePage(Long userId, Long id, Integer status);
 
+	List<TLpglAuthority> findAllFloorAuthority(Long roleId);
+
+	List<TLpglUserPosistion> findUserPosition(Long id);
 }

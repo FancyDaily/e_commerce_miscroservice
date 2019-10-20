@@ -41,6 +41,7 @@ public class LpglCertController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth(withoutPermission = true)
 	public Object houseUnderCertList(Integer status, Integer type, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
