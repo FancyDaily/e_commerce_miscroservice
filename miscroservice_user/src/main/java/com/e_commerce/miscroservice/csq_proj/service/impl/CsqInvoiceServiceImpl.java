@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Author: FangyiXu
@@ -318,7 +317,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 	}
 
 	@Override
-	public Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
+	public Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		//已开票总金额统计
 		List<TCsqUserInvoice> csqUserInvoices = csqUserInvoiceDao.selectByIsOut(CsqInvoiceEnum.ISOUT_OUT_ALREADY.getCode());
 		Double totalAmount = csqUserInvoices.stream()
@@ -333,8 +332,9 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			if(isNum) {
 				boolean matches = searchParam.length() > 30;	//生成的orderoNo长度为31,且以020开头
 				if(!matches) {
-					TCsqOrder tCsqOrder = csqOrderDao.selectByOrderNo(searchParam);
-					searchParam = tCsqOrder == null? "": tCsqOrder.getOrderNo();
+					List<TCsqOrder> orders = csqOrderDao.selectByOrderNo(searchParam, isFuzzySearch);
+
+					searchParam = orders == null || orders.isEmpty()? "": orders.get(0).getOrderNo();
 				}
 				if("".equals(searchParam)) {
 					map.put("queryResult", new QueryResult<>());
@@ -342,7 +342,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 				}
 				baseBuild.like(TCsqUserInvoice::getOrderNos, "%" + searchParam + "%");	//订单编号
 			} else {	//按开票申请人名称搜索
-				List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, false);//当前为关闭模糊查找
+				List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);//当前为关闭模糊查找
 				List<Long> userIds = tCsqUsers.stream()
 					.map(TCsqUser::getId).collect(Collectors.toList());
 				baseBuild = userIds.isEmpty()? baseBuild : baseBuild.in(TCsqUserInvoice::getUserId, userIds);	//申请人
@@ -395,11 +395,13 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 				String orderNos1 = a.getOrderNos();
 				List<TCsqOrder> orders1 = orderNoOrderMap.get(orderNos1);
 				if(orders1 != null) {
-					TCsqOrder tCsqOrder = theOrders.get(0);
+//					TCsqOrder tCsqOrder = theOrders.get(0);
+					TCsqOrder tCsqOrder = orders1.get(0);
 					Long toId = tCsqOrder.getToId();
 					String toName = tCsqOrder.getToName();
 					a.setToId(toId);
 					a.setToName(toName);
+					a.setDateString(DateUtil.timeStamp2Date(tCsqOrder.getCreateTime().getTime()));
 				}
 				return a;
 			}).collect(Collectors.toList());

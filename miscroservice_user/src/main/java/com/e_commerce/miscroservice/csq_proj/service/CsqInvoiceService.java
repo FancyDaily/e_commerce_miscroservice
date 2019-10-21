@@ -26,7 +26,7 @@ public interface CsqInvoiceService {
 
 	int express(Long invoiceId, String expressNo);
 
-	Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize);
+	Map list(String searchParam, Integer isOut, Integer pageNum, Integer pageSize, boolean isFuzzySearch);
 
 	void modify(TCsqUserInvoice obj);
 }

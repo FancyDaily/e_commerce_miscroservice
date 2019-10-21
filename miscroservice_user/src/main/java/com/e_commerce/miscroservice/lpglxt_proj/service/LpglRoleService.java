@@ -46,4 +46,6 @@ public interface LpglRoleService {
 	List<TLpglAuthority> findAllFloorAuthority(Long roleId);
 
 	List<TLpglUserPosistion> findUserPosition(Long id);
+
+	void removeRoleAuthority(Long roleId, Long authority);
 }

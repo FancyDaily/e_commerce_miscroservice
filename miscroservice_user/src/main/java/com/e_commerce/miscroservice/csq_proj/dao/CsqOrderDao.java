@@ -85,4 +85,8 @@ public interface CsqOrderDao {
 	List<TCsqOrder> selectByToType(int toCode);
 
 	List<TCsqOrder> selectByFromTypeAndToIdAndToTypeAndStatusDesc(int i, long l, int i1, int i2);
+
+	List<TCsqOrder> selectInToIdAndToTypeAndStatusDesc(List<Long> fundIds, int toCode, Integer code);
+
+	List<TCsqOrder> selectByOrderNo(String searchParam, boolean isFuzzySearch);
 }

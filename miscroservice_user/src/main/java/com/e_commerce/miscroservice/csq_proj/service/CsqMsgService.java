@@ -38,5 +38,5 @@ public interface CsqMsgService {
 
 	void sendServiceMsgForFund(TCsqFund fund, Long userId);
 
-	QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize);
+	QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch);
 }

@@ -130,8 +130,15 @@ public class CsqFundServiceImpl implements CsqFundService {
 					throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的基金未达到标准，请再接再厉!");
 				}
 			}
+			if(!status.equals(currentStatus) && CsqFundEnum.STATUS_DONE.getVal() == currentStatus) {	//基金捐助已完成
+				//停止捐款， 首页继续展示 => pass
+			}
+			if(!status.equals(currentStatus) && CsqFundEnum.STATUS_OFF_SHELF.getVal() == currentStatus) {	//基金下架
+				//停止捐款， 首页不展示， 停止使用基金付费 => is_shown => 0
+				csqFund.setIsShown(CsqFundEnum.IS_SHOWN_NO.getVal());
+			}
 		}
-		//若 status =2 直接处理成【公开】
+		//若 status = 2 直接处理成【公开】
 //		fund.setBalance(null);	//若仅用于基本信息修改则不允许修改金额
 		fund.setUserId(null);	//可能与基金持有者不同的修改人
 		fundDao.update(fund);
@@ -161,7 +168,8 @@ public class CsqFundServiceImpl implements CsqFundService {
 		Double currentBalance = fund.getBalance();
 		boolean undone = CsqFundEnum.STATUS_ACTIVATED.getVal() == fund.getStatus();	//当前为 "已激活"(未公开的状态)
 		boolean achieveMinimum = CsqFundEnum.PUBLIC_MINIMUM <= currentBalance;	//达到下限值
-		return undone & achieveMinimum && checkFundCompletion(fund);	//满足开放条件
+		boolean isNotDoneOrOffShelf = CsqFundEnum.STATUS_DONE.getVal() != fund.getStatus() && CsqFundEnum.STATUS_OFF_SHELF.getVal() != fund.getStatus();
+		return undone & achieveMinimum && checkFundCompletion(fund) && isNotDoneOrOffShelf;	//满足开放条件
 	}
 
 	@Override
@@ -602,7 +610,7 @@ public class CsqFundServiceImpl implements CsqFundService {
 	}
 
 	@Override
-	public QueryResult<TCsqFund> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> trendPubkeys, Integer pageNum, Integer pageSize, Boolean fuzzySearch) {
+	public HashMap<String, Object> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> trendPubkeys, Integer pageNum, Integer pageSize, Boolean fuzzySearch) {
 		MybatisPlusBuild baseBuild = fundDao.baseBuild();
 		if(!StringUtil.isEmpty(searchParam)) {
 			if(! isFundParam) {	//用户名查找
@@ -653,7 +661,20 @@ public class CsqFundServiceImpl implements CsqFundService {
 		List<TCsqFund> tCsqFundList = fundDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		long total = IdUtil.getTotal();
 
-		return getQueryResult(tCsqFundList, total);
+		//统计trendPubkeys的收入
+		List<TCsqFund> csqFunds = fundDao.selectWithBuild(baseBuild);
+		List<Long> fundIds = csqFunds.stream()
+			.map(TCsqFund::getId).collect(Collectors.toList());
+		List<TCsqOrder> orders = csqOrderDao.selectInToIdAndToTypeAndStatusDesc(fundIds, CsqEntityTypeEnum.TYPE_FUND.toCode(), CsqOrderEnum.STATUS_ALREADY_PAY.getCode());
+		Double pubKeyTotal = orders.stream()
+			.map(TCsqOrder::getPrice).reduce(0d, Double::sum);
+
+		QueryResult<TCsqFund> queryResult = getQueryResult(tCsqFundList, total);
+		HashMap<String, Object> resMap = new HashMap<>();
+		resMap.put("pubKeyTotal", pubKeyTotal);
+		resMap.put("queryResult", queryResult);
+
+		return resMap;
 	}
 
 	@Override

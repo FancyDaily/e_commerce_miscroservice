@@ -1631,8 +1631,8 @@ public class CsqManagerSystemController {
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("基金列表,pageNum={}, pageSize={}, managerId={}, isFundParam={}, searchParam={}, status={}, isFuzzySearch={}, trendPubKeys={}", pageNum, pageSize, userIds, isFundParam, searchParam, status, isFuzzySearch, trendPubKeys);
-			QueryResult<TCsqFund> queryResult = csqFundService.searchList(isFundParam, searchParam, status, trendPubKeys == null ? new ArrayList<>() : Arrays.asList(trendPubKeys), pageNum, pageSize, isFundParam);
-			result.setData(queryResult);
+			HashMap<String, Object> map = csqFundService.searchList(isFundParam, searchParam, status, trendPubKeys == null ? new ArrayList<>() : Arrays.asList(trendPubKeys), pageNum, pageSize, isFundParam);
+			result.setData(map);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "基金列表", e.getMessage());
@@ -1763,6 +1763,7 @@ public class CsqManagerSystemController {
 	 * @param isOut       是否支出
 	 * @param pageNum     页码
 	 * @param pageSize    大小
+	 * @param isFuzzySearch 是否模糊查询
 	 *                    <p>
 	 *                    {
 	 *                    "resultList": [],
@@ -1772,12 +1773,12 @@ public class CsqManagerSystemController {
 	 */
 	@RequestMapping("invoice/list")
 	@UrlAuth()
-	public AjaxResult invoiceList(String searchParam, Integer isOut, Integer pageNum, Integer pageSize) {
+	public AjaxResult invoiceList(String searchParam, Integer isOut, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
-			log.info("发票申请列表, searchParam={}, inOut={}, pageNum={}, pageSize={}", searchParam, isOut, pageNum, pageSize);
-			Map list = csqInvoiceService.list(searchParam, isOut, pageNum, pageSize);
+			log.info("发票申请列表, searchParam={}, inOut={}, pageNum={}, pageSize={}, isFuzzySearch={}", searchParam, isOut, pageNum, pageSize, isFuzzySearch);
+			Map list = csqInvoiceService.list(searchParam, isOut, pageNum, pageSize, isFuzzySearch);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1916,12 +1917,12 @@ public class CsqManagerSystemController {
 	 */
 	@RequestMapping("message/list")
 	@UrlAuth()
-	public AjaxResult msgList(String searchParam, Integer pageNum, Integer pageSize) {
+	public AjaxResult msgList(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
-			log.info("消息列表, searchParam={},pageNum={}, pageSize={}", searchParam, pageNum, pageSize);
-			QueryResult<TCsqSysMsg> list = csqMsgService.list(searchParam, pageNum, pageSize);
+			log.info("消息列表, searchParam={},pageNum={}, pageSize={}", searchParam, pageNum, pageSize, isFuzzySearch);
+			QueryResult<TCsqSysMsg> list = csqMsgService.list(searchParam, pageNum, pageSize, isFuzzySearch);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -2129,6 +2130,7 @@ public class CsqManagerSystemController {
 	/**
 	 * 爱心账户充值记录
 	 *
+	 * @param orderNo		订单号
 	 * @param searchParam   搜索参数(用户昵称)
 	 * @param pageNum       页码
 	 * @param pageSize      大小
@@ -2248,13 +2250,13 @@ public class CsqManagerSystemController {
 	 */
 	@RequestMapping("account/record/list")
 	@UrlAuth()
-	public AjaxResult accountRecordList(String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
+	public AjaxResult accountRecordList(String orderNo, String searchParam, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 //		Long userIds = IdUtil.getId();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
-			log.info("爱心账户充值记录, userIds={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, searchParam, pageNum, pageSize, isFuzzySearch);
-			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParam, pageNum, pageSize, isFuzzySearch);
+			log.info("爱心账户充值记录, userIds={}, orderNo={}, searchParma={}, pageNum={}, pageSize={}, isFuzzySearch={}", userIds, orderNo, searchParam, pageNum, pageSize, isFuzzySearch);
+			Map<String, Object> watersAndTotal = csqPaymentService.findWatersAndTotal(searchParam, pageNum, pageSize, isFuzzySearch, orderNo);
 			result.setData(watersAndTotal);
 			result.setSuccess(true);
 		} catch (MessageException e) {

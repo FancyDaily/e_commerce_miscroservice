@@ -20,7 +20,6 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
 import com.e_commerce.miscroservice.user.wechat.entity.TemplateData;
 import com.e_commerce.miscroservice.user.wechat.entity.WxMssVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
-import com.netflix.eureka.registry.Key;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -447,11 +446,11 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 	}
 
 	@Override
-	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize) {
+	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		//searchParam为标题
 		MybatisPlusBuild baseBuild = csqMsgDao.getBaseBuild();
 		if (!StringUtil.isEmpty(searchParam)) {
-			baseBuild = baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
+			baseBuild = isFuzzySearch? baseBuild.like(TCsqSysMsg::getTitle, "%" + searchParam + "%") : baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
 		}
 
 		List<TCsqSysMsg> tCsqSysMsgs = csqMsgDao.selectWithBuildPage(baseBuild, pageNum, pageSize);

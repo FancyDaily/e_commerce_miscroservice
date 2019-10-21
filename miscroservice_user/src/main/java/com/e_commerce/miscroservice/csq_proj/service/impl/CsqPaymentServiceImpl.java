@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.csq_proj.service.impl;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
  * @Version 1.0
  */
 @Service
+@Log
 public class CsqPaymentServiceImpl implements CsqPaymentService {
 
 	@Autowired
@@ -496,7 +498,27 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch) {
+	public Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, String orderNo) {
+		Map<String, Object> resultMap = new HashMap<>();
+		resultMap.put("queryResult", new QueryResult<>());
+		MybatisPlusBuild baseBuild = csqUserPaymentDao.baseBuild();
+		baseBuild
+			.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //账户充值
+			.or()
+			.groupBefore()
+			.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_HUMAN.toCode())
+			.lte(TCsqUserPaymentRecord::getCreateTime, "2019-09-23 18:36:25")
+			.groupAfter()
+			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
+		;
+
+		List<TCsqUserPaymentRecord> tCsqUserPaymentRecords = csqUserPaymentDao.selectWithBuild(baseBuild);
+		//统计
+		Double totalAmount = tCsqUserPaymentRecords.stream()
+			.map(TCsqUserPaymentRecord::getMoney)
+			.reduce(0d, Double::sum);
+		resultMap.put("totalAmount", totalAmount);
+
 		Page page = PageUtil.prePage(pageNum, pageSize);
 		pageNum = page.getPageNum();
 		pageSize = page.getPageSize();
@@ -504,15 +526,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		List<TCsqUser> csqUsers = new ArrayList<>();
 		if (isSearch) {
 			csqUsers = csqUserDao.selectByName(searchParma, isFuzzySearch);
+			if(csqUsers.isEmpty()) return resultMap;
 		}
 		List<Long> userIds = csqUsers.stream()
 			.map(a -> a.getId()).collect(Collectors.toList());
-
-		MybatisPlusBuild baseBuild = csqUserPaymentDao.baseBuild();
-		baseBuild
-			.eq(TCsqUserPaymentRecord::getEntityType, CsqEntityTypeEnum.TYPE_ACCOUNT.toCode())    //账户充值
-			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_IN.toCode())    //收入
-		;
 
 		baseBuild =
 			isSearch ?
@@ -520,11 +537,18 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 				.in(TCsqUserPaymentRecord::getUserId, userIds)    //搜索参数得到的用户编号
 				: baseBuild;
 
+		//订单号筛选
+		baseBuild =
+			orderNo == null?
+				baseBuild: baseBuild
+				.eq(TCsqOrder::getOrderNo, orderNo);
+
+		//排序
+		baseBuild.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TCsqUserPaymentRecord::getCreateTime));
+
+		log.info("baseBuild={}", baseBuild.build());
 		List<TCsqUserPaymentRecord> userPaymentRecordList = csqUserPaymentDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
-		//统计
-		Double totalAmount = userPaymentRecordList.stream()
-			.map(TCsqUserPaymentRecord::getMoney)
-			.reduce(0d, Double::sum);
+
 		//结果集
 		List<CsqUserPaymentRecordVo> vos = userPaymentRecordList.stream()
 			.map(a -> {
@@ -550,9 +574,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		long total = IdUtil.getTotal();
 
 		QueryResult queryResult = PageUtil.buildQueryResult(vos, total);
-		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("queryResult", queryResult);
-		resultMap.put("totalAmount", totalAmount);
 
 		return resultMap;
 	}
@@ -577,6 +599,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		Double donateTotalAmount = orderIdHoder.stream()
 			.map(TCsqUserPaymentRecord::getMoney).reduce(0d, Double::sum);
 		int donateCnt = orderIdHoder.size();
+		HashMap<String, Object> resultMap = new HashMap<>();
+		resultMap.put("donateCnt", donateCnt);
+		resultMap.put("donateTotalAmount", donateTotalAmount);
+		resultMap.put("queryResult", new QueryResult<>());
 
 		//初始化
 		baseBuild = csqUserPaymentDao.baseBuild();
@@ -587,7 +613,10 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.eq(TCsqUserPaymentRecord::getInOrOut, CsqUserPaymentEnum.INOUT_OUT.toCode());	//MODIFY from INOUT_IN to INOUT_OUT
 
 		//用户昵称到用户编号
+		if(searchParam == null) searchParam = "";
+		if("".equals(searchParam)) isFuzzySearch = true;
 		List<TCsqUser> csqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
+		if(csqUsers.isEmpty()) return resultMap;
 		List<Long> csqUserIds = csqUsers.stream()
 			.map(TCsqUser::getId).collect(Collectors.toList());
 
@@ -651,9 +680,6 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		//结果集
 		QueryResult result = PageUtil.buildQueryResult(vos, IdUtil.getTotal());
 
-		HashMap<String, Object> resultMap = new HashMap<>();
-		resultMap.put("donateCnt", donateCnt);
-		resultMap.put("donateTotalAmount", donateTotalAmount);
 		resultMap.put("queryResult", result);
 
 		return resultMap;

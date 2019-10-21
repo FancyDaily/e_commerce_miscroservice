@@ -4,6 +4,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqFund;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqFundVo;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +92,7 @@ public interface CsqFundService {
 
 	List<TCsqFund> selectAllAndIdGreaterThan(long l);
 
-	QueryResult<TCsqFund> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> asList, Integer pageNum, Integer pageSize, Boolean fundParam);
+	HashMap<String, Object> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> asList, Integer pageNum, Integer pageSize, Boolean fundParam);
 
 	void modifyFundManager(Long managerId, TCsqFund obj);
 }

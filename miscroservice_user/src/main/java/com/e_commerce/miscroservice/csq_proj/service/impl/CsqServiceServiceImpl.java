@@ -540,6 +540,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		csqService.setPersonInChargePic(csqFund.getPersonInChargePic());
 		csqService.setOccupation(csqFund.getOccupation());
 		csqService.setSharePic(csqFund.getSharePic());
+		csqService.setIsShown(csqFund.getIsShown());
 		if (isInsert) {
 			csqServiceDao.insert(csqService);
 			return;
@@ -651,7 +652,11 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 
 	@Override
 	public void modify(TCsqService csqService) {
+		Long id = csqService.getId();
+		if(id == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "修改时，编号不能为空");
 		Double expectedAmount = csqService.getExpectedAmount();
+		Integer expectedStatus = csqService.getStatus();
+		TCsqService csqService2 = csqServiceDao.selectByPrimaryKey(id);
 		//针对修改期望金额需要更多逻辑
 		if(expectedAmount != null) {
 			//重新计算剩余期望金额
@@ -660,6 +665,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 			double amount = expectedAmount - sumTotalIn;
 			Double expectRemainAmount = amount > 0d? amount: 0d;
 			csqService.setExpectedRemainAmount(expectRemainAmount);
+		}
+		if(expectedStatus!= null && !csqService2.getStatus().equals(expectedStatus)) {	//修改状态
+			if(CsqServiceEnum.STATUS_DONE.getCode() == expectedStatus) {	//触发已完成
+				//停止捐款，首页列表展示
+			}
+			if(CsqServiceEnum.STATUS_OFF_SHELF.getCode() == expectedStatus) {	//触发下架
+				//停止捐款，首页列表不展示
+				csqService.setIsShown(CsqServiceEnum.IS_SHOWN_NO.getCode());
+			}
+
 		}
 		csqServiceDao.update(csqService);
 	}
@@ -740,7 +755,7 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		List<TCsqService> tCsqServices = csqServiceDao.selectWithBuildPage(baseBuild, pageNum, pageSize);
 		//获得最后收入时间戳
 		List<Long> serviceIds = tCsqServices.stream().map(TCsqService::getId).collect(Collectors.toList());
-		List<TCsqUserPaymentRecord> userPaymentRecords = csqUserPaymentDao.selectInEntityIdsAndEntityTypeAndInOrOutDesc(serviceIds, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
+		List<TCsqUserPaymentRecord> userPaymentRecords = serviceIds.isEmpty()? new ArrayList<>(): csqUserPaymentDao.selectInEntityIdsAndEntityTypeAndInOrOutDesc(serviceIds, CsqEntityTypeEnum.TYPE_SERVICE.toCode(), CsqUserPaymentEnum.INOUT_IN.toCode());
 		Map<Long, List<TCsqUserPaymentRecord>> entityIdPaymentMap = userPaymentRecords.stream()
 			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getEntityId));
 		tCsqServices = tCsqServices.stream()

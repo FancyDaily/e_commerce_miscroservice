@@ -16,6 +16,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceDetailVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceListVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqServiceReportVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
+import com.sun.org.apache.regexp.internal.RE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -492,6 +493,7 @@ public class CsqServiceController {
 	 * @param creditCard     银行卡
 	 * @param personInCharge 负责人
 	 * @param certificatedNo 身份证/机构代码
+	 * @param status 状态0初始1已完成2下架
 	 * @return
 	 */
 	@Consume(CsqServiceDetailVo.class)
@@ -510,15 +512,16 @@ public class CsqServiceController {
 							 @RequestParam(required = false) String creditCard,
 							 @RequestParam(required = false) String personInCharge,
 							 @RequestParam(required = false) String certificatedNo,
-							 @RequestParam(required = false) String sharePic
+							 @RequestParam(required = false) String sharePic,
+							 @RequestParam(required = false) Integer status
 	) {
 		AjaxResult result = new AjaxResult();
 		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = csqServiceVo.copyTCsqService();
 		try {
 			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
-					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}, sharePic={}",
-				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo, sharePic);
+					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}, sharePic={}, status",
+				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo, sharePic, status);
 			csqServiceService.modify(csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

@@ -10,6 +10,9 @@ public enum CsqServiceEnum {
 	TYPE_FUND(1, "类型-基金"),
 	STATUS_UNDER_CERT(-1, "待审核"),
 	STATUS_INITIAL(0, "初始状态"),
+	STATUS_DONE(1, "已完成"),
+	STATUS_OFF_SHELF(2, "下架"),
+
 	IS_SHOWN_YES(CsqFundEnum.IS_SHOWN_YES.getVal(), "可展示"),
 	IS_SHOWN_NO(CsqFundEnum.IS_SHOWN_NO.getVal(), "不可展示")
 	;

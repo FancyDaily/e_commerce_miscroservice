@@ -1,9 +1,11 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglRoleDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.vo.TLpglAuthorityVo;
@@ -411,6 +413,19 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 			.eq(TLpglUserPosistion::getUserId, id)
 		);
 	}
+
+	@Override
+	public void removeRoleAuthority(Long roleId, Long authority) {
+		List<TLpglRoleAuthority> all = MybatisPlus.getInstance().findAll(new TLpglRoleAuthority(), new MybatisPlusBuild(TLpglRoleAuthority.class)
+			.eq(TLpglRoleAuthority::getRoleId, roleId)
+			.eq(TLpglRoleAuthority::getAuthorityId, authority)
+		);
+		for(TLpglRoleAuthority the:all) {
+			the.setDeletedFlag(true);
+			MybatisPlus.getInstance().update(the, new MybatisPlusBuild(TLpglRoleAuthority.class).eq(TLpglRoleAuthority::getId, the.getId()));
+		}
+	}
+
 
 	public static void main(String[] args) {
 		String code = "1190000";

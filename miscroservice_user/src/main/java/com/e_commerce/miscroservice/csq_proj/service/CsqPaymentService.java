@@ -61,7 +61,7 @@ public interface CsqPaymentService {
 
 	List<CsqBasicUserVo> getTopDonaters(List<TCsqUserPaymentRecord> tCsqUserPaymentRecords, List<Long> orderIds);
 
-	Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch);
+	Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, String orderNo);
 
 	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch);
 

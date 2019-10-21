@@ -163,7 +163,6 @@ public class CsqUserPaymentDaoImpl implements CsqUserPaymentDao {
 
 	@Override
 	public List<TCsqUserPaymentRecord> selectWithBuild(MybatisPlusBuild baseBuild) {
-		IdUtil.setTotal(baseBuild);
 		return MybatisPlus.getInstance().findAll(new TCsqUserPaymentRecord(), baseBuild
 		);
 	}

@@ -107,7 +107,7 @@ public class CsqFundController {
 	 * @param personInCharge  负责人
 	 * @param creditCardName  银行名
 	 * @param creditCardId    银行卡号
-	 * @param status          基金状态(用于发起审核)
+	 * @param status          基金状态(用于发起审核)4已完成5下架
 	 * @param agentModeStatus 代理状态
 	 * @param detailPic	详情图
 	 * @param purpose	目的描述(概述

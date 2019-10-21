@@ -14,6 +14,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -314,6 +315,20 @@ public class LpglUserController {
 		return ajaxResult;
 	}
 
+	/**
+	 * 移除角色的权限
+	 * @param roleId 角色编号
+	 * @param authority 权限编号
+	 * @return
+	 */
+	@RequestMapping("role/authority/remove")
+	public Object removeRoleAuthority(Long roleId, Long authority) {
+		Long userId = IdUtil.getId();
+		AjaxResult ajaxResult = new AjaxResult();
+		lpglRoleService.removeRoleAuthority(roleId, authority);
+		ajaxResult.setSuccess(true);
+		return ajaxResult;
+	}
 
 
 	/**

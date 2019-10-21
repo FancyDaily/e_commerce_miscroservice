@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.*;
 import com.e_commerce.miscroservice.csq_proj.po.*;
@@ -76,48 +77,50 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 		Integer SEARCH_TYPE_PERSON = 1;
 
 		boolean isPerson = searchType.equals(SEARCH_TYPE_PERSON);
-		if (isPerson) {    //去用户表获取到编号
-			List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
-			List<Long> userIds = tCsqUsers.stream()
-				.map(TCsqUser::getId).collect(Collectors.toList());
-			baseBuild = userIds.isEmpty() ? baseBuild : baseBuild
-				.in(TCsqMoneyApplyRecord::getUserId, userIds);    //实际递交申请的申请者的昵称
-		} else {    //去serivce表获取到编号
-			List<TCsqService> csqServices = csqServiceDao.selectByName(searchParam, isFuzzySearch);
-			List<Long> serviceIds = csqServices.stream()
-				.filter(a -> CsqServiceEnum.TYPE_SERIVE.getCode() == a.getType())
-				.map(TCsqService::getId).collect(Collectors.toList());
-			List<Long> fundIds = csqServices.stream()
-				.filter(a -> CsqServiceEnum.TYPE_FUND.getCode() == a.getType())
-				.map(TCsqService::getFundId).collect(Collectors.toList());
-			boolean noneEmptyServiceCondition = !serviceIds.isEmpty();
-			boolean noneEmptyFundCondition = !fundIds.isEmpty();
-			boolean allCondition = noneEmptyFundCondition && noneEmptyServiceCondition;
-			if (noneEmptyServiceCondition || noneEmptyFundCondition) {
+		if(!StringUtil.isEmpty(searchParam)) {
+			if (isPerson) {    //去用户表获取到编号
+				List<TCsqUser> tCsqUsers = csqUserDao.selectByName(searchParam, isFuzzySearch);
+				List<Long> userIds = tCsqUsers.stream()
+					.map(TCsqUser::getId).collect(Collectors.toList());
+				if(userIds.isEmpty()) return new QueryResult();
 				baseBuild = baseBuild
-					.and()
-					.groupBefore()
-					.groupBefore();
-
-				baseBuild = baseBuild
-					.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ? CsqEntityTypeEnum.TYPE_FUND.toCode() : CsqEntityTypeEnum.TYPE_SERVICE.toCode())
-					.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? fundIds : serviceIds)
-					.groupAfter()
-				;
-
-				baseBuild = allCondition ?
-					baseBuild
-						.or()
+					.in(TCsqMoneyApplyRecord::getUserId, userIds);    //实际递交申请的申请者的昵称
+			} else {    //去serivce表获取到编号
+				List<TCsqService> csqServices = csqServiceDao.selectByName(searchParam, isFuzzySearch);
+				List<Long> serviceIds = csqServices.stream()
+					.filter(a -> CsqServiceEnum.TYPE_SERIVE.getCode() == a.getType())
+					.map(TCsqService::getId).collect(Collectors.toList());
+				List<Long> fundIds = csqServices.stream()
+					.filter(a -> CsqServiceEnum.TYPE_FUND.getCode() == a.getType())
+					.map(TCsqService::getFundId).collect(Collectors.toList());
+				boolean noneEmptyServiceCondition = !serviceIds.isEmpty();
+				boolean noneEmptyFundCondition = !fundIds.isEmpty();
+				boolean allCondition = noneEmptyFundCondition && noneEmptyServiceCondition;
+				if(!noneEmptyServiceCondition && !noneEmptyFundCondition) return new QueryResult();
+					baseBuild = baseBuild
+						.and()
 						.groupBefore()
-						.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ? CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode())
-						.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? serviceIds : fundIds)
-						.groupAfter() : baseBuild
-				;
+						.groupBefore();
 
-				baseBuild.groupAfter();
+					baseBuild = baseBuild
+						.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ? CsqEntityTypeEnum.TYPE_FUND.toCode() : CsqEntityTypeEnum.TYPE_SERVICE.toCode())
+						.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? fundIds : serviceIds)
+						.groupAfter()
+					;
 
+					baseBuild = allCondition ?
+						baseBuild
+							.or()
+							.groupBefore()
+							.eq(TCsqMoneyApplyRecord::getEntityType, noneEmptyFundCondition ? CsqEntityTypeEnum.TYPE_SERVICE.toCode() : CsqEntityTypeEnum.TYPE_FUND.toCode())
+							.in(TCsqMoneyApplyRecord::getEntityId, noneEmptyFundCondition ? serviceIds : fundIds)
+							.groupAfter() : baseBuild
+					;
+
+					baseBuild.groupAfter();
+
+				}
 			}
-		}
 
 		//状态
 		baseBuild = status == null || status.length == 0 ? baseBuild : baseBuild.in(TCsqMoneyApplyRecord::getStatus, Arrays.asList(status));

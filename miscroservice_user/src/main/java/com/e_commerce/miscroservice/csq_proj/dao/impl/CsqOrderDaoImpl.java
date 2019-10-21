@@ -347,6 +347,23 @@ public class CsqOrderDaoImpl implements CsqOrderDao {
 		);
 	}
 
+	@Override
+	public List<TCsqOrder> selectInToIdAndToTypeAndStatusDesc(List<Long> fundIds, int toCode, Integer code) {
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), baseBuild()
+			.in(TCsqOrder::getToId, fundIds)
+			.eq(TCsqOrder::getToType, toCode)
+			.eq(TCsqOrder::getStatus, code)
+		);
+	}
+
+	@Override
+	public List<TCsqOrder> selectByOrderNo(String searchParam, boolean isFuzzySearch) {
+		MybatisPlusBuild base = baseBuild();
+		base = isFuzzySearch? base.like(TCsqOrder::getOrderNo, "%" + searchParam + "%"):
+			base.eq(TCsqOrder::getOrderNo, searchParam);
+		return MybatisPlus.getInstance().findAll(new TCsqOrder(), base);
+	}
+
 	private MybatisPlusBuild byFromIdAndFromTypeInOrderIdsAndStatusBuild(Long fundId, int toCode, List<Long> tOrderIds, Integer code) {
 		return new MybatisPlusBuild(TCsqOrder.class)
 			.eq(TCsqOrder::getFromId, fundId)

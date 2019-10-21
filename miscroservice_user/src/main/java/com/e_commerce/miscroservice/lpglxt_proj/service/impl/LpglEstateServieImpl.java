@@ -254,6 +254,7 @@ public class LpglEstateServieImpl implements LpglEstateService {
 													obj.put("roomId",numObj.getId());
 													obj.put("status",numObj.getStatus());
 													obj.put("saleManId",numObj.getSaleManId());
+													obj.put("price", numObj.getDisCountPrice() == null? numObj.getTotalPrice() : numObj.getDisCountPrice());
 													numList.add(obj);
 													if (headerList.size()<floorList.size()){
 														headerList.add(numObj.getBuildingArea());
