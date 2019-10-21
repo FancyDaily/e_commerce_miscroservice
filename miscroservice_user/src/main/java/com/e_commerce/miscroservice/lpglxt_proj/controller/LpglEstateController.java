@@ -153,7 +153,7 @@ public class LpglEstateController {
 	 * @return
 	 */
 	@RequestMapping("house/content")
-	public Object houseContent(Long estateId, Integer buildingNum){
+	public Object houseContent(Long estateId, String buildingNum){
 		AjaxResult result = lpglEstateService.houseContent(estateId,buildingNum);
 		return result;
 
