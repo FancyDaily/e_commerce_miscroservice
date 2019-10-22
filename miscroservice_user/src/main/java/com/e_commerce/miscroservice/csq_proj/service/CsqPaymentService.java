@@ -63,7 +63,7 @@ public interface CsqPaymentService {
 
 	Map<String, Object> findWatersAndTotal(String searchParma, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, String orderNo);
 
-	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch);
+	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch, String orderNo);
 
 	QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly);
 

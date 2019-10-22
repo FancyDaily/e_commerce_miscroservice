@@ -7,6 +7,8 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUserInvoice;
 import lombok.Builder;
 import lombok.Data;
 
+import java.sql.Timestamp;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-27 18:04
@@ -20,6 +22,8 @@ public class CsqUserInvoiceVo {
 	private Long userId;
 
 	private Long toId;	//项目或基金编号(如果为项目)
+
+	private String toIds;
 
 	private String toName;
 
@@ -60,6 +64,8 @@ public class CsqUserInvoiceVo {
 
 	@Column(commit = "联系方式")
 	private String telephone;
+
+	private Timestamp createTime;
 
 	public TCsqUserInvoice copyTCsqUserInvoice() {
 		return null;

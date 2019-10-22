@@ -494,6 +494,8 @@ public class CsqServiceController {
 	 * @param personInCharge 负责人
 	 * @param certificatedNo 身份证/机构代码
 	 * @param status 状态0初始1已完成2下架
+	 * @param occupation 职位
+	 * @param personInChargePic 负责人头像
 	 * @return
 	 */
 	@Consume(CsqServiceDetailVo.class)
@@ -513,15 +515,17 @@ public class CsqServiceController {
 							 @RequestParam(required = false) String personInCharge,
 							 @RequestParam(required = false) String certificatedNo,
 							 @RequestParam(required = false) String sharePic,
-							 @RequestParam(required = false) Integer status
+							 @RequestParam(required = false) Integer status,
+							 @RequestParam(required = false) String occupation,
+							 @RequestParam(required = false) String personInChargePic
 	) {
 		AjaxResult result = new AjaxResult();
 		CsqServiceDetailVo csqServiceVo = (CsqServiceDetailVo) ConsumeHelper.getObj();
 		TCsqService csqService = csqServiceVo.copyTCsqService();
 		try {
 			log.info("修改项目信息, userId={}, id= {}, name={}, recordNo={}, typePubKeys={}" +
-					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}, sharePic={}, status",
-				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo, sharePic, status);
+					", purpose={}, expectedAmount={}, coverPic={}, description={}, detailPic={}, beneficiary={}, creditCard={}, personInCharge={},certificatedNo={}, sharePic={}, status={}, occupation={}, personInChargePic",
+				csqServiceVo.getUserId(), id, name, recordNo, typePubKeys, purpose, expectedAmount, coverPic, description, detailPic, beneficiary, creditCard, personInCharge, certificatedNo, sharePic, status, occupation, personInChargePic);
 			csqServiceService.modify(csqService);
 			result.setSuccess(true);
 		} catch (MessageException e) {

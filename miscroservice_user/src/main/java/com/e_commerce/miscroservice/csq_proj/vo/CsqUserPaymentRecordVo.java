@@ -18,6 +18,8 @@ public class CsqUserPaymentRecordVo extends CsqBasicUserVo {
 
 	private Long orderId;
 
+	private String orderNo;
+
 	private Long userId;
 
 	private String nickName;

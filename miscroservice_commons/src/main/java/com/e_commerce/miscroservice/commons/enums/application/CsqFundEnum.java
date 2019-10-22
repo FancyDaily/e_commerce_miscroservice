@@ -16,7 +16,7 @@ public enum CsqFundEnum {
 	STATUS_DONE(4, "已完成"),
 	STATUS_OFF_SHELF(5, "下架"),
 	RAISE_STATUS_RAISING(0, "筹备中"),
-	RAISE_STAUTS_DONE(1, "已公开"),
+	RAISE_STAUTS_DONE(1, "进行中"),
 	IS_SHOWN_YES(1, "可展示"),
 	IS_SHOWN_NO(0, "不展示")
 	;

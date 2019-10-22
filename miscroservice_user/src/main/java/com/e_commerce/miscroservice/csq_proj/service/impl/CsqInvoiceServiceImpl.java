@@ -362,10 +362,21 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 			return map;
 		}
 		List<CsqUserInvoiceVo> resultList = tCsqUserInvoices.stream().map(a -> a.copyCsqUserInvoiceVo()).collect(Collectors.toList());
-		List<String> orderNos = tCsqUserInvoices.stream().map(TCsqUserInvoice::getOrderNos).collect(Collectors.toList());
-		List<TCsqOrder> orders = orderNos.isEmpty()? new ArrayList<>() : csqOrderDao.selectInOrderNos(orderNos);
-		Map<String, List<TCsqOrder>> orderNoOrderMap = orders.stream().collect(Collectors.groupingBy(TCsqOrder::getOrderNo));
-		List<TCsqOrder> theOrders = orders.stream()
+//		List<String> orderNoList = tCsqUserInvoices.stream().map(TCsqUserInvoice::getOrderNos).collect(Collectors.toList());
+		List<String> orderNoList = new ArrayList<>();
+		tCsqUserInvoices
+			.forEach(a -> {
+				String orderNos = a.getOrderNos();
+				if(orderNos.contains(",")) {
+					String[] split = orderNos.split(",");
+					orderNoList.addAll(Arrays.asList(split));
+				} else {
+					orderNoList.add(orderNos);
+				}
+			});
+
+		List<TCsqOrder> orders = orderNoList.isEmpty()? new ArrayList<>() : csqOrderDao.selectInOrderNos(orderNoList);
+		orders = orders.stream()
 			.map(a -> {
 				Integer toType = a.getToType();
 				Long toId = a.getToId();
@@ -389,20 +400,39 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 				a.setToName(name);
 				return a;
 			}).collect(Collectors.toList());
+		Map<String, List<TCsqOrder>> orderNoOrderMap = orders.stream().collect(Collectors.groupingBy(TCsqOrder::getOrderNo));
 
 		resultList = resultList.stream()
 			.map(a -> {
 				String orderNos1 = a.getOrderNos();
-				List<TCsqOrder> orders1 = orderNoOrderMap.get(orderNos1);
-				if(orders1 != null) {
-//					TCsqOrder tCsqOrder = theOrders.get(0);
-					TCsqOrder tCsqOrder = orders1.get(0);
-					Long toId = tCsqOrder.getToId();
-					String toName = tCsqOrder.getToName();
-					a.setToId(toId);
-					a.setToName(toName);
-					a.setDateString(DateUtil.timeStamp2Date(tCsqOrder.getCreateTime().getTime()));
+				List<String> orderNos = Arrays.asList(orderNos1.contains(",")? orderNos1.split(","): new String[]{orderNos1});
+				String toIds = "";
+				String toNames = "";
+				Long firstToId = null;
+				int cnt = 0;
+				for(String orderNo: orderNos) {
+					List<TCsqOrder> orders1 = orderNoOrderMap.get(orderNo);
+					if(orders1 != null) {
+	//					TCsqOrder tCsqOrder = theOrders.get(0);
+						TCsqOrder tCsqOrder = orders1.get(0);
+						Long toId = tCsqOrder.getToId();
+						if(cnt == 0) {
+							firstToId = toId;
+						}
+						String toName = tCsqOrder.getToName();
+						toIds = toIds.contains(toId.toString())? toIds: toIds + toId + ",";
+						toNames = toNames.contains(toName)? toNames: toNames + toName + ",";
+//						a.setDateString(DateUtil.timeStamp2Date(tCsqOrder.getCreateTime().getTime()));
+						cnt ++;
+					}
 				}
+				if(toIds.endsWith(",")) toIds = toIds.substring(0, toIds.length()-1);
+				if(toNames.endsWith(",")) toNames = toNames.substring(0, toNames.length()-1);
+				a.setToId(firstToId);
+				a.setToIds(toIds);
+				a.setToName(toNames);
+				a.setDateString(DateUtil.timeStamp2Date(a.getCreateTime().getTime()));
+
 				return a;
 			}).collect(Collectors.toList());
 		List<Long> userIds = resultList.stream()
@@ -429,6 +459,7 @@ public class CsqInvoiceServiceImpl implements CsqInvoiceService {
 
 	@Override
 	public void modify(TCsqUserInvoice obj) {
+		obj.setUserId(null);
 		csqUserInvoiceDao.update(obj);
 	}
 

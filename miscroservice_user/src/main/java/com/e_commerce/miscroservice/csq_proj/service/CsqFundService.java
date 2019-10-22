@@ -95,4 +95,7 @@ public interface CsqFundService {
 	HashMap<String, Object> searchList(Boolean isFundParam, String searchParam, Integer status, List<String> asList, Integer pageNum, Integer pageSize, Boolean fundParam);
 
 	void modifyFundManager(Long managerId, TCsqFund obj);
+
+	Map<String, Object> getTotalBalance();
+
 }

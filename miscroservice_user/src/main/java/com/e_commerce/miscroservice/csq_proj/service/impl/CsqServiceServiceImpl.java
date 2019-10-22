@@ -825,6 +825,16 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 		return resultMap;
 	}
 
+	@Override
+	public Map<String, Object> getTotalBalance() {
+		Map<String, Object> res = new HashMap<>();
+		List<TCsqService> csqServices = csqServiceDao.selectAll();
+		Double total = csqServices.stream()
+			.map(TCsqService::getSurplusAmount).reduce(0d, Double::sum);
+		res.put("total", total);
+		return res;
+	}
+
 	private String getLikeParam(String searchParam) {
 		return "%" + searchParam + "%";
 	}

@@ -1479,6 +1479,9 @@ public class CsqManagerSystemController {
 	 *
 	 * @param id              用户编号
 	 * @param availableStatus 可用状态
+	 * @param name 昵称
+	 * @param userTel 手机号
+	 * @param userHeadPortraitPath 头像
 	 *                        <p>
 	 *                        {"success":true,"errorCode":"","msg":"","data":""}
 	 * @return
@@ -1486,12 +1489,12 @@ public class CsqManagerSystemController {
 	@RequestMapping("user/modify")
 	@UrlAuth()
 	@Consume(CsqBasicUserVo.class)
-	public AjaxResult modify(Long id, Integer availableStatus) {
+	public AjaxResult modify(Long id, Integer availableStatus, String name, String userTel, String userHeadPortraitPath) {
 		AjaxResult result = new AjaxResult();
 		CsqBasicUserVo obj = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
-			log.info("用户修改, userId={}, availableStatus={}", id, availableStatus);
+			log.info("用户修改, userId={}, availableStatus={}, name={}, userTel={}, userHeadPortraitPath={}", id, availableStatus, name, userTel, userHeadPortraitPath);
 			csqUserService.modify(id, obj, false);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1642,6 +1645,60 @@ public class CsqManagerSystemController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("基金列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 基金总余额
+	 * @return
+	 */
+	@RequestMapping("fund/total")
+	@UrlAuth
+	public AjaxResult fundTotal() {
+		AjaxResult result = new AjaxResult();
+		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("基金总余额");
+			Map<String, Object> map = csqFundService.getTotalBalance();
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "基金总余额", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("基金总余额", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 项目总金额
+	 * @return
+	 */
+	@RequestMapping("service/total")
+	@UrlAuth
+	public AjaxResult serviceTotal() {
+		AjaxResult result = new AjaxResult();
+		try {
+			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
+			log.info("项目总金额");
+			Map<String, Object> map = csqServiceService.getTotalBalance();
+			result.setData(map);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "项目总金额", e.getMessage());
+			result.setErrorCode(e.getErrorCode());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("项目总金额", e);
 			result.setSuccess(false);
 		}
 		return result;
@@ -2418,7 +2475,7 @@ public class CsqManagerSystemController {
 
 	/**
 	 * 基金/项目捐赠记录
-	 *
+	 * @param orderNo 订单号
 	 * @param searchParam   搜索参数
 	 * @param pageNum       页码
 	 * @param pageSize      大小
@@ -2430,13 +2487,13 @@ public class CsqManagerSystemController {
 	@Consume(Page.class)
 	@RequestMapping("donate/record/list")
 	@UrlAuth()
-	public AjaxResult donateRecordList(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
+	public AjaxResult donateRecordList(String orderNo, String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
 		AjaxResult result = new AjaxResult();
 		Page page = (Page) ConsumeHelper.getObj();
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
-			log.info("基金/项目捐赠记录, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", searchParam, pageNum, pageSize, isFuzzySearch);
-			HashMap<String, Object> map = csqPaymentService.donateRecordList(userIds, searchParam, page, isFuzzySearch);
+			log.info("基金/项目捐赠记录, orderNo={}, searchParam={}, pageNum={}, pageSize={}, isFuzzySearch={}", orderNo, searchParam, pageNum, pageSize, isFuzzySearch);
+			HashMap<String, Object> map = csqPaymentService.donateRecordList(userIds, searchParam, page, isFuzzySearch, orderNo);
 			result.setData(map);
 			result.setSuccess(true);
 		} catch (MessageException e) {

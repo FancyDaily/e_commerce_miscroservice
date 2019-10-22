@@ -151,7 +151,15 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 				CsqMoneyApplyRecordVo vo = a.copyCsqMoneyApplyRecordVo();
 				String date = DateUtil.timeStamp2Date(a.getCreateTime().getTime());
 				vo.setDate(date);
-				List<TCsqService> services = serviceMap.get(a.getEntityId());
+				Integer entityType = a.getEntityType();
+				Long entityId = a.getEntityId();
+				List<TCsqService> services = null;
+				if(CsqEntityTypeEnum.TYPE_FUND.toCode() == entityType) {
+					TCsqService csqService = csqServiceDao.selectByFundId(entityId);
+					services = Arrays.asList(csqService);
+				} else {
+					services = serviceMap.get(entityId);
+				}
 				if (services != null) {
 					vo.setName(services.get(0).getName());
 				}
@@ -173,8 +181,6 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 		TCsqMoneyApplyRecord build = TCsqMoneyApplyRecord.builder()
 			.status(status).build();
 		build.setId(csqMoneyRecordId);
-		//针对审核通过和不通过可能有不同额外操作
-		csqMoneyApplyRecordDao.update(build);
 		//TODO 若审核通过，项目或基金做一条支出记录, 同时余额减少,如果是基金，要同步项目
 		if (CsqMoneyApplyRecordEnum.STATUS_CERT_PASS.getCode().equals(status) && !CsqMoneyApplyRecordEnum.STATUS_CERT_PASS.getCode().equals(originStatus)) {    //审核通过
 			Integer entityType = csqMoneyApplyRecord.getEntityType();
@@ -223,6 +229,7 @@ public class CsqMoneyApplyRecordServiceImpl implements CsqMoneyApplyRecordServic
 				csqMsgService.sendServiceMsg(CsqServiceMsgEnum.SERVICE_OR_FUND_OUT, CsqServiceMsgParamVo.builder().csqMoneyApplyRecordVo(csqMoneyApplyRecord.copyCsqMoneyApplyRecordVo()).build(), array);
 			}
 		}
+		csqMoneyApplyRecordDao.update(build);
 	}
 
 	private List<Long> getOrdererIds(Integer entityType, Long entityId) {

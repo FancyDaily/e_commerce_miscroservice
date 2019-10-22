@@ -105,6 +105,7 @@ public class CsqFundController {
 	 * @param orgAddr         组织地址
 	 * @param contact         联系方式
 	 * @param personInCharge  负责人
+	 * @param occupation	  职位
 	 * @param creditCardName  银行名
 	 * @param creditCardId    银行卡号
 	 * @param status          基金状态(用于发起审核)4已完成5下架
@@ -112,6 +113,7 @@ public class CsqFundController {
 	 * @param detailPic	详情图
 	 * @param purpose	目的描述(概述
 	 * @param sharePic 分享图
+	 * @param personInChargePic 负责人头像
 	 * @return
 	 */
 	@RequestMapping("modify")
@@ -119,16 +121,17 @@ public class CsqFundController {
 	@UrlAuth
 	public AjaxResult modifyMyFund(@RequestParam Long id, String trendPubKeys, String name,
 								   String description, String coverPic, String orgName, String orgAddr, String detailPic,
-								   String contact, String personInCharge, String creditCardName, String creditCardId,String purpose,
+								   String contact, String occupation, String personInCharge, String creditCardName, String creditCardId,String purpose,
 								   String sharePic,
+								   String personInChargePic,
 								   @RequestParam(required = false) Integer status,
 								   @RequestParam(required = false) Integer agentModeStatus) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, personIncharge={}, creditCardName={}, creditCardId={}, detailPic={}, purpose={}",
-				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, personInCharge, creditCardName, creditCardId, detailPic, purpose);
+			log.info("修改基金, fundId={}, trendPubKeys={}, name={}, description={}, coverPic={}, orgName={}, orgAddr={}, contact={}, occupation={}, personIncharge={}, creditCardName={}, creditCardId={}, detailPic={}, purpose={}, personInChargePic={}",
+				id, trendPubKeys, name, description, coverPic, orgName, orgAddr, contact, occupation, personInCharge, creditCardName, creditCardId, detailPic, purpose, personInChargePic);
 			fundService.modifyFund(vo.getUserId(), csqFund);
 			result.setSuccess(true);
 		} catch (MessageException e) {

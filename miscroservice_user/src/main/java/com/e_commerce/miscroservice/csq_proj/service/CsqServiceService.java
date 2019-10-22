@@ -145,4 +145,8 @@ public interface CsqServiceService {
 	String getName(Integer entityType, Long k);
 
 	Map serviceNameCheck(String name, Integer type);
+
+	Map<String, Object> getTotalBalance();
+
+
 }

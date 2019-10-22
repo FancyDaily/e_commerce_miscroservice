@@ -643,9 +643,11 @@ public class CsqFundServiceImpl implements CsqFundService {
 			}
 		}
 
+		//状态
 		baseBuild = status == null? baseBuild:
 				baseBuild
-				.eq(TCsqFund::getStatus, status);	//状态
+				.eq(TCsqFund::getStatus, status);
+		baseBuild.neq(TCsqFund::getStatus, CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal());
 
 		Iterator<String> iterator = trendPubkeys.iterator();
 		while(iterator.hasNext()) {
@@ -725,6 +727,18 @@ public class CsqFundServiceImpl implements CsqFundService {
 				csqServiceService.synchronizeService(csqFund);
 			}
 		});
+	}
+
+	@Override
+	public Map<String, Object> getTotalBalance() {
+		List<TCsqFund> csqFunds = fundDao.selectAll();
+		Double reduce = csqFunds.stream()
+			.filter(a -> CsqFundEnum.STATUS_WAIT_ACTIVATE.getVal() != a.getStatus())
+			.map(TCsqFund::getBalance).reduce(0d, Double::sum);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("fundTotal", reduce);
+		return map;
 	}
 
 	private TCsqFund getFundIfNotNullFundId(Long fundId) {
