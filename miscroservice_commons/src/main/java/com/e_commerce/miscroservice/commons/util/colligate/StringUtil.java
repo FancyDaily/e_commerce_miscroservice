@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * 
+ *
  * 功能描述:字符串实用类
  * 模块:
  * 项目:
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * 创建时间:2017年7月7日 下午4:10:13
  */
 public class StringUtil {
-	
+
     /** Constant representing the empty string, equal to &quot;&quot; */
     public static final String EMPTY_STRING = "";
 
@@ -39,7 +39,7 @@ public class StringUtil {
 
     /** Constant representing the default quote character (double quote), equal to '&quot;'</code> */
     public static final char DEFAULT_QUOTE_CHAR = '"';
-	
+
     /**
      * 清除空格
      */
@@ -55,22 +55,22 @@ public class StringUtil {
 
         return out;
     }
-    
+
     /**
      * 是否存在字符
      */
     public static boolean hasText( String in ){
     	return clean( in ) != null;
     }
-    
+
     public static boolean hasText( String str,String in ){
     	if(StringUtil.isEmpty(str)){
     		return false;
     	}
     	return str.contains(in);
     }
-    
-    
+
+
 	private static Pattern numericPattern = Pattern.compile("^[0-9\\-]+$");
 	private static Pattern numericStringPattern = Pattern.compile("^[0-9\\-\\-]+$");
 	private static Pattern floatNumericPattern = Pattern.compile("^[0-9\\-\\.]+$");
@@ -80,7 +80,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否数字表示
-	 * 
+	 *
 	 * @param src
 	 *            源字符串
 	 * @return 是否数字的标志
@@ -98,7 +98,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否数字表示
-	 * 
+	 *
 	 * @param src
 	 *            源字符串
 	 * @return 是否数字的标志
@@ -116,7 +116,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否纯字母组合
-	 * 
+	 *
 	 * @param src
 	 *            源字符串
 	 * @return 是否纯字母组合的标志
@@ -134,7 +134,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否浮点数字表示
-	 * 
+	 *
 	 * @param src
 	 *            源字符串
 	 * @return 是否数字的标志
@@ -152,7 +152,7 @@ public class StringUtil {
 
 	/**
 	 * 把string array or list用给定的符号symbol连接成一个字符串
-	 * 
+	 *
 	 * @param array
 	 * @param symbol
 	 * @return
@@ -179,7 +179,7 @@ public class StringUtil {
 	}
 	/**
 	 * 截取字符串　超出的字符用symbol代替 　　
-	 * 
+	 *
 	 * @param len
 	 *            　字符串长度　长度计量单位为一个GBK汉字　　两个英文字母计算为一个单位长度
 	 * @param str
@@ -220,7 +220,7 @@ public class StringUtil {
 
 	/**
 	 * 截取字符串　超出的字符用symbol代替 　　
-	 * 
+	 *
 	 * @param len
 	 *            　字符串长度　长度计量单位为一个GBK汉字　　两个英文字母计算为一个单位长度
 	 * @param str
@@ -232,9 +232,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 截取字符，不转码
-	 * 
+	 *
 	 * @param subject
 	 * @param size
 	 * @return
@@ -248,7 +248,7 @@ public class StringUtil {
 
 	/**
 	 * 把string array or list用给定的符号symbol连接成一个字符串
-	 * 
+	 *
 	 * @param array
 	 * @param symbol
 	 * @return
@@ -269,7 +269,7 @@ public class StringUtil {
 
 	/**
 	 * 取得字符串的实际长度（考虑了汉字的情况）
-	 * 
+	 *
 	 * @param SrcStr
 	 *            源字符串
 	 * @return 字符串的实际长度
@@ -287,7 +287,7 @@ public class StringUtil {
 
 	/**
 	 * 检查数据串中是否包含非法字符集
-	 * 
+	 *
 	 * @param str
 	 * @return [true]|[false] 包含|不包含
 	 */
@@ -306,7 +306,7 @@ public class StringUtil {
 
 	/***************************************************************************
 	 * getHideEmailPrefix - 隐藏邮件地址前缀。
-	 * 
+	 *
 	 * @param email
 	 *            - EMail邮箱地址 例如: linwenguo@koubei.com 等等...
 	 * @return 返回已隐藏前缀邮件地址, 如 *********@koubei.com.
@@ -324,7 +324,7 @@ public class StringUtil {
 
 	/***************************************************************************
 	 * repeat - 通过源字符串重复生成N次组成新的字符串。
-	 * 
+	 *
 	 * @param src
 	 *            - 源字符串 例如: 空格(" "), 星号("*"), "浙江" 等等...
 	 * @param num
@@ -341,7 +341,7 @@ public class StringUtil {
 
 	/**
 	 * 根据指定的字符把源字符串分割成一个数组
-	 * 
+	 *
 	 * @param src
 	 * @return
 	 */
@@ -359,7 +359,7 @@ public class StringUtil {
 
 	/**
 	 * 根据指定的字符把源字符串分割成一个数组
-	 * 
+	 *
 	 * @param src
 	 * @return
 	 */
@@ -370,7 +370,7 @@ public class StringUtil {
 
 	/**
 	 * 格式化一个float
-	 * 
+	 *
 	 * @param format
 	 *            要格式化成的格式 such as #.00, #.#
 	 */
@@ -382,7 +382,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否是空字符串 null和"" 都返回 true
-	 * 
+	 *
 	 * @author Robin Chang
 	 * @param s
 	 * @return
@@ -396,9 +396,9 @@ public class StringUtil {
 
 	/**
 	 * 自定义的分隔字符串函数 例如: 1,2,3 =>[1,2,3] 3个元素 ,2,3=>[,2,3] 3个元素 ,2,3,=>[,2,3,] 4个元素 ,,,=>[,,,] 4个元素
-	 * 
+	 *
 	 * 5.22算法修改，为提高速度不用正则表达式 两个间隔符,,返回""元素
-	 * 
+	 *
 	 * @param split
 	 *            分割字符 默认,
 	 * @param src
@@ -437,7 +437,7 @@ public class StringUtil {
 
 	/**
 	 * 把 名=值 参数表转换成字符串 (a=1,b=2 =>a=1&b=2)
-	 * 
+	 *
 	 * @param map
 	 * @return
 	 */
@@ -458,7 +458,7 @@ public class StringUtil {
 
 	/**
 	 * 解析字符串返回 名称=值的参数表 (a=1&b=2 => a=1,b=2)
-	 * 
+	 *
 	 * @see test.koubei.util.StringUtilTest#testParseStr()
 	 * @param str
 	 * @return
@@ -506,7 +506,7 @@ public class StringUtil {
 
 	/**
 	 * 根据输入的多个解释和下标返回一个值
-	 * 
+	 *
 	 * @param captions
 	 *            例如:"无,爱干净,一般,比较乱"
 	 * @param index
@@ -525,7 +525,7 @@ public class StringUtil {
 
 	/**
 	 * 数字转字符串,如果num<=0 则输出"";
-	 * 
+	 *
 	 * @param num
 	 * @return
 	 */
@@ -547,7 +547,7 @@ public class StringUtil {
 
 	/**
 	 * 货币转字符串
-	 * 
+	 *
 	 * @param money
 	 * @param style
 	 *            样式 [default]要格式化成的格式 such as #.00, #.#
@@ -581,7 +581,7 @@ public class StringUtil {
 
 	/**
 	 * 在sou中是否存在finds 如果指定的finds字符串有一个在sou中找到,返回true;
-	 * 
+	 *
 	 * @param sou
 	 * @param find
 	 * @return
@@ -613,7 +613,7 @@ public class StringUtil {
 
 	/**
 	 * 判断两个字符串是否相等 如果都为null则判断为相等,一个为null另一个not null则判断不相等 否则如果s1=s2则相等
-	 * 
+	 *
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -647,7 +647,7 @@ public class StringUtil {
 
 	/**
 	 * 把xml 转为object
-	 * 
+	 *
 	 * @param xml
 	 * @return
 	 */
@@ -691,7 +691,7 @@ public class StringUtil {
 
 	/**
 	 * 过滤用户输入的URL地址（防治用户广告） 目前只针对以http或www开头的URL地址 本方法调用的正则表达式，不建议用在对性能严格的地方例如:循环及list页面等
-	 * 
+	 *
 	 * @author fengliang
 	 * @param str
 	 *            需要处理的字符串
@@ -705,7 +705,7 @@ public class StringUtil {
 
 	/**
 	 * 随即生成指定位数的含数字验证码字符串
-	 * 
+	 *
 	 * @author Peltason
 	 * @date 2007-5-9
 	 * @param bit
@@ -722,9 +722,9 @@ public class StringUtil {
 
 	/**
 	 * 随即生成指定位数的含验证码字符串
-	 * 
+	 *
 	 * @author Peltason
-	 * 
+	 *
 	 * @date 2007-5-9
 	 * @param bit
 	 *            指定生成验证码位数
@@ -741,7 +741,7 @@ public class StringUtil {
 
 	/**
 	 * Wap页面的非法字符检查
-	 * 
+	 *
 	 * @author hugh115
 	 * @date 2007-06-29
 	 * @param str
@@ -770,7 +770,7 @@ public class StringUtil {
 
 	/**
 	 * 字符串转float 如果异常返回0.00
-	 * 
+	 *
 	 * @param s
 	 *            输入的字符串
 	 * @return 转换后的float
@@ -785,7 +785,7 @@ public class StringUtil {
 
 	/**
 	 * 页面中去除字符串中的空格、回车、换行符、制表符
-	 * 
+	 *
 	 * @author shazao
 	 * @date 2007-08-17
 	 * @param str
@@ -802,7 +802,7 @@ public class StringUtil {
 
 	/**
 	 * 全角生成半角
-	 * 
+	 *
 	 * @author bailong
 	 * @date 2007-08-29
 	 * @param str
@@ -839,9 +839,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 转换编码
-	 * 
+	 *
 	 * @param s
 	 *            源字符串
 	 * @param fencode
@@ -867,7 +867,7 @@ public class StringUtil {
 	/**
 	 * @param str
 	 * @return
-	 ************************************************************************* 
+	 *************************************************************************
 	 */
 	public static String removeHTMLLableExe(String str) {
 		str = stringReplace(str, ">\\s*<", "><");
@@ -883,7 +883,7 @@ public class StringUtil {
 
 	/**
 	 * 除去html标签
-	 * 
+	 *
 	 * @param str
 	 *            源字符串
 	 * @return 目标字符串
@@ -899,7 +899,7 @@ public class StringUtil {
 
 	/**
 	 * 去掉HTML标签之外的字符串
-	 * 
+	 *
 	 * @param str
 	 *            源字符串
 	 * @return 目标字符串
@@ -912,9 +912,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 字符串替换
-	 * 
+	 *
 	 * @param str
 	 *            源字符串
 	 * @param sr
@@ -932,9 +932,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 将html的省略写法替换成非省略写法
-	 * 
+	 *
 	 * @param str
 	 *            html字符串
 	 * @param pt
@@ -964,9 +964,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 得到字符串的子串位置序列
-	 * 
+	 *
 	 * @param str
 	 *            字符串
 	 * @param sub
@@ -1000,9 +1000,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * 根据正则表达式分割字符串
-	 * 
+	 *
 	 * @param str
 	 *            源字符串
 	 * @param ms
@@ -1018,12 +1018,12 @@ public class StringUtil {
 
 	/**
 	 * 根据正则表达式提取字符串,相同的字符串只返回一个
-	 * 
+	 *
 	 * @param str源字符串
 	 * @param pattern
 	 *            正则表达式
 	 * @return 目标字符串数据组
-	 ************************************************************************* 
+	 *************************************************************************
 	 */
 
 	// ★传入一个字符串，把符合pattern格式的字符串放入字符串数组
@@ -1053,7 +1053,7 @@ public class StringUtil {
 
 	/**
 	 * 得到第一个b,e之间的字符串,并返回e后的子串
-	 * 
+	 *
 	 * @param s
 	 *            源字符串
 	 * @param b
@@ -1087,7 +1087,7 @@ public class StringUtil {
 
 	/**
 	 * 带有前一次替代序列的正则表达式替代
-	 * 
+	 *
 	 * @param s
 	 * @param pf
 	 * @param pb
@@ -1126,7 +1126,7 @@ public class StringUtil {
 
 	/**
 	 * 存文本替换
-	 * 
+	 *
 	 * @param s
 	 *            源字符串
 	 * @param sf
@@ -1162,7 +1162,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否与给定字符串样式匹配
-	 * 
+	 *
 	 * @param str
 	 *            字符串
 	 * @param pattern
@@ -1178,7 +1178,7 @@ public class StringUtil {
 
 	/**
 	 * 截取字符串
-	 * 
+	 *
 	 * @param s
 	 *            源字符串
 	 * @param jmp
@@ -1214,10 +1214,10 @@ public class StringUtil {
 
 	/**
 	 * ************************************************************************* 用要通过URL传输的内容进行编码
-	 * 
+	 *
 	 * @param 源字符串
 	 * @return 经过编码的内容
-	 ************************************************************************* 
+	 *************************************************************************
 	 */
 	public static String URLEncode(String src) {
 		String return_value = "";
@@ -1236,23 +1236,23 @@ public class StringUtil {
 
 	/**
 	 * *************************************************************************
-	 * 
+	 *
 	 * @author 李锋 2007.4.18
 	 * @param 传入
 	 *            &#31119;test&#29031;&#27004;&#65288;&#21271;&#22823;&#38376;&# 24635 ;&#24215;&#65289;&#31119;
 	 * @return 经过解码的内容
-	 ************************************************************************* 
+	 *************************************************************************
 	 */
 	public static String getGBK(String str) {
 
 		return transfer(str);
 	}
 
-	
-	
+
+
 	/**
 	 * 将Unicode编码转换为正常字符
-	 * 
+	 *
 	 * @param unicode
 	 * @return
 	 */
@@ -1269,7 +1269,7 @@ public class StringUtil {
 
 	/**
 	 * 将正常字符转换为Unicode
-	 * 
+	 *
 	 * @param source
 	 * @return
 	 */
@@ -1286,11 +1286,11 @@ public class StringUtil {
 		}
 		return sb.toString();
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	public static String transfer(String str) {
 		Pattern p = Pattern.compile("&#\\d+;");
 		Matcher m = p.matcher(str);
@@ -1309,7 +1309,7 @@ public class StringUtil {
 
 	/**
 	 * yahoo首页中切割字符串.
-	 * 
+	 *
 	 * @author yxg
 	 * @date 2007-09-17
 	 * @param str
@@ -1327,7 +1327,7 @@ public class StringUtil {
 
 	/**
 	 * 泛型方法(通用)，把list转换成以“,”相隔的字符串 调用时注意类型初始化（申明类型） 如：List<Integer> intList = new ArrayList<Integer>(); 调用方法：StringUtil.listTtoString(intList); 效率：list中4条信息，1000000次调用时间为850ms左右
-	 * 
+	 *
 	 * @author fengliang
 	 * @serialData 2008-01-09
 	 * @param <T>
@@ -1354,7 +1354,7 @@ public class StringUtil {
 
 	/**
 	 * 把整形数组转换成以“,”相隔的字符串
-	 * 
+	 *
 	 * @author fengliang
 	 * @serialData 2008-01-08
 	 * @param a
@@ -1378,7 +1378,7 @@ public class StringUtil {
 
 	/**
 	 * 判断文字内容重复
-	 * 
+	 *
 	 * @author 沙枣
 	 * @Date 2008-04-17
 	 */
@@ -1435,7 +1435,7 @@ public class StringUtil {
 
 	/**
 	 * 判断是否是空字符串 null和"" null返回result,否则返回字符串
-	 * 
+	 *
 	 * @param s
 	 * @return
 	 */
@@ -1448,7 +1448,7 @@ public class StringUtil {
 
 	/**
 	 * 判断对象是否为空
-	 * 
+	 *
 	 * @param str
 	 * @return
 	 */
@@ -1466,7 +1466,7 @@ public class StringUtil {
 
 	/**
 	 * 全角字符变半角字符
-	 * 
+	 *
 	 * @author shazao
 	 * @date 2008-04-03
 	 * @param str
@@ -1492,7 +1492,7 @@ public class StringUtil {
 
 	/**
 	 * 全角括号转为半角
-	 * 
+	 *
 	 * @author shazao
 	 * @date 2007-11-29
 	 * @param str
@@ -1508,7 +1508,7 @@ public class StringUtil {
 
 	/**
 	 * 解析字符串返回map键值对(例：a=1&b=2 => a=1,b=2)
-	 * 
+	 *
 	 * @param query
 	 *            源参数字符串
 	 * @param split1
@@ -1568,7 +1568,7 @@ public class StringUtil {
 
 	/**
 	 * 将list 用传入的分隔符组装为String
-	 * 
+	 *
 	 * @param list
 	 * @param slipStr
 	 * @return String
@@ -1588,7 +1588,7 @@ public class StringUtil {
 
 	/**
 	 * 获取从start开始用*替换len个长度后的字符串
-	 * 
+	 *
 	 * @param str
 	 *            要替换的字符串
 	 * @param start
@@ -1629,7 +1629,7 @@ public class StringUtil {
 
 	/**
 	 * 根据传入的分割符号,把传入的字符串分割为List字符串
-	 * 
+	 *
 	 * @param slipStr
 	 *            分隔的字符串
 	 * @param src
@@ -1650,7 +1650,7 @@ public class StringUtil {
 
 	/**
 	 * 截取字符串
-	 * 
+	 *
 	 * @param str
 	 *            原始字符串
 	 * @param len
@@ -1743,7 +1743,7 @@ public class StringUtil {
 
 	/**
 	 * 解析前台encodeURIComponent编码后的参数
-	 * 
+	 *
 	 * @param encodeURIComponent
 	 *            (encodeURIComponent(no))
 	 * @return
@@ -1789,7 +1789,7 @@ public class StringUtil {
 
 	/**
 	 * 判断某个字符串是否存在于数组中
-	 * 
+	 *
 	 * @param stringArray
 	 *            原数组
 	 * @param source
@@ -1808,7 +1808,7 @@ public class StringUtil {
 		}
 	}
 
-	
+
 	/**
 	 * 首字母大写
 	 * @param realName
@@ -1843,28 +1843,28 @@ public class StringUtil {
 		}
 		return isBaseClass;
 	}
-	
+
 	//去除字符串前缀
-	
+
 	public static String removeStrPrefix(String str,String prefix){
 		if(StringUtil.isEmpty(str)){
 			return null;
 		}
 		return str.replaceFirst(prefix, "");
 	}
-	
+
 	public static Boolean isAnyEmpty(String... string) {
 		Boolean flag = false;
 		if(string==null || string.length == 0) {
 			flag = true;
 		}
 		for(String str:string) {
-			if(str == null || str.trim() == "") {
+			if(str == null || "".equals(str.trim())) {
 				flag = true;
 			}
 		}
 		return flag;
 	}
-	
-	
+
+
 }

@@ -864,7 +864,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 					return a;
 				}).collect(Collectors.toList());
 			//把查找的数据进行组装
-			HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList, true);
+			HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList, true, startDate, endDate);
 
 			CsqDataBIVo build = CsqDataBIVo.builder()
 				.entityId(null)
@@ -952,11 +952,15 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		Map<Long, List<TCsqUserPaymentRecord>> unhandledMap = unHandledList.stream()
 			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getEntityId));
 
-		HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList, false);
+		HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList, false, startDate, endDate);
 		return diagramMap;
 	}
 
 	private HashMap<String, List<CsqLineDiagramData>> getDiagramMap(List<TCsqUserPaymentRecord> v, boolean isPlatform) {
+		return getDiagramMap(v, isPlatform, null, null);
+	}
+
+	private HashMap<String, List<CsqLineDiagramData>> getDiagramMap(List<TCsqUserPaymentRecord> v, boolean isPlatform, String startDate, String endDate) {
 		List<TCsqUserPaymentRecord> inList;
 		List<TCsqUserPaymentRecord> outList;
 		if(isPlatform) {
@@ -979,10 +983,53 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 		//TODO 这里有一点，当日没有发生交易的日期在这里是不存在的，也就不会返给前端，需要作出说明
 		List<CsqLineDiagramData> inDiagramDataList = getDiagramDataList(inDateRecordMap);
 		List<CsqLineDiagramData> outDiagramDataList = getDiagramDataList(outDateRecordMap);
+
+		//TODO 结合空日期
+		if(!StringUtil.isAnyEmpty(startDate, endDate)) {
+			inDiagramDataList = getDiagramDataListByDate(inDiagramDataList, startDate, endDate);
+			outDiagramDataList = getDiagramDataListByDate(outDiagramDataList, startDate, endDate);
+		}
+
 		HashMap<String, List<CsqLineDiagramData>> diagramMap = new HashMap<>();
 		diagramMap.put("in", inDiagramDataList);
 		diagramMap.put("out", outDiagramDataList);
 		return diagramMap;
+	}
+
+	private List<CsqLineDiagramData> getDiagramDataListByDate(List<CsqLineDiagramData> inDiagramDataList, String startDate, String endDate) {
+		//根据日期构建日期List
+		//日期校验
+		String startStamp = DateUtil.dateToStamp(startDate);
+		String endStamp = DateUtil.dateToStamp(endDate);
+		long length = (Long.valueOf(endStamp) - Long.valueOf(startStamp)) / DateUtil.interval + 1;
+		ArrayList<CsqLineDiagramData> diagramDataArrayList = new ArrayList<>();
+		//构建list
+		long currenStamp;
+		for(int i=0; i<length; i++) {
+			currenStamp = Long.valueOf(startStamp) + DateUtil.interval * i;
+			String date = DateUtil.timeStamp2Date(currenStamp);
+			CsqLineDiagramData build = CsqLineDiagramData.builder()
+				.timeStamp(currenStamp)
+				.date(date)
+				.amount(0d)
+				.label(date)
+				.value(0d)
+				.build();
+			diagramDataArrayList.add(build);
+		}
+
+		Map<String, List<CsqLineDiagramData>> dateDataMap = inDiagramDataList.stream()
+			.collect(Collectors.groupingBy(CsqLineDiagramData::getDate));
+		//匹配已有数据
+		inDiagramDataList = diagramDataArrayList.stream()
+			.map(a -> {
+				List<CsqLineDiagramData> lineDiagramData = dateDataMap.get(a.getDate());
+				if(lineDiagramData != null) {
+					a = lineDiagramData.get(0);
+				}
+				return a;
+			}).collect(Collectors.toList());
+		return inDiagramDataList;
 	}
 
 	private List<CsqLineDiagramData> getDiagramDataList(Map<String, List<TCsqUserPaymentRecord>> inDateRecordMap) {
