@@ -32,4 +32,9 @@ public class RedisConfig extends RedisTemplateConfig {
 		return createTemplateCache(OperateEnum.STR);
 	}
 
+	@Bean(name = "sdxRedisTemplate")
+	public HashOperations<String, String, Object> createSdxRedisTemplate() {
+		return createTemplateCache(OperateEnum.HASH).opsForHash();
+	}
+
 }

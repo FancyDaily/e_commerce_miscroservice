@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.csq_proj.po;
 
-import com.e_commerce.miscroservice.commons.annotation.colligate.generate.CopyIgnore;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
@@ -160,6 +159,15 @@ public class TCsqUser extends BaseEntity {
 
 	@Column(commit = "邮箱")
 	private String mail;
+
+	@Column(commit = "书袋熊标记", defaultVal = "0")
+	private Integer isSdx;
+
+	@Column(commit = "兴趣")
+	private String interests;
+
+	@Column(commit = "书袋熊积分", length = 11, defaultVal = "0")
+	private Integer sdxScores;
 
 	public CsqBasicUserVo copyCsqBasicUserVo() {
 		return null;

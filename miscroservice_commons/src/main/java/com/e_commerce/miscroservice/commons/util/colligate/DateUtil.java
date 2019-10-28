@@ -37,6 +37,10 @@ public class DateUtil {
 
     public static Long interval = (long) (24 * 60 * 60 * 1000);
 
+    public static Long hour = 60L * 60 * 1000;
+
+    public static Long minute = 60L * 1000;
+
     /*
      * 时间戳转换成日期格式字符串
      * @param seconds 精确到秒的字符串
@@ -643,5 +647,19 @@ public class DateUtil {
 		}
 
 		return timeAgo;
+	}
+
+	public static String getMinsStrWithinOneDay(long currentInterval) {
+		if(currentInterval > interval) return "";
+		long hours = currentInterval / hour;
+		long minutes = (currentInterval - hours * hour) / minute;
+		String res = "";
+		if(hours > 1) {
+			res += hours + "小时";
+		} else if(hours > 0) {
+			res += minutes + "分钟";
+		}
+		res += "前";
+		return res;
 	}
 }

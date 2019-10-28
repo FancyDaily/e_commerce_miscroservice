@@ -1,18 +1,14 @@
-package com.e_commerce.miscroservice.csq_proj.controller;
+package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.csq_proj.service.CsqPublishService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxPublishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * publishController
@@ -23,10 +19,10 @@ import java.util.Map;
 @Log
 @RestController
 @RequestMapping("csq/publish")
-public class CsqPublishController {
+public class SdxPublishController {
 
 	@Autowired
-	private CsqPublishService publishService;
+	private SdxPublishService publishService;
 
 	/**
 	 * 插入一条publish记录
