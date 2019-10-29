@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,6 +45,7 @@ public class TSdxUserDaoImpl implements TSdxUserDao {
 
 	@Override
 	public Map<Long, List<TCsqUser>> groupingByIdInIds(List<Long> userIds) {
+		if(userIds == null || userIds.isEmpty()) return new HashMap<>();
 		List<TCsqUser> tCsqUsers = selectInIds(userIds);
 		return tCsqUsers.stream()
 			.collect(Collectors.groupingBy(TCsqUser::getId));

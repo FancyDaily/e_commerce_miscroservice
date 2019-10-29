@@ -14,15 +14,15 @@ public class WechatPhoneAuthDto {
 	/**
 	 * 微信加密数据
 	 */
-	String encryptedData;
+	private String encryptedData;
 
 	/**
 	 * 微信iv
 	 */
-	String iv;
+	private String iv;
 
 	/**
 	 * 微信sessionKey
 	 */
-	String sessionKey;
+	private String sessionKey;
 }

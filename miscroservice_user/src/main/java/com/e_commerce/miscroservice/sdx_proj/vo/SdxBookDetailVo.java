@@ -3,6 +3,8 @@ package com.e_commerce.miscroservice.sdx_proj.vo;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 书籍详情vo
  * @Author: FangyiXu
@@ -11,6 +13,21 @@ import lombok.Data;
 @Data
 @Builder
 public class SdxBookDetailVo {
+
+	/**
+	 * 售出比例
+	 */
+	private Integer purchaseRate;
+
+	/**
+	 * 读后感记录
+	 */
+	private List<TSdxBookAfterReadingNoteVo> afterReadingNoteVos;
+
+	/**
+	 * 捐赠记录(用户信息)
+	 */
+	private List<SdxBookOrderUserInfoVo> donateUserRecords;
 
 	/**
 	 * 余量

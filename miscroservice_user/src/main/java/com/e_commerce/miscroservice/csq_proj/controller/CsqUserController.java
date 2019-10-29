@@ -183,6 +183,40 @@ public class CsqUserController {
 	}
 
 	/**
+	 * 获取手机号
+	 *
+	 * @param encryptedData 微信加密数据
+	 * @param iv            微信iv
+	 * @param sessionKey    微信sessionKey
+	 * @return
+	 */
+	@Consume(WechatPhoneAuthDto.class)
+	@RequestMapping("phone")
+	public AjaxResult openidLogin(@RequestParam(required = false) String encryptedData,
+								  @RequestParam(required = false) String iv,
+								  @RequestParam(required = false) String sessionKey) {
+		AjaxResult result = new AjaxResult();
+		try {
+			WechatPhoneAuthDto wechatPhoneAuthDto = (WechatPhoneAuthDto) ConsumeHelper.getObj();
+			log.info("获取手机号, encryptedData={}, iv={}, sessionKey={}", encryptedData, iv, sessionKey);
+			String phone = csqUserService.authPhone(wechatPhoneAuthDto);
+			result.setData(phone);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "获取手机号", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("获取手机号", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+
+
+	/**
 	 * 换绑手机号(更换新手机号阶段或者第一次绑定手机)
 	 *
 	 * @param telephone 手机号
@@ -584,6 +618,7 @@ public class CsqUserController {
 	 * 修改个人基本信息
 	 *
 	 * @param name                 姓名
+	 * @param userTel			   手机号
 	 * @param remarks              描述
 	 * @param userHeadPortraitPath 头像
 	 * @param weiboAccount         微博号
@@ -597,14 +632,14 @@ public class CsqUserController {
 	@RequestMapping("modify")
 	@Consume(CsqBasicUserVo.class)
 	@UrlAuth
-	public AjaxResult modify(String name, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo,
+	public AjaxResult modify(String name, String userTel, String remarks, String userHeadPortraitPath, String weiboAccount, String wechatPubAccount, String contactPerson, String contactNo,
 							 String trendPubKeys,
 							 boolean isWechatAuth) {
 		AjaxResult result = new AjaxResult();
 		Long userIds = IdUtil.getId();
 		CsqBasicUserVo csqBasicUserVo = (CsqBasicUserVo) ConsumeHelper.getObj();
 		try {
-			log.info("修改个人基本信息, userId={}, name={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}, trendPubKeys={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo, trendPubKeys);
+			log.info("修改个人基本信息, userId={}, name={}, userTel={}, remarks={}, userHeadPortraitPath={}, weiboAccount={}, wechatAccount={}, contactPerson={}, contactNo={}, trendPubKeys={}", userIds, name, remarks, userHeadPortraitPath, weiboAccount, wechatPubAccount, contactPerson, contactNo, trendPubKeys);
 			csqUserService.modify(userIds, csqBasicUserVo, isWechatAuth);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -963,6 +998,15 @@ public class CsqUserController {
 			result.setSuccess(false);
 		}
 		return result;
+	}
+
+	@RequestMapping("getUser/tel")
+	public Object getUserByTel(String userTel) {
+		AjaxResult result = new AjaxResult();
+		Object userByTel = csqUserService.getUserByTel(userTel);
+		result.setData(userByTel);
+		return result;
+
 	}
 
 }

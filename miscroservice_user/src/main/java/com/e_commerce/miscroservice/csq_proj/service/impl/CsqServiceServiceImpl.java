@@ -631,6 +631,8 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 				Integer minutesAgo = a.getMinutesAgo();
 				//处理 minuteAgo
 				String minutesAgoStr = com.e_commerce.miscroservice.commons.util.colligate.DateUtil.minutes2TimeAgo(minutesAgo);
+				minutesAgoStr = com.e_commerce.miscroservice.commons.util.colligate.DateUtil.timeStamp2MonthDay(a.getCreateTime().getTime());
+
 				minutesAgo = minutesAgo > 60 ? 60 : minutesAgo;
 
 				return CsqDonateRecordVo.builder()

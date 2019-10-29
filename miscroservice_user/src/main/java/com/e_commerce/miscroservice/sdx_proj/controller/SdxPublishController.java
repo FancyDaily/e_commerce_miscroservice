@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Log
 @RestController
-@RequestMapping("csq/publish")
+@RequestMapping("sdx/publish")
 public class SdxPublishController {
 
 	@Autowired

@@ -22,9 +22,7 @@ import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -559,13 +557,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 							long mills = System.currentTimeMillis() - a.getUpdateTime().getTime();
 							Long minutesLong = mills / 1000 / 60;
 							Integer minutesAgo = minutesLong.intValue();
-							minutesAgo = minutesAgo > 60? 60: minutesAgo;
 							Long theUserId = a.getUserId();
 							List<TCsqUser> csqUsers = userMap.get(theUserId);
 							TCsqUser csqUser = csqUsers.get(0);
+							String minutesAgoStr = DateUtil.minutes2TimeAgo(minutesAgo);
+							minutesAgoStr = DateUtil.timeStamp2MonthDay(a.getCreateTime().getTime());
+							minutesAgo = minutesAgo > 60? 60: minutesAgo;
 							CsqDonateRecordVo donateRecordVo = CsqDonateRecordVo.builder().userHeadPortraitPath(csqUser.getUserHeadPortraitPath())
 								.name(csqUser.getName())
 								.donateAmount(a.getPrice())
+								.minutesAgoStr(minutesAgoStr)
 								.minutesAgo(minutesAgo).build();
 							return donateRecordVo;
 						}).collect(Collectors.toList());
@@ -1370,6 +1371,46 @@ public class CsqUserServiceImpl implements CsqUserService {
 		map.put("personNum", personNum);
 		map.put("totalIn", totalIn);
 		return map;
+	}
+
+	@Override
+	public String authPhone(WechatPhoneAuthDto wechatPhoneAuthDto) {
+		String phoneNumber = null;
+		String encryptData = wechatPhoneAuthDto.getEncryptedData();
+		String iv = wechatPhoneAuthDto.getIv();
+		String sessionKey = wechatPhoneAuthDto.getSessionKey();
+		if (StringUtil.isAnyEmpty(encryptData, iv, sessionKey)) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "必要参数为空");
+		}
+		WechatSession wechatSession = new WechatSession();
+		wechatSession.setSession_key(sessionKey);
+		phoneNumber = wechatService.getPhoneNumber(encryptData, iv, wechatSession);
+		return phoneNumber;
+	}
+
+	@Override
+	public Object getUserByTel(String userTel) {
+		Map<String, Object> res = new HashMap<>();
+		if(userTel == null) {
+			List<TCsqUser> tCsqUsers = csqUserDao.selectAll();
+			Map<String, List<TCsqUser>> telUserMap = tCsqUsers.stream()
+				.filter(a -> !StringUtil.isEmpty(a.getUserTel()))
+				.collect(Collectors.groupingBy(TCsqUser::getUserTel));
+			Map<String,  List<TCsqUser>> resultMap = new HashMap<>();
+			List<String> userTels = new ArrayList<>();
+			telUserMap.forEach((k,v) -> {
+				if(v.size() > 1) {
+					userTels.add(k);
+					resultMap.put(k,v);
+				}
+			});
+			res.put("tel", userTels);
+			res.put("map", resultMap);
+		} else {
+			TCsqUser csqUser = csqUserDao.selectByUserTel(userTel);
+			res.put("user", csqUser);
+		}
+		return res;
 	}
 
 	private void buildWithAccountTypeAndAvailableStatus(Integer accountType, Integer availableStatus, MybatisPlusBuild baseBuild) {

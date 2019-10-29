@@ -1,8 +1,5 @@
 package com.e_commerce.miscroservice.commons.entity.colligate;
 
-import lombok.Builder;
-import lombok.Data;
-
 /**
  * @Author: FangyiXu
  * @Date: 2019-09-09 17:13
@@ -28,4 +25,11 @@ public class Page {
 		this.pageSize = pageSize;
 	}
 
+	public Page() {
+	}
+
+	public Page(Integer pageNum, Integer pageSize) {
+		this.pageNum = pageNum;
+		this.pageSize = pageSize;
+	}
 }

@@ -26,8 +26,10 @@ public class TSdxBookOrderPo extends BaseEntity {
 	@Column(commit = "多个书本编号")
 	private String bookIds;
 
+	/*@Column(commit = "书本信息编号")
+	private Long bookIfIs;*/
 	@Column(commit = "书本信息编号")
-	private Long bookInfoIds;
+	private Long bookIfIs;
 
 	@Column(commit = "购书人或者捐书人编号")
 	private Long userId;

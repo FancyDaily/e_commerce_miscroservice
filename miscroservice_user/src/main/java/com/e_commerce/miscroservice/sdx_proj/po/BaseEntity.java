@@ -8,7 +8,7 @@ public class BaseEntity extends com.e_commerce.miscroservice.commons.entity.appl
 
 	public static void main(String[] args) {
 		AutoGenerateCode.generate(TSdxBookPo.class, TSdxBookAfterReadingNotePo.class, TSdxBookAfterReadingNoteUserPo.class, TSdxBookInfoPo.class
-			, TSdxBookInfoReservePo.class, TSdxBookOrderPo.class, TSdxBookStationPo.class, TSdxBookTicktPo.class, TSdxBookTransRecordPo.class, TSdxInviterPo.class,
+			, TSdxBookInfoReservePo.class, TSdxBookOrderPo.class, TSdxBookStationPo.class, TSdxBookTicketPo.class, TSdxBookTransRecordPo.class, TSdxInviterPo.class,
 			TSdxScoreRecordPo.class, TSdxShippingAddressPo.class, TSdxShoppingTrolleysPo.class, TSdxWishListPo.class
 		);
 	}

@@ -62,7 +62,7 @@ public class SdxBookController {
 	 *
 	 * @return
 	 */
-	@RequestMapping("find")
+	@RequestMapping("bookinfo/find")
 	@Consume(TSdxBookInfoVo.class)
 	public Response findTSdxBookInfo(
 		@RequestParam(required = false) Integer page,
@@ -89,7 +89,12 @@ public class SdxBookController {
 		return Response.success(sdxBookInfoService.findTSdxBookInfoByAll(tSdxBookInfoVo.copyTSdxBookInfoPo (),page,size, sortType), IdUtil.getTotal());
 	}
 
-	@RequestMapping("detail")
+	/**
+	 * 书籍详情
+	 * @param id 书籍信息编号
+	 * @return
+	 */
+	@RequestMapping("bookinfo/detail")
 	@Consume(TSdxBookInfoVo.class)
 	public Response detail(Long id) {
 		TSdxBookVo tSdxBookVo = (TSdxBookVo) ConsumeHelper.getObj();
@@ -99,5 +104,33 @@ public class SdxBookController {
 		return Response.success(sdxBookService.detail(tSdxBookVo.getId()));
 	}
 
+	/**
+	 * 书籍详情-捐助/购买人列表
+	 * @param id 书籍信息编号
+	 * @return
+	 */
+	@RequestMapping("bookinfo/user/sold/list")
+	@Consume(TSdxBookInfoVo.class)
+	public Response bookSoldUserList(Long id, Integer pageNum, Integer pageSize, Boolean isSold) {
+		TSdxBookVo tSdxBookVo = (TSdxBookVo) ConsumeHelper.getObj();
+		if (tSdxBookVo == null || tSdxBookVo.getId()==null) {
+			return Response.fail();
+		}
+		return Response.success(sdxBookService.soldOrPurchaseUserList(tSdxBookVo.getId(), pageNum, pageSize, isSold));
+	}
 
+	/**
+	 * 申请预定
+	 * @param id 书籍信息编号
+	 * @return
+	 */
+	@RequestMapping("preOrder/add")
+	public Response preOrder(Long id) {
+		Long userId = IdUtil.getId();
+		if(id == null) {
+			return Response.fail();
+		}
+		sdxBookService.preOrder(id, userId);
+		return Response.success();
+	}
 }

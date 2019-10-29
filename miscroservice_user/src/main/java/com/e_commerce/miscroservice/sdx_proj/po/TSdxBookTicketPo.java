@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 预定书券
@@ -16,7 +17,8 @@ import lombok.Data;
 @Data
 @Builder
 @Table(commit = "预定书券")
-public class TSdxBookTicktPo extends BaseEntity{
+@NoArgsConstructor
+public class TSdxBookTicketPo extends BaseEntity{
 
 	@Column(commit = "过期时间点")
 	private Long expire;
@@ -27,5 +29,5 @@ public class TSdxBookTicktPo extends BaseEntity{
     public TSdxBookTicktVo  copyTSdxBookTicktVo() {
         return null;
      }
- 
+
 }

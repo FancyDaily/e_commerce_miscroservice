@@ -1,12 +1,13 @@
 package com.e_commerce.miscroservice.sdx_proj.po;
 
-import com.e_commerce.miscroservice.commons.helper.util.colligate.other.AutoGenerateCode;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookDetailVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍信息
@@ -16,6 +17,7 @@ import lombok.Data;
 @Table(commit = "书籍信息")
 @Data
 @Builder
+@NoArgsConstructor
 public class TSdxBookInfoPo extends BaseEntity {
 
 	/**
@@ -99,5 +101,7 @@ public class TSdxBookInfoPo extends BaseEntity {
     public TSdxBookInfoVo  copyTSdxBookInfoVo() {
         return null;
      }
+
+    public SdxBookDetailVo copySdxBookDetailVo() {return null; }
 
 }

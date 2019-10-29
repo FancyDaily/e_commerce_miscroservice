@@ -236,4 +236,8 @@ public interface CsqUserService {
 	Map share(String name, boolean isActivity);
 
 	Map<String, Object> platformPreview();
+
+	String authPhone(WechatPhoneAuthDto wechatPhoneAuthDto);
+
+	Object getUserByTel(String userTel);
 }

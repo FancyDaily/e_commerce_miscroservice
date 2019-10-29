@@ -2,6 +2,8 @@ package com.e_commerce.miscroservice.commons.utils;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.*;
+import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 
 import java.util.List;
 
@@ -9,7 +11,7 @@ import java.util.List;
  * @Author: FangyiXu
  * @Date: 2019-09-09 16:44
  */
-public class PageUtil {
+public class PageUtil<T> {
 
 	public static <T> QueryResult buildQueryResult(List<T> vos, long total) {
 		QueryResult<T> queryResult = new QueryResult<>();
@@ -18,6 +20,10 @@ public class PageUtil {
 		queryResult.setTotalCount(total);
 
 		return queryResult;
+	}
+
+	public static <T> QueryResult buildQueryResult() {
+		return new QueryResult();
 	}
 
 	public static Page prePage(Integer pageNum, Integer pageSize) {
@@ -42,4 +48,12 @@ public class PageUtil {
 	public static Page prePage(Page page) {
 		return prePage(page.getPageNum(), page.getPageSize());
 	}
+
+	public static MybatisPlusBuild dealWithPage(MybatisPlusBuild build, Page page) {
+		if(page == null) return build;
+		IdUtil.setTotal(build);
+		build = build.page(page.getPageNum(), page.getPageSize());
+		return build;
+	}
+
 }

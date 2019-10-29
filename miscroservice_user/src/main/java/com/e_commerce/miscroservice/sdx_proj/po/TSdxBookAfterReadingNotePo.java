@@ -6,9 +6,9 @@ import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
-import com.e_commerce.miscroservice.commons.helper.util.colligate.other.AutoGenerateCode;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍读后感
@@ -18,6 +18,7 @@ import lombok.Data;
 @Table(commit = "书籍读后感")
 @Data
 @Builder
+@NoArgsConstructor
 public class TSdxBookAfterReadingNotePo extends BaseEntity {
 
 	/**

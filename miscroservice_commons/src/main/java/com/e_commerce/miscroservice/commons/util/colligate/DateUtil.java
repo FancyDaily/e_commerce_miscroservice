@@ -85,6 +85,18 @@ public class DateUtil {
         return sdf.format(new Date(Long.valueOf(seconds + "000")));
     }
 
+	public static String timeStamp2MonthDay(Long timeStamp) {
+		String seconds = String.valueOf(timeStamp / 1000);
+		if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
+			return "";
+		}
+		String format = "yyyy-MM-dd";
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		String ymd = sdf.format(new Date(Long.valueOf(seconds + "000")));
+		String[] split = ymd.split("-");
+		return ymd.substring(split[0].length() + 1, ymd.length());
+	}
+
     /*
      * 时间戳转换成月份字符串
      * @param time
@@ -546,8 +558,8 @@ public class DateUtil {
         return parse.getTime();
     }
 
-    public static void main(String[] args) {
-		/*String s = wholeDateToStamp("2019-01-03 23:53:00");
+   /* public static void main(String[] args) {
+		*//*String s = wholeDateToStamp("2019-01-03 23:53:00");
 
 		String date = "2019.7.3";
 		StringBuffer stringBuffer = new StringBuffer(date);
@@ -558,8 +570,8 @@ public class DateUtil {
 		stringBuffer.replace(4,5, "-");
 		String s1 = dateToStamp(stringBuffer.toString());
 		System.out.println(stringBuffer);
-		System.out.println(s1);*/
-		/*String s2 = date.replaceAll(".", "");
+		System.out.println(s1);*//*
+		*//*String s2 = date.replaceAll(".", "");
 		System.out.println(s2);
 		String s1 = null;
 		try {
@@ -569,9 +581,9 @@ public class DateUtil {
 			e.printStackTrace();
 		}
 //		System.out.println(s);
-		System.out.println(s1);*/
+		System.out.println(s1);*//*
 
-	}
+	}*/
 
 	public static int getContinueDayCnt(List<Long> createTimeList) {
     	//要求参数createTimeList为倒序

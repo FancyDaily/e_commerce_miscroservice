@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.AutoGenerateCode;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍
@@ -18,6 +19,7 @@ import lombok.Data;
 @Table(commit = "书袋熊书籍")
 @Data
 @Builder
+@NoArgsConstructor
 public class TSdxBookPo extends BaseEntity {
 
 	@Column(commit = "公益项目编号")
