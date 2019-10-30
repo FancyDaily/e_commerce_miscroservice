@@ -806,13 +806,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 
 	@Override
 	public Map<String, Object> registerBySMS(String telephone, String validCode, Integer type, TCsqUser user) {
+		checkBeforeReg(telephone, validCode, type);
+		return reg(telephone, type, user);
+	}
+
+	private void checkBeforeReg(String telephone, String validCode, Integer type) {
 		if (!Arrays.stream(CsqUserEnum.values()).filter(a -> a.name().startsWith("ACCOUNT_TYPE_")).map(a -> a.toCode()).collect(Collectors.toList()).contains(type)) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "参数type不正确!");
 		}
 
 		//check
 		userService.checkSMS(telephone, validCode);
+	}
 
+	private Map<String, Object> reg(String telephone, Integer type, TCsqUser user) {
 		//check手机号是否已经使用
 		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
 		if (csqUser != null) {
@@ -822,11 +829,13 @@ public class CsqUserServiceImpl implements CsqUserService {
 		//注册用户
 		String name = user.getName();
 		String userHeadPortraitPath = user.getUserHeadPortraitPath();
+		String uuid = user.getUuid();
 
 		TCsqUser build = TCsqUser.builder()
 			.userTel(telephone)
 			.name(name)
 			.userHeadPortraitPath(userHeadPortraitPath)
+			.uuid(uuid)
 			.build();
 		TCsqUser register = register(build);
 
@@ -844,13 +853,16 @@ public class CsqUserServiceImpl implements CsqUserService {
 		if (csqUser == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "账号不存在!");
 		}
+		return login(uuid, csqUser);
+	}
+
+	private Map<String, Object> login(String uuid, TCsqUser csqUser) {
 		csqUser.setUuid(uuid);
 		csqUser = UserUtil.login(csqUser, ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode(), authorizeRpcService);
 
 		Map<String, Object> resultMap = new HashMap<>();
 		resultMap.put("token", csqUser.getToken());
 		resultMap.put("user", csqUser);
-
 		return resultMap;
 	}
 
@@ -1411,6 +1423,20 @@ public class CsqUserServiceImpl implements CsqUserService {
 			res.put("user", csqUser);
 		}
 		return res;
+	}
+
+	@Override
+	public Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid) {
+		checkBeforeReg(telephone, validCode, type);
+		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
+		if(csqUser == null) {
+			user.setUuid(uuid);
+			Map<String, Object> map = reg(telephone, type, user);
+			csqUser = (TCsqUser) map.get("user");
+			if(csqUser.getToken() != null) return map;
+		}
+
+		return login(uuid, csqUser);
 	}
 
 	private void buildWithAccountTypeAndAvailableStatus(Integer accountType, Integer availableStatus, MybatisPlusBuild baseBuild) {

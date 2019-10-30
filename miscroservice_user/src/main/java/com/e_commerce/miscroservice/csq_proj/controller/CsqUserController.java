@@ -146,6 +146,36 @@ public class CsqUserController {
 	}
 
 	/**
+	 * 手机号验证码注册并登录
+	 *
+	 * @param telephone 手机号
+	 * @param validCode 验证码
+	 * @param type      1个人 2组织
+	 * @return
+	 */
+	@Consume(TCsqUser.class)
+	@RequestMapping("regAndLogin/sms")
+	public AjaxResult regAndLoginBySMS(String telephone, String validCode, Integer type, String name, String userHeadPortraitPath, @RequestParam(required = true) String uuid) {
+		AjaxResult result = new AjaxResult();
+		TCsqUser user = (TCsqUser) ConsumeHelper.getObj();
+		try {
+			log.info("手机号注册并登录，telephone={}, validCode={}, type={}, name={}, userHeadPortraitPath={}, uuid={}", telephone, validCode, type, name, userHeadPortraitPath, uuid);
+			Map<String, Object> resultMap = csqUserService.regAndLoginBySMS(telephone, validCode, type, user, uuid);
+			result.setData(resultMap);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "手机号注册", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("手机号注册", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
 	 * openid登录
 	 *
 	 * @param openid        微信openid

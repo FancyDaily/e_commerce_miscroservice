@@ -26,6 +26,9 @@ public class TSdxBookTicketPo extends BaseEntity{
 	@Column(commit = "拥有者用户编号")
 	private Long userId;
 
+	@Column(commit = "使用状态", defaultVal = "0")
+	private Integer isUsed;
+
     public TSdxBookTicktVo  copyTSdxBookTicktVo() {
         return null;
      }

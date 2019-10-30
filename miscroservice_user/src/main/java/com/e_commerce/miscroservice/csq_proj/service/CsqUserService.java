@@ -240,4 +240,6 @@ public interface CsqUserService {
 	String authPhone(WechatPhoneAuthDto wechatPhoneAuthDto);
 
 	Object getUserByTel(String userTel);
+
+	Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid);
 }
