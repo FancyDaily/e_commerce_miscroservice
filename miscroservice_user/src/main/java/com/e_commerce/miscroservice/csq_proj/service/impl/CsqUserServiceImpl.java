@@ -1212,6 +1212,8 @@ public class CsqUserServiceImpl implements CsqUserService {
 		TCsqUser build2 = TCsqUser.builder()
 			.id(userWithTel.getId())
 			.vxOpenId(vxOpenId).build();
+		if(userWithTel.getSurplusAmount() > 0 && CsqUserEnum.BALANCE_STATUS_WAIT_ACTIVATE.toCode().equals(userWithTel.getBalanceStatus()))
+			build2.setBalanceStatus(CsqUserEnum.BALANCE_STATUS_AVAILABLE.toCode());	//激活修正
 		//DO
 		csqUserDao.update(Arrays.asList(build, build2));
 		// 将他的捐赠流水按年份展现
