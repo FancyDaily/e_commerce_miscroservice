@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.commons.enums.application;
 
+import java.util.Arrays;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-06-11 17:06
@@ -19,7 +21,8 @@ public enum CsqUserEnum {
 	AVAILABLE_STATUS_NO(0, "不可用"),
 	AVAILABLE_STATUS_YES(1, "可用"),
 	MANAGER_TYPE_NOT_A_MANAGER(0, "非后台管理员"),
-	MANAGER_TYPE_NORMAL(1, "普通后台管理员"),
+	MANAGER_TYPE_SUPER(1, "最高后台管理员"),
+	MANAGER_TYPE_NORMAL(2, "普通后台管理员")
 	;
 
 	/**
@@ -54,6 +57,10 @@ public enum CsqUserEnum {
 	CsqUserEnum(int code, String desc) {
 		this.code = code;
 		this.desc = desc;
+	}
+
+	public static boolean verifyManager(int code) {
+		return Arrays.asList(MANAGER_TYPE_NORMAL.toCode(), MANAGER_TYPE_SUPER.toCode()).contains(code);
 	}
 
 }

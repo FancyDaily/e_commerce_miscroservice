@@ -146,8 +146,8 @@ public class UserUtil {
 			}
 		}
 
-		Integer maanagerType = csqUser.getMaanagerType();
-		if (CsqUserEnum.MANAGER_TYPE_NOT_A_MANAGER.toCode().equals(maanagerType)) {    //非管理员
+		Integer managerType = csqUser.getMaanagerType();
+		if (!CsqUserEnum.verifyManager(managerType)) {    //非管理员
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当前用户没有权限！");
 		}
 		return id;
