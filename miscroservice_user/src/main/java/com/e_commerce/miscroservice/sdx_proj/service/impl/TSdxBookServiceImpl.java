@@ -117,6 +117,10 @@ public class TSdxBookServiceImpl implements TSdxBookService {
 
 		//读后感列表(前5条)
 		List<TSdxBookAfterReadingNotePo> limitedAfterReadingNoteList = sdxBookAfterReadingNoteDao.selectByBookInfoIdPageDesc(id, 1, 5);
+		//确认读后感购买状态
+		/*limitedAfterReadingNoteList.stream()
+			.map(TSdxBookAfterReadingNotePo::)*/
+
 		//装载创作者基本信息
 		List<Long> userIds = limitedAfterReadingNoteList.stream()
 			.map(TSdxBookAfterReadingNotePo::getUserId).collect(Collectors.toList());

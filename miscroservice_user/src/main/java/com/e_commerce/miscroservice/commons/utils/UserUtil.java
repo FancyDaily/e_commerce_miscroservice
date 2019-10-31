@@ -1,12 +1,9 @@
 package com.e_commerce.miscroservice.commons.utils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
-import com.e_commerce.miscroservice.commons.entity.application.TServiceDescribe;
 import com.e_commerce.miscroservice.commons.entity.application.TUser;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
-import com.e_commerce.miscroservice.commons.enums.application.UserEnum;
 import com.e_commerce.miscroservice.commons.enums.colligate.AppErrorEnums;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
@@ -22,8 +19,6 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -236,8 +231,14 @@ public class UserUtil {
 		String namePrefix = UserUtil.getApplicationNamePrefix(application);
 		Token load = authorizeRpcService.load(namePrefix + tCsqUser.getId(),
 			DEFAULT_PASS, tCsqUser.getUuid());
-		if (load != null && load.getToken() != null) {
+		if (load != null && !StringUtil.isEmpty(load.getToken())) {
 			tCsqUser.setToken(load.getToken());
+		} else {
+			//注册到认证中心
+			Token to = authorizeRpcService.reg(namePrefix + tCsqUser.getId(), DEFAULT_PASS, tCsqUser.getId().toString(), tCsqUser.getUuid().trim(), Boolean.FALSE);
+			if (to != null) {
+				tCsqUser.setToken(to.getToken());
+			}
 		}
 		return tCsqUser;
 	}
