@@ -1,8 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.po;
 
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
-
-
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
@@ -20,6 +18,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TSdxBookAfterReadingNotePo extends BaseEntity {
+
+	/**
+	 * 是否无需购买
+	 */
+	@Transient
+	private boolean noNeedBuy;
 
 	/**
 	 * 创作日期

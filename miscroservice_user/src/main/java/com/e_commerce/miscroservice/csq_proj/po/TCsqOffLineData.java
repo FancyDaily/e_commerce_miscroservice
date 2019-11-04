@@ -26,7 +26,7 @@ public class TCsqOffLineData {
 
 	private Long serviceId;
 
-	@Column(commit = "类型")
+	@Column(commit = "类型0收入1支出")
 	private Integer type;
 
 	@Column(commit = "捐款人")

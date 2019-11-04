@@ -1,12 +1,15 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
-import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.sdx_proj.dao.TSdxBookAfterReadingNoteDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.TSdxBookAfterReadingNoteUserDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNoteUserPo;
 import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookAfterReadingNoteService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import io.netty.handler.codec.MessageAggregationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -25,6 +28,8 @@ public class TSdxBookAfterReadingNoteServiceImpl implements TSdxBookAfterReading
     private final int ERROR_INT = 0;
     @Autowired
     private TSdxBookAfterReadingNoteDao tSdxBookAfterReadingNoteDao;
+	@Autowired
+    private TSdxBookAfterReadingNoteUserDao tSdxBookAfterReadingNoteUserDao;
     @Override
     public long modTSdxBookAfterReadingNote(TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo) {
         if (tSdxBookAfterReadingNotePo == null) {
@@ -75,6 +80,29 @@ public class TSdxBookAfterReadingNoteServiceImpl implements TSdxBookAfterReading
         return tSdxBookAfterReadingNoteVos;
     }
 
+	@Override
+	public void buy(Long bookArnId, Long userId) {
+		TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo = tSdxBookAfterReadingNoteDao.selectByPrimaryKey(bookArnId);
+		if(tSdxBookAfterReadingNotePo == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "读后感不存在！");
 
+		//检查是否已购买、点赞、或点踩
+		int type = SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode();
+		TSdxBookAfterReadingNoteUserPo afterReadingNoteUserPo = tSdxBookAfterReadingNoteUserDao.selectByBookAfrnIdAndUserIdAndType(bookArnId, userId, type);
+		if(afterReadingNoteUserPo != null) {
+			if(SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode() == afterReadingNoteUserPo.getIsPurchase()) return;
+			afterReadingNoteUserPo.setIsPurchase(SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode());
+			tSdxBookAfterReadingNoteUserDao.update(afterReadingNoteUserPo);
+		} else {
+			afterReadingNoteUserPo = TSdxBookAfterReadingNoteUserPo.builder()
+				.bookAfterReadingNoteId(bookArnId)
+				.userId(userId)
+				.bookId(tSdxBookAfterReadingNotePo.getBookId())
+				.bookInfoId(tSdxBookAfterReadingNotePo.getBookInfoId())
+				.type(SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode())
+				.isPurchase(SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode()).build();
+			tSdxBookAfterReadingNoteUserDao.insert(afterReadingNoteUserPo);
+		}
+		//TODO 消耗积分 -> 使用消耗积分逻辑，设计扣钱，插入流水等。
 
+	}
 }

@@ -101,7 +101,7 @@ public class SdxBookController {
 		if (tSdxBookVo == null || tSdxBookVo.getId()==null) {
 			return Response.fail();
 		}
-		return Response.success(sdxBookService.detail(tSdxBookVo.getId()));
+		return Response.success(sdxBookService.detail(tSdxBookVo.getId(), IdUtil.getId()));
 	}
 
 	/**

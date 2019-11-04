@@ -43,6 +43,9 @@ public class TSdxScoreRecordPo extends BaseEntity {
 	@Column(commit = "数额", length = 11, isNUll = false)
 	Integer amount;
 
+	@Column(commit = "消耗金钱(支付场景)", precision = 2)
+	Double money;
+
     public TSdxScoreRecordVo  copyTSdxScoreRecordVo() {
         return null;
      }

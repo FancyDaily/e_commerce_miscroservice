@@ -34,7 +34,7 @@ public class CsqPayController {
 	private CsqPayService csqPayService;
 
 	/**
-	 * 微信支付(发起)
+	 * 微信支付、正元支付(发起)
 	 *
 	 * @param orderNo      订单号
 	 * @param entityId     被充值对象编号
@@ -44,6 +44,8 @@ public class CsqPayController {
 	 * @param trendPubKeys 趋向
 	 * @param isAnonymous 是否匿名
 	 * @param isActivity 是否活动相关0否1是
+	 * @param isYunmaPay 是否为正元支付
+	 * @param yunmaId 正元支付userId
 	 * @return
 	 */
 	@Consume(CsqFundVo.class)
@@ -57,14 +59,16 @@ public class CsqPayController {
 						   @RequestParam(required = false) String trendPubKeys,
 						   @RequestParam(required = false) boolean isAnonymous,
 						   @RequestParam(required = false) Integer isActivity,
+						   @RequestParam(required = false) boolean isYunmaPay,
+						   @RequestParam(required = false) Long yunmaId,
 						   HttpServletRequest httpServletRequest) {
 		AjaxResult result = new AjaxResult();
 		CsqFundVo vo = (CsqFundVo) ConsumeHelper.getObj();
 		TCsqFund csqFund = vo.copyTCsqFund();
 		try {
-			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}, isActivity={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys, isActivity);
+			log.info("微信支付(发起), userId={}, orderNo={}, entityId={}, entityType={}, fee={}, name={}, trendPubKeys={}, isActivity={}, isYunmaPay={}, yunmaId={}", vo.getUserId(), orderNo, entityId, entityType, fee, name, trendPubKeys, isActivity, isYunmaPay, yunmaId);
 			entityId = entityId == -1 ? null : entityId;
-			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund, isAnonymous, isActivity);
+			Map<String, String> stringStringMap = csqPayService.preOrder(vo.getUserId(), orderNo, entityId, entityType, fee, httpServletRequest, csqFund, isAnonymous, isActivity, isYunmaPay, yunmaId);
 			result.setData(stringStringMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -102,6 +106,28 @@ public class CsqPayController {
 		return result;
 	}
 
+	/**
+	 * 正元回调函数 - 支付
+	 *
+	 * @return
+	 */
+	@RequestMapping("yunmaNotify/pay")
+	public Object yunmaNotify(HttpServletRequest request) {
+		AjaxResult result = new AjaxResult();
+		try {
+			csqPayService.yunmaNotify(request, true);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "正元回调函数 - 支付", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("正元回调函数 - 支付", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
 	/**
 	 * 微信退款发起 -> TODO
 	 *

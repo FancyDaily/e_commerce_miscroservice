@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍读后感用户相关
@@ -16,6 +17,7 @@ import lombok.Data;
 @Table(commit = "书籍读后感用户相关")
 @Data
 @Builder
+@NoArgsConstructor
 public class TSdxBookAfterReadingNoteUserPo extends BaseEntity {
 
 	@Column(commit = "读后感编号")

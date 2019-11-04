@@ -97,6 +97,13 @@ public class TSdxBookAfterReadingNoteDaoImpl implements TSdxBookAfterReadingNote
 		return MybatisPlus.getInstance().findAll(new TSdxBookAfterReadingNotePo(), build.page(pageNum, pageSize));
 	}
 
+	@Override
+	public TSdxBookAfterReadingNotePo selectByPrimaryKey(Long bookArnId) {
+		return MybatisPlus.getInstance().findOne(new TSdxBookAfterReadingNotePo(), baseBuild()
+			.eq(TSdxBookAfterReadingNotePo::getId, bookArnId)
+		);
+	}
+
 	private MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TSdxBookAfterReadingNotePo.class)
 			.eq(TSdxBookAfterReadingNotePo::getDeletedFlag, Boolean.FALSE);

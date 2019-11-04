@@ -387,7 +387,6 @@ public class CsqServiceDaoImpl implements CsqServiceDao {
 	public static void main(String[] args) {
 		Long userId = 18L;
 		String build = new MybatisPlusBuild(TCsqService.class)
-			.eq(TCsqService::getIsValid, AppConstant.IS_VALID_YES)
 			.eq(TCsqService::getIsShown, CsqServiceEnum.IS_SHOWN_YES.getCode())    //判断是否可展示
 			.and()
 			.groupBefore()

@@ -11,7 +11,7 @@ public interface TSdxBookService {
 
 	List<TSdxBookVo> findTSdxBookByAll(TSdxBookPo tSdxBookPo, Integer page, Integer size);
 
-	String detail(Long id);
+	String detail(Long id, Long userId);
 
 	QueryResult soldOrPurchaseUserList(Long id, Integer pageNum, Integer pageSize, Boolean isSold);
 

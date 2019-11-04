@@ -13,4 +13,6 @@ public interface TSdxBookAfterReadingNoteDao {
 	List<TSdxBookAfterReadingNotePo> selectByBookInfoIdPage(Long id, Integer pageNum, Integer pageSize);
 
 	List<TSdxBookAfterReadingNotePo> selectByBookInfoIdPageDesc(Long id, Integer pageNum, Integer pageSize);
+
+	TSdxBookAfterReadingNotePo selectByPrimaryKey(Long bookArnId);
 }

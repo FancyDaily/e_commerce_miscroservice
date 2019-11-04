@@ -7,4 +7,6 @@ public interface TSdxBookAfterReadingNoteService {
     int delTSdxBookAfterReadingNoteByIds(Long... ids);
     TSdxBookAfterReadingNoteVo findTSdxBookAfterReadingNoteById(Long id);
     List<TSdxBookAfterReadingNoteVo> findTSdxBookAfterReadingNoteByAll(TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo, Integer page, Integer size);
+
+	void buy(Long bArnId, Long userId);
 }

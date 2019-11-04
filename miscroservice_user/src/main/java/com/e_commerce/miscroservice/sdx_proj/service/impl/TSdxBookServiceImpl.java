@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.sdx_proj.dao.*;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.*;
@@ -41,6 +42,9 @@ public class TSdxBookServiceImpl implements TSdxBookService {
 
 	@Autowired
 	private TSdxBookAfterReadingNoteDao sdxBookAfterReadingNoteDao;
+
+	@Autowired
+	private TSdxBookAfterReadingNoteUserDao sdxBookAfterReadingNoteUserDao;
 
 	@Autowired
 	private TSdxBookInfoDao sdxBookInfoDao;
@@ -105,7 +109,7 @@ public class TSdxBookServiceImpl implements TSdxBookService {
 	}
 
 	@Override
-	public String detail(Long id) {
+	public String detail(Long id, Long userId) {
 		//曾经捐过这本书的列表
 		List<SdxBookOrderUserInfoVo> donateList = sdxorderservice.getEverDonateList(id);
 		//基本信息
@@ -118,8 +122,28 @@ public class TSdxBookServiceImpl implements TSdxBookService {
 		//读后感列表(前5条)
 		List<TSdxBookAfterReadingNotePo> limitedAfterReadingNoteList = sdxBookAfterReadingNoteDao.selectByBookInfoIdPageDesc(id, 1, 5);
 		//确认读后感购买状态
-		/*limitedAfterReadingNoteList.stream()
-			.map(TSdxBookAfterReadingNotePo::)*/
+		limitedAfterReadingNoteList = limitedAfterReadingNoteList.stream()
+			.map(a -> {
+				if (userId.equals(a.getUserId())) a.setNoNeedBuy(Boolean.TRUE);
+				return a;
+			}).collect(Collectors.toList());
+		List<Long> afrdnIds = limitedAfterReadingNoteList.stream()
+			.filter(a -> !a.isNoNeedBuy())
+			.map(TSdxBookAfterReadingNotePo::getId).collect(Collectors.toList());
+		//查看自己是否为创作者
+		List<TSdxBookAfterReadingNoteUserPo> userAfrdnList = sdxBookAfterReadingNoteUserDao.selectInAfrdnIdsAndUserIdAndIsPurchase(afrdnIds, SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode(), userId);
+		Map<Long, List<TSdxBookAfterReadingNoteUserPo>> idArdnMap = userAfrdnList.stream()
+			.collect(Collectors.groupingBy(TSdxBookAfterReadingNoteUserPo::getId));
+
+		limitedAfterReadingNoteList = limitedAfterReadingNoteList.stream()
+			.filter(a -> !a.isNoNeedBuy())
+			.map(a -> {
+				List<TSdxBookAfterReadingNoteUserPo> tSdxBookAfterReadingNoteUserPos = idArdnMap.get(a.getId());
+				if(tSdxBookAfterReadingNoteUserPos != null) {
+					a.setNoNeedBuy(userId.equals(tSdxBookAfterReadingNoteUserPos.get(0).getUserId()));
+				}
+				return a;
+			}).collect(Collectors.toList());
 
 		//装载创作者基本信息
 		List<Long> userIds = limitedAfterReadingNoteList.stream()
@@ -127,8 +151,8 @@ public class TSdxBookServiceImpl implements TSdxBookService {
 		Map<Long, List<TCsqUser>> idUserMap = sdxUserDao.groupingByIdInIds(userIds);
 		List<TSdxBookAfterReadingNoteVo> afterReadingNoteVos = limitedAfterReadingNoteList.stream()
 			.map(a -> {
-				Long userId = a.getUserId();
-				List<TCsqUser> csqUsers = idUserMap.get(userId);
+				Long tUserId = a.getUserId();
+				List<TCsqUser> csqUsers = idUserMap.get(tUserId);
 				TSdxBookAfterReadingNoteVo vo = a.copyTSdxBookAfterReadingNoteVo();
 				if (csqUsers != null) {
 					TCsqUser csqUser = csqUsers.get(0);
