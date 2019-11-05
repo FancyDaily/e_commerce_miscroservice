@@ -25,14 +25,14 @@ public class TSdxScoreRecordPo extends BaseEntity {
 	@Transient
 	String date;
 
+	@Column(commit = "用户编号")
+	Long userId;
+
 	@Column(commit = "书籍信息编号")
 	Long bookInfoId;
 
-	@Column(commit = "捐书单号")
-	Long donateOrderId;
-
-	@Column(commit = "购书单号")
-	Long purchaseOrderId;
+	@Column(commit = "订单号")
+	Long orderId;
 
 	@Column(commit = "描述")
 	String description;
@@ -45,6 +45,9 @@ public class TSdxScoreRecordPo extends BaseEntity {
 
 	@Column(commit = "消耗金钱(支付场景)", precision = 2)
 	Double money;
+
+	@Column(commit = "类型", isNUll = false)
+	Integer type;
 
     public TSdxScoreRecordVo  copyTSdxScoreRecordVo() {
         return null;

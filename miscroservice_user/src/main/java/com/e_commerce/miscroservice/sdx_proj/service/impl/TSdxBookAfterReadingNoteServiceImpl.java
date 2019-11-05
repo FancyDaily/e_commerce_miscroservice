@@ -1,11 +1,15 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.sdx_proj.dao.TSdxBookAfterReadingNoteDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.TSdxBookAfterReadingNoteUserDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.TSdxScoreRecordDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.TSdxUserDao;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNoteUserPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxScoreRecordPo;
 import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookAfterReadingNoteService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
@@ -30,6 +34,10 @@ public class TSdxBookAfterReadingNoteServiceImpl implements TSdxBookAfterReading
     private TSdxBookAfterReadingNoteDao tSdxBookAfterReadingNoteDao;
 	@Autowired
     private TSdxBookAfterReadingNoteUserDao tSdxBookAfterReadingNoteUserDao;
+	@Autowired
+	private TSdxUserDao tSdxUserDao;
+	@Autowired
+	private TSdxScoreRecordDao tSdxScoreRecordDao;
     @Override
     public long modTSdxBookAfterReadingNote(TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo) {
         if (tSdxBookAfterReadingNotePo == null) {
@@ -84,6 +92,10 @@ public class TSdxBookAfterReadingNoteServiceImpl implements TSdxBookAfterReading
 	public void buy(Long bookArnId, Long userId) {
 		TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo = tSdxBookAfterReadingNoteDao.selectByPrimaryKey(bookArnId);
 		if(tSdxBookAfterReadingNotePo == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "读后感不存在！");
+		TCsqUser csqUser = tSdxUserDao.selectByPrimaryKey(userId);
+		Integer sdxScores = csqUser.getSdxScores();
+		Integer forSaleScore = tSdxBookAfterReadingNotePo.getForSaleScore();
+		if((sdxScores = (sdxScores - forSaleScore)) < 0) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "剩余积分不足，无法购买！");
 
 		//检查是否已购买、点赞、或点踩
 		int type = SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode();
@@ -102,7 +114,17 @@ public class TSdxBookAfterReadingNoteServiceImpl implements TSdxBookAfterReading
 				.isPurchase(SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode()).build();
 			tSdxBookAfterReadingNoteUserDao.insert(afterReadingNoteUserPo);
 		}
-		//TODO 消耗积分 -> 使用消耗积分逻辑，设计扣钱，插入流水等。
+		//消耗积分 -> 使用消耗积分逻辑，涉及积分消耗等
+		dealWithScoreOut(csqUser, sdxScores);
+	}
 
+	private void dealWithScoreOut(TCsqUser csqUser, Integer sdxScores) {
+		//消耗积分 -> 使用消耗积分逻辑，涉及积分消耗等                                                                                                                                                                                                                                                                                                                               插入流水等。
+		csqUser.setSdxScores(sdxScores);
+		tSdxUserDao.update(csqUser);
+		//支出流水
+		//TODO
+//		tSdxScoreRecordDao.saveTSdxScoreRecordIfNotExist(TSdxScoreRecordPo.builder()
+//		)
 	}
 }

@@ -31,6 +31,9 @@ public class TSdxBookAfterReadingNotePo extends BaseEntity {
 	@Transient
 	private String date;
 
+	@Column(commit = "购买所需积分", length = 11)
+	private Integer forSaleScore;
+
 	@Column(commit = "书本编号")
 	private Long bookId;
 

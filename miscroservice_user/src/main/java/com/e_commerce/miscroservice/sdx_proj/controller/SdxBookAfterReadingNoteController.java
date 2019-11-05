@@ -2,21 +2,15 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
-import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.dao.TSdxBookAfterReadingNoteDao;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
 import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookAfterReadingNoteService;
 import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**

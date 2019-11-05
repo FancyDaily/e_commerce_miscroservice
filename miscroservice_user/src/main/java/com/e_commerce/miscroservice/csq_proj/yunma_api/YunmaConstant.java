@@ -32,7 +32,7 @@ public interface YunmaConstant {
 	/**
 	 * 异步通知地址
 	 */
-	String NOTIFY_URL = "";
+	String NOTIFY_URL = "http://test.xiaoshitimebank.com/user/yunmaNotify/pay";
 
 	/**
 	 * 返回页面地址

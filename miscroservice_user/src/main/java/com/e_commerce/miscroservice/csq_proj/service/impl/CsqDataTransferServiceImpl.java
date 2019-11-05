@@ -1411,6 +1411,12 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 		outList.stream()
 			.forEach(a -> {
 				boolean isService = a.getServiceId() != null;
+				if(!StringUtil.isEmpty(a.getFundName())) {
+					//试图找到对应编号
+					TCsqFund fund = csqFundDao.selectByName(a.getFundName());
+					a.setFundId(fund == null? a.getFundId(): fund.getId());
+				}
+
 				Long fundId = a.getFundId();
 				Long serviceId = a.getServiceId();
 				if (fundId != null || serviceId != null) {
@@ -1467,7 +1473,13 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 					log.info("当前转移的数据 a={}", a);
 					String userName = a.getUserName();
 					String fundName = a.getFundName();
-					TCsqFund csqFund = StringUtil.isEmpty(fundName)? null: TCsqFund.builder().name(fundName).build();
+					boolean emptyFundName = StringUtil.isEmpty(fundName);
+					TCsqFund csqFund = emptyFundName? null: TCsqFund.builder().name(fundName).build();
+					if(!emptyFundName) {
+						//试图找到对应编号
+						TCsqFund fund = csqFundDao.selectByName(fundName);
+						a.setFundId(fund == null? a.getFundId(): fund.getId());
+					}
 					List<TCsqUser> tCsqUsers = csqUserNameUserMap.get(userName);
 					if (tCsqUsers != null && !tCsqUsers.isEmpty()) {
 						boolean isService = a.getServiceId() != null;
