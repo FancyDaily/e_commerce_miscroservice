@@ -39,6 +39,8 @@ public interface CsqUserDao {
 
 	int update(List<TCsqUser> asList);
 
+	int update(TCsqUser asList);
+
 	TCsqUser selectByNameAndNotNullUserTel(String name);
 
 	MybatisPlusBuild baseBuild();

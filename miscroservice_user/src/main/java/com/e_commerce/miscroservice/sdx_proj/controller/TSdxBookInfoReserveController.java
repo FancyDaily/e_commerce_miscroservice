@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoReserveService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoReserveService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoReserveVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxBookInfoReserve")
 public class TSdxBookInfoReserveController {
     @Autowired
-    private TSdxBookInfoReserveService tSdxBookInfoReserveService;
-    
+    private SdxBookInfoReserveService sdxBookInfoReserveService;
+
     /**
-    * 添加或者修改书籍预定信息 
+    * 添加或者修改书籍预定信息
     *
     * @param id        书籍预定信息的Id,修改或者查询的需要
     * @param userId        预定用户编号
     * @param bookInfoId        书籍信息编号
-    * @param bookTicketId        书券编号 
+    * @param bookTicketId        书券编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -44,20 +44,20 @@ public class TSdxBookInfoReserveController {
         if (tSdxBookInfoReserveVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoReserveService.modTSdxBookInfoReserve(tSdxBookInfoReserveVo.copyTSdxBookInfoReservePo()));
+        return Response.success(sdxBookInfoReserveService.modTSdxBookInfoReserve(tSdxBookInfoReserveVo.copyTSdxBookInfoReservePo()));
     }
-    
+
     /**
-    * 删除书籍预定信息 
+    * 删除书籍预定信息
     *
-    * @param ids 书籍预定信息的Id的集合,例如1,2,3多个用英文,隔开 
+    * @param ids 书籍预定信息的Id的集合,例如1,2,3多个用英文,隔开
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
     *                 code==200,代表请求成功
     *                 data==0,代表操作不成功
     *                 data!=0,代表影响的数量
-    *    
+    *
     * @return
     */
     @RequestMapping("del")
@@ -65,11 +65,11 @@ public class TSdxBookInfoReserveController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoReserveService.delTSdxBookInfoReserveByIds(ids));
+        return Response.success(sdxBookInfoReserveService.delTSdxBookInfoReserveByIds(ids));
     }
-    
+
     /**
-    * 查找书籍预定信息 
+    * 查找书籍预定信息
     *
     * @param page 页数默认第一页
     * @param size 每页返回的数量，默认10个
@@ -77,7 +77,7 @@ public class TSdxBookInfoReserveController {
     * @param id        书籍预定信息的Id,修改或者查询的需要
     * @param userId        预定用户编号
     * @param bookInfoId        书籍信息编号
-    * @param bookTicketId        书券编号 
+    * @param bookTicketId        书券编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -91,7 +91,7 @@ public class TSdxBookInfoReserveController {
     @RequestMapping("find")
     @Consume(TSdxBookInfoReserveVo.class)
     public Response findTSdxBookInfoReserve(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long userId,@RequestParam(required = false) Long bookInfoId,@RequestParam(required = false) Long bookTicketId) {
-        
+
     TSdxBookInfoReserveVo tSdxBookInfoReserveVo = (TSdxBookInfoReserveVo) ConsumeHelper.getObj();
         if (tSdxBookInfoReserveVo == null) {
             return Response.fail();
@@ -100,8 +100,8 @@ public class TSdxBookInfoReserveController {
             return Response.success(JavaDocReader.read(TSdxBookInfoReserveVo.class));
         }
         if(tSdxBookInfoReserveVo.getId()!=null){
-            return Response.success(tSdxBookInfoReserveService.findTSdxBookInfoReserveById(tSdxBookInfoReserveVo.getId()));
+            return Response.success(sdxBookInfoReserveService.findTSdxBookInfoReserveById(tSdxBookInfoReserveVo.getId()));
         }
-        return Response.success(tSdxBookInfoReserveService.findTSdxBookInfoReserveByAll(tSdxBookInfoReserveVo.copyTSdxBookInfoReservePo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxBookInfoReserveService.findTSdxBookInfoReserveByAll(tSdxBookInfoReserveVo.copyTSdxBookInfoReservePo (),page,size), IdUtil.getTotal());
     }
 }

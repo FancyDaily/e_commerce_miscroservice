@@ -82,7 +82,6 @@ public class CsqWeChatPay {
 
 	}
 
-
 	private String httpsRequest(String requestUrl, String requestMethod, String outputStr) {
 		try {
 

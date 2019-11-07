@@ -18,6 +18,8 @@ public interface CsqPayService {
 
 	Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous, Integer isActivity, boolean isYunmaPay, Long yunmaId) throws Exception;
 
+	Map<String, String> buildWebParam(Long userId, String orderNo, String attach, Double fee, HttpServletRequest httpServletRequest, boolean isYunmaPay, Long yunmaId) throws Exception;
+
 	void wxNotify(HttpServletRequest request, boolean b) throws Exception;
 
 	void preRefund(Long userId, String orderNo, HttpServletRequest request) throws Exception;

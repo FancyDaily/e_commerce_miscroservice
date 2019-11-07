@@ -7,6 +7,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍回收驿站
@@ -16,7 +17,11 @@ import lombok.Data;
 @Table(commit = "书籍回收驿站")
 @Data
 @Builder
+@NoArgsConstructor
 public class TSdxBookStationPo extends BaseEntity {
+
+	@Column(commit = "城市")
+	private String city;
 
 	@Column(commit = "驿站名字")
 	private String name;

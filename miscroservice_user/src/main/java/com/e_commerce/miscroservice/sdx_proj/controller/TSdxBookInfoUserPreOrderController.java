@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoUserPreOrderService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoUserPreOrderService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoUserPreOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxBookInfoUserPreOrder")
 public class TSdxBookInfoUserPreOrderController {
     @Autowired
-    private TSdxBookInfoUserPreOrderService tSdxBookInfoUserPreOrderService;
-    
+    private SdxBookInfoUserPreOrderService sdxBookInfoUserPreOrderService;
+
     /**
-    * 添加或者修改书籍信息预定(书籍信息用户关系) 
+    * 添加或者修改书籍信息预定(书籍信息用户关系)
     *
     * @param id        书籍信息预定(书籍信息用户关系)的Id,修改或者查询的需要
     * @param userId        用户编号
-    * @param bookInfoId        书籍信息编号 
+    * @param bookInfoId        书籍信息编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -43,20 +43,20 @@ public class TSdxBookInfoUserPreOrderController {
         if (tSdxBookInfoUserPreOrderVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoUserPreOrderService.modTSdxBookInfoUserPreOrder(tSdxBookInfoUserPreOrderVo.copyTSdxBookInfoUserPreOrderPo()));
+        return Response.success(sdxBookInfoUserPreOrderService.modTSdxBookInfoUserPreOrder(tSdxBookInfoUserPreOrderVo.copyTSdxBookInfoUserPreOrderPo()));
     }
-    
+
     /**
-    * 删除书籍信息预定(书籍信息用户关系) 
+    * 删除书籍信息预定(书籍信息用户关系)
     *
-    * @param ids 书籍信息预定(书籍信息用户关系)的Id的集合,例如1,2,3多个用英文,隔开 
+    * @param ids 书籍信息预定(书籍信息用户关系)的Id的集合,例如1,2,3多个用英文,隔开
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
     *                 code==200,代表请求成功
     *                 data==0,代表操作不成功
     *                 data!=0,代表影响的数量
-    *    
+    *
     * @return
     */
     @RequestMapping("del")
@@ -64,18 +64,18 @@ public class TSdxBookInfoUserPreOrderController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoUserPreOrderService.delTSdxBookInfoUserPreOrderByIds(ids));
+        return Response.success(sdxBookInfoUserPreOrderService.delTSdxBookInfoUserPreOrderByIds(ids));
     }
-    
+
     /**
-    * 查找书籍信息预定(书籍信息用户关系) 
+    * 查找书籍信息预定(书籍信息用户关系)
     *
     * @param page 页数默认第一页
     * @param size 每页返回的数量，默认10个
     * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
     * @param id        书籍信息预定(书籍信息用户关系)的Id,修改或者查询的需要
     * @param userId        用户编号
-    * @param bookInfoId        书籍信息编号 
+    * @param bookInfoId        书籍信息编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -89,7 +89,7 @@ public class TSdxBookInfoUserPreOrderController {
     @RequestMapping("find")
     @Consume(TSdxBookInfoUserPreOrderVo.class)
     public Response findTSdxBookInfoUserPreOrder(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long userId,@RequestParam(required = false) Long bookInfoId) {
-        
+
     TSdxBookInfoUserPreOrderVo tSdxBookInfoUserPreOrderVo = (TSdxBookInfoUserPreOrderVo) ConsumeHelper.getObj();
         if (tSdxBookInfoUserPreOrderVo == null) {
             return Response.fail();
@@ -98,8 +98,8 @@ public class TSdxBookInfoUserPreOrderController {
             return Response.success(JavaDocReader.read(TSdxBookInfoUserPreOrderVo.class));
         }
         if(tSdxBookInfoUserPreOrderVo.getId()!=null){
-            return Response.success(tSdxBookInfoUserPreOrderService.findTSdxBookInfoUserPreOrderById(tSdxBookInfoUserPreOrderVo.getId()));
+            return Response.success(sdxBookInfoUserPreOrderService.findTSdxBookInfoUserPreOrderById(tSdxBookInfoUserPreOrderVo.getId()));
         }
-        return Response.success(tSdxBookInfoUserPreOrderService.findTSdxBookInfoUserPreOrderByAll(tSdxBookInfoUserPreOrderVo.copyTSdxBookInfoUserPreOrderPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxBookInfoUserPreOrderService.findTSdxBookInfoUserPreOrderByAll(tSdxBookInfoUserPreOrderVo.copyTSdxBookInfoUserPreOrderPo (),page,size), IdUtil.getTotal());
     }
 }

@@ -4,6 +4,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.*;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxScoreRecordPo;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxScoreRecordVo;
 
 import java.util.List;
 
@@ -56,4 +58,12 @@ public class PageUtil<T> {
 		return build;
 	}
 
+	public static MybatisPlusBuild pageBuild(MybatisPlusBuild eq, Integer pageNum, Integer pageSize) {
+		IdUtil.setTotal(eq);
+		return eq.page(pageNum, pageSize);
+	}
+
+	public static <T> QueryResult buildQueryResult(List<T> vos) {
+		return buildQueryResult(vos, IdUtil.getTotal());
+	}
 }

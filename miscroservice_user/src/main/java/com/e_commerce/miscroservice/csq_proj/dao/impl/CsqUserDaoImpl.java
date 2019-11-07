@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.user.po.TUser;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,6 +114,11 @@ public class CsqUserDaoImpl implements CsqUserDao {
 			.map(TCsqUser::getId).collect(Collectors.toList());
 		return MybatisPlus.getInstance().update(asList, new MybatisPlusBuild(TCsqUser.class)
 			.in(TCsqUser::getId, ids));
+	}
+
+	@Override
+	public int update(TCsqUser asList) {
+		return update(Arrays.asList(asList));
 	}
 
 	@Override

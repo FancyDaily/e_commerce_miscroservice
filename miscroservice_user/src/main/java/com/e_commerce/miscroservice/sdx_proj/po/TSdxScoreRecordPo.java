@@ -1,13 +1,14 @@
 package com.e_commerce.miscroservice.sdx_proj.po;
 
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxScoreRecordVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxScoreRecordVo;
-
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 积分流水
@@ -17,6 +18,7 @@ import lombok.Data;
 @Data
 @Table(commit = "积分流水")
 @Builder
+@NoArgsConstructor
 public class TSdxScoreRecordPo extends BaseEntity {
 
 	/**
@@ -29,7 +31,10 @@ public class TSdxScoreRecordPo extends BaseEntity {
 	Long userId;
 
 	@Column(commit = "书籍信息编号")
-	Long bookInfoId;
+	String bookInfoIds;
+
+	@Column(commit = "读后感编号")
+	Long bookAfterReadingNoteId;
 
 	@Column(commit = "订单号")
 	Long orderId;
@@ -53,4 +58,7 @@ public class TSdxScoreRecordPo extends BaseEntity {
         return null;
      }
 
+	public SdxScoreRecordVo copySdxScoreRecordVo() {
+		return null;
+	}
 }

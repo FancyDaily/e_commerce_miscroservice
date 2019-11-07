@@ -326,6 +326,10 @@ public class CsqDataTransferController {
 		return result;
 	}
 
+	/**
+	 * 导出捐款数据(参数写死)
+	 * @return
+	 */
 	@RequestMapping("dataOut_1")
 	public Object dataOut_1() {
 		AjaxResult result = new AjaxResult();

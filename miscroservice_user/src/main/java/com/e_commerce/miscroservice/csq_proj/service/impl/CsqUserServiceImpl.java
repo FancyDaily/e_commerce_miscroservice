@@ -17,6 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.dto.WechatPhoneAuthDto;
 import com.e_commerce.miscroservice.csq_proj.po.*;
 import com.e_commerce.miscroservice.csq_proj.service.*;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
+import com.e_commerce.miscroservice.csq_proj.yunma_api.YunmaPayUtil;
 import com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService;
 import com.e_commerce.miscroservice.user.service.UserService;
 import com.e_commerce.miscroservice.user.wechat.entity.WechatSession;
@@ -25,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -1428,17 +1431,41 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid) {
+	public Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid, Long yunmaId) {
 		checkBeforeReg(telephone, validCode, type);
 		TCsqUser csqUser = csqUserDao.selectByUserTelAndAccountType(telephone, type);
 		if(csqUser == null) {
 			user.setUuid(uuid);
+			user.setYunmaId(yunmaId);
 			Map<String, Object> map = reg(telephone, type, user);
 			csqUser = (TCsqUser) map.get("user");
 			if(csqUser.getToken() != null) return map;
 		}
 
+		TCsqUser theFinalUser = TCsqUser.builder().id(csqUser.getId()).build();
+
+		if(csqUser.getYunmaId() == null && yunmaId != null) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void afterCompletion(int status) {
+					super.afterCompletion(status);
+					theFinalUser.setYunmaId(yunmaId);
+					csqUserDao.update(theFinalUser);
+				}
+			});
+		}
+
 		return login(uuid, csqUser);
+	}
+
+	@Override
+	public Map<String, String> getYunmaAccessToken(String code) {
+		return YunmaPayUtil.deCode(code);
+	}
+
+	@Override
+	public HashMap<String, String> getYunmaUserInfos(String accessToken, String userId) {
+		return YunmaPayUtil.infos(accessToken, userId);
 	}
 
 	private void buildWithAccountTypeAndAvailableStatus(Integer accountType, Integer availableStatus, MybatisPlusBuild baseBuild) {

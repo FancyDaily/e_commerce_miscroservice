@@ -1016,6 +1016,10 @@ public class StringUtil {
 		return sp;
 	}
 
+	public static List<String> splitStringToList(String str, String ms) {
+		return Arrays.asList(splitString(str, ms));
+	}
+
 	/**
 	 * 根据正则表达式提取字符串,相同的字符串只返回一个
 	 *
@@ -1864,6 +1868,10 @@ public class StringUtil {
 			}
 		}
 		return flag;
+	}
+
+	public static String makeNoNull(String str) {
+		return StringUtil.isEmpty(str)? "": str;
 	}
 
 

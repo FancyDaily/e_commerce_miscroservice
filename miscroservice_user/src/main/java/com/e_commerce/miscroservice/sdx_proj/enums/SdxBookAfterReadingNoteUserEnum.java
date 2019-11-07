@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.enums;
 
+import java.util.Arrays;
+
 /**
  * 书袋熊订单枚举
  * @Author: FangyiXu
@@ -17,6 +19,13 @@ public enum SdxBookAfterReadingNoteUserEnum {
 ;
 	int code;
 	String msg;
+
+	public static SdxBookAfterReadingNoteUserEnum getType(Integer option) {
+		for(SdxBookAfterReadingNoteUserEnum theEnum: Arrays.asList(THUMB_TYPE_DOWN, THUMB_TYPE_UP)) {
+			if(theEnum.getCode() == option) return theEnum;
+		}
+		return null;
+	}
 
 	public int getCode() {
 		return code;

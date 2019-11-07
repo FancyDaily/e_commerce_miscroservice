@@ -1,10 +1,8 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
-import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoService;
-import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxBookInfo")
 public class TSdxBookInfoController {
     @Autowired
-    private TSdxBookInfoService tSdxBookInfoService;
+    private SdxBookInfoService sdxBookInfoService;
 
     /**
     * 添加或者修改书籍信息
@@ -55,7 +53,7 @@ public class TSdxBookInfoController {
         if (tSdxBookInfoVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoService.modTSdxBookInfo(tSdxBookInfoVo.copyTSdxBookInfoPo()));
+        return Response.success(sdxBookInfoService.modTSdxBookInfo(tSdxBookInfoVo.copyTSdxBookInfoPo()));
     }
 
     /**
@@ -76,7 +74,7 @@ public class TSdxBookInfoController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxBookInfoService.delTSdxBookInfoByIds(ids));
+        return Response.success(sdxBookInfoService.delTSdxBookInfoByIds(ids));
     }
 
    /**
@@ -122,8 +120,8 @@ public class TSdxBookInfoController {
             return Response.success(JavaDocReader.read(TSdxBookInfoVo.class));
         }
         if(tSdxBookInfoVo.getId()!=null){
-            return Response.success(tSdxBookInfoService.findTSdxBookInfoById(tSdxBookInfoVo.getId()));
+            return Response.success(sdxBookInfoService.findTSdxBookInfoById(tSdxBookInfoVo.getId()));
         }
-        return Response.success(tSdxBookInfoService.findTSdxBookInfoByAll(tSdxBookInfoVo.copyTSdxBookInfoPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxBookInfoService.findTSdxBookInfoByAll(tSdxBookInfoVo.copyTSdxBookInfoPo (),page,size), IdUtil.getTotal());
     }*/
 }

@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxScoreRecordService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxScoreRecordVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxScoreRecord")
 public class TSdxScoreRecordController {
     @Autowired
-    private TSdxScoreRecordService tSdxScoreRecordService;
-    
+    private SdxScoreRecordService sdxScoreRecordService;
+
     /**
-    * 添加或者修改积分流水 
+    * 添加或者修改积分流水
     *
-    * @param id        积分流水的Id,修改或者查询的需要 
+    * @param id        积分流水的Id,修改或者查询的需要
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -41,20 +41,20 @@ public class TSdxScoreRecordController {
         if (tSdxScoreRecordVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxScoreRecordService.modTSdxScoreRecord(tSdxScoreRecordVo.copyTSdxScoreRecordPo()));
+        return Response.success(sdxScoreRecordService.modTSdxScoreRecord(tSdxScoreRecordVo.copyTSdxScoreRecordPo()));
     }
-    
+
     /**
-    * 删除积分流水 
+    * 删除积分流水
     *
-    * @param ids 积分流水的Id的集合,例如1,2,3多个用英文,隔开 
+    * @param ids 积分流水的Id的集合,例如1,2,3多个用英文,隔开
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
     *                 code==200,代表请求成功
     *                 data==0,代表操作不成功
     *                 data!=0,代表影响的数量
-    *    
+    *
     * @return
     */
     @RequestMapping("del")
@@ -62,16 +62,16 @@ public class TSdxScoreRecordController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxScoreRecordService.delTSdxScoreRecordByIds(ids));
+        return Response.success(sdxScoreRecordService.delTSdxScoreRecordByIds(ids));
     }
-    
+
     /**
-    * 查找积分流水 
+    * 查找积分流水
     *
     * @param page 页数默认第一页
     * @param size 每页返回的数量，默认10个
     * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
-    * @param id        积分流水的Id,修改或者查询的需要 
+    * @param id        积分流水的Id,修改或者查询的需要
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -85,7 +85,7 @@ public class TSdxScoreRecordController {
     @RequestMapping("find")
     @Consume(TSdxScoreRecordVo.class)
     public Response findTSdxScoreRecord(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id) {
-        
+
     TSdxScoreRecordVo tSdxScoreRecordVo = (TSdxScoreRecordVo) ConsumeHelper.getObj();
         if (tSdxScoreRecordVo == null) {
             return Response.fail();
@@ -94,8 +94,8 @@ public class TSdxScoreRecordController {
             return Response.success(JavaDocReader.read(TSdxScoreRecordVo.class));
         }
         if(tSdxScoreRecordVo.getId()!=null){
-            return Response.success(tSdxScoreRecordService.findTSdxScoreRecordById(tSdxScoreRecordVo.getId()));
+            return Response.success(sdxScoreRecordService.findTSdxScoreRecordById(tSdxScoreRecordVo.getId()));
         }
-        return Response.success(tSdxScoreRecordService.findTSdxScoreRecordByAll(tSdxScoreRecordVo.copyTSdxScoreRecordPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxScoreRecordService.findTSdxScoreRecordByAll(tSdxScoreRecordVo.copyTSdxScoreRecordPo (),page,size), IdUtil.getTotal());
     }
 }

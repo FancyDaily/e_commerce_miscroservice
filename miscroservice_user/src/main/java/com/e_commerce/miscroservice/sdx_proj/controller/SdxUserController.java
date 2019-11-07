@@ -4,7 +4,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxUserService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SdxUserController {
 
 	@Autowired
-	private TSdxUserService tSdxUserService;
+	private SdxUserService sdxUserService;
 
 	/**
 	 * 用户信息
@@ -32,13 +32,13 @@ public class SdxUserController {
 	public Object infos(Long userId) {
 		Long ids = userId == null? IdUtil.getId() : userId;
 		log.info("用户信息, userId={}. ids={}", userId, ids);
-		return Response.success(tSdxUserService.infos(userId));
+		return Response.success(sdxUserService.infos(userId));
 	}
 
 	@RequestMapping("global/donate")
 	public Object globalDonate() {
 		log.info("全局播报");
-		return Response.success(tSdxUserService.globalDonate());
+		return Response.success(sdxUserService.globalDonate());
 	}
 
 

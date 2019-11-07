@@ -18,6 +18,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
 import com.e_commerce.miscroservice.csq_proj.yunma_api.YunmaConstant;
 import com.e_commerce.miscroservice.csq_proj.yunma_api.YunmaPayUtil;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -83,6 +84,9 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	private CsqPublishService csqPublishService;
 
 	@Autowired
+	private SdxBookOrderService sdxBookOrderService;
+
+	@Autowired
 	@Qualifier("csqRedisTemplate")
 	HashOperations<String, String, Object> userRedisTemplate;
 
@@ -136,16 +140,24 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 	public Map<String, String> preOrder(Long userId, String orderNo, Long entityId, Integer entityType, Double fee, HttpServletRequest httpServletRequest, TCsqFund csqfund, boolean isAnonymous, Integer isActivity, boolean isYunmaPay, Long yunmaId) throws Exception {
 		//生成orderNo
 		orderNo = beforePreOrder(userId, entityId, entityType, fee, csqfund, isAnonymous, isActivity);
+		//微信支付时的附加字段
+		String attach = entityType.toString();
+		return buildWebParam(userId, orderNo, attach, fee, httpServletRequest, isYunmaPay, yunmaId);
+	}
+
+	@Override
+	public Map<String, String> buildWebParam(Long userId, String orderNo, String attach, Double fee, HttpServletRequest httpServletRequest, boolean isYunmaPay, Long yunmaId) throws Exception {
+		TCsqUser tempUser;
+		yunmaId = yunmaId == null? (tempUser = csqUserDao.selectByPrimaryKey(userId)) == null? null: tempUser.getYunmaId() : yunmaId;
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
-		Map<String, String> webParam = new HashMap<>();
-		String attach = entityType.toString();    //支付目标的类型
+		Map<String, String> webParam;
 		if (!isYunmaPay) {    //微信支付
 			//向微信请求发起支付
 			webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
 			webParam.put("orderNo", orderNo);
 		} else {
 			if (yunmaId == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "正元用户编号不能为空!");
-			webParam = YunmaPayUtil.preOrder(orderNo, fee, "", "66666", "", YunmaConstant.NOTIFY_URL, httpServletRequest.getRemoteHost(), YunmaConstant.RETURN_URL, yunmaId.toString());
+			webParam = YunmaPayUtil.preOrder(orderNo, fee, "zhangsan", "666666", "Zhangsanisnonull", YunmaConstant.NOTIFY_URL, httpServletRequest.getRemoteHost(), YunmaConstant.RETURN_URL, yunmaId.toString());
 		}
 		return webParam;
 	}
@@ -478,8 +490,17 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			//支付成功业务流程
 			// 应当在生成订单时产生一个(两个)自定义参数以标识是哪种业务类型
 			log.info("微信回调, orderNo={}, attch={}", out_trade_no, attach);
-			dealWithOrderNoPay(out_trade_no, attach);
+			String SDX_BOOK_ATTACH = "book";
+			if(!SDX_BOOK_ATTACH.equals(attach)) {
+				dealWithOrderNoPay(out_trade_no, attach);
+				return;
+			}
+			dealWithSdxBookPay(out_trade_no, attach);
 		}
+	}
+
+	private void dealWithSdxBookPay(String out_trade_no, String attach) {
+		sdxBookOrderService.dealWithBookPay(out_trade_no, attach);
 	}
 
 	@Override

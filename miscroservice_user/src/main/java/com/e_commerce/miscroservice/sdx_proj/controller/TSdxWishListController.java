@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxWishListService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxWishListService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxWishListVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxWishList")
 public class TSdxWishListController {
     @Autowired
-    private TSdxWishListService tSdxWishListService;
-    
+    private SdxWishListService sdxWishListService;
+
     /**
-    * 添加或者修改心愿单 
+    * 添加或者修改心愿单
     *
     * @param id        心愿单的Id,修改或者查询的需要
-    * @param bookInfoId        书本信息编号 
+    * @param bookInfoId        书本信息编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -42,20 +42,20 @@ public class TSdxWishListController {
         if (tSdxWishListVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxWishListService.modTSdxWishList(tSdxWishListVo.copyTSdxWishListPo()));
+        return Response.success(sdxWishListService.modTSdxWishList(tSdxWishListVo.copyTSdxWishListPo()));
     }
-    
+
     /**
-    * 删除心愿单 
+    * 删除心愿单
     *
-    * @param ids 心愿单的Id的集合,例如1,2,3多个用英文,隔开 
+    * @param ids 心愿单的Id的集合,例如1,2,3多个用英文,隔开
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
     *                 code==200,代表请求成功
     *                 data==0,代表操作不成功
     *                 data!=0,代表影响的数量
-    *    
+    *
     * @return
     */
     @RequestMapping("del")
@@ -63,17 +63,17 @@ public class TSdxWishListController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxWishListService.delTSdxWishListByIds(ids));
+        return Response.success(sdxWishListService.delTSdxWishListByIds(ids));
     }
-    
+
     /**
-    * 查找心愿单 
+    * 查找心愿单
     *
     * @param page 页数默认第一页
     * @param size 每页返回的数量，默认10个
     * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
     * @param id        心愿单的Id,修改或者查询的需要
-    * @param bookInfoId        书本信息编号 
+    * @param bookInfoId        书本信息编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -87,7 +87,7 @@ public class TSdxWishListController {
     @RequestMapping("find")
     @Consume(TSdxWishListVo.class)
     public Response findTSdxWishList(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long bookInfoId) {
-        
+
     TSdxWishListVo tSdxWishListVo = (TSdxWishListVo) ConsumeHelper.getObj();
         if (tSdxWishListVo == null) {
             return Response.fail();
@@ -96,8 +96,8 @@ public class TSdxWishListController {
             return Response.success(JavaDocReader.read(TSdxWishListVo.class));
         }
         if(tSdxWishListVo.getId()!=null){
-            return Response.success(tSdxWishListService.findTSdxWishListById(tSdxWishListVo.getId()));
+            return Response.success(sdxWishListService.findTSdxWishListById(tSdxWishListVo.getId()));
         }
-        return Response.success(tSdxWishListService.findTSdxWishListByAll(tSdxWishListVo.copyTSdxWishListPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxWishListService.findTSdxWishListByAll(tSdxWishListVo.copyTSdxWishListPo (),page,size), IdUtil.getTotal());
     }
 }

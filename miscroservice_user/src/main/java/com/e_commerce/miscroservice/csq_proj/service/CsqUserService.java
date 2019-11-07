@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqDailyDonateVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSceneVo;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -241,5 +242,9 @@ public interface CsqUserService {
 
 	Object getUserByTel(String userTel);
 
-	Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid);
+	Map<String, Object> regAndLoginBySMS(String telephone, String validCode, Integer type, TCsqUser user, String uuid, Long yunmaId);
+
+	Map<String, String> getYunmaAccessToken(String code);
+
+	HashMap<String, String> getYunmaUserInfos(String accessToken, String userId);
 }

@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,6 @@ import com.alibaba.fastjson.JSONObject;
 @Log
 public class YunmaPayUtil {
 
-
 	/**商户编码，由云马提供。每一个收款账号对应一个商户编码*/
 	private static final String CP_CODE  = "yiyun";
 
@@ -44,19 +44,22 @@ public class YunmaPayUtil {
 	private static final String APP_ID = YunmaConstant.APP_ID;
 
 	public static Map<String, String> preOrder(String orderNo, Double tranMoney, String prodName, String tranType, String prodDes, String notifyUrl, String clientIp, String returnUrl, String yunmaUserId) {
+		log.info("预下单preOrder, orderNo={}, tranMoney={}, proName={}, tranType={}, prodDes={}, notifyUrl={}, clientIp={}, returnUrl={}, yunmaUserId={}", orderNo, tranMoney, prodName, tranType, prodDes, notifyUrl, clientIp, returnUrl, yunmaUserId);
 		Map<String, String> paramMap = new HashMap<>();
 		//商户编码 必须
 		paramMap.put("cp_code", CP_CODE);
 		//商户订单号 必须
-		paramMap.put("cp_tran_no", orderNo); // 商户放订单号，同一个订单号只能支付一次，测试时请注意每次修改
+		paramMap.put("cp_tran_no", orderNo);
 		//金额,单位为分 必须
 		int money = (int) (tranMoney * 100);
 		paramMap.put("tran_money", String.valueOf(money));
 		//商品名字 必须
+		prodName = StringUtil.makeNoNull(prodName);
 		paramMap.put("prod_name", prodName);
 		//业务类型 必须
 		paramMap.put("tran_type", tranType);
 		//商品描述
+		prodDes = StringUtil.makeNoNull(prodDes);
 		paramMap.put("prod_des", prodDes);
 		//异步通知地址 必须
 		paramMap.put("notify_url", notifyUrl);
@@ -77,7 +80,7 @@ public class YunmaPayUtil {
 		log.info("sign={}", sign);
 		//签名 必须
 		paramMap.put("sign", sign);
-		String response = sendPost("https://unifiedpay.lsmart.wang/pay/unified/preOrderDemo.shtml", paramMap);
+		String response = sendPost("https://unifiedpay.lsmart.wang/pay/unified/preOrder.shtml", paramMap);
 
 		JSONObject jsonObject = JSON.parseObject(response);
 		HashMap<String, String> map = new HashMap<>();
@@ -218,6 +221,7 @@ public class YunmaPayUtil {
 				return null;
 			}
 			int statusCode = response.getStatusLine().getStatusCode();
+			log.info("statusCode={}", statusCode);
 			if (statusCode != 200) {
 				throw new RuntimeException("http请求返还非200错误");
 			}
@@ -231,6 +235,8 @@ public class YunmaPayUtil {
 			return result;
 		} catch ( SocketTimeoutException | UnknownHostException e) {
 			throw new RuntimeException("http请求超时", e);
+		} catch (RuntimeException e) {
+			throw new RuntimeException(e.getMessage(), e);
 		} catch (Exception e) {
 			throw new RuntimeException("http请求异常", e);
 		} finally {
@@ -268,5 +274,64 @@ public class YunmaPayUtil {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static Map<String, String> deCode(String code) {
+		log.info("解析code, code={}", code);
+		Map<String, String> paramMap = new HashMap<>();
+		//商户编码 必须
+		paramMap.put("cp_code", CP_CODE);
+		paramMap.put("app_id", APP_ID);
+		paramMap.put("code", code);
+		String sign = getSign(paramMap, SIGN_KEY);
+		log.info("sign={}", sign);
+		//签名 必须
+		paramMap.put("sign", sign);
+		String response = sendPost("http://auth.xiaofubao.com/oauth2/access_token", paramMap);
+
+		JSONObject jsonObject = JSON.parseObject(response);
+		HashMap<String, String> map = new HashMap<>();
+		if ("0".equals(jsonObject.getString("ret_code"))) {
+			String accessToken = jsonObject.getString("access_token");
+			String userId = jsonObject.getString("user_id");
+			map.put("accessToken", accessToken);
+			map.put("userId", userId);
+			log.info("解析成功，accessToken={}, userId={}" + accessToken, userId);
+		} else {
+			log.info("解析失败，错误原因：" + jsonObject.getString("ret_msg"));
+		}
+		return map;
+	}
+
+	public static HashMap<String, String> infos(String accessToken, String userId) {
+		log.info("解析用户信息, accessToken={}, userId={}", accessToken, userId);
+		Map<String, String> paramMap = new HashMap<>();
+		paramMap.put("app_id", APP_ID);
+		paramMap.put("user_id", userId);
+		paramMap.put("access_token", accessToken);
+
+		String sign = getSign(paramMap, SIGN_KEY);
+		log.info("sign={}", sign);
+		//签名 必须
+		paramMap.put("sign", sign);
+		String response = sendPost("http://auth.xiaofubao.com/oauth2/userinfo", paramMap);
+
+		JSONObject jsonObject = JSON.parseObject(response);
+		HashMap<String, String> map = new HashMap<>();
+		if ("0".equals(jsonObject.getString("ret_code"))) {
+			userId = jsonObject.getString("user_id");
+			String userName = jsonObject.getString("user_name");
+			String certNo = jsonObject.getString("cert_no");
+			String telephone = jsonObject.getString("mobile_no");
+			map.put("userId", userId);
+			map.put("userName", userName);
+			map.put("certNo", certNo);
+			map.put("telephone", telephone);
+			log.info("解析成功，accessToken={}, userId={}" + accessToken, userId);
+		} else {
+			log.info("解析失败，错误原因：" + jsonObject.getString("ret_msg"));
+		}
+
+		return map;
 	}
 }

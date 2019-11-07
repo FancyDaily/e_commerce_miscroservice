@@ -7,7 +7,12 @@ package com.e_commerce.miscroservice.csq_proj.yunma_api;
  */
 public interface YunmaConstant {
 
-	String APP_ID = "";
+	/**
+	 * 应用编号
+	 */
+	String TEST_APP_ID = "116511";
+
+	String APP_ID = TEST_APP_ID;
 
 	/**
 	 * 测试地址
@@ -37,18 +42,20 @@ public interface YunmaConstant {
 	/**
 	 * 返回页面地址
 	 */
-	String RETURN_URL = "";
+	String RETURN_URL = "http://unified.lsmart.wang/back";
 
 	/**
 	 * 商户编码
 	 */
-	String CP_CODE = "";
+	String TEST_CP_CODE = "1005454";
 
+	String CP_CODE = TEST_CP_CODE;
 	/**
 	 * 签名秘钥
 	 */
-	String SIGN_KEY = "";
+	String TEST_SIGN_KEY = "1651130";
 
+	String SIGN_KEY = TEST_SIGN_KEY;
 	/**
 	 * platform参数
 	 */

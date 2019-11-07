@@ -23,13 +23,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TSdxBookOrderPo extends BaseEntity {
 
+	@Column(commit = "订单号")
+	private String orderNo;
+
 	@Column(commit = "多个书本编号")
 	private String bookIds;
 
 	/*@Column(commit = "书本信息编号")
 	private Long bookIfIs;*/
 	@Column(commit = "书本信息编号")
-	private Long bookIfIs;
+	private String bookIfIs;
 
 	@Column(commit = "购书人或者捐书人编号")
 	private Long userId;

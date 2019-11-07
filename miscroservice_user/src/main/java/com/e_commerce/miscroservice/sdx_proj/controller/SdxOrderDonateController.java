@@ -4,8 +4,8 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoService;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookOrderService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SdxOrderDonateController {
 
 	@Autowired
-	TSdxBookInfoService sdxBookInfoService;
+	SdxBookInfoService sdxBookInfoService;
 
 	@Autowired
-	TSdxBookOrderService sdxBookOrderService;
+	SdxBookOrderService sdxBookOrderService;
 
 	/**
 	 * 平台书籍去向列表

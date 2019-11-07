@@ -6,7 +6,7 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocR
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxShippingAddressService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxShippingAddressService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxShippingAddressVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SdxShippingAddressController {
 
 	@Autowired
-	private TSdxShippingAddressService tSdxShippingAddressService;
+	private SdxShippingAddressService sdxShippingAddressService;
 
 	/**
 	 * 添加或者修改配送地址
@@ -56,7 +56,7 @@ public class SdxShippingAddressController {
 			return Response.fail();
 		}
 //		tSdxShippingAddressVo.setUserId(IdUtil.getId());
-		return Response.success(tSdxShippingAddressService.modTSdxShippingAddress(tSdxShippingAddressVo.copyTSdxShippingAddressPo()));
+		return Response.success(sdxShippingAddressService.modTSdxShippingAddress(tSdxShippingAddressVo.copyTSdxShippingAddressPo()));
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class SdxShippingAddressController {
 		if (ids == null || ids.length == 0) {
 			return Response.fail();
 		}
-		return Response.success(tSdxShippingAddressService.delTSdxShippingAddressByIds(ids));
+		return Response.success(sdxShippingAddressService.delTSdxShippingAddressByIds(ids));
 	}
 
 	/**
@@ -117,9 +117,20 @@ public class SdxShippingAddressController {
 			return Response.success(JavaDocReader.read(TSdxShippingAddressVo.class));
 		}
 		if(tSdxShippingAddressVo.getId()!=null){
-			return Response.success(tSdxShippingAddressService.findTSdxShippingAddressById(tSdxShippingAddressVo.getId()));
+			return Response.success(sdxShippingAddressService.findTSdxShippingAddressById(tSdxShippingAddressVo.getId()));
 		}
-		return Response.success(tSdxShippingAddressService.findTSdxShippingAddressByAll(tSdxShippingAddressVo.copyTSdxShippingAddressPo (),page,size), IdUtil.getTotal());
+		return Response.success(sdxShippingAddressService.findTSdxShippingAddressByAll(tSdxShippingAddressVo.copyTSdxShippingAddressPo (),page,size), IdUtil.getTotal());
+	}
+
+	/**
+	 * 配送地址列表
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @return
+	 */
+	@RequestMapping("list")
+	public Response list(Integer pageNum, Integer pageSize) {
+		return Response.success(sdxShippingAddressService.list(IdUtil.getId(), pageNum, pageSize));
 	}
 
 }

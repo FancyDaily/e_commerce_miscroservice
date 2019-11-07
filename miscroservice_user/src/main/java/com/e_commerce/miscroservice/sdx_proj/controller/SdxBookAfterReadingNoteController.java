@@ -5,9 +5,9 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookAfterReadingNoteService;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoService;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookAfterReadingNoteService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,20 +24,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class SdxBookAfterReadingNoteController {
 
 	@Autowired
-	private TSdxBookService sdxBookService;
+	private SdxBookService sdxBookService;
 
 	@Autowired
-	private TSdxBookInfoService sdxBookInfoService;
+	private SdxBookInfoService sdxBookInfoService;
 
 	@Autowired
-	private TSdxBookAfterReadingNoteService sdxBookAfterReadingNoteService;
+	private SdxBookAfterReadingNoteService sdxBookAfterReadingNoteService;
 
 	/**
 	 * 购买读后感
 	 * @param id 书籍读后感编号
 	 * @return
 	 */
-	@RequestMapping("bookinfo/detail")
+	@RequestMapping("buy")
 	@Consume(TSdxBookAfterReadingNoteVo.class)
 	public Response buy(Long id) {
 		TSdxBookAfterReadingNoteVo vo = (TSdxBookAfterReadingNoteVo) ConsumeHelper.getObj();
@@ -45,6 +45,12 @@ public class SdxBookAfterReadingNoteController {
 			return Response.fail();
 		}
 		sdxBookAfterReadingNoteService.buy(vo.getId(), IdUtil.getId());
+		return Response.success();
+	}
+
+	@RequestMapping("thumb")
+	public Response thumb(Long bookAfterReadingId, Integer option) {
+		sdxBookAfterReadingNoteService.thumb(bookAfterReadingId, IdUtil.getId(), option);
 		return Response.success();
 	}
 

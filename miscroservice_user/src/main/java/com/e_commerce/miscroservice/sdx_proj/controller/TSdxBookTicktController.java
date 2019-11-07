@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookTicktService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookTicktService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookTicktVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxBookTickt")
 public class TSdxBookTicktController {
     @Autowired
-    private TSdxBookTicktService tSdxBookTicktService;
-    
+    private SdxBookTicktService sdxBookTicktService;
+
     /**
-    * 添加或者修改预定书券 
+    * 添加或者修改预定书券
     *
     * @param id        预定书券的Id,修改或者查询的需要
     * @param expire        过期时间点
-    * @param userId        拥有者用户编号 
+    * @param userId        拥有者用户编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -43,20 +43,20 @@ public class TSdxBookTicktController {
         if (tSdxBookTicktVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxBookTicktService.modTSdxBookTickt(tSdxBookTicktVo.copyTSdxBookTicktPo()));
+        return Response.success(sdxBookTicktService.modTSdxBookTickt(tSdxBookTicktVo.copyTSdxBookTicktPo()));
     }
-    
+
     /**
-    * 删除预定书券 
+    * 删除预定书券
     *
-    * @param ids 预定书券的Id的集合,例如1,2,3多个用英文,隔开 
+    * @param ids 预定书券的Id的集合,例如1,2,3多个用英文,隔开
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
     *                 code==200,代表请求成功
     *                 data==0,代表操作不成功
     *                 data!=0,代表影响的数量
-    *    
+    *
     * @return
     */
     @RequestMapping("del")
@@ -64,18 +64,18 @@ public class TSdxBookTicktController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxBookTicktService.delTSdxBookTicktByIds(ids));
+        return Response.success(sdxBookTicktService.delTSdxBookTicktByIds(ids));
     }
-    
+
     /**
-    * 查找预定书券 
+    * 查找预定书券
     *
     * @param page 页数默认第一页
     * @param size 每页返回的数量，默认10个
     * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
     * @param id        预定书券的Id,修改或者查询的需要
     * @param expire        过期时间点
-    * @param userId        拥有者用户编号 
+    * @param userId        拥有者用户编号
     *
     *                 code==503,代表服务器出错,请先检测参数类型是否正确
     *                 code==500,代表参数不正确
@@ -89,7 +89,7 @@ public class TSdxBookTicktController {
     @RequestMapping("find")
     @Consume(TSdxBookTicktVo.class)
     public Response findTSdxBookTickt(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long expire,@RequestParam(required = false) Long userId) {
-        
+
     TSdxBookTicktVo tSdxBookTicktVo = (TSdxBookTicktVo) ConsumeHelper.getObj();
         if (tSdxBookTicktVo == null) {
             return Response.fail();
@@ -98,8 +98,8 @@ public class TSdxBookTicktController {
             return Response.success(JavaDocReader.read(TSdxBookTicktVo.class));
         }
         if(tSdxBookTicktVo.getId()!=null){
-            return Response.success(tSdxBookTicktService.findTSdxBookTicktById(tSdxBookTicktVo.getId()));
+            return Response.success(sdxBookTicktService.findTSdxBookTicktById(tSdxBookTicktVo.getId()));
         }
-        return Response.success(tSdxBookTicktService.findTSdxBookTicktByAll(tSdxBookTicktVo.copyTSdxBookTicktPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxBookTicktService.findTSdxBookTicktByAll(tSdxBookTicktVo.copyTSdxBookTicktPo (),page,size), IdUtil.getTotal());
     }
 }

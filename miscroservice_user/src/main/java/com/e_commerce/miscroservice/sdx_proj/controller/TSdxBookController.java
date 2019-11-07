@@ -3,7 +3,7 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("tSdxBook")
 public class TSdxBookController {
     @Autowired
-    private TSdxBookService tSdxBookService;
+    private SdxBookService sdxBookService;
 
     /**
     * 添加或者修改书袋熊书籍
@@ -49,7 +49,7 @@ public class TSdxBookController {
         if (tSdxBookVo == null) {
             return Response.fail();
         }
-        return Response.success(tSdxBookService.modTSdxBook(tSdxBookVo.copyTSdxBookPo()));
+        return Response.success(sdxBookService.modTSdxBook(tSdxBookVo.copyTSdxBookPo()));
     }
 
     /**
@@ -70,7 +70,7 @@ public class TSdxBookController {
         if (ids == null || ids.length == 0) {
             return Response.fail();
         }
-        return Response.success(tSdxBookService.delTSdxBookByIds(ids));
+        return Response.success(sdxBookService.delTSdxBookByIds(ids));
     }
 
     /**
@@ -110,8 +110,8 @@ public class TSdxBookController {
             return Response.success(JavaDocReader.read(TSdxBookVo.class));
         }
         if(tSdxBookVo.getId()!=null){
-            return Response.success(tSdxBookService.findTSdxBookById(tSdxBookVo.getId()));
+            return Response.success(sdxBookService.findTSdxBookById(tSdxBookVo.getId()));
         }
-        return Response.success(tSdxBookService.findTSdxBookByAll(tSdxBookVo.copyTSdxBookPo (),page,size), IdUtil.getTotal());
+        return Response.success(sdxBookService.findTSdxBookByAll(tSdxBookVo.copyTSdxBookPo (),page,size), IdUtil.getTotal());
     }
 }

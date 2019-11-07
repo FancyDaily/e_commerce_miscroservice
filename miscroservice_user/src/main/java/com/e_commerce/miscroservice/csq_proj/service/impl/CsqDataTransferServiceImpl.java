@@ -1214,6 +1214,7 @@ public class CsqDataTransferServiceImpl implements CsqDataTransferService {
 	public String dataOut_1() {
 		//查询订单表
 		List<TCsqOrder> orignOrders = csqOrderDao.selectByFromTypeAndToIdAndToTypeAndStatusDesc(1, 76L, 4, 2);    //TODO 写死的数据
+		orignOrders = csqOrderDao.selectByToIdAndToTypeAndStatusDesc(98L, 4, 2);
 		List<Long> userIds = orignOrders.stream()
 			.map(TCsqOrder::getFromId)
 			.distinct()

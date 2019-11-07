@@ -6,8 +6,8 @@ import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocR
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookInfoService;
-import com.e_commerce.miscroservice.sdx_proj.service.TSdxBookService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SdxBookController {
 
 	@Autowired
-	private TSdxBookService sdxBookService;
+	private SdxBookService sdxBookService;
 
 	@Autowired
-	private TSdxBookInfoService sdxBookInfoService;
+	private SdxBookInfoService sdxBookInfoService;
 
 	/**
 	 * 查找书籍信息(书籍列表)

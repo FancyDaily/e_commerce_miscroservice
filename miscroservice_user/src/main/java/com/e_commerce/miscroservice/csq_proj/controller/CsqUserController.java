@@ -155,12 +155,12 @@ public class CsqUserController {
 	 */
 	@Consume(TCsqUser.class)
 	@RequestMapping("regAndLogin/sms")
-	public AjaxResult regAndLoginBySMS(String telephone, String validCode, Integer type, String name, String userHeadPortraitPath, @RequestParam(required = true) String uuid) {
+	public AjaxResult regAndLoginBySMS(String telephone, String validCode, Integer type, String name, String userHeadPortraitPath, @RequestParam(required = true) String uuid, Long yunmaId) {
 		AjaxResult result = new AjaxResult();
 		TCsqUser user = (TCsqUser) ConsumeHelper.getObj();
 		try {
-			log.info("手机号注册并登录，telephone={}, validCode={}, type={}, name={}, userHeadPortraitPath={}, uuid={}", telephone, validCode, type, name, userHeadPortraitPath, uuid);
-			Map<String, Object> resultMap = csqUserService.regAndLoginBySMS(telephone, validCode, type, user, uuid);
+			log.info("手机号注册并登录，telephone={}, validCode={}, type={}, name={}, userHeadPortraitPath={}, uuid={}, yunmaId={}", telephone, validCode, type, name, userHeadPortraitPath, uuid, yunmaId);
+			Map<String, Object> resultMap = csqUserService.regAndLoginBySMS(telephone, validCode, type, user, uuid, yunmaId);
 			result.setData(resultMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -1037,6 +1037,55 @@ public class CsqUserController {
 		result.setData(userByTel);
 		return result;
 
+	}
+
+	/**
+	 * 解析正元code
+	 * @param code 加密值
+	 * @return
+	 */
+	@RequestMapping("code/yunma")
+	public Object getYunmaAccessToken(String code) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("解析正元code, code={}", code);
+			result.setData(csqUserService.getYunmaAccessToken(code));
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "解析正元code", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("解析正元code", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 获取用户信息
+	 * @param accessToken 访问凭证
+	 * @param userId 用户编号
+	 * @return
+	 */
+	@RequestMapping("infos/yunma")
+	public Object yunmaInfos(String accessToken, String userId) {
+		AjaxResult result = new AjaxResult();
+		try {
+			log.info("获取用户信息, accessToken={}, userId={}", accessToken, userId);
+			result.setData(csqUserService.getYunmaUserInfos(accessToken, userId));
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "获取用户信息", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("获取用户信息", e);
+			result.setSuccess(false);
+		}
+		return result;
 	}
 
 }
