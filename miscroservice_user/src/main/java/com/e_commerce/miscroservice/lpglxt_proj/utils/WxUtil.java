@@ -199,7 +199,7 @@ public class WxUtil {
                                      String firstData, String orderNo, String orderType,String content,String lastData,String url
                                      ) {
 
-    	String templateId = "CniLsHXOBFx7yoPyTMYhTa8ow_0XpTyzM9KJHEkZvPE";
+    	String templateId = "IbNz7SuGLwQqQz7br-EXPGsXwoXS4Yv0fVApJ3gSfMI";
 
         Map<String, TemplateData> map = new HashMap<>();
         map.put("first", new TemplateData(firstData));
