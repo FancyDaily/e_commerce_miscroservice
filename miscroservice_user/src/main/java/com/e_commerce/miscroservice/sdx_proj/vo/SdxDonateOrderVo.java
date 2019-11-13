@@ -1,9 +1,13 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 捐书订单vo
@@ -12,7 +16,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class TSdxBookDonateOrderVo {
+public class SdxDonateOrderVo {
 
 	@Column(commit = "快递单号")
 	private String expressNo;
@@ -21,7 +25,13 @@ public class TSdxBookDonateOrderVo {
 	private String bookIds;
 
 	@Column(commit = "书本信息编号")
-	private Long bookInfoIds;
+	private String bookInfoIds;
+
+	@Column(commit = "书本集合")
+	private List<TSdxBookPo> books;
+
+	@Column(commit = "书本信息集合")
+	private List<TSdxBookInfoPo> bookInfos;
 
 	@Column(commit = "状态")
 	private Integer status;

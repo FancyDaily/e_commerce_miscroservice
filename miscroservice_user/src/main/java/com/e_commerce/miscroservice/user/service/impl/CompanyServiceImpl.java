@@ -167,7 +167,7 @@ public class CompanyServiceImpl implements CompanyService {
         // 查询名下发布的以组织名义的活动
         List<TOrder> orders = orderDao.selectBySourceAndUserIdAndStatuses(AppConstant.SERV_TYPE_CORP,userId,availableStatusArray);
 
-        // list
+        // purchaseList
         List<StrServiceView> serviceViews = new ArrayList<StrServiceView>();
         // String化
         for (TOrder order : orders) {

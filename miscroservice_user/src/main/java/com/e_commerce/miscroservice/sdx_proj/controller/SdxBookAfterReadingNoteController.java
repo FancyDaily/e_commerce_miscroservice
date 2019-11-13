@@ -48,6 +48,12 @@ public class SdxBookAfterReadingNoteController {
 		return Response.success();
 	}
 
+	/**
+	 * 点赞/踩
+	 * @param bookAfterReadingId
+	 * @param option
+	 * @return
+	 */
 	@RequestMapping("thumb")
 	public Response thumb(Long bookAfterReadingId, Integer option) {
 		sdxBookAfterReadingNoteService.thumb(bookAfterReadingId, IdUtil.getId(), option);

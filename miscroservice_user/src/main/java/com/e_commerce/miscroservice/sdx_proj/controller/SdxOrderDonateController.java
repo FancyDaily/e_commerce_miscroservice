@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
+import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
@@ -86,5 +87,15 @@ public class SdxOrderDonateController {
 		return Response.success(sdxBookOrderService.modTSdxBookOrder(tSdxBookOrderVo.copyTSdxBookOrderPo()));
 	}
 
+	/**
+	 * 捐赠订单列表
+	 * @param option 操作-2全部
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @return
+	 */
+	public Object list(Integer option, Integer pageNum, Integer pageSize) {
+		return Response.success(sdxBookOrderService.donateList(IdUtil.getId(), option, pageNum, pageSize));
+	}
 
 }

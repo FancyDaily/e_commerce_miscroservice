@@ -559,7 +559,7 @@ public class UserController extends BaseController {
      *              }
      * @return
      */
-    @RequestMapping("skill/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("skill/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object skillList(String token) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -735,7 +735,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("collect/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("collect/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object collectList(String token, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -1952,7 +1952,7 @@ public class UserController extends BaseController {
      *                 }
      * @return
      */
-    @RequestMapping("company/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("company/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object companyList(String token, Long userId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2029,7 +2029,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @RequestMapping("company/social/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("company/social/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object companySocialList(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();
@@ -2106,7 +2106,7 @@ public class UserController extends BaseController {
      *                  }
      * @return
      */
-    @RequestMapping("company/social/list/mine/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("company/social/purchaseList/mine/" + TokenUtil.AUTH_SUFFIX)
     public Object companySocialListMine(String token, Long companyId, Integer pageNum, Integer pageSize) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();

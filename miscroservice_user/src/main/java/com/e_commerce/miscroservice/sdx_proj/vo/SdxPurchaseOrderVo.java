@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.sdx_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class TSdxBookPurchaseOrderVo {
+public class SdxPurchaseOrderVo {
 
 	@Column(commit = "快递单号")
 	private String expressNo;
@@ -44,5 +45,39 @@ public class TSdxBookPurchaseOrderVo {
 	@Column(commit = "总价", precision = 2)
 	private Double price;
 
+	/**
+	 * 收件信息
+	 */
+	@Column(commit = "姓名")
+	private String name;
+
+	@Column(commit = "手机号")
+	private String userTel;
+
+	@Column(commit = "省")
+	private String province;
+
+	@Column(commit = "市")
+	private String city;
+
+	@Column(commit = "区/县")
+	private String county;
+
+	@Column(commit = "街道")
+	private String street;
+
+	@Column(commit = "详细地址")
+	private String detailAddress;
+
 	public TSdxBookOrderPo copyTSdxBookOrder() {return null;}
+
+	public void setAddress(TSdxShippingAddressPo po) {
+		this.name = po.getName();
+		this.userTel = po.getUserTel();
+		this.province = po.getProvince();
+		this.city = po.getCity();
+		this.county = po.getCounty();
+		this.street = po.getStreet();
+		this.detailAddress = po.getDetailAddress();
+	}
 }

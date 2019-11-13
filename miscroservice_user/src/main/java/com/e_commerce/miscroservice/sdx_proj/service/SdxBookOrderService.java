@@ -1,6 +1,8 @@
 package com.e_commerce.miscroservice.sdx_proj.service;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookOrderUserInfoVo;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxPurchaseOrderVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookDonateOrderVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
 
@@ -25,4 +27,12 @@ public interface SdxBookOrderService {
 	void dealWithBookPay(String out_trade_no, String attach);
 
 	void confirmReceipt(Long orderId);
+
+	SdxPurchaseOrderVo detail(Long orderId);
+
+	QueryResult purchaseList(Long userIds, Integer status, Integer pageNum, Integer pageSize);
+
+	QueryResult donateList(Long id, Integer option, Integer pageNum, Integer pageSize);
+
+
 }

@@ -1,10 +1,12 @@
 package com.e_commerce.miscroservice.sdx_proj.dao.impl;
 
+import com.alipay.api.domain.MyBkAccountVO;
 import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -165,6 +167,28 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 		return MybatisPlus.getInstance().findOne(new TSdxBookOrderPo(), baseBuild()
 			.eq(TSdxBookOrderPo::getId, orderId)
 		);
+	}
+
+	@Override
+	public List<TSdxBookOrderPo> purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+		Integer OPTION_ALL = -2;	//全部
+		MybatisPlusBuild eq = listAllTypeBuild(userIds, option, OPTION_ALL);
+		eq.eq(TSdxBookOrderPo::getType, SdxBookOrderEnum.TYPE_PURCHASE.getCode());
+		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), eq.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TSdxBookOrderPo> donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+		Integer OPTION_ALL = -2;	//全部
+		MybatisPlusBuild eq = listAllTypeBuild(userIds, option, OPTION_ALL);
+		eq.eq(TSdxBookOrderPo::getType, SdxBookOrderEnum.TYPE_DONATE.getCode());
+		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), eq.page(pageNum, pageSize));
+	}
+
+	private MybatisPlusBuild listAllTypeBuild(Long userIds, Integer option, Integer OPTION_ALL) {
+		MybatisPlusBuild eq = baseBuild().eq(TSdxBookOrderPo::getUserId, userIds);
+		eq = option == null || option.equals(OPTION_ALL) ? eq : eq.eq(TSdxBookOrderPo::getStatus, option);
+		return eq;
 	}
 
 	private static MybatisPlusBuild buildContains4BookInfos(MybatisPlusBuild build, Long param) {

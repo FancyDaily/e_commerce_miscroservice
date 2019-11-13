@@ -273,7 +273,7 @@ public class GZSubjectController {
 	 * @param lessonId 课程编号
 	 * @return
 	 */
-	@RequestMapping("video/list/" + TokenUtil.AUTH_SUFFIX)
+	@RequestMapping("video/purchaseList/" + TokenUtil.AUTH_SUFFIX)
 	public Object lessonVideoList(@RequestParam(required = true) Long lessonId) {
 		TUser user = UserUtil.getUser();
 		AjaxResult result = new AjaxResult();
@@ -364,7 +364,7 @@ public class GZSubjectController {
      *                  }
      * @return
      */
-    @RequestMapping("lesson/list/mine/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("lesson/purchaseList/mine/" + TokenUtil.AUTH_SUFFIX)
     public Object mySubjectLessonList(@RequestParam(required = true) Long subjectId, Integer pageNum, Integer pageSize) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -443,7 +443,7 @@ public class GZSubjectController {
      *
      * @return
      */
-    @RequestMapping("lesson/evaluate/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("lesson/evaluate/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object subjectLessonEvaluateList(@RequestParam(required = true) Long subjectId, @RequestParam(required = true) Long lessonId, Integer pageNum, Integer pageSize) {
         TUser user = UserUtil.getUser();
         AjaxResult result = new AjaxResult();
@@ -575,7 +575,7 @@ public class GZSubjectController {
      * }
      * @return
      */
-    @RequestMapping("subject/learning/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("subject/learning/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object findMyLearningSubject(Integer pageNum,Integer pageSize){
         AjaxResult result = new AjaxResult();
         if (pageNum==null||pageSize==null){
@@ -608,7 +608,7 @@ public class GZSubjectController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("subject/ending/list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("subject/ending/purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object findEndingSubject(Integer pageNum,Integer pageSize){
         AjaxResult result = new AjaxResult();
         if (pageNum==null||pageSize==null){

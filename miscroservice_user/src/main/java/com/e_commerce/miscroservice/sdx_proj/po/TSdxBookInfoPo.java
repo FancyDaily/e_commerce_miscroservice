@@ -36,7 +36,7 @@ public class TSdxBookInfoPo extends BaseEntity {
 	 * 图片
 	 */
 	@Column(commit = "图片")
-	private String introPic;
+	private String coverPic;
 
 	/**
 	 * 类型名
@@ -66,7 +66,7 @@ public class TSdxBookInfoPo extends BaseEntity {
 	 * 出版社
 	 */
 	@Column(commit = "出版社")
-	private String press;
+	private String publisher;
 
 	/**
 	 * 装帧

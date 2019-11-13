@@ -42,7 +42,7 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 	public HashMap<String, Object> list(Integer status, Integer pageNum, Integer pageSize, Long estateId, Integer isDone, String area, String department, boolean isToday) {
 		//十五天有效
 		Long timeStamp = System.currentTimeMillis() - 15L * 24 * 60 * 60 * 1000;
-//		List<TLpglCustomerInfos> list = TlpglCustomerInfoEnum.STATUS_VALID.getCode() == status? lpglCustomerInfoDao.selectByStatusAndGteUpdateTimePage(status, timeStamp, pageNum, pageSize) : lpglCustomerInfoDao.selectByStatusPage(status, pageNum, pageSize);
+//		List<TLpglCustomerInfos> purchaseList = TlpglCustomerInfoEnum.STATUS_VALID.getCode() == status? lpglCustomerInfoDao.selectByStatusAndGteUpdateTimePage(status, timeStamp, pageNum, pageSize) : lpglCustomerInfoDao.selectByStatusPage(status, pageNum, pageSize);
 		List<TLpglCustomerInfos> list = lpglCustomerInfoDao.selectByStatusAndEstateIdAndIsDoneAndAreAndDepartmentAndIsToday(status, estateId, isDone, area, department, isToday);
 		pageNum --;
 		//手动分片

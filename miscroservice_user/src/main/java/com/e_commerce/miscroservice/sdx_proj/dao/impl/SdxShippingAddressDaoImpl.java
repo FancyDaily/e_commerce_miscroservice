@@ -91,4 +91,11 @@ public class SdxShippingAddressDaoImpl implements SdxShippingAddressDao {
 		return MybatisPlus.getInstance().findAll(new TSdxShippingAddressPo(), isPage? PageUtil.pageBuild(eq, pageNum, pageSize) : eq
 		);
 	}
+
+	@Override
+	public TSdxShippingAddressPo selectByPrimaryKey(Long shippingAddressId) {
+		return MybatisPlus.getInstance().findOne(new TSdxShippingAddressPo(), baseBuild()
+			.eq(TSdxShippingAddressPo::getId, shippingAddressId)
+		);
+	}
 }

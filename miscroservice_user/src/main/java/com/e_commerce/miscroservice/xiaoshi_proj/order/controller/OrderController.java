@@ -384,7 +384,7 @@ public class OrderController extends BaseController {
      *                      }
      * @return
      */
-    @PostMapping({"/list/" + TokenUtil.AUTH_SUFFIX, "list"})
+    @PostMapping({"/purchaseList/" + TokenUtil.AUTH_SUFFIX, "list"})
     @Consume(PageOrderParamView.class)
     public Object listOrder(Integer type, Integer serviceTypeId, double longitude, double latitude, Integer pageNum,
                             Integer pageSize, String condition, String token) {

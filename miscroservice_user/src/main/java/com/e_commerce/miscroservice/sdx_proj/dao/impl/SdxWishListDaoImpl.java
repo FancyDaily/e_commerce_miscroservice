@@ -31,16 +31,14 @@ public class SdxWishListDaoImpl implements SdxWishListDao {
     }
     @Override
     public TSdxWishListPo findTSdxWishListById(Long id) {
-        MybatisPlusBuild build = new MybatisPlusBuild(TSdxWishListPo.class);
-        build.eq(TSdxWishListPo::getDeletedFlag, Boolean.FALSE);
-        build.eq(TSdxWishListPo::getId, id);
+		MybatisPlusBuild build = baseBuild();
+		build.eq(TSdxWishListPo::getId, id);
         return MybatisPlus.getInstance().findOne( TSdxWishListPo.builder().build(), build);
     }
     @Override
     public List<TSdxWishListPo> findTSdxWishListByAll(TSdxWishListPo tSdxWishListPo, Integer page, Integer size) {
-        MybatisPlusBuild build = new MybatisPlusBuild(TSdxWishListPo.class);
-        build.eq(TSdxWishListPo::getDeletedFlag, Boolean.FALSE);
-        if (tSdxWishListPo.getId() == null) {
+		MybatisPlusBuild build = baseBuild();
+		if (tSdxWishListPo.getId() == null) {
             if (tSdxWishListPo.getBookInfoId()!=null ) {
                 build.eq(TSdxWishListPo::getBookInfoId,tSdxWishListPo.getBookInfoId());
             }
@@ -55,4 +53,18 @@ public class SdxWishListDaoImpl implements SdxWishListDao {
         }
         return MybatisPlus.getInstance().findAll( TSdxWishListPo.builder().build()    , build);
     }
+
+	private MybatisPlusBuild baseBuild() {
+		MybatisPlusBuild build = new MybatisPlusBuild(TSdxWishListPo.class);
+		build.eq(TSdxWishListPo::getDeletedFlag, Boolean.FALSE);
+		return build;
+	}
+
+	@Override
+	public List<TSdxWishListPo> selectByUserId(Long userId, Integer pageNum, Integer pageSize) {
+		MybatisPlusBuild eq = baseBuild()
+			.eq(TSdxWishListPo::getUserId, userId);
+		return MybatisPlus.getInstance().findAll(new TSdxWishListPo(), eq.page(pageNum, pageSize)
+		);
+	}
 }

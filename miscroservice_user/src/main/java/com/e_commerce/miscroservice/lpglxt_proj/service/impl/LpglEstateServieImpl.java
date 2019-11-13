@@ -98,7 +98,7 @@ public class LpglEstateServieImpl implements LpglEstateService {
 	}
 
 	/*
-	list: [
+	purchaseList: [
 
                 {
                     louceng: "7号楼",
@@ -112,7 +112,7 @@ public class LpglEstateServieImpl implements LpglEstateService {
                         ],
 
 
-                        list: [
+                        purchaseList: [
                             {
                                 index: 1,
                                 room: [
@@ -158,7 +158,7 @@ public class LpglEstateServieImpl implements LpglEstateService {
                         ],
 
 
-                        list: [
+                        purchaseList: [
                             {
                                 index: 1,
                                 room: [

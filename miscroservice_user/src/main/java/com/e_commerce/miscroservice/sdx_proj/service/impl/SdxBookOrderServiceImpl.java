@@ -1,25 +1,27 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxShippingAddressDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
-import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookOrderUserInfoVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookDonateOrderVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
+import com.e_commerce.miscroservice.sdx_proj.vo.*;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	private SdxScoreRecordService sdxScoreRecordService;
 	@Autowired
 	private SdxBookDao sdxbookDao;
+	@Autowired
+	SdxShippingAddressDao sdxShippingAddressDao;
 
 	@Override
 	public long modTSdxBookOrder(TSdxBookOrderPo tSdxBookOrderPo) {
@@ -181,10 +185,55 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	@Override
 	public void confirmReceipt(Long orderId) {
 		TSdxBookOrderPo tSdxBookOrderPo = sdxBookOrderDao.selectByPrimaryKey(orderId);
-		if(tSdxBookOrderPo == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
+		checkExist(tSdxBookOrderPo);
 		//订单状态改变
 		tSdxBookOrderPo.setStatus(SdxBookOrderEnum.STATUS_DONE.getCode());
 		sdxBookOrderDao.modTSdxBookOrder(tSdxBookOrderPo);
+	}
+
+	private void checkExist(TSdxBookOrderPo tSdxBookOrderPo) {
+		if(tSdxBookOrderPo == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "订单不存在!");
+	}
+
+	@Override
+	public SdxPurchaseOrderVo detail(Long orderId) {
+		//查找收货人信息，补全
+		TSdxBookOrderPo tSdxBookOrderPo = sdxBookOrderDao.selectByPrimaryKey(orderId);
+		checkExist(tSdxBookOrderPo);
+		SdxPurchaseOrderVo vo = tSdxBookOrderPo.copySdxPurchaseOrderVo();
+		Long shippingAddressId = tSdxBookOrderPo.getShippingAddressId();
+		if(shippingAddressId != null) {	//自送或没有邮寄地址,则dismiss
+			TSdxShippingAddressPo tSdxShippingAddressPo = sdxShippingAddressDao.selectByPrimaryKey(shippingAddressId);
+			vo.setAddress(tSdxShippingAddressPo);
+		}
+		return vo;
+	}
+
+	@Override
+	public QueryResult purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+		List<TSdxBookOrderPo> list = sdxBookOrderDao.purchaseList(userIds, option, pageNum, pageSize);
+		List<SdxPurchaseOrderVo> vos = list.stream()
+			.map(TSdxBookOrderPo::copySdxPurchaseOrderVo).collect(Collectors.toList());
+		return PageUtil.buildQueryResult(vos);
+	}
+
+	@Override
+	public QueryResult donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+		List<TSdxBookOrderPo> tSdxBookOrderPos = sdxBookOrderDao.donateList(userIds, option, pageNum, pageSize);
+		//装载
+		List<SdxDonateOrderVo> vos = tSdxBookOrderPos.stream()
+			.map(a -> {
+				SdxDonateOrderVo vo = a.copySdxDonateOrderVo();
+				//订单解构
+				String bookIds = vo.getBookIds();
+				String[] bookIdArray = StringUtil.splitString(bookIds, ",");
+				List<TSdxBookPo> bookPos = sdxbookDao.selectInIds(Arrays.stream(bookIdArray).map(Long::valueOf).collect(Collectors.toList()));
+				vo.setBooks(bookPos);
+//				Long bookInfoIds = vo.getBookInfoIds();
+				return vo;
+			}).collect(Collectors.toList());
+		//按日期分组 TODO
+		return PageUtil.buildQueryResult(vos);
 	}
 
 	private void afterPaySuccess(TSdxBookOrderPo order) {
@@ -197,7 +246,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		String bookIdStr = order.getBookIds();
 		List<String> strings = StringUtil.splitStringToList(bookIdStr, ",");
 		List<Long> bookIds = strings.stream()
-			.map(a -> Long.valueOf(a)).collect(Collectors.toList());
+			.map(Long::valueOf).collect(Collectors.toList());
 		List<TSdxBookPo> sdxBookPos = sdxbookDao.selectInIds(bookIds);
 		List<TSdxBookPo> toUpdaters = sdxBookPos.stream().map(a -> {
 			TSdxBookPo build = TSdxBookPo.builder()
@@ -241,8 +290,13 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	private void checkBookSurplusAmount(String bookInfoIds) {
-		boolean condition = true;
-		if(condition) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "余量不足！");
+		List<String> bookInfos = Arrays.asList(bookInfoIds.contains(",")? bookInfoIds.split(",") : new String[]{bookInfoIds});
+
+		for(String bookInfo: bookInfos) {
+			Long bookInfoId = Long.valueOf(bookInfo);
+			List<TSdxBookPo> books = sdxBookService.getAvailableBooks(bookInfoId);
+			if(books.isEmpty()) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "部分商品的余量已不足！请退出查看!");
+		}
 	}
 
 	private String dealWithPreOrder(Long shippingAddressId, String bookInfoIds, String bookIds, Double bookFee, Long userId, Double shipFee, Integer scoreUsed) {
@@ -270,7 +324,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.shipPirce(shipFee)    //邮费
 			.scoreDiscount(scoreUsed)    //抵扣积分总额
 			.price(bookFee + shipFee)        //订单总价
-			.status(SdxBookOrderEnum.STATUS_INITAIL.getCode())
+			.status(SdxBookOrderEnum.STATUS_UNPAY.getCode())
 			.build();
 		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
 		return orderNo;

@@ -85,12 +85,12 @@ public class TSdxBookInfoController {
     * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
     * @param id        书籍信息的Id,修改或者查询的需要
     * @param name        书名
-    * @param press        出版社
+    * @param publisher        出版社
     * @param price        价格
     * @param author        作者
     * @param catalog        目录
     * @param soldNum        销量
-    * @param introPic        图片
+    * @param coverPic        图片
     * @param categoryId        类型编号
     * @param scoreDouban        豆瓣评分
     * @param bindingStyle        装帧风格
@@ -110,7 +110,7 @@ public class TSdxBookInfoController {
     *//*
     @RequestMapping("find")
     @Consume(TSdxBookInfoVo.class)
-    public Response findTSdxBookInfo(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) String name,@RequestParam(required = false) String press,@RequestParam(required = false) Double price,@RequestParam(required = false) String author,@RequestParam(required = false) String catalog,@RequestParam(required = false) Integer soldNum,@RequestParam(required = false) String introPic,@RequestParam(required = false) Integer categoryId,@RequestParam(required = false) Double scoreDouban,@RequestParam(required = false) String bindingStyle,@RequestParam(required = false) String categoryName,@RequestParam(required = false) String introduction,@RequestParam(required = false) Integer maximumReserve,@RequestParam(required = false) Double maximumDiscount) {
+    public Response findTSdxBookInfo(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) String name,@RequestParam(required = false) String publisher,@RequestParam(required = false) Double price,@RequestParam(required = false) String author,@RequestParam(required = false) String catalog,@RequestParam(required = false) Integer soldNum,@RequestParam(required = false) String coverPic,@RequestParam(required = false) Integer categoryId,@RequestParam(required = false) Double scoreDouban,@RequestParam(required = false) String bindingStyle,@RequestParam(required = false) String categoryName,@RequestParam(required = false) String introduction,@RequestParam(required = false) Integer maximumReserve,@RequestParam(required = false) Double maximumDiscount) {
 
     TSdxBookInfoVo tSdxBookInfoVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
         if (tSdxBookInfoVo == null) {

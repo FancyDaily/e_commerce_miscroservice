@@ -32,7 +32,7 @@ public class GZOrderController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("list/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("purchaseList/" + TokenUtil.AUTH_SUFFIX)
     public Object findMyOrderList(Integer pageNum,Integer pageSize){
 
         AjaxResult ajaxResult = new AjaxResult();

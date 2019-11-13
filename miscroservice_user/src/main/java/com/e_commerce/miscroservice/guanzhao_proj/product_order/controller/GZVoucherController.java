@@ -34,7 +34,7 @@ public class GZVoucherController {
      * @param option
      * @return
      */
-    @RequestMapping("list/my/" + TokenUtil.AUTH_SUFFIX)
+    @RequestMapping("purchaseList/my/" + TokenUtil.AUTH_SUFFIX)
     public Object myVoucherList( Integer pageNum, Integer pageSize, Integer... option) {
         AjaxResult result = new AjaxResult();
         TUser user = UserUtil.getUser();

@@ -45,8 +45,8 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
             if (StringUtils.isNotEmpty(tSdxBookInfoPo.getName())) {
                 build.like(TSdxBookInfoPo::getName,tSdxBookInfoPo.getName());
             }
-            if (StringUtils.isNotEmpty(tSdxBookInfoPo.getPress())) {
-                build.like(TSdxBookInfoPo::getPress,tSdxBookInfoPo.getPress());
+            if (StringUtils.isNotEmpty(tSdxBookInfoPo.getPublisher())) {
+                build.like(TSdxBookInfoPo::getPublisher,tSdxBookInfoPo.getPublisher());
             }
             if (tSdxBookInfoPo.getPrice()!=null ) {
                 build.eq(TSdxBookInfoPo::getPrice,tSdxBookInfoPo.getPrice());

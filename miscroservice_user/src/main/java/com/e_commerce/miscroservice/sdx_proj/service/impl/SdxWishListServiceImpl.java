@@ -1,7 +1,12 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
+import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.utils.PageUtil;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxWishListDao;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxWishListPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxWishListService;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxWishListVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxWishListVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
 * 心愿单的service层
@@ -22,6 +28,8 @@ public class SdxWishListServiceImpl implements SdxWishListService {
     private final int ERROR_INT = 0;
     @Autowired
     private SdxWishListDao sdxWishListDao;
+	@Autowired
+    private SdxBookInfoDao sdxBookInfoDao;
     @Override
     public long modTSdxWishList(TSdxWishListPo tSdxWishListPo) {
         if (tSdxWishListPo == null) {
@@ -71,4 +79,18 @@ public class SdxWishListServiceImpl implements SdxWishListService {
         }
         return tSdxWishListVos;
     }
+
+	@Override
+	public QueryResult list(Long userId, Integer pageNum, Integer pageSize) {
+		List<TSdxWishListPo> pos = sdxWishListDao.selectByUserId(userId, pageNum, pageSize);
+		List<SdxWishListVo> collect = pos.stream()
+			.map(a -> {
+				SdxWishListVo vo = a.copySdxWishListVo();
+				Long bookInfoId = vo.getBookInfoId();
+				TSdxBookInfoPo sdxBookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
+				vo.setSdxBookInfoPo(sdxBookInfoPo);
+				return vo;
+			}).collect(Collectors.toList());
+		return PageUtil.buildQueryResult(collect);
+	}
 }

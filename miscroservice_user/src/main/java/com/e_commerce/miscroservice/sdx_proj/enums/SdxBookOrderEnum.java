@@ -11,6 +11,7 @@ public enum SdxBookOrderEnum {
 	SHIP_TYPE_MAILING(1, "邮寄"),
 	SHIP_TYPE_IN_PERSON(2,"自送"),
 //	STATUS_INVALID(-1, "无效的"),
+	STATUS_UNPAY(-1, "待支付"),
 	STATUS_INITAIL(0, "书籍待收取(邮寄)"),
 	STATUS_PROCESSING(1, "进行中"),
 	STATUS_DONE(2, "已完成")

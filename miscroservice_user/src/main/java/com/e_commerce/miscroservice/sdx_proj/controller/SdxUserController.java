@@ -35,6 +35,7 @@ public class SdxUserController {
 		return Response.success(sdxUserService.infos(userId));
 	}
 
+
 	@RequestMapping("global/donate")
 	public Object globalDonate() {
 		log.info("全局播报");

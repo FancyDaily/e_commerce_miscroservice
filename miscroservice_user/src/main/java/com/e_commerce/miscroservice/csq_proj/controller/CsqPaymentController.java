@@ -44,7 +44,7 @@ public class CsqPaymentController {
 	 * @param isGroupingByYear 是否按年份分组
 	 *                         <p>
 	 *                         {
-	 *                         "list": {
+	 *                         "purchaseList": {
 	 *                         "resultList": [
 	 *                         {
 	 *                         "id": 31,

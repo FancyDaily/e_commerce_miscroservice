@@ -9,4 +9,6 @@ public interface SdxShippingAddressDao {
     List<TSdxShippingAddressPo> findTSdxShippingAddressByAll(TSdxShippingAddressPo tSdxShippingAddressPo, Integer page, Integer size);
 
 	List<TSdxShippingAddressPo> selectByUserId(Long id, boolean isPage, Integer pageNum, Integer pageSize);
+
+	TSdxShippingAddressPo selectByPrimaryKey(Long shippingAddressId);
 }

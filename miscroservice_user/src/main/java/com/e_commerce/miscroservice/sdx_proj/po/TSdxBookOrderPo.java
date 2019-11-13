@@ -1,13 +1,11 @@
 package com.e_commerce.miscroservice.sdx_proj.po;
 
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
+import com.e_commerce.miscroservice.sdx_proj.vo.*;
 
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.AutoGenerateCode;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookDonateOrderVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookPurchaseOrderVo;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +20,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TSdxBookOrderPo extends BaseEntity {
+
+	@Column(commit = "快递单号")
+	private String expressNo;
 
 	@Column(commit = "订单号")
 	private String orderNo;
@@ -76,6 +77,10 @@ public class TSdxBookOrderPo extends BaseEntity {
 	public TSdxBookDonateOrderVo copyTSdxBookDonateOrderVo() {return null;}
 
 	public TSdxBookPurchaseOrderVo copyTSdxBookPurchaseOrderVo() {return null;}
+
+	public SdxPurchaseOrderVo copySdxPurchaseOrderVo() {return null;}
+
+	public SdxDonateOrderVo copySdxDonateOrderVo() {return null;}
 
 	public static void main(String[] args) {
 		AutoGenerateCode.generate(TSdxBookOrderPo.class);
