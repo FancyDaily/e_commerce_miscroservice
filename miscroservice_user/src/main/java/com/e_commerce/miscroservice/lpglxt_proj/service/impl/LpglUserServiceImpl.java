@@ -33,7 +33,7 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
  */
 @Service
 @Log
-public class LpglUserServiceImpl  implements LpglUserService {
+public class LpglUserServiceImpl implements LpglUserService {
 
 
 	@Autowired
@@ -45,9 +45,9 @@ public class LpglUserServiceImpl  implements LpglUserService {
 
 	@Override
 	public TLpglUser findOne(Long id) {
-		TLpglUser tLpglUser = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class)
-			.eq(TLpglUser::getId,id)
-			.eq(TLpglUser::getDeletedFlag,0)
+		TLpglUser tLpglUser = MybatisPlus.getInstance().findOne(new TLpglUser(), new MybatisPlusBuild(TLpglUser.class)
+			.eq(TLpglUser::getId, id)
+			.eq(TLpglUser::getDeletedFlag, 0)
 		);
 		return tLpglUser;
 	}
@@ -55,25 +55,25 @@ public class LpglUserServiceImpl  implements LpglUserService {
 	@Override
 	public AjaxResult login(String username, String password, HttpServletRequest request, HttpServletResponse response, String openid) {
 		AjaxResult ajaxResult = new AjaxResult();
-		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class)
-			.eq(TLpglUser::getUserAccount,username)
-			.eq(TLpglUser::getPassword,password)
+		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(), new MybatisPlusBuild(TLpglUser.class)
+			.eq(TLpglUser::getUserAccount, username)
+			.eq(TLpglUser::getPassword, password)
 		);
 
-		if (user==null){
+		if (user == null) {
 			log.warn("用户名或密码错误");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("用户名或密码错误");
 			return ajaxResult;
 		}
-		if(!StringUtil.isEmpty(openid) && !openid.equals(user.getVxOpenId())) {
+		if (!StringUtil.isEmpty(openid) && !openid.equals(user.getVxOpenId())) {
 			user.setVxOpenId(openid);
 			MybatisPlus.getInstance().update(user, new MybatisPlusBuild(TLpglUser.class)
 				.eq(TLpglUser::getId, user.getId())
 			);
 		}
 
-		user = UserUtil.loginTLpg(user, ApplicationEnum.LPGL_APPLICATION.toCode(), authorizeRpcService,response);
+		user = UserUtil.loginTLpg(user, ApplicationEnum.LPGL_APPLICATION.toCode(), authorizeRpcService, response);
 
 		List<TLpglUserPosistion> userPosition = lpglRoleService.findUserPosition(user.getId());
 		List<Long> positionIds = userPosition.stream()
@@ -96,10 +96,10 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		AjaxResult ajaxResult = new AjaxResult();
 
 		TLpglUser req = new TLpglUser();
-		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
+		TLpglUser user = MybatisPlus.getInstance().findOne(new TLpglUser(), new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount, username));
 
 		TLpglPosistion tLpglPosistion = lpglRoleService.findAllPosistionById(posistionId);
-		if (tLpglPosistion==null){
+		if (tLpglPosistion == null) {
 			log.warn("职位不存在");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("用户已注册");
@@ -109,35 +109,36 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		req.setPassword(password);
 		req.setName(name);
 		req.setUserTel(username);
-		if (user!=null){
+		if (user != null) {
 			log.warn("用户已注册 更新职位");
 			ajaxResult.setSuccess(true);
-			int i =lpglRoleService.updatePosistionRole(posistionId,user.getId());
+			int i = lpglRoleService.updatePosistionRole(posistionId, user.getId());
 
 			return ajaxResult;
 		}
 
 		MybatisPlus.getInstance().save(req);
-		TLpglUser result = MybatisPlus.getInstance().findOne(new TLpglUser(),new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount,username));
+		TLpglUser result = MybatisPlus.getInstance().findOne(new TLpglUser(), new MybatisPlusBuild(TLpglUser.class).eq(TLpglUser::getUserAccount, username));
 
 		//注册到认证中心
 		String namePrefix = UserUtil.getApplicationNamePrefix(ApplicationEnum.CONGSHANQIAO_APPLICATION.toCode());
 		Token token = authorizeRpcService.reg(namePrefix + result.getId(), DEFAULT_PASS, result.getId().toString(), username, Boolean.FALSE);
 
 
-		log.info("认证中心获取的token为={},msg={}",token!=null?token.getToken():"",token!=null?token.getMsg():"");
+		log.info("认证中心获取的token为={},msg={}", token != null ? token.getToken() : "", token != null ? token.getMsg() : "");
 		if (token != null && token.getToken() != null) {
-			response.addHeader("token",token.getToken());
+			response.addHeader("token", token.getToken());
 		}
 
 
-		int i =lpglRoleService.updatePosistionRole(posistionId,result.getId());
+		int i = lpglRoleService.updatePosistionRole(posistionId, result.getId());
 		ajaxResult.setSuccess(true);
 		return ajaxResult;
 	}
 
 	@Override
 	public AjaxResult getOpenid(String code) {
+
 		AjaxResult result = new AjaxResult();
 		String openId = WxUtil.code2PublicOpenId(code);
 		HashMap<String, Object> map = new HashMap<>();
@@ -165,7 +166,6 @@ public class LpglUserServiceImpl  implements LpglUserService {
 		List<TLpglUserPosistion> userPosition = lpglRoleService.findUserPosition(id);
 		List<Long> positionIds = userPosition.stream()
 			.map(TLpglUserPosistion::getPosistionId).collect(Collectors.toList());
-		;
 		List<TLpglRole> allPosistionRole = lpglRoleService.findAllPosistionRole(positionIds);
 		List<Long> roleIds = allPosistionRole.stream()
 			.map(TLpglRole::getId).collect(Collectors.toList());
@@ -180,6 +180,6 @@ public class LpglUserServiceImpl  implements LpglUserService {
 	}
 
 	private String preStringParam(String str) {
-		return str == null? "": str;
+		return str == null ? "" : str;
 	}
 }
