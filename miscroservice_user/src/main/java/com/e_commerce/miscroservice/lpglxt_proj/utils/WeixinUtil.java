@@ -4,11 +4,11 @@ public class WeixinUtil {
     /**
      * 微信开发平台应用ID
      */
-    public static final String APP_ID = "wx7d22702e405fbcd2";
+    public static final String APP_ID = "wx931234879c8cf896";
     /**
      * 微信开发平台应用app_secret
      */
-    public static final String APP_SECRET = "b2626e43a79504f8b3f3c7713dde0186";
+    public static final String APP_SECRET = "927f8c1f72831e66cd1f1634960269f5";
     /**
      * 应用对应的密钥
      */

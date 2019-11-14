@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAut
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.RedisUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
@@ -59,10 +60,11 @@ public class LpglUserController {
 
 	/**
 	 * 查找所有职位
+	 *
 	 * @return
 	 */
 	@RequestMapping("findAllPosistion")
-	public Object findAllPosistion(){
+	public Object findAllPosistion() {
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglPosistion> tLpglPosistions = lpglRoleService.findAllPosistion();
 		ajaxResult.setSuccess(true);
@@ -71,13 +73,13 @@ public class LpglUserController {
 	}
 
 
-
 	/**
 	 * 查找所有角色
+	 *
 	 * @return
 	 */
 	@RequestMapping("findAllRole")
-	public Object findAllRole(){
+	public Object findAllRole() {
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglRole> tLpglRoles = lpglRoleService.findAllRole();
 		ajaxResult.setSuccess(true);
@@ -87,24 +89,27 @@ public class LpglUserController {
 
 	/**
 	 * 查找职位角色
+	 *
 	 * @param posistionId 职位id
 	 * @return
 	 */
 	@RequestMapping("findAllPosistionRole")
-	public Object findAllPosistionRole(Long posistionId){
+	public Object findAllPosistionRole(Long posistionId) {
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglRole> tLpglRoles = lpglRoleService.findAllPosistionRole(posistionId);
 		ajaxResult.setSuccess(true);
 		ajaxResult.setData(tLpglRoles);
 		return ajaxResult;
 	}
+
 	/**
 	 * 查找角色权限
+	 *
 	 * @param roleId 角色id
 	 * @return
 	 */
 	@RequestMapping("findAllRoleAuthority")
-	public Object findAllRoleAuthority(Long roleId){
+	public Object findAllRoleAuthority(Long roleId) {
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglAuthority> tLpglAuthorities = lpglRoleService.findAllRoleAuthority(roleId);
 		ajaxResult.setSuccess(true);
@@ -114,6 +119,7 @@ public class LpglUserController {
 
 	/**
 	 * 查找楼层权限
+	 *
 	 * @param roleId
 	 * @return
 	 */
@@ -128,10 +134,11 @@ public class LpglUserController {
 
 	/**
 	 * 查找所有权限
+	 *
 	 * @return
 	 */
 	@RequestMapping("findAllAuthority")
-	public Object findAllAuthority(){
+	public Object findAllAuthority() {
 		AjaxResult ajaxResult = new AjaxResult();
 		List<TLpglAuthority> tLpglAuthorities = lpglRoleService.findAllAuthority();
 		ajaxResult.setSuccess(true);
@@ -142,11 +149,12 @@ public class LpglUserController {
 
 	/**
 	 * 添加职位
+	 *
 	 * @param posistionName 职位名称
 	 * @return
 	 */
 	@RequestMapping("editPosistion")
-	public Object editPosistion(String posistionName){
+	public Object editPosistion(String posistionName) {
 		AjaxResult ajaxResult = new AjaxResult();
 		TLpglPosistion tLpglPosistion = new TLpglPosistion();
 		tLpglPosistion.setPosisitionName(posistionName);
@@ -157,49 +165,51 @@ public class LpglUserController {
 
 	/**
 	 * 添加职位角色
+	 *
 	 * @param posistionId 职位名称
-	 * @param roleId 角色id
+	 * @param roleId      角色id
 	 * @return
 	 */
 	@RequestMapping("editPosistionRole")
-	public Object editPosistionRole(Long posistionId,Long roleId){
+	public Object editPosistionRole(Long posistionId, Long roleId) {
 		AjaxResult ajaxResult = new AjaxResult();
-		TLpglPosistion posistion = MybatisPlus.getInstance().findOne(new TLpglPosistion(),new MybatisPlusBuild(TLpglPosistion.class)
-			.eq(TLpglPosistion::getId,posistionId)
-			.eq(TLpglPosistion::getDeletedFlag,0)
+		TLpglPosistion posistion = MybatisPlus.getInstance().findOne(new TLpglPosistion(), new MybatisPlusBuild(TLpglPosistion.class)
+			.eq(TLpglPosistion::getId, posistionId)
+			.eq(TLpglPosistion::getDeletedFlag, 0)
 		);
 
-		TLpglRole role = MybatisPlus.getInstance().findOne(new TLpglRole(),new MybatisPlusBuild(TLpglRole.class)
-			.eq(TLpglRole::getId,roleId)
-			.eq(TLpglRole::getDeletedFlag,0)
+		TLpglRole role = MybatisPlus.getInstance().findOne(new TLpglRole(), new MybatisPlusBuild(TLpglRole.class)
+			.eq(TLpglRole::getId, roleId)
+			.eq(TLpglRole::getDeletedFlag, 0)
 		);
-		if (posistion==null){
+		if (posistion == null) {
 			log.warn("该职位不存在");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("该职位不存在");
 			return ajaxResult;
 		}
-		if (role==null){
+		if (role == null) {
 			log.warn("该角色不存在");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("该角色不存在");
 			return ajaxResult;
 		}
-		TLpglPosistionRole tLpglPosistionRole  = new TLpglPosistionRole();
+		TLpglPosistionRole tLpglPosistionRole = new TLpglPosistionRole();
 		tLpglPosistionRole.setPosisitionId(posistionId);
 		tLpglPosistionRole.setRoleId(roleId);
-		int i  = MybatisPlus.getInstance().save(tLpglPosistionRole);
+		int i = MybatisPlus.getInstance().save(tLpglPosistionRole);
 		ajaxResult.setSuccess(true);
 		return ajaxResult;
 	}
 
 	/**
 	 * 添加角色
+	 *
 	 * @param roleName 角色名称
 	 * @return
 	 */
 	@RequestMapping("editRole")
-	public Object editRole(String roleName){
+	public Object editRole(String roleName) {
 		AjaxResult ajaxResult = new AjaxResult();
 		TLpglRole role = new TLpglRole();
 		role.setRoleName(roleName);
@@ -210,72 +220,74 @@ public class LpglUserController {
 	}
 
 
-
 	/**
 	 * 添加角色权限
+	 *
 	 * @param authorityId 权限id
-	 * @param roleId 角色id
+	 * @param roleId      角色id
 	 * @return
 	 */
 	@RequestMapping("editRoleAuthority")
-	public Object editRoleAuthority(Long authorityId,Long roleId){
+	public Object editRoleAuthority(Long authorityId, Long roleId) {
 		AjaxResult ajaxResult = new AjaxResult();
 
-		TLpglRole role = MybatisPlus.getInstance().findOne(new TLpglRole(),new MybatisPlusBuild(TLpglRole.class)
-			.eq(TLpglRole::getId,roleId)
-			.eq(TLpglRole::getDeletedFlag,0)
+		TLpglRole role = MybatisPlus.getInstance().findOne(new TLpglRole(), new MybatisPlusBuild(TLpglRole.class)
+			.eq(TLpglRole::getId, roleId)
+			.eq(TLpglRole::getDeletedFlag, 0)
 		);
-		TLpglAuthority authority = MybatisPlus.getInstance().findOne(new TLpglAuthority(),new MybatisPlusBuild(TLpglAuthority.class)
-			.eq(TLpglAuthority::getId,authorityId)
-			.eq(TLpglAuthority::getDeletedFlag,0)
+		TLpglAuthority authority = MybatisPlus.getInstance().findOne(new TLpglAuthority(), new MybatisPlusBuild(TLpglAuthority.class)
+			.eq(TLpglAuthority::getId, authorityId)
+			.eq(TLpglAuthority::getDeletedFlag, 0)
 		);
 
 
-		if (role==null){
+		if (role == null) {
 			log.warn("该角色不存在");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("该角色不存在");
 			return ajaxResult;
 		}
-		if (authority==null){
+		if (authority == null) {
 			log.warn("该权限不存在");
 			ajaxResult.setSuccess(false);
 			ajaxResult.setMsg("该权限不存在");
 			return ajaxResult;
 		}
-		TLpglRoleAuthority tLpglRoleAuthority  = new TLpglRoleAuthority();
+		TLpglRoleAuthority tLpglRoleAuthority = new TLpglRoleAuthority();
 		tLpglRoleAuthority.setAuthorityId(authorityId);
 		tLpglRoleAuthority.setRoleId(roleId);
-		int i  = MybatisPlus.getInstance().save(tLpglRoleAuthority);
+		int i = MybatisPlus.getInstance().save(tLpglRoleAuthority);
 		ajaxResult.setSuccess(true);
 		return ajaxResult;
 	}
+
 	/**
 	 * 添加权限
+	 *
 	 * @param authorityName 权限名称
-	 * @param parentId 父级Id
-	 * @param code 权限Code
-	 * @param url 权限地址
+	 * @param parentId      父级Id
+	 * @param code          权限Code
+	 * @param url           权限地址
 	 * @param operationType 操作类型
-	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
+	 * @param status        平台类型:0-pc后台,1-小程序前端，2-公众号前端
 	 * @return
 	 */
 	@RequestMapping("editAuthority")
-	public Object editAuthority(String authorityName, Long parentId,String code,String url,Integer operationType,Integer status){
+	public Object editAuthority(String authorityName, Long parentId, String code, String url, Integer operationType, Integer status) {
 		AjaxResult ajaxResult = new AjaxResult();
 		TLpglAuthority authority = new TLpglAuthority();
 		authority.setAuthorityName(authorityName);
 		authority.setCode(code);
 		authority.setStatus(status);
 
-		if(parentId!=null){
+		if (parentId != null) {
 			authority.setParentId(parentId);
 		}
 
-		if(StringUtils.isNotEmpty(url)){
+		if (StringUtils.isNotEmpty(url)) {
 			authority.setUrl(url);
 		}
-		if(operationType!=null){
+		if (operationType != null) {
 			authority.setOperationType(operationType);
 		}
 
@@ -287,29 +299,31 @@ public class LpglUserController {
 
 	/**
 	 * 查询权限
-	 * @param id 权限id（为空则表示为一级页面）
+	 *
+	 * @param id     权限id（为空则表示为一级页面）
 	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
 	 * @return
 	 */
 	@RequestMapping("/findRolePage/auth")
-	public Object findRolePage(Long id,Integer status){
+	public Object findRolePage(Long id, Integer status) {
 		Long userId = IdUtil.getId();
 
-		AjaxResult ajaxResult = lpglRoleService.findRolePage(userId,id,status);
+		AjaxResult ajaxResult = lpglRoleService.findRolePage(userId, id, status);
 		return ajaxResult;
 	}
 
 
 	/**
 	 * 查询所有权限
+	 *
 	 * @param status 平台类型:0-pc后台,1-小程序前端，2-公众号前端
 	 * @return
 	 */
 	@RequestMapping("/findAllRolePage/auth")
-	public Object findAllRolePage(Integer status){
+	public Object findAllRolePage(Integer status) {
 		Long userId = IdUtil.getId();
 		AjaxResult ajaxResult = new AjaxResult();
-		JSONObject jsonObject = lpglRoleService.findRole(userId,status);
+		JSONObject jsonObject = lpglRoleService.findRole(userId, status);
 		ajaxResult.setSuccess(true);
 		ajaxResult.setData(jsonObject);
 		return ajaxResult;
@@ -317,7 +331,8 @@ public class LpglUserController {
 
 	/**
 	 * 移除角色的权限
-	 * @param roleId 角色编号
+	 *
+	 * @param roleId    角色编号
 	 * @param authority 权限编号
 	 * @return
 	 */
@@ -333,16 +348,17 @@ public class LpglUserController {
 
 	/**
 	 * 注册
-	 * @param username 用户名
-	 * @param password 密码
-	 * @param name 姓名
+	 *
+	 * @param username    用户名
+	 * @param password    密码
+	 * @param name        姓名
 	 * @param posistionId 职位id
 	 * @return
 	 */
 	@RequestMapping("register")
-	public Object register(HttpServletResponse response, HttpServletRequest request,String username, String password, Long posistionId, String name){
+	public Object register(HttpServletResponse response, HttpServletRequest request, String username, String password, Long posistionId, String name) {
 
-		AjaxResult ajaxResult = lpglUserService.register(username,password,posistionId,response,request, name);
+		AjaxResult ajaxResult = lpglUserService.register(username, password, posistionId, response, request, name);
 
 		return ajaxResult;
 	}
@@ -350,14 +366,15 @@ public class LpglUserController {
 
 	/**
 	 * 用户列表
-	 * @param name 昵称
+	 *
+	 * @param name        昵称
 	 * @param userAccount 用户名
-	 * @param pageNum 页码
-	 * @param pageSize 大小
+	 * @param pageNum     页码
+	 * @param pageSize    大小
 	 * @return
 	 */
 	@RequestMapping("user/list")
-	public Object userList(String name, String userAccount, Integer pageNum, Integer pageSize){
+	public Object userList(String name, String userAccount, Integer pageNum, Integer pageSize) {
 
 		AjaxResult ajaxResult = lpglUserService.userList(name, userAccount, pageNum, pageSize);
 
@@ -366,25 +383,27 @@ public class LpglUserController {
 
 	/**
 	 * 登录
+	 *
 	 * @param username 用户名
 	 * @param password 密码
 	 * @return
 	 */
 	@RequestMapping("login")
-	public Object login(HttpServletResponse response, HttpServletRequest request, String username, String password, String openid){
+	public Object login(HttpServletResponse response, HttpServletRequest request, String username, String password, String openid) {
 
-		AjaxResult ajaxResult = lpglUserService.login(username,password,request,response, openid);
+		AjaxResult ajaxResult = lpglUserService.login(username, password, request, response, openid);
 
 		return ajaxResult;
 	}
 
 	/**
 	 * 查询用户权限
+	 *
 	 * @return
 	 */
 	@RequestMapping("user/authorities")
 	@UrlAuth(withoutPermission = true)
-	public Object userAuthorities(){
+	public Object userAuthorities() {
 
 		AjaxResult ajaxResult = lpglUserService.authorities(IdUtil.getId());
 
@@ -393,11 +412,13 @@ public class LpglUserController {
 
 	/**
 	 * 获取openid
+	 *
 	 * @param code
 	 * @return
 	 */
 	@RequestMapping("openid")
-	public Object getOpenid(String code){
+	public Object getOpenid(String code) {
+		log.info("code={}", code);
 
 		AjaxResult ajaxResult = lpglUserService.getOpenid(code);
 

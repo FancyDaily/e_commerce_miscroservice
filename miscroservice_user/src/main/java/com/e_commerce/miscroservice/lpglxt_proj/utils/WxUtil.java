@@ -59,13 +59,15 @@ public class WxUtil {
      */
     public static String code2PublicOpenId(String code) {
         String stringToken = String.format(OPENID_PUBLIC_BASE_URL, APPID, SECRET, code);
+
         String response = httpsRequestToString(stringToken, GET, null);
+		System.out.println(response);
         return JSON.parseObject(response).getString("openid");
     }
 
 
     public static void main(String[] args) {
-//        System.out.println(code2PublicOpenId("0713aW3i0IghOv15Mq3i06Eb4i03aW3o"));
+        System.out.println(code2PublicOpenId("021LgDLw1ScrJg01FwLw1mFJLw1LgDLf"));
 //        String openId = "o8Qkiv7DqEl4lDioRQeReCcv2dSQ";
 //        sendPublicMsg(openId, "url","sss", "wo",
 //                "11","111", "11");
@@ -199,7 +201,7 @@ public class WxUtil {
                                      String firstData, String orderNo, String orderType,String content,String lastData,String url
                                      ) {
 
-    	String templateId = "CniLsHXOBFx7yoPyTMYhTa8ow_0XpTyzM9KJHEkZvPE";
+    	String templateId = "IbNz7SuGLwQqQz7br-EXPGsXwoXS4Yv0fVApJ3gSfMI";
 
         Map<String, TemplateData> map = new HashMap<>();
         map.put("first", new TemplateData(firstData));
@@ -356,9 +358,11 @@ public class WxUtil {
             SSLSocketFactory ssf = sslContext.getSocketFactory();
 
             URL url = new URL(path);
-            conn = (HttpsURLConnection) url.openConnection(
-                    new Proxy(Proxy.Type.HTTP
-                            , new InetSocketAddress("47.96.70.20", 3129)));
+//            conn = (HttpsURLConnection) url.openConnection(
+//                    new Proxy(Proxy.Type.HTTP
+//                            , new InetSocketAddress("47.96.70.20", 3129)));
+
+			conn = (HttpsURLConnection) url.openConnection();
             conn.setSSLSocketFactory(ssf);
 
             conn.setDoOutput(true);
