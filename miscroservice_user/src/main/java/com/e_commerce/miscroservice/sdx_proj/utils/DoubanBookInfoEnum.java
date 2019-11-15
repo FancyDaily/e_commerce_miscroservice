@@ -23,6 +23,7 @@ public enum DoubanBookInfoEnum {
 
 	public static String INTRODUCTION = "简介";
 	public static String CATALOG = "目录";
+	public static String TAG = "标签";
 
 	int code;
 	String msg;

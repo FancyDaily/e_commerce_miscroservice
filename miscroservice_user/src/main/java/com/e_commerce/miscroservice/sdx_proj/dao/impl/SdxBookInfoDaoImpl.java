@@ -57,8 +57,8 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
             if (StringUtils.isNotEmpty(tSdxBookInfoPo.getCatalog())) {
                 build.like(TSdxBookInfoPo::getCatalog,tSdxBookInfoPo.getCatalog());
             }
-            if (tSdxBookInfoPo.getCategoryId()!=null ) {
-                build.eq(TSdxBookInfoPo::getCategoryId,tSdxBookInfoPo.getCategoryId());
+            if (tSdxBookInfoPo.getTagId()!=null ) {
+                build.eq(TSdxBookInfoPo::getTagId,tSdxBookInfoPo.getTagId());
             }
             if (tSdxBookInfoPo.getScoreDouban()!=null ) {
                 build.eq(TSdxBookInfoPo::getScoreDouban,tSdxBookInfoPo.getScoreDouban());
@@ -66,8 +66,8 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
             if (StringUtils.isNotEmpty(tSdxBookInfoPo.getBindingStyle())) {
                 build.like(TSdxBookInfoPo::getBindingStyle,tSdxBookInfoPo.getBindingStyle());
             }
-            if (StringUtils.isNotEmpty(tSdxBookInfoPo.getCategoryName())) {
-                build.like(TSdxBookInfoPo::getCategoryName,tSdxBookInfoPo.getCategoryName());
+            if (StringUtils.isNotEmpty(tSdxBookInfoPo.getTag())) {
+                build.like(TSdxBookInfoPo::getTag,tSdxBookInfoPo.getTag());
             }
             if (StringUtils.isNotEmpty(tSdxBookInfoPo.getIntroduction())) {
                 build.like(TSdxBookInfoPo::getIntroduction,tSdxBookInfoPo.getIntroduction());
@@ -112,6 +112,13 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
 	@Override
 	public TSdxBookInfoPo selectByPrimaryKey(Long id) {
 		return MybatisPlus.getInstance().findOne(new TSdxBookInfoPo(), baseBuild()
+		);
+	}
+
+	@Override
+	public TSdxBookInfoPo selectByName(String name) {
+		return MybatisPlus.getInstance().findOne(new TSdxBookInfoPo(), baseBuild()
+			.eq(TSdxBookInfoPo::getName, name)
 		);
 	}
 

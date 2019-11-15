@@ -50,7 +50,17 @@ public class SdxOrderDonateController {
 	}
 
 	/**
-	 * 创建或者修改捐书订单
+	 * 创建捐赠订单
+	 * @return
+	 */
+	@RequestMapping("donate/create")
+	public Object createBookDonateOrder() {
+	//TODO		return Response.success(sdxBookOrderService.);
+		return null;
+	}
+
+	/**
+	 * 修改捐书订单
 	 *
 	 * @param id        订单的Id,修改或者查询的需要
 	 * @param type        订单类型(捐书、购书)

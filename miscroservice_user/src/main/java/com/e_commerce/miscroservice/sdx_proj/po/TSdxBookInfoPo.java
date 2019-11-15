@@ -42,13 +42,13 @@ public class TSdxBookInfoPo extends BaseEntity {
 	 * 类型名
 	 */
 	@Column(commit = "类型名")
-	private String categoryName;
+	private String tag;
 
 	/**
 	 * 类型编号
 	 */
 	@Column(commit = "类型编号")
-	private Integer categoryId;
+	private String tagId;
 
 	/**
 	 * 价格

@@ -1,7 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.service;
 
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
-import com.e_commerce.miscroservice.sdx_proj.utils.DoubanBookInfo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 
 import java.util.List;
@@ -15,5 +14,5 @@ public interface SdxBookInfoService {
 
 	List<TSdxBookInfoVo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType);
 
-	DoubanBookInfo getBookInfo(String isbnCode);
+	TSdxBookInfoPo getBookInfo(String isbnCode);
 }

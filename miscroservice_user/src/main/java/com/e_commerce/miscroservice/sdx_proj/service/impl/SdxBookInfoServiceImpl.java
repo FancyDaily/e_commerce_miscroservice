@@ -4,7 +4,9 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxTagDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxTagPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.utils.DoubanBookInfo;
 import com.e_commerce.miscroservice.sdx_proj.utils.IsbnHelper;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 书籍信息的service层
@@ -28,6 +32,8 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 	private final int ERROR_INT = 0;
 	@Autowired
 	private SdxBookInfoDao sdxBookInfoDao;
+	@Autowired
+	private SdxTagDao sdxTagDao;
 
 	@Override
 	public long modTSdxBookInfo(TSdxBookInfoPo tSdxBookInfoPo) {
@@ -83,20 +89,57 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 	}
 
 	@Override
-	public DoubanBookInfo getBookInfo(String isbnCode) {
+	public TSdxBookInfoPo getBookInfo(String isbnCode) {
 		if (StringUtil.isEmpty(isbnCode)) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "ISBN码不能为空!");
 		DoubanBookInfo infos = null;
+		TSdxBookInfoPo tSdxBookInfoPo = null;
 		try {
 			infos = IsbnHelper.infos(isbnCode);
+			if(infos == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的ISBN码!");
 
 			//拷贝成bookInfo， 其中 检查是否需要插入新的分类 -> 并需要补全分类编号
+			tSdxBookInfoPo = infos.copyTSdxBookInfoPo();
+			//检查分类信息
+			String tag = tSdxBookInfoPo.getTag();
+			String tagId = dealWithNewTag(tag);
+			tSdxBookInfoPo.setTagId(tagId);
+			//与现有的bookInfo进行匹配，若不存在，插入一条相应bookInfo
+			TSdxBookInfoPo exist = sdxBookInfoDao.selectByName(tSdxBookInfoPo.getName());
+			if(exist == null) {
+				sdxBookInfoDao.saveTSdxBookInfoIfNotExist(tSdxBookInfoPo);
+			}
 		} catch (Exception e) {
 
 		}
-		//与现有的bookInfo进行匹配，若不存在，插入一条相应bookInfo
+		return tSdxBookInfoPo;
+	}
 
-		//创建一个book
-		if(infos == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的ISBN码!");
-		return infos;
+	private String dealWithNewTag(String tag) {
+		//拆分
+		if(!tag.contains(",")) return null;
+		String[] tagNames = tag.split(",");
+		List<TSdxTagPo> sdxTagPos = sdxTagDao.selectInNames(tagNames);
+		Map<String, List<TSdxTagPo>> namePoMap = sdxTagPos.stream()
+			.collect(Collectors.groupingBy(TSdxTagPo::getName));
+		StringBuilder idBuilder = new StringBuilder();
+		for(String tagName:tagNames) {
+			List<TSdxTagPo> pos = namePoMap.get(tagName);
+			TSdxTagPo sdxTagPo;
+			if(pos == null) {	//本tag需要insert
+				sdxTagPo = new TSdxTagPo();
+				sdxTagPo.setName(tagName);
+				sdxTagDao.saveTSdxTagIfNotExist(sdxTagPo);
+				//加入到map
+				namePoMap.put(tagName, Arrays.asList(sdxTagPo));
+			} else {
+				sdxTagPo = pos.get(0);
+			}
+			idBuilder.append(sdxTagPo.getId());
+			idBuilder.append(",");
+		}
+		String ids = idBuilder.toString();
+		ids = StringUtil.dealWithEndWith(ids, ",");
+
+		return ids;
 	}
 }

@@ -1874,5 +1874,11 @@ public class StringUtil {
 		return StringUtil.isEmpty(str)? "": str;
 	}
 
+	public static String dealWithEndWith(String catalog, String cataSplit) {
+		if(catalog.endsWith(cataSplit)) {
+			catalog = catalog.substring(0, catalog.length() - cataSplit.length());
+		}
+		return catalog;
+	}
 
 }

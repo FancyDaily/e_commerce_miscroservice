@@ -28,7 +28,7 @@ public class IsbnHelper {
 
 	public static void main(String[] args) {
 		try {
-			infos("9787513927277");
+			infos("9787532781263");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -48,6 +48,7 @@ public class IsbnHelper {
 			keyValMap.put(name, null);
 		}
 
+		//不带超链接属性
 		for (Element theEle : info) {
 			List<TextNode> textNodes = theEle.textNodes();
 			for (TextNode textNode : textNodes) {
@@ -69,8 +70,9 @@ public class IsbnHelper {
 			}
 			Elements a = info.select("a");
 
+			//带超链接属性
 			for (Element theA : a) {
-				String aSVal = theA.text();
+				String aSVal = theA.text();	//值
 				Element element = theA.previousElementSibling();
 				String previousElementVal = element.text();
 				String theVal = valNameMap.get(previousElementVal);
@@ -99,26 +101,59 @@ public class IsbnHelper {
 				paragraphAppender.append("\n");
 			}
 			String introduction = paragraphAppender.toString();	//简介
-			System.out.println(introduction);
-			if(introduction.endsWith("\n")) {
-				introduction = introduction.substring(0, introduction.length() - "\n".length());
-			}
-			//TODO 目录、分类
+			introduction = dealWithEndWith(introduction, "\n");
+//			System.out.println("introduction" + introduction);
 
+			//目录
+			Elements select = doc.select("div[class=related_info]").select("div[class=indent]");
+			Element element = select.get(3);
+			StringBuilder catalogBuilder = new StringBuilder();
+			String cataSplit = ",";
+			for(TextNode node:element.textNodes()) {
+				String text = node.text();
+				if(text.contains("· · · · · ·") || ") ".equals(text)) {
+					continue;
+				}
+				catalogBuilder.append(text);
+				catalogBuilder.append(cataSplit);
+			}
+			String catalog = catalogBuilder.toString();
+			catalog = dealWithEndWith(catalog, cataSplit);
+//			System.out.println("catalog" + catalog);
+
+			//分类
+			Elements tags = doc.select("div#db-tags-section").select("div[class=indent]").select("a");
+			StringBuilder tagBuilder = new StringBuilder();
+			String tagSplit = ",";
+			for(Element tag:tags) {
+				tagBuilder.append(tag.text());
+				tagBuilder.append(tagSplit);
+			}
+			String tag = tagBuilder.toString();
+			tag = dealWithEndWith(tag, tagSplit);
+//			System.out.println("tag" + tag);
 
 			//装载遗漏
 			keyValMap.put(DoubanBookInfoEnum.NAME, Arrays.asList(name));
 			keyValMap.put(DoubanBookInfoEnum.COVER_PIC, Arrays.asList(src));
 			keyValMap.put(DoubanBookInfoEnum.RATING, Arrays.asList(rate));
 			keyValMap.put(DoubanBookInfoEnum.INTRODUCTION, Arrays.asList(introduction));
+			keyValMap.put(DoubanBookInfoEnum.CATALOG, Arrays.asList(catalog));
+			keyValMap.put(DoubanBookInfoEnum.TAG, Arrays.asList(tag));
 
 			//打印最终的map
 			System.out.println(keyValMap);
-
 		}
 		DoubanBookInfo doubanBookInfo = mapToDoubanBookInfo(keyValMap);
 		System.out.println(doubanBookInfo);
 		return doubanBookInfo;
+	}
+
+	private static String dealWithEndWith(String catalog, String cataSplit) {
+		if(catalog.endsWith(cataSplit)) {
+			catalog = catalog.substring(0, catalog.length() - cataSplit.length());
+		}
+		return catalog;
 	}
 
 	private static String getRidOfSpace(String text) {
@@ -152,6 +187,9 @@ public class IsbnHelper {
 			.name(map.get(DoubanBookInfoEnum.NAME))
 			.coverPic(map.get(DoubanBookInfoEnum.COVER_PIC))
 			.rating(map.get(DoubanBookInfoEnum.RATING))
+			.introduction(map.get(DoubanBookInfoEnum.INTRODUCTION))
+			.catalog(map.get(DoubanBookInfoEnum.CATALOG))
+			.tag(map.get(DoubanBookInfoEnum.TAG))
 			.build();
 	}
 

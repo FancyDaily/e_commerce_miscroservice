@@ -9,4 +9,6 @@ public interface SdxBookInfoDao {
     List<TSdxBookInfoPo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType);
 
 	TSdxBookInfoPo selectByPrimaryKey(Long id);
+
+	TSdxBookInfoPo selectByName(String name);
 }

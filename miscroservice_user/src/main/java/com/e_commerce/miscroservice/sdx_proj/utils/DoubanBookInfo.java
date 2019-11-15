@@ -98,9 +98,9 @@ public class DoubanBookInfo {
 			.publisher(publisher)
 			.bindingStyle(bindingLayout)
 			.scoreDouban(Double.valueOf(rating))
-			.categoryName(tag)
 			.introduction(introduction)
 			.catalog(catalog)
+			.tag(tag)
 			.build();
 	}
 }
