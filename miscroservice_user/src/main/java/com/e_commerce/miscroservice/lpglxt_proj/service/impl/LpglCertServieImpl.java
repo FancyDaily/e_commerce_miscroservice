@@ -109,7 +109,7 @@ public class LpglCertServieImpl implements LpglCertService {
 		switch (theEnum = TlpglCertEnum.getType(type)) {
 			case TYPE_SOLDOUTREQUEST:
 				//1.递交售卖完成审核 -> TODO 通知销售经理、财务 level3除了市场角色 ;总经理、总经办 level1
-				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=1&certId=" + build.getId();
+				url = "http://wx.p4j.cn/loupan/html/shenhe.html?type=1&certId=" + build.getId();
 				//				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "市场经理");
 
@@ -119,14 +119,14 @@ public class LpglCertServieImpl implements LpglCertService {
 				break;
 			case TYPE_PRICEDISCOUNT:
 				//2.申请优惠 -> TODO 通知市场经理、销售经理 level3除了财务角色
-				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=2&certId=" + build.getId();
+				url = "http://wx.p4j.cn/loupan/html/shenhe.html?type=2&certId=" + build.getId();
 //				TODO content = "";
 				roleNames = getRoleNamesExceptName(names, "财务经理");
 
 				break;
 			case TYPE_CUSTOMER:
 				//3.客户报备 -> TODO 通知前台人员、销售经理、销售主管 level3销售经理 level4销售主管、前台
-				url = "http://test.bxcrm.cn/loupan/html/shenhe.html?type=3&certId=" + build.getId();
+				url = "http://wx.p4j.cn/loupan/html/shenhe.html?type=3&certId=" + build.getId();
 //				TODO content = "";
 				roleNames = getRoleNamesInArray(names, "前台人员", "销售经理", "销售主管");
 
