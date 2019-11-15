@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -70,9 +67,40 @@ public class LpglCertServieImpl implements LpglCertService {
 				.map(TLpglUser::getId).collect(Collectors.toList());
 		}
 		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeAndStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
+		List<Long> houseIds = tLpglCerts.stream()
+			.map(TLpglCert::getHouseId).collect(Collectors.toList());
+		List<TLpglHouse> houses = lpglHouseDao.selectInIds(houseIds);
+		Map<Long, List<TLpglHouse>> idHouseMap = houses.stream()
+			.collect(Collectors.groupingBy(TLpglHouse::getId));
+
+		List<Long> estateIds = houses.stream()
+			.map(TLpglHouse::getEstateId).collect(Collectors.toList());
+		List<TLpglEstate> tLpglEstates = lpglEstateDao.selectInIds(estateIds);
+		Map<Long, List<TLpglEstate>> idEstateMap = tLpglEstates.stream()
+			.collect(Collectors.groupingBy(TLpglEstate::getId));
+
+		List<TLpglCert> results = tLpglCerts.stream()
+			.map(a -> {
+				Long houseId = a.getHouseId();
+				List<TLpglHouse> tLpglHouses = idHouseMap.get(houseId);
+				if (tLpglHouses != null) {
+					TLpglHouse houseInfo = tLpglHouses.get(0);
+					Long estateId = houseInfo.getEstateId();
+					List<TLpglEstate> lpglEstates = idEstateMap.get(estateId);
+					if(lpglEstates != null) {
+						String estateName = lpglEstates.get(0).getName();
+						a.setEstateName(estateName);
+					}
+					a.setGroupName(houseInfo.getGroupName());
+					a.setBuildingNum(houseInfo.getBuildingNum());
+					a.setHouseNum(houseInfo.getHouseNum());
+				}
+				return a;
+			}).collect(Collectors.toList());
+
 		long total = IdUtil.getTotal();
 
-		return PageUtil.buildQueryResult(tLpglCerts, total);
+		return PageUtil.buildQueryResult(results, total);
 	}
 
 	@Override
