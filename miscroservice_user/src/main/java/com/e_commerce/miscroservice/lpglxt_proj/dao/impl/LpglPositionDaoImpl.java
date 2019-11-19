@@ -51,4 +51,18 @@ public class LpglPositionDaoImpl implements LpglPositionDao {
 			.eq(TLpglPosistion::getLevel, level)
 		);
 	}
+
+	@Override
+	public List<TLpglPosistion> selectInNames(String... posisitionName) {
+		return MybatisPlus.getInstance().findAll(new TLpglPosistion(), baseBuild()
+			.in(TLpglPosistion::getPosisitionName, posisitionName)
+		);
+	}
+
+	@Override
+	public List<TLpglPosistion> selectInNames(List<String> posisitionName) {
+		return MybatisPlus.getInstance().findAll(new TLpglPosistion(), baseBuild()
+			.in(TLpglPosistion::getPosisitionName, posisitionName)
+		);
+	}
 }

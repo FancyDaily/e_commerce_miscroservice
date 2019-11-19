@@ -1,6 +1,9 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglPosistion;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
+
+import java.util.List;
 
 /**
  * @Author: FangyiXu
@@ -13,4 +16,6 @@ public interface LpglPositionService {
 	TLpglPosistion getPosition(Long userId);
 
 	TLpglPosistion getHigherPosition(TLpglPosistion position);
+
+	List<TLpglUser> findUsersByPositionNames(List<String> posisitionName);
 }

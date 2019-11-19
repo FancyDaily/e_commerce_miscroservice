@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookTicketEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.*;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
@@ -222,7 +223,9 @@ public class SdxBookServiceImpl implements SdxBookService {
 		sdxBookTicketPos = sdxBookTicketPos.stream()
 			.sorted(Comparator.comparing(TSdxBookTicketPo::getCreateTime).reversed()).collect(Collectors.toList());
 		TSdxBookTicketPo tSdxBookTicketPo = sdxBookTicketPos.get(0);
-//		tSdxBookTicketPo.setIsUsed(Sdxbookticket);
+		tSdxBookTicketPo.setIsUsed(SdxBookTicketEnum.IS_USED_YES.getCode());
+		sdxBookTicketDao.modTSdxBookTickt(tSdxBookTicketPo);
+		//TODO 建立书本信息-用户关联 预定
 	}
 
 	@Override
@@ -230,9 +233,18 @@ public class SdxBookServiceImpl implements SdxBookService {
 		return sdxBookDao.selectByBookInfoIdAndStatus(bookInfoId, SdxBookEnum.STATUS_ON_SHELF.getCode());
 	}
 
-	public static void main(String[] args) {
-    	int purchasedNums = 111;
-    	int surplusNum = 22;
+	@Override
+	public Map<Long, Integer> getIdExpectedScoresMap(Long... bookInfoIds) {
+		List<TSdxBookInfoPo> sdxBookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIds);
+		Map<Long, List<TSdxBookInfoPo>> idEntityMap = sdxBookInfoPos.stream()
+			.collect(Collectors.groupingBy(TSdxBookInfoPo::getId));
+		Map<Long, Integer> res = new HashMap<>();
+		idEntityMap.forEach((k, v) -> {
+			res.put(k, v.stream()
+				.map(TSdxBookInfoPo::getExpectedScore).collect(Collectors.toList()).get(0)
+			);
+		});
+		return res;
 	}
 
 	@Override

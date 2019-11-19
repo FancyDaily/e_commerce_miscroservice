@@ -18,6 +18,7 @@ import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	private SdxBookDao sdxbookDao;
 	@Autowired
 	SdxShippingAddressDao sdxShippingAddressDao;
+	@Autowired
+	SdxBookInfoService sdxBookInfoService;
 
 	@Override
 	public long modTSdxBookOrder(TSdxBookOrderPo tSdxBookOrderPo) {
@@ -60,12 +64,22 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			log.warn("操作订单参数为空");
 			return ERROR_LONG;
 		}
-		if (tSdxBookOrderPo.getId() == null) {
+		Long id;
+		if ((id=tSdxBookOrderPo.getId()) == null) {
 			log.info("start添加订单={}", tSdxBookOrderPo);
 			int result = sdxBookOrderDao.saveTSdxBookOrderIfNotExist(tSdxBookOrderPo);
 			return result != 0 ? tSdxBookOrderPo.getId() : ERROR_LONG;
 		} else {
 			log.info("start修改订单={}", tSdxBookOrderPo.getId());
+			String expressNo = tSdxBookOrderPo.getExpressNo();
+			//如果是添加快递单号 -> 状态变成已发货
+			TSdxBookOrderPo orderPo = sdxBookOrderDao.selectByPrimaryKey(id);
+			Integer originStatus = orderPo.getStatus();
+			TSdxBookOrderPo toUpdater = TSdxBookOrderPo.builder().build();
+			toUpdater.setId(id);
+			if(SdxBookOrderEnum.STATUS_INITAIL.getCode() == originStatus && !StringUtil.isEmpty(expressNo)) {
+				toUpdater.setStatus(SdxBookOrderEnum.STATUS_PROCESSING.getCode());	//订单进行中
+			}
 			return sdxBookOrderDao.modTSdxBookOrder(tSdxBookOrderPo);
 		}
 	}
@@ -236,6 +250,74 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		return PageUtil.buildQueryResult(vos);
 	}
 
+	@Override
+	public String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId) {
+		//将给定的书籍信息 -> 生成出book实体，重复的infoIds数量决定了同infoId的book数量
+		Map<Long, Integer> idExpectedScoresMap = sdxBookService.getIdExpectedScoresMap(bookInfoIds);
+		List<TSdxBookPo> bookList = new ArrayList<>();
+		Integer totalExpectedScores = 0;
+		for(Long bookInfoId: bookInfoIds) {
+			//获取预估积分
+			Integer expectedScores = idExpectedScoresMap.get(bookInfoId);
+			totalExpectedScores += expectedScores;
+			//生成book实体
+			TSdxBookPo build = TSdxBookPo.builder()
+				.status(SdxBookEnum.STATUS_INITIAL.getCode())
+				.bookInfoId(bookInfoId)
+				.currentOwnerId(userId)    //当前拥有者 -> 捐助过程中填写捐助人( 或者应当不填
+				.donaterId(userId)
+				.expectedScore(expectedScores)    //预估积分
+				.serviceId(serviceId)
+				.build();
+			sdxbookDao.saveTSdxBookIfNotExist(build);
+			//用bookList替代 bookInfoIds
+			bookList.add(build);
+		}
+		//创建订单
+		String orderNo = UUIdUtil.generateOrderNo();
+		TSdxBookOrderPo build = TSdxBookOrderPo.builder()
+			.type(SdxBookOrderEnum.TYPE_DONATE.getCode())
+//			.expressNo()	//运单号, 填写之后(订单由初始 -> 途中(配送或者自送))
+			.orderNo(orderNo)        //订单号
+			.bookIds(StringUtil.longListToString(Arrays.asList(bookInfoIds)))        //书本编号
+			.bookIfIs(StringUtil.longListToString(bookList.stream().map(TSdxBookPo::getId).collect(Collectors.toList())))        //书本信息编号
+			.userId(userId)
+			.status(SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode())    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
+			.shippingAddressId(shippingAddressId)
+			.expectedTotalScores(totalExpectedScores)
+//			.exactTotalScores()	//实际获得积分
+			.shipType(shipType)
+			.bookStationId(bookStationId)
+			.build();
+		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
+		//返回订单号orderNo
+		return orderNo;
+	}
+
+	@Override
+	public void cancel(Long orderId) {
+		TSdxBookOrderPo po = sdxBookOrderDao.selectByPrimaryKey(orderId);
+		String bookIds = po.getBookIds();
+		List<String> bookIdList = Arrays.asList(bookIds.split(","));
+		//处理书本状态
+		List<TSdxBookPo> toUpdater = bookIdList.stream()
+			.map(Long::valueOf)
+			.map(a -> {
+				TSdxBookPo build = TSdxBookPo.builder()
+					.status(SdxBookEnum.STATUS_CANCLE.getCode())    //STATUS REMARK
+					.build();
+				build.setId(a);
+				return build;
+			}).collect(Collectors.toList());
+		sdxbookDao.update(toUpdater);
+
+		//处理订单状态
+		TSdxBookOrderPo build = TSdxBookOrderPo.builder()
+			.status(SdxBookOrderEnum.STATUS_CANCLE.getCode())
+			.build();
+		sdxBookOrderDao.modTSdxBookOrder(build);
+	}
+
 	private void afterPaySuccess(TSdxBookOrderPo order) {
 		//积分减少，插入流水
 		sdxScoreRecordService.dealWithScoreOut(order);
@@ -284,9 +366,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			bookIdList.add(books.get(0).getId());
 		}
 		//拼接成String
-		return bookIdList.stream()
-			.map(String::valueOf)
-			.reduce("", (a, b) -> a + "," + b);
+		return StringUtil.longListToString(bookIdList);
 	}
 
 	private void checkBookSurplusAmount(String bookInfoIds) {

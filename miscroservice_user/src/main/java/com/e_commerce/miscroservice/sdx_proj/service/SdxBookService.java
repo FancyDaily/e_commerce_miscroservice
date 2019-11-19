@@ -3,6 +3,8 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import java.util.List;
+import java.util.Map;
+
 public interface SdxBookService {
     long modTSdxBook(TSdxBookPo tSdxBookPo);
     int delTSdxBookByIds(Long... ids);
@@ -18,4 +20,6 @@ public interface SdxBookService {
 	void preOrder(Long id, Long userId);
 
 	List<TSdxBookPo> getAvailableBooks(Long bookInfoId);
+
+	Map<Long, Integer> getIdExpectedScoresMap(Long... bookInfoIds);
 }

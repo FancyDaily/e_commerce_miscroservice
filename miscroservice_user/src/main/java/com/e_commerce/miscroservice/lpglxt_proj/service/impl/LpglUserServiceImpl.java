@@ -1,16 +1,22 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
 import com.e_commerce.miscroservice.commons.enums.colligate.ApplicationEnum;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglPositionDao;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
+import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
+import com.e_commerce.miscroservice.lpglxt_proj.service.LpglPositionService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglRoleService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import com.e_commerce.miscroservice.lpglxt_proj.utils.WxUtil;
@@ -21,6 +27,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,12 +43,23 @@ import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_
 @Log
 public class LpglUserServiceImpl implements LpglUserService {
 
-
 	@Autowired
 	private LpglRoleService lpglRoleService;
 
 	@Autowired
+	private LpglPositionService lpglPositionService;
+
+	@Autowired
+	private LpglPositionDao lpglPositionDao;
+
+	@Autowired
+	private LpglUserDao lpglUserDao;
+
+	@Autowired
 	private AuthorizeRpcService authorizeRpcService;
+
+	@Autowired
+	LpglCertService lpglCertService;
 
 
 	@Override
@@ -173,6 +192,36 @@ public class LpglUserServiceImpl implements LpglUserService {
 		result.setData(lpglRoleService.findAllRoleAuthority(roleIds));
 		result.setSuccess(true);
 		return result;
+	}
+
+	@Override
+	public List<TLpglUser> getBoss(Long id) {
+		//销售主管 -> 显示 销售经理 总经理 总经办
+		TLpglUser user = lpglUserDao.selectByPrimaryKey(id);
+		TLpglPosistion position = lpglPositionService.getPosition(id);
+		if(position == null) return new ArrayList<>();
+		String posisitionName = position.getPosisitionName();
+		List<String> positionNames = new ArrayList<>();
+		if("销售主管".equals(posisitionName)) {
+			positionNames = Arrays.asList("销售经理", "总经理", "总经办");
+		}
+		//市场经理 -> 显示 总经理 总经办
+		if("市场经理".equals(posisitionName)) {
+			positionNames = Arrays.asList("总经理", "总经办");
+		}
+
+		//获得相应用户信息
+		return lpglPositionService.findUsersByPositionNames(positionNames);
+	}
+
+	@Override
+	public void handOver(Long userId, Long certId) {
+		TLpglUser tLpglUser = lpglUserDao.selectByPrimaryKey(userId);
+		if(tLpglUser == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "用户不存在！");
+		String vxOpenId = tLpglUser.getVxOpenId();
+		if(vxOpenId == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "发送通知对象所需openid为空！");
+		//发送通知
+		lpglCertService.handOverMessage(certId, vxOpenId);
 	}
 
 	private String buildLikeString(String str) {

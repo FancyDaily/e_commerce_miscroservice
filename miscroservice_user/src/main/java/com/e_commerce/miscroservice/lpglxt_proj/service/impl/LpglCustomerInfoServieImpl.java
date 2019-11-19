@@ -12,6 +12,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.enums.TlpglCustomerInfoEnum;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCustomerInfos;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglHouse;
+import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCustomerInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,9 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 	@Autowired
 	private LpglCustomerInfoDao lpglCustomerInfoDao;
 
+	@Autowired
+	private LpglCertService lpglCertService;
+
 	@Override
 	public HashMap<String, Object> list(Integer status, Integer pageNum, Integer pageSize, Long estateId, Integer isDone, String area, String department, boolean isToday) {
 		//十五天有效
@@ -48,7 +52,7 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 		//手动分片
 		int total = list.size();	//总数
 		long isDoneCnt = list.stream()	//带看总数
-			.filter(a -> TlpglCustomerInfoEnum.IS_DONE_YES.getCode() == a.getIsDone()).count();
+			.filter(a -> a.getIsDone() != null && TlpglCustomerInfoEnum.IS_DONE_YES.getCode() == a.getIsDone()).count();
 		list = list.stream()
 			.skip(pageNum * pageSize)
 			.limit(pageNum * pageSize + pageSize).collect(Collectors.toList());
@@ -62,7 +66,7 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 				return a;
 			}).collect(Collectors.toList());
 
-		lpglCustomerInfoDao.updateByStatusAndLtUpdateTimePage(status, timeStamp);	//清理失效
+		lpglCustomerInfoDao.delLtUpdateTimePage(timeStamp);	//清理失效
 		HashMap<String, Object> res = new HashMap<>();
 		QueryResult result = PageUtil.buildQueryResult(list, total);
 		res.put("queryResult", result);
@@ -114,19 +118,22 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 		}
 		final Long customerIdFinal = customerId;
 
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+		//插入一条 '审核' 记录
+		TLpglCert toInserter = TLpglCert.builder()
+			.customerInfoId(customerIdFinal)
+			.houseId(houseId)
+			.type(TlpglCertEnum.TYPE_CUSTOMER.getCode())
+			.description(description).build();
+		lpglCertDao.insert(toInserter);
+		//推送消息
+		lpglCertService.dealWithMessage(TlpglCertEnum.TYPE_CUSTOMER.getCode(), toInserter);
+
+	/*	TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
 			public void afterCompletion(int status) {
 				super.afterCompletion(status);
-				//插入一条 '审核' 记录
-				TLpglCert toInserter = TLpglCert.builder()
-					.customerInfoId(customerIdFinal)
-					.houseId(houseId)
-					.type(TlpglCertEnum.TYPE_CUSTOMER.getCode())
-					.description(description).build();
-				lpglCertDao.insert(toInserter);
 			}
-		});
+		});*/
 	}
 
 	@Override

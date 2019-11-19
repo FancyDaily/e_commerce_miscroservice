@@ -122,6 +122,13 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
 		);
 	}
 
+	@Override
+	public List<TSdxBookInfoPo> selectInIds(Long... bookInfoIds) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookInfoPo(), baseBuild()
+			.in(TSdxBookInfoPo::getId, bookInfoIds)
+		);
+	}
+
 	private MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TSdxBookInfoPo.class)
 			.eq(TSdxBookInfoPo::getDeletedFlag, Boolean.FALSE);

@@ -11,4 +11,6 @@ public interface SdxBookInfoDao {
 	TSdxBookInfoPo selectByPrimaryKey(Long id);
 
 	TSdxBookInfoPo selectByName(String name);
+
+	List<TSdxBookInfoPo> selectInIds(Long... bookInfoIds);
 }

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.po;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookDetailVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 
@@ -19,6 +20,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TSdxBookInfoPo extends BaseEntity {
+
+	/**
+	 * 捐助时可折抵积分
+	 */
+	@Transient
+	private Integer expectedScore;
 
 	/**
 	 * 书名

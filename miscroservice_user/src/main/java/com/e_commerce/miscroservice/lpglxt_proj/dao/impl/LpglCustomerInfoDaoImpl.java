@@ -98,15 +98,15 @@ public class LpglCustomerInfoDaoImpl implements LpglCustomerInfoDao {
 			baseBuild
 				.eq(TLpglCustomerInfos::getStatus, status);
 			baseBuild = TlpglCustomerInfoEnum.STATUS_VALID.getCode() == status?
-				baseBuild.lte(TLpglCustomerInfos::getUpdateTime, new Timestamp(timeStamp).toString()) : baseBuild;	//时间有效性
+				baseBuild.gte(TLpglCustomerInfos::getUpdateTime, new Timestamp(timeStamp).toString()) : baseBuild;	//时间有效性
 		}
 		baseBuild = estateId != null? baseBuild
 			.eq(TLpglCustomerInfos::getEstateId, estateId) : baseBuild;
 		baseBuild = isDone != null? baseBuild
 			.eq(TLpglCustomerInfos::getIsDone, isDone) : baseBuild;
-		baseBuild = area != null? baseBuild
+		baseBuild = !StringUtil.isEmpty(area)? baseBuild
 			.like(TLpglCustomerInfos::getArea, area) : baseBuild;
-		baseBuild = department != null? baseBuild
+		baseBuild = !StringUtil.isEmpty(department)? baseBuild
 			.eq(TLpglCustomerInfos::getDepartment, department) : baseBuild;
 
 		//今天的时间区间
@@ -118,6 +118,16 @@ public class LpglCustomerInfoDaoImpl implements LpglCustomerInfoDao {
 			.lte(TLpglCustomerInfos::getCreateTime, new Timestamp(endStamp)) : baseBuild;
 
 		return MybatisPlus.getInstance().findAll(new TLpglCustomerInfos(), baseBuild);
+	}
+
+	@Override
+	public int delLtUpdateTimePage(Long timeStamp) {
+		TLpglCustomerInfos build = TLpglCustomerInfos.builder().build();
+		build.setIsValid(AppConstant.IS_VALID_NO);
+		build.setDeletedFlag(true);
+		return MybatisPlus.getInstance().update(build, baseBuild()
+			.lt(TLpglCustomerInfos::getUpdateTime, new Timestamp(timeStamp).toString())
+		);
 	}
 
 }

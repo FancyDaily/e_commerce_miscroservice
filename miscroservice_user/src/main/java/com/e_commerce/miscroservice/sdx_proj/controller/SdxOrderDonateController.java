@@ -5,8 +5,10 @@ import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxDonateOrderVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,12 +53,42 @@ public class SdxOrderDonateController {
 
 	/**
 	 * 创建捐赠订单
+	 * @param bookInfoIds 书籍信息编号(一或多个)
+	 * @param serviceId 关联公益项目编号
+	 * @param shipType 捐书方式 1邮寄2自送
+	 * @param shippingAddressId 邮寄地址编号（指定一个）
+	 * @param bookStationId 书籍驿站编号（指定一个）
 	 * @return
 	 */
 	@RequestMapping("donate/create")
-	public Object createBookDonateOrder() {
-	//TODO		return Response.success(sdxBookOrderService.);
-		return null;
+	public Object createBookDonateOrder(Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
+		return Response.success(sdxBookOrderService.createDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId));
+	}
+
+	/**
+	 * 取消捐赠订单
+	 * @param orderId 订单编号
+	 * @return
+	 */
+	@RequestMapping("donate/cancel")
+	public Object cancelBookDonateOrder(Long orderId) {
+		sdxBookOrderService.cancel(orderId);
+		return Response.success();
+	}
+
+	/**
+	 * 确认收货/书本已寄出
+	 * @param id 订单编号
+	 * @param status 状态
+	 * @param expressNo 快递单号
+	 * @return
+	 */
+	@Consume(SdxDonateOrderVo.class)
+	public Object modify(Long id, Integer status, String expressNo) {
+		SdxDonateOrderVo obj = (SdxDonateOrderVo) ConsumeHelper.getObj();
+		TSdxBookOrderPo tSdxBookOrderPo = obj.copyTSdxBookOrder();
+		sdxBookOrderService.modTSdxBookOrder(tSdxBookOrderPo);
+		return Response.success();
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -45,6 +46,7 @@ public class LpglCustomerInfoController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public Object commitCustomerInfos(Integer status, Integer pageNum, Integer pageSize, Long estateId, Integer isDone, String area, String department, boolean isToday) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
@@ -73,6 +75,7 @@ public class LpglCustomerInfoController {
 	 * @return
 	 */
 	@RequestMapping("commit")
+	@UrlAuth
 	public Object commitCustomerInfos(Long id, Long houseId, String telephone, String description) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
@@ -98,6 +101,7 @@ public class LpglCustomerInfoController {
 	 * @return
 	 */
 	@RequestMapping("remove")
+	@UrlAuth
 	public Object removeCustomerInfos(Long id) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();

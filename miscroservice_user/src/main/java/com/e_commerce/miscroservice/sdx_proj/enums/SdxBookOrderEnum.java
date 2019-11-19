@@ -14,7 +14,8 @@ public enum SdxBookOrderEnum {
 	STATUS_UNPAY(-1, "待支付"),
 	STATUS_INITAIL(0, "书籍待收取(邮寄)"),
 	STATUS_PROCESSING(1, "进行中"),
-	STATUS_DONE(2, "已完成")
+	STATUS_DONE(2, "已完成"),
+	STATUS_CANCLE(3, "已取消")
 ;
 	int code;
 	String msg;

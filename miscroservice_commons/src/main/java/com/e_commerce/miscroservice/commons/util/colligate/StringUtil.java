@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 /**
@@ -1378,6 +1379,10 @@ public class StringUtil {
 				return b.toString();
 			b.append(",");
 		}
+	}
+
+	public static String longListToString(List<Long> longs) {
+		return longs.stream().map(String::valueOf).reduce("", (a, b) -> a + "," + b);
 	}
 
 	/**

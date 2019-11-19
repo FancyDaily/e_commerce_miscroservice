@@ -5,7 +5,6 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAut
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
-import com.e_commerce.miscroservice.commons.helper.util.application.generate.TokenUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;

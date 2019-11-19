@@ -124,7 +124,12 @@ public class LpglCertServieImpl implements LpglCertService {
 			.discountPrice(disCountPrice)
 			.description(description).build();
 		lpglCertDao.insert(build);
+		dealWithMessage(type, build);
 
+	}
+
+	@Override
+	public void dealWithMessage(Integer type, TLpglCert build) {
 		//递交审核时，根据类别，向相应负责人发送通知
 		List<String> roleNames = null;
 		List<String> names = TlpglRoleEnum.getNames(3);
@@ -146,10 +151,13 @@ public class LpglCertServieImpl implements LpglCertService {
 
 				break;
 			case TYPE_PRICEDISCOUNT:
-				//2.申请优惠 -> TODO 通知市场经理、销售经理 level3除了财务角色
+				//2.申请优惠 -> TODO 通知level3市场经理、level4销售主管
 				url = "http://wx.p4j.cn/loupan/html/shenhe.html?type=2&certId=" + build.getId();
 //				TODO content = "";
-				roleNames = getRoleNamesExceptName(names, "财务经理");
+//				roleNames = getRoleNamesExceptName(names, "财务经理");
+				roleNames = getRoleNamesInArray(names, "市场经理");
+				List<String> names3 = getRoleNamesInArray(TlpglRoleEnum.getNames(4), "销售主管");
+				roleNames.addAll(names3);
 
 				break;
 			case TYPE_CUSTOMER:
@@ -174,6 +182,16 @@ public class LpglCertServieImpl implements LpglCertService {
 			//String openId, String firstData, String orderNo, String orderType, String content, String lastData, String url
 			WxUtil.sendPublicWaitMsg(openId, firstData, build.getId().toString(), theEnum.getMsg(), content, lastData, url);
 		}
+	}
+
+	@Override
+	public void handOverMessage(Long certId, String... openIds) {
+		TLpglCert tLpglCert = lpglCertDao.selectByPrimaryKey(certId);
+		Double discountPrice = tLpglCert.getDiscountPrice();
+		discountPrice = discountPrice != null ? discountPrice <= 0 ? null : discountPrice : discountPrice;
+		Integer type = tLpglCert.getType();
+
+		dealWithMessage(type, tLpglCert);
 	}
 
 	@Override

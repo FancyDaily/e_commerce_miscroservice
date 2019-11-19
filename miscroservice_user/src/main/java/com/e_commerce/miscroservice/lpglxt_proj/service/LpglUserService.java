@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @Author: FangyiXu
@@ -22,4 +23,8 @@ public interface LpglUserService {
 	AjaxResult userList(String name, String userAccount, Integer pageNum, Integer pageSize);
 
 	AjaxResult authorities(Long id);
+
+	List<TLpglUser> getBoss(Long id);
+
+	void handOver(Long userId, Long certId);
 }

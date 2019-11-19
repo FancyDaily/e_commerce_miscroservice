@@ -15,5 +15,9 @@ public interface LpglCertService {
 
 	void commitCert(Long userId, Long houseId, Integer type, Double disCountPrice, String description);
 
+	void dealWithMessage(Integer type, TLpglCert build);
+
+	void handOverMessage(Long certId, String... openIds);
+
 	TLpglCert detail(Long certId);
 }

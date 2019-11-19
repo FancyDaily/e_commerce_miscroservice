@@ -2,7 +2,6 @@ package com.e_commerce.miscroservice.sdx_proj.po;
 
 import com.e_commerce.miscroservice.sdx_proj.vo.*;
 
-
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.AutoGenerateCode;
@@ -55,6 +54,7 @@ public class TSdxBookOrderPo extends BaseEntity {
 
 	@Column(commit = "书籍驿站编号")
 	private Long bookStationId;
+
 
 	@Column(commit = "订单类型(捐书、购书)")
 	private Integer type;

@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
@@ -425,5 +426,32 @@ public class LpglUserController {
 		return ajaxResult;
 	}
 
+	/**
+	 * 获取上司列表(递交权)
+	 * @return
+	 */
+	@RequestMapping("boss")
+	@UrlAuth
+	public Object getBoss() {
+		AjaxResult result = new AjaxResult();
+		List<TLpglUser> res = lpglUserService.getBoss(IdUtil.getId());
+		result.setData(res);
+		result.setSuccess(true);
+		return result;
+	}
 
+	/**
+	 * 转交优惠审批
+	 * @param userIds 用户编号
+	 * @param certId 审核编号
+	 * @return
+	 */
+	@RequestMapping("handOver")
+	@UrlAuth
+	public Object handOver(Long userIds, Long certId) {
+		AjaxResult result = new AjaxResult();
+		lpglUserService.handOver(userIds, certId);
+		result.setSuccess(true);
+		return result;
+	}
 }

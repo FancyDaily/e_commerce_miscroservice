@@ -17,4 +17,8 @@ public interface LpglPositionDao {
 	List<TLpglPosistion> selectByLevel(Integer level);
 
 	TLpglPosistion getPosition(Integer level);
+
+	List<TLpglPosistion> selectInNames(String... posisitionName);
+
+	List<TLpglPosistion> selectInNames(List<String> posisitionName);
 }
