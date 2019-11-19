@@ -65,4 +65,11 @@ public class LpglPositionDaoImpl implements LpglPositionDao {
 			.in(TLpglPosistion::getPosisitionName, posisitionName)
 		);
 	}
+
+	@Override
+	public List<TLpglPosistion> selectInIds(List<Long> positionIds) {
+		return MybatisPlus.getInstance().findAll(new TLpglPosistion(), baseBuild()
+			.in(TLpglPosistion::getId, positionIds)
+		);
+	}
 }

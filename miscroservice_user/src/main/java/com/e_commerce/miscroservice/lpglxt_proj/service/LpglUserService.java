@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.service;
 
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
+import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUserPosistion;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,4 +28,10 @@ public interface LpglUserService {
 	List<TLpglUser> getBoss(Long id);
 
 	void handOver(Long userId, Long certId);
+
+	void delUser(Long userIds);
+
+	AjaxResult delUserAuthorities(Long id, Long authId);
+
+	List<TLpglUserPosistion> findUserPosition(Long userIds);
 }

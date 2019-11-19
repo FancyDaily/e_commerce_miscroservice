@@ -721,7 +721,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
+	public HashMap<String, Object> platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly) {
 		List<CsqDataBIVo> csqDataBIVos = new ArrayList<>();
 		//基本构建
 		MybatisPlusBuild baseBuild = csqPaymentDao.baseBuild();
@@ -874,7 +874,17 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			csqDataBIVos.add(build);
 		}
 
-		return PageUtil.buildQueryResult(csqDataBIVos, total);
+		QueryResult result = PageUtil.buildQueryResult(csqDataBIVos, total);
+		CsqDataBIVo csqDataBIVo = (CsqDataBIVo) result.getResultList().get(0);
+		Map<String, List<CsqLineDiagramData>> diagramMap = csqDataBIVo.getDiagramMap();
+		Double totalIn = sumAmount(diagramMap.get("in"));
+		Double totalOut = sumAmount(diagramMap.get("out"));
+		HashMap<String, Object> resultMap = new HashMap<>();
+		resultMap.put("queryResult", result);
+		resultMap.put("totalIn", totalIn);
+		resultMap.put("totalOut", totalOut);
+
+		return resultMap;
 	}
 
 	@Override
@@ -885,7 +895,7 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 	}
 
 	@Override
-	public HashMap<String, List<CsqLineDiagramData>> platformDataStatistics(Long userIds, Long entityId, Integer entityType, String startDate, String endDate) {
+	public HashMap<String, Object> platformDataStatistics(Long userIds, Long entityId, Integer entityType, String startDate, String endDate) {
 		List<CsqDataBIVo> csqDataBIVos = new ArrayList<>();
 		//基本构建
 		MybatisPlusBuild baseBuild = csqPaymentDao.baseBuild();
@@ -953,7 +963,23 @@ public class CsqPaymentServiceImpl implements CsqPaymentService {
 			.collect(Collectors.groupingBy(TCsqUserPaymentRecord::getEntityId));
 
 		HashMap<String, List<CsqLineDiagramData>> diagramMap = getDiagramMap(unHandledList, false, startDate, endDate);
-		return diagramMap;
+
+		//汇总金额
+		List<CsqLineDiagramData> in = diagramMap.get("in");
+		List<CsqLineDiagramData> out = diagramMap.get("out");
+		Double totalIn = sumAmount(in);
+		Double totalOut = sumAmount(out);
+		HashMap<String, Object> resultMap = new HashMap<>();
+		resultMap.putAll(diagramMap);
+		resultMap.put("totalIn", totalIn);
+		resultMap.put("totalOut", totalOut);
+
+		return resultMap;
+	}
+
+	private Double sumAmount(List<CsqLineDiagramData> in) {
+		return in.stream()
+			.map(CsqLineDiagramData::getAmount).reduce(0d, Double::sum);
 	}
 
 	private HashMap<String, List<CsqLineDiagramData>> getDiagramMap(List<TCsqUserPaymentRecord> v, boolean isPlatform) {

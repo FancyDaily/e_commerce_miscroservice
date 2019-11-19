@@ -9,26 +9,21 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.service.CsqPayService;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxShippingAddressDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookTransRecordEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTransRecordPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
+import com.e_commerce.miscroservice.sdx_proj.service.*;
 import com.e_commerce.miscroservice.sdx_proj.vo.*;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +52,10 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	SdxShippingAddressDao sdxShippingAddressDao;
 	@Autowired
 	SdxBookInfoService sdxBookInfoService;
+	@Autowired
+	SdxBookTransRecordService sdxBookTransRecordService;
+	@Autowired
+	SdxBookTransRecordDao sdxBookTransRecordDao;
 
 	@Override
 	public long modTSdxBookOrder(TSdxBookOrderPo tSdxBookOrderPo) {
@@ -75,10 +74,58 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			//如果是添加快递单号 -> 状态变成已发货
 			TSdxBookOrderPo orderPo = sdxBookOrderDao.selectByPrimaryKey(id);
 			Integer originStatus = orderPo.getStatus();
-			TSdxBookOrderPo toUpdater = TSdxBookOrderPo.builder().build();
+			TSdxBookOrderPo toUpdater = tSdxBookOrderPo;
+			Integer status = toUpdater.getStatus();
+			Integer type = orderPo.getType();	//原订单
+			String bookIds = orderPo.getBookIds();	//原订单
+			String bookInfos = orderPo.getBookIfIs();
 			toUpdater.setId(id);
 			if(SdxBookOrderEnum.STATUS_INITAIL.getCode() == originStatus && !StringUtil.isEmpty(expressNo)) {
-				toUpdater.setStatus(SdxBookOrderEnum.STATUS_PROCESSING.getCode());	//订单进行中
+				if(status == null) {
+					toUpdater.setStatus(SdxBookOrderEnum.STATUS_PROCESSING.getCode());	//订单进行中
+				}
+			}
+
+			//如果是确认收货 -> 类型 捐书 -> 书籍状态改变，书籍漂流记录添加, 返积分
+			if(SdxBookOrderEnum.STATUS_DONE.getCode() != originStatus && SdxBookOrderEnum.STATUS_DONE.getCode() == status) {
+				if(SdxBookOrderEnum.TYPE_DONATE.getCode() == type) {
+					List<Long> bookIdList = StringUtil.splitToArray(bookIds);
+					List<Long> bookInfoList = StringUtil.splitToArray(bookInfos);
+					if(bookIdList.size() != bookInfoList.size()) {
+						List<TSdxBookPo> tSdxBookPos = sdxbookDao.selectInIds(bookIdList);
+						bookInfoList = tSdxBookPos.stream().map(TSdxBookPo::getBookInfoId).collect(Collectors.toList());
+					}
+
+					List<TSdxBookPo> tSdxBookPos = sdxbookDao.selectInIds(bookIdList);
+					tSdxBookPos = tSdxBookPos.stream()
+						.map(a -> {
+							a.setStatus(SdxBookEnum.STATUS_ON_SHELF.getCode());	//上架
+							return a;
+						}).collect(Collectors.toList());
+					//更新
+					sdxbookDao.update(tSdxBookPos);
+					//TODO 书籍漂流记录 -> 第 1 位主人捐于 xxx ,类型
+					for(int i=0; i < bookIdList.size(); i++) {
+						Long bookId = bookIdList.get(i);
+						Long bookInfoId = bookInfoList.get(i);
+						//查询是第几任主人
+						String description = "第%d位主人捐于" + DateUtil.timeStamp2Date(System.currentTimeMillis());
+						List<TSdxBookTransRecordPo> recordPos = sdxBookTransRecordDao.selectByBookIdAndType(bookId);
+						description = String.format(description, recordPos.size());
+
+						TSdxBookTransRecordPo.builder()
+							.type(SdxBookTransRecordEnum.TYPE_BECOME_OWNER.getCode())
+							.userId(orderPo.getUserId())
+							.bookId(bookId)
+							.bookInfoId(bookInfoId)
+							.description(description)	//TODO 构建描述
+							.notes(null)
+							.build();
+					}
+
+//					sdxBookTransRecordDao.saveTSdxBookTransRecordIfNotExist();
+					//TODO 返还积分（根据约定的积分
+				}
 			}
 			return sdxBookOrderDao.modTSdxBookOrder(tSdxBookOrderPo);
 		}

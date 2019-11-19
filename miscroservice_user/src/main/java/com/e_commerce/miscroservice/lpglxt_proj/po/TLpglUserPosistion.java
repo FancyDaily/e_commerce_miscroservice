@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TLpglUserPosistion extends BaseEntity {
+
+	@Transient
+	private String name;
 
 	@Column(commit = "用户id",length = 11)
 	private Long userId;

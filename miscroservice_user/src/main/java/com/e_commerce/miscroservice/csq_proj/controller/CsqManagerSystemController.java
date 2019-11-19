@@ -2528,7 +2528,7 @@ public class CsqManagerSystemController {
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("数据BI(收支统计), searchParam={}, startDate={}, endDate={}, pageNum={}, pageSize={}, isFuzzySearch={}, isServiceOnly={}", searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
-			QueryResult queryResult = csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
+			HashMap<String, Object> queryResult = csqPaymentService.platformDataStatistics(userIds, searchParam, startDate, endDate, pageNum, pageSize, isFuzzySearch, isServiceOnly);
 			result.setData(queryResult);
 			result.setSuccess(true);
 		} catch (MessageException e) {
@@ -2559,7 +2559,7 @@ public class CsqManagerSystemController {
 		try {
 			Long userIds = UserUtil.getManagerId(csqUserDao, userRedisTemplate);
 			log.info("项目/基金 数据BI, entityId={}, entityType={}, startDate={}, endDate={}", entityId, entityType, startDate, endDate);
-			HashMap<String, List<CsqLineDiagramData>> stringListHashMap = csqPaymentService.platformDataStatistics(userIds, entityId, entityType, startDate, endDate);
+			HashMap<String, Object> stringListHashMap = csqPaymentService.platformDataStatistics(userIds, entityId, entityType, startDate, endDate);
 			result.setData(stringListHashMap);
 			result.setSuccess(true);
 		} catch (Exception e) {

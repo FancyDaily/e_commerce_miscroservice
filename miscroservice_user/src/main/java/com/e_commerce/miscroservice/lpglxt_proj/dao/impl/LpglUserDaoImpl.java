@@ -10,6 +10,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglUser;
 import com.e_commerce.miscroservice.user.po.TUser;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,11 @@ public class LpglUserDaoImpl implements LpglUserDao {
 			.map(TLpglUser::getId).collect(Collectors.toList());
 		return MybatisPlus.getInstance().update(asList, new MybatisPlusBuild(TLpglUser.class)
 			.in(TLpglUser::getId, ids));
+	}
+
+	@Override
+	public int update(TLpglUser user) {
+		return update(Arrays.asList(user));
 	}
 
 	@Override

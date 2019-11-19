@@ -7,4 +7,8 @@ public interface SdxBookTransRecordDao {
     int delTSdxBookTransRecordByIds(Long... ids);
     TSdxBookTransRecordPo findTSdxBookTransRecordById(Long id);
     List<TSdxBookTransRecordPo> findTSdxBookTransRecordByAll(TSdxBookTransRecordPo tSdxBookTransRecordPo, Integer page, Integer size);
+
+	List<TSdxBookTransRecordPo> selectByBookId(Long bookId);
+
+	List<TSdxBookTransRecordPo> selectByBookIdAndType(Long bookId);
 }

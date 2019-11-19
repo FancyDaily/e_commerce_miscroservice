@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.lpglxt_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.entity.service.Token;
@@ -14,6 +15,7 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.commons.utils.UserUtil;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglPositionDao;
 import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserDao;
+import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglUserPositionDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.*;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglPositionService;
@@ -27,10 +29,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.e_commerce.miscroservice.user.rpc.AuthorizeRpcService.DEFAULT_PASS;
@@ -60,6 +59,9 @@ public class LpglUserServiceImpl implements LpglUserService {
 
 	@Autowired
 	LpglCertService lpglCertService;
+
+	@Autowired
+	LpglUserPositionDao lpglUserPositionDao;
 
 
 	@Override
@@ -171,6 +173,8 @@ public class LpglUserServiceImpl implements LpglUserService {
 		AjaxResult result = new AjaxResult();
 		MybatisPlusBuild mybatisPlusBuild = new MybatisPlusBuild(TLpglUser.class);
 
+		mybatisPlusBuild.eq(TLpglUser::getIsValid, AppConstant.IS_VALID_YES);
+		mybatisPlusBuild.eq(TLpglUser::getDeletedFlag, false);
 		mybatisPlusBuild.like(TLpglUser::getName, buildLikeString(name));
 		mybatisPlusBuild.like(TLpglUser::getUserAccount, buildLikeString(userAccount));
 
@@ -222,6 +226,40 @@ public class LpglUserServiceImpl implements LpglUserService {
 		if(vxOpenId == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "发送通知对象所需openid为空！");
 		//发送通知
 		lpglCertService.handOverMessage(certId, vxOpenId);
+	}
+
+	@Override
+	public void delUser(Long userIds) {
+		TLpglUser build = TLpglUser.builder()
+			.build();
+		build.setId(userIds);
+		build.setIsValid(AppConstant.IS_VALID_YES);
+		build.setDeletedFlag(true);
+		lpglUserDao.update(build);
+	}
+
+	@Override
+	public AjaxResult delUserAuthorities(Long id, Long authId) {
+		AjaxResult result = new AjaxResult();
+		return result;
+	}
+
+	@Override
+	public List<TLpglUserPosistion> findUserPosition(Long userIds) {
+		List<TLpglUserPosistion> userPosistions = lpglUserPositionDao.selectByUserId(userIds);
+		if(userPosistions.isEmpty()) return new ArrayList<>();
+		List<Long> positionIds = userPosistions.stream()
+			.map(TLpglUserPosistion::getId).collect(Collectors.toList());
+		List<TLpglPosistion> posistions = lpglPositionDao.selectInIds(positionIds);
+		Map<Long, List<TLpglPosistion>> idPositionMap = posistions.stream()
+			.collect(Collectors.groupingBy(TLpglPosistion::getId));
+		return userPosistions.stream()
+			.map(a -> {
+				List<TLpglPosistion> tLpglPosistions = idPositionMap.get(a.getPosistionId());
+				TLpglPosistion tLpglPosistion = tLpglPosistions.get(0);
+				a.setName(tLpglPosistion.getPosisitionName());
+				return a;
+			}).collect(Collectors.toList());
 	}
 
 	private String buildLikeString(String str) {

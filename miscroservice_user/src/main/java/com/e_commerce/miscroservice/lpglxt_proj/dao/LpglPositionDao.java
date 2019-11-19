@@ -21,4 +21,6 @@ public interface LpglPositionDao {
 	List<TLpglPosistion> selectInNames(String... posisitionName);
 
 	List<TLpglPosistion> selectInNames(List<String> posisitionName);
+
+	List<TLpglPosistion> selectInIds(List<Long> positionIds);
 }

@@ -1769,6 +1769,10 @@ public class StringUtil {
 		return trem;
 	}
 
+	public static List<Long> splitToArray(String bookIds) {
+		return Arrays.asList(bookIds.split(",")).stream().filter(a -> !StringUtil.isEmpty(a)).map(Long::valueOf).collect(Collectors.toList());
+	}
+
 	// 判断一个字符串是否都为数字
 	public boolean isDigit(String strNum) {
 		Pattern pattern = Pattern.compile("[0-9]{1,}");

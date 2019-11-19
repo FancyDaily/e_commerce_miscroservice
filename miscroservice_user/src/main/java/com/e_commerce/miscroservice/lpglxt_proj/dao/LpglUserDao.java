@@ -28,6 +28,8 @@ public interface LpglUserDao {
 
 	int update(List<TLpglUser> asList);
 
+	int update(TLpglUser user);
+
 	MybatisPlusBuild baseBuild();
 
 	List<TLpglUser> selectByName(String name);

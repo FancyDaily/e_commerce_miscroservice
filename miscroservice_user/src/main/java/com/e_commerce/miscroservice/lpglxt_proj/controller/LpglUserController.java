@@ -3,7 +3,6 @@ package com.e_commerce.miscroservice.lpglxt_proj.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
-import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.entity.colligate.AjaxResult;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
@@ -16,7 +15,6 @@ import com.e_commerce.miscroservice.lpglxt_proj.service.LpglUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -454,4 +452,30 @@ public class LpglUserController {
 		result.setSuccess(true);
 		return result;
 	}
+
+	/**
+	 * 删除用户
+	 * @param userIds 用户编号
+	 * @return
+	 */
+	@RequestMapping("del")
+	@UrlAuth
+	public Object delUser(Long userIds) {
+		AjaxResult result = new AjaxResult();
+		lpglUserService.delUser(userIds);
+		result.setSuccess(true);
+		return result;
+	}
+
+
+	@RequestMapping("user/positions")
+	@UrlAuth
+	public Object findUserPosition(Long userIds) {
+		AjaxResult result = new AjaxResult();
+		List<TLpglUserPosistion> userPosition = lpglUserService.findUserPosition(userIds);
+		result.setData(userPosition);
+		result.setSuccess(true);
+		return result;
+	}
+
 }

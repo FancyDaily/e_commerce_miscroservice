@@ -5,7 +5,6 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqOrder;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUserPaymentRecord;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqBasicUserVo;
-import com.e_commerce.miscroservice.csq_proj.vo.CsqLineDiagramData;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqUserPaymentRecordVo;
 
 import java.sql.Timestamp;
@@ -65,9 +64,9 @@ public interface CsqPaymentService {
 
 	HashMap<String, Object> donateRecordList(Long userIds, String searchParam, Page page, boolean isFuzzySearch, String orderNo);
 
-	QueryResult platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly);
+	HashMap<String, Object> platformDataStatistics(Long userIds, String searchParam, String startDate, String endDate, Integer pageNum, Integer pageSize, Boolean isFuzzySearch, Boolean isServiceOnly);
 
 	Double getPlatFromInCome();
 
-	HashMap<String, List<CsqLineDiagramData>> platformDataStatistics(Long userIds, Long entityId, Integer entityType, String startDate, String endDate);
+	HashMap<String, Object> platformDataStatistics(Long userIds, Long entityId, Integer entityType, String startDate, String endDate);
 }
