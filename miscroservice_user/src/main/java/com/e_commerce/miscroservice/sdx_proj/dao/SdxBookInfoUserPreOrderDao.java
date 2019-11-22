@@ -9,4 +9,8 @@ public interface SdxBookInfoUserPreOrderDao {
     List<TSdxBookInfoUserPreOrderPo> findTSdxBookInfoUserPreOrderByAll(TSdxBookInfoUserPreOrderPo tSdxBookInfoUserPreOrderPo, Integer page, Integer size);
 
 	List<TSdxBookInfoUserPreOrderPo> selectByBookInfoId(Long id);
+
+	List<TSdxBookInfoUserPreOrderPo> selectByUserIdAndBookInfoId(Long userId, Long bookInfoId);
+
+	int update(List<TSdxBookInfoUserPreOrderPo> toUpdater);
 }

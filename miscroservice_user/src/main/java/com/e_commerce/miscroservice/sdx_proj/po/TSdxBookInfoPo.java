@@ -28,6 +28,18 @@ public class TSdxBookInfoPo extends BaseEntity {
 	private Integer expectedScore;
 
 	/**
+	 * 想要人数
+	 */
+	@Transient
+	private Integer wishNum;
+
+	/**
+	 * 常年关联的公益项目编号
+	 */
+	@Column(commit = "关联项目编号")
+	private Long serviceId;
+
+	/**
 	 * 书名
 	 */
 	@Column(commit = "书名")

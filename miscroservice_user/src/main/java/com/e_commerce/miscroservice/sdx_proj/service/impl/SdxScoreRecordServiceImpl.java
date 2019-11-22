@@ -1,9 +1,12 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxScoreRecordDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxScoreRecordEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxScoreRecordPo;
@@ -141,6 +144,37 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 			.orderId(order.getId())
 			.build()
 		);
+	}
+
+	@Override
+	public void earnScores(Long userId, TSdxBookOrderPo order) {
+		Integer type = order.getType();
+		checkTypeIn(type);
+		//余额变动
+		TCsqUser user = sdxUserDao.selectByPrimaryKey(userId);
+		Integer sdxScores = user.getSdxScores();
+		Integer scores = order.getExpectedTotalScores();
+		user.setSdxScores(sdxScores + scores);
+		sdxUserDao.update(user);
+		// 插入流水 -> 1条 用户获取积分流水
+		String description = "捐赠书籍";
+		TSdxScoreRecordPo build = TSdxScoreRecordPo.builder()
+			.userId(userId)
+			.amount(scores)
+			.orderId(order.getId())
+			.type(type)
+			.inOut(SdxScoreRecordEnum.IN_OUT_IN.getCode())
+			.bookInfoIds(order.getBookIfIs())
+			.bookIds(order.getBookIds())
+//			.bookAfterReadingNoteId()	//TODO 读后感编号??
+			.description(description)		//描述
+			.build();
+//			.date()		//trasient
+		sdxScoreRecordDao.saveTSdxScoreRecordIfNotExist(build);
+	}
+
+	private void checkTypeIn(Integer type) {
+		if(SdxBookOrderEnum.TYPE_PURCHASE.getCode() == type) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的赚取类型！");
 	}
 
 	private static String formatDateToMdHm(String dateStr) {

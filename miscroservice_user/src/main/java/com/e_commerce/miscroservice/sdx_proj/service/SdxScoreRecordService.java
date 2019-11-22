@@ -16,4 +16,11 @@ public interface SdxScoreRecordService {
 	QueryResult list(Long id, Integer pageNum, Integer pageSize, Integer option);
 
 	void dealWithScoreOut(TSdxBookOrderPo order);
+
+	/**
+	 * 纯积分赚取
+	 * @param userId
+	 * @param order
+	 */
+	void earnScores(Long userId, TSdxBookOrderPo order);
 }

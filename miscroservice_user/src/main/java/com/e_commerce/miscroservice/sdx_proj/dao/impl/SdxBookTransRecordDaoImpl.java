@@ -79,4 +79,9 @@ public class SdxBookTransRecordDaoImpl implements SdxBookTransRecordDao {
 	public List<TSdxBookTransRecordPo> selectByBookIdAndType(Long bookId) {
 		return null;
 	}
+
+	@Override
+	public int save(List<TSdxBookTransRecordPo> toInserter) {
+		return MybatisPlus.getInstance().save(toInserter);
+	}
 }

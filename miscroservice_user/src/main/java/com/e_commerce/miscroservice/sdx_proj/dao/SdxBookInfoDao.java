@@ -13,4 +13,8 @@ public interface SdxBookInfoDao {
 	TSdxBookInfoPo selectByName(String name);
 
 	List<TSdxBookInfoPo> selectInIds(Long... bookInfoIds);
+
+	List<TSdxBookInfoPo> selectInIds(List<Long> bookInfoIds);
+
+	List<TSdxBookInfoPo> selectInServiceIds(List<Long> serviceIds);
 }

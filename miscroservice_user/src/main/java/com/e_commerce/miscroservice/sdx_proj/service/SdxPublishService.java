@@ -21,5 +21,7 @@ public interface SdxPublishService {
 
 	Map get(Integer mainKey);
 
+	String getValue(Integer mainKey);
+
 	Object getAsList(Integer mainKey);
 }

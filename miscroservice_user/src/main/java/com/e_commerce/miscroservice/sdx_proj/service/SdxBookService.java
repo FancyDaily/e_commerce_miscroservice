@@ -1,5 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.service;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import java.util.List;
@@ -9,7 +11,10 @@ public interface SdxBookService {
     long modTSdxBook(TSdxBookPo tSdxBookPo);
     int delTSdxBookByIds(Long... ids);
     TSdxBookVo findTSdxBookById(Long id);
-    List<TSdxBookVo> findTSdxBookByAll(TSdxBookPo tSdxBookPo, Integer page, Integer size, Integer sortType);
+
+	void setSuggestList(Integer dayNo, List<Long> bookInfoIds);
+
+	List<TSdxBookVo> findTSdxBookByAll(TSdxBookPo tSdxBookPo, Integer page, Integer size, Integer sortType);
 
 	List<TSdxBookVo> findTSdxBookByAll(TSdxBookPo tSdxBookPo, Integer page, Integer size);
 
@@ -22,4 +27,14 @@ public interface SdxBookService {
 	List<TSdxBookPo> getAvailableBooks(Long bookInfoId);
 
 	Map<Long, Integer> getIdExpectedScoresMap(Long... bookInfoIds);
+
+	void putOnShelf(String bookIds);
+
+	List<TSdxBookInfoPo> mostFollowList();
+
+	List<TSdxBookInfoPo> suggestList();
+
+	String getSuggestInitail();
+
+	List<TCsqService> gotoServiceList();
 }

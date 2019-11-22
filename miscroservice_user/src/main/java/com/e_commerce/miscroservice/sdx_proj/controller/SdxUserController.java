@@ -36,6 +36,10 @@ public class SdxUserController {
 	}
 
 
+	/**
+	 * 全局播报
+	 * @return
+	 */
 	@RequestMapping("global/donate")
 	public Object globalDonate() {
 		log.info("全局播报");

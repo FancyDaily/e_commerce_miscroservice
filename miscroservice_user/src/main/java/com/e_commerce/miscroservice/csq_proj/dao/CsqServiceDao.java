@@ -98,4 +98,6 @@ public interface CsqServiceDao {
 	List<TCsqService> selectAll(Long userIds);
 
 	TCsqService selectByNameAndType(String name, Integer type);
+
+	List<TCsqService> selectByIsSdx(int code);
 }

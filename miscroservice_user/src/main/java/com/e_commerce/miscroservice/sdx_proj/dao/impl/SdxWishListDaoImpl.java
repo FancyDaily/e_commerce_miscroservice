@@ -67,4 +67,9 @@ public class SdxWishListDaoImpl implements SdxWishListDao {
 		return MybatisPlus.getInstance().findAll(new TSdxWishListPo(), eq.page(pageNum, pageSize)
 		);
 	}
+
+	@Override
+	public List<TSdxWishListPo> selectAll() {
+		return MybatisPlus.getInstance().findAll(new TSdxWishListPo(), baseBuild());
+	}
 }

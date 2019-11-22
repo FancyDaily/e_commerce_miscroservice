@@ -121,7 +121,6 @@ public class SdxOrderDonateController {
 	@PostMapping("mod")
 	@Consume(TSdxBookOrderVo.class)
 	public Response modTSdxBookOrder(@RequestParam(required = false) Long id, @RequestParam(required = false) Integer type, @RequestParam(required = false) Double price, @RequestParam(required = false) Integer status, @RequestParam(required = false) String bookIds, @RequestParam(required = false) Integer shipType, @RequestParam(required = false) Double bookPrice, @RequestParam(required = false) Double shipPirce, @RequestParam(required = false) Double totalPrice, @RequestParam(required = false) Long bookInfoIds, @RequestParam(required = false) Long bookStationId, @RequestParam(required = false) Integer scoreDiscount, @RequestParam(required = false) Integer exactTotalScores, @RequestParam(required = false) Long shippingAddressId, @RequestParam(required = false) Integer expectedTotalScores) {
-//		type =
 		TSdxBookOrderVo tSdxBookOrderVo = (TSdxBookOrderVo) ConsumeHelper.getObj();
 		if (tSdxBookOrderVo == null) {
 			return Response.fail();

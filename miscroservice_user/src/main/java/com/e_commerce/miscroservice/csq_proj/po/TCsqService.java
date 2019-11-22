@@ -56,6 +56,9 @@ public class TCsqService extends BaseEntity {
 	@Transient
 	private List<TCsqServiceReport> reports;
 
+	@Transient
+	private Integer relatedBookInfoNum;
+
 	@Column(commit = "白名单")
 	private String whiteList;
 
@@ -136,6 +139,9 @@ public class TCsqService extends BaseEntity {
 
 	@Column(commit = "优先级", defaultVal = "0")
 	private Integer priority;
+
+	@Column(commit = "书袋熊相关", defaultVal = "0")
+	private Integer isSdx;
 
 	public CsqDailyDonateVo copyCsqDailyDonateVo() {
 		return null;

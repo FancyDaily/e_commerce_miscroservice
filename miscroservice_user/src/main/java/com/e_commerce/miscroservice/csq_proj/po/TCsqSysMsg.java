@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSysMsgVo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,9 @@ public class TCsqSysMsg extends BaseEntity {
 	@Transient
 	private TCsqService csqService;
 
+	@Transient
+	private TSdxBookInfoPo sdxBookInfoPo;
+
 	@Column(commit = "类别", length = 11, isNUll = false, defaultVal = "1")
 	private Integer type;
 
@@ -46,8 +50,14 @@ public class TCsqSysMsg extends BaseEntity {
 	@Column(commit = "项目编号")
 	private Long serviceId;
 
+	@Column(commit = "书本信息编号")
+	private Long bookInfoId;
+
 	@Column(commit = "已读状态", length = 11, defaultVal = "0")
 	private Integer isRead;
+
+	@Column(commit = "是否树袋熊相关", defaultVal = "0")
+	private Integer isSdx;
 
 	public TCsqSysMsg copyTCsqSysMsg() {
 		return null;

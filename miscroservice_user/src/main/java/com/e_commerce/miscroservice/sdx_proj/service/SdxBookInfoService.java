@@ -15,4 +15,5 @@ public interface SdxBookInfoService {
 	List<TSdxBookInfoVo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType);
 
 	TSdxBookInfoPo getBookInfo(String isbnCode);
+
 }

@@ -13,13 +13,11 @@ import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookTransRecordEnum;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTransRecordPo;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
+import com.e_commerce.miscroservice.sdx_proj.po.*;
 import com.e_commerce.miscroservice.sdx_proj.service.*;
 import com.e_commerce.miscroservice.sdx_proj.vo.*;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +54,12 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	SdxBookTransRecordService sdxBookTransRecordService;
 	@Autowired
 	SdxBookTransRecordDao sdxBookTransRecordDao;
+	@Autowired
+	SdxShoppingTrolleysDao sdxShoppingTrolleysDao;
+	@Autowired
+	SdxBookInfoUserPreOrderDao sdxBookInfoUserPreOrderDao;
+	@Autowired
+	SdxBookInfoDao sdxBookInfoDao;
 
 	@Override
 	public long modTSdxBookOrder(TSdxBookOrderPo tSdxBookOrderPo) {
@@ -74,20 +78,21 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			//如果是添加快递单号 -> 状态变成已发货
 			TSdxBookOrderPo orderPo = sdxBookOrderDao.selectByPrimaryKey(id);
 			Integer originStatus = orderPo.getStatus();
-			TSdxBookOrderPo toUpdater = tSdxBookOrderPo;
-			Integer status = toUpdater.getStatus();
-			Integer type = orderPo.getType();	//原订单
-			String bookIds = orderPo.getBookIds();	//原订单
+			Integer status = tSdxBookOrderPo.getStatus();
+			//原订单
+			Integer type = orderPo.getType();
+			String bookIds = orderPo.getBookIds();
 			String bookInfos = orderPo.getBookIfIs();
-			toUpdater.setId(id);
+			Long userId = orderPo.getUserId();
+			tSdxBookOrderPo.setId(id);
 			if(SdxBookOrderEnum.STATUS_INITAIL.getCode() == originStatus && !StringUtil.isEmpty(expressNo)) {
 				if(status == null) {
-					toUpdater.setStatus(SdxBookOrderEnum.STATUS_PROCESSING.getCode());	//订单进行中
+					tSdxBookOrderPo.setStatus(SdxBookOrderEnum.STATUS_PROCESSING.getCode());	//订单进行中
 				}
 			}
 
 			//如果是确认收货 -> 类型 捐书 -> 书籍状态改变，书籍漂流记录添加, 返积分
-			if(SdxBookOrderEnum.STATUS_DONE.getCode() != originStatus && SdxBookOrderEnum.STATUS_DONE.getCode() == status) {
+			if(status != null &&SdxBookOrderEnum.STATUS_DONE.getCode() != originStatus && SdxBookOrderEnum.STATUS_DONE.getCode() == status) {
 				if(SdxBookOrderEnum.TYPE_DONATE.getCode() == type) {
 					List<Long> bookIdList = StringUtil.splitToArray(bookIds);
 					List<Long> bookInfoList = StringUtil.splitToArray(bookInfos);
@@ -104,27 +109,32 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 						}).collect(Collectors.toList());
 					//更新
 					sdxbookDao.update(tSdxBookPos);
-					//TODO 书籍漂流记录 -> 第 1 位主人捐于 xxx ,类型
+					// 书籍漂流记录 -> 第 1 位主人捐于 xxx ,类型
+					List<TSdxBookTransRecordPo> toInserter = new ArrayList<>();
 					for(int i=0; i < bookIdList.size(); i++) {
 						Long bookId = bookIdList.get(i);
 						Long bookInfoId = bookInfoList.get(i);
 						//查询是第几任主人
-						String description = "第%d位主人捐于" + DateUtil.timeStamp2Date(System.currentTimeMillis());
+						String description = "第%d位主人捐于" + DateUtil.timeStamp2Date(System.currentTimeMillis());	// 构建描述
 						List<TSdxBookTransRecordPo> recordPos = sdxBookTransRecordDao.selectByBookIdAndType(bookId);
 						description = String.format(description, recordPos.size());
 
-						TSdxBookTransRecordPo.builder()
+						TSdxBookTransRecordPo build = TSdxBookTransRecordPo.builder()
 							.type(SdxBookTransRecordEnum.TYPE_BECOME_OWNER.getCode())
-							.userId(orderPo.getUserId())
+							.userId(userId)
 							.bookId(bookId)
 							.bookInfoId(bookInfoId)
-							.description(description)	//TODO 构建描述
+							.description(description)
 							.notes(null)
 							.build();
-					}
 
-//					sdxBookTransRecordDao.saveTSdxBookTransRecordIfNotExist();
-					//TODO 返还积分（根据约定的积分
+						toInserter.add(build);
+					}
+					sdxBookTransRecordDao.save(toInserter);
+					// 返还积分（根据约定的积分 -> 包括用户积分增加、流水插入
+					sdxScoreRecordService.earnScores(userId, orderPo);
+					// 书本上架
+					sdxBookService.putOnShelf(orderPo.getBookIds());
 				}
 			}
 			return sdxBookOrderDao.modTSdxBookOrder(tSdxBookOrderPo);
@@ -366,6 +376,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	private void afterPaySuccess(TSdxBookOrderPo order) {
+		Long userId = order.getUserId();
 		//积分减少，插入流水
 		sdxScoreRecordService.dealWithScoreOut(order);
 		//订单状态变化
@@ -384,6 +395,28 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			build.setId(a.getId());
 			return build;
 		}).collect(Collectors.toList());
+		// 如果你是书本的预定者，则释放对应书籍信息一单位预定数，消除用户-书本预定关系( 删除或者改状态
+		String bookIfIs = order.getBookIfIs();
+		List<String> strings1 = StringUtil.splitStringToList(bookIfIs, ",");
+		List<Long> bookInfoIds = strings1.stream()
+			.map(Long::valueOf).collect(Collectors.toList());
+		List<TSdxBookInfoPo> bookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIds);
+
+
+		List<TSdxBookInfoUserPreOrderPo> toUpdater = new ArrayList<>();
+		List<TSdxBookInfoPo> sdxBookInfoPos = new ArrayList<>();
+		bookInfoPos.stream()
+			.forEach(a -> {
+				Long bookInfoId = a.getId();
+				List<TSdxBookInfoUserPreOrderPo> sdxBookInfoUserPreOrderPos = sdxBookInfoUserPreOrderDao.selectByUserIdAndBookInfoId(userId, bookInfoId);
+				if(!sdxBookInfoUserPreOrderPos.isEmpty()) {
+					TSdxBookInfoUserPreOrderPo tSdxBookInfoUserPreOrderPo = sdxBookInfoUserPreOrderPos.get(0);
+					tSdxBookInfoUserPreOrderPo.setDeletedFlag(Boolean.TRUE);	//消除
+
+					toUpdater.add(tSdxBookInfoUserPreOrderPo);
+				}
+			});
+		sdxBookInfoUserPreOrderDao.update(toUpdater);
 		sdxbookDao.update(toUpdaters);
 	}
 
@@ -409,7 +442,13 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		for(String bookInfo: bookInfos) {
 			Long bookInfoId = Long.valueOf(bookInfo);
 			List<TSdxBookPo> books = sdxBookService.getAvailableBooks(bookInfoId);
-			if(books.isEmpty()) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "部分商品的余量已不足！请退出查看!");
+			//有效数量为 余量 - 已预定数量
+			int surplusAmount = books.size();
+			//查询预定数量
+			List<TSdxBookInfoUserPreOrderPo> bookInfoUserPreOrderPos = sdxBookInfoUserPreOrderDao.selectByBookInfoId(bookInfoId);
+			int preOrderNum = bookInfoUserPreOrderPos.size();
+			surplusAmount -= preOrderNum;
+			if(surplusAmount < 1) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "部分商品的余量已不足！请退出查看!");
 			bookIdList.add(books.get(0).getId());
 		}
 		//拼接成String
@@ -454,6 +493,14 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.status(SdxBookOrderEnum.STATUS_UNPAY.getCode())
 			.build();
 		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
+
+		//从购物车中删除对应bookInfoId的书籍条目
+		List<Long> bookInfoIdList = StringUtil.splitToArray(bookInfoIds);
+		List<TSdxShoppingTrolleysPo> pos = sdxShoppingTrolleysDao.selectByUserIdInBookInfoIds(userId, bookInfoIdList);
+		List<Long> trolleyIds = pos.stream()
+			.map(TSdxShoppingTrolleysPo::getId).collect(Collectors.toList());
+		sdxShoppingTrolleysDao.delTSdxShoppingTrolleysByIds(trolleyIds);
+
 		return orderNo;
 	}
 

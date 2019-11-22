@@ -78,6 +78,12 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
             if (tSdxBookInfoPo.getMaximumDiscount()!=null ) {
                 build.eq(TSdxBookInfoPo::getMaximumDiscount,tSdxBookInfoPo.getMaximumDiscount());
             }
+            if (tSdxBookInfoPo.getTag() != null) {
+            	build.eq(TSdxBookInfoPo::getTag, tSdxBookInfoPo.getTag());
+			}
+            if (tSdxBookInfoPo.getTagId() != null) {
+            	build.eq(TSdxBookInfoPo::getTagId, tSdxBookInfoPo.getTagId());
+			}
             if (page == null) {
                 page = 1;
             }
@@ -126,6 +132,20 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
 	public List<TSdxBookInfoPo> selectInIds(Long... bookInfoIds) {
 		return MybatisPlus.getInstance().findAll(new TSdxBookInfoPo(), baseBuild()
 			.in(TSdxBookInfoPo::getId, bookInfoIds)
+		);
+	}
+
+	@Override
+	public List<TSdxBookInfoPo> selectInIds(List<Long> bookInfoIds) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookInfoPo(), baseBuild()
+			.in(TSdxBookInfoPo::getId, bookInfoIds)
+		);
+	}
+
+	@Override
+	public List<TSdxBookInfoPo> selectInServiceIds(List<Long> serviceIds) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookInfoPo(), baseBuild()
+			.in(TSdxBookInfoPo::getServiceId, serviceIds)
 		);
 	}
 

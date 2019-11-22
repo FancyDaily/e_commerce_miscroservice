@@ -33,6 +33,9 @@ public class TSdxScoreRecordPo extends BaseEntity {
 	@Column(commit = "书籍信息编号")
 	String bookInfoIds;
 
+	@Column(commit = "书籍编号")
+	String bookIds;
+
 	@Column(commit = "读后感编号")
 	Long bookAfterReadingNoteId;
 

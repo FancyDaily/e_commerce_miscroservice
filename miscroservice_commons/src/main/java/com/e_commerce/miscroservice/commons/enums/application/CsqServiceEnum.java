@@ -12,6 +12,8 @@ public enum CsqServiceEnum {
 	STATUS_INITIAL(0, "初始状态"),
 	STATUS_DONE(1, "已完成"),
 	STATUS_OFF_SHELF(2, "下架"),
+	IS_SDX_FALSE(0, "是否书袋熊相关-否"),
+	IS_SDX_TRUE(1, "是否书袋熊相关-是"),
 
 	IS_SHOWN_YES(CsqFundEnum.IS_SHOWN_YES.getVal(), "可展示"),
 	IS_SHOWN_NO(CsqFundEnum.IS_SHOWN_NO.getVal(), "不可展示")

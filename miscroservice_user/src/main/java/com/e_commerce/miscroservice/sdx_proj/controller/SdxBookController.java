@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 书袋熊书籍
  * @Author: FangyiXu
@@ -37,28 +39,23 @@ public class SdxBookController {
 	 * @param page 页数默认第一页
 	 * @param size 每页返回的数量，默认10个
 	 * @param openResponseExplainFlag 如果想查看返回类型的字段说明,请填写任意内容即可查看返回说明
-	 * @param id        书籍信息的Id,修改或者查询的需要
-	 * @param name        书名
-	 * @param press        出版社
-	 * @param price        价格
-	 * @param author        作者
-	 * @param catalog        目录
-	 * @param categoryId        类型编号
-	 * @param scoreDouban        豆瓣评分
-	 * @param bindingStyle        装帧风格
-	 * @param categoryName        类型名
-	 * @param introduction        简介
-	 * @param maximumReserve        最大预购接收数
-	 * @param maximumDiscount        最高可抵扣价格
-	 * @param sortType				排序类型[0~3]
-	 * @param isFuzzySearch			是否启用模糊查询(对书名或作者)
-	 *
-	 *                 code==503,代表服务器出错,请先检测参数类型是否正确
-	 *                 code==500,代表参数不正确
-	 *                 code==200,代表请求成功
-	 *                 count!=0,代表当前查询条件总的数量
-	 *                 data==0,代表操作不成功
-	 *                 data!=0,代表影响的数量
+	 * @param id 书籍信息的Id,修改或者查询的需要
+	 * @param serviceId
+	 * @param name 书名
+	 * @param tag 类型名
+	 * @param press 出版社
+	 * @param price 价格
+	 * @param author 作者
+	 * @param scoreDouban 豆瓣评分
+	 * @param bindingStyle 装帧风格
+	 * @param tagId 类型编号
+	 * @param introduction 简介
+	 * @param maximumReserve 最大预定接收数
+	 * @param publisher 出版社
+	 * @param catalog 目录
+	 * @param maximumDiscount 最高可抵扣价格
+	 * @param sortType 排序类型[0~3]
+	 * @param isFuzzySearch 是否启用模糊查询(对书名或作者)
 	 *
 	 * @return
 	 */
@@ -68,12 +65,13 @@ public class SdxBookController {
 		@RequestParam(required = false) Integer page,
 		@RequestParam(required = false) Integer size,
 		@RequestParam(required = false) String openResponseExplainFlag,
-		@RequestParam(required = false) Long id,@RequestParam(required = false) String name,
-		@RequestParam(required = false) String press,@RequestParam(required = false) Double price,
-		@RequestParam(required = false) String author,@RequestParam(required = false) String catalog,
-		@RequestParam(required = false) Integer categoryId,@RequestParam(required = false) Double scoreDouban,
-		@RequestParam(required = false) String bindingStyle,@RequestParam(required = false) String categoryName,
-		@RequestParam(required = false) String introduction,@RequestParam(required = false) Integer maximumReserve,
+		@RequestParam(required = false) Long id, @RequestParam(required = false) Long serviceId,
+		@RequestParam(required = false) String name, @RequestParam(required = false) String tag,
+		@RequestParam(required = false) String press, @RequestParam(required = false) Double price,
+		@RequestParam(required = false) String author, @RequestParam(required = false) Double scoreDouban,
+		@RequestParam(required = false) String bindingStyle, @RequestParam(required = false) String tagId,
+		@RequestParam(required = false) String introduction, @RequestParam(required = false) Integer maximumReserve,
+		@RequestParam(required = false) String publisher, @RequestParam(required = false) String catalog,
 		@RequestParam(required = false) Double maximumDiscount, Integer sortType, @RequestParam boolean isFuzzySearch) {
 
 		TSdxBookInfoVo tSdxBookInfoVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
@@ -132,5 +130,44 @@ public class SdxBookController {
 		}
 		sdxBookService.preOrder(id, userId);
 		return Response.success();
+	}
+
+	/**
+	 * 关注最高书籍列表
+	 * @return
+	 */
+	@RequestMapping("list/most/follow")
+	public Object mostFollowList() {
+		return Response.success(sdxBookService.mostFollowList());
+	}
+
+	@RequestMapping("list/suggest")
+	public Object suggestList() {
+		return Response.success(sdxBookService.suggestList());
+	}
+
+	/**
+	 * 定制日推
+	 * @return
+	 */
+	@RequestMapping("suggest/set")
+	public Object setSuggestList(Integer dayNo, List<Long> bookInfoIds) {
+		sdxBookService.setSuggestList(dayNo, bookInfoIds);
+		return Response.success();
+	}
+
+	/**
+	 * 获取每日推荐默认Json
+	 * @return
+	 */
+	@RequestMapping("suggest/initail/get")
+	public Object getSuggestInitail() {
+		return Response.success(sdxBookService.getSuggestInitail());
+	}
+
+
+	@RequestMapping("service/list/goto")
+	public Object bookGotoServiceList() {
+		return Response.success(sdxBookService.gotoServiceList());
 	}
 }

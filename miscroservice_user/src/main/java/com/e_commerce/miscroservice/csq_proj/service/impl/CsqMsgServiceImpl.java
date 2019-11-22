@@ -17,6 +17,8 @@ import com.e_commerce.miscroservice.csq_proj.service.CsqPaymentService;
 import com.e_commerce.miscroservice.csq_proj.service.CsqServiceService;
 import com.e_commerce.miscroservice.csq_proj.vo.*;
 import com.e_commerce.miscroservice.csq_proj.service.CsqMsgService;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.user.wechat.entity.TemplateData;
 import com.e_commerce.miscroservice.user.wechat.entity.WxMssVo;
 import com.e_commerce.miscroservice.user.wechat.service.WechatService;
@@ -63,6 +65,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Autowired
 	private CsqServiceService csqServiceService;
+
+	@Autowired
+	private SdxBookInfoDao sdxBookInfoDao;
 
 	@Value("${page.person}")
 	private String INDEX_PAGE;
@@ -157,13 +162,16 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当为普通类型时，title，content不能为空!");
 		}
 
-		String title = csqSysMsg.getTitle();
-		title = title == null ? "收到一个项目" : title;    //默认项目类型消息名称
-		csqSysMsg.setTitle(title);
+		putTiltleIfNull(csqSysMsg, "收到一个项目");
 
 		List<TCsqSysMsg> toInserter = new ArrayList<>();
 		//check operator
+		toInserter = dealWithToUserIds(csqSysMsg, toInserter);
 
+		csqMsgDao.insert(toInserter);
+	}
+
+	private List<TCsqSysMsg> dealWithToUserIds(TCsqSysMsg csqSysMsg, List<TCsqSysMsg> toInserter) {
 		//判断userId
 		Long userId = csqSysMsg.getUserId();
 		if (userId == null) {
@@ -185,7 +193,38 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 			}
 			toInserter.add(csqSysMsg);
 		}
+		return toInserter;
+	}
+
+	@Override
+	public void insertSdx(Long operatorId, TCsqSysMsg csqSysMsg) {
+		//check参数
+		Integer type = csqSysMsg.getType();
+		if (CsqSysMsgEnum.IS_SDX_FALSE.getCode() == csqSysMsg.getType()) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "错误的类型");
+		}
+
+		if (CsqSysMsgEnum.TYPE_NORMAL.getCode() == type && StringUtil.isAnyEmpty(csqSysMsg.getTitle(), csqSysMsg.getContent())) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "当为普通类型时，title，content不能为空!");
+		}
+		Long bookInfoId = csqSysMsg.getBookInfoId();
+		if (CsqSysMsgEnum.TYPE_SREVICE.getCode() == type && bookInfoId == null) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "推送类型，缺少书籍信息编号!");
+		}
+
+		String title = "你的书籍已经到了新用户手上";
+		putTiltleIfNull(csqSysMsg, title);
+
+		List<TCsqSysMsg> toInserter = new ArrayList<>();
+		//判断userId
+		toInserter = dealWithToUserIds(csqSysMsg, toInserter);
 		csqMsgDao.insert(toInserter);
+	}
+
+	private void putTiltleIfNull(TCsqSysMsg csqSysMsg, String defaultTitle) {
+		String title = csqSysMsg.getTitle();
+		title = title == null ?  defaultTitle: title;    //默认项目类型消息名称
+		csqSysMsg.setTitle(title);
 	}
 
 	@Override
@@ -447,8 +486,14 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Override
 	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch) {
+		return list(searchParam, pageNum, pageSize, isFuzzySearch, false);
+	}
+
+	@Override
+	public QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch, boolean isSdx) {
 		//searchParam为标题
 		MybatisPlusBuild baseBuild = csqMsgDao.getBaseBuild();
+		baseBuild.eq(TCsqSysMsg::getIsSdx, isSdx? CsqSysMsgEnum.IS_SDX_TRUE.getCode(): CsqSysMsgEnum.IS_SDX_FALSE.getCode());
 		if (!StringUtil.isEmpty(searchParam)) {
 			baseBuild = isFuzzySearch? baseBuild.like(TCsqSysMsg::getTitle, "%" + searchParam + "%") : baseBuild.eq(TCsqSysMsg::getTitle, searchParam);
 		}

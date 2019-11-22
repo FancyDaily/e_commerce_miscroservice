@@ -6,6 +6,7 @@ import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoUserPreOrderPo;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
 * 书籍信息预定(书籍信息用户关系)的dao层
@@ -61,9 +62,30 @@ public class SdxBookInfoUserPreOrderDaoImpl implements SdxBookInfoUserPreOrderDa
 
 	@Override
 	public List<TSdxBookInfoUserPreOrderPo> selectByBookInfoId(Long id) {
-		return MybatisPlus.getInstance().findAll(new TSdxBookInfoUserPreOrderPo(), new MybatisPlusBuild(TSdxBookInfoUserPreOrderPo.class)
+		return MybatisPlus.getInstance().findAll(new TSdxBookInfoUserPreOrderPo(), baseBuild()
 			.eq(TSdxBookInfoUserPreOrderPo::getBookInfoId, id)
-			.eq(TSdxBookInfoUserPreOrderPo::getDeletedFlag, Boolean.FALSE)
+		);
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TSdxBookInfoUserPreOrderPo.class)
+			.eq(TSdxBookInfoUserPreOrderPo::getDeletedFlag, Boolean.FALSE);
+	}
+
+	@Override
+	public List<TSdxBookInfoUserPreOrderPo> selectByUserIdAndBookInfoId(Long userId, Long bookInfoId) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookInfoUserPreOrderPo(), baseBuild()
+			.eq(TSdxBookInfoUserPreOrderPo::getUserId, userId)
+			.eq(TSdxBookInfoUserPreOrderPo::getBookInfoId, bookInfoId)
+		);
+	}
+
+	@Override
+	public int update(List<TSdxBookInfoUserPreOrderPo> toUpdater) {
+		List<Long> toUpdateIds = toUpdater.stream()
+			.map(TSdxBookInfoUserPreOrderPo::getId).collect(Collectors.toList());
+		return MybatisPlus.getInstance().update(toUpdater, baseBuild()
+			.in(TSdxBookInfoUserPreOrderPo::getId, toUpdateIds)
 		);
 	}
 }

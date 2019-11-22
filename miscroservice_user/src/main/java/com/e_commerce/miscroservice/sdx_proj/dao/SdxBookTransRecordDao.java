@@ -11,4 +11,6 @@ public interface SdxBookTransRecordDao {
 	List<TSdxBookTransRecordPo> selectByBookId(Long bookId);
 
 	List<TSdxBookTransRecordPo> selectByBookIdAndType(Long bookId);
+
+	int save(List<TSdxBookTransRecordPo> toInserter);
 }

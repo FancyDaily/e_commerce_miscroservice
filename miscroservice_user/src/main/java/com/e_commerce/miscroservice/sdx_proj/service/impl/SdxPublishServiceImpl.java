@@ -133,16 +133,14 @@ public class SdxPublishServiceImpl implements SdxPublishService {
 		return toMap(map);
 	}
 
-	private String getValue(Integer mainKey) {
+	@Override
+	public String getValue(Integer mainKey) {
 		TSdxPublish tSdxPublish = sdxPublishDao.selectByMainKey(mainKey);
 		return tSdxPublish.getValue();
 	}
 
 	@Override
 	public Object getAsList(Integer mainKey) {
-		/*if(mainKey == CsqPublishEnum.MAIN_KEY_TREND.toCode()) {
-			return getObjectList(mainKey);
-		}*/
 		Object result;
 		try {
 			Map map = get(mainKey);
@@ -214,7 +212,7 @@ public class SdxPublishServiceImpl implements SdxPublishService {
 	}
 
 	public static void main(String[] args) {
-		HashMap<Long, String> map = new HashMap<>();
+		/*HashMap<Long, String> map = new HashMap<>();
 		map.put(1l, "zhangsan");
 		map.put(2l, "lisi");
 		map.put(3l, "wangwu");
@@ -250,6 +248,28 @@ public class SdxPublishServiceImpl implements SdxPublishService {
 		List<CsqBasicPublishVo> lists = parseToObjectArray(s1);
 		lists.stream()
 			.forEach(a -> a.getValue());
+*/
+
+		List<Long> bookInfoIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+		String s2 = JSONObject.toJSONString(bookInfoIds);
+		System.out.println(s2);
+
+		Map<String, List<Long>> resultMap = new HashMap() {
+			{
+				put("1", bookInfoIds);
+				put("2", bookInfoIds);
+				put("3", bookInfoIds);
+			}
+		};
+
+		String s = JSONObject.toJSONString(resultMap);
+		System.out.println(s);
+
+		Map map = JSONObject.toJavaObject(JSONObject.parseObject(s), Map.class);
+		List<Long> list = (List) map.get("2");
+
+		System.out.println(list.get(3));
+
 	}
 
 	private static List<CsqBasicPublishVo> parseToObjectArray(String s1) {

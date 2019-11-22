@@ -5,6 +5,17 @@ public interface SdxShoppingTrolleysDao {
     int saveTSdxShoppingTrolleysIfNotExist(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo);
     int modTSdxShoppingTrolleys(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo);
     int delTSdxShoppingTrolleysByIds(Long... ids);
-    TSdxShoppingTrolleysPo findTSdxShoppingTrolleysById(Long id);
+
+	int delTSdxShoppingTrolleysByIds(List<Long> ids);
+
+	TSdxShoppingTrolleysPo findTSdxShoppingTrolleysById(Long id);
     List<TSdxShoppingTrolleysPo> findTSdxShoppingTrolleysByAll(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo, Integer page, Integer size);
+
+	TSdxShoppingTrolleysPo selectByPo(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo);
+
+	List<TSdxShoppingTrolleysPo> selectByUserId(Long id);
+
+	List<TSdxShoppingTrolleysPo> selectByUserIdPage(Long id, Integer pageNum, Integer pageSize);
+
+	List<TSdxShoppingTrolleysPo> selectByUserIdInBookInfoIds(Long userId, List<Long> bookInfoIdList);
 }

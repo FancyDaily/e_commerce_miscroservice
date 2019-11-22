@@ -14,7 +14,10 @@ public enum CsqSysMsgEnum {
 	TYPE_NORMAL(1, "普通类型"),
 	TYPE_SREVICE(2, "项目推送类型"),
 	IS_READ_FALSE(0, "未读"),
-	IS_READ_TRUE(1, "已读");
+	IS_READ_TRUE(1, "已读"),
+	IS_SDX_FALSE(0, "是否为树袋熊相关-否"),
+	IS_SDX_TRUE(1, "是否为树袋熊相关-是")
+	;
 
 	int code;
 	String msg;

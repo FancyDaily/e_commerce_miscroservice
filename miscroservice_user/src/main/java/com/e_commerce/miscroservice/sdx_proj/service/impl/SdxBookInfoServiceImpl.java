@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
@@ -15,10 +16,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -81,7 +79,7 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 		}
 		log.info("start根据条件查找书籍信息={}", tSdxBookInfoPo);
 		List<TSdxBookInfoPo> tSdxBookInfoPos = sdxBookInfoDao.findTSdxBookInfoByAll(tSdxBookInfoPo, page, size, sortType);
-		//TODO 对结果的继续处理
+		//TODO 对结果的继续处理 -> 根据积分抵扣规则(可能加上个人剩余积分)处理
 		for (TSdxBookInfoPo po : tSdxBookInfoPos) {
 			tSdxBookInfoVos.add(po.copyTSdxBookInfoVo());
 		}
