@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -41,6 +42,7 @@ public class SdxBookStationController {
     */
     @PostMapping("mod")
     @Consume(TSdxBookStationVo.class)
+	@UrlAuth
     public Response modTSdxBookStation(@RequestParam(required = false) Long id,@RequestParam(required = false) String name,@RequestParam(required = false) String address,@RequestParam(required = false) Double latitude,@RequestParam(required = false) Double longitude) {
         TSdxBookStationVo tSdxBookStationVo = (TSdxBookStationVo) ConsumeHelper.getObj();
         if (tSdxBookStationVo == null) {
@@ -63,6 +65,7 @@ public class SdxBookStationController {
     * @return
     */
     @RequestMapping("del")
+	@UrlAuth
     public Response delTSdxBookStation(Long[] ids) {
         if (ids == null || ids.length == 0) {
             return Response.fail();
@@ -93,6 +96,7 @@ public class SdxBookStationController {
     */
     @RequestMapping("find")
     @Consume(TSdxBookStationVo.class)
+	@UrlAuth
     public Response findTSdxBookStation(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) String name,@RequestParam(required = false) String address,@RequestParam(required = false) Double latitude,@RequestParam(required = false) Double longitude) {
 
     TSdxBookStationVo tSdxBookStationVo = (TSdxBookStationVo) ConsumeHelper.getObj();
@@ -108,7 +112,20 @@ public class SdxBookStationController {
         return Response.success(sdxBookStationService.findTSdxBookStationByAll(tSdxBookStationVo.copyTSdxBookStationPo (),page,size), IdUtil.getTotal());
     }
 
+	/**
+	 * 书籍回收驿站列表
+	 * @param pageNum
+	 * @param pageSize
+	 * @param id
+	 * @param city
+	 * @param name
+	 * @param address
+	 * @param latitude
+	 * @param longitude
+	 * @return
+	 */
     @RequestMapping("list")
+	@UrlAuth
     public Response list(@RequestParam(required = false) Integer pageNum,@RequestParam(required = false) Integer pageSize,@RequestParam(required = false) Long id,@RequestParam(required = false) String city, @RequestParam(required = false) String name,@RequestParam(required = false) String address,@RequestParam(required = false) Double latitude,@RequestParam(required = false) Double longitude) {
     	return Response.success(sdxBookStationService.list(city, longitude, latitude, pageNum, pageSize));
 	}

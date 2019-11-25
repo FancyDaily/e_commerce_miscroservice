@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -61,6 +62,7 @@ public class SdxBookController {
 	 */
 	@RequestMapping("bookinfo/find")
 	@Consume(TSdxBookInfoVo.class)
+	@UrlAuth
 	public Response findTSdxBookInfo(
 		@RequestParam(required = false) Integer page,
 		@RequestParam(required = false) Integer size,
@@ -94,8 +96,9 @@ public class SdxBookController {
 	 */
 	@RequestMapping("bookinfo/detail")
 	@Consume(TSdxBookInfoVo.class)
+	@UrlAuth
 	public Response detail(Long id) {
-		TSdxBookVo tSdxBookVo = (TSdxBookVo) ConsumeHelper.getObj();
+		TSdxBookInfoVo tSdxBookVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
 		if (tSdxBookVo == null || tSdxBookVo.getId()==null) {
 			return Response.fail();
 		}
@@ -109,8 +112,9 @@ public class SdxBookController {
 	 */
 	@RequestMapping("bookinfo/user/sold/list")
 	@Consume(TSdxBookInfoVo.class)
+	@UrlAuth
 	public Response bookSoldUserList(Long id, Integer pageNum, Integer pageSize, Boolean isSold) {
-		TSdxBookVo tSdxBookVo = (TSdxBookVo) ConsumeHelper.getObj();
+		TSdxBookInfoVo tSdxBookVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
 		if (tSdxBookVo == null || tSdxBookVo.getId()==null) {
 			return Response.fail();
 		}
@@ -123,6 +127,7 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("preOrder/add")
+	@UrlAuth
 	public Response preOrder(Long id) {
 		Long userId = IdUtil.getId();
 		if(id == null) {
@@ -137,11 +142,17 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("list/most/follow")
+	@UrlAuth
 	public Object mostFollowList() {
 		return Response.success(sdxBookService.mostFollowList());
 	}
 
+	/**
+	 * 每日推荐
+	 * @return
+	 */
 	@RequestMapping("list/suggest")
+	@UrlAuth
 	public Object suggestList() {
 		return Response.success(sdxBookService.suggestList());
 	}
@@ -151,6 +162,7 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("suggest/set")
+	@UrlAuth
 	public Object setSuggestList(Integer dayNo, List<Long> bookInfoIds) {
 		sdxBookService.setSuggestList(dayNo, bookInfoIds);
 		return Response.success();
@@ -161,12 +173,18 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("suggest/initail/get")
+	@UrlAuth
 	public Object getSuggestInitail() {
 		return Response.success(sdxBookService.getSuggestInitail());
 	}
 
 
+	/**
+	 * 书籍项目列表
+	 * @return
+	 */
 	@RequestMapping("service/list/goto")
+	@UrlAuth
 	public Object bookGotoServiceList() {
 		return Response.success(sdxBookService.gotoServiceList());
 	}

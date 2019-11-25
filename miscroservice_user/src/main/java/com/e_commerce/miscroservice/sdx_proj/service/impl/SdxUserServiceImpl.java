@@ -45,8 +45,8 @@ public class SdxUserServiceImpl implements SdxUserService {
 		} else {
 			voList = (LimitQueue<CsqDonateRecordVo>) exist;
 		}
-		//TODO 处理得到list
-		/*List<CsqDonateRecordVo> resultList = new ArrayList<>();
+		/*//TODO 处理得到list
+		List<CsqDonateRecordVo> resultList = new ArrayList<>();
 		Iterator<CsqDonateRecordVo> iterator = voList.iterator();
 		while (iterator.hasNext()) {
 			CsqDonateRecordVo csqDonateRecordVo = iterator.next();

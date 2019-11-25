@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -37,6 +38,7 @@ public class SdxOrderDonateController {
 	 * @return
 	 */
 	@RequestMapping("donate/goto/list")
+	@UrlAuth
 	public Object donateGotoList() {
 		return null;
 	}
@@ -47,6 +49,7 @@ public class SdxOrderDonateController {
 	 * @return
 	 */
 	@RequestMapping("getBookInfo")
+	@UrlAuth
 	public Object getBookInfo(String isbnCode) {
 		return Response.success(sdxBookInfoService.getBookInfo(isbnCode));
 	}
@@ -55,12 +58,13 @@ public class SdxOrderDonateController {
 	 * 创建捐赠订单
 	 * @param bookInfoIds 书籍信息编号(一或多个)
 	 * @param serviceId 关联公益项目编号
-	 * @param shipType 捐书方式 1邮寄2自送
+	 * @param shipType 捐书方式(1邮寄2自送)
 	 * @param shippingAddressId 邮寄地址编号（指定一个）
 	 * @param bookStationId 书籍驿站编号（指定一个）
 	 * @return
 	 */
 	@RequestMapping("donate/create")
+	@UrlAuth
 	public Object createBookDonateOrder(Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
 		return Response.success(sdxBookOrderService.createDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId));
 	}
@@ -71,6 +75,7 @@ public class SdxOrderDonateController {
 	 * @return
 	 */
 	@RequestMapping("donate/cancel")
+	@UrlAuth
 	public Object cancelBookDonateOrder(Long orderId) {
 		sdxBookOrderService.cancel(orderId);
 		return Response.success();
@@ -78,14 +83,17 @@ public class SdxOrderDonateController {
 
 	/**
 	 * 确认收货/书本已寄出
-	 * @param id 订单编号
+	 * @param orderNo 订单编号
 	 * @param status 状态
 	 * @param expressNo 快递单号
 	 * @return
 	 */
 	@Consume(SdxDonateOrderVo.class)
-	public Object modify(Long id, Integer status, String expressNo) {
+	@UrlAuth
+	@RequestMapping("modify")
+	public Object modify(String orderNo, Integer status, String expressNo) {
 		SdxDonateOrderVo obj = (SdxDonateOrderVo) ConsumeHelper.getObj();
+		obj.setOrderNo(orderNo);
 		TSdxBookOrderPo tSdxBookOrderPo = obj.copyTSdxBookOrder();
 		sdxBookOrderService.modTSdxBookOrder(tSdxBookOrderPo);
 		return Response.success();
@@ -120,6 +128,7 @@ public class SdxOrderDonateController {
 	 */
 	@PostMapping("mod")
 	@Consume(TSdxBookOrderVo.class)
+	@UrlAuth
 	public Response modTSdxBookOrder(@RequestParam(required = false) Long id, @RequestParam(required = false) Integer type, @RequestParam(required = false) Double price, @RequestParam(required = false) Integer status, @RequestParam(required = false) String bookIds, @RequestParam(required = false) Integer shipType, @RequestParam(required = false) Double bookPrice, @RequestParam(required = false) Double shipPirce, @RequestParam(required = false) Double totalPrice, @RequestParam(required = false) Long bookInfoIds, @RequestParam(required = false) Long bookStationId, @RequestParam(required = false) Integer scoreDiscount, @RequestParam(required = false) Integer exactTotalScores, @RequestParam(required = false) Long shippingAddressId, @RequestParam(required = false) Integer expectedTotalScores) {
 		TSdxBookOrderVo tSdxBookOrderVo = (TSdxBookOrderVo) ConsumeHelper.getObj();
 		if (tSdxBookOrderVo == null) {
@@ -135,6 +144,8 @@ public class SdxOrderDonateController {
 	 * @param pageSize 大小
 	 * @return
 	 */
+	@RequestMapping("list")
+	@UrlAuth
 	public Object list(Integer option, Integer pageNum, Integer pageSize) {
 		return Response.success(sdxBookOrderService.donateList(IdUtil.getId(), option, pageNum, pageSize));
 	}

@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 购物车的操作接口
 */
 @RestController
-@RequestMapping("tSdxShoppingTrolleys")
+@RequestMapping("sdxShoppingTrolleys")
 public class SdxShoppingTrolleysController {
     @Autowired
     private SdxShoppingTrolleysService sdxShoppingTrolleysService;
@@ -27,6 +28,7 @@ public class SdxShoppingTrolleysController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public Object list(Integer pageNum, Integer pageSize) {
 		return Response.success(sdxShoppingTrolleysService.list(IdUtil.getId(), pageNum, pageSize));
 	}
@@ -48,6 +50,7 @@ public class SdxShoppingTrolleysController {
     */
     @PostMapping("mod")
     @Consume(TSdxShoppingTrolleysVo.class)
+	@UrlAuth
     public Response modTSdxShoppingTrolleys(@RequestParam(required = false) Long id,@RequestParam(required = true) Long userId,@RequestParam(required = true) Long bookInfoId) {
         TSdxShoppingTrolleysVo tSdxShoppingTrolleysVo = (TSdxShoppingTrolleysVo) ConsumeHelper.getObj();
         if (tSdxShoppingTrolleysVo == null) {
@@ -73,6 +76,7 @@ public class SdxShoppingTrolleysController {
     * @return
     */
     @RequestMapping("del")
+	@UrlAuth
     public Response delTSdxShoppingTrolleys(Long[] ids) {
         if (ids == null || ids.length == 0) {
             return Response.fail();
@@ -101,6 +105,7 @@ public class SdxShoppingTrolleysController {
     */
     @RequestMapping("find")
     @Consume(TSdxShoppingTrolleysVo.class)
+	@UrlAuth
     public Response findTSdxShoppingTrolleys(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long userId,@RequestParam(required = false) Long bookInfoId) {
 
     TSdxShoppingTrolleysVo tSdxShoppingTrolleysVo = (TSdxShoppingTrolleysVo) ConsumeHelper.getObj();

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -39,6 +40,7 @@ public class SdxBookAfterReadingNoteController {
 	 */
 	@RequestMapping("buy")
 	@Consume(TSdxBookAfterReadingNoteVo.class)
+	@UrlAuth
 	public Response buy(Long id) {
 		TSdxBookAfterReadingNoteVo vo = (TSdxBookAfterReadingNoteVo) ConsumeHelper.getObj();
 		if (vo == null || vo.getId()==null) {
@@ -55,6 +57,7 @@ public class SdxBookAfterReadingNoteController {
 	 * @return
 	 */
 	@RequestMapping("thumb")
+	@UrlAuth
 	public Response thumb(Long bookAfterReadingId, Integer option) {
 		sdxBookAfterReadingNoteService.thumb(bookAfterReadingId, IdUtil.getId(), option);
 		return Response.success();

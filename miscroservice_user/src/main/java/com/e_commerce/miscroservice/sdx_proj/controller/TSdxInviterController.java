@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 邀请人信息的操作接口
+* T邀请人信息的操作接口
 */
 @RestController
 @RequestMapping("tSdxInviter")

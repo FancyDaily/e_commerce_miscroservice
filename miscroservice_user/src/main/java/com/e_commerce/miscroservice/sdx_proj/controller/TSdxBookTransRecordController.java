@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 书籍漂流记录的操作接口
+* T书籍漂流记录的操作接口
 */
 @RestController
 @RequestMapping("tSdxBookTransRecord")

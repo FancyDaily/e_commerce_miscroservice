@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 积分流水的操作接口
+* T积分流水的操作接口
 */
 @RestController
 @RequestMapping("tSdxScoreRecord")

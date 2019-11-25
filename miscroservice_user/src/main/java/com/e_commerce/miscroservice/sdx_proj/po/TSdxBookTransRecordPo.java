@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 书籍漂流记录
@@ -17,6 +18,7 @@ import lombok.Data;
 @Data
 @Builder
 @Table(commit = "书籍漂流记录")
+@NoArgsConstructor
 public class TSdxBookTransRecordPo extends BaseEntity {
 
 	/**

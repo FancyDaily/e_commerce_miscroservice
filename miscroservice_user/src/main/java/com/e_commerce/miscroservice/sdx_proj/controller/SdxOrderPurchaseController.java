@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
@@ -38,6 +39,7 @@ public class SdxOrderPurchaseController {
 	 * @return
 	 */
 	@RequestMapping("pre/order")
+	@UrlAuth
 	public Object preOrder(Long shippingAddressId, String bookInfoIds, Integer scoreUsed, Double bookFee, HttpServletRequest httpServletRequest, Double shipFee) throws Exception {
 		return Response.success(sdxBookOrderService.preOrder(shippingAddressId, bookInfoIds, bookFee, IdUtil.getId(), httpServletRequest, shipFee, scoreUsed));
 	}
@@ -49,6 +51,7 @@ public class SdxOrderPurchaseController {
 	 * @return
 	 */
 	@RequestMapping("receipt/confirm")
+	@UrlAuth
 	public Object confirmReceipt(Long orderId) {
 		sdxBookOrderService.confirmReceipt(orderId);
 		return Response.success();
@@ -61,6 +64,7 @@ public class SdxOrderPurchaseController {
 	 * @return
 	 */
 	@RequestMapping("detail")
+	@UrlAuth
 	public Object orderDetail(Long orderId) {
 		SdxPurchaseOrderVo detail = sdxBookOrderService.detail(orderId);
 		return Response.success(detail);
@@ -74,6 +78,8 @@ public class SdxOrderPurchaseController {
 	 * @param pageSize 大小
 	 * @return
 	 */
+	@RequestMapping("list")
+	@UrlAuth
 	public Object list(Integer option, Integer pageNum, Integer pageSize) {
 		Long userIds = IdUtil.getId();
 		return Response.success(sdxBookOrderService.purchaseList(userIds, option, pageNum, pageSize));

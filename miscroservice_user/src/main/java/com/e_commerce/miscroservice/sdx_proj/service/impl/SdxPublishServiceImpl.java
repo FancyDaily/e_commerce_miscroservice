@@ -250,7 +250,7 @@ public class SdxPublishServiceImpl implements SdxPublishService {
 			.forEach(a -> a.getValue());
 */
 
-		List<Long> bookInfoIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+		/*List<Long> bookInfoIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
 		String s2 = JSONObject.toJSONString(bookInfoIds);
 		System.out.println(s2);
 
@@ -268,8 +268,12 @@ public class SdxPublishServiceImpl implements SdxPublishService {
 		Map map = JSONObject.toJavaObject(JSONObject.parseObject(s), Map.class);
 		List<Long> list = (List) map.get("2");
 
-		System.out.println(list.get(3));
+		System.out.println(list.get(3));*/
 
+		List<String> urls = new ArrayList<>();
+		urls.add("http://imgsrc.baidu.com/forum/w=580/sign=686022c859b5c9ea62f303ebe53bb622/4d9457cb0a46f21fe2f24a90f4246b600e33ae89.jpg");
+		String s = JSONObject.toJSONString(urls);
+		System.out.println(s);
 	}
 
 	private static List<CsqBasicPublishVo> parseToObjectArray(String s1) {

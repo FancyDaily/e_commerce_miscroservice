@@ -27,12 +27,8 @@ public class TSdxBookInfoUserPreOrderPo extends BaseEntity {
 	@Column(commit = "用户编号")
 	private Long userId;
 
-	public static void main(String[] args) {
-		AutoGenerateCode.generate(TSdxBookInfoUserPreOrderPo.class);
-	}
-
     public TSdxBookInfoUserPreOrderVo  copyTSdxBookInfoUserPreOrderVo() {
         return null;
      }
- 
+
 }

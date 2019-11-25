@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.application.generate.UUIdUtil;
@@ -13,16 +14,19 @@ import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookTransRecordEnum;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxRedisEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.*;
 import com.e_commerce.miscroservice.sdx_proj.service.*;
 import com.e_commerce.miscroservice.sdx_proj.vo.*;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
-import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -60,12 +64,22 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	SdxBookInfoUserPreOrderDao sdxBookInfoUserPreOrderDao;
 	@Autowired
 	SdxBookInfoDao sdxBookInfoDao;
+	@Autowired
+	@Qualifier("sdxRedisTemplate")
+	private HashOperations<String, String, Object> userRedisTemplate;
 
 	@Override
 	public long modTSdxBookOrder(TSdxBookOrderPo tSdxBookOrderPo) {
 		if (tSdxBookOrderPo == null) {
 			log.warn("操作订单参数为空");
 			return ERROR_LONG;
+		}
+		String orderNo = tSdxBookOrderPo.getOrderNo();
+		if(!StringUtil.isEmpty(orderNo)) {
+			TSdxBookOrderPo idContainer = sdxBookOrderDao.selectByOrderNo(orderNo);
+			if (idContainer != null) {
+				tSdxBookOrderPo.setId(idContainer.getId());
+			}
 		}
 		Long id;
 		if ((id=tSdxBookOrderPo.getId()) == null) {
@@ -116,7 +130,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 						Long bookInfoId = bookInfoList.get(i);
 						//查询是第几任主人
 						String description = "第%d位主人捐于" + DateUtil.timeStamp2Date(System.currentTimeMillis());	// 构建描述
-						List<TSdxBookTransRecordPo> recordPos = sdxBookTransRecordDao.selectByBookIdAndType(bookId);
+						List<TSdxBookTransRecordPo> recordPos = sdxBookTransRecordDao.selectByBookIdAndType(bookId, SdxBookTransRecordEnum.TYPE_BECOME_OWNER.getCode());
 						description = String.format(description, recordPos.size());
 
 						TSdxBookTransRecordPo build = TSdxBookTransRecordPo.builder()
@@ -135,10 +149,63 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 					sdxScoreRecordService.earnScores(userId, orderPo);
 					// 书本上架
 					sdxBookService.putOnShelf(orderPo.getBookIds());
+
+					//确认收货之后，捐款播报中加入捐助的记录
+					String hashKey = SdxRedisEnum.ALL.getMsg();
+					//获取队列
+					LimitQueue<SdxGlobalDonateRecordVo> queue = (LimitQueue<SdxGlobalDonateRecordVo>) userRedisTemplate.get(SdxRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), hashKey);
+					//由订单构建vo
+					SdxGlobalDonateRecordVo globalDonateRecordVo = transToGlobalDonateRecordVo(orderPo);
+					//将vo添加队列末尾
+					//覆写
+					queue.offer(globalDonateRecordVo);
+					userRedisTemplate.put(SdxRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(),  hashKey, queue);
 				}
 			}
 			return sdxBookOrderDao.modTSdxBookOrder(tSdxBookOrderPo);
 		}
+	}
+
+	private SdxGlobalDonateRecordVo transToGlobalDonateRecordVo(TSdxBookOrderPo orderPo) {
+		String bookIfIs = orderPo.getBookIfIs();
+		Long userId = orderPo.getUserId();
+		TCsqUser csqUser = sdxUserDao.selectByPrimaryKey(userId);
+		String donaterName = csqUser.getName();
+		List<TSdxBookInfoPo> bookInfoPos = sdxBookInfoDao.selectInIds(Arrays.stream(bookIfIs.split(",")).map(Long::valueOf).collect(Collectors.toList()));
+		String bookInfoNames = bookInfoPos.stream()
+			.map(TSdxBookInfoPo::getName).reduce("", bookNamesReducer(","));
+		String timeAgo = DateUtil.minutes2TimeAgo(DateUtil.timestamp2MinutesAgo(orderPo.getCreateTime().getTime()));
+		//构建描述
+		StringBuilder builder = new StringBuilder();
+		String donate = "捐赠";
+		String description = builder.append(timeAgo).append(" ").append(donaterName).append(donate).append(buidBookStrs(bookInfoNames, Boolean.FALSE)).toString();
+
+		return SdxGlobalDonateRecordVo.builder()
+			.timeAgo(timeAgo)
+			.userId(userId)
+			.donaterName(donaterName)
+			.bookInfoIds(bookIfIs)
+			.bookInfoPos(bookInfoPos)
+			.bookInfoNames(bookInfoNames)
+			.description(description)
+			.build();
+	}
+
+	private String buidBookStrs(String bookInfoNames, Boolean isUseEllipsis) {
+		String[] split = bookInfoNames.split(",");
+		List<String> names = Arrays.stream(split)
+			.map(a -> "《" + a + "》"
+			).collect(Collectors.toList());
+		if(!isUseEllipsis) return names.stream().reduce("", bookNamesReducer("、"));
+		Integer ellipsisLimit = 2;
+		//启用缩写 -> 两本书
+		return names.stream()
+			.limit(ellipsisLimit)
+			.reduce("", bookNamesReducer("、")) + "等书";
+	}
+
+	private BinaryOperator<String> bookNamesReducer(String s) {
+		return (a, b) -> a + s + b;
 	}
 
 	@Override
@@ -316,6 +383,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		for(Long bookInfoId: bookInfoIds) {
 			//获取预估积分
 			Integer expectedScores = idExpectedScoresMap.get(bookInfoId);
+			expectedScores = expectedScores == null? 15: expectedScores;
 			totalExpectedScores += expectedScores;
 			//生成book实体
 			TSdxBookPo build = TSdxBookPo.builder()
@@ -368,6 +436,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			}).collect(Collectors.toList());
 		sdxbookDao.update(toUpdater);
 
+		//TODO 退邮费
+
 		//处理订单状态
 		TSdxBookOrderPo build = TSdxBookOrderPo.builder()
 			.status(SdxBookOrderEnum.STATUS_CANCLE.getCode())
@@ -418,12 +488,6 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			});
 		sdxBookInfoUserPreOrderDao.update(toUpdater);
 		sdxbookDao.update(toUpdaters);
-	}
-
-	public static void main(String[] args) {
-		String bookIds = "12";
-		String[] strings = StringUtil.splitString(bookIds, ",");
-		System.out.println(Arrays.asList(strings));
 	}
 
 	private TSdxBookOrderPo checkAttach(String out_trade_no, String attach) {

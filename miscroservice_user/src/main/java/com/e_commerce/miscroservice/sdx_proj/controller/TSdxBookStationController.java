@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 书籍回收驿站的操作接口
+* T书籍回收驿站的操作接口
 */
 @RestController
 @RequestMapping("tSdxBookStation")

@@ -105,6 +105,8 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 			TSdxBookInfoPo exist = sdxBookInfoDao.selectByName(tSdxBookInfoPo.getName());
 			if(exist == null) {
 				sdxBookInfoDao.saveTSdxBookInfoIfNotExist(tSdxBookInfoPo);
+			} else {
+				tSdxBookInfoPo = exist;
 			}
 		} catch (Exception e) {
 

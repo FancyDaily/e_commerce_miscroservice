@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -38,6 +39,7 @@ public class SdxWishListController {
     */
     @PostMapping("mod")
     @Consume(TSdxWishListVo.class)
+	@UrlAuth
     public Response modTSdxWishList(@RequestParam(required = false) Long id,@RequestParam(required = false) Long bookInfoId) {
         TSdxWishListVo tSdxWishListVo = (TSdxWishListVo) ConsumeHelper.getObj();
         if (tSdxWishListVo == null) {
@@ -60,6 +62,7 @@ public class SdxWishListController {
     * @return
     */
     @RequestMapping("del")
+	@UrlAuth
     public Response delTSdxWishList(Long[] ids) {
         if (ids == null || ids.length == 0) {
             return Response.fail();
@@ -87,6 +90,7 @@ public class SdxWishListController {
     */
     @RequestMapping("find")
     @Consume(TSdxWishListVo.class)
+	@UrlAuth
     public Response findTSdxWishList(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Long bookInfoId) {
 
     TSdxWishListVo tSdxWishListVo = (TSdxWishListVo) ConsumeHelper.getObj();
@@ -107,6 +111,7 @@ public class SdxWishListController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
     public Object list(Integer pageNum, Integer pageSize) {
     	return Response.success(sdxWishListService.list(IdUtil.getId(), pageNum, pageSize));
 	}

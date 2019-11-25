@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -50,6 +51,7 @@ public class SdxShippingAddressController {
 	 */
 	@PostMapping("mod")
 	@Consume(TSdxShippingAddressVo.class)
+	@UrlAuth
 	public Response modTSdxShippingAddress(@RequestParam(required = false) Long id,@RequestParam(required = false) String city,@RequestParam(required = false) String name,@RequestParam(required = false) String county,@RequestParam(required = false) String street,@RequestParam(required = false) Long userId,@RequestParam(required = false) String userTel,@RequestParam(required = false) String province,@RequestParam(required = false) String detailAddress) {
 		TSdxShippingAddressVo tSdxShippingAddressVo = (TSdxShippingAddressVo) ConsumeHelper.getObj();
 		if (tSdxShippingAddressVo == null) {
@@ -73,6 +75,7 @@ public class SdxShippingAddressController {
 	 * @return
 	 */
 	@RequestMapping("del")
+	@UrlAuth
 	public Response delTSdxShippingAddress(Long[] ids) {
 		if (ids == null || ids.length == 0) {
 			return Response.fail();
@@ -107,6 +110,7 @@ public class SdxShippingAddressController {
 	 */
 	@RequestMapping("find")
 	@Consume(TSdxShippingAddressVo.class)
+	@UrlAuth
 	public Response findTSdxShippingAddress(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) String city,@RequestParam(required = false) String name,@RequestParam(required = false) String county,@RequestParam(required = false) String street,@RequestParam(required = false) Long userId,@RequestParam(required = false) String userTel,@RequestParam(required = false) String province,@RequestParam(required = false) String detailAddress) {
 
 		TSdxShippingAddressVo tSdxShippingAddressVo = (TSdxShippingAddressVo) ConsumeHelper.getObj();
@@ -129,6 +133,7 @@ public class SdxShippingAddressController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public Response list(Integer pageNum, Integer pageSize) {
 		return Response.success(sdxShippingAddressService.list(IdUtil.getId(), pageNum, pageSize));
 	}

@@ -674,4 +674,9 @@ public class DateUtil {
 		res += "前";
 		return res;
 	}
+
+	public static Integer timestamp2MinutesAgo(long time) {
+		long mills = System.currentTimeMillis() - time;
+		return Long.valueOf(mills / (1000 * 60)).intValue();
+	}
 }

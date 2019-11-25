@@ -24,7 +24,7 @@ public class TSdxBookInfoPo extends BaseEntity {
 	/**
 	 * 捐助时可折抵积分
 	 */
-	@Transient
+	@Column(commit = "可折抵积分", length = 11)
 	private Integer expectedScore;
 
 	/**

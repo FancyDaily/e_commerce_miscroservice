@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 购物车的操作接口
+* T购物车的操作接口
 */
 @RestController
 @RequestMapping("tSdxShoppingTrolleys")

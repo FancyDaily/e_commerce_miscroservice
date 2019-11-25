@@ -19,16 +19,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TSdxPublish extends BaseEntity {
 
-	@Id
-	private Long id;
-
 	@Column(commit = "业务类型名")
 	private Integer mainKey;
 
 	@Column(commit = "业务类型描述", defaultVal = "未知")
 	private String keyDesc;
 
-	@Column(commit = "值(json)", charset = "utf8mb4")
+	@Column(commit = "值(json)", charset = "utf8mb4", length = 4096)
 	private String value;
 
 

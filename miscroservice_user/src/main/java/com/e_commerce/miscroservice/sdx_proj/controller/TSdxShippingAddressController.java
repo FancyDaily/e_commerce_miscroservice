@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 配送地址的操作接口
+* T配送地址的操作接口
 */
 @RestController
 @RequestMapping("tSdxShippingAddress")

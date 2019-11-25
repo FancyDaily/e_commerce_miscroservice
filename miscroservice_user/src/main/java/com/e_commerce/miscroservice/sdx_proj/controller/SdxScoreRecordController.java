@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 * 书袋熊积分
 */
 @RestController
-@RequestMapping("tSdxScoreRecord")
+@RequestMapping("sdxScoreRecord")
 public class SdxScoreRecordController {
     @Autowired
     private SdxScoreRecordService sdxScoreRecordService;
@@ -24,6 +25,7 @@ public class SdxScoreRecordController {
 	 * @return
 	 */
 	@RequestMapping("list")
+	@UrlAuth
 	public Object list(Integer pageNum, Integer pageSize, Integer option) {
 		return Response.success(sdxScoreRecordService.list(IdUtil.getId(), pageNum, pageSize, option));
 	}

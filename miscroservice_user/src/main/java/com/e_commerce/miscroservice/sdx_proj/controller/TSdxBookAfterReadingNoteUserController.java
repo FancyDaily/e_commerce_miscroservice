@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* 书籍读后感用户相关的操作接口
+* T书籍读后感用户相关的操作接口
 */
 @RestController
 @RequestMapping("tSdxBookAfterReadingNoteUser")

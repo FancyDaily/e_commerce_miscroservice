@@ -18,6 +18,11 @@ import java.util.List;
 @Builder
 public class SdxDonateOrderVo {
 
+	/**
+	 * 订单号
+	 */
+	private String orderNo;
+
 	@Column(commit = "快递单号")
 	private String expressNo;
 
