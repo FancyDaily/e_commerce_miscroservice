@@ -3,6 +3,7 @@ import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
+import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookDetailVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public interface SdxBookService {
 
 	List<TSdxBookVo> findTSdxBookByAll(TSdxBookPo tSdxBookPo, Integer page, Integer size);
 
-	String detail(Long id, Long userId);
+	SdxBookDetailVo detail(Long id, Long userId);
 
 	QueryResult soldOrPurchaseUserList(Long id, Integer pageNum, Integer pageSize, Boolean isSold);
 

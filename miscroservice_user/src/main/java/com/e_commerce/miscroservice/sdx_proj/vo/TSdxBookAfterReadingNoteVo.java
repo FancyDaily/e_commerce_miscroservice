@@ -61,6 +61,12 @@ public class TSdxBookAfterReadingNoteVo {
     */
 
     private Integer thumbDownNum;
+
+	/**
+	 * 内容
+	 */
+    private String content;
+
     public TSdxBookAfterReadingNotePo copyTSdxBookAfterReadingNotePo() {
         return null;
     }

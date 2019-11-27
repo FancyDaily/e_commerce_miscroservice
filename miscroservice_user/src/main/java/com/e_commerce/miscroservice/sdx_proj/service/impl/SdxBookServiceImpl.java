@@ -43,6 +43,9 @@ public class SdxBookServiceImpl implements SdxBookService {
 	private final int ERROR_INT = 0;
 
 	@Autowired
+	private SdxBookService sdxBookService;
+
+	@Autowired
 	private SdxBookDao sdxBookDao;
 
 	@Autowired
@@ -124,7 +127,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 	}
 
 	@Override
-	public String detail(Long id, Long userId) {
+	public SdxBookDetailVo detail(Long id, Long userId) {
 		//曾经捐过这本书的列表
 		List<SdxBookOrderUserInfoVo> donateList = sdxorderservice.getEverDonateList(id);
 		//基本信息
@@ -146,12 +149,11 @@ public class SdxBookServiceImpl implements SdxBookService {
 			.filter(a -> !a.isNoNeedBuy())
 			.map(TSdxBookAfterReadingNotePo::getId).collect(Collectors.toList());
 		//查看自己是否为创作者
-		List<TSdxBookAfterReadingNoteUserPo> userAfrdnList = sdxBookAfterReadingNoteUserDao.selectInAfrdnIdsAndUserIdAndIsPurchase(afrdnIds, SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode(), userId);
+		List<TSdxBookAfterReadingNoteUserPo> userAfrdnList = afrdnIds.isEmpty()? new ArrayList<>(): sdxBookAfterReadingNoteUserDao.selectInAfrdnIdsAndUserIdAndIsPurchase(afrdnIds, SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode(), userId);
 		Map<Long, List<TSdxBookAfterReadingNoteUserPo>> idArdnMap = userAfrdnList.stream()
 			.collect(Collectors.groupingBy(TSdxBookAfterReadingNoteUserPo::getId));
 
 		limitedAfterReadingNoteList = limitedAfterReadingNoteList.stream()
-			.filter(a -> !a.isNoNeedBuy())
 			.map(a -> {
 				List<TSdxBookAfterReadingNoteUserPo> tSdxBookAfterReadingNoteUserPos = idArdnMap.get(a.getId());
 				if (tSdxBookAfterReadingNoteUserPos != null) {
@@ -181,14 +183,21 @@ public class SdxBookServiceImpl implements SdxBookService {
 		int purchasedNums = purchasedOrders.size();
 		int rate = (int) ((double) purchasedNums / (purchasedNums + surplusNum) * 100);
 
+		//库存
+		List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(sdxBookInfoPo.getId());
+
 		//装配
 		SdxBookDetailVo sdxBookDetailVo = sdxBookInfoPo.copySdxBookDetailVo();
+		sdxBookDetailVo.setPublisher(sdxBookInfoPo.getPublisher());
+		sdxBookDetailVo.setBindingStyle(sdxBookInfoPo.getBindingStyle());
+		sdxBookDetailVo.setCoverPic(sdxBookInfoPo.getCoverPic());
 		sdxBookDetailVo.setSurplusNum(surplusNum);
 		sdxBookDetailVo.setDonateUserRecords(donateList);
 		sdxBookDetailVo.setAfterReadingNoteVos(afterReadingNoteVos);
 		sdxBookDetailVo.setPurchaseRate(rate);
+		sdxBookDetailVo.setAvailableNum(availableBooks.size());
 
-		return new String();
+		return sdxBookDetailVo;
 	}
 
 	@Override
@@ -253,7 +262,8 @@ public class SdxBookServiceImpl implements SdxBookService {
 
 	@Override
 	public List<TSdxBookPo> getAvailableBooks(Long bookInfoId) {
-		return sdxBookDao.selectByBookInfoIdAndStatus(bookInfoId, SdxBookEnum.STATUS_ON_SHELF.getCode());
+		List<TSdxBookPo> tSdxBookPos = sdxBookDao.selectByBookInfoIdAndStatus(bookInfoId, SdxBookEnum.STATUS_ON_SHELF.getCode());
+		return tSdxBookPos.isEmpty()? new ArrayList<>(): tSdxBookPos;
 	}
 
 	@Override
@@ -326,7 +336,14 @@ public class SdxBookServiceImpl implements SdxBookService {
 		Map map = getBookDailySuggestMap();
 		Integer today = DateUtil.getWeekDayInt(System.currentTimeMillis());
 		List<Long> list = (List<Long>) map.get(today.toString());
-		return sdxBookInfoDao.selectInIds(list);
+		List<TSdxBookInfoPo> bookInfoPos = sdxBookInfoDao.selectInIds(list);
+		return bookInfoPos.stream()
+			.map(a -> {
+				Long id = a.getId();
+				List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(id);
+				a.setAvailableNum(availableBooks.size());
+				return a;
+			}).collect(Collectors.toList());
 	}
 
 	private Map getBookDailySuggestMap() {

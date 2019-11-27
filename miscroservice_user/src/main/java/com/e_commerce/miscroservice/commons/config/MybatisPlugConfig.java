@@ -31,7 +31,8 @@ public class MybatisPlugConfig {
         dbHandler.setDataSource(dataSource);
 //        dbHandler.setPackageBase("com.e_commerce.miscroservice.user.entity,com.e_commerce.miscroservice.commons.entity.application.user");
 //        dbHandler.setPackageBase("com.e_commerce.miscroservice.guanzhao_proj.product_order.po");
-		dbHandler.setPackageBase("com.e_commerce.miscroservice.sdx_proj.po");
+		dbHandler.setPackageBase("com.e_commerce.miscroservice.csq_proj.po");
+//		dbHandler.setPackageBase("com.e_commerce.miscroservice.sdx_proj.po");
 //		dbHandler.setPackageBase("com.e_commerce.miscroservice.lpglxt_proj.po");
         dbHandler.setShowSql(Boolean.TRUE);
         dbHandler.setAlwaysInit(Boolean.TRUE);

@@ -3,13 +3,15 @@ package com.e_commerce.miscroservice.lpglxt_proj.service;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 
+import java.util.List;
+
 /**
  * @Author: FangyiXu
  * @Date: 2019-10-14 16:40
  */
 public interface LpglCertService {
 
-	QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId);
+	QueryResult underCertList(Integer type, List<Integer> status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId);
 
 	void cert(Long userId, Long certId, Integer status);
 

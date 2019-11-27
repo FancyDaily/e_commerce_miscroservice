@@ -6,7 +6,7 @@ import java.util.List;
 public interface SdxWishListService {
     long modTSdxWishList(TSdxWishListPo tSdxWishListPo);
     int delTSdxWishListByIds(Long... ids);
-    TSdxWishListVo findTSdxWishListById(Long id);
+    List<TSdxWishListVo> findTSdxWishListById(Long id);
     List<TSdxWishListVo> findTSdxWishListByAll(TSdxWishListPo tSdxWishListPo, Integer page, Integer size);
 
 	QueryResult list(Long userId, Integer pageNum, Integer pageSize);

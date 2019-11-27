@@ -7,8 +7,10 @@ import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxTagDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxTagPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.utils.DoubanBookInfo;
 import com.e_commerce.miscroservice.sdx_proj.utils.IsbnHelper;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 	private final long ERROR_LONG = 0L;
 	private final int ERROR_INT = 0;
+	@Autowired
+	private SdxBookService sdxBookService;
 	@Autowired
 	private SdxBookInfoDao sdxBookInfoDao;
 	@Autowired
@@ -83,6 +87,15 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 		for (TSdxBookInfoPo po : tSdxBookInfoPos) {
 			tSdxBookInfoVos.add(po.copyTSdxBookInfoVo());
 		}
+
+		tSdxBookInfoVos.stream()
+			.map(a -> {
+				Long id = a.getId();
+				List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(id);
+				a.setAvailableNum(availableBooks.size());
+				return a;
+			}).collect(Collectors.toList());
+
 		return tSdxBookInfoVos;
 	}
 
@@ -97,6 +110,9 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 
 			//拷贝成bookInfo， 其中 检查是否需要插入新的分类 -> 并需要补全分类编号
 			tSdxBookInfoPo = infos.copyTSdxBookInfoPo();
+			String rating = infos.getRating();
+			tSdxBookInfoPo.setScoreDouban(Double.valueOf(rating));
+			tSdxBookInfoPo.setBindingStyle(infos.getBindingLayout());
 			//检查分类信息
 			String tag = tSdxBookInfoPo.getTag();
 			String tagId = dealWithNewTag(tag);

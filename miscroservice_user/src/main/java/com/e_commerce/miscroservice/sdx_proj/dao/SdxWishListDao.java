@@ -11,4 +11,6 @@ public interface SdxWishListDao {
 	List<TSdxWishListPo> selectByUserId(Long userId, Integer pageNum, Integer pageSize);
 
 	List<TSdxWishListPo> selectAll();
+
+	TSdxWishListPo selectByUserIdAndBookInfoId(Long userId, Long bookInfoId);
 }

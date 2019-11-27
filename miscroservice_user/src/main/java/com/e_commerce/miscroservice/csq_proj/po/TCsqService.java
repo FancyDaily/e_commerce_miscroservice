@@ -110,7 +110,7 @@ public class TCsqService extends BaseEntity {
 	@Column(commit = "分享图")
 	private String sharePic;
 
-	@Column(commit = "描述", charset = "utf8mb4", length = 4096)
+	@Column(commit = "描述", charset = "utf8mb4", length = 8192)
 	private String description;
 
 	@Column(commit = "描述图", length = 2048)

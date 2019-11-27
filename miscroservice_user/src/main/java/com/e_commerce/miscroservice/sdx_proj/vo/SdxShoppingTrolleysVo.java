@@ -1,4 +1,5 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxShoppingTrolleysPo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,4 +63,10 @@ public class SdxShoppingTrolleysVo {
     public TSdxShoppingTrolleysPo copyTSdxShoppingTrolleysPo() {
         return null;
     }
+
+	public void setBookInfo(TSdxBookInfoPo po) {
+    	this.bookInfoCoverPic = po.getCoverPic();
+    	this.bookInfoName = po.getName();
+    	this.price = po.getPrice();
+	}
 }

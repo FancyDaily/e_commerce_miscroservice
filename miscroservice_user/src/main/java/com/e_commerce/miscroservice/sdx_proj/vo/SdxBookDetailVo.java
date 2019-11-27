@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 
@@ -47,7 +48,7 @@ public class SdxBookDetailVo {
 	/**
 	 * 图片
 	 */
-	private String introPic;
+	private String coverPic;
 
 	/**
 	 * 类型名
@@ -72,7 +73,7 @@ public class SdxBookDetailVo {
 	/**
 	 * 出版社
 	 */
-	private String press;
+	private String publisher;
 
 	/**
 	 * 装帧
@@ -108,4 +109,9 @@ public class SdxBookDetailVo {
 	 * 推荐信息(姓名、职位、头像、评语)Json
 	 */
 	private String introduceInfo;
+
+	/**
+	 * 可售卖数量
+	 */
+	private Integer availableNum;
 }

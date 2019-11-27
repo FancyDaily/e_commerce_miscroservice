@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TSdxBookInfoVo {
 
+	/**
+	 * 剩余可售卖数量
+	 */
+	private Integer availableNum;
+
     /**
     *书籍信息的Id,修改或者查询的需要
     *

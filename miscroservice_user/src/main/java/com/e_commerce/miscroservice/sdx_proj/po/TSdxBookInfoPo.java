@@ -22,6 +22,12 @@ import lombok.NoArgsConstructor;
 public class TSdxBookInfoPo extends BaseEntity {
 
 	/**
+	 * 可售卖数量
+	 */
+	@Transient
+	private Integer availableNum;
+
+	/**
 	 * 捐助时可折抵积分
 	 */
 	@Column(commit = "可折抵积分", length = 11)

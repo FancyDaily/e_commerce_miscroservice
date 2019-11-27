@@ -19,4 +19,6 @@ public interface LpglCertDao {
 	int insert(TLpglCert build);
 
 	List<TLpglCert> selectByTypeAndStatusInApplyUserIdsPage(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds);
+
+	List<TLpglCert> selectByTypeInStatusInApplyUserIdsPage(Integer type, List<Integer> status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds);
 }

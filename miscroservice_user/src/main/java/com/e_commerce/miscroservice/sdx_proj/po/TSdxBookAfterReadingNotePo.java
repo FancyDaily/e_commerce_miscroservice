@@ -43,11 +43,14 @@ public class TSdxBookAfterReadingNotePo extends BaseEntity {
 	@Column(commit = "创作者编号")
 	private Long userId;
 
-	@Column(commit = "点赞数量", length = 11)
+	@Column(commit = "点赞数量", length = 11, defaultVal = "0")
 	private Integer thumbUpNum;
 
-	@Column(commit = "点踩数量", length = 11)
+	@Column(commit = "点踩数量", length = 11, defaultVal = "0")
 	private Integer thumbDownNum;
+
+	@Column(commit = "内容")
+	private String content;
 
     public TSdxBookAfterReadingNoteVo  copyTSdxBookAfterReadingNoteVo() {
         return null;

@@ -351,8 +351,36 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	public QueryResult purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
 		List<TSdxBookOrderPo> list = sdxBookOrderDao.purchaseList(userIds, option, pageNum, pageSize);
 		List<SdxPurchaseOrderVo> vos = list.stream()
-			.map(TSdxBookOrderPo::copySdxPurchaseOrderVo).collect(Collectors.toList());
+			.map(a -> {
+				SdxPurchaseOrderVo vo = a.copySdxPurchaseOrderVo();
+				vo.setTimeStamp(a.getCreateTime().getTime());
+				return vo;
+			}).collect(Collectors.toList());
+		//按日期分组
+		groupingByDate(vos);
+
 		return PageUtil.buildQueryResult(vos);
+	}
+
+	private List<SdxPurchaseOrderDateGroupVo> groupingByDate(List<SdxPurchaseOrderVo> vos) {
+		List<SdxPurchaseOrderDateGroupVo> purchaseOrderDateGroupVos = new ArrayList<>();
+		vos.stream()
+			.map(a -> {
+				Long timeStamp = a.getTimeStamp();
+				String wholeDate = DateUtil.timeStamp2Date(timeStamp);
+				String monthDay = DateUtil.timeStamp2MonthDay(timeStamp);
+				a.setWholeDate(wholeDate);
+				a.setMonthDay(monthDay);
+				return a;
+			}).collect(Collectors.groupingBy(SdxPurchaseOrderVo::getWholeDate)).forEach((k,v) -> {
+					SdxPurchaseOrderVo purchaseOrderVo = v.get(0);
+					purchaseOrderDateGroupVos.add(SdxPurchaseOrderDateGroupVo.builder()
+						.monthDay(purchaseOrderVo.getMonthDay())
+						.wholeDate(k)
+						.sdxPurchaseOrderVos(v)
+						.build());
+		});
+		return purchaseOrderDateGroupVos;
 	}
 
 	@Override
@@ -370,7 +398,6 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 //				Long bookInfoIds = vo.getBookInfoIds();
 				return vo;
 			}).collect(Collectors.toList());
-		//按日期分组 TODO
 		return PageUtil.buildQueryResult(vos);
 	}
 
@@ -404,8 +431,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.type(SdxBookOrderEnum.TYPE_DONATE.getCode())
 //			.expressNo()	//运单号, 填写之后(订单由初始 -> 途中(配送或者自送))
 			.orderNo(orderNo)        //订单号
-			.bookIds(StringUtil.longListToString(Arrays.asList(bookInfoIds)))        //书本编号
-			.bookIfIs(StringUtil.longListToString(bookList.stream().map(TSdxBookPo::getId).collect(Collectors.toList())))        //书本信息编号
+			.bookIds(StringUtil.longListToString(bookList.stream().map(TSdxBookPo::getId).collect(Collectors.toList())))        //书本编号
+			.bookIfIs(StringUtil.longListToString(Arrays.asList(bookInfoIds)))        //书本信息编号
 			.userId(userId)
 			.status(SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode())    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
 			.shippingAddressId(shippingAddressId)

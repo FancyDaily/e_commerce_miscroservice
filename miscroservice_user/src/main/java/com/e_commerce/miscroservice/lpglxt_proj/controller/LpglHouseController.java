@@ -137,6 +137,7 @@ public class LpglHouseController {
 
 	/**
 	 * 商品房信息添加
+	 * @param estateId 楼盘编号
 	 * @param houseNum 房号
 	 * @param name 名字
 	 * @param houseType 户型
@@ -155,15 +156,15 @@ public class LpglHouseController {
 	 */
 	@RequestMapping("add")
 	@Consume(TLpglHouse.class)
-	public Object houseAdd(Integer houseNum, String name, String houseType,
+	public Object houseAdd(Long estateId, Integer houseNum, String name, String houseType,
 							  String structType, Integer buildingNum, Integer groupNum, Integer floorNum,
 							  String direction, Double buildingArea, Double insideArea, Double buildingPrice, Double insidePrice, Integer status, Integer isValid) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		TLpglHouse obj = (TLpglHouse) ConsumeHelper.getObj();
 		try {
-			log.info("商品房信息添加, houseNum={}, name={}, houseType={}, structType={}, buildingNum={}, " +
-					"groupNum={}, floorNum={}, direction={}, buildingArea={}, insideArea={}, buildingPrice={}, insidePrice={}, status={}, isValid={}", houseNum, name, houseType, structType,
+			log.info("商品房信息添加, estateId={}, houseNum={}, name={}, houseType={}, structType={}, buildingNum={}, " +
+					"groupNum={}, floorNum={}, direction={}, buildingArea={}, insideArea={}, buildingPrice={}, insidePrice={}, status={}, isValid={}", estateId, houseNum, name, houseType, structType,
 				buildingNum, groupNum, floorNum, direction, buildingArea, insideArea, buildingPrice, insidePrice, status, isValid);
 			lpglHouseService.add(obj);
 			result.setSuccess(true);

@@ -97,6 +97,10 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 	@Override
 	public QueryResult list(Long id, Integer pageNum, Integer pageSize) {
 		List<TSdxShoppingTrolleysPo> trolleysPos = sdxShoppingTrolleysDao.selectByUserIdPage(id, pageNum, pageSize);
+		//收集所有所需的bookInfoId，组装成map备用
+		List<Long> bookInfoIds = trolleysPos.stream()
+			.map(TSdxShoppingTrolleysPo::getBookInfoId).collect(Collectors.toList());
+		Map<Long, List<TSdxBookInfoPo>> idBookInfoMap = sdxBookInfoDao.selectInIds(bookInfoIds).stream().collect(Collectors.groupingBy(TSdxBookInfoPo::getId));
 		//分组、排序 -> 按关联项目分组，并组内排序, 要注意关联项目为空的情况(这些不进行分组, 组外排序，将组内最晚的元素提取，代表组参与排序
 		Map<Boolean, List<TSdxShoppingTrolleysPo>> collect = trolleysPos.stream()
 			.collect(Collectors.partitioningBy(a -> a.getServiceId() == null));
@@ -113,7 +117,7 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 		groupVo.setServiceName("未分类");	//未归属任何组
 		groupVo.setCoverPic(CsqUserEnum.DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH);	//默认封面图
 		groupVo.setDescription("这些书没有属于任何公益项目。");
-		groupVo.setTrolleysBookInfos(noneServiceIdTrolleyPoList.stream().map(TSdxShoppingTrolleysPo::copySdxShoppingTrolleysVo).collect(Collectors.toList()));
+		groupVo.setTrolleysBookInfos(sdxShoppingTrolleysPoToVo(idBookInfoMap, noneServiceIdTrolleyPoList));
 		groupVo.setTimeStamp(noneServiceIdTrolleyPoList.isEmpty()? -1L : noneServiceIdTrolleyPoList.get(0).getUpdateTime().getTime());
 		finalList.add(groupVo);
 
@@ -124,11 +128,8 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 		serviceIdTrolleysMap.forEach((k,v) -> {
 			//获取项目信息
 			TCsqService csqService = csqServiceDao.selectByPrimaryKey(k);
-			//排序
-			List<SdxShoppingTrolleysVo> vos = v.stream()
-				.sorted(Comparator.comparing(TSdxShoppingTrolleysPo::getUpdateTime).reversed())
-				.map(TSdxShoppingTrolleysPo::copySdxShoppingTrolleysVo)
-				.collect(Collectors.toList());
+			//排序与组装
+			List<SdxShoppingTrolleysVo> vos = sdxShoppingTrolleysPoToVo(idBookInfoMap, v);
 			SdxShoppingTrolleysServiceGroupVo build = SdxShoppingTrolleysServiceGroupVo.builder()
 				.userId(id)
 				.serviceId(k)
@@ -147,6 +148,22 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 			.sorted(Comparator.comparing(SdxShoppingTrolleysServiceGroupVo::getTimeStamp).reversed()).collect(Collectors.toList());
 
 		return PageUtil.buildQueryResult(finalList);
+	}
+
+	private List<SdxShoppingTrolleysVo> sdxShoppingTrolleysPoToVo(Map<Long, List<TSdxBookInfoPo>> idBookInfoMap, List<TSdxShoppingTrolleysPo> v) {
+		return v.stream()
+					.sorted(Comparator.comparing(TSdxShoppingTrolleysPo::getUpdateTime).reversed())
+					.map(a -> {
+						SdxShoppingTrolleysVo vo = a.copySdxShoppingTrolleysVo();
+						Long bookInfoId = vo.getBookInfoId();
+						List<TSdxBookInfoPo> bookInfoPos = idBookInfoMap.get(bookInfoId);
+						if(bookInfoPos != null) {
+							TSdxBookInfoPo bookInfoPo = bookInfoPos.get(0);
+							vo.setBookInfo(bookInfoPo);
+						}
+						return vo;
+					})
+					.collect(Collectors.toList());
 	}
 
 }

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+
 /**
  * 审核
  * @Author: FangyiXu
@@ -31,22 +33,22 @@ public class LpglCertController {
 
 	/**
 	 * 审批列表(优惠价申请、更改状态为已售出申请、客户报备)
-	 * @param status 状态
 	 * @param type 类型1优惠价申请2售出申请3客户报备
 	 * @param pageNum 页码
 	 * @param pageSize 大小
 	 * @param isToday 是否筛选今天
 	 * @param groupId 分组编号
+	 * @param status 状态
 	 * @return
 	 */
 	@RequestMapping("list")
 	@UrlAuth(withoutPermission = true)
-	public Object houseUnderCertList(Integer status, Integer type, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
+	public Object houseUnderCertList(Integer type, Integer pageNum, Integer pageSize, boolean isToday, Long groupId, Integer... status) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
 			log.info("审批商品房列表(优惠价申请、更改状态为已售出申请、客户报备), status={}, type={}, pageNum={}, pageSize={}, isToday={}, groupId={}", status, type, pageNum, pageSize, isToday, groupId);
-			QueryResult result1 = lpglCertService.underCertList(type, status, pageNum, pageSize, isToday, groupId);
+			QueryResult result1 = lpglCertService.underCertList(type, Arrays.asList(status), pageNum, pageSize, isToday, groupId);
 			result.setData(result1);
 			result.setSuccess(true);
 		} catch (MessageException e) {

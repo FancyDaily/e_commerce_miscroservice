@@ -9,6 +9,7 @@ import com.e_commerce.miscroservice.lpglxt_proj.dao.LpglCertDao;
 import com.e_commerce.miscroservice.lpglxt_proj.po.TLpglCert;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -55,9 +56,14 @@ public class LpglCertDaoImpl implements LpglCertDao {
 
 	@Override
 	public List<TLpglCert> selectByTypeAndStatusInApplyUserIdsPage(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds) {
+		return selectByTypeInStatusInApplyUserIdsPage(type, Arrays.asList(status), pageNum, pageSize, isToday, userIds);
+	}
+
+	@Override
+	public List<TLpglCert> selectByTypeInStatusInApplyUserIdsPage(Integer type, List<Integer> status, Integer pageNum, Integer pageSize, boolean isToday, List<Long> userIds) {
 		MybatisPlusBuild eq = baseBuild()
 			.eq(TLpglCert::getType, type);
-		eq = status != null? eq.eq(TLpglCert::getStatus, status) : eq;
+		eq = status != null? eq.in(TLpglCert::getStatus, status) : eq;
 
 		long currentTimeMillis = System.currentTimeMillis();
 		long startStamp = DateUtil.getStartStamp(currentTimeMillis);

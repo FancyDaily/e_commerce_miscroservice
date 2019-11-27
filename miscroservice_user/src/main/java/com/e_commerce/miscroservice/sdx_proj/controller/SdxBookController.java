@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -10,7 +11,6 @@ import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
-import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -133,7 +133,11 @@ public class SdxBookController {
 		if(id == null) {
 			return Response.fail();
 		}
-		sdxBookService.preOrder(id, userId);
+		try {
+			sdxBookService.preOrder(id, userId);
+		} catch (MessageException e) {
+			return Response.errorMsg(e.getMessage());
+		}
 		return Response.success();
 	}
 

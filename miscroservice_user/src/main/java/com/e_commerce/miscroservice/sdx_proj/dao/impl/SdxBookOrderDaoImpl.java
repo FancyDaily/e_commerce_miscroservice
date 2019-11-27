@@ -124,23 +124,6 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 		);
 	}
 
-	public static void main(String[] args) {
-		Integer type = SdxBookOrderEnum.TYPE_DONATE.getCode();
-		Integer status = SdxBookOrderEnum.STATUS_DONE.getCode();
-		Long bookInfoId = 5L;
-		String build = buildContains4BookInfos(byTypeAndStatusBuild(type, status), bookInfoId).build();
-		System.out.println(build);
-
-		System.out.println(new MybatisPlusBuild(TSdxBookInfoPo.class)
-			.groupBefore()
-			.like(TSdxBookOrderPo::getBookIfIs, "1")
-			.or()
-			.like(TSdxBookOrderPo::getBookIfIs, "2")
-			.or()
-			.like(TSdxBookOrderPo::getBookIfIs, "3")
-			.groupAfter().build());
-	}
-
 	@Override
 	public List<TSdxBookOrderPo> selectByBookInfoIdAndTypeAndStatus(Long bookInfoId, int type, int status, Page page) {
 		MybatisPlusBuild build = buildContains4BookInfos(byTypeAndStatusBuild(type, status), bookInfoId);
@@ -224,7 +207,7 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 	}
 
 	private static MybatisPlusBuild baseBuild() {
-		return new MybatisPlusBuild(TSdxBookInfoPo.class)
+		return new MybatisPlusBuild(TSdxBookOrderPo.class)
 			.eq(TSdxBookOrderPo::getDeletedFlag, Boolean.FALSE);
 	}
 }

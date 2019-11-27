@@ -4,7 +4,9 @@ import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxWishListDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxWishListPo;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxWishListService;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxWishListVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxWishListVo;
@@ -30,6 +32,8 @@ public class SdxWishListServiceImpl implements SdxWishListService {
     private SdxWishListDao sdxWishListDao;
 	@Autowired
     private SdxBookInfoDao sdxBookInfoDao;
+	@Autowired
+	private SdxBookService sdxBookService;
     @Override
     public long modTSdxWishList(TSdxWishListPo tSdxWishListPo) {
         if (tSdxWishListPo == null) {
@@ -38,7 +42,12 @@ public class SdxWishListServiceImpl implements SdxWishListService {
         }
         if (tSdxWishListPo.getId() == null) {
             log.info("start添加心愿单={}", tSdxWishListPo);
-            int result = sdxWishListDao.saveTSdxWishListIfNotExist(tSdxWishListPo);
+            //判重
+			TSdxWishListPo exist = sdxWishListDao.selectByUserIdAndBookInfoId(tSdxWishListPo.getUserId(), tSdxWishListPo.getBookInfoId());
+			if(exist != null) {
+				return 0;
+			}
+			int result = sdxWishListDao.saveTSdxWishListIfNotExist(tSdxWishListPo);
             return result != 0 ? tSdxWishListPo.getId() : ERROR_LONG;
         }
         else {
@@ -56,14 +65,14 @@ public class SdxWishListServiceImpl implements SdxWishListService {
         return sdxWishListDao.delTSdxWishListByIds(ids);
     }
     @Override
-    public TSdxWishListVo findTSdxWishListById(Long id) {
+    public List<TSdxWishListVo> findTSdxWishListById(Long id) {
         if (id == null||id<=0L) {
             log.warn("根据Id查找心愿单,所传Id不符合规范");
-            return new TSdxWishListVo();
+            return new ArrayList<>();
         }
         log.info("start根据Id={}查找心愿单", id);
         TSdxWishListPo tSdxWishListPo = sdxWishListDao.findTSdxWishListById(id);
-        return tSdxWishListPo==null?new TSdxWishListVo():tSdxWishListPo.copyTSdxWishListVo() ;
+        return tSdxWishListPo==null?new ArrayList<>():Arrays.asList(tSdxWishListPo.copyTSdxWishListVo());
     }
     @Override
     public List<TSdxWishListVo> findTSdxWishListByAll(TSdxWishListPo tSdxWishListPo,Integer page, Integer size) {
@@ -75,7 +84,15 @@ public class SdxWishListServiceImpl implements SdxWishListService {
         log.info("start根据条件查找心愿单={}", tSdxWishListPo);
         List        <TSdxWishListPo> tSdxWishListPos = sdxWishListDao.findTSdxWishListByAll(            tSdxWishListPo,page,size);
         for (TSdxWishListPo po : tSdxWishListPos) {
-            tSdxWishListVos.add(po.copyTSdxWishListVo());
+        	//书本信息
+			Long bookInfoId = po.getBookInfoId();
+			TSdxBookInfoPo sdxBookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
+			TSdxWishListVo vo = po.copyTSdxWishListVo();
+			vo.setBookInfo(sdxBookInfoPo);
+			//缺货信息 -> 获取余量
+			List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(bookInfoId);
+			vo.setOutOfStock(availableBooks.size() < 1);	//是否有余量
+			tSdxWishListVos.add(vo);
         }
         return tSdxWishListVos;
     }

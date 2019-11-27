@@ -1382,7 +1382,12 @@ public class StringUtil {
 	}
 
 	public static String longListToString(List<Long> longs) {
-		return longs.stream().map(String::valueOf).reduce("", (a, b) -> a + "," + b);
+		String reduce = longs.stream().map(String::valueOf).reduce("", (a, b) -> a + "," + b);
+		return reduce.substring(1, reduce.length());
+	}
+
+	public static void main(String[] args) {
+		System.out.println(longListToString(Arrays.asList(1L,2L)));
 	}
 
 	/**

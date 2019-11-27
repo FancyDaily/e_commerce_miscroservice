@@ -25,6 +25,8 @@ public class SdxShoppingTrolleysController {
 
 	/**
 	 * 我的购物车
+	 * @param pageNum 页码
+	 * @param pageSize 大小
 	 * @return
 	 */
 	@RequestMapping("list")

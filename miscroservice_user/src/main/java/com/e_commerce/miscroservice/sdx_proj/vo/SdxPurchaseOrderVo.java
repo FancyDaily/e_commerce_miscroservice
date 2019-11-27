@@ -15,6 +15,18 @@ import lombok.Data;
 @Builder
 public class SdxPurchaseOrderVo {
 
+	private Long timeStamp;
+
+	/**
+	 * 日期
+	 */
+	private String monthDay;
+
+	/**
+	 * 带年份的日期
+	 */
+	private String wholeDate;
+
 	@Column(commit = "快递单号")
 	private String expressNo;
 

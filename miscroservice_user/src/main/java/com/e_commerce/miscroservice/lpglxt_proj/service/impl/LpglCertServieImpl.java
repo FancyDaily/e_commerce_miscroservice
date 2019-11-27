@@ -59,14 +59,14 @@ public class LpglCertServieImpl implements LpglCertService {
 	private LpglRoleDao lpglRoleDao;
 
 	@Override
-	public QueryResult underCertList(Integer type, Integer status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
+	public QueryResult underCertList(Integer type, List<Integer> status, Integer pageNum, Integer pageSize, boolean isToday, Long groupId) {
 		List<Long> userIds = null;
 		if (groupId != null) {
 			List<TLpglUser> tLpglUsers = lpglUserDao.selectByGroupId(groupId);
 			userIds = tLpglUsers.stream()
 				.map(TLpglUser::getId).collect(Collectors.toList());
 		}
-		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeAndStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
+		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeInStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
 		List<Long> houseIds = tLpglCerts.stream()
 			.map(TLpglCert::getHouseId).collect(Collectors.toList());
 		List<TLpglHouse> houses = lpglHouseDao.selectInIds(houseIds);

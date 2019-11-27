@@ -118,6 +118,7 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
 	@Override
 	public TSdxBookInfoPo selectByPrimaryKey(Long id) {
 		return MybatisPlus.getInstance().findOne(new TSdxBookInfoPo(), baseBuild()
+			.eq(TSdxBookInfoPo::getId, id)
 		);
 	}
 
