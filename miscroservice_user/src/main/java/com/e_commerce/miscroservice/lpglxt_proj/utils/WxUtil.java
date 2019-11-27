@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

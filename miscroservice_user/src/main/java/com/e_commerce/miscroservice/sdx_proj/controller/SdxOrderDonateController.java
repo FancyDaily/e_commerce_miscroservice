@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 书袋熊捐书订单
  * @Author: FangyiXu
@@ -55,7 +57,7 @@ public class SdxOrderDonateController {
 	}
 
 	/**
-	 * 创建捐赠订单
+	 * 创建捐赠订单(跳过邮费支付或者自送)
 	 * @param bookInfoIds 书籍信息编号(一或多个)
 	 * @param serviceId 关联公益项目编号
 	 * @param shipType 捐书方式(1邮寄2自送)
@@ -65,8 +67,32 @@ public class SdxOrderDonateController {
 	 */
 	@RequestMapping("donate/create")
 	@UrlAuth
-	public Object createBookDonateOrder(Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
+	public Object createDonateOrder(Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
 		return Response.success(sdxBookOrderService.createDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId));
+	}
+
+	/**
+	 * 创建捐赠订单(邮寄支付邮费)
+	 * @param bookInfoIds 书籍信息编号(一或多个)
+	 * @param serviceId 关联公益项目编号
+	 * @param shippingAddressId 邮寄地址编号（指定一个）
+	 * @return
+	 */
+	@RequestMapping("preOrder")
+	@UrlAuth
+	public Object preOrder(HttpServletRequest request, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
+		return Response.success(sdxBookOrderService.preDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, request));
+	}
+
+	/**
+	 * 创建待支付邮费的订单
+	 * @return
+	 */
+	@RequestMapping("wxNotify")
+	@UrlAuth
+	public Object wxNotify(String orderNo) {
+
+		return null;
 	}
 
 	/**

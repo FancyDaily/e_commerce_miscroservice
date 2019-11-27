@@ -402,7 +402,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	@Override
-	public String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId) {
+	public String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Integer status) {
 		//将给定的书籍信息 -> 生成出book实体，重复的infoIds数量决定了同infoId的book数量
 		Map<Long, Integer> idExpectedScoresMap = sdxBookService.getIdExpectedScoresMap(bookInfoIds);
 		List<TSdxBookPo> bookList = new ArrayList<>();
@@ -434,7 +434,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.bookIds(StringUtil.longListToString(bookList.stream().map(TSdxBookPo::getId).collect(Collectors.toList())))        //书本编号
 			.bookIfIs(StringUtil.longListToString(Arrays.asList(bookInfoIds)))        //书本信息编号
 			.userId(userId)
-			.status(SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode())    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
+			.status(status == null? SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode() : status)    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
 			.shippingAddressId(shippingAddressId)
 			.expectedTotalScores(totalExpectedScores)
 //			.exactTotalScores()	//实际获得积分
@@ -444,6 +444,11 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
 		//返回订单号orderNo
 		return orderNo;
+	}
+
+	@Override
+	public String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId) {
+		return createDonateOrder(userId, bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, null);
 	}
 
 	@Override
@@ -470,6 +475,17 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.status(SdxBookOrderEnum.STATUS_CANCLE.getCode())
 			.build();
 		sdxBookOrderDao.modTSdxBookOrder(build);
+	}
+
+	@Override
+	public Object preDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request) {
+		//创建订单
+		String orderNo = createDonateOrder(userId, bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, SdxBookOrderEnum.STATUS_UNPAY.getCode());
+		//创建微信支付参数 -> orderNo => webParam
+		//TODO
+		Double fee = 5d;	//默认收费5元
+//		buildWebParam(userId, String orderNo, attach, fee, request);	//TODO 往csq_proj 下的微信notify_url对应接口添加邮费支付类型
+		return null;
 	}
 
 	private void afterPaySuccess(TSdxBookOrderPo order) {

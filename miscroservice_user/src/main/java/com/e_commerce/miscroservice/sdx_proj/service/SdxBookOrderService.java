@@ -34,7 +34,11 @@ public interface SdxBookOrderService {
 
 	QueryResult donateList(Long id, Integer option, Integer pageNum, Integer pageSize);
 
+	String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Integer status);
+
 	String createDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId);
 
 	void cancel(Long orderId);
+
+	Object preDonateOrder(Long id, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request);
 }
