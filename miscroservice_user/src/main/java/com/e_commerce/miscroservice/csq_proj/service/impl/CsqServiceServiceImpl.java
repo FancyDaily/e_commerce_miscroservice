@@ -655,7 +655,10 @@ public class CsqServiceServiceImpl implements CsqServiceService {
 	@Override
 	public void modify(TCsqService csqService) {
 		Long id = csqService.getId();
+		String description = csqService.getDescription();
+		description = description == null? "": description;
 		if(id == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "修改时，编号不能为空");
+		if(description.length() > 8192) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "项目描述长度过长！");
 		Double expectedAmount = csqService.getExpectedAmount();
 		Integer expectedStatus = csqService.getStatus();
 		TCsqService csqService2 = csqServiceDao.selectByPrimaryKey(id);

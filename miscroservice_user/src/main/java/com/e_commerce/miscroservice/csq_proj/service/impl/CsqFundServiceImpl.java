@@ -112,6 +112,9 @@ public class CsqFundServiceImpl implements CsqFundService {
 		if(fund == null) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "所有必要参数为空");
 		}
+		String description = fund.getDescription();
+		description = description == null? "": description;
+		if(description.length() > 8192) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "描述长度过长！");
 		/*// check实名
 		TCsqUser tCsqUser = userDao.selectByPrimaryKey(userId);
 		if(!CsqUserEnum.AUTHENTICATION_STATUS_YES.toCode().equals(tCsqUser.getAuthenticationStatus())) {
