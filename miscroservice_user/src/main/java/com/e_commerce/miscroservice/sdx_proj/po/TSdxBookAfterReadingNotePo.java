@@ -26,6 +26,18 @@ public class TSdxBookAfterReadingNotePo extends BaseEntity {
 	private boolean noNeedBuy;
 
 	/**
+	 * 是否点赞/踩
+	 */
+	@Transient
+	private Integer isThumb;
+
+	/**
+	 * 点赞/踩类型
+	 */
+	@Transient
+	private Integer thumbType;
+
+	/**
 	 * 创作日期
 	 */
 	@Transient

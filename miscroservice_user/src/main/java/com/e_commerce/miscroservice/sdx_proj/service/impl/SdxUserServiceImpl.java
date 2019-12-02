@@ -64,4 +64,9 @@ public class SdxUserServiceImpl implements SdxUserService {
 		return resultList;*/
 		return null;
 	}
+
+	@Override
+	public Double getCutDownFee(Integer sdxScores) {
+		return sdxScores == null || sdxScores <= 0 ? 0: 3d;	//TODO 写死 所有积分抵扣3元
+	}
 }

@@ -1,4 +1,5 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookTicketDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTicketPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookTicktService;
@@ -29,7 +30,10 @@ public class SdxBookTicktServiceImpl implements SdxBookTicktService {
             return ERROR_LONG;
         }
         if (tSdxBookTicketPo.getId() == null) {
-            log.info("start添加预定书券={}", tSdxBookTicketPo);
+			Long expire = tSdxBookTicketPo.getExpire();
+			if(expire == null) expire = DateUtil.interval * 15 + System.currentTimeMillis();
+			tSdxBookTicketPo.setExpire(expire);
+			log.info("start添加预定书券={}", tSdxBookTicketPo);
             int result = sdxBookTicketDao.saveTSdxBookTicktIfNotExist(tSdxBookTicketPo);
             return result != 0 ? tSdxBookTicketPo.getId() : ERROR_LONG;
         }

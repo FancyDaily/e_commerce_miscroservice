@@ -144,14 +144,15 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 
 	@Override
 	public TSdxBookOrderPo selectByShippingAddressIdAndBookInfoIdsAndBookFeeAndUserIdAndShipFee(Long shippingAddressId, String bookInfoIds, Double bookFee, Long userId, Double shipFee, int code, int type) {
-		return MybatisPlus.getInstance().findOne(new TSdxBookOrderPo(), baseBuild()
+		MybatisPlusBuild eq = baseBuild()
 			.eq(TSdxBookOrderPo::getShippingAddressId, shippingAddressId)
 			.eq(TSdxBookOrderPo::getBookIfIs, bookInfoIds)
 			.eq(TSdxBookOrderPo::getBookPrice, bookFee)
 			.eq(TSdxBookOrderPo::getUserId, userId)
-			.eq(TSdxBookOrderPo::getShipPirce, shipFee)
 			.eq(TSdxBookOrderPo::getStatus, code)
-			.eq(TSdxBookOrderPo::getType, type)
+			.eq(TSdxBookOrderPo::getType, type);
+		eq = shipFee != null? eq.eq(TSdxBookOrderPo::getShipPirce, shipFee): eq;
+		return MybatisPlus.getInstance().findOne(new TSdxBookOrderPo(), eq
 		);
 	}
 

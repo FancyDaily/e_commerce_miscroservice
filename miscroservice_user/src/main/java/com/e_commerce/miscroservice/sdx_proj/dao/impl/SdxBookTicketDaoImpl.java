@@ -38,11 +38,17 @@ public class SdxBookTicketDaoImpl implements SdxBookTicketDao {
     }
     @Override
     public List<TSdxBookTicketPo> findTSdxBookTicktByAll(TSdxBookTicketPo tSdxBookTicketPo, Integer page, Integer size) {
-        MybatisPlusBuild build = new MybatisPlusBuild(TSdxBookTicketPo.class);
+		Long expire = tSdxBookTicketPo.getExpire();
+		Integer isUsed = tSdxBookTicketPo.getIsUsed();
+
+		MybatisPlusBuild build = new MybatisPlusBuild(TSdxBookTicketPo.class);
         build.eq(TSdxBookTicketPo::getDeletedFlag, Boolean.FALSE);
         if (tSdxBookTicketPo.getId() == null) {
-            if (tSdxBookTicketPo.getExpire()!=null ) {
-                build.eq(TSdxBookTicketPo::getExpire, tSdxBookTicketPo.getExpire());
+        	if(isUsed != null) {
+        		build.eq(TSdxBookTicketPo::getIsUsed, isUsed);
+			}
+            if (expire !=null ) {
+                build.gt(TSdxBookTicketPo::getExpire, expire);
             }
             if (tSdxBookTicketPo.getUserId()!=null ) {
                 build.eq(TSdxBookTicketPo::getUserId, tSdxBookTicketPo.getUserId());
@@ -61,9 +67,21 @@ public class SdxBookTicketDaoImpl implements SdxBookTicketDao {
 
 	@Override
 	public List<TSdxBookTicketPo> selectByUserId(Long userId) {
-		return MybatisPlus.getInstance().findAll(new TSdxBookTicketPo(), new MybatisPlusBuild(TSdxBookTicketPo.class)
+		return MybatisPlus.getInstance().findAll(new TSdxBookTicketPo(), baseBuild()
 			.gt(TSdxBookTicketPo::getExpire, System.currentTimeMillis())
 			.eq(TSdxBookTicketPo::getUserId, userId)
+		);
+	}
+
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TSdxBookTicketPo.class)
+			.eq(TSdxBookTicketPo::getDeletedFlag, Boolean.FALSE);
+	}
+
+	@Override
+	public List<TSdxBookTicketPo> selectByUserIdAndIsUsed(Long userId, int code) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookTicketPo(), baseBuild()
+			.eq(TSdxBookTicketPo::getIsUsed, code)
 		);
 	}
 }

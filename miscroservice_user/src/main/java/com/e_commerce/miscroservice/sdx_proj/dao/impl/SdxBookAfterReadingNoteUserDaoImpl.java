@@ -115,6 +115,25 @@ public class SdxBookAfterReadingNoteUserDaoImpl implements SdxBookAfterReadingNo
 		);
 	}
 
+	@Override
+	public List<TSdxBookAfterReadingNoteUserPo> selectByBookAfrnIdAndUserIdAndIsThumb(Long afrId, Long userId, int code) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookAfterReadingNoteUserPo(), byBookAfrnIdAndUserIdAndIsThumbBuild(afrId, userId, code)
+		);
+	}
+
+	private MybatisPlusBuild byBookAfrnIdAndUserIdAndIsThumbBuild(Long afrId, Long userId, int code) {
+		return baseBuild()
+			.eq(TSdxBookAfterReadingNoteUserPo::getBookAfterReadingNoteId, afrId)
+			.eq(TSdxBookAfterReadingNoteUserPo::getUserId, userId)
+			.eq(TSdxBookAfterReadingNoteUserPo::getIsThumb, code);
+	}
+
+	@Override
+	public TSdxBookAfterReadingNoteUserPo selectByBookAfrnIdAndUserIdAndIsThumbAndType(Long afrId, Long userId, int code, int code1) {
+		return MybatisPlus.getInstance().findOne(new TSdxBookAfterReadingNoteUserPo(), byBookAfrnIdAndUserIdAndIsThumbBuild(afrId, userId, code)
+			.eq(TSdxBookAfterReadingNoteUserPo::getType, code1));
+	}
+
 	private MybatisPlusBuild baseBuild() {
 		return new MybatisPlusBuild(TSdxBookAfterReadingNotePo.class)
 			.eq(TSdxBookAfterReadingNoteUserPo::getDeletedFlag, Boolean.FALSE);

@@ -69,13 +69,13 @@ public class LpglCertServieImpl implements LpglCertService {
 		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeInStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
 		List<Long> houseIds = tLpglCerts.stream()
 			.map(TLpglCert::getHouseId).collect(Collectors.toList());
-		List<TLpglHouse> houses = lpglHouseDao.selectInIds(houseIds);
+		List<TLpglHouse> houses = houseIds.isEmpty()? new ArrayList<>(): lpglHouseDao.selectInIds(houseIds);
 		Map<Long, List<TLpglHouse>> idHouseMap = houses.stream()
 			.collect(Collectors.groupingBy(TLpglHouse::getId));
 
 		List<Long> estateIds = houses.stream()
 			.map(TLpglHouse::getEstateId).collect(Collectors.toList());
-		List<TLpglEstate> tLpglEstates = lpglEstateDao.selectInIds(estateIds);
+		List<TLpglEstate> tLpglEstates = estateIds.isEmpty()? new ArrayList<>(): lpglEstateDao.selectInIds(estateIds);
 		Map<Long, List<TLpglEstate>> idEstateMap = tLpglEstates.stream()
 			.collect(Collectors.groupingBy(TLpglEstate::getId));
 

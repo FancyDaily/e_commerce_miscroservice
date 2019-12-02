@@ -2,9 +2,13 @@ package com.e_commerce.miscroservice.lpglxt_proj.po;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Table;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.stylesheets.LinkStyle;
+
+import java.util.List;
 
 /**
  * 楼盘管理职位表
@@ -16,6 +20,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class TLpglPosistion extends BaseEntity {
+
+	@Transient
+	private List<TLpglRole> roles;
 
 	@Column(commit = "职位名称")
 	private String posisitionName;

@@ -142,6 +142,17 @@ public class SdxBookController {
 	}
 
 	/**
+	 * 预定状态
+	 * @param bookInfoId 书籍信息编号
+	 * @return
+	 */
+	@RequestMapping("preOrder/status")
+	@UrlAuth
+	public Response preOrderStatus(Long bookInfoId) {
+		return Response.success(sdxBookService.preOrderStatus(IdUtil.getId(), bookInfoId));
+	}
+
+	/**
 	 * 关注最高书籍列表
 	 * @return
 	 */

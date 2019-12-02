@@ -91,7 +91,7 @@ public class SdxWishListServiceImpl implements SdxWishListService {
 			vo.setBookInfo(sdxBookInfoPo);
 			//缺货信息 -> 获取余量
 			List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(bookInfoId);
-			vo.setOutOfStock(availableBooks.size() < 1);	//是否有余量
+			vo.setOutOfStock(!availableBooks.isEmpty());	//是否有余量
 			tSdxWishListVos.add(vo);
         }
         return tSdxWishListVos;

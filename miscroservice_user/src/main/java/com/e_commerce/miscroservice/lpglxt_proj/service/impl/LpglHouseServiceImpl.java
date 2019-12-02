@@ -222,12 +222,16 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 			} else if("3".equals(groupNum)) {
 				groupName = "三单元";
 			}
-			//TODO 楼层号
+			Integer houseNum = Integer.valueOf(listString.get(1));
+			String houseNumStr = String.valueOf(houseNum);
+			String substring = houseNumStr.substring(0, houseNumStr.length() - 2);
+			Integer floorNum = Integer.valueOf(substring);
 			Integer buildingNumer = Integer.valueOf(buildingNum);
 			TLpglHouse build = TLpglHouse.builder()
 				.estateId(estateId)
 				.buildingNum(buildingNumer)
-				.houseNum(Integer.valueOf(listString.get(1)))
+				.floorNum(floorNum)
+				.houseNum(houseNum)
 				.buildingArea(Double.valueOf(listString.get(4)))
 				.buildingPrice(Double.valueOf(listString.get(5)))
 				.totalPrice(Double.valueOf(listString.get(6)))
@@ -266,3 +270,4 @@ public class LpglHouseServiceImpl implements LpglHouseService {
 		return i;
 	}
 }
+

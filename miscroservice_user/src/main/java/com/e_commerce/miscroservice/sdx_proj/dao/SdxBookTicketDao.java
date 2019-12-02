@@ -9,4 +9,6 @@ public interface SdxBookTicketDao {
     List<TSdxBookTicketPo> findTSdxBookTicktByAll(TSdxBookTicketPo tSdxBookTicketPo, Integer page, Integer size);
 
 	List<TSdxBookTicketPo> selectByUserId(Long userId);
+
+	List<TSdxBookTicketPo> selectByUserIdAndIsUsed(Long userId, int code);
 }

@@ -147,13 +147,18 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 
 	@Override
 	public Map<String, String> buildWebParam(Long userId, String orderNo, String attach, Double fee, HttpServletRequest httpServletRequest, boolean isYunmaPay, Long yunmaId) throws Exception {
+		return buildWebParam(userId, orderNo, attach, fee, httpServletRequest, isYunmaPay, yunmaId, false);
+	}
+
+	@Override
+	public Map<String, String> buildWebParam(Long userId, String orderNo, String attach, Double fee, HttpServletRequest httpServletRequest, boolean isYunmaPay, Long yunmaId, boolean isSdx) throws Exception {
 		TCsqUser tempUser;
 		yunmaId = yunmaId == null? (tempUser = csqUserDao.selectByPrimaryKey(userId)) == null? null: tempUser.getYunmaId() : yunmaId;
 		//针对不同的实体类型，有不同的支付前逻辑(eg. 产生待激活的基金等)
 		Map<String, String> webParam;
 		if (!isYunmaPay) {    //微信支付
 			//向微信请求发起支付
-			webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false);
+			webParam = wechatPay.createWebParam(orderNo, fee, httpServletRequest, attach, false, isSdx);
 			webParam.put("orderNo", orderNo);
 		} else {
 			if (yunmaId == null) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "正元用户编号不能为空!");

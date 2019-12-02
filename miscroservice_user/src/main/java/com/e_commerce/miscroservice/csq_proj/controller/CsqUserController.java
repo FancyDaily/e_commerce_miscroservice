@@ -533,6 +533,7 @@ public class CsqUserController {
 	/**
 	 * 分享活动页
 	 *
+	 *
 	 * @param name 项目名字/基金名字
 	 * @return
 	 */

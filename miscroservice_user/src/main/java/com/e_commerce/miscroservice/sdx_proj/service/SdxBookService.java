@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.service;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
+import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
@@ -38,4 +39,6 @@ public interface SdxBookService {
 	String getSuggestInitail();
 
 	List<TCsqService> gotoServiceList();
+
+	boolean preOrderStatus(Long id, Long bookInfoId);
 }

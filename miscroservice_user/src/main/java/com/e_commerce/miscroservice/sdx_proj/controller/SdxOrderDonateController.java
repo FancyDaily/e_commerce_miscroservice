@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
@@ -53,7 +54,13 @@ public class SdxOrderDonateController {
 	@RequestMapping("getBookInfo")
 	@UrlAuth
 	public Object getBookInfo(String isbnCode) {
-		return Response.success(sdxBookInfoService.getBookInfo(isbnCode));
+		Response response;
+		try {
+			response = Response.success(sdxBookInfoService.getBookInfo(isbnCode));
+		} catch (MessageException e) {
+			response = Response.errorMsg(e.getMessage());
+		}
+		return response;
 	}
 
 	/**

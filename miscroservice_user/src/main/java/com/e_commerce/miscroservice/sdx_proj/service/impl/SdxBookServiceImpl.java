@@ -142,6 +142,12 @@ public class SdxBookServiceImpl implements SdxBookService {
 		//确认读后感购买状态
 		limitedAfterReadingNoteList = limitedAfterReadingNoteList.stream()
 			.map(a -> {
+				//查询点赞状态
+				Long afrId = a.getId();
+				TSdxBookAfterReadingNoteUserPo afterReadingNoteUserPo = sdxBookAfterReadingNoteUserDao.selectByBookAfrnIdAndUserIdAndIsThumbAndType(afrId, userId, SdxBookAfterReadingNoteUserEnum.IS_THUMB_YES.getCode(), SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode());
+				//查看是点赞还是点踩
+				a.setThumbType(afterReadingNoteUserPo == null? SdxBookAfterReadingNoteUserEnum.THUMB_TYPE_UP.getCode(): afterReadingNoteUserPo.getThumbType());
+				a.setIsThumb(afterReadingNoteUserPo == null? SdxBookAfterReadingNoteUserEnum.IS_THUMB_NO.getCode(): afterReadingNoteUserPo.getIsThumb());
 				if (userId.equals(a.getUserId())) a.setNoNeedBuy(Boolean.TRUE);
 				return a;
 			}).collect(Collectors.toList());
@@ -233,7 +239,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 	@Override
 	public void preOrder(Long id, Long userId) {
 		//获取所有预定书券
-		List<TSdxBookTicketPo> sdxBookTicketPos = sdxBookTicketDao.selectByUserId(userId);
+		List<TSdxBookTicketPo> sdxBookTicketPos = sdxBookTicketDao.selectByUserIdAndIsUsed(userId, SdxBookTicketEnum.IS_USED_NO.getCode());
 		if (sdxBookTicketPos.isEmpty()) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有可用书券!");
 
 		//检查可用预定数
@@ -396,6 +402,12 @@ public class SdxBookServiceImpl implements SdxBookService {
 				resultList.add(csqService);
 			});
 		return resultList;
+	}
+
+	@Override
+	public boolean preOrderStatus(Long id, Long bookInfoId) {
+		List<TSdxBookInfoUserPreOrderPo> bookInfoUserPreOrderPos = sdxBookInfoUserPreOrderDao.selectByUserIdAndBookInfoId(id, bookInfoId);
+		return !bookInfoUserPreOrderPos.isEmpty();
 	}
 
 	@Override

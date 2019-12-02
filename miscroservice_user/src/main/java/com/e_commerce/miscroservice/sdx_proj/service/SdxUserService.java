@@ -7,4 +7,5 @@ public interface SdxUserService {
 
 	Object globalDonate();
 
+	Double getCutDownFee(Integer sdxScores);
 }

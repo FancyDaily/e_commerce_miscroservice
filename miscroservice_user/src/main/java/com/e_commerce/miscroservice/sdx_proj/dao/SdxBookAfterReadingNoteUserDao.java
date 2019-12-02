@@ -17,4 +17,8 @@ public interface SdxBookAfterReadingNoteUserDao {
 	int insert(List<TSdxBookAfterReadingNoteUserPo> afterReadingNoteUserPo);
 
 	int update(TSdxBookAfterReadingNoteUserPo afterReadingNoteUserPo);
+
+	List<TSdxBookAfterReadingNoteUserPo> selectByBookAfrnIdAndUserIdAndIsThumb(Long afrId, Long userId, int code);
+
+	TSdxBookAfterReadingNoteUserPo selectByBookAfrnIdAndUserIdAndIsThumbAndType(Long afrId, Long userId, int code, int code1);
 }

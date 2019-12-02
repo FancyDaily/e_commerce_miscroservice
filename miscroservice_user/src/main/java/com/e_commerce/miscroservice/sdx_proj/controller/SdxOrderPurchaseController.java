@@ -2,6 +2,7 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 书袋熊购书订单
@@ -30,18 +32,40 @@ public class SdxOrderPurchaseController {
 	SdxBookOrderService sdxBookOrderService;
 
 	/**
+	 * 拉取新订单信息
+	 * @param shippingAddressId 邮寄编号
+	 * @param bookInfoIds 书本信息编号
+	 * @return
+	 */
+	@RequestMapping("pre/order/infos")
+	@UrlAuth
+	public Object preOrderInfos(Long shippingAddressId, String bookInfoIds) {
+		try {
+			return Response.success(sdxBookOrderService.preOrderInfos(IdUtil.getId(), shippingAddressId, bookInfoIds));
+		} catch (MessageException e) {
+			return Response.errorMsg(e.getMessage());
+		}
+	}
+
+	/**
 	 * 下单(微信支付)
 	 *
 	 * @param shippingAddressId 邮寄地址编号
 	 * @param bookInfoIds       书籍信息编号
 	 * @param scoreUsed         使用积分
-	 * @param bookFee           最终价格
+	 * @param bookFee           最终价格(不含邮费)
+	 * @param shipFee			邮费
 	 * @return
 	 */
 	@RequestMapping("pre/order")
 	@UrlAuth
 	public Object preOrder(Long shippingAddressId, String bookInfoIds, Integer scoreUsed, Double bookFee, HttpServletRequest httpServletRequest, Double shipFee) throws Exception {
-		return Response.success(sdxBookOrderService.preOrder(shippingAddressId, bookInfoIds, bookFee, IdUtil.getId(), httpServletRequest, shipFee, scoreUsed));
+		try {
+			Map<String, String> result = sdxBookOrderService.preOrder(shippingAddressId, bookInfoIds, bookFee, IdUtil.getId(), httpServletRequest, shipFee, scoreUsed);
+			return Response.success(result);
+		} catch (MessageException e) {
+			return Response.errorMsg(e.getMessage());
+		}
 	}
 
 	/**

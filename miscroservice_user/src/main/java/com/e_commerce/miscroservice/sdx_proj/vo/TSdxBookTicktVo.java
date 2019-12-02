@@ -30,6 +30,12 @@ public class TSdxBookTicktVo {
     */
 
     private Long userId;
+
+	/**
+	 * 是否已使用
+	 */
+    private Integer isUsed;
+
     public TSdxBookTicketPo copyTSdxBookTicktPo() {
         return null;
     }

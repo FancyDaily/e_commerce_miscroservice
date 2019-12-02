@@ -36,7 +36,7 @@ public class CsqWeChatPay {
 	private static final int MAX_CAP = 1_000;
 	private static Map<String, String> openIdCache = new ConcurrentHashMap<>(MAX_CAP);
 
-	private String getOpenId(HttpServletRequest request) {
+	private String getOpenId(HttpServletRequest request, boolean isSdx) {
 
 		String openid = request.getParameter("openid");
 
@@ -52,9 +52,9 @@ public class CsqWeChatPay {
 		if (openid == null) {
 			StringBuilder params = new StringBuilder();
 			params.append("secret=");
-			params.append(CsqWechatConstant.APP_SECRET);
+			params.append(isSdx? CsqWechatConstant.SDX_APP_SECRET: CsqWechatConstant.APP_SECRET);
 			params.append("&appid=");
-			params.append(CsqWechatConstant.APP_ID);
+			params.append(isSdx? CsqWechatConstant.SDX_APP_ID: CsqWechatConstant.APP_ID);
 			params.append("&grant_type=authorization_code");
 			//		params.append("&code=");
 			params.append("&js_code=");
@@ -80,6 +80,10 @@ public class CsqWeChatPay {
 
 		return openid;
 
+	}
+
+	private String getOpenId(HttpServletRequest request) {
+		return getOpenId(request, false);
 	}
 
 	private String httpsRequest(String requestUrl, String requestMethod, String outputStr) {
@@ -210,6 +214,10 @@ public class CsqWeChatPay {
 	}*/
 
 	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb) throws Exception {
+		return createWebParam(orderNo, payCount, request, attach, isWeb, false);
+	}
+
+	public Map<String, String> createWebParam(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb, boolean isSdx) throws Exception {
 		log.info("web params= orderNo={}, payCount={}, attach={}", orderNo, payCount, attach);
 		SortedMap<String, String> param = new TreeMap<>();
 		param.put("appId", CsqWechatConstant.APP_ID);
@@ -263,6 +271,10 @@ public class CsqWeChatPay {
 	}
 
 	private Map<String, String> createPay(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb) throws Exception {
+		return createPay(orderNo, payCount, request, attach, isWeb, false);
+	}
+
+	private Map<String, String> createPay(String orderNo, Double payCount, HttpServletRequest request, String attach, boolean isWeb, boolean isSdx) throws Exception {
 		String openId = null;
 		if (request != null) {
 			openId = getOpenId(request);
@@ -273,6 +285,9 @@ public class CsqWeChatPay {
 		log.info("sing_info, msg={}", resultMap.toString());
 		return resultMap;
 	}
+
+
+
 
 	private Map<String, String> createRefund(String orderNo, Double payCount, HttpServletRequest request, String attach) throws Exception {
 		String openId = null;

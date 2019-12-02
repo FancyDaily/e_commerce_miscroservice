@@ -1778,6 +1778,13 @@ public class StringUtil {
 		return Arrays.asList(bookIds.split(",")).stream().filter(a -> !StringUtil.isEmpty(a)).map(Long::valueOf).collect(Collectors.toList());
 	}
 
+	public static String reducer(List<String> src, String split) {
+		String reduce = src.stream()
+			.filter(Objects::nonNull)
+			.reduce("", (a, b) -> a + split + b);
+		return reduce = reduce.contains(split)? reduce.substring(1, reduce.length()): reduce;
+	}
+
 	// 判断一个字符串是否都为数字
 	public boolean isDigit(String strNum) {
 		Pattern pattern = Pattern.compile("[0-9]{1,}");

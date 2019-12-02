@@ -65,6 +65,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	@Autowired
 	SdxBookInfoDao sdxBookInfoDao;
 	@Autowired
+	SdxUserService sdxUserService;
+	@Autowired
 	@Qualifier("sdxRedisTemplate")
 	private HashOperations<String, String, Object> userRedisTemplate;
 
@@ -488,6 +490,32 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		return null;
 	}
 
+	@Override
+	public Map<String, Object> preOrderInfos(Long userId, Long shippingAddressId, String bookInfoIdStr) {
+		Map<String, Object> resultMap = new HashMap<>();
+		List<String> bookInfoIds = StringUtil.splitStringToList(bookInfoIdStr, ",");
+		boolean isSelfPurchase = shippingAddressId == null;	//自提
+		Double shipFee = isSelfPurchase || bookInfoIds.size() > 5 ? 0: 5D;
+		Double bookFee = getFee(bookInfoIdStr);
+		Integer sdxScores = sdxUserDao.selectByPrimaryKey(userId).getSdxScores();
+		Double cutDownFee = sdxUserService.getCutDownFee(sdxScores);
+		resultMap.put("shipFee", shipFee);
+		resultMap.put("bookFee", bookFee);
+		resultMap.put("sdxScores", sdxScores);
+		resultMap.put("cutDwonFee", cutDownFee);
+
+		return resultMap;
+	}
+
+	private Double getFee(String bookInfoIdStr) {
+		//check
+		getBookIds(bookInfoIdStr);
+		List<Long> bookInfoIds = StringUtil.splitStringToList(bookInfoIdStr, ",").stream().map(Long::valueOf).collect(Collectors.toList());
+		return sdxBookInfoDao.selectInIds(bookInfoIds).stream()
+			.map(TSdxBookInfoPo::getPrice).reduce(0d, Double::sum);
+	}
+
+
 	private void afterPaySuccess(TSdxBookOrderPo order) {
 		Long userId = order.getUserId();
 		//积分减少，插入流水
@@ -546,6 +574,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		List<String> bookInfos = Arrays.asList(bookInfoIds.contains(",")? bookInfoIds.split(",") : new String[]{bookInfoIds});
 
 		List<Long> bookIdList = new ArrayList<>();
+		List<String> errorMsgList = new ArrayList<>();
 		for(String bookInfo: bookInfos) {
 			Long bookInfoId = Long.valueOf(bookInfo);
 			List<TSdxBookPo> books = sdxBookService.getAvailableBooks(bookInfoId);
@@ -555,8 +584,18 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			List<TSdxBookInfoUserPreOrderPo> bookInfoUserPreOrderPos = sdxBookInfoUserPreOrderDao.selectByBookInfoId(bookInfoId);
 			int preOrderNum = bookInfoUserPreOrderPos.size();
 			surplusAmount -= preOrderNum;
-			if(surplusAmount < 1) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "部分商品的余量已不足！请退出查看!");
-			bookIdList.add(books.get(0).getId());
+			if(surplusAmount < 1) {
+				TSdxBookInfoPo tSdxBookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
+				errorMsgList.add(tSdxBookInfoPo.getName());
+			}
+			if(!books.isEmpty()) {
+				bookIdList.add(books.get(0).getId());
+			}
+		}
+		//检查错误信息
+		if(!errorMsgList.isEmpty()) {
+			String nameStr = StringUtil.reducer(errorMsgList, "、");
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, nameStr + "等商品的余量已不足！请退出查看!");
 		}
 		//拼接成String
 		return StringUtil.longListToString(bookIdList);
@@ -573,6 +612,10 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	private String dealWithPreOrder(Long shippingAddressId, String bookInfoIds, String bookIds, Double bookFee, Long userId, Double shipFee, Integer scoreUsed) {
+		//check 积分是否充足
+		TCsqUser csqUser = sdxUserDao.selectByPrimaryKey(userId);
+		if(scoreUsed > csqUser.getSdxScores()) throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "您的剩余积分已不足，请返回重新打开订单页!");
+
 		String orderNo;
 		orderNo = UUIdUtil.generateOrderNo();    //默认生成新的订单号
 		//查看对于同一用户同一业务(entityId、entityType、fee相同)	是否有可复用的订单
@@ -601,12 +644,14 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.build();
 		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
 
-		//从购物车中删除对应bookInfoId的书籍条目
+		//从购物车中删除对应bookInfoId的书籍条目 -> 如果有
 		List<Long> bookInfoIdList = StringUtil.splitToArray(bookInfoIds);
 		List<TSdxShoppingTrolleysPo> pos = sdxShoppingTrolleysDao.selectByUserIdInBookInfoIds(userId, bookInfoIdList);
-		List<Long> trolleyIds = pos.stream()
-			.map(TSdxShoppingTrolleysPo::getId).collect(Collectors.toList());
-		sdxShoppingTrolleysDao.delTSdxShoppingTrolleysByIds(trolleyIds);
+		if(!pos.isEmpty()) {
+			List<Long> trolleyIds = pos.stream()
+				.map(TSdxShoppingTrolleysPo::getId).collect(Collectors.toList());
+			sdxShoppingTrolleysDao.delTSdxShoppingTrolleysByIds(trolleyIds);
+		}
 
 		return orderNo;
 	}

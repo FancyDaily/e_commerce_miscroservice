@@ -101,11 +101,22 @@ public class LpglUserServiceImpl implements LpglUserService {
 			.map(TLpglUserPosistion::getPosistionId)
 			.distinct()
 			.collect(Collectors.toList());
+		List<TLpglPosistion> posistions = lpglPositionDao.selectInIds(positionIds);
 		List<TLpglRole> roles = lpglRoleService.findAllPosistionRole(positionIds);
+		Map<Long, List<TLpglRole>> positionIdRoles = roles.stream()
+			.collect(Collectors.groupingBy(TLpglRole::getPositionId));
+		List<TLpglPosistion> tLpglPosistions = new ArrayList<>();
+		posistions
+			.forEach(a -> {
+				Long positionId = a.getId();
+				List<TLpglRole> roles1 = positionIdRoles.get(positionId);
+				a.setRoles(roles1);
+				tLpglPosistions.add(a);
+			});
 
 		HashMap<String, Object> resMap = new HashMap<>();
 		resMap.put("user", user);
-		resMap.put("roles", roles);
+		resMap.put("positions", tLpglPosistions);
 		ajaxResult.setData(resMap);
 		ajaxResult.setSuccess(true);
 		return ajaxResult;

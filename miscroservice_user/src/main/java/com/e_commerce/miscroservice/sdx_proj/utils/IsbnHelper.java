@@ -174,6 +174,7 @@ public class IsbnHelper {
 		Map<String, String> map = listMapToStringMap(keyValMap);
 		String price = map.get(DoubanBookInfoEnum.PRICE);
 		price = price.endsWith("元")? price.substring(0, price.length() - 1) : price;
+//		price = getNumbers(price);
 		return DoubanBookInfo.builder()
 			.author(map.get(DoubanBookInfoEnum.AUTHOR))
 			.publisher(map.get(DoubanBookInfoEnum.PUBLISHER))
@@ -191,6 +192,12 @@ public class IsbnHelper {
 			.catalog(map.get(DoubanBookInfoEnum.CATALOG))
 			.tag(map.get(DoubanBookInfoEnum.TAG))
 			.build();
+	}
+
+	private static String getNumbers(String price) {
+		String regex = "\\d+\\.?\\d*";
+		//TODO
+		return null;
 	}
 
 	private static Map<String, String> listMapToStringMap(Map<String, List<String>> keyValMap) {

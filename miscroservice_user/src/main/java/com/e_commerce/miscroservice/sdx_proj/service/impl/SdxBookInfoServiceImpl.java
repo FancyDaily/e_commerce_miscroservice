@@ -6,6 +6,8 @@ import com.e_commerce.miscroservice.commons.exception.colligate.MessageException
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxTagDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookInfoEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxTagPo;
@@ -113,6 +115,7 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 			String rating = infos.getRating();
 			tSdxBookInfoPo.setScoreDouban(Double.valueOf(rating));
 			tSdxBookInfoPo.setBindingStyle(infos.getBindingLayout());
+			tSdxBookInfoPo.setMaximumReserve(SdxBookInfoEnum.DEFAULT_MAXIMUMRESERVE);
 			//检查分类信息
 			String tag = tSdxBookInfoPo.getTag();
 			String tagId = dealWithNewTag(tag);
@@ -124,8 +127,10 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 			} else {
 				tSdxBookInfoPo = exist;
 			}
+		} catch (MessageException e) {
+			throw e;
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 		return tSdxBookInfoPo;
 	}

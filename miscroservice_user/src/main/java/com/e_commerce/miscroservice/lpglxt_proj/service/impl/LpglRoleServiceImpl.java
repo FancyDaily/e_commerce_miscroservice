@@ -265,6 +265,7 @@ public class LpglRoleServiceImpl implements LpglRoleService {
 					.eq(TLpglRole::getDeletedFlag, 0)
 				);
 				if (role != null) {
+					role.setPositionId(tLpglPosistionRole.getPosisitionId());
 					lpglRoles.add(role);
 				}
 			}

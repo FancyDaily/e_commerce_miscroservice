@@ -117,7 +117,7 @@ public class TSdxBookInfoPo extends BaseEntity {
 	@Column(commit = "目录")
 	private String catalog;
 
-	@Column(commit = "最大预购接收数", length = 11)
+	@Column(commit = "最大预购接收数", length = 11, defaultVal = "0")
 	private Integer maximumReserve;
 
 	@Column(commit = "销量", length = 11)
