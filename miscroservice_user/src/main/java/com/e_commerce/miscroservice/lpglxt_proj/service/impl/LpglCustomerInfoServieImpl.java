@@ -16,8 +16,6 @@ import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCertService;
 import com.e_commerce.miscroservice.lpglxt_proj.service.LpglCustomerInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +84,7 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 	}
 
 	@Override
-	public void commit(Long id, Long houseId, String telephone, String description) {
+	public void commit(Long estateId, Long id, Long houseId, String telephone, String description) {
 		boolean isModify = id != null;
 		Long customerId = null;
 		if(isModify) {	//修改
@@ -104,6 +102,9 @@ public class LpglCustomerInfoServieImpl implements LpglCustomerInfoService {
 			TLpglCustomerInfos.TLpglCustomerInfosBuilder builder = TLpglCustomerInfos.builder()
 				.telephone(telephone)
 				.description(description);
+			if(estateId != null) {
+				builder.estateId(estateId);
+			}
 			if(tLpglHouse != null) {
 				builder.estateId(tLpglHouse.getEstateId())
 					.houseId(houseId)

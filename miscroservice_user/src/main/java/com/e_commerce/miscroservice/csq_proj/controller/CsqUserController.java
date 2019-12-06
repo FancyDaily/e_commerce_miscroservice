@@ -61,14 +61,15 @@ public class CsqUserController {
 	 * 与微信校验授权
 	 *
 	 * @param code 加密数据
+	 * @param isSdx 是否为书袋熊 1是
 	 * @return
 	 */
 	@RequestMapping("checkAuth")
-	public AjaxResult checkAuth(@Check("==''") String code, @Check("(>10 || <20 ) && !=40") Integer age) {
+	public AjaxResult checkAuth(@Check("==''") String code, @Check("(>10 || <20 ) && !=40") Integer age, Integer isSdx) {
 		AjaxResult result = new AjaxResult();
 		try {
 			log.info("与微信校验授权，code={}");
-			WechatSession wechatSession = wechatService.checkAuthCode(code, CsqWechatConstant.APP_ID, CsqWechatConstant.APP_SECRET);
+			WechatSession wechatSession = isSdx != null && 1 == isSdx? wechatService.checkAuthCode(code, CsqWechatConstant.SDX_APP_ID, CsqWechatConstant.SDX_APP_SECRET) : wechatService.checkAuthCode(code, CsqWechatConstant.APP_ID, CsqWechatConstant.APP_SECRET);
 			log.info("openid={}", wechatSession.getOpenid());
 			log.info("wechatSession={}", wechatSession);
 			result.setData(wechatSession);
@@ -192,12 +193,13 @@ public class CsqUserController {
 								  @RequestParam(required = false) String specialGuest,
 								  @RequestParam(required = false) String encryptedData,
 								  @RequestParam(required = false) String iv,
-								  @RequestParam(required = false) String sessionKey) {
+								  @RequestParam(required = false) String sessionKey,
+								  @RequestParam(required = false) Integer isSdx) {
 		AjaxResult result = new AjaxResult();
 		try {
 			WechatPhoneAuthDto wechatPhoneAuthDto = (WechatPhoneAuthDto) ConsumeHelper.getObj();
 			log.info("openid登录, openid={}, uuid={}, specialGuest={}", openid, uuid, specialGuest);
-			Map<String, Object> resultMap = csqUserService.openidLogin(openid, uuid, wechatPhoneAuthDto);
+			Map<String, Object> resultMap = csqUserService.openidLogin(openid, uuid, wechatPhoneAuthDto, isSdx);
 			result.setData(resultMap);
 			result.setSuccess(true);
 		} catch (MessageException e) {

@@ -21,6 +21,18 @@ public class TCsqUser extends BaseEntity {
 	@Id
 	private Long id;
 
+	/**
+	 * 我的捐书订单数量
+	 */
+	@Transient
+	private Integer bookDonateOrderNum;
+
+	/**
+	 * 购物车数量
+	 */
+	@Transient
+	private Integer trolleyNum;
+
 	@Transient
 	private String fundName;
 

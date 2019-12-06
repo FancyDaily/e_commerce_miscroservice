@@ -170,7 +170,7 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 			.description(description)		//描述
 			.build();
 //			.date()		//trasient
-		sdxScoreRecordDao.saveTSdxScoreRecordIfNotExist(build);
+		sdxScoreRecordDao.save(build);
 	}
 
 	private void checkTypeIn(Integer type) {

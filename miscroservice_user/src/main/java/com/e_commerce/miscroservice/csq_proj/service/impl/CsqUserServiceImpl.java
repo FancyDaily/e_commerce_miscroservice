@@ -130,7 +130,7 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	@Override
-	public Map<String, Object> openidLogin(String openid, String uuid, WechatPhoneAuthDto wechatPhoneAuthDto) {
+	public Map<String, Object> openidLogin(String openid, String uuid, WechatPhoneAuthDto wechatPhoneAuthDto, Integer isSdx) {
 		boolean isRegister = false;
 		String phoneNumber = null;
 		String encryptData = wechatPhoneAuthDto.getEncryptedData();
@@ -148,6 +148,9 @@ public class CsqUserServiceImpl implements CsqUserService {
 			tCsqUser.setUuid(uuid);
 			tCsqUser.setVxOpenId(openid);
 			tCsqUser.setUserTel(phoneNumber);
+			if(isSdx != null && isSdx == 1) {
+				tCsqUser.setIsSdx(isSdx);
+			}
 			tCsqUser = register(tCsqUser);
 			isRegister = true;
 		}

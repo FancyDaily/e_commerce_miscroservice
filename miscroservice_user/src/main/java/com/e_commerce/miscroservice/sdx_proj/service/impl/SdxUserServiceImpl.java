@@ -3,9 +3,14 @@ package com.e_commerce.miscroservice.sdx_proj.service.impl;
 import com.e_commerce.miscroservice.commons.entity.colligate.LimitQueue;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxShoppingTrolleysDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxRedisEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxUserEnum;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxShoppingTrolleysPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,6 +24,10 @@ public class SdxUserServiceImpl implements SdxUserService {
 
 	@Autowired
 	private SdxUserDao sdxUserDao;
+	@Autowired
+	private SdxBookOrderDao sdxBookOrderDao;
+	@Autowired
+	private SdxShoppingTrolleysDao sdxShoppingTrolleysDao;
 
 	@Autowired
 	@Qualifier("sdxRedisTemplate")
@@ -28,6 +37,13 @@ public class SdxUserServiceImpl implements SdxUserService {
 	public TCsqUser infos(Long userId) {
 		//可能对兴趣爱好作出处理
 		TCsqUser byId = sdxUserDao.findById(userId);
+		//查询购书订单数
+		List<TSdxBookOrderPo> sdxBookOrderPos = sdxBookOrderDao.selectByUserIdAndType(userId, SdxBookOrderEnum.TYPE_DONATE.getCode());
+		byId.setBookDonateOrderNum(sdxBookOrderPos.size());
+		//查询购物车条数
+		List<TSdxShoppingTrolleysPo> tSdxShoppingTrolleysPos = sdxShoppingTrolleysDao.selectByUserId(userId);
+		byId.setTrolleyNum(tSdxShoppingTrolleysPos.size());
+
 		if(byId != null && byId.getIsSdx() != null) {
 			byId.setIsSdx(SdxUserEnum.IS_SDX_YES.getCode());
 			sdxUserDao.update(byId);

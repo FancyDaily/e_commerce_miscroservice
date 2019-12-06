@@ -18,8 +18,15 @@ public class SdxScoreRecordDaoImpl implements SdxScoreRecordDao {
         private final int PAGE_SIZE = 10;
     @Override
     public int saveTSdxScoreRecordIfNotExist(TSdxScoreRecordPo tSdxScoreRecordPo) {
-        return tSdxScoreRecordPo.save();
+//        return tSdxScoreRecordPo.save();
+		return MybatisPlus.getInstance().save(tSdxScoreRecordPo);
     }
+
+    @Override
+    public int save(TSdxScoreRecordPo po) {
+    	return MybatisPlus.getInstance().save(po);
+	}
+
     @Override
     public int modTSdxScoreRecord(TSdxScoreRecordPo tSdxScoreRecordPo) {
         return tSdxScoreRecordPo.update(tSdxScoreRecordPo.build().eq(TSdxScoreRecordPo::getId, tSdxScoreRecordPo.getId()));

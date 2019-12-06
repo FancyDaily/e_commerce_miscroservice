@@ -88,7 +88,12 @@ public class SdxOrderDonateController {
 	@RequestMapping("preOrder")
 	@UrlAuth
 	public Object preOrder(HttpServletRequest request, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
-		return Response.success(sdxBookOrderService.preDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, request));
+		try {
+			return Response.success(sdxBookOrderService.preDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, request));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.errorMsg("");
+		}
 	}
 
 	/**

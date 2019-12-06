@@ -21,7 +21,7 @@ public class SdxScoreRecordController {
 	 * 积分列表
 	 * @param pageNum
 	 * @param pageSize
-	 * @param option
+	 * @param option 全部-1收入0支出1
 	 * @return
 	 */
 	@RequestMapping("list")

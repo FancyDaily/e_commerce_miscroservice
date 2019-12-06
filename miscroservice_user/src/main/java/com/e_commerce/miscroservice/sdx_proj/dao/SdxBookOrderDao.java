@@ -30,4 +30,6 @@ public interface SdxBookOrderDao {
 	List<TSdxBookOrderPo> purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize);
 
 	List<TSdxBookOrderPo> donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize);
+
+	List<TSdxBookOrderPo> selectByUserIdAndType(Long userId, int code);
 }

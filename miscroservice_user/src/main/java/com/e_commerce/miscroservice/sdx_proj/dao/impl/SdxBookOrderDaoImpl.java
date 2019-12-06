@@ -186,6 +186,14 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), eq.page(pageNum, pageSize));
 	}
 
+	@Override
+	public List<TSdxBookOrderPo> selectByUserIdAndType(Long userId, int code) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), baseBuild()
+			.eq(TSdxBookOrderPo::getUserId, userId)
+			.eq(TSdxBookOrderPo::getType, code)
+		);
+	}
+
 	private MybatisPlusBuild listAllTypeBuild(Long userIds, Integer option, Integer OPTION_ALL) {
 		MybatisPlusBuild eq = baseBuild().eq(TSdxBookOrderPo::getUserId, userIds);
 		eq = option == null || option.equals(OPTION_ALL) ? eq : eq.eq(TSdxBookOrderPo::getStatus, option);

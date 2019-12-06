@@ -40,7 +40,7 @@ public interface SdxBookOrderService {
 
 	void cancel(Long orderId);
 
-	Object preDonateOrder(Long id, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request);
+	Object preDonateOrder(Long id, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request) throws Exception;
 
 	Map<String, Object> preOrderInfos(Long userId, Long shippingAddressId, String bookInfoIds);
 }

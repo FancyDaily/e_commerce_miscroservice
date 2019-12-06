@@ -6,7 +6,7 @@ package com.e_commerce.miscroservice.sdx_proj.enums;
  */
 public enum SdxRedisEnum {
 
-	CSQ_GLOBAL_DONATE_BROADCAST(0,"csq:global:doante:broadcast"),
+	CSQ_GLOBAL_DONATE_BROADCAST(0,"sdx:global:doante:broadcast"),
 //	CSQ_GLOBAL_DONATE_BROADCAST_GATHER(1, "csq:global:doante:broadcast:gather"),
 	ALL(-1, "all");
 

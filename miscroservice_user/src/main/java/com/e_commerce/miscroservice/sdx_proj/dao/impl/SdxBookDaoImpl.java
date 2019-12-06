@@ -115,11 +115,19 @@ public class SdxBookDaoImpl implements SdxBookDao {
 
 	@Override
 	public int update(List<TSdxBookPo> toUpdaters) {
+    	int cnt = 0;
+    	for(TSdxBookPo toUpdater: toUpdaters) {
+    		cnt += MybatisPlus.getInstance().update(toUpdater, baseBuild()
+				.in(TSdxBookPo::getId, toUpdater.getId())
+			);
+		}
+    	return cnt;
+/*
 		List<Long> toUpdateIds = toUpdaters.stream()
 			.map(a -> a.getId()).collect(Collectors.toList());
 		return MybatisPlus.getInstance().update(toUpdaters, baseBuild()
 			.in(TSdxBookPo::getId, toUpdateIds)
-		);
+		);*/
 	}
 
 	private MybatisPlusBuild baseBuild() {

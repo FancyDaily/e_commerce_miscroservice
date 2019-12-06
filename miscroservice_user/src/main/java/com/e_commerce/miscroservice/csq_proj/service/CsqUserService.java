@@ -35,9 +35,10 @@ public interface CsqUserService {
 	 * @param openid
 	 * @param uid
 	 * @param wechatPhoneAuthDto
+	 * @param isSdx
 	 * @return
 	 */
-	Map<String, Object> openidLogin(String openid, String uid, WechatPhoneAuthDto wechatPhoneAuthDto);
+	Map<String, Object> openidLogin(String openid, String uid, WechatPhoneAuthDto wechatPhoneAuthDto, Integer isSdx);
 
 	/**
 	 * 绑定手机号码

@@ -69,6 +69,7 @@ public class LpglCustomerInfoController {
 
 	/**
 	 * 递交报备信息
+	 * @param estateId 楼盘编号
 	 * @param houseId 商品房编号
 	 * @param telephone 手机号
 	 * @param description 描述
@@ -76,12 +77,12 @@ public class LpglCustomerInfoController {
 	 */
 	@RequestMapping("commit")
 	@UrlAuth
-	public Object commitCustomerInfos(Long id, Long houseId, String telephone, String description) {
+	public Object commitCustomerInfos(Long estateId, Long id, Long houseId, String telephone, String description) {
 		AjaxResult result = new AjaxResult();
 		Long userId = IdUtil.getId();
 		try {
-			log.info("递交报备信息, id={}, houseId={}, telephone={}, description={}", id, houseId, telephone, description);
-			lpglCustomerInfoService.commit(id, houseId, telephone, description);
+			log.info("递交报备信息, estateId={}, id={}, houseId={}, telephone={}, description={}", estateId, id, houseId, telephone, description);
+			lpglCustomerInfoService.commit(estateId, id, houseId, telephone, description);
 			result.setSuccess(true);
 		} catch (MessageException e) {
 			log.warn("====方法描述: {}, Message: {}====", "递交报备信息", e.getMessage());

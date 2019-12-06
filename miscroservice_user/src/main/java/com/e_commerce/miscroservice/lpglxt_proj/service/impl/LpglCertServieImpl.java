@@ -68,7 +68,9 @@ public class LpglCertServieImpl implements LpglCertService {
 		}
 		List<TLpglCert> tLpglCerts = lpglCertDao.selectByTypeInStatusInApplyUserIdsPage(type, status, pageNum, pageSize, isToday, userIds);
 		List<Long> houseIds = tLpglCerts.stream()
-			.map(TLpglCert::getHouseId).collect(Collectors.toList());
+			.map(TLpglCert::getHouseId)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 		List<TLpglHouse> houses = houseIds.isEmpty()? new ArrayList<>(): lpglHouseDao.selectInIds(houseIds);
 		Map<Long, List<TLpglHouse>> idHouseMap = houses.stream()
 			.collect(Collectors.groupingBy(TLpglHouse::getId));
@@ -95,6 +97,9 @@ public class LpglCertServieImpl implements LpglCertService {
 					a.setBuildingNum(houseInfo.getBuildingNum());
 					a.setHouseNum(houseInfo.getHouseNum());
 				}
+				//如果为报备类型，补充信息
+				if(TlpglCertEnum.TYPE_CUSTOMER.getCode() == a.getType())
+					a.setCustomerInfo(lpglCustomerInfoDao.selectByPrimaryKey(a.getCustomerInfoId()));
 				return a;
 			}).collect(Collectors.toList());
 

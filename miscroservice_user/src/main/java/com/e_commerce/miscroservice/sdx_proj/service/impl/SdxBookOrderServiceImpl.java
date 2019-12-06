@@ -110,7 +110,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			//如果是确认收货 -> 类型 捐书 -> 书籍状态改变，书籍漂流记录添加, 返积分
 			if(status != null &&SdxBookOrderEnum.STATUS_DONE.getCode() != originStatus && SdxBookOrderEnum.STATUS_DONE.getCode() == status) {
 				if(SdxBookOrderEnum.TYPE_DONATE.getCode() == type) {
-					List<Long> bookIdList = StringUtil.splitToArray(bookIds);
+					List<Long>  bookIdList = StringUtil.splitToArray(bookIds);
 					List<Long> bookInfoList = StringUtil.splitToArray(bookInfos);
 					if(bookIdList.size() != bookInfoList.size()) {
 						List<TSdxBookPo> tSdxBookPos = sdxbookDao.selectInIds(bookIdList);
@@ -156,6 +156,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 					String hashKey = SdxRedisEnum.ALL.getMsg();
 					//获取队列
 					LimitQueue<SdxGlobalDonateRecordVo> queue = (LimitQueue<SdxGlobalDonateRecordVo>) userRedisTemplate.get(SdxRedisEnum.CSQ_GLOBAL_DONATE_BROADCAST.getMsg(), hashKey);
+					queue = queue == null? new LimitQueue<>(): queue;
 					//由订单构建vo
 					SdxGlobalDonateRecordVo globalDonateRecordVo = transToGlobalDonateRecordVo(orderPo);
 					//将vo添加队列末尾
@@ -397,7 +398,26 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 				String[] bookIdArray = StringUtil.splitString(bookIds, ",");
 				List<TSdxBookPo> bookPos = sdxbookDao.selectInIds(Arrays.stream(bookIdArray).map(Long::valueOf).collect(Collectors.toList()));
 				vo.setBooks(bookPos);
-//				Long bookInfoIds = vo.getBookInfoIds();
+				String bookInfoIds = vo.getBookInfoIds();
+				if(bookInfoIds != null) {
+					String[] bookInfoIdArray = StringUtil.splitString(bookInfoIds, ",");
+					List<Long> bookInfoIdList = Arrays.stream(bookInfoIdArray).map(Long::valueOf).collect(Collectors.toList());
+					List<TSdxBookInfoPo> bookInfoPos = new ArrayList<>();
+					for(Long bookInfoId: bookInfoIdList) {
+						TSdxBookInfoPo bookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
+						bookInfoPos.add(bookInfoPo);
+					}
+					vo.setBookInfos(bookInfoPos);
+				} else {
+					List<Long> ids = bookPos.stream()
+						.map(TSdxBookPo::getBookInfoId).collect(Collectors.toList());
+					List<TSdxBookInfoPo> bookInfoPos = new ArrayList<>();
+					for(Long bookInfoId: ids) {
+						TSdxBookInfoPo bookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
+						bookInfoPos.add(bookInfoPo);
+					}
+					vo.setBookInfos(bookInfoPos);
+				}
 				return vo;
 			}).collect(Collectors.toList());
 		return PageUtil.buildQueryResult(vos);
@@ -480,14 +500,13 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	@Override
-	public Object preDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request) {
+	public Object preDonateOrder(Long userId, Long[] bookInfoIds, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, HttpServletRequest request) throws Exception {
 		//创建订单
 		String orderNo = createDonateOrder(userId, bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, SdxBookOrderEnum.STATUS_UNPAY.getCode());
 		//创建微信支付参数 -> orderNo => webParam
-		//TODO
 		Double fee = 5d;	//默认收费5元
-//		buildWebParam(userId, String orderNo, attach, fee, request);	//TODO 往csq_proj 下的微信notify_url对应接口添加邮费支付类型
-		return null;
+		String attach = SdxBookOrderEnum.ATTACH_DONATE.getMsg();
+		return buildWebParam(userId, orderNo, attach, fee, request);	//TODO 往csq_proj 下的微信notify_url对应接口添加邮费支付类型
 	}
 
 	@Override
@@ -563,7 +582,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 
 	private TSdxBookOrderPo checkAttach(String out_trade_no, String attach) {
 		TSdxBookOrderPo tSdxBookOrderPo = sdxBookOrderDao.selectByOrderNo(out_trade_no);
-		if(attach == null || tSdxBookOrderPo == null || !tSdxBookOrderPo.getOrderNo().equals(out_trade_no)) {
+		if(attach == null || tSdxBookOrderPo == null || !tSdxBookOrderPo.getType().equals(SdxBookOrderEnum.getTypeCode(attach))) {
 			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "类型不正确!");
 		}
 		return tSdxBookOrderPo;

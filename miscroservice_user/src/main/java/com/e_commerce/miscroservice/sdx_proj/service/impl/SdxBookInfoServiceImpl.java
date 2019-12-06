@@ -113,7 +113,7 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 			//拷贝成bookInfo， 其中 检查是否需要插入新的分类 -> 并需要补全分类编号
 			tSdxBookInfoPo = infos.copyTSdxBookInfoPo();
 			String rating = infos.getRating();
-			tSdxBookInfoPo.setScoreDouban(Double.valueOf(rating));
+			tSdxBookInfoPo.setScoreDouban(StringUtil.isEmpty(rating)? 0d: Double.valueOf(rating));
 			tSdxBookInfoPo.setBindingStyle(infos.getBindingLayout());
 			tSdxBookInfoPo.setMaximumReserve(SdxBookInfoEnum.DEFAULT_MAXIMUMRESERVE);
 			//检查分类信息

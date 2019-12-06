@@ -21,4 +21,6 @@ public interface SdxBookAfterReadingNoteUserDao {
 	List<TSdxBookAfterReadingNoteUserPo> selectByBookAfrnIdAndUserIdAndIsThumb(Long afrId, Long userId, int code);
 
 	TSdxBookAfterReadingNoteUserPo selectByBookAfrnIdAndUserIdAndIsThumbAndType(Long afrId, Long userId, int code, int code1);
+
+	List<TSdxBookAfterReadingNoteUserPo> selectByBookAfrnIdAndUserIdAndTypeAndIsPurchase(Long id, Long currentUserId, int code, int code1);
 }

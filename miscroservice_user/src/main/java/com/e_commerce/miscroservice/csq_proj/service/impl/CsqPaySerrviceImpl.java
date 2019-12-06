@@ -18,6 +18,7 @@ import com.e_commerce.miscroservice.csq_proj.vo.CsqDonateRecordVo;
 import com.e_commerce.miscroservice.csq_proj.vo.CsqSimpleServiceVo;
 import com.e_commerce.miscroservice.csq_proj.yunma_api.YunmaConstant;
 import com.e_commerce.miscroservice.csq_proj.yunma_api.YunmaPayUtil;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -495,13 +496,20 @@ public class CsqPaySerrviceImpl implements CsqPayService {
 			//支付成功业务流程
 			// 应当在生成订单时产生一个(两个)自定义参数以标识是哪种业务类型
 			log.info("微信回调, orderNo={}, attch={}", out_trade_no, attach);
-			String SDX_BOOK_ATTACH = "book";
-			if(!SDX_BOOK_ATTACH.equals(attach)) {
+			if(!SdxBookOrderEnum.ATTACH_PURCHASE.equals(attach)) {
 				dealWithOrderNoPay(out_trade_no, attach);
 				return;
 			}
-			dealWithSdxBookPay(out_trade_no, attach);
+			if(SdxBookOrderEnum.ATTACH_PURCHASE.equals(attach)) {
+				dealWithSdxBookPay(out_trade_no, attach);
+				return;
+			}
+			dealWithSdxDonatePay(out_trade_no, attach);
 		}
+	}
+
+	private void dealWithSdxDonatePay(String out_trade_no, String attach) {
+
 	}
 
 	private void dealWithSdxBookPay(String out_trade_no, String attach) {

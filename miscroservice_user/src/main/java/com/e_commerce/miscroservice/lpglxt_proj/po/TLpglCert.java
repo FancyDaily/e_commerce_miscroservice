@@ -18,6 +18,57 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TLpglCert extends BaseEntity {
 
+	@Transient
+	private Long estateId;
+
+	@Transient
+	private Integer floorNum;
+
+	@Transient
+	private String houseName;
+
+	@Transient
+	private String customerName;
+
+	@Transient
+	private String telephone;
+
+	@Transient
+	private String date;
+
+	@Transient
+	private Integer customerNum;
+
+	@Transient
+	private String companyName;
+
+	@Transient
+	private String salesManName;
+
+	@Transient
+	private String salesManTel;
+
+	@Transient
+	private String licenseName;
+
+	/**
+	 * 类型 - 自驾或接送
+	 */
+	@Transient
+	private Integer driveType;
+
+	@Transient
+	private Integer isDone;
+
+	@Transient
+	private String area;
+
+	@Transient
+	private String department;
+
+	@Transient
+	private Double reimbursementAmount;
+
 	/**
 	 * 楼盘编号
 	 */
@@ -65,5 +116,41 @@ public class TLpglCert extends BaseEntity {
 
 	@Column(commit = "状态", defaultVal = "0")
 	private Integer status;
+
+	public void setCustomerInfo(TLpglCustomerInfos customerInfo) {
+		if(customerInfo == null) return;
+
+		this.estateId = customerInfo.getEstateId();
+
+		this.floorNum = customerInfo.getFloorNum();
+
+		this.houseName = customerInfo.getHouseName();
+
+		this.customerName = customerInfo.getCustomerName();
+
+		this.telephone = customerInfo.getTelephone();
+
+		this.date = customerInfo.getDate();
+
+		this.customerNum = customerInfo.getCustomerNum();
+
+		this.companyName = customerInfo.getCompanyName();
+
+		this.salesManName = customerInfo.getSalesManName();
+
+		this.salesManTel = customerInfo.getSalesManTel();
+
+		this.licenseName = customerInfo.getLicenseName();
+
+		this.driveType = customerInfo.getType();
+
+		this.isDone = customerInfo.getIsDone();
+
+		this.area = customerInfo.getArea();
+
+		this.department = customerInfo.getDepartment();
+
+		this.reimbursementAmount = customerInfo.getReimbursementAmount();
+	}
 
 }

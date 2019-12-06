@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.utils;
 
+import com.alipay.api.domain.AlipayIserviceMindvAnswersBatchqueryModel;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,6 +11,8 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 通过ISBN获取书本信息
@@ -24,14 +27,6 @@ public class IsbnHelper {
 		String connectUrl = url + IsbnCode;
 		Document document = Jsoup.connect(connectUrl).get();
 		return dealWithInfo(document);
-	}
-
-	public static void main(String[] args) {
-		try {
-			infos("9787532781263");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static DoubanBookInfo dealWithInfo(Document doc) {
@@ -173,8 +168,8 @@ public class IsbnHelper {
 	private static DoubanBookInfo mapToDoubanBookInfo(Map<String, List<String>> keyValMap) {
 		Map<String, String> map = listMapToStringMap(keyValMap);
 		String price = map.get(DoubanBookInfoEnum.PRICE);
-		price = price.endsWith("元")? price.substring(0, price.length() - 1) : price;
-//		price = getNumbers(price);
+//		price = price.endsWith("元")? price.substring(0, price.length() - 1) : price;
+		price = getNumbers(price);
 		return DoubanBookInfo.builder()
 			.author(map.get(DoubanBookInfoEnum.AUTHOR))
 			.publisher(map.get(DoubanBookInfoEnum.PUBLISHER))
@@ -195,9 +190,23 @@ public class IsbnHelper {
 	}
 
 	private static String getNumbers(String price) {
-		String regex = "\\d+\\.?\\d*";
-		//TODO
-		return null;
+		String regex = "([1-9]{1})(\\d{1}(\\.\\d{1,2})?)";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(price);
+		matcher.find();
+		String group = matcher.group();
+		return group;
+	}
+
+	public static void main(String[] args) {
+		String str = "CNY92.00";
+		String numbers = getNumbers(str);
+		System.out.println(numbers);
+		/*try {
+			infos("9787532781263");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}*/
 	}
 
 	private static Map<String, String> listMapToStringMap(Map<String, List<String>> keyValMap) {

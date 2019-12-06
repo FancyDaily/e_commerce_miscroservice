@@ -146,7 +146,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 				Long afrId = a.getId();
 				TSdxBookAfterReadingNoteUserPo afterReadingNoteUserPo = sdxBookAfterReadingNoteUserDao.selectByBookAfrnIdAndUserIdAndIsThumbAndType(afrId, userId, SdxBookAfterReadingNoteUserEnum.IS_THUMB_YES.getCode(), SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode());
 				//查看是点赞还是点踩
-				a.setThumbType(afterReadingNoteUserPo == null? SdxBookAfterReadingNoteUserEnum.THUMB_TYPE_UP.getCode(): afterReadingNoteUserPo.getThumbType());
+				a.setThumbType(afterReadingNoteUserPo == null || afterReadingNoteUserPo.getThumbType() == null ? SdxBookAfterReadingNoteUserEnum.THUMB_TYPE_UP.getCode(): afterReadingNoteUserPo.getThumbType());
 				a.setIsThumb(afterReadingNoteUserPo == null? SdxBookAfterReadingNoteUserEnum.IS_THUMB_NO.getCode(): afterReadingNoteUserPo.getIsThumb());
 				if (userId.equals(a.getUserId())) a.setNoNeedBuy(Boolean.TRUE);
 				return a;

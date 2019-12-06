@@ -3,6 +3,7 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -49,14 +50,18 @@ public class SdxBookAfterReadingNoteController {
 		if (vo == null || vo.getId()==null) {
 			return Response.fail();
 		}
-		sdxBookAfterReadingNoteService.buy(vo.getId(), IdUtil.getId());
+		try {
+			sdxBookAfterReadingNoteService.buy(vo.getId(), IdUtil.getId());
+		} catch (MessageException e) {
+			Response.errorMsg(e.getMessage());
+		}
 		return Response.success();
 	}
 
 	/**
 	 * 点赞/踩
-	 * @param bookAfterReadingId
-	 * @param option
+	 * @param bookAfterReadingId 读后感编号
+	 * @param option 操作，1点赞2点踩a
 	 * @return
 	 */
 	@RequestMapping("thumb")

@@ -134,8 +134,18 @@ public class SdxBookAfterReadingNoteUserDaoImpl implements SdxBookAfterReadingNo
 			.eq(TSdxBookAfterReadingNoteUserPo::getType, code1));
 	}
 
+	@Override
+	public List<TSdxBookAfterReadingNoteUserPo> selectByBookAfrnIdAndUserIdAndTypeAndIsPurchase(Long id, Long currentUserId, int code, int code1) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookAfterReadingNoteUserPo(), baseBuild()
+			.eq(TSdxBookAfterReadingNoteUserPo::getBookAfterReadingNoteId, id)
+			.eq(TSdxBookAfterReadingNoteUserPo::getUserId, currentUserId)
+			.eq(TSdxBookAfterReadingNoteUserPo::getType, code)
+			.eq(TSdxBookAfterReadingNoteUserPo::getIsPurchase, code1)
+		);
+	}
+
 	private MybatisPlusBuild baseBuild() {
-		return new MybatisPlusBuild(TSdxBookAfterReadingNotePo.class)
+		return new MybatisPlusBuild(TSdxBookAfterReadingNoteUserPo.class)
 			.eq(TSdxBookAfterReadingNoteUserPo::getDeletedFlag, Boolean.FALSE);
 	}
 }
