@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTransRecordPo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,16 @@ public class TSdxBookTransRecordVo {
     */
 
     private Long userId;
+
+	/**
+	 * 书籍主人昵称
+	 */
+    private String userName;
+
+	/**
+	 * 书籍主人头像
+	 */
+	private String headPic;
 
     /**
     *书籍信息编号
@@ -81,4 +92,12 @@ public class TSdxBookTransRecordVo {
     public TSdxBookTransRecordPo copyTSdxBookTransRecordPo() {
         return null;
     }
+
+    public void setAfterReadingNote(TSdxBookAfterReadingNotePo po) {
+		this.isThumb = po.getIsThumb();
+		this.thumbType = po.getThumbType();
+		this.thumbUpNum = po.getThumbUpNum();
+		this.thumbDownNum = po.getThumbDownNum();
+		this.content = po.getContent();
+	}
 }

@@ -2,14 +2,18 @@ package com.e_commerce.miscroservice.sdx_proj.controller;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
+import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxPurchaseOrderVo;
+import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookOrderVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,9 +108,23 @@ public class SdxOrderPurchaseController {
 	 */
 	@RequestMapping("list")
 	@UrlAuth
-	public Object list(Integer option, Integer pageNum, Integer pageSize) {
+	public Object list(String option, Integer pageNum, Integer pageSize) {
 		Long userIds = IdUtil.getId();
 		return Response.success(sdxBookOrderService.purchaseList(userIds, option, pageNum, pageSize));
+	}
+
+	/**
+	 * 修改状态
+	 * @param id 订单编号
+	 * @param status 状态
+	 * @return
+	 */
+	@RequestMapping("mod")
+	@Consume(TSdxBookOrderVo.class)
+	@UrlAuth
+	public Object mod(Long id, Integer status) {
+		TSdxBookOrderVo obj = (TSdxBookOrderVo) ConsumeHelper.getObj();
+		return Response.success(sdxBookOrderService.modTSdxBookOrder(obj.copyTSdxBookOrderPo()));
 	}
 
 }

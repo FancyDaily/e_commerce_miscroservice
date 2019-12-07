@@ -72,6 +72,31 @@ public class SdxBookAfterReadingNoteController {
 	}
 
 	/**
+	 * 第几任主人
+	 *
+	 * @param bookInfoId        书籍信息编号
+	 *
+	 *                 code==503,代表服务器出错,请先检测参数类型是否正确
+	 *                 code==500,代表参数不正确
+	 *                 code==200,代表请求成功
+	 *                 data==0,代表操作不成功
+	 *                 data!=0,新增时候data返回的是自增id,修改的时候代表影响的数量
+	 *
+	 * @return
+	 */
+	@PostMapping("getIndex")
+	@Consume(TSdxBookAfterReadingNoteVo.class)
+	@UrlAuth
+	public Response getIndex(@RequestParam(required = false) Long bookInfoId) {
+		TSdxBookAfterReadingNoteVo tSdxBookAfterReadingNoteVo = (TSdxBookAfterReadingNoteVo) ConsumeHelper.getObj();
+		tSdxBookAfterReadingNoteVo.setUserId(IdUtil.getId());
+		if (tSdxBookAfterReadingNoteVo == null) {
+			return Response.fail();
+		}
+		return Response.success(sdxBookAfterReadingNoteService.getIndex(tSdxBookAfterReadingNoteVo.copyTSdxBookAfterReadingNotePo()));
+	}
+
+	/**
 	 * 添加或者修改书籍读后感
 	 *
 	 * @param id        书籍读后感的Id,修改或者查询的需要
@@ -80,6 +105,7 @@ public class SdxBookAfterReadingNoteController {
 	 * @param bookInfoId        书籍信息编号
 	 * @param thumbUpNum        点赞数量
 	 * @param thumbDownNum        点踩数量
+	 * @param content			内容
 	 *
 	 *                 code==503,代表服务器出错,请先检测参数类型是否正确
 	 *                 code==500,代表参数不正确

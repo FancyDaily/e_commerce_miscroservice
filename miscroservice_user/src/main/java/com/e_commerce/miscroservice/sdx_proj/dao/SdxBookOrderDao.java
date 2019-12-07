@@ -27,7 +27,7 @@ public interface SdxBookOrderDao {
 
 	TSdxBookOrderPo selectByPrimaryKey(Long orderId);
 
-	List<TSdxBookOrderPo> purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize);
+	List<TSdxBookOrderPo> purchaseList(Long userIds, List<Integer> option, Integer pageNum, Integer pageSize);
 
 	List<TSdxBookOrderPo> donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize);
 

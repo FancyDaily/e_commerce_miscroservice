@@ -35,6 +35,9 @@ public class TSdxBookPurchaseOrderVo {
 	@Column(commit = "抵扣积分总额", length = 11)
 	private Integer scoreUsed;
 
+	@Column(commit = "积分抵扣总金额", precision = 2)
+	private Double scoreDiscountPrice;
+
 	@Column(commit = "运费")
 	private Double shipPirce;
 

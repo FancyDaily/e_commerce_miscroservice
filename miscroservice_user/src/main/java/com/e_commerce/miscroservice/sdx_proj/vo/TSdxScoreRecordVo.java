@@ -19,34 +19,34 @@ public class TSdxScoreRecordVo {
     private Long id;
 
 	@Column(commit = "用户编号")
-	Long userId;
+	private Long userId;
 
 	@Column(commit = "书籍信息编号")
-	String bookInfoIds;
+	private String bookInfoIds;
 
 	@Column(commit = "书籍编号")
-	String bookIds;
+	private String bookIds;
 
 	@Column(commit = "读后感编号")
-	Long bookAfterReadingNoteId;
+	private Long bookAfterReadingNoteId;
 
 	@Column(commit = "订单号")
-	Long orderId;
+	private Long orderId;
 
 	@Column(commit = "描述")
-	String description;
+	private String description;
 
 	@Column(commit = "收入或支出", isNUll = false)
-	Integer inOut;
+	private Integer inOut;
 
 	@Column(commit = "数额", length = 11, isNUll = false)
-	Integer amount;
+	private Integer amount;
 
 	@Column(commit = "消耗金钱(支付场景)", precision = 2)
-	Double money;
+	private Double money;
 
 	@Column(commit = "类型", isNUll = false)
-	Integer type;
+	private Integer type;
 
     public TSdxScoreRecordPo copyTSdxScoreRecordPo() {
         return null;

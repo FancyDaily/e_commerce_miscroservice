@@ -30,7 +30,7 @@ public interface SdxBookOrderService {
 
 	SdxPurchaseOrderVo detail(Long orderId);
 
-	QueryResult purchaseList(Long userIds, Integer status, Integer pageNum, Integer pageSize);
+	QueryResult purchaseList(Long userIds, String options, Integer pageNum, Integer pageSize);
 
 	QueryResult donateList(Long id, Integer option, Integer pageNum, Integer pageSize);
 

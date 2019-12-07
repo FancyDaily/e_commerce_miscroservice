@@ -1,10 +1,13 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxShippingAddressPo;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * 购书订单编号
@@ -14,6 +17,8 @@ import lombok.Data;
 @Data
 @Builder
 public class SdxPurchaseOrderVo {
+
+	private String date;
 
 	private Long timeStamp;
 
@@ -26,6 +31,11 @@ public class SdxPurchaseOrderVo {
 	 * 带年份的日期
 	 */
 	private String wholeDate;
+
+	private Long id;
+
+	@Column(commit = "订单号")
+	private String orderNo;
 
 	@Column(commit = "快递单号")
 	private String expressNo;
@@ -81,6 +91,11 @@ public class SdxPurchaseOrderVo {
 	@Column(commit = "详细地址")
 	private String detailAddress;
 
+	/**
+	 * 书本信息
+	 */
+	private List<TSdxBookInfoPo> bookInfos;
+
 	public TSdxBookOrderPo copyTSdxBookOrder() {return null;}
 
 	public void setAddress(TSdxShippingAddressPo po) {
@@ -92,4 +107,5 @@ public class SdxPurchaseOrderVo {
 		this.street = po.getStreet();
 		this.detailAddress = po.getDetailAddress();
 	}
+
 }

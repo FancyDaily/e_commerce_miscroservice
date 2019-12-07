@@ -4,13 +4,12 @@ import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookAfterReadingNoteDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookAfterReadingNoteUserDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxScoreRecordDao;
-import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookTransRecordEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNoteUserPo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTransRecordPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookAfterReadingNoteService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
@@ -42,7 +41,8 @@ public class SdxBookAfterReadingNoteServiceImpl implements SdxBookAfterReadingNo
 	private SdxScoreRecordDao sdxScoreRecordDao;
 	@Autowired
 	private SdxScoreRecordServiceImpl tSdxScoreRecordService;
-
+	@Autowired
+	private SdxBookTransRecordDao sdxBookTransRecordDao;
 	@Override
 	public long modTSdxBookAfterReadingNote(TSdxBookAfterReadingNotePo tSdxBookAfterReadingNotePo) {
 		if (tSdxBookAfterReadingNotePo == null) {
@@ -51,7 +51,21 @@ public class SdxBookAfterReadingNoteServiceImpl implements SdxBookAfterReadingNo
 		}
 		if (tSdxBookAfterReadingNotePo.getId() == null) {
 			log.info("start添加书籍读后感={}", tSdxBookAfterReadingNotePo);
+			//加入一条漂流日记
+			//确认我是第几任主人
+			List<TSdxBookTransRecordPo> transRecordPos = sdxBookTransRecordDao.selectByBookInfoIdAndType(tSdxBookAfterReadingNotePo.getBookInfoId(), SdxBookTransRecordEnum.TYPE_BECOME_OWNER.getCode());
+			int num = transRecordPos == null? 1 : transRecordPos.size() + 1;
 			int result = sdxBookAfterReadingNoteDao.saveTSdxBookAfterReadingNoteIfNotExist(tSdxBookAfterReadingNotePo);
+
+			TSdxBookTransRecordPo po = TSdxBookTransRecordPo.builder()
+				.type(SdxBookTransRecordEnum.TYPE_AFTER_READING_NOTE.getCode())
+				.bookAfterReadingNoteId(tSdxBookAfterReadingNotePo.getId())
+				.userId(tSdxBookAfterReadingNotePo.getUserId())
+				.bookInfoId(tSdxBookAfterReadingNotePo.getBookInfoId())
+				.bookId(tSdxBookAfterReadingNotePo.getBookId())
+				.description("发表了读后感")
+				.build();
+			sdxBookTransRecordDao.saveTSdxBookTransRecordIfNotExist(po);
 			return result != 0 ? tSdxBookAfterReadingNotePo.getId() : ERROR_LONG;
 		} else {
 			log.info("start修改书籍读后感={}", tSdxBookAfterReadingNotePo.getId());
@@ -247,6 +261,15 @@ public class SdxBookAfterReadingNoteServiceImpl implements SdxBookAfterReadingNo
 
 		sdxBookAfterReadingNoteDao.modTSdxBookAfterReadingNote(sdxBookAfterReadingNotePo);
 		sdxBookAfterReadingNoteUserDao.update(sdxBookAfterReadingNoteUserPo);
+	}
+
+	@Override
+	public Integer getIndex(TSdxBookAfterReadingNotePo copyTSdxBookAfterReadingNotePo) {
+		Long userId = copyTSdxBookAfterReadingNotePo.getUserId();
+		Long bookInfoId = copyTSdxBookAfterReadingNotePo.getBookInfoId();
+		List<TSdxBookTransRecordPo> transRecordPos = sdxBookTransRecordDao.selectByBookInfoIdAndUserId(bookInfoId, userId);
+
+		return transRecordPos == null? 1: transRecordPos.size() + 1;
 	}
 
 	private void checkThumbOption(Integer option) {

@@ -11,4 +11,6 @@ public interface SdxBookAfterReadingNoteService {
 	void buy(Long bArnId, Long userId);
 
 	void thumb(Long bookAfterReadingId, Long id, Integer option);
+
+	Integer getIndex(TSdxBookAfterReadingNotePo copyTSdxBookAfterReadingNotePo);
 }

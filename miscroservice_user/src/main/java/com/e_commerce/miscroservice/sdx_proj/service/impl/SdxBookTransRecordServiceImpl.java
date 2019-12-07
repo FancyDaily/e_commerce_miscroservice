@@ -1,5 +1,12 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
+import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookAfterReadingNoteDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookAfterReadingNoteUserDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookTransRecordDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookAfterReadingNoteUserEnum;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNotePo;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNoteUserPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTransRecordPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookTransRecordService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookTransRecordVo;
@@ -22,6 +29,12 @@ public class SdxBookTransRecordServiceImpl implements SdxBookTransRecordService 
     private final int ERROR_INT = 0;
     @Autowired
     private SdxBookTransRecordDao sdxBookTransRecordDao;
+	@Autowired
+    private SdxBookAfterReadingNoteDao sdxBookAfterReadingNoteDao;
+	@Autowired
+	private SdxBookAfterReadingNoteUserDao sdxBookAfterReadingNoteUserDao;
+	@Autowired
+	private SdxUserDao sdxUserDao;
     @Override
     public long modTSdxBookTransRecord(TSdxBookTransRecordPo tSdxBookTransRecordPo) {
         if (tSdxBookTransRecordPo == null) {
@@ -67,7 +80,31 @@ public class SdxBookTransRecordServiceImpl implements SdxBookTransRecordService 
         log.info("start根据条件查找书籍漂流记录={}", tSdxBookTransRecordPo);
         List        <TSdxBookTransRecordPo> tSdxBookTransRecordPos = sdxBookTransRecordDao.findTSdxBookTransRecordByAll(            tSdxBookTransRecordPo,page,size);
         for (TSdxBookTransRecordPo po : tSdxBookTransRecordPos) {
-            tSdxBookTransRecordVos.add(po.copyTSdxBookTransRecordVo());
+			TSdxBookTransRecordVo tSdxBookTransRecordVo = po.copyTSdxBookTransRecordVo();
+			Long afterReadingNoteId = tSdxBookTransRecordVo.getBookAfterReadingNoteId();
+			Long userId = tSdxBookTransRecordPo.getUserId();
+			if(userId != null) {
+				TCsqUser csqUser = sdxUserDao.selectByPrimaryKey(userId);
+				tSdxBookTransRecordVo.setUserName(csqUser.getName());
+				tSdxBookTransRecordVo.setHeadPic(csqUser.getUserHeadPortraitPath());
+			}
+			if(afterReadingNoteId != null) {
+				TSdxBookAfterReadingNotePo afterReadingNotePo = sdxBookAfterReadingNoteDao.selectByPrimaryKey(afterReadingNoteId);
+				//确认点赞状态、类型,购买状态
+				Long afterReadingNotePoId = afterReadingNotePo.getId();
+				List<TSdxBookAfterReadingNoteUserPo> sdxBookAfterReadingNoteUserPos = sdxBookAfterReadingNoteUserDao.selectByBookAfrnIdAndUserIdAndIsThumb(afterReadingNotePoId, userId, SdxBookAfterReadingNoteUserEnum.IS_THUMB_YES.getCode());
+				if(!sdxBookAfterReadingNoteUserPos.isEmpty()) {
+					TSdxBookAfterReadingNoteUserPo readingNoteUserPo = sdxBookAfterReadingNoteUserPos.get(0);
+					afterReadingNotePo.setIsThumb(readingNoteUserPo.getIsThumb());
+					afterReadingNotePo.setThumbType(readingNoteUserPo.getThumbType());
+				}
+				List<TSdxBookAfterReadingNoteUserPo> bookAfterReadingNoteUserPos = sdxBookAfterReadingNoteUserDao.selectByBookAfrnIdAndUserIdAndTypeAndIsPurchase(afterReadingNotePoId, userId, SdxBookAfterReadingNoteUserEnum.TYPE_THUMB_OR_PURCHASE.getCode(), SdxBookAfterReadingNoteUserEnum.IS_PURCHASE_YES.getCode());
+				if(!bookAfterReadingNoteUserPos.isEmpty()) {
+					afterReadingNotePo.setNoNeedBuy(true);
+				}
+				tSdxBookTransRecordVo.setAfterReadingNote(afterReadingNotePo);
+			}
+			tSdxBookTransRecordVos.add(tSdxBookTransRecordVo);
         }
         return tSdxBookTransRecordVos;
     }

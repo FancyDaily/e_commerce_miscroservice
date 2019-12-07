@@ -55,7 +55,6 @@ public class TSdxBookOrderPo extends BaseEntity {
 	@Column(commit = "书籍驿站编号")
 	private Long bookStationId;
 
-
 	@Column(commit = "订单类型(捐书、购书)")
 	private Integer type;
 
@@ -64,6 +63,9 @@ public class TSdxBookOrderPo extends BaseEntity {
 
 	@Column(commit = "积分抵扣总额", length = 11)
 	private Integer scoreDiscount;
+
+	@Column(commit = "积分抵扣总金额", precision = 2)
+	private Double scoreDiscountPrice;
 
 	@Column(commit = "运费", precision = 2)
 	private Double shipPirce;

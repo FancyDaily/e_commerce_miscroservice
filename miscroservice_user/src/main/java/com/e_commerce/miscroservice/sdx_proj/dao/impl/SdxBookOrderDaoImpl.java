@@ -1,18 +1,17 @@
 package com.e_commerce.miscroservice.sdx_proj.dao.impl;
 
-import com.alipay.api.domain.MyBkAccountVO;
 import com.e_commerce.miscroservice.commons.entity.colligate.Page;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
-import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -171,7 +170,7 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 	}
 
 	@Override
-	public List<TSdxBookOrderPo> purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+	public List<TSdxBookOrderPo> purchaseList(Long userIds, List<Integer> option, Integer pageNum, Integer pageSize) {
 		Integer OPTION_ALL = -2;	//全部
 		MybatisPlusBuild eq = listAllTypeBuild(userIds, option, OPTION_ALL);
 		eq.eq(TSdxBookOrderPo::getType, SdxBookOrderEnum.TYPE_PURCHASE.getCode());
@@ -181,7 +180,7 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 	@Override
 	public List<TSdxBookOrderPo> donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
 		Integer OPTION_ALL = -2;	//全部
-		MybatisPlusBuild eq = listAllTypeBuild(userIds, option, OPTION_ALL);
+		MybatisPlusBuild eq = listAllTypeBuild(userIds, Arrays.asList(option), OPTION_ALL);
 		eq.eq(TSdxBookOrderPo::getType, SdxBookOrderEnum.TYPE_DONATE.getCode());
 		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), eq.page(pageNum, pageSize));
 	}
@@ -194,9 +193,9 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 		);
 	}
 
-	private MybatisPlusBuild listAllTypeBuild(Long userIds, Integer option, Integer OPTION_ALL) {
+	private MybatisPlusBuild listAllTypeBuild(Long userIds, List<Integer> option, Integer OPTION_ALL) {
 		MybatisPlusBuild eq = baseBuild().eq(TSdxBookOrderPo::getUserId, userIds);
-		eq = option == null || option.equals(OPTION_ALL) ? eq : eq.eq(TSdxBookOrderPo::getStatus, option);
+		eq = option == null || option.isEmpty() || option.size() == 1 && option.contains(OPTION_ALL) ? eq : eq.in(TSdxBookOrderPo::getStatus, option);
 		return eq;
 	}
 

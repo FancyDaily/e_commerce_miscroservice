@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.controller;
 
+import com.e_commerce.miscroservice.commons.annotation.colligate.generate.UrlAuth;
 import com.e_commerce.miscroservice.commons.annotation.service.Consume;
 import com.e_commerce.miscroservice.commons.helper.util.colligate.other.JavaDocReader;
 import com.e_commerce.miscroservice.commons.helper.util.service.ConsumeHelper;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
-* T书籍漂流记录的操作接口
+* 书籍漂流记录的操作接口
 */
 @RestController
 @RequestMapping("sdxBookTransRecord")
@@ -42,6 +43,7 @@ public class SdxBookTransRecordController {
     */
     @PostMapping("mod")
     @Consume(TSdxBookTransRecordVo.class)
+	@UrlAuth
     public Response modTSdxBookTransRecord(@RequestParam(required = false) Long id,@RequestParam(required = false) Integer type,@RequestParam(required = false) Long bookId,@RequestParam(required = false) Long userId,@RequestParam(required = false) Long bookInfoId,@RequestParam(required = false) String description) {
         TSdxBookTransRecordVo tSdxBookTransRecordVo = (TSdxBookTransRecordVo) ConsumeHelper.getObj();
         if (tSdxBookTransRecordVo == null) {
@@ -64,6 +66,7 @@ public class SdxBookTransRecordController {
     * @return
     */
     @RequestMapping("del")
+	@UrlAuth
     public Response delTSdxBookTransRecord(Long[] ids) {
         if (ids == null || ids.length == 0) {
             return Response.fail();
@@ -95,6 +98,7 @@ public class SdxBookTransRecordController {
     */
     @RequestMapping("find")
     @Consume(TSdxBookTransRecordVo.class)
+	@UrlAuth
     public Response findTSdxBookTransRecord(@RequestParam(required = false) Integer page,@RequestParam(required = false) Integer size,@RequestParam(required = false) String openResponseExplainFlag,@RequestParam(required = false) Long id,@RequestParam(required = false) Integer type,@RequestParam(required = false) Long bookId,@RequestParam(required = false) Long userId,@RequestParam(required = false) Long bookInfoId,@RequestParam(required = false) String description) {
 
     TSdxBookTransRecordVo tSdxBookTransRecordVo = (TSdxBookTransRecordVo) ConsumeHelper.getObj();

@@ -88,8 +88,16 @@ public class SdxScoreRecordDaoImpl implements SdxScoreRecordDao {
 	@Override
 	public List<TSdxScoreRecordPo> selectByUserIdAndInOutPage(Long userId, Integer inOut, Integer pageNum, Integer pageSize) {
 		MybatisPlusBuild eq = byUserIdBuild(userId);
-		eq = inOut == null? eq: eq.eq(TSdxScoreRecordPo::getInOut, inOut);
+		eq = inOut == null? eq: eq.eq(TSdxScoreRecordPo::getInOrOut, inOut);
 		return MybatisPlus.getInstance().findAll(new TSdxScoreRecordPo(), PageUtil.pageBuild(eq, pageNum, pageSize));
+	}
+
+	public static void main(String[] args) {
+		String build = new MybatisPlusBuild(TSdxScoreRecordPo.class)
+			.eq(TSdxScoreRecordPo::getDeletedFlag, Boolean.FALSE)
+			.eq(TSdxScoreRecordPo::getUserId, 918L)
+			.page(1, 99999).build();
+		System.out.println(build);
 	}
 
 	private MybatisPlusBuild baseBuild() {

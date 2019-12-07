@@ -97,9 +97,12 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 	@Override
 	public QueryResult list(Long id, Integer pageNum, Integer pageSize) {
 		List<TSdxShoppingTrolleysPo> trolleysPos = sdxShoppingTrolleysDao.selectByUserIdPage(id, pageNum, pageSize);
+		if(trolleysPos.isEmpty()) return new QueryResult();
 		//收集所有所需的bookInfoId，组装成map备用
 		List<Long> bookInfoIds = trolleysPos.stream()
 			.map(TSdxShoppingTrolleysPo::getBookInfoId).collect(Collectors.toList());
+
+
 		Map<Long, List<TSdxBookInfoPo>> idBookInfoMap = sdxBookInfoDao.selectInIds(bookInfoIds).stream().collect(Collectors.groupingBy(TSdxBookInfoPo::getId));
 		//分组、排序 -> 按关联项目分组，并组内排序, 要注意关联项目为空的情况(这些不进行分组, 组外排序，将组内最晚的元素提取，代表组参与排序
 		Map<Boolean, List<TSdxShoppingTrolleysPo>> collect = trolleysPos.stream()
@@ -112,7 +115,15 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 		noneServiceIdTrolleyPoList = noneServiceIdTrolleyPoList.stream()
 			.sorted(Comparator.comparing(TSdxShoppingTrolleysPo::getUpdateTime).reversed()).collect(Collectors.toList());
 
-		//构建无分类元素 备用
+		SdxShoppingTrolleysServiceGroupVo groupVo = new SdxShoppingTrolleysServiceGroupVo();
+		groupVo.setServiceName("未分类");	//未归属任何组
+		groupVo.setCoverPic(CsqUserEnum.DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH);	//默认封面图
+		groupVo.setDescription("这些书没有属于任何公益项目。");
+		groupVo.setTrolleysBookInfos(sdxShoppingTrolleysPoToVo(idBookInfoMap, trolleysPos));
+		groupVo.setTimeStamp(noneServiceIdTrolleyPoList.isEmpty()? -1L : noneServiceIdTrolleyPoList.get(0).getUpdateTime().getTime());
+		finalList.add(groupVo);
+
+		/*//构建无分类元素 备用
 		SdxShoppingTrolleysServiceGroupVo groupVo = new SdxShoppingTrolleysServiceGroupVo();
 		groupVo.setServiceName("未分类");	//未归属任何组
 		groupVo.setCoverPic(CsqUserEnum.DEFAULT_ANONYMOUS_HEADPORTRAITUREPATH);	//默认封面图
@@ -145,7 +156,7 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 
 		//外层排序
 		finalList = finalList.stream()
-			.sorted(Comparator.comparing(SdxShoppingTrolleysServiceGroupVo::getTimeStamp).reversed()).collect(Collectors.toList());
+			.sorted(Comparator.comparing(SdxShoppingTrolleysServiceGroupVo::getTimeStamp).reversed()).collect(Collectors.toList());*/
 
 		return PageUtil.buildQueryResult(finalList);
 	}

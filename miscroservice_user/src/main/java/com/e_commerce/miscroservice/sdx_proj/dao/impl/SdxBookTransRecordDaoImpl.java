@@ -77,15 +77,35 @@ public class SdxBookTransRecordDaoImpl implements SdxBookTransRecordDao {
 
 	@Override
 	public List<TSdxBookTransRecordPo> selectByBookIdAndType(Long bookId, int type) {
-		return MybatisPlus.getInstance().findAll(new TSdxBookTransRecordPo(), new MybatisPlusBuild(TSdxBookTransRecordPo.class)
-			.eq(TSdxBookTransRecordPo::getDeletedFlag, Boolean.FALSE)
+		return MybatisPlus.getInstance().findAll(new TSdxBookTransRecordPo(), baseBuild()
 			.eq(TSdxBookTransRecordPo::getBookId, bookId)
 			.eq(TSdxBookTransRecordPo::getType, type)
 		);
 	}
 
+	private MybatisPlusBuild baseBuild() {
+		return new MybatisPlusBuild(TSdxBookTransRecordPo.class)
+			.eq(TSdxBookTransRecordPo::getDeletedFlag, Boolean.FALSE);
+	}
+
 	@Override
 	public int save(List<TSdxBookTransRecordPo> toInserter) {
 		return MybatisPlus.getInstance().save(toInserter);
+	}
+
+	@Override
+	public List<TSdxBookTransRecordPo> selectByBookInfoIdAndType(Long bookInfoId, int code) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookTransRecordPo(), baseBuild()
+			.eq(TSdxBookTransRecordPo::getBookInfoId, bookInfoId)
+			.eq(TSdxBookTransRecordPo::getType, code)
+		);
+	}
+
+	@Override
+	public List<TSdxBookTransRecordPo> selectByBookInfoIdAndUserId(Long bookInfoId, Long userId) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookTransRecordPo(), baseBuild()
+			.eq(TSdxBookTransRecordPo::getBookInfoId, bookInfoId)
+			.eq(TSdxBookTransRecordPo::getUserId, userId)
+		);
 	}
 }

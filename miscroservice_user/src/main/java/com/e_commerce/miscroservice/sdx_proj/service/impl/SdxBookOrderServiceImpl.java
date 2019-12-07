@@ -19,6 +19,7 @@ import com.e_commerce.miscroservice.sdx_proj.po.*;
 import com.e_commerce.miscroservice.sdx_proj.service.*;
 import com.e_commerce.miscroservice.sdx_proj.vo.*;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.HashOperations;
@@ -174,6 +175,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		Long userId = orderPo.getUserId();
 		TCsqUser csqUser = sdxUserDao.selectByPrimaryKey(userId);
 		String donaterName = csqUser.getName();
+		String headPic = csqUser.getUserHeadPortraitPath();
 		List<TSdxBookInfoPo> bookInfoPos = sdxBookInfoDao.selectInIds(Arrays.stream(bookIfIs.split(",")).map(Long::valueOf).collect(Collectors.toList()));
 		String bookInfoNames = bookInfoPos.stream()
 			.map(TSdxBookInfoPo::getName).reduce("", bookNamesReducer(","));
@@ -187,6 +189,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.timeAgo(timeAgo)
 			.userId(userId)
 			.donaterName(donaterName)
+			.headPic(headPic)
 			.bookInfoIds(bookIfIs)
 			.bookInfoPos(bookInfoPos)
 			.bookInfoNames(bookInfoNames)
@@ -347,15 +350,28 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			TSdxShippingAddressPo tSdxShippingAddressPo = sdxShippingAddressDao.selectByPrimaryKey(shippingAddressId);
 			vo.setAddress(tSdxShippingAddressPo);
 		}
+		//今天的日期
+		vo.setDate(DateUtil.timeStamp2Date(tSdxBookOrderPo.getCreateTime().getTime()));
+		//积分抵扣
+		vo.setScoreUsed(tSdxBookOrderPo.getScoreDiscount());
+		//书本信息
+		dealWithBookInfos(vo, tSdxBookOrderPo.getBookIfIs());
 		return vo;
 	}
 
 	@Override
-	public QueryResult purchaseList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
-		List<TSdxBookOrderPo> list = sdxBookOrderDao.purchaseList(userIds, option, pageNum, pageSize);
+	public QueryResult purchaseList(Long userIds, String option, Integer pageNum, Integer pageSize) {
+		String[] split = option.split(",");
+		List<Integer> options = Arrays.stream(split)
+			.map(Integer::valueOf).collect(Collectors.toList());
+		List<TSdxBookOrderPo> list = sdxBookOrderDao.purchaseList(userIds, options, pageNum, pageSize);
 		List<SdxPurchaseOrderVo> vos = list.stream()
 			.map(a -> {
 				SdxPurchaseOrderVo vo = a.copySdxPurchaseOrderVo();
+				//书本信息装载
+				String bookIfIs = a.getBookIfIs();
+				dealWithBookInfos(vo, bookIfIs);
+
 				vo.setTimeStamp(a.getCreateTime().getTime());
 				return vo;
 			}).collect(Collectors.toList());
@@ -363,6 +379,14 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		groupingByDate(vos);
 
 		return PageUtil.buildQueryResult(vos);
+	}
+
+	private void dealWithBookInfos(SdxPurchaseOrderVo vo, String bookIfIs) {
+		if(!StringUtil.isEmpty(bookIfIs)) {
+			List<Long> bookInfoIds = new ArrayList<>(StringUtil.splitToArray(bookIfIs));
+			List<TSdxBookInfoPo> sdxBookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIds);
+			vo.setBookInfos(sdxBookInfoPos);
+		}
 	}
 
 	private List<SdxPurchaseOrderDateGroupVo> groupingByDate(List<SdxPurchaseOrderVo> vos) {
@@ -429,6 +453,8 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		Map<Long, Integer> idExpectedScoresMap = sdxBookService.getIdExpectedScoresMap(bookInfoIds);
 		List<TSdxBookPo> bookList = new ArrayList<>();
 		Integer totalExpectedScores = 0;
+		Double fee = bookInfoIds.length > 5? 0d: 5d;
+		status = status == null? SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType ? fee == 0d? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_UNPAY.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode() : status;
 		for(Long bookInfoId: bookInfoIds) {
 			//获取预估积分
 			Integer expectedScores = idExpectedScoresMap.get(bookInfoId);
@@ -456,11 +482,12 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.bookIds(StringUtil.longListToString(bookList.stream().map(TSdxBookPo::getId).collect(Collectors.toList())))        //书本编号
 			.bookIfIs(StringUtil.longListToString(Arrays.asList(bookInfoIds)))        //书本信息编号
 			.userId(userId)
-			.status(status == null? SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode() == shipType? SdxBookOrderEnum.STATUS_INITAIL.getCode() : SdxBookOrderEnum.STATUS_PROCESSING.getCode() : status)    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
+			.status(status)    //针对配送方式不同给予不同的状态,eg.自送类型时创建订单即在途中
 			.shippingAddressId(shippingAddressId)
 			.expectedTotalScores(totalExpectedScores)
 //			.exactTotalScores()	//实际获得积分
 			.shipType(shipType)
+			.shipPirce(fee)
 			.bookStationId(bookStationId)
 			.build();
 		sdxBookOrderDao.saveTSdxBookOrderIfNotExist(build);
@@ -506,7 +533,13 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		//创建微信支付参数 -> orderNo => webParam
 		Double fee = 5d;	//默认收费5元
 		String attach = SdxBookOrderEnum.ATTACH_DONATE.getMsg();
-		return buildWebParam(userId, orderNo, attach, fee, request);	//TODO 往csq_proj 下的微信notify_url对应接口添加邮费支付类型
+		if(bookInfoIds.length > 5) {	//免支付邮费
+			return new HashMap<String, String>() {{
+				put("orderNo", orderNo);
+			}};
+		} else {	//生成支付参数
+			return buildWebParam(userId, orderNo, attach, fee, request);	// 往csq_proj 下的微信notify_url对应接口添加邮费支付类型
+		}
 	}
 
 	@Override
@@ -602,7 +635,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			//查询预定数量
 			List<TSdxBookInfoUserPreOrderPo> bookInfoUserPreOrderPos = sdxBookInfoUserPreOrderDao.selectByBookInfoId(bookInfoId);
 			int preOrderNum = bookInfoUserPreOrderPos.size();
-			surplusAmount -= preOrderNum;
+//			surplusAmount -= preOrderNum;	//去掉预定限制
 			if(surplusAmount < 1) {
 				TSdxBookInfoPo tSdxBookInfoPo = sdxBookInfoDao.selectByPrimaryKey(bookInfoId);
 				errorMsgList.add(tSdxBookInfoPo.getName());
@@ -652,12 +685,14 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 			.type(SdxBookOrderEnum.TYPE_PURCHASE.getCode())
 			.shipType(SdxBookOrderEnum.SHIP_TYPE_MAILING.getCode())
 			.shippingAddressId(shippingAddressId)
+			.orderNo(orderNo)
 			.userId(userId)
 			.bookIds(bookIds)
 			.bookIfIs(bookInfoIds)
 			.bookPrice(bookFee)    //书本总价
 			.shipPirce(shipFee)    //邮费
 			.scoreDiscount(scoreUsed)    //抵扣积分总额
+			.scoreDiscountPrice(sdxUserService.getCutDownFee(scoreUsed))
 			.price(bookFee + shipFee)        //订单总价
 			.status(SdxBookOrderEnum.STATUS_UNPAY.getCode())
 			.build();

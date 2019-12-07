@@ -32,6 +32,11 @@ public class SdxGlobalDonateRecordVo {
 	private String donaterName;
 
 	/**
+	 * 捐助者头像
+	 */
+	private String headPic;
+
+	/**
 	 * 书籍信息编号
 	 */
 	private String bookInfoIds;

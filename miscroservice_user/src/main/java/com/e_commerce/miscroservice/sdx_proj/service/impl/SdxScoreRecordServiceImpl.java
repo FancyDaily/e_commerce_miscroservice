@@ -2,12 +2,15 @@ package com.e_commerce.miscroservice.sdx_proj.service.impl;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxScoreRecordDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxScoreRecordEnum;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxScoreRecordPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxScoreRecordService;
@@ -37,6 +40,8 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
     private SdxScoreRecordDao sdxScoreRecordDao;
     @Autowired
 	private SdxUserDao sdxUserDao;
+	@Autowired
+    private SdxBookInfoDao sdxBookInfoDao;
     @Override
     public long modTSdxScoreRecord(TSdxScoreRecordPo tSdxScoreRecordPo) {
         if (tSdxScoreRecordPo == null) {
@@ -95,7 +100,7 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 		//支出流水
 		sdxScoreRecordDao.saveTSdxScoreRecordIfNotExist(TSdxScoreRecordPo.builder()
 			.userId(csqUser.getId())
-			.inOut(SdxScoreRecordEnum.IN_OUT_OUT.getCode())
+			.inOrOut(SdxScoreRecordEnum.IN_OUT_OUT.getCode())
 			.amount(forSaleScore)
 			.type(SdxScoreRecordEnum.TYPE_AFTER_READING_NOTE.getCode())
 			.build()
@@ -112,10 +117,19 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 		List<TSdxScoreRecordPo> sdxScoreRecordPos = sdxScoreRecordDao.selectByUserIdAndInOutPage(userId, option == -1? null: option, pageNum, pageSize);
 		vos = sdxScoreRecordPos.stream()
 			.map(a -> {
+				String bookInfoIds = a.getBookInfoIds();
+				String description = a.getDescription();
+				if(bookInfoIds != null) {
+					List<Long> bookInfoIdList = Arrays.asList(StringUtil.splitString(bookInfoIds, ",")).stream().map(Long::valueOf).collect(Collectors.toList());
+					List<TSdxBookInfoPo> bookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIdList);
+					String bookInfoNames = bookInfoPos.stream().map(TSdxBookInfoPo::getName).reduce("", (b, c) -> b + "," + c).substring(1);
+					String act = SdxScoreRecordEnum.IN_OUT_IN.getCode() == a.getInOrOut()? "捐赠了 ": "购买了" + bookInfoNames;
+					description = StringUtil.isEmpty(description)? act: description;
+				}
 				SdxScoreRecordVo vo = a.copySdxScoreRecordVo();
 				String dateStr = a.getCreateTime().toString();
 				vo.setDate(formatDateToMdHm(dateStr));    //日期
-				vo.setDescription(a.getDescription());	  //TODO 描述部分
+				vo.setDescription(description);	  //TODO 描述部分
 				return vo;
 			}).collect(Collectors.toList());
 		//排序
@@ -136,7 +150,7 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 		//TODO
 		sdxScoreRecordDao.saveTSdxScoreRecordIfNotExist(TSdxScoreRecordPo.builder()
 			.userId(csqUser.getId())
-			.inOut(SdxScoreRecordEnum.IN_OUT_OUT.getCode())
+			.inOrOut(SdxScoreRecordEnum.IN_OUT_OUT.getCode())
 			.amount(order.getScoreDiscount())
 			.money(order.getTotalPrice())
 			.type(SdxScoreRecordEnum.TYPE_AFTER_READING_NOTE.getCode())
@@ -163,7 +177,7 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 			.amount(scores)
 			.orderId(order.getId())
 			.type(type)
-			.inOut(SdxScoreRecordEnum.IN_OUT_IN.getCode())
+			.inOrOut(SdxScoreRecordEnum.IN_OUT_IN.getCode())
 			.bookInfoIds(order.getBookIfIs())
 			.bookIds(order.getBookIds())
 //			.bookAfterReadingNoteId()	//TODO 读后感编号??

@@ -26,7 +26,7 @@ public class SdxScoreRecordVo {
 	/**
 	 * 收入还是支出
 	 */
-	private Integer inOut;
+	private Integer inOrOut;
 
 	/**
 	 * 积分数额

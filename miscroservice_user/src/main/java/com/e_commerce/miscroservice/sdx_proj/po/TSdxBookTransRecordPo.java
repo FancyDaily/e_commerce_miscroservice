@@ -33,6 +33,9 @@ public class TSdxBookTransRecordPo extends BaseEntity {
 	@Column(commit = "书籍信息编号")
 	private Long bookInfoId;
 
+	@Column(commit = "读后感编号")
+	private Long bookAfterReadingNoteId;
+
 	@Column(commit = "书籍主人编号")
 	private Long userId;
 

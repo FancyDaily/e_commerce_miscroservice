@@ -83,6 +83,7 @@ public class SdxOrderDonateController {
 	 * @param bookInfoIds 书籍信息编号(一或多个)
 	 * @param serviceId 关联公益项目编号
 	 * @param shippingAddressId 邮寄地址编号（指定一个）
+	 * @param shipType 捐书方式1邮寄
 	 * @return
 	 */
 	@RequestMapping("preOrder")
@@ -94,17 +95,6 @@ public class SdxOrderDonateController {
 			e.printStackTrace();
 			return Response.errorMsg("");
 		}
-	}
-
-	/**
-	 * 创建待支付邮费的订单
-	 * @return
-	 */
-	@RequestMapping("wxNotify")
-	@UrlAuth
-	public Object wxNotify(String orderNo) {
-
-		return null;
 	}
 
 	/**
