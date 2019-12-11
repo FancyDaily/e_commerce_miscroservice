@@ -95,7 +95,7 @@ public class SdxOrderPurchaseController {
 	@RequestMapping("detail")
 	@UrlAuth
 	public Object orderDetail(Long orderId) {
-		SdxPurchaseOrderVo detail = sdxBookOrderService.detail(orderId);
+		Map<String, Object> detail = sdxBookOrderService.detail(orderId);
 		return Response.success(detail);
 	}
 
