@@ -378,7 +378,7 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 	}
 
 	@Override
-	public SdxPurchaseOrderVo detail(Long orderId) {
+	public Map<String, Object> detail(Long orderId) {
 		//查找收货人信息，补全
 		TSdxBookOrderPo tSdxBookOrderPo = sdxBookOrderDao.selectByPrimaryKey(orderId);
 		checkExist(tSdxBookOrderPo);
@@ -393,8 +393,11 @@ public class SdxBookOrderServiceImpl implements SdxBookOrderService {
 		//积分抵扣
 		vo.setScoreUsed(tSdxBookOrderPo.getScoreDiscount());
 		//书本信息
-		dealWithBookInfos(vo, tSdxBookOrderPo.getBookIfIs());
-		return vo;
+		String bookInfoIds = tSdxBookOrderPo.getBookIfIs();
+		dealWithBookInfos(vo, bookInfoIds);
+
+		return preOrderInfos(IdUtil.getId(), shippingAddressId, bookInfoIds);
+		//		return vo;
 	}
 
 	//查询全部
