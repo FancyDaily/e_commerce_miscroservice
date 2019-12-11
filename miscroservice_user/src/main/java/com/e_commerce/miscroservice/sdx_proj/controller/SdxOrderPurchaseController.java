@@ -54,6 +54,7 @@ public class SdxOrderPurchaseController {
 	/**
 	 * 下单(微信支付)
 	 *
+	 * @param orderNo			订单号
 	 * @param shippingAddressId 邮寄地址编号
 	 * @param bookInfoIds       书籍信息编号
 	 * @param scoreUsed         使用积分
@@ -63,9 +64,9 @@ public class SdxOrderPurchaseController {
 	 */
 	@RequestMapping("pre/order")
 	@UrlAuth
-	public Object preOrder(Long shippingAddressId, String bookInfoIds, Integer scoreUsed, Double bookFee, HttpServletRequest httpServletRequest, Double shipFee) throws Exception {
+	public Object preOrder(String orderNo, Long shippingAddressId, String bookInfoIds, Integer scoreUsed, Double bookFee, HttpServletRequest httpServletRequest, Double shipFee) throws Exception {
 		try {
-			Map<String, String> result = sdxBookOrderService.preOrder(shippingAddressId, bookInfoIds, bookFee, IdUtil.getId(), httpServletRequest, shipFee, scoreUsed);
+			Map<String, String> result = sdxBookOrderService.preOrder(orderNo, shippingAddressId, bookInfoIds, bookFee, IdUtil.getId(), httpServletRequest, shipFee, scoreUsed);
 			return Response.success(result);
 		} catch (MessageException e) {
 			return Response.errorMsg(e.getMessage());

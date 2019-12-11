@@ -168,6 +168,13 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 		TCsqUser user = sdxUserDao.selectByPrimaryKey(userId);
 		Integer sdxScores = user.getSdxScores();
 		Integer scores = order.getExpectedTotalScores();
+		//获取书本总价，一比一兑换成积分
+		String bookIfIs = order.getBookIfIs();
+		List<Long> bookInfoIds = StringUtil.splitToArray(bookIfIs);
+		List<TSdxBookInfoPo> sdxBookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIds);
+		scores = sdxBookInfoPos.stream()
+			.map(TSdxBookInfoPo::getPrice)
+			.reduce(0d, Double::sum).intValue();
 		user.setSdxScores(sdxScores + scores);
 		sdxUserDao.update(user);
 		// 插入流水 -> 1条 用户获取积分流水
@@ -178,7 +185,7 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 			.orderId(order.getId())
 			.type(type)
 			.inOrOut(SdxScoreRecordEnum.IN_OUT_IN.getCode())
-			.bookInfoIds(order.getBookIfIs())
+			.bookInfoIds(bookIfIs)
 			.bookIds(order.getBookIds())
 //			.bookAfterReadingNoteId()	//TODO 读后感编号??
 			.description(description)		//描述
@@ -195,9 +202,4 @@ public class SdxScoreRecordServiceImpl implements SdxScoreRecordService {
 		return dateStr.substring(5, dateStr.length() - 3).replace("-", "/");
 	}
 
-	public static void main(String[] args) {
-		String str = "2019-10-22 19:36:00";
-	    str = formatDateToMdHm(str);
-	    System.out.println(str);
-	}
 }

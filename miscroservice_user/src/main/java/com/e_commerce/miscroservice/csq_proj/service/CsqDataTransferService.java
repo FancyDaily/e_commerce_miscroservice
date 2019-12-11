@@ -63,5 +63,5 @@ public interface CsqDataTransferService {
 
 	void offlineDataRecordIn(List<TCsqTransferData> datas);
 
-	String dataOut_1();
+	String dataOut_1(Long toId, Integer toType);
 }

@@ -34,7 +34,7 @@ public class CsqMsgController {
 	private CsqMsgService csqMsgService;
 
 	/**
-	 * 消息列表
+	 * 消息列表 - 从善桥
 	 *
 	 * @param pageNum  页码
 	 * @param pageSize 大小
@@ -66,6 +66,53 @@ public class CsqMsgController {
 		try {
 			log.info("消息列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
 			QueryResult<CsqSysMsgVo> list = csqMsgService.list(userId, pageNum, pageSize);
+			result.setData(list);
+			result.setSuccess(true);
+		} catch (MessageException e) {
+			log.warn("====方法描述: {}, Message: {}====", "消息列表", e.getMessage());
+			result.setMsg(e.getMessage());
+			result.setSuccess(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("消息列表", e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 消息列表 - 书袋熊
+	 *
+	 * @param pageNum  页码
+	 * @param pageSize 大小
+	 *                 <p>
+	 *                 {
+	 *                 "resultList":[
+	 *                 {
+	 *                 "id":8,
+	 *                 "userId":2000,
+	 *                 "dateString":"2019/07/03",
+	 *                 "serviceId":14, //项目编号
+	 *                 "name":"测试标题",		//项目名
+	 *                 "description":"测试发布项目",	//项目描述
+	 *                 "coverPic":"",	//封面图
+	 *                 "sumTotalIn":0,	//总计捐入
+	 *                 "title":"再见了您呐",	//消息标题
+	 *                 "content":"您已经失去了",	//消息内容
+	 *                 "type":2,	//消息类型
+	 *                 "isRead":1	//是否已读
+	 *                 }
+	 *                 }
+	 * @return
+	 */
+	@RequestMapping("list/sdx")
+	@UrlAuth
+	public AjaxResult msgListSdx(Integer pageNum, Integer pageSize) {
+		AjaxResult result = new AjaxResult();
+		Long userId = IdUtil.getId();
+		try {
+			log.info("消息列表, userId={}, pageNum={}, pageSize={}", userId, pageNum, pageSize);
+			QueryResult<CsqSysMsgVo> list = csqMsgService.listSdx(userId, pageNum, pageSize);
 			result.setData(list);
 			result.setSuccess(true);
 		} catch (MessageException e) {

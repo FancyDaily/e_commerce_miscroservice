@@ -17,4 +17,6 @@ public interface SdxBookTransRecordDao {
 	List<TSdxBookTransRecordPo> selectByBookInfoIdAndType(Long bookInfoId, int code);
 
 	List<TSdxBookTransRecordPo> selectByBookInfoIdAndUserId(Long bookInfoId, Long userId);
+
+	List<TSdxBookTransRecordPo> selectByBookInfoIdAndTypeDesc(Long bookInfoId, int code);
 }

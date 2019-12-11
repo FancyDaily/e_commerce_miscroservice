@@ -1,11 +1,14 @@
 package com.e_commerce.miscroservice.sdx_proj.dao.impl;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
+import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -37,10 +40,29 @@ public class SdxBookInfoDaoImpl implements SdxBookInfoDao {
         build.eq(TSdxBookInfoPo::getId, id);
         return MybatisPlus.getInstance().findOne( TSdxBookInfoPo.builder().build(), build);
     }
+
     @Override
-    public List<TSdxBookInfoPo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType) {
+    public List<TSdxBookInfoPo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType, Integer filterType) {
+    	final Integer FILTER_TYPE_NEW = 1;	//新书上架
+    	final Integer FILTER_TYPE_DOUBAN_OVER = 2;	//豆瓣8.5
+		final Integer FILTER_TYPE_NEW_THAT_YOU_CAN_NOT_AFFORD = 3;	//买不起的新书
         MybatisPlusBuild build = new MybatisPlusBuild(TSdxBookInfoPo.class);
         build.eq(TSdxBookInfoPo::getDeletedFlag, Boolean.FALSE);
+        final Long dayCnt = 7L;
+        final Double overScores = 8.5;
+        final Double overPrice = 45d;
+        if(filterType != null) {
+        	if(filterType.equals(FILTER_TYPE_NEW) || filterType.equals(FILTER_TYPE_NEW_THAT_YOU_CAN_NOT_AFFORD)) {
+				long mills = System.currentTimeMillis() - DateUtil.interval * dayCnt;
+				build.gte(TSdxBookInfoPo::getCreateTime, new Timestamp(mills).toString());
+				if(filterType.equals(FILTER_TYPE_NEW_THAT_YOU_CAN_NOT_AFFORD)) {
+					build.gte(TSdxBookInfoPo::getPrice, overPrice);
+				}
+			} else if(filterType.equals(FILTER_TYPE_DOUBAN_OVER)) {
+				build.gte(TSdxBookInfoPo::getScoreDouban, overScores);
+			}
+		}
+
         if (tSdxBookInfoPo.getId() == null) {
             if (StringUtils.isNotEmpty(tSdxBookInfoPo.getName())) {
                 build.like(TSdxBookInfoPo::getName,tSdxBookInfoPo.getName());

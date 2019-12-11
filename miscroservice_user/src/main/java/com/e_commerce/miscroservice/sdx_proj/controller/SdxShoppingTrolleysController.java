@@ -122,4 +122,15 @@ public class SdxShoppingTrolleysController {
         }
         return Response.success(sdxShoppingTrolleysService.findTSdxShoppingTrolleysByAll(tSdxShoppingTrolleysVo.copyTSdxShoppingTrolleysPo (),page,size), IdUtil.getTotal());
     }
+
+	/**
+	 * 购物车选中书目可抵扣积分总量
+	 * @param bookInfoIds 书本信息编号
+	 * @return
+	 */
+	@RequestMapping("score/discount")
+	@UrlAuth
+    public Response trolleyScoreDiscount(String bookInfoIds) {
+		return Response.success(sdxShoppingTrolleysService.scoreDiscount(IdUtil.getId(), bookInfoIds));
+	}
 }

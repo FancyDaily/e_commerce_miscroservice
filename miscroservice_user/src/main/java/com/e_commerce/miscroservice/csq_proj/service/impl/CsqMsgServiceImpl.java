@@ -83,9 +83,9 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 //		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
 		List<TCsqSysMsg> tCsqSysMsgs;
 		if (isUnread) {
-			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsReadDescPage(pageNum, pageSize, userId, CsqSysMsgEnum.IS_READ_FALSE.getCode());
+			tCsqSysMsgs = csqMsgDao.selectByUserIdAndIsReadDescPageAndIsSdx(pageNum, pageSize, userId, CsqSysMsgEnum.IS_READ_FALSE.getCode(), CsqSysMsgEnum.IS_SDX_FALSE.getCode());
 		} else {
-			tCsqSysMsgs = csqMsgDao.selectByUserIdDescPage(pageNum, pageSize, userId);
+			tCsqSysMsgs = csqMsgDao.selectByUserIdDescPageAndIsSdx(pageNum, pageSize, userId, CsqSysMsgEnum.IS_SDX_FALSE.getCode());
 		}
 		long total = IdUtil.getTotal();
 		//如果为"收到一个项目"类型，查询项目
@@ -252,11 +252,28 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 
 	@Override
 	public void insertTemplateMsg(Integer type, Long... userId) {
-		CsqSysMsgTemplateEnum currentEnum = CsqSysMsgTemplateEnum.getType(type);
-		if (currentEnum == null) {
-			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "type参数有误！");
+		insertTemplateMsg(CsqUserEnum.IS_SDX_FALSE.toCode(), type, userId);
+	}
+
+	@Override
+	public void insertTemplateMsg(Integer isSdx, Integer type, Long... userId) {
+		if(CsqUserEnum.IS_SDX_TRUE.toCode().equals(isSdx)) {
+			List<TCsqSysMsg> toInserter = new ArrayList<>();
+			for(Long theId: userId) {
+				toInserter.add(TCsqSysMsg.builder().type(CsqSysMsgEnum.TYPE_NORMAL.getCode())
+				.userId(theId)
+				.isSdx(CsqUserEnum.IS_SDX_TRUE.toCode())
+				.title("欢迎加入书袋熊")
+				.content("欢迎加入书袋熊").build());
+			}
+			csqMsgDao.insert(toInserter);
+		} else {
+			CsqSysMsgTemplateEnum currentEnum = CsqSysMsgTemplateEnum.getType(type);
+			if (currentEnum == null) {
+				throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "type参数有误！");
+			}
+			insertTemplateMsg(currentEnum, userId);
 		}
-		insertTemplateMsg(currentEnum, userId);
 	}
 
 	@Override
@@ -522,6 +539,51 @@ public class CsqMsgServiceImpl implements CsqMsgService {
 		tCsqSysMsgQueryResult.setTotalCount(total);
 
 		return tCsqSysMsgQueryResult;
+	}
+
+	@Override
+	public QueryResult<CsqSysMsgVo> listSdx(Long userId, Integer pageNum, Integer pageSize) {
+			pageNum = pageNum == null ? 1 : pageNum;
+			pageSize = pageSize == null ? 0 : pageSize;
+//		Page<Object> startPage = PageHelper.startPage(pageNum, pageSize);
+			List<TCsqSysMsg> tCsqSysMsgs;
+			tCsqSysMsgs = csqMsgDao.selectByUserIdDescPageAndIsSdx(pageNum, pageSize, userId, CsqSysMsgEnum.IS_SDX_FALSE.getCode());
+			long total = IdUtil.getTotal();
+			//如果为"收到一个项目"类型，查询项目
+			List<Long> serviceIds = tCsqSysMsgs.stream()
+				.filter(a -> CsqSysMsgEnum.TYPE_SREVICE.getCode() == a.getType())
+				.map(TCsqSysMsg::getServiceId).collect(Collectors.toList());
+			//书本信息
+			List<TSdxBookInfoPo> tSdxBookInfoPos = serviceIds.isEmpty() ? new ArrayList<>() : sdxBookInfoDao.selectInIds(serviceIds);
+
+			Map<Long, List<TSdxBookInfoPo>> serviceMap = tSdxBookInfoPos.stream()
+				.collect(Collectors.groupingBy(TSdxBookInfoPo::getId));
+
+			List<CsqSysMsgVo> resultList = tCsqSysMsgs.stream()
+	//			.sorted(Comparator.comparing(TCsqSysMsg::getCreateTime))
+				.map(a -> {
+					CsqSysMsgVo csqSysMsgVo = a.copyCsqSysMsgVo();
+					String dateString = DateUtil.timeStamp2Date(a.getCreateTime().getTime(), "yyyy/MM/dd");
+					csqSysMsgVo.setDateString(dateString);
+					List<TSdxBookInfoPo> sdxBookInfoPos = serviceMap.get(a.getServiceId());
+					if (sdxBookInfoPos == null) {
+						return csqSysMsgVo;
+					}
+					//装载项目信息
+					TSdxBookInfoPo tCsqService = sdxBookInfoPos.get(0);
+
+					csqSysMsgVo.setVo(tCsqService.copyTSdxBookInfoVo());
+					csqSysMsgVo.setServiceId(tCsqService.getId());
+					csqSysMsgVo.setName(tCsqService.getName());
+					String coverPic = tCsqService.getCoverPic();
+					csqSysMsgVo.setCoverPic(coverPic.contains(",") ? Arrays.asList(coverPic.split(",")).get(0) : coverPic);
+					return csqSysMsgVo;
+				}).collect(Collectors.toList());
+
+			QueryResult<CsqSysMsgVo> queryResult = new QueryResult<>();
+			queryResult.setResultList(resultList);
+			queryResult.setTotalCount(total);
+			return queryResult;
 	}
 
 }

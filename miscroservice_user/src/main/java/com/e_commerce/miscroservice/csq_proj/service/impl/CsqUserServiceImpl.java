@@ -1027,6 +1027,10 @@ public class CsqUserServiceImpl implements CsqUserService {
 	}
 
 	private TCsqUser register(TCsqUser csqUser) {
+		return register(csqUser, CsqUserEnum.IS_SDX_FALSE.toCode());
+	}
+
+	private TCsqUser register(TCsqUser csqUser, Integer isSdx) {
 		//默认头像等...
 		csqUser = dealWithDefaultVal(csqUser);
 

@@ -124,6 +124,7 @@ public class SdxBookAfterReadingNoteServiceImpl implements SdxBookAfterReadingNo
 		Long currentUserId = tSdxBookAfterReadingNotePo.getUserId();
 		tSdxBookAfterReadingNotePo.setUserId(null);
 		List<TSdxBookAfterReadingNotePo> tSdxBookAfterReadingNotePos = sdxBookAfterReadingNoteDao.findTSdxBookAfterReadingNoteByAll(tSdxBookAfterReadingNotePo, page, size);
+		if(tSdxBookAfterReadingNotePos.isEmpty()) return new ArrayList<>();
 		List<Long> userIds = tSdxBookAfterReadingNotePos.stream()
 			.map(TSdxBookAfterReadingNotePo::getUserId).collect(Collectors.toList());
 		Map<Long, List<TCsqUser>> idUserMap = sdxUserDao.selectInIds(userIds).stream().collect(Collectors.groupingBy(TCsqUser::getId));

@@ -1,7 +1,13 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 import com.e_commerce.miscroservice.commons.util.colligate.DateUtil;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookOrderDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookTicketDao;
+import com.e_commerce.miscroservice.sdx_proj.dao.SdxUserDao;
+import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookOrderEnum;
+import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookOrderPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookTicketPo;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookTicktService;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookTicktVo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
@@ -23,6 +29,12 @@ public class SdxBookTicktServiceImpl implements SdxBookTicktService {
     private final int ERROR_INT = 0;
     @Autowired
     private SdxBookTicketDao sdxBookTicketDao;
+	@Autowired
+    private SdxUserDao sdxUserDao;
+	@Autowired
+	private SdxBookOrderDao sdxBookOrderDao;
+	@Autowired
+	private SdxBookOrderService sdxBookOrderService;
     @Override
     public long modTSdxBookTickt(TSdxBookTicketPo tSdxBookTicketPo) {
         if (tSdxBookTicketPo == null) {
@@ -75,4 +87,28 @@ public class SdxBookTicktServiceImpl implements SdxBookTicktService {
         }
         return tSdxBookTicktVos;
     }
+
+	@Override
+	public void earnTickt(List<Long> bookInfos, Long userId) {
+		//check
+		if(!checkBeforeEarnTickt(bookInfos.size(), userId)) return;
+		//earn
+		TSdxBookTicketPo build = TSdxBookTicketPo.builder()
+			.userId(userId)
+			.expire(System.currentTimeMillis() + DateUtil.interval * 15)    //默认15天
+			.build();
+		sdxBookTicketDao.saveTSdxBookTicktIfNotExist(build);
+	}
+
+	private Boolean checkBeforeEarnTickt(int numThisTime, Long userId) {
+		//如果捐赠书本数量 < 20 && 近期(上一次的数量和本次差20)未获得书券
+		List<TSdxBookOrderPo> sdxBookOrderPos = sdxBookOrderDao.selectByUserIdAndType(userId, SdxBookOrderEnum.TYPE_DONATE.getCode());
+		Integer bookNums = sdxBookOrderService.getOrdersBookNums(sdxBookOrderPos);
+		bookNums += numThisTime;
+		//获取上一次的数量
+		List<TSdxBookTicketPo> sdxBookTicketPos = sdxBookTicketDao.selectByUserIdDesc(userId);
+		Integer gainNum = sdxBookTicketPos.size();
+
+		return bookNums / 20 > gainNum;
+	}
 }

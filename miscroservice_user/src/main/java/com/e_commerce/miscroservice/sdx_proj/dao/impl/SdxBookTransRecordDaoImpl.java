@@ -108,4 +108,13 @@ public class SdxBookTransRecordDaoImpl implements SdxBookTransRecordDao {
 			.eq(TSdxBookTransRecordPo::getUserId, userId)
 		);
 	}
+
+	@Override
+	public List<TSdxBookTransRecordPo> selectByBookInfoIdAndTypeDesc(Long bookInfoId, int code) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookTransRecordPo(), baseBuild()
+			.eq(TSdxBookTransRecordPo::getBookInfoId, bookInfoId)
+			.eq(TSdxBookTransRecordPo::getType, code)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TSdxBookTransRecordPo::getCreateTime))
+		);
+	}
 }

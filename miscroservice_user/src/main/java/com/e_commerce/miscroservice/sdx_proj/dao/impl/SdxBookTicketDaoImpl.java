@@ -84,4 +84,12 @@ public class SdxBookTicketDaoImpl implements SdxBookTicketDao {
 			.eq(TSdxBookTicketPo::getIsUsed, code)
 		);
 	}
+
+	@Override
+	public List<TSdxBookTicketPo> selectByUserIdDesc(Long userId) {
+		return MybatisPlus.getInstance().findAll(new TSdxBookTicketPo(), baseBuild()
+			.eq(TSdxBookTicketPo::getUserId, userId)
+			.orderBy(MybatisPlusBuild.OrderBuild.buildDesc(TSdxBookTicketPo::getCreateTime))
+		);
+	}
 }

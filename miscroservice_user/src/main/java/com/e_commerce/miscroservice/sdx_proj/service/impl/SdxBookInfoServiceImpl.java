@@ -1,12 +1,10 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
 import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxTagDao;
-import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookEnum;
 import com.e_commerce.miscroservice.sdx_proj.enums.SdxBookInfoEnum;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
@@ -77,15 +75,15 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 	}
 
 	@Override
-	public List<TSdxBookInfoVo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType) {
+	public List<TSdxBookInfoVo> findTSdxBookInfoByAll(Long userId, TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType, Integer filterType) {
 		List<TSdxBookInfoVo> tSdxBookInfoVos = new ArrayList<>();
 		if (tSdxBookInfoPo == null) {
 			log.warn("根据条件查找书籍信息,参数不对");
 			return tSdxBookInfoVos;
 		}
 		log.info("start根据条件查找书籍信息={}", tSdxBookInfoPo);
-		List<TSdxBookInfoPo> tSdxBookInfoPos = sdxBookInfoDao.findTSdxBookInfoByAll(tSdxBookInfoPo, page, size, sortType);
-		//TODO 对结果的继续处理 -> 根据积分抵扣规则(可能加上个人剩余积分)处理
+		List<TSdxBookInfoPo> tSdxBookInfoPos = sdxBookInfoDao.findTSdxBookInfoByAll(tSdxBookInfoPo, page, size, sortType, filterType);
+		// 对结果的继续处理 -> 根据积分抵扣规则(可能加上个人剩余积分)处理
 		for (TSdxBookInfoPo po : tSdxBookInfoPos) {
 			tSdxBookInfoVos.add(po.copyTSdxBookInfoVo());
 		}
@@ -95,6 +93,9 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 				Long id = a.getId();
 				List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(id);
 				a.setAvailableNum(availableBooks.size());
+				//最大可抵扣金额
+				Double maximumDiscountMoney = sdxBookService.dealWithScoreMoney(userId, a.getPrice());
+				a.setMaximumDiscount(maximumDiscountMoney);
 				return a;
 			}).collect(Collectors.toList());
 
@@ -127,6 +128,7 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 			} else {
 				tSdxBookInfoPo = exist;
 			}
+			tSdxBookInfoPo.setExpectedScore(tSdxBookInfoPo.getPrice().intValue());
 		} catch (MessageException e) {
 			throw e;
 		} catch (Exception e) {
@@ -137,7 +139,7 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 
 	private String dealWithNewTag(String tag) {
 		//拆分
-		if(!tag.contains(",")) return null;
+		if(tag == null || !tag.contains(",")) return null;
 		String[] tagNames = tag.split(",");
 		List<TSdxTagPo> sdxTagPos = sdxTagDao.selectInNames(tagNames);
 		Map<String, List<TSdxTagPo>> namePoMap = sdxTagPos.stream()

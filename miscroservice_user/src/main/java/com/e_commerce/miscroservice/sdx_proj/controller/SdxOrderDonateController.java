@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 书袋熊捐书订单
@@ -80,6 +81,7 @@ public class SdxOrderDonateController {
 
 	/**
 	 * 创建捐赠订单(邮寄支付邮费)
+	 * @param orderNo 订单号
 	 * @param bookInfoIds 书籍信息编号(一或多个)
 	 * @param serviceId 关联公益项目编号
 	 * @param shippingAddressId 邮寄地址编号（指定一个）
@@ -88,9 +90,9 @@ public class SdxOrderDonateController {
 	 */
 	@RequestMapping("preOrder")
 	@UrlAuth
-	public Object preOrder(HttpServletRequest request, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
+	public Object preOrder(String orderNo, HttpServletRequest request, Integer shipType, Long shippingAddressId, Long bookStationId, Long serviceId, Long... bookInfoIds) {
 		try {
-			return Response.success(sdxBookOrderService.preDonateOrder(IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, request));
+			return Response.success(sdxBookOrderService.preDonateOrder(orderNo, IdUtil.getId(), bookInfoIds, shipType, shippingAddressId, bookStationId, serviceId, request));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return Response.errorMsg("");
@@ -174,7 +176,7 @@ public class SdxOrderDonateController {
 	 */
 	@RequestMapping("list")
 	@UrlAuth
-	public Object list(Integer option, Integer pageNum, Integer pageSize) {
+	public Object list(String option, Integer pageNum, Integer pageSize) {
 		return Response.success(sdxBookOrderService.donateList(IdUtil.getId(), option, pageNum, pageSize));
 	}
 

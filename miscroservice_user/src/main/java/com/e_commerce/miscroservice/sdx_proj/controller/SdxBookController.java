@@ -54,6 +54,7 @@ public class SdxBookController {
 	 * @param maximumReserve 最大预定接收数
 	 * @param publisher 出版社
 	 * @param catalog 目录
+	 * @param filterType 筛选类型1新书上架/2豆瓣8.5/3买不起的新书
 	 * @param maximumDiscount 最高可抵扣价格
 	 * @param sortType 排序类型[0~3]
 	 * @param isFuzzySearch 是否启用模糊查询(对书名或作者)
@@ -62,7 +63,7 @@ public class SdxBookController {
 	 */
 	@RequestMapping("bookinfo/find")
 	@Consume(TSdxBookInfoVo.class)
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public Response findTSdxBookInfo(
 		@RequestParam(required = false) Integer page,
 		@RequestParam(required = false) Integer size,
@@ -73,7 +74,7 @@ public class SdxBookController {
 		@RequestParam(required = false) String author, @RequestParam(required = false) Double scoreDouban,
 		@RequestParam(required = false) String bindingStyle, @RequestParam(required = false) String tagId,
 		@RequestParam(required = false) String introduction, @RequestParam(required = false) Integer maximumReserve,
-		@RequestParam(required = false) String publisher, @RequestParam(required = false) String catalog,
+		@RequestParam(required = false) String publisher, @RequestParam(required = false) String catalog, @RequestParam(required = false) Integer filterType,
 		@RequestParam(required = false) Double maximumDiscount, Integer sortType, @RequestParam boolean isFuzzySearch) {
 
 		TSdxBookInfoVo tSdxBookInfoVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
@@ -86,7 +87,7 @@ public class SdxBookController {
 		if(tSdxBookInfoVo.getId()!=null){
 			return Response.success(sdxBookInfoService.findTSdxBookInfoById(tSdxBookInfoVo.getId()));
 		}
-		return Response.success(sdxBookInfoService.findTSdxBookInfoByAll(tSdxBookInfoVo.copyTSdxBookInfoPo (),page,size, sortType), IdUtil.getTotal());
+		return Response.success(sdxBookInfoService.findTSdxBookInfoByAll(IdUtil.getId(), tSdxBookInfoVo.copyTSdxBookInfoPo (),page,size, sortType, filterType), IdUtil.getTotal());
 	}
 
 	/**
@@ -96,7 +97,7 @@ public class SdxBookController {
 	 */
 	@RequestMapping("bookinfo/detail")
 	@Consume(TSdxBookInfoVo.class)
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public Response detail(Long id) {
 		TSdxBookInfoVo tSdxBookVo = (TSdxBookInfoVo) ConsumeHelper.getObj();
 		if (tSdxBookVo == null || tSdxBookVo.getId()==null) {
@@ -108,6 +109,9 @@ public class SdxBookController {
 	/**
 	 * 书籍详情-捐助/购买人列表
 	 * @param id 书籍信息编号
+	 * @param pageNum 页码
+	 * @param pageSize 大小
+	 * @param isSold 是否捐赠Boolean
 	 * @return
 	 */
 	@RequestMapping("bookinfo/user/sold/list")
@@ -157,7 +161,7 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("list/most/follow")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public Object mostFollowList() {
 		return Response.success(sdxBookService.mostFollowList());
 	}
@@ -167,7 +171,7 @@ public class SdxBookController {
 	 * @return
 	 */
 	@RequestMapping("list/suggest")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public Object suggestList() {
 		return Response.success(sdxBookService.suggestList());
 	}

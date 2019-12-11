@@ -41,7 +41,7 @@ public class SdxUserController {
 	 * @return
 	 */
 	@RequestMapping("global/donate")
-	@UrlAuth
+	@UrlAuth(withoutPermission = true)
 	public Object globalDonate() {
 		log.info("全局播报");
 		return Response.success(sdxUserService.globalDonate());

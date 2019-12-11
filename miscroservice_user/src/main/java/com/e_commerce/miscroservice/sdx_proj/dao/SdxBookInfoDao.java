@@ -6,7 +6,7 @@ public interface SdxBookInfoDao {
     int modTSdxBookInfo(TSdxBookInfoPo tSdxBookInfoPo);
     int delTSdxBookInfoByIds(Long... ids);
     TSdxBookInfoPo findTSdxBookInfoById(Long id);
-    List<TSdxBookInfoPo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType);
+    List<TSdxBookInfoPo> findTSdxBookInfoByAll(TSdxBookInfoPo tSdxBookInfoPo, Integer page, Integer size, Integer sortType, Integer filterType);
 
 	TSdxBookInfoPo selectByPrimaryKey(Long id);
 

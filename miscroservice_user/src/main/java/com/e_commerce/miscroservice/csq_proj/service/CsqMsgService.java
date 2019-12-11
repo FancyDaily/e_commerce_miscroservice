@@ -32,6 +32,8 @@ public interface CsqMsgService {
 
 	void insertTemplateMsg(Integer type, Long... userId);
 
+	void insertTemplateMsg(Integer isSdx, Integer type, Long... userId);
+
 	void collectFormId(Long userId, String formId);
 
 	void sendServiceMsg(Long messageUserId, CsqServiceMsgEnum csqServiceMsgEnum, CsqServiceMsgParamVo csqServiceMsgParamVo);
@@ -43,4 +45,6 @@ public interface CsqMsgService {
 	QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch);
 
 	QueryResult<TCsqSysMsg> list(String searchParam, Integer pageNum, Integer pageSize, boolean isFuzzySearch, boolean isSdx);
+
+	QueryResult<CsqSysMsgVo> listSdx(Long userId, Integer pageNum, Integer pageSize);
 }

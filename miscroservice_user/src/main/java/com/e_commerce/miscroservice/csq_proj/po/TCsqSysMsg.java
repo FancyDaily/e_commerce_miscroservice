@@ -21,6 +21,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TCsqSysMsg extends BaseEntity {
 
+	@Column(commit = "第几位读者", length = 11)
+	private Integer readerNo;
+
 	@Id
 	private Long id;
 

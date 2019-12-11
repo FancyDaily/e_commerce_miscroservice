@@ -34,4 +34,8 @@ public interface CsqMsgDao {
 	List<TCsqSysMsg> selectWithBuildPage(MybatisPlusBuild baseBuild, Integer pageNum, Integer pageSize);
 
 	MybatisPlusBuild getBaseBuild();
+
+	List<TCsqSysMsg> selectByUserIdAndIsReadDescPageAndIsSdx(Integer pageNum, Integer pageSize, Long userId, int code, int code1);
+
+	List<TCsqSysMsg> selectByUserIdDescPageAndIsSdx(Integer pageNum, Integer pageSize, Long userId, int code);
 }

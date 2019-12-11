@@ -22,7 +22,9 @@ public enum CsqUserEnum {
 	AVAILABLE_STATUS_YES(1, "可用"),
 	MANAGER_TYPE_NOT_A_MANAGER(0, "非后台管理员"),
 	MANAGER_TYPE_SUPER(1, "最高后台管理员"),
-	MANAGER_TYPE_NORMAL(2, "普通后台管理员")
+	MANAGER_TYPE_NORMAL(2, "普通后台管理员"),
+	IS_SDX_TRUE(1, "是否为书袋熊相关-是"),
+	IS_SDX_FALSE(0, "是否为书袋熊相关-否")
 	;
 
 	/**

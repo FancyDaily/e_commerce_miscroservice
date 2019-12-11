@@ -5,6 +5,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.table.Id;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqSysMsg;
+import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
 import lombok.Data;
 
 /**
@@ -13,6 +14,15 @@ import lombok.Data;
  */
 @Data(matchSuffix = true)
 public class CsqSysMsgVo {
+
+	/**
+	 * 第几位读者
+	 */
+	@Transient
+	private Integer readerNo;
+
+	@Transient
+	private TSdxBookInfoVo vo;
 
 	@Id
 	private Long id;

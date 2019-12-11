@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.csq_proj.dao.impl;
 
 import com.e_commerce.miscroservice.commons.constant.colligate.AppConstant;
+import com.e_commerce.miscroservice.commons.enums.application.CsqSysMsgEnum;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlus;
 import com.e_commerce.miscroservice.commons.helper.plug.mybatis.util.MybatisPlusBuild;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
@@ -72,6 +73,7 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 	@Override
 	public List<TCsqSysMsg> selectByUserIdAndIsReadDescPage(Integer pageNum, Integer pageSize, Long userId, int code) {
 		MybatisPlusBuild mybatisPlusBuild = byUserIdAndIsReadDescBuild(userId, code);
+		mybatisPlusBuild.eq(TCsqSysMsg::getIsSdx, CsqSysMsgEnum.IS_SDX_FALSE.getCode());
 		IdUtil.setTotal(mybatisPlusBuild);
 
 		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
@@ -80,6 +82,7 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 	@Override
 	public List<TCsqSysMsg> selectByUserIdDescPage(Integer pageNum, Integer pageSize, Long userId) {
 		MybatisPlusBuild mybatisPlusBuild = byUserIdDescBuild(userId);
+		mybatisPlusBuild.eq(TCsqSysMsg::getIsSdx, CsqSysMsgEnum.IS_SDX_FALSE.getCode());
 		IdUtil.setTotal(mybatisPlusBuild);
 
 		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
@@ -100,6 +103,24 @@ public class CsqMsgDaoImpl implements CsqMsgDao {
 	public MybatisPlusBuild getBaseBuild() {
 		return new MybatisPlusBuild(TCsqSysMsg.class)
 			.eq(TCsqSysMsg::getIsValid, AppConstant.IS_VALID_YES);
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdAndIsReadDescPageAndIsSdx(Integer pageNum, Integer pageSize, Long userId, int code, int code1) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdAndIsReadDescBuild(userId, code);
+		mybatisPlusBuild.eq(TCsqSysMsg::getIsSdx, code1);	//是否书袋熊相关
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
+	}
+
+	@Override
+	public List<TCsqSysMsg> selectByUserIdDescPageAndIsSdx(Integer pageNum, Integer pageSize, Long userId, int code) {
+		MybatisPlusBuild mybatisPlusBuild = byUserIdDescBuild(userId);
+		mybatisPlusBuild.eq(TCsqSysMsg::getIsSdx, code);	//是否书袋熊相关
+		IdUtil.setTotal(mybatisPlusBuild);
+
+		return MybatisPlus.getInstance().findAll(new TCsqSysMsg(), mybatisPlusBuild.page(pageNum, pageSize));
 	}
 
 	private MybatisPlusBuild byUserIdDescBuild(Long userId) {

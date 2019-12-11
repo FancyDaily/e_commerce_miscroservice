@@ -8,6 +8,7 @@ import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookAfterReadingNoteUserPo;
 import com.e_commerce.miscroservice.commons.helper.util.service.IdUtil;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -82,7 +83,7 @@ public class SdxBookAfterReadingNoteUserDaoImpl implements SdxBookAfterReadingNo
 
 	@Override
 	public List<TSdxBookAfterReadingNoteUserPo> selectInAfrdnIdsAndUserIdAndIsPurchase(List<Long> afrdnIds, Integer isPurchase, Long userId) {
-		return MybatisPlus.getInstance().findAll(new TSdxBookAfterReadingNoteUserPo(), baseBuild()
+		return userId == null? new ArrayList<>(): MybatisPlus.getInstance().findAll(new TSdxBookAfterReadingNoteUserPo(), baseBuild()
 			.in(TSdxBookAfterReadingNoteUserPo::getBookAfterReadingNoteId, afrdnIds)
 			.eq(TSdxBookAfterReadingNoteUserPo::getIsPurchase, isPurchase)
 			.eq(TSdxBookAfterReadingNoteUserPo::getUserId, userId)

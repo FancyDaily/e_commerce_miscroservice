@@ -11,4 +11,6 @@ public interface SdxBookTicketDao {
 	List<TSdxBookTicketPo> selectByUserId(Long userId);
 
 	List<TSdxBookTicketPo> selectByUserIdAndIsUsed(Long userId, int code);
+
+	List<TSdxBookTicketPo> selectByUserIdDesc(Long userId);
 }

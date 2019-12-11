@@ -178,9 +178,9 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 	}
 
 	@Override
-	public List<TSdxBookOrderPo> donateList(Long userIds, Integer option, Integer pageNum, Integer pageSize) {
+	public List<TSdxBookOrderPo> donateList(Long userIds, List<Integer> option, Integer pageNum, Integer pageSize) {
 		Integer OPTION_ALL = -2;	//全部
-		MybatisPlusBuild eq = listAllTypeBuild(userIds, Arrays.asList(option), OPTION_ALL);
+		MybatisPlusBuild eq = listAllTypeBuild(userIds, option, OPTION_ALL);
 		eq.eq(TSdxBookOrderPo::getType, SdxBookOrderEnum.TYPE_DONATE.getCode());
 		return MybatisPlus.getInstance().findAll(new TSdxBookOrderPo(), eq.page(pageNum, pageSize));
 	}
@@ -195,7 +195,7 @@ public class SdxBookOrderDaoImpl implements SdxBookOrderDao {
 
 	private MybatisPlusBuild listAllTypeBuild(Long userIds, List<Integer> option, Integer OPTION_ALL) {
 		MybatisPlusBuild eq = baseBuild().eq(TSdxBookOrderPo::getUserId, userIds);
-		eq = option == null || option.isEmpty() || option.size() == 1 && option.contains(OPTION_ALL) ? eq : eq.in(TSdxBookOrderPo::getStatus, option);
+		eq = option == null || option.isEmpty() || option.size() == 1 && option.contains(OPTION_ALL) || option.contains(null) ? eq : eq.in(TSdxBookOrderPo::getStatus, option);
 		return eq;
 	}
 

@@ -11,4 +11,5 @@ public interface SdxShoppingTrolleysService {
 
 	QueryResult list(Long id, Integer pageNum, Integer pageSize);
 
+	Double scoreDiscount(Long userId, String bookInfoIdStr);
 }

@@ -1,6 +1,7 @@
 package com.e_commerce.miscroservice.sdx_proj.service.impl;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
 import com.e_commerce.miscroservice.commons.enums.application.CsqUserEnum;
+import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
 import com.e_commerce.miscroservice.commons.utils.PageUtil;
 import com.e_commerce.miscroservice.csq_proj.dao.CsqServiceDao;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
@@ -8,6 +9,7 @@ import com.e_commerce.miscroservice.sdx_proj.dao.SdxBookInfoDao;
 import com.e_commerce.miscroservice.sdx_proj.dao.SdxShoppingTrolleysDao;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxShoppingTrolleysPo;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxShoppingTrolleysService;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxShoppingTrolleysServiceGroupVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxShoppingTrolleysVo;
@@ -33,8 +35,11 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
     private SdxShoppingTrolleysDao sdxShoppingTrolleysDao;
 	@Autowired
     private SdxBookInfoDao sdxBookInfoDao;
-
+	@Autowired
 	private CsqServiceDao csqServiceDao;
+	@Autowired
+	private SdxBookService sdxBookService;
+
     @Override
     public long modTSdxShoppingTrolleys(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo) {
         if (tSdxShoppingTrolleysPo == null) {
@@ -159,6 +164,15 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 			.sorted(Comparator.comparing(SdxShoppingTrolleysServiceGroupVo::getTimeStamp).reversed()).collect(Collectors.toList());*/
 
 		return PageUtil.buildQueryResult(finalList);
+	}
+
+	@Override
+	public Double scoreDiscount(Long userId, String bookInfoIdStr) {
+		List<Long> bookInfoIds = StringUtil.splitToArray(bookInfoIdStr);
+		List<TSdxBookInfoPo> sdxBookInfoPos = sdxBookInfoDao.selectInIds(bookInfoIds);
+		Double moeny = sdxBookInfoPos.stream()
+			.map(TSdxBookInfoPo::getPrice).reduce(0d, Double::sum);
+		return sdxBookService.dealWithScoreMoney(userId, moeny);
 	}
 
 	private List<SdxShoppingTrolleysVo> sdxShoppingTrolleysPoToVo(Map<Long, List<TSdxBookInfoPo>> idBookInfoMap, List<TSdxShoppingTrolleysPo> v) {

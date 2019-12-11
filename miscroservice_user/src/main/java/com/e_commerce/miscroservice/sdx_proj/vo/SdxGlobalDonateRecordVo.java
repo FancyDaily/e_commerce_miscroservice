@@ -56,5 +56,10 @@ public class SdxGlobalDonateRecordVo {
 	 */
 	private String description;
 
+	/**
+	 * 时间戳
+	 */
+	private Long timeStamp;
+
 	public TSdxBookOrderPo copyTSdxBookOrder() {return null;}
 }

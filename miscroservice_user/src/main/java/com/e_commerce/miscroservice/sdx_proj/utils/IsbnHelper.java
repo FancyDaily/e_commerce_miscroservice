@@ -1,7 +1,9 @@
 package com.e_commerce.miscroservice.sdx_proj.utils;
 
-import com.alipay.api.domain.AlipayIserviceMindvAnswersBatchqueryModel;
+import com.e_commerce.miscroservice.commons.constant.colligate.AppErrorConstant;
+import com.e_commerce.miscroservice.commons.exception.colligate.MessageException;
 import com.e_commerce.miscroservice.commons.util.colligate.StringUtil;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,7 +11,6 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,10 +24,14 @@ import java.util.regex.Pattern;
 public class IsbnHelper {
 	private final static String url = "https://book.douban.com/isbn/";
 
-	public static DoubanBookInfo infos(String IsbnCode) throws IOException {
+	public static DoubanBookInfo infos(String IsbnCode) throws Exception {
 		String connectUrl = url + IsbnCode;
-		Document document = Jsoup.connect(connectUrl).get();
-		return dealWithInfo(document);
+		try {
+			Document document = Jsoup.connect(connectUrl).get();
+			return dealWithInfo(document);
+		} catch (HttpStatusException e) {
+			throw new MessageException(AppErrorConstant.NOT_PASS_PARAM, "没有这本书的信息，请换一本书!");
+		}
 	}
 
 	private static DoubanBookInfo dealWithInfo(Document doc) {
@@ -101,40 +106,44 @@ public class IsbnHelper {
 
 			//目录
 			Elements select = doc.select("div[class=related_info]").select("div[class=indent]");
-			Element element = select.get(3);
-			StringBuilder catalogBuilder = new StringBuilder();
-			String cataSplit = ",";
-			for(TextNode node:element.textNodes()) {
-				String text = node.text();
-				if(text.contains("· · · · · ·") || ") ".equals(text)) {
-					continue;
-				}
-				catalogBuilder.append(text);
-				catalogBuilder.append(cataSplit);
-			}
-			String catalog = catalogBuilder.toString();
-			catalog = dealWithEndWith(catalog, cataSplit);
-//			System.out.println("catalog" + catalog);
 
-			//分类
-			Elements tags = doc.select("div#db-tags-section").select("div[class=indent]").select("a");
-			StringBuilder tagBuilder = new StringBuilder();
-			String tagSplit = ",";
-			for(Element tag:tags) {
-				tagBuilder.append(tag.text());
-				tagBuilder.append(tagSplit);
+			if(select.size() > 2) {	//可能简介、目录皆无
+				Element element = select.get(3);
+				StringBuilder catalogBuilder = new StringBuilder();
+				String cataSplit = ",";
+				for(TextNode node:element.textNodes()) {
+					String text = node.text();
+					if(text.contains("· · · · · ·") || ") ".equals(text)) {
+						continue;
+					}
+					catalogBuilder.append(text);
+					catalogBuilder.append(cataSplit);
+				}
+				String catalog = catalogBuilder.toString();
+				catalog = dealWithEndWith(catalog, cataSplit);
+	//			System.out.println("catalog" + catalog);
+
+				//分类
+				Elements tags = doc.select("div#db-tags-section").select("div[class=indent]").select("a");
+				StringBuilder tagBuilder = new StringBuilder();
+				String tagSplit = ",";
+				for(Element tag:tags) {
+					tagBuilder.append(tag.text());
+					tagBuilder.append(tagSplit);
+				}
+				String tag = tagBuilder.toString();
+				tag = dealWithEndWith(tag, tagSplit);
+	//			System.out.println("tag" + tag);
+
+				keyValMap.put(DoubanBookInfoEnum.CATALOG, Arrays.asList(catalog));
+				keyValMap.put(DoubanBookInfoEnum.TAG, Arrays.asList(tag));
 			}
-			String tag = tagBuilder.toString();
-			tag = dealWithEndWith(tag, tagSplit);
-//			System.out.println("tag" + tag);
 
 			//装载遗漏
 			keyValMap.put(DoubanBookInfoEnum.NAME, Arrays.asList(name));
 			keyValMap.put(DoubanBookInfoEnum.COVER_PIC, Arrays.asList(src));
 			keyValMap.put(DoubanBookInfoEnum.RATING, Arrays.asList(rate));
 			keyValMap.put(DoubanBookInfoEnum.INTRODUCTION, Arrays.asList(introduction));
-			keyValMap.put(DoubanBookInfoEnum.CATALOG, Arrays.asList(catalog));
-			keyValMap.put(DoubanBookInfoEnum.TAG, Arrays.asList(tag));
 
 			//打印最终的map
 			System.out.println(keyValMap);

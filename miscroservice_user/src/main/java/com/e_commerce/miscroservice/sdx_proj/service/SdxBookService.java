@@ -22,6 +22,8 @@ public interface SdxBookService {
 
 	SdxBookDetailVo detail(Long id, Long userId);
 
+	Double dealWithScoreMoney(Long userId, Double price);
+
 	QueryResult soldOrPurchaseUserList(Long id, Integer pageNum, Integer pageSize, Boolean isSold);
 
 	void preOrder(Long id, Long userId);

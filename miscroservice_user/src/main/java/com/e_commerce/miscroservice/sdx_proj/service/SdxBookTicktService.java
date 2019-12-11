@@ -7,4 +7,6 @@ public interface SdxBookTicktService {
     int delTSdxBookTicktByIds(Long... ids);
     TSdxBookTicktVo findTSdxBookTicktById(Long id);
     List<TSdxBookTicktVo> findTSdxBookTicktByAll(TSdxBookTicketPo tSdxBookTicketPo, Integer page, Integer size);
+
+	void earnTickt(List<Long> longs, Long userId);
 }

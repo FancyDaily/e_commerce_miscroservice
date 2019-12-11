@@ -71,6 +71,11 @@ public class SdxBookDetailVo {
 	private Double maximumDiscount;
 
 	/**
+	 * 抵扣后价格
+	 */
+	private Double surplusPrice;
+
+	/**
 	 * 出版社
 	 */
 	private String publisher;

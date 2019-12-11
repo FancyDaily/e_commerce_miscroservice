@@ -181,6 +181,9 @@ public class TCsqUser extends BaseEntity {
 	@Column(commit = "书袋熊积分", length = 11, defaultVal = "0")
 	private Integer sdxScores;
 
+	@Transient
+	private Double sdxScoreMoney;
+
 	@Column(commit = "正元用户编号")
 	private Long yunmaId;
 

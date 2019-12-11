@@ -20,6 +20,7 @@ import com.e_commerce.miscroservice.sdx_proj.po.*;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxPublishService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxUserService;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookOrderUserInfoVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookDetailVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
@@ -28,6 +29,7 @@ import com.e_commerce.miscroservice.commons.annotation.colligate.generate.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,6 +85,9 @@ public class SdxBookServiceImpl implements SdxBookService {
 
 	@Autowired
 	private CsqServiceDao csqServiceDao;
+
+	@Autowired
+	private SdxUserService sdxUserService;
 
 	@Override
 	public long modTSdxBook(TSdxBookPo tSdxBookPo) {
@@ -148,7 +153,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 				//查看是点赞还是点踩
 				a.setThumbType(afterReadingNoteUserPo == null || afterReadingNoteUserPo.getThumbType() == null ? SdxBookAfterReadingNoteUserEnum.THUMB_TYPE_UP.getCode(): afterReadingNoteUserPo.getThumbType());
 				a.setIsThumb(afterReadingNoteUserPo == null? SdxBookAfterReadingNoteUserEnum.IS_THUMB_NO.getCode(): afterReadingNoteUserPo.getIsThumb());
-				if (userId.equals(a.getUserId())) a.setNoNeedBuy(Boolean.TRUE);
+				if (userId != null && userId.equals(a.getUserId())) a.setNoNeedBuy(Boolean.TRUE);
 				return a;
 			}).collect(Collectors.toList());
 		List<Long> afrdnIds = limitedAfterReadingNoteList.stream()
@@ -163,7 +168,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 			.map(a -> {
 				List<TSdxBookAfterReadingNoteUserPo> tSdxBookAfterReadingNoteUserPos = idArdnMap.get(a.getId());
 				if (tSdxBookAfterReadingNoteUserPos != null) {
-					a.setNoNeedBuy(userId.equals(tSdxBookAfterReadingNoteUserPos.get(0).getUserId()));
+					a.setNoNeedBuy(userId != null && userId.equals(tSdxBookAfterReadingNoteUserPos.get(0).getUserId()));
 				}
 				return a;
 			}).collect(Collectors.toList());
@@ -203,7 +208,42 @@ public class SdxBookServiceImpl implements SdxBookService {
 		sdxBookDetailVo.setPurchaseRate(rate);
 		sdxBookDetailVo.setAvailableNum(availableBooks.size());
 
+		//获取用户所有积分，计算积分能够抵扣多少钱，和剩余多少钱
+		Double maximumDiscount = dealWithScoreMoney(userId, sdxBookDetailVo.getPrice());
+		sdxBookDetailVo.setMaximumDiscount(maximumDiscount);
+		sdxBookDetailVo.setSurplusPrice(new BigDecimal(sdxBookDetailVo.getPrice().toString()).subtract(new BigDecimal(maximumDiscount.toString())).doubleValue());
+
 		return sdxBookDetailVo;
+	}
+
+	public static void main(String[] args) {
+		/*Double price = 58.7d;
+		Double maximumDiscount = price * 0.85;
+		maximumDiscount = Math.floor(maximumDiscount);
+		System.out.println(maximumDiscount);*/
+		BigDecimal bigDecimal = new BigDecimal(String.valueOf("49.8"));
+		BigDecimal decimal = new BigDecimal("25.0");
+		double v = bigDecimal.subtract(decimal).doubleValue();
+		System.out.println(v);
+	}
+
+	@Override
+	public Double dealWithScoreMoney(Long userId, Double price) {
+		Integer sdxScores;
+		if(userId == null) {
+			sdxScores = 0;
+		} else {
+			TCsqUser csqUser = sdxUserDao.selectByPrimaryKey(userId);
+			sdxScores = csqUser.getSdxScores();
+		}
+		Double cutDownFee = sdxUserService.getCutDownFee(sdxScores);
+		// 书本价格的 85%为最高可抵扣积分，与用户的积分价值取最小即可得到最终结果
+		Double maximumDiscount = price * 0.85;
+		maximumDiscount = Math.floor(maximumDiscount);
+		if(maximumDiscount > cutDownFee) {
+			maximumDiscount = cutDownFee;
+		}
+		return maximumDiscount;
 	}
 
 	@Override
@@ -217,7 +257,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 		//构建map备用
 		Map<Long, List<TCsqUser>> idUserMap = sdxUserDao.groupingByIdInIds(tSdxBookOrderPos.stream().map(TSdxBookOrderPo::getUserId).collect(Collectors.toList()));
 		//装载
-		List<TSdxBookOrderPo> vos = tSdxBookOrderPos.stream()
+		List<SdxBookOrderUserInfoVo> vos = tSdxBookOrderPos.stream()
 			.map(a -> {
 				Long userId = a.getUserId();
 				List<TCsqUser> tCsqUsers = idUserMap.get(userId);
@@ -230,7 +270,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 				long timeStamp = a.getCreateTime().getTime();
 				vo.setTimeStamp(timeStamp);
 				vo.buildDoneTimeDesc(timeStamp);
-				return a;
+				return vo;
 			}).collect(Collectors.toList());
 
 		return PageUtil.buildQueryResult(vos, IdUtil.getTotal());

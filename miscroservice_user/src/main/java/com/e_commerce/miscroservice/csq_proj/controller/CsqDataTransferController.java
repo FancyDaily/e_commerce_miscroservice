@@ -331,10 +331,10 @@ public class CsqDataTransferController {
 	 * @return
 	 */
 	@RequestMapping("dataOut_1")
-	public Object dataOut_1() {
+	public Object dataOut_1(Long toId, Integer toType) {
 		AjaxResult result = new AjaxResult();
 		try {
-			String path = csqDataTransferService.dataOut_1();
+			String path = csqDataTransferService.dataOut_1(toId, toType);
 			result.setData(path);
 			result.setSuccess(true);
 		} catch (Exception e) {
