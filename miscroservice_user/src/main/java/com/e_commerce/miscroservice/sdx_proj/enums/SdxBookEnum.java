@@ -9,9 +9,8 @@ public enum SdxBookEnum {
 	STATUS_INITIAL(0, "初始(捐助过程中...)"),
 	STATUS_ON_SHELF(1, "在书架上"),
 	STATUS_BOUGHT(2, "被买走"),
-	STATUS_CANCLE(3, "捐助过程取消")
+	STATUS_CANCLE(3, "捐助过程取消"),
 	;
-
 	int code;
 	String msg;
 
