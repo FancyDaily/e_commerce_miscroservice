@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.sdx_proj.service;
 import com.e_commerce.miscroservice.commons.entity.colligate.QueryResult;
-import com.e_commerce.miscroservice.commons.helper.util.service.Response;
 import com.e_commerce.miscroservice.csq_proj.po.TCsqService;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
@@ -34,9 +33,9 @@ public interface SdxBookService {
 
 	void putOnShelf(String bookIds);
 
-	List<TSdxBookInfoPo> mostFollowList();
+	List<TSdxBookInfoPo> mostFollowList(Long userId);
 
-	List<TSdxBookInfoPo> suggestList();
+	List<TSdxBookInfoPo> suggestList(Long userId);
 
 	String getSuggestInitail();
 

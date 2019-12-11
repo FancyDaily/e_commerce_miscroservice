@@ -163,7 +163,7 @@ public class SdxBookController {
 	@RequestMapping("list/most/follow")
 	@UrlAuth(withoutPermission = true)
 	public Object mostFollowList() {
-		return Response.success(sdxBookService.mostFollowList());
+		return Response.success(sdxBookService.mostFollowList(IdUtil.getId()));
 	}
 
 	/**
@@ -173,7 +173,7 @@ public class SdxBookController {
 	@RequestMapping("list/suggest")
 	@UrlAuth(withoutPermission = true)
 	public Object suggestList() {
-		return Response.success(sdxBookService.suggestList());
+		return Response.success(sdxBookService.suggestList(IdUtil.getId()));
 	}
 
 	/**

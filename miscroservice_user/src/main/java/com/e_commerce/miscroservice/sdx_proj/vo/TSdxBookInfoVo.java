@@ -1,5 +1,6 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 import com.e_commerce.miscroservice.commons.annotation.colligate.table.Column;
+import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookInfoPo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,11 @@ import lombok.NoArgsConstructor;
 @Data(matchSuffix = true)
 @NoArgsConstructor
 public class TSdxBookInfoVo {
+
+	/**
+	 * 是否在购物车
+	 */
+	private boolean inTrolley;
 
 	/**
 	 * 剩余可售卖数量

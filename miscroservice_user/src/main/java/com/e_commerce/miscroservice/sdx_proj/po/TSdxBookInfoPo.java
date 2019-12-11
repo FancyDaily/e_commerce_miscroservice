@@ -22,6 +22,12 @@ import lombok.NoArgsConstructor;
 public class TSdxBookInfoPo extends BaseEntity {
 
 	/**
+	 * 是否在购物车
+	 */
+	@Transient
+	private boolean inTrolley;
+
+	/**
 	 * 可售卖数量
 	 */
 	@Transient

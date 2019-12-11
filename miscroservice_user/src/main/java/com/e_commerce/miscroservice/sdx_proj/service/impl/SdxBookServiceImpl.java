@@ -17,10 +17,7 @@ import com.e_commerce.miscroservice.csq_proj.po.TCsqUser;
 import com.e_commerce.miscroservice.sdx_proj.dao.*;
 import com.e_commerce.miscroservice.sdx_proj.enums.*;
 import com.e_commerce.miscroservice.sdx_proj.po.*;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxBookOrderService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxPublishService;
-import com.e_commerce.miscroservice.sdx_proj.service.SdxUserService;
+import com.e_commerce.miscroservice.sdx_proj.service.*;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookOrderUserInfoVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.SdxBookDetailVo;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookAfterReadingNoteVo;
@@ -88,6 +85,9 @@ public class SdxBookServiceImpl implements SdxBookService {
 
 	@Autowired
 	private SdxUserService sdxUserService;
+
+	@Autowired
+	private SdxShoppingTrolleysService sdxShoppingTrolleysService;
 
 	@Override
 	public long modTSdxBook(TSdxBookPo tSdxBookPo) {
@@ -199,6 +199,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 
 		//装配
 		SdxBookDetailVo sdxBookDetailVo = sdxBookInfoPo.copySdxBookDetailVo();
+		sdxBookDetailVo.setBookInfoId(sdxBookInfoPo.getId());
 		sdxBookDetailVo.setPublisher(sdxBookInfoPo.getPublisher());
 		sdxBookDetailVo.setBindingStyle(sdxBookInfoPo.getBindingStyle());
 		sdxBookDetailVo.setCoverPic(sdxBookInfoPo.getCoverPic());
@@ -207,6 +208,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 		sdxBookDetailVo.setAfterReadingNoteVos(afterReadingNoteVos);
 		sdxBookDetailVo.setPurchaseRate(rate);
 		sdxBookDetailVo.setAvailableNum(availableBooks.size());
+		sdxBookDetailVo.setInTrolley(sdxShoppingTrolleysService.isInTrolley(sdxBookDetailVo.getBookInfoId(), userId));
 
 		//获取用户所有积分，计算积分能够抵扣多少钱，和剩余多少钱
 		Double maximumDiscount = dealWithScoreMoney(userId, sdxBookDetailVo.getPrice());
@@ -345,7 +347,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 	}
 
 	@Override
-	public List<TSdxBookInfoPo> mostFollowList() {
+	public List<TSdxBookInfoPo> mostFollowList(Long userId) {
 		//获得心愿单信息，统计最高的几个
 		List<TSdxWishListPo> sdxWishListPos = sdxWishListDao.selectAll();
 		Map<Long, List<TSdxWishListPo>> bookInfoIdWishMap = sdxWishListPos.stream()
@@ -367,6 +369,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 			.map(a -> {
 				int count = bookInfoIdWishMap.get(a.getId()).size();
 				a.setWishNum(count);
+				a.setInTrolley(userId !=null && sdxShoppingTrolleysService.isInTrolley(a.getId(), userId));
 				return a;
 			}).collect(Collectors.toList());
 		result = result.stream()
@@ -377,7 +380,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 	}
 
 	@Override
-	public List<TSdxBookInfoPo> suggestList() {
+	public List<TSdxBookInfoPo> suggestList(Long userId) {
 		//从publish中获取 -> mainkey = "suggest"
 		Map map = getBookDailySuggestMap();
 		Integer today = DateUtil.getWeekDayInt(System.currentTimeMillis());
@@ -388,6 +391,7 @@ public class SdxBookServiceImpl implements SdxBookService {
 				Long id = a.getId();
 				List<TSdxBookPo> availableBooks = sdxBookService.getAvailableBooks(id);
 				a.setAvailableNum(availableBooks.size());
+				a.setInTrolley(userId !=null && sdxShoppingTrolleysService.isInTrolley(a.getId(), userId));
 				return a;
 			}).collect(Collectors.toList());
 	}

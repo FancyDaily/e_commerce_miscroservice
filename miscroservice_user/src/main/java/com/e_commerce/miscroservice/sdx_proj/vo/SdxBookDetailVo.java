@@ -1,6 +1,5 @@
 package com.e_commerce.miscroservice.sdx_proj.vo;
 
-import com.e_commerce.miscroservice.commons.annotation.colligate.table.Transient;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +13,13 @@ import java.util.List;
 @Data
 @Builder
 public class SdxBookDetailVo {
+
+	private Long bookInfoId;
+
+	/**
+	 * 是否在购物车
+	 */
+	private boolean inTrolley;
 
 	/**
 	 * 售出比例

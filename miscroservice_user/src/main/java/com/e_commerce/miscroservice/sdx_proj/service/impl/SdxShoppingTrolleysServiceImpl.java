@@ -40,6 +40,15 @@ public class SdxShoppingTrolleysServiceImpl implements SdxShoppingTrolleysServic
 	@Autowired
 	private SdxBookService sdxBookService;
 
+	@Override
+	public boolean isInTrolley(Long bookInfoId, Long userId) {
+		TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo = TSdxShoppingTrolleysPo.builder()
+			.bookInfoId(bookInfoId)
+			.userId(userId).build();
+		TSdxShoppingTrolleysPo trolleysPos = sdxShoppingTrolleysDao.selectByPo(tSdxShoppingTrolleysPo);
+		return trolleysPos != null;
+	}
+
     @Override
     public long modTSdxShoppingTrolleys(TSdxShoppingTrolleysPo tSdxShoppingTrolleysPo) {
         if (tSdxShoppingTrolleysPo == null) {

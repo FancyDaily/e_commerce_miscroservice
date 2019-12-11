@@ -11,6 +11,7 @@ import com.e_commerce.miscroservice.sdx_proj.po.TSdxBookPo;
 import com.e_commerce.miscroservice.sdx_proj.po.TSdxTagPo;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookInfoService;
 import com.e_commerce.miscroservice.sdx_proj.service.SdxBookService;
+import com.e_commerce.miscroservice.sdx_proj.service.SdxShoppingTrolleysService;
 import com.e_commerce.miscroservice.sdx_proj.utils.DoubanBookInfo;
 import com.e_commerce.miscroservice.sdx_proj.utils.IsbnHelper;
 import com.e_commerce.miscroservice.sdx_proj.vo.TSdxBookInfoVo;
@@ -36,6 +37,8 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 	private SdxBookInfoDao sdxBookInfoDao;
 	@Autowired
 	private SdxTagDao sdxTagDao;
+	@Autowired
+	private SdxShoppingTrolleysService sdxShoppingTrolleysService;
 
 	@Override
 	public long modTSdxBookInfo(TSdxBookInfoPo tSdxBookInfoPo) {
@@ -96,6 +99,8 @@ public class SdxBookInfoServiceImpl implements SdxBookInfoService {
 				//最大可抵扣金额
 				Double maximumDiscountMoney = sdxBookService.dealWithScoreMoney(userId, a.getPrice());
 				a.setMaximumDiscount(maximumDiscountMoney);
+				//是否已经加入购物车
+				a.setInTrolley(sdxShoppingTrolleysService.isInTrolley(a.getId(), userId));
 				return a;
 			}).collect(Collectors.toList());
 
